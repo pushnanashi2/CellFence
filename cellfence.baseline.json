@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T12:35:32.427Z",
+  "generatedAt": "2026-07-12T13:53:32.109Z",
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
@@ -12,21 +12,21 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 11,
-      "publicSurfaceLines": 1338,
+      "publicSurfaceLines": 1383,
       "crossCellDependencies": 1,
       "resourceAccesses": []
     },
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 184,
+      "publicSurfaceLines": 193,
       "crossCellDependencies": 1,
       "resourceAccesses": []
     },
     "github-action": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 22,
+      "publicSurfaceLines": 32,
       "crossCellDependencies": 1,
       "resourceAccesses": []
     }

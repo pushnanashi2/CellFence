@@ -80,6 +80,7 @@ CellFence v0.x enforces:
 - duplicate cell IDs;
 - overlapping owned path prefixes;
 - private cross-cell imports;
+- unresolved relative imports as warnings;
 - undeclared consumers;
 - missing public entry files;
 - declared public symbols versus actual exported symbols;
@@ -90,6 +91,8 @@ CellFence v0.x enforces:
 - ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
 
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. Dynamic paths, arbitrary ORM metadata, query-builder semantics, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
+
+Relative import resolution supports NodeNext runtime specifiers by remapping `.js`, `.jsx`, `.mjs`, and `.cjs` specifiers to TypeScript source candidates before checking cell boundaries. A relative import that still cannot be resolved is not silently ignored; it produces an unresolved-import warning.
 
 ORM, query builder, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma support does not cover TypeORM or Sequelize, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table or topic names, and which dynamic forms produce fail-closed unresolved findings.
 

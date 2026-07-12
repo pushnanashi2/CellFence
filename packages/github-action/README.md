@@ -2,4 +2,4 @@
 
 GitHub Action entrypoint package for CellFence checks.
 
-See the main CellFence repository README for usage.
+See the main CellFence README: https://github.com/pushnanashi2/CellFence#readme

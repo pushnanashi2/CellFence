@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { checkRepository, formatHumanResult } from "@cellfence/engine";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
 function readInput(name: string, fallback: string | undefined): string | undefined {
   const environmentName = `INPUT_${name.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`;
@@ -15,7 +17,15 @@ export function main(): number {
   return result.exitCode;
 }
 
-const exitCode = main();
-if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exitCode = exitCode;
+function isDirectActionExecution(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(import.meta.url)) === fs.realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectActionExecution()) {
+  process.exitCode = main();
 }

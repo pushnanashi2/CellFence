@@ -36,11 +36,11 @@ function packageTarball(packageDir, tarballDir) {
     throw new Error(`npm pack did not return file metadata for ${packageDir}`);
   }
   const packedFiles = packInfo.files.map((file) => file.path).sort();
-  const forbiddenFile = packedFiles.find((filePath) => filePath.endsWith(".tsbuildinfo"));
+  const forbiddenFile = packedFiles.find((filePath) => filePath.endsWith(".tsbuildinfo") || filePath.endsWith(".js.map"));
   if (forbiddenFile) {
-    throw new Error(`${packageDir} package includes forbidden build info file ${forbiddenFile}`);
+    throw new Error(`${packageDir} package includes forbidden generated metadata file ${forbiddenFile}`);
   }
-  for (const requiredFile of ["README.md", "package.json", "dist/index.js", "dist/index.d.ts"]) {
+  for (const requiredFile of ["LICENSE", "README.md", "package.json", "dist/index.js", "dist/index.d.ts"]) {
     if (!packedFiles.includes(requiredFile)) {
       throw new Error(`${packageDir} package is missing ${requiredFile}`);
     }

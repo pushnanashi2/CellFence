@@ -4,4 +4,4 @@ Repository analysis engine for CellFence. It validates cell ownership, public su
 
 Most users should install the `cellfence` CLI package instead.
 
-See the main CellFence repository README for usage.
+See the main CellFence README: https://github.com/pushnanashi2/CellFence#readme

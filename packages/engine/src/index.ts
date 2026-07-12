@@ -32,6 +32,7 @@ export type RuleId =
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+  | "CELLFENCE_UNRESOLVED_IMPORT"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
@@ -332,6 +333,8 @@ const PRISMA_READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "cou
 const PRISMA_WRITE_METHODS = new Set(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
 const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
+const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
+const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
 
 function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
   return { source, detectedBy, confidence };
@@ -453,20 +456,6 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
   const dynamicSqlVariables = collectDynamicSqlVariables(sourceFile);
 
   function visit(node: ts.Node): void {
-    const text = literalText(node);
-    if (text) {
-      for (const sqlAccess of sqlTableAccesses(text)) {
-        addResourceAccess(accesses, {
-          kind: "database",
-          access: sqlAccess.access,
-          selector: sqlAccess.selector,
-          filePath: relativeFilePath,
-          line: getLineNumber(sourceFile, node),
-          ...resourceAccessSource("sql-literal", "sql-literal", "medium"),
-        });
-      }
-    }
-
     if (ts.isTaggedTemplateExpression(node) && ts.isPropertyAccessExpression(node.tag)) {
       const methodName = node.tag.name.text;
       const rootName = expressionRootName(node.tag.expression);
@@ -556,21 +545,30 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
               ...resourceAccessSource(methodName, "prisma-adapter", "low"),
             });
           }
-        } else if (
-          methodName === "query"
-          && !firstArgumentText
-          && (expressionContainsSqlLiteral(node.arguments[0]) || (ts.isIdentifier(node.arguments[0]) && dynamicSqlVariables.has(node.arguments[0].text)))
-        ) {
-          addResourceAccess(accesses, {
-            kind: "database",
-            access: "read",
-            selector: "unresolved:dynamic-sql",
-            filePath: relativeFilePath,
-            line: getLineNumber(sourceFile, node),
-            unresolved: true,
-            reason: "SQL query is assembled dynamically",
-            ...resourceAccessSource(methodName, "sql-literal", "low"),
-          });
+        } else if (methodName === "query") {
+          if (firstArgumentText) {
+            for (const sqlAccess of sqlTableAccesses(firstArgumentText)) {
+              addResourceAccess(accesses, {
+                kind: "database",
+                access: sqlAccess.access,
+                selector: sqlAccess.selector,
+                filePath: relativeFilePath,
+                line: getLineNumber(sourceFile, node),
+                ...resourceAccessSource(methodName, "sql-literal", "medium"),
+              });
+            }
+          } else if (expressionContainsSqlLiteral(node.arguments[0]) || (ts.isIdentifier(node.arguments[0]) && dynamicSqlVariables.has(node.arguments[0].text))) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: "read",
+              selector: "unresolved:dynamic-sql",
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              unresolved: true,
+              reason: "SQL query is assembled dynamically",
+              ...resourceAccessSource(methodName, "sql-literal", "low"),
+            });
+          }
         }
 
         if (methodName === "add" && ts.isPropertyAccessExpression(node.expression)) {
@@ -614,8 +612,21 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
         }
       }
 
+      if (name && (FILE_READ_METHODS.has(name) || FILE_WRITE_METHODS.has(name)) && !firstArgumentText && node.arguments.length > 0) {
+        addResourceAccess(accesses, {
+          kind: "file",
+          access: FILE_READ_METHODS.has(name) ? "read" : "write",
+          selector: "unresolved:dynamic-file-path",
+          filePath: relativeFilePath,
+          line: getLineNumber(sourceFile, node),
+          unresolved: true,
+          reason: "file path argument is not a static literal",
+          ...resourceAccessSource(name, "file-call", "low"),
+        });
+      }
+
       if (name && firstArgumentText) {
-        if (["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"].includes(name)) {
+        if (FILE_READ_METHODS.has(name)) {
           addResourceAccess(accesses, {
             kind: "file",
             access: "read",
@@ -624,7 +635,7 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             line: getLineNumber(sourceFile, node),
             ...resourceAccessSource(name),
           });
-        } else if (["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"].includes(name)) {
+        } else if (FILE_WRITE_METHODS.has(name)) {
           addResourceAccess(accesses, {
             kind: "file",
             access: "write",
@@ -734,16 +745,17 @@ function resourceAccessVerb(access: ResourceAccessMode): string {
   return "writes";
 }
 
-function validateResourceAccesses(context: AnalysisContext, findings: Finding[], baseline: CellFenceBaseline | undefined): Map<string, ResourceAccessReference[]> {
+function validateResourceAccesses(context: AnalysisContext, findings: Finding[], warnings: Finding[], baseline: CellFenceBaseline | undefined): Map<string, ResourceAccessReference[]> {
   const accessesByCell = new Map<string, ResourceAccessReference[]>();
   for (const cell of context.manifest.cells) {
     const cellAccesses: ResourceAccessReference[] = [];
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
       for (const access of collectResourceAccesses(context.rootDir, sourceFilePath)) {
         if (access.unresolved) {
-          addFinding(findings, {
+          const severity: Severity = access.kind === "file" ? "warning" : "error";
+          addFinding(severity === "warning" ? warnings : findings, {
             ruleId: "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
-            severity: "error",
+            severity,
             cellId: cell.id,
             filePath: access.filePath,
             message: `${cell.id} has unresolved ${access.kind} resource access at line ${access.line}: ${access.reason || "resource access is not statically resolvable"}`,
@@ -932,13 +944,34 @@ function extractImports(rootDir: string, filePath: string, warnings: Finding[]):
   return references;
 }
 
+function addUniquePath(candidates: string[], candidatePath: string): void {
+  if (!candidates.includes(candidatePath)) candidates.push(candidatePath);
+}
+
+function sourceExtensionsForRuntimeSpecifier(extension: string): string[] {
+  if (extension === ".js") return [".ts", ".tsx", ".js", ".jsx"];
+  if (extension === ".jsx") return [".tsx", ".jsx"];
+  if (extension === ".mjs") return [".mts", ".mjs"];
+  if (extension === ".cjs") return [".cts", ".cjs"];
+  return [];
+}
+
 function candidateModulePaths(basePath: string): string[] {
-  const candidates = [basePath];
-  for (const extension of SOURCE_EXTENSIONS) {
-    candidates.push(`${basePath}${extension}`);
+  const candidates: string[] = [];
+  const extension = path.extname(basePath);
+  addUniquePath(candidates, basePath);
+  if (extension) {
+    const basePathWithoutExtension = basePath.slice(0, -extension.length);
+    for (const sourceExtension of sourceExtensionsForRuntimeSpecifier(extension)) {
+      addUniquePath(candidates, `${basePathWithoutExtension}${sourceExtension}`);
+    }
+    return candidates;
   }
-  for (const extension of SOURCE_EXTENSIONS) {
-    candidates.push(path.join(basePath, `index${extension}`));
+  for (const sourceExtension of SOURCE_EXTENSIONS) {
+    addUniquePath(candidates, `${basePath}${sourceExtension}`);
+  }
+  for (const sourceExtension of SOURCE_EXTENSIONS) {
+    addUniquePath(candidates, path.join(basePath, `index${sourceExtension}`));
   }
   return candidates;
 }
@@ -1019,12 +1052,15 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
     const missingSymbols = [...declaredSymbols].filter((symbol) => !actualSymbols.has(symbol));
     const undeclaredSymbols = [...actualSymbols].filter((symbol) => !declaredSymbols.has(symbol));
     if (missingSymbols.length > 0 || undeclaredSymbols.length > 0) {
+      const mismatchParts = [];
+      if (missingSymbols.length > 0) mismatchParts.push(`missing: ${missingSymbols.join(", ")}`);
+      if (undeclaredSymbols.length > 0) mismatchParts.push(`undeclared: ${undeclaredSymbols.join(", ")}`);
       addFinding(findings, {
         ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
         severity: "error",
         cellId: cell.id,
         filePath: cell.publicEntry,
-        message: `public symbols for cell ${cell.id} do not match manifest`,
+        message: `public symbols for cell ${cell.id} do not match manifest (${mismatchParts.join("; ")})`,
         details: { missingSymbols, undeclaredSymbols },
       });
     }
@@ -1103,6 +1139,15 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
       const references = extractImports(context.rootDir, sourceFilePath, warnings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
+        if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
+          addFinding(warnings, {
+            ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
+            severity: "warning",
+            filePath: reference.importerPath,
+            message: `relative import ${reference.specifier} could not be resolved statically at line ${reference.line}`,
+            details: { line: reference.line, specifier: reference.specifier },
+          });
+        }
         if (resolvedImport.isExternal || !resolvedImport.targetCell || resolvedImport.targetCell.id === importerCell.id) continue;
         const producerCell = resolvedImport.targetCell;
         const declaration = consumerDeclaration(importerCell, producerCell.id);
@@ -1285,7 +1330,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipOverlap(manifest, findings);
   validatePublicEntries(context, findings);
   const crossCellDependencies = validateImports(context, findings, warnings);
-  const accessesByCell = validateResourceAccesses(context, findings, baseline);
+  const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(
     accessesByCell,
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),

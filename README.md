@@ -172,35 +172,7 @@ The consumer declaration is not enough to authorize private imports. It authoriz
 
 ## Quick start
 
-### Current pre-release: run from source
-
-```bash
-npm ci
-npm run build
-node packages/cli/dist/index.js check \
-  --manifest cellfence.manifest.json
-```
-
-Run CellFence against another repository:
-
-```bash
-node /path/to/CellFence/packages/cli/dist/index.js check \
-  --root /path/to/target-repository \
-  --manifest cellfence.manifest.json
-```
-
-Create a starter manifest in a new or disposable repository:
-
-```bash
-node /path/to/CellFence/packages/cli/dist/index.js init \
-  --root /path/to/target-repository
-```
-
-`init` creates `cellfence.manifest.json` and a small example cell. For an established repository, writing the manifest manually is usually safer.
-
-### After the npm package is published
-
-The package is not published yet. The intended public installation flow is:
+Install the CLI in the repository you want to check:
 
 ```bash
 npm install --save-dev cellfence
@@ -209,7 +181,15 @@ npx cellfence baseline create
 npx cellfence baseline check
 ```
 
-Do not treat this block as available until the npm release is listed as `enforced` in [docs/implementation-status.md](docs/implementation-status.md).
+`check` validates the manifest contract only. It is useful before a baseline exists. Once a repository adopts ratchets, use `baseline check` in CI so public surface, ownership, dependency, and resource inventory growth is rejected.
+
+Create a starter manifest in a new or disposable repository:
+
+```bash
+npx cellfence init
+```
+
+`init` creates `cellfence.manifest.json` and a small example cell. For an established repository, writing the manifest manually is usually safer.
 
 ## CLI
 
@@ -452,6 +432,7 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
+| `CELLFENCE_UNRESOLVED_IMPORT` | Relative import could not be resolved statically; emitted as a warning |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH` | Public entry line count increased |
@@ -476,6 +457,8 @@ CellFence v0.x analyzes:
 - common TypeScript export declarations and named exports.
 
 Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
+
+NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` warnings.
 
 Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, query-builder semantics, runtime broker topology, or values assembled through general dataflow.
 

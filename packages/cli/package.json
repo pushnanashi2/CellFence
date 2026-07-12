@@ -1,9 +1,18 @@
 {
   "name": "cellfence",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Public CellFence CLI.",
   "license": "Apache-2.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
   "keywords": [
     "architecture",
     "governance",
@@ -19,13 +28,19 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
-    "dist/**/*.js.map",
+    "LICENSE",
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.0"
+    "@cellfence/engine": "0.1.1"
   }
 }

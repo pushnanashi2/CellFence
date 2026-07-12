@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   checkRepository,
@@ -177,7 +178,15 @@ export function main(argv = process.argv.slice(2)): number {
   }
 }
 
-const exitCode = main();
-if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exitCode = exitCode;
+function isDirectCliExecution(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(import.meta.url)) === fs.realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectCliExecution()) {
+  process.exitCode = main();
 }

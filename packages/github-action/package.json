@@ -1,9 +1,18 @@
 {
   "name": "@cellfence/github-action",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GitHub Action entrypoint for CellFence checks.",
   "license": "Apache-2.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/github-action"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
   "keywords": [
     "architecture",
     "governance",
@@ -22,10 +31,10 @@
     "action.yml",
     "dist/**/*.js",
     "dist/**/*.d.ts",
-    "dist/**/*.js.map",
+    "LICENSE",
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.0"
+    "@cellfence/engine": "0.1.1"
   }
 }

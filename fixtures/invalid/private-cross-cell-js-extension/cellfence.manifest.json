@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "billing",
+      "ownedPaths": [
+        "src/billing/**"
+      ],
+      "publicEntry": "src/billing/public.ts",
+      "publicSymbols": [
+        "billingPublic"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "orders",
+      "ownedPaths": [
+        "src/orders/**"
+      ],
+      "publicEntry": "src/orders/public.ts",
+      "publicSymbols": [
+        "ordersPublic"
+      ],
+      "consumes": [
+        {
+          "cell": "billing"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

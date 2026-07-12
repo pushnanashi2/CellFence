@@ -9,15 +9,22 @@ inputs:
     description: Optional baseline path for ratchet checks.
     required: false
     default: ""
+  evidence:
+    description: Optional runtime resource evidence JSON path.
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
     - shell: bash
-      run: npm run build
-    - shell: bash
       run: |
+        set -euo pipefail
+        evidence_args=()
+        if [ -n "${{ inputs.evidence }}" ]; then
+          evidence_args=(--evidence "${{ inputs.evidence }}")
+        fi
         if [ -n "${{ inputs.baseline }}" ]; then
-          node packages/cli/dist/index.js baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}"
+          npx --yes cellfence@0.1.1 baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}" "${evidence_args[@]}"
         else
-          node packages/cli/dist/index.js check --manifest "${{ inputs.manifest }}"
+          npx --yes cellfence@0.1.1 check --manifest "${{ inputs.manifest }}"
         fi

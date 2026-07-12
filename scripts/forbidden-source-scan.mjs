@@ -13,6 +13,13 @@ const forbiddenTerms = [
   "C:\\\\Users\\\\",
   "your-email@example.com"
 ];
+const allowedPhrases = [
+  "github.com/pushnanashi2/cellfence",
+  "git+https://github.com/pushnanashi2/cellfence.git",
+  "https://github.com/pushnanashi2/cellfence",
+  "https://github.com/pushnanashi2/cellfence/issues",
+  "https://github.com/pushnanashi2/cellfence#readme"
+];
 
 const root = process.cwd();
 const selfPath = path.relative(root, new URL(import.meta.url).pathname);
@@ -32,7 +39,10 @@ function visit(directoryPath) {
     if (!entry.isFile() || !scannedExtensions.has(path.extname(entry.name))) continue;
     const relativePath = path.relative(root, entryPath).split(path.sep).join("/");
     if (ignoredFiles.has(relativePath)) continue;
-    const text = fs.readFileSync(entryPath, "utf8").toLowerCase();
+    let text = fs.readFileSync(entryPath, "utf8").toLowerCase();
+    for (const allowedPhrase of allowedPhrases) {
+      text = text.split(allowedPhrase).join("");
+    }
     for (const term of forbiddenTerms) {
       if (text.includes(term.toLowerCase())) {
         findings.push(`${relativePath}: forbidden term '${term}'`);

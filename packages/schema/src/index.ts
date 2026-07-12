@@ -107,7 +107,7 @@ function optionalString(value: unknown): value is string | undefined {
 
 function validateConsumer(value: unknown, location: string, errors: string[]): value is CellConsumerManifest {
   if (!isRecord(value)) {
-    errors.push(`${location} must be an object`);
+    errors.push(`${location} must be an object like {"cell":"producer-cell"}`);
     return false;
   }
   if (typeof value.cell !== "string" || value.cell.trim().length === 0) {
@@ -231,7 +231,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (value.consumes !== undefined) {
     if (!Array.isArray(value.consumes)) {
-      errors.push(`${location}.consumes must be an array when present`);
+      errors.push(`${location}.consumes must be an array of objects like [{"cell":"producer-cell"}] when present`);
     } else {
       value.consumes.forEach((consumer, consumerIndex) => {
         validateConsumer(consumer, `${location}.consumes[${consumerIndex}]`, errors);

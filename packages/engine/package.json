@@ -1,9 +1,18 @@
 {
   "name": "@cellfence/engine",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CellFence repository analysis engine.",
   "license": "Apache-2.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/engine"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
   "keywords": [
     "architecture",
     "governance",
@@ -27,11 +36,11 @@
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
-    "dist/**/*.js.map",
+    "LICENSE",
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/schema": "0.1.0",
+    "@cellfence/schema": "0.1.1",
     "typescript": "^5.5.4"
   }
 }

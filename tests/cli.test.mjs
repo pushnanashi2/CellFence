@@ -4,12 +4,20 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
 const cliPath = path.join(root, "packages/cli/dist/index.js");
 
 function runCli(args, cwd = root) {
   return spawnSync(process.execPath, [cliPath, ...args], {
+    cwd,
+    encoding: "utf8",
+  });
+}
+
+function runExecutable(command, args, cwd = root) {
+  return spawnSync(command, args, {
     cwd,
     encoding: "utf8",
   });
@@ -138,4 +146,31 @@ test("CLI baseline create stores BullMQ and KafkaJS inventory", () => {
       confidence: "medium",
     },
   ]);
+});
+
+test("CLI exits nonzero when executed through a node_modules bin symlink", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bin-"));
+  const binDir = path.join(tempDir, "node_modules/.bin");
+  fs.mkdirSync(binDir, { recursive: true });
+  const binPath = path.join(binDir, "cellfence");
+  fs.symlinkSync(cliPath, binPath);
+
+  const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
+  const result = runExecutable(binPath, ["check", "--json"], fixturePath);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /CELLFENCE_PRIVATE_IMPORT/);
+});
+
+test("CLI package import has no command execution side effect", () => {
+  const result = spawnSync(process.execPath, [
+    "--input-type=module",
+    "-e",
+    `import ${JSON.stringify(pathToFileURL(cliPath).href)}; console.log("import-ok");`,
+  ], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout.trim(), "import-ok");
+  assert.equal(result.stderr.trim(), "");
 });
