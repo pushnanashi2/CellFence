@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "producer",
+      "ownedPaths": [
+        "src/producer/**"
+      ],
+      "publicEntry": "src/producer/public.ts",
+      "publicSymbols": [
+        "producerValue"
+      ],
+      "consumes": [],
+      "producesArtifacts": [
+        {
+          "id": "report-v1",
+          "paths": [
+            "src/producer/artifacts/report-v1/**"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "consumer",
+      "ownedPaths": [
+        "src/consumer/**"
+      ],
+      "publicEntry": "src/consumer/public.ts",
+      "publicSymbols": [
+        "consumerValue"
+      ],
+      "consumes": [
+        {
+          "cell": "producer"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

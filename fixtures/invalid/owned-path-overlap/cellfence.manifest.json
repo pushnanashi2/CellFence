@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "wide",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/public.ts",
+      "publicSymbols": [
+        "wideValue"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "narrow",
+      "ownedPaths": [
+        "src/shared/narrow/**"
+      ],
+      "publicEntry": "src/shared/narrow/public.ts",
+      "publicSymbols": [
+        "narrowValue"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

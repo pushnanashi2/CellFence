@@ -1,0 +1,663 @@
+import fs from "node:fs";
+import path from "node:path";
+import ts from "typescript";
+
+import {
+  CELLFENCE_BASELINE_SCHEMA_VERSION,
+  type CellBaselineRecord,
+  type CellFenceBaseline,
+  type CellFenceManifest,
+  type CellManifest,
+  type CellConsumerManifest,
+  validateBaseline,
+  validateManifest,
+} from "@cellfence/schema";
+
+export type RuleId =
+  | "CELLFENCE_MANIFEST_INVALID"
+  | "CELLFENCE_DUPLICATE_CELL_ID"
+  | "CELLFENCE_OWNERSHIP_OVERLAP"
+  | "CELLFENCE_PRIVATE_IMPORT"
+  | "CELLFENCE_UNDECLARED_CONSUMER"
+  | "CELLFENCE_PUBLIC_ENTRY_MISSING"
+  | "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+  | "CELLFENCE_UNDECLARED_ARTIFACT"
+  | "CELLFENCE_RATCHET_OWNED_PATH_GROWTH"
+  | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH"
+  | "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+  | "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH"
+  | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
+
+export type Severity = "error" | "warning";
+
+export type Finding = {
+  ruleId: RuleId;
+  severity: Severity;
+  message: string;
+  filePath?: string;
+  cellId?: string;
+  producerCellId?: string;
+  details?: Record<string, unknown>;
+};
+
+export type CheckOptions = {
+  rootDir?: string;
+  manifestPath?: string;
+  baselinePath?: string;
+};
+
+export type CheckResult = {
+  ok: boolean;
+  exitCode: 0 | 1 | 2 | 3;
+  findings: Finding[];
+  warnings: Finding[];
+  metrics: Record<string, CellBaselineRecord>;
+};
+
+type ImportKind = "import" | "export-from" | "require" | "dynamic-import";
+
+type ImportReference = {
+  importerPath: string;
+  specifier: string;
+  kind: ImportKind;
+  typeOnly: boolean;
+  line: number;
+};
+
+type ResolvedImport = {
+  targetPath?: string;
+  targetCell?: CellManifest;
+  artifactLaneId?: string;
+  isExternal: boolean;
+  isPublicPackage: boolean;
+};
+
+type AnalysisContext = {
+  rootDir: string;
+  manifest: CellFenceManifest;
+  cellsById: Map<string, CellManifest>;
+  packageToCell: Map<string, CellManifest>;
+  packageRoots: Map<string, string>;
+};
+
+const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
+const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
+const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
+const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
+
+function normalizePath(filePath: string): string {
+  return filePath.split(path.sep).join("/");
+}
+
+function repoPath(rootDir: string, filePath: string): string {
+  return normalizePath(path.relative(rootDir, filePath));
+}
+
+function absolutePath(rootDir: string, relativePath: string): string {
+  return path.resolve(rootDir, relativePath);
+}
+
+function readJsonFile(filePath: string): unknown {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+}
+
+function patternToRegExp(pattern: string): RegExp {
+  const normalized = normalizePath(pattern);
+  let expression = "";
+  for (let index = 0; index < normalized.length; index += 1) {
+    const character = normalized[index];
+    const nextCharacter = normalized[index + 1];
+    if (character === "*" && nextCharacter === "*") {
+      expression += ".*";
+      index += 1;
+    } else if (character === "*") {
+      expression += "[^/]*";
+    } else {
+      expression += escapeRegExp(character);
+    }
+  }
+  return new RegExp(`^${expression}$`);
+}
+
+function matchesPattern(relativePath: string, pattern: string): boolean {
+  return patternToRegExp(pattern).test(normalizePath(relativePath));
+}
+
+function literalPrefix(pattern: string): string {
+  const normalized = normalizePath(pattern);
+  const wildcardIndex = normalized.search(/[*?]/);
+  const prefix = wildcardIndex === -1 ? normalized : normalized.slice(0, wildcardIndex);
+  return prefix.replace(/\/+$/, "");
+}
+
+function addFinding(findings: Finding[], finding: Finding): void {
+  findings.push(finding);
+}
+
+function listFiles(rootDir: string): string[] {
+  const files: string[] = [];
+  function visit(directoryPath: string): void {
+    for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
+      if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
+      const entryPath = path.join(directoryPath, entry.name);
+      if (entry.isDirectory()) {
+        visit(entryPath);
+      } else if (entry.isFile()) {
+        files.push(entryPath);
+      }
+    }
+  }
+  visit(rootDir);
+  return files;
+}
+
+function sourceFilesForCell(rootDir: string, cell: CellManifest): string[] {
+  return listFiles(rootDir).filter((filePath) => {
+    const relativePath = repoPath(rootDir, filePath);
+    return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+  });
+}
+
+function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
+  return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
+}
+
+function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {
+  let directoryPath = path.dirname(absolutePath(rootDir, publicEntry));
+  while (directoryPath.startsWith(rootDir)) {
+    if (fs.existsSync(path.join(directoryPath, "package.json"))) {
+      return repoPath(rootDir, directoryPath);
+    }
+    const parentPath = path.dirname(directoryPath);
+    if (parentPath === directoryPath) break;
+    directoryPath = parentPath;
+  }
+  return undefined;
+}
+
+function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisContext {
+  const cellsById = new Map<string, CellManifest>();
+  const packageToCell = new Map<string, CellManifest>();
+  const packageRoots = new Map<string, string>();
+  for (const cell of manifest.cells) {
+    cellsById.set(cell.id, cell);
+    if (cell.packageName) {
+      packageToCell.set(cell.packageName, cell);
+      const packageRoot = findPackageRoot(rootDir, cell.publicEntry);
+      if (packageRoot) packageRoots.set(cell.packageName, packageRoot);
+    }
+  }
+  return { rootDir, manifest, cellsById, packageToCell, packageRoots };
+}
+
+function validateDuplicateCellIds(manifest: CellFenceManifest, findings: Finding[]): void {
+  const seenCellIds = new Set<string>();
+  for (const cell of manifest.cells) {
+    if (seenCellIds.has(cell.id)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_DUPLICATE_CELL_ID",
+        severity: "error",
+        cellId: cell.id,
+        message: `duplicate cell id ${cell.id}`,
+      });
+    }
+    seenCellIds.add(cell.id);
+  }
+}
+
+function validateOwnershipOverlap(manifest: CellFenceManifest, findings: Finding[]): void {
+  for (let leftIndex = 0; leftIndex < manifest.cells.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < manifest.cells.length; rightIndex += 1) {
+      const leftCell = manifest.cells[leftIndex];
+      const rightCell = manifest.cells[rightIndex];
+      for (const leftPattern of leftCell.ownedPaths) {
+        for (const rightPattern of rightCell.ownedPaths) {
+          const leftPrefix = literalPrefix(leftPattern);
+          const rightPrefix = literalPrefix(rightPattern);
+          if (leftPrefix && rightPrefix && (leftPrefix.startsWith(rightPrefix) || rightPrefix.startsWith(leftPrefix))) {
+            addFinding(findings, {
+              ruleId: "CELLFENCE_OWNERSHIP_OVERLAP",
+              severity: "error",
+              cellId: leftCell.id,
+              producerCellId: rightCell.id,
+              message: `owned path patterns overlap: ${leftCell.id}:${leftPattern} and ${rightCell.id}:${rightPattern}`,
+              details: { leftPattern, rightPattern },
+            });
+          }
+        }
+      }
+    }
+  }
+}
+
+function sourceKindForPath(filePath: string): ts.ScriptKind {
+  const extension = path.extname(filePath);
+  if (extension === ".tsx") return ts.ScriptKind.TSX;
+  if (extension === ".jsx") return ts.ScriptKind.JSX;
+  if (extension === ".js" || extension === ".mjs" || extension === ".cjs") return ts.ScriptKind.JS;
+  return ts.ScriptKind.TS;
+}
+
+function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
+  return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+}
+
+function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const references: ImportReference[] = [];
+  const importerPath = repoPath(rootDir, filePath);
+
+  function addReference(specifier: string, kind: ImportKind, node: ts.Node, typeOnly: boolean): void {
+    references.push({
+      importerPath,
+      specifier,
+      kind,
+      typeOnly,
+      line: getLineNumber(sourceFile, node),
+    });
+  }
+
+  function visit(node: ts.Node): void {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      addReference(node.moduleSpecifier.text, "import", node, Boolean(node.importClause?.isTypeOnly));
+    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+      addReference(node.moduleSpecifier.text, "export-from", node, Boolean(node.isTypeOnly));
+    } else if (
+      ts.isCallExpression(node)
+      && ts.isIdentifier(node.expression)
+      && node.expression.text === "require"
+      && node.arguments.length === 1
+      && ts.isStringLiteral(node.arguments[0])
+    ) {
+      addReference(node.arguments[0].text, "require", node, false);
+    } else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+      const [specifierNode] = node.arguments;
+      if (specifierNode && ts.isStringLiteral(specifierNode)) {
+        addReference(specifierNode.text, "dynamic-import", node, false);
+      } else {
+        addFinding(warnings, {
+          ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+          severity: "warning",
+          filePath: importerPath,
+          message: `computed dynamic import cannot be resolved statically at line ${getLineNumber(sourceFile, node)}`,
+          details: { line: getLineNumber(sourceFile, node) },
+        });
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return references;
+}
+
+function candidateModulePaths(basePath: string): string[] {
+  const candidates = [basePath];
+  for (const extension of SOURCE_EXTENSIONS) {
+    candidates.push(`${basePath}${extension}`);
+  }
+  for (const extension of SOURCE_EXTENSIONS) {
+    candidates.push(path.join(basePath, `index${extension}`));
+  }
+  return candidates;
+}
+
+function resolveRelativeImport(context: AnalysisContext, importerPath: string, specifier: string): string | undefined {
+  const importerAbsolutePath = absolutePath(context.rootDir, importerPath);
+  const basePath = path.resolve(path.dirname(importerAbsolutePath), specifier);
+  for (const candidatePath of candidateModulePaths(basePath)) {
+    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
+      return repoPath(context.rootDir, candidatePath);
+    }
+  }
+  return undefined;
+}
+
+function findArtifactLaneForPath(cell: CellManifest, relativePath: string): string | undefined {
+  for (const lane of cell.producesArtifacts || []) {
+    if (lane.paths.some((pattern) => matchesPattern(relativePath, pattern))) return lane.id;
+  }
+  return undefined;
+}
+
+function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
+  if (reference.specifier.startsWith(".") || reference.specifier.startsWith("/")) {
+    const targetPath = resolveRelativeImport(context, reference.importerPath, reference.specifier);
+    if (!targetPath) return { isExternal: false, isPublicPackage: false };
+    const targetCell = findOwningCell(context.manifest, targetPath);
+    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, targetPath) : undefined;
+    return { targetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+  }
+
+  const exactPackageCell = context.packageToCell.get(reference.specifier);
+  if (exactPackageCell) {
+    return {
+      targetPath: exactPackageCell.publicEntry,
+      targetCell: exactPackageCell,
+      isExternal: false,
+      isPublicPackage: true,
+    };
+  }
+
+  for (const [packageName, packageCell] of context.packageToCell.entries()) {
+    const subpathPrefix = `${packageName}/`;
+    if (!reference.specifier.startsWith(subpathPrefix)) continue;
+    const packageRoot = context.packageRoots.get(packageName);
+    const subpath = reference.specifier.slice(subpathPrefix.length);
+    const targetPath = packageRoot ? normalizePath(path.join(packageRoot, subpath)) : undefined;
+    return {
+      targetPath,
+      targetCell: packageCell,
+      isExternal: false,
+      isPublicPackage: false,
+    };
+  }
+
+  return { isExternal: true, isPublicPackage: false };
+}
+
+function consumerDeclaration(cell: CellManifest, producerCellId: string): CellConsumerManifest | undefined {
+  return (cell.consumes || []).find((consumer) => consumer.cell === producerCellId);
+}
+
+function validatePublicEntries(context: AnalysisContext, findings: Finding[]): void {
+  for (const cell of context.manifest.cells) {
+    const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
+    if (!fs.existsSync(publicEntryPath)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_PUBLIC_ENTRY_MISSING",
+        severity: "error",
+        cellId: cell.id,
+        filePath: cell.publicEntry,
+        message: `public entry for cell ${cell.id} is missing: ${cell.publicEntry}`,
+      });
+      continue;
+    }
+    const actualSymbols = extractPublicSymbols(publicEntryPath);
+    const declaredSymbols = new Set(cell.publicSymbols);
+    const missingSymbols = [...declaredSymbols].filter((symbol) => !actualSymbols.has(symbol));
+    const undeclaredSymbols = [...actualSymbols].filter((symbol) => !declaredSymbols.has(symbol));
+    if (missingSymbols.length > 0 || undeclaredSymbols.length > 0) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        severity: "error",
+        cellId: cell.id,
+        filePath: cell.publicEntry,
+        message: `public symbols for cell ${cell.id} do not match manifest`,
+        details: { missingSymbols, undeclaredSymbols },
+      });
+    }
+  }
+}
+
+function exportedNameFromDeclarationName(name: ts.DeclarationName | undefined): string | undefined {
+  if (!name) return undefined;
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text;
+  return undefined;
+}
+
+function extractPublicSymbols(filePath: string): Set<string> {
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const symbols = new Set<string>();
+
+  function hasExportModifier(node: ts.Node): boolean {
+    return Boolean(ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export);
+  }
+
+  function visit(node: ts.Node): void {
+    if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
+      if (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Default) {
+        symbols.add("default");
+      } else {
+        const exportedName = exportedNameFromDeclarationName(node.name);
+        if (exportedName) symbols.add(exportedName);
+      }
+    } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
+      for (const declaration of node.declarationList.declarations) {
+        const exportedName = exportedNameFromDeclarationName(declaration.name);
+        if (exportedName) symbols.add(exportedName);
+      }
+    } else if (ts.isExportAssignment(node)) {
+      symbols.add("default");
+    } else if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
+      for (const element of node.exportClause.elements) {
+        symbols.add(element.name.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return symbols;
+}
+
+function validateImports(context: AnalysisContext, findings: Finding[], warnings: Finding[]): Map<string, Set<string>> {
+  const crossCellDependencies = new Map<string, Set<string>>();
+  for (const importerCell of context.manifest.cells) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell)) {
+      const references = extractImports(context.rootDir, sourceFilePath, warnings);
+      for (const reference of references) {
+        const resolvedImport = resolveImport(context, reference);
+        if (resolvedImport.isExternal || !resolvedImport.targetCell || resolvedImport.targetCell.id === importerCell.id) continue;
+        const producerCell = resolvedImport.targetCell;
+        const declaration = consumerDeclaration(importerCell, producerCell.id);
+        const dependencySet = crossCellDependencies.get(importerCell.id) || new Set<string>();
+        dependencySet.add(producerCell.id);
+        crossCellDependencies.set(importerCell.id, dependencySet);
+
+        if (!declaration) {
+          addFinding(findings, {
+            ruleId: "CELLFENCE_UNDECLARED_CONSUMER",
+            severity: "error",
+            cellId: importerCell.id,
+            producerCellId: producerCell.id,
+            filePath: reference.importerPath,
+            message: `${importerCell.id} imports ${producerCell.id} without declaring a consumer relationship`,
+            details: { specifier: reference.specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
+          });
+        }
+
+        if (resolvedImport.artifactLaneId) {
+          const declaredArtifactLanes = new Set(declaration?.artifactLanes || []);
+          if (!declaredArtifactLanes.has(resolvedImport.artifactLaneId)) {
+            addFinding(findings, {
+              ruleId: "CELLFENCE_UNDECLARED_ARTIFACT",
+              severity: "error",
+              cellId: importerCell.id,
+              producerCellId: producerCell.id,
+              filePath: reference.importerPath,
+              message: `${importerCell.id} imports artifact lane ${resolvedImport.artifactLaneId} from ${producerCell.id} without declaring it`,
+              details: { specifier: reference.specifier, artifactLaneId: resolvedImport.artifactLaneId, line: reference.line },
+            });
+          }
+          continue;
+        }
+
+        const targetIsPublicEntry = normalizePath(resolvedImport.targetPath || "") === normalizePath(producerCell.publicEntry);
+        if (!targetIsPublicEntry || (!resolvedImport.isPublicPackage && reference.specifier.includes("/src/"))) {
+          addFinding(findings, {
+            ruleId: "CELLFENCE_PRIVATE_IMPORT",
+            severity: "error",
+            cellId: importerCell.id,
+            producerCellId: producerCell.id,
+            filePath: reference.importerPath,
+            message: `${importerCell.id} imports private implementation from ${producerCell.id}`,
+            details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+          });
+        }
+      }
+    }
+  }
+  return crossCellDependencies;
+}
+
+function countLines(filePath: string): number {
+  if (!fs.existsSync(filePath)) return 0;
+  const content = fs.readFileSync(filePath, "utf8");
+  if (content.length === 0) return 0;
+  return content.split(/\r?\n/).length;
+}
+
+function computeMetrics(context: AnalysisContext, crossCellDependencies: Map<string, Set<string>>): Record<string, CellBaselineRecord> {
+  const metrics: Record<string, CellBaselineRecord> = {};
+  for (const cell of context.manifest.cells) {
+    metrics[cell.id] = {
+      ownedPathPatterns: cell.ownedPaths.length,
+      publicSymbols: cell.publicSymbols.length,
+      publicSurfaceLines: countLines(absolutePath(context.rootDir, cell.publicEntry)),
+      crossCellDependencies: crossCellDependencies.get(cell.id)?.size || 0,
+    };
+  }
+  return metrics;
+}
+
+function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: CellFenceBaseline, findings: Finding[]): void {
+  for (const [cellId, metric] of Object.entries(metrics)) {
+    const baselineRecord = baseline.cells[cellId];
+    if (!baselineRecord) continue;
+    if (metric.ownedPathPatterns > baselineRecord.ownedPathPatterns) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_OWNED_PATH_GROWTH",
+        severity: "error",
+        cellId,
+        message: `${cellId} owned path patterns grew from ${baselineRecord.ownedPathPatterns} to ${metric.ownedPathPatterns}`,
+      });
+    }
+    if (metric.publicSymbols > baselineRecord.publicSymbols) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
+        severity: "error",
+        cellId,
+        message: `${cellId} public symbols grew from ${baselineRecord.publicSymbols} to ${metric.publicSymbols}`,
+      });
+    }
+    if (metric.publicSurfaceLines > baselineRecord.publicSurfaceLines) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
+        severity: "error",
+        cellId,
+        message: `${cellId} public surface lines grew from ${baselineRecord.publicSurfaceLines} to ${metric.publicSurfaceLines}`,
+      });
+    }
+    if (metric.crossCellDependencies > baselineRecord.crossCellDependencies) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH",
+        severity: "error",
+        cellId,
+        message: `${cellId} cross-cell dependencies grew from ${baselineRecord.crossCellDependencies} to ${metric.crossCellDependencies}`,
+      });
+    }
+  }
+}
+
+function manifestInvalidResult(message: string): CheckResult {
+  const finding: Finding = {
+    ruleId: "CELLFENCE_MANIFEST_INVALID",
+    severity: "error",
+    message,
+  };
+  return { ok: false, exitCode: 2, findings: [finding], warnings: [], metrics: {} };
+}
+
+export function loadManifestFromFile(manifestPath: string): CellFenceManifest {
+  const validation = validateManifest(readJsonFile(manifestPath));
+  if (!validation.ok || !validation.value) {
+    throw new Error(validation.errors.join("; "));
+  }
+  return validation.value;
+}
+
+export function checkRepository(options: CheckOptions = {}): CheckResult {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const baselinePath = options.baselinePath ? path.resolve(rootDir, options.baselinePath) : undefined;
+
+  let rawManifest: unknown;
+  try {
+    rawManifest = readJsonFile(manifestPath);
+  } catch (error) {
+    return manifestInvalidResult(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  const manifestValidation = validateManifest(rawManifest);
+  if (!manifestValidation.ok || !manifestValidation.value) {
+    return manifestInvalidResult(manifestValidation.errors.join("; "));
+  }
+
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  const manifest = manifestValidation.value;
+  const context = createContext(rootDir, manifest);
+
+  validateDuplicateCellIds(manifest, findings);
+  validateOwnershipOverlap(manifest, findings);
+  validatePublicEntries(context, findings);
+  const crossCellDependencies = validateImports(context, findings, warnings);
+  const metrics = computeMetrics(context, crossCellDependencies);
+
+  if (baselinePath) {
+    try {
+      const baselineValidation = validateBaseline(readJsonFile(baselinePath));
+      if (!baselineValidation.ok || !baselineValidation.value) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_MANIFEST_INVALID",
+          severity: "error",
+          message: `baseline is invalid: ${baselineValidation.errors.join("; ")}`,
+        });
+      } else {
+        compareBaseline(metrics, baselineValidation.value, findings);
+      }
+    } catch (error) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_MANIFEST_INVALID",
+        severity: "error",
+        message: `failed to read baseline ${repoPath(rootDir, baselinePath)}: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  }
+
+  const hasErrors = findings.some((finding) => finding.severity === "error");
+  return {
+    ok: !hasErrors,
+    exitCode: hasErrors ? 1 : 0,
+    findings,
+    warnings,
+    metrics,
+  };
+}
+
+export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
+  const result = checkRepository({ ...options, baselinePath: undefined });
+  if (result.exitCode === 2 || result.exitCode === 3) {
+    throw new Error(result.findings.map((finding) => finding.message).join("; "));
+  }
+  return {
+    schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    cells: result.metrics,
+  };
+}
+
+export function writeBaselineFile(filePath: string, baseline: CellFenceBaseline): void {
+  fs.writeFileSync(filePath, `${JSON.stringify(baseline, null, 2)}\n`);
+}
+
+export function defaultBaselinePath(rootDir = process.cwd()): string {
+  return path.resolve(rootDir, DEFAULT_BASELINE_PATH);
+}
+
+export function formatHumanResult(result: CheckResult): string {
+  const lines: string[] = [];
+  lines.push(result.ok ? "CellFence check passed." : "CellFence check failed.");
+  for (const finding of [...result.findings, ...result.warnings]) {
+    const location = finding.filePath ? ` ${finding.filePath}` : "";
+    lines.push(`[${finding.severity}] ${finding.ruleId}${location}: ${finding.message}`);
+  }
+  return lines.join("\n");
+}

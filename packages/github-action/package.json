@@ -1,0 +1,16 @@
+{
+  "name": "@cellfence/github-action",
+  "version": "0.1.0",
+  "description": "GitHub Action entrypoint for CellFence checks.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "action.yml",
+    "dist"
+  ],
+  "dependencies": {
+    "@cellfence/engine": "0.1.0"
+  }
+}

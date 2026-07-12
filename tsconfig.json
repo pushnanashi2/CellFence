@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@cellfence/schema": [
+        "./packages/schema/src/index.ts"
+      ],
+      "@cellfence/engine": [
+        "./packages/engine/src/index.ts"
+      ]
+    }
+  }
+}

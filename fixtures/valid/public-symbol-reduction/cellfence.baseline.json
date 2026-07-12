@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "cellfence.baseline.v1",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "cells": {
+    "core": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 5,
+      "crossCellDependencies": 0
+    }
+  }
+}

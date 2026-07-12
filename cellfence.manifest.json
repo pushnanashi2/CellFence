@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "schema",
+      "packageName": "@cellfence/schema",
+      "ownedPaths": [
+        "packages/schema/**"
+      ],
+      "publicEntry": "packages/schema/src/index.ts",
+      "publicSymbols": [
+        "ArchitecturalBudgets",
+        "ArtifactLaneManifest",
+        "CELLFENCE_BASELINE_SCHEMA_VERSION",
+        "CELLFENCE_MANIFEST_SCHEMA_VERSION",
+        "CellBaselineRecord",
+        "CellConsumerManifest",
+        "CellFenceBaseline",
+        "CellFenceManifest",
+        "CellManifest",
+        "EnforcementStatus",
+        "ValidationResult",
+        "validateBaseline",
+        "validateManifest"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "engine",
+      "packageName": "@cellfence/engine",
+      "ownedPaths": [
+        "packages/engine/**"
+      ],
+      "publicEntry": "packages/engine/src/index.ts",
+      "publicSymbols": [
+        "CheckOptions",
+        "CheckResult",
+        "Finding",
+        "RuleId",
+        "Severity",
+        "checkRepository",
+        "createBaseline",
+        "defaultBaselinePath",
+        "formatHumanResult",
+        "loadManifestFromFile",
+        "writeBaselineFile"
+      ],
+      "consumes": [
+        {
+          "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "packageName": "cellfence",
+      "ownedPaths": [
+        "packages/cli/**"
+      ],
+      "publicEntry": "packages/cli/src/index.ts",
+      "publicSymbols": [
+        "main"
+      ],
+      "consumes": [
+        {
+          "cell": "engine"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "github-action",
+      "packageName": "@cellfence/github-action",
+      "ownedPaths": [
+        "packages/github-action/**"
+      ],
+      "publicEntry": "packages/github-action/src/index.ts",
+      "publicSymbols": [
+        "main"
+      ],
+      "consumes": [
+        {
+          "cell": "engine"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

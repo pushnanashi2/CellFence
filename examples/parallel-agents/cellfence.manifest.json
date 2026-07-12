@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "producer",
+      "ownedPaths": [
+        "examples/parallel-agents/src/producer/**"
+      ],
+      "publicEntry": "examples/parallel-agents/src/producer/public.ts",
+      "publicSymbols": [
+        "producerValue"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "consumer",
+      "ownedPaths": [
+        "examples/parallel-agents/src/consumer/**"
+      ],
+      "publicEntry": "examples/parallel-agents/src/consumer/public.ts",
+      "publicSymbols": [
+        "consumerValue"
+      ],
+      "consumes": [
+        {
+          "cell": "producer"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

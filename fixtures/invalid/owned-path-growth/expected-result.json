@@ -1,0 +1,8 @@
+{
+  "mode": "baseline-check",
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_RATCHET_OWNED_PATH_GROWTH"
+  ],
+  "warningRuleIds": []
+}

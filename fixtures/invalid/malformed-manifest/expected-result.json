@@ -1,0 +1,8 @@
+{
+  "mode": "check",
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_MANIFEST_INVALID"
+  ],
+  "warningRuleIds": []
+}

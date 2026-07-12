@@ -1,0 +1,23 @@
+name: CellFence Check
+description: Run CellFence repository governance checks.
+inputs:
+  manifest:
+    description: Path to the CellFence manifest.
+    required: false
+    default: cellfence.manifest.json
+  baseline:
+    description: Optional baseline path for ratchet checks.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: npm run build
+    - shell: bash
+      run: |
+        if [ -n "${{ inputs.baseline }}" ]; then
+          node packages/cli/dist/index.js baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}"
+        else
+          node packages/cli/dist/index.js check --manifest "${{ inputs.manifest }}"
+        fi

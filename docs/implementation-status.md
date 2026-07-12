@@ -1,0 +1,24 @@
+# Implementation Status
+
+| mechanism | status | enforcement location | limitations | verification method |
+|---|---|---|---|---|
+| Manifest shape validation | enforced | `@cellfence/schema` and `@cellfence/engine` | JSON schema is implemented by TypeScript validators, not a standalone schema file | fixture tests and `cellfence check` |
+| Duplicate cell ID detection | enforced | `@cellfence/engine` | Detects IDs inside one manifest file | invalid fixture |
+| Owned path overlap detection | partially_enforced | `@cellfence/engine` | Prefix overlap is detected; full glob intersection is conservative | invalid fixture |
+| Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports are warnings | invalid fixture |
+| Undeclared consumer rejection | enforced | `@cellfence/engine` | Applies to repository-local cells | invalid fixture |
+| Public entry existence | enforced | `@cellfence/engine` | One public entry per cell in v0.x | invalid fixture |
+| Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
+| Artifact lane declaration | enforced | `@cellfence/engine` | File path lanes only in v0.x | invalid fixture |
+| Baseline ratchets | enforced | `@cellfence/engine` | Counts are intentionally coarse in v0.x | baseline fixture tests |
+| TypeScript compiler API source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
+| CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
+| Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |
+| GitHub Actions support | partially_enforced | `.github/workflows` and action wrapper | Required-check configuration must be set externally | workflow files and self-check |
+| CODEOWNERS | documented | `.github/CODEOWNERS` | Enforcement requires repository settings | root-of-trust document |
+| Protected branches | documented | external repository settings | Not enforceable by repository files alone | root-of-trust document |
+| External immutable checker | planned | external service or pinned workflow | Not implemented in v0.x | root-of-trust document |
+| Sealed hash ledger | planned | external ledger | Not implemented in v0.x | root-of-trust document |
+| Credential separation | documented | external repository and npm settings | Not enforceable by package code | root-of-trust document |
+| npm trusted publishing | planned | npm and GitHub OIDC settings | Publishing workflow is intentionally absent | release verification |
+| Provenance or forbidden-source scan | enforced | `scripts/forbidden-source-scan.mjs` | Term list is conservative and project-owned | lint and CI |

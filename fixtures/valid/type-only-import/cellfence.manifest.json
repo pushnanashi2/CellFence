@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/public.ts",
+      "publicSymbols": [
+        "PublicThing"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "consumer",
+      "ownedPaths": [
+        "src/consumer/**"
+      ],
+      "publicEntry": "src/consumer/public.ts",
+      "publicSymbols": [
+        "consumerValue"
+      ],
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}
