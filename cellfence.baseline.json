@@ -1,17 +1,17 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T11:45:54.781Z",
+  "generatedAt": "2026-07-12T12:07:07.685Z",
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 13,
-      "publicSurfaceLines": 210,
+      "publicSymbols": 16,
+      "publicSurfaceLines": 255,
       "crossCellDependencies": 0
     },
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 11,
-      "publicSurfaceLines": 687,
+      "publicSurfaceLines": 868,
       "crossCellDependencies": 1
     },
     "cli": {

@@ -25,6 +25,8 @@ Producer: a cell that exposes a public entry or artifact lane.
 
 Artifact lane: a versioned path contract for generated or runtime files that may be consumed across cells.
 
+Resource contract: a declared static coupling to a file path, database table, queue or topic, or HTTP route or endpoint.
+
 Baseline: a captured measurement of architectural surface area.
 
 Ratchet: a check that permits reductions but rejects silent growth beyond a baseline.
@@ -47,6 +49,14 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
     {
       "id": "report-v1",
       "paths": ["artifacts/engine/report-v1/**"]
+    }
+  ],
+  "resourceContracts": [
+    {
+      "id": "runtime-db",
+      "kind": "database",
+      "access": ["read", "write"],
+      "selectors": ["app.users", "app.events"]
     }
   ],
   "budgets": {
@@ -72,6 +82,7 @@ CellFence v0.x enforces:
 - missing public entry files;
 - declared public symbols versus actual exported symbols;
 - undeclared artifact lane consumption;
+- undeclared static file, database, queue, and HTTP resource access;
 - ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
 
 ## Planned or Environment-Dependent Enforcement

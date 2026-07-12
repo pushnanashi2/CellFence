@@ -19,6 +19,9 @@
         "CellFenceManifest",
         "CellManifest",
         "EnforcementStatus",
+        "ResourceAccessMode",
+        "ResourceContractKind",
+        "ResourceContractManifest",
         "ValidationResult",
         "validateBaseline",
         "validateManifest"

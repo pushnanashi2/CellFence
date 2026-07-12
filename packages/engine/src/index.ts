@@ -26,6 +26,7 @@ export type RuleId =
   | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH"
   | "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
   | "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH"
+  | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
@@ -62,6 +63,18 @@ type ImportReference = {
   kind: ImportKind;
   typeOnly: boolean;
   line: number;
+};
+
+type ResourceAccessKind = "file" | "database" | "queue" | "http";
+type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
+
+type ResourceAccessReference = {
+  kind: ResourceAccessKind;
+  access: ResourceAccessMode;
+  selector: string;
+  filePath: string;
+  line: number;
+  source: string;
 };
 
 type ResolvedImport = {
@@ -244,6 +257,173 @@ function sourceKindForPath(filePath: string): ts.ScriptKind {
 
 function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+}
+
+function expressionName(expression: ts.Expression): string | undefined {
+  if (ts.isIdentifier(expression)) return expression.text;
+  if (ts.isPropertyAccessExpression(expression)) return expression.name.text;
+  return undefined;
+}
+
+function literalText(node: ts.Node | undefined): string | undefined {
+  if (!node) return undefined;
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  return undefined;
+}
+
+function addResourceAccess(accesses: ResourceAccessReference[], access: ResourceAccessReference): void {
+  const duplicate = accesses.some((candidate) =>
+    candidate.kind === access.kind
+    && candidate.access === access.access
+    && candidate.selector === access.selector
+    && candidate.filePath === access.filePath
+    && candidate.line === access.line
+  );
+  if (!duplicate) accesses.push(access);
+}
+
+function sqlTableAccesses(text: string): Array<{ access: "read" | "write"; selector: string }> {
+  const accesses: Array<{ access: "read" | "write"; selector: string }> = [];
+  const sqlPattern = /\b(from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$"]*)/gi;
+  let match: RegExpExecArray | null;
+  while ((match = sqlPattern.exec(text)) !== null) {
+    const verb = match[1].toLowerCase();
+    const selector = match[2].replace(/"/g, "");
+    accesses.push({ access: verb === "into" || verb === "update" ? "write" : "read", selector });
+  }
+  return accesses;
+}
+
+function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
+  const lowered = name.toLowerCase();
+  if (/(?:publish|enqueue|emitevent|sendmessage)$/.test(lowered)) return "publish";
+  if (/(?:subscribe|consume|dequeue|receivemessage)$/.test(lowered)) return "subscribe";
+  return undefined;
+}
+
+function collectResourceAccesses(rootDir: string, filePath: string): ResourceAccessReference[] {
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const relativeFilePath = repoPath(rootDir, filePath);
+  const accesses: ResourceAccessReference[] = [];
+
+  function visit(node: ts.Node): void {
+    const text = literalText(node);
+    if (text) {
+      for (const sqlAccess of sqlTableAccesses(text)) {
+        addResourceAccess(accesses, {
+          kind: "database",
+          access: sqlAccess.access,
+          selector: sqlAccess.selector,
+          filePath: relativeFilePath,
+          line: getLineNumber(sourceFile, node),
+          source: "sql-literal",
+        });
+      }
+    }
+
+    if (ts.isCallExpression(node)) {
+      const name = expressionName(node.expression);
+      const firstArgumentText = literalText(node.arguments[0]);
+      if (name && firstArgumentText) {
+        if (["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"].includes(name)) {
+          addResourceAccess(accesses, {
+            kind: "file",
+            access: "read",
+            selector: normalizePath(firstArgumentText),
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            source: name,
+          });
+        } else if (["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"].includes(name)) {
+          addResourceAccess(accesses, {
+            kind: "file",
+            access: "write",
+            selector: normalizePath(firstArgumentText),
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            source: name,
+          });
+        } else if ((name === "fetch" || name === "request") && /^https?:\/\//.test(firstArgumentText)) {
+          addResourceAccess(accesses, {
+            kind: "http",
+            access: "call",
+            selector: firstArgumentText,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            source: name,
+          });
+        } else if (["get", "post", "put", "patch", "delete"].includes(name) && firstArgumentText.startsWith("/")) {
+          addResourceAccess(accesses, {
+            kind: "http",
+            access: "serve",
+            selector: `${name.toUpperCase()} ${firstArgumentText}`,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            source: name,
+          });
+        }
+
+        const queueMode = queueAccessMode(name);
+        if (queueMode && !firstArgumentText.startsWith("/") && !/^https?:\/\//.test(firstArgumentText)) {
+          addResourceAccess(accesses, {
+            kind: "queue",
+            access: queueMode,
+            selector: firstArgumentText,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            source: name,
+          });
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return accesses;
+}
+
+function resourceAccessDeclared(cell: CellManifest, access: ResourceAccessReference): boolean {
+  return (cell.resourceContracts || []).some((contract) =>
+    contract.kind === access.kind
+    && contract.access.includes(access.access)
+    && contract.selectors.some((selector) => matchesPattern(access.selector, selector) || selector === access.selector)
+  );
+}
+
+function resourceAccessVerb(access: ResourceAccessMode): string {
+  if (access === "publish") return "publishes";
+  if (access === "subscribe") return "subscribes to";
+  if (access === "call") return "calls";
+  if (access === "serve") return "serves";
+  if (access === "read") return "reads";
+  return "writes";
+}
+
+function validateResourceAccesses(context: AnalysisContext, findings: Finding[]): void {
+  for (const cell of context.manifest.cells) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
+      for (const access of collectResourceAccesses(context.rootDir, sourceFilePath)) {
+        if (resourceAccessDeclared(cell, access)) continue;
+        addFinding(findings, {
+          ruleId: "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+          severity: "error",
+          cellId: cell.id,
+          filePath: access.filePath,
+          message: `${cell.id} ${resourceAccessVerb(access.access)} undeclared ${access.kind} resource ${access.selector}`,
+          details: {
+            kind: access.kind,
+            access: access.access,
+            selector: access.selector,
+            line: access.line,
+            source: access.source,
+          },
+        });
+      }
+    }
+  }
 }
 
 function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
@@ -622,6 +802,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipOverlap(manifest, findings);
   validatePublicEntries(context, findings);
   const crossCellDependencies = validateImports(context, findings, warnings);
+  validateResourceAccesses(context, findings);
   const metrics = computeMetrics(context, crossCellDependencies);
 
   if (baselinePath) {

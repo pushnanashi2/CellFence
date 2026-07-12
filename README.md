@@ -2,9 +2,9 @@
 
 > **AI coding agents do not need more prompts. They need enforceable architectural boundaries.**
 
-**CellFence is a manifest-driven repository architecture governance tool for TypeScript and JavaScript codebases changed by parallel AI coding agents.** It turns architectural intent into deterministic CLI and CI checks: non-overlapping cell ownership, declared cross-cell dependencies, public entry points, declared artifact lanes, and one-way ratchets that reject silent boundary growth.
+**CellFence is a manifest-driven repository architecture governance tool for TypeScript and JavaScript codebases changed by parallel AI coding agents.** It turns architectural intent into deterministic CLI and CI checks: non-overlapping cell ownership, declared cross-cell dependencies, public entry points, declared artifact lanes, static resource contracts, and one-way ratchets that reject silent boundary growth.
 
-Use CellFence to detect private cross-module imports, undeclared dependencies, overlapping ownership, public API drift, undeclared artifact imports, and architecture expansion before a change reaches `main`.
+Use CellFence to detect private cross-module imports, undeclared dependencies, overlapping ownership, public API drift, undeclared artifact imports, undeclared static file/database/queue/HTTP coupling, and architecture expansion before a change reaches `main`.
 
 When CellFence is configured as a required check behind a protected branch, it acts as a **repository architecture firewall** for AI-generated and human-written code. It does not run coding agents, grant permissions, or sandbox tool calls; it verifies the repository state they leave behind.
 
@@ -83,6 +83,7 @@ Each cell declares:
 - **public symbols** — the exports expected from that public entry;
 - **consumers** — the other cells or artifact lanes this cell depends on;
 - **artifact lanes** — declared file paths produced for other cells;
+- **resource contracts** — declared static file, database, queue, or HTTP resources accessed by the cell;
 - **budgets or baselines** — architectural surface that may shrink but may not silently grow.
 
 CellFence currently enforces these invariants:
@@ -92,7 +93,8 @@ CellFence currently enforces these invariants:
 3. A cross-cell source import must target the producer's declared public entry.
 4. An imported artifact lane must be declared by both producer and consumer.
 5. The symbols in a cell manifest must match the exports in its public entry.
-6. Selected architecture metrics may decrease, but growth fails against the accepted baseline.
+6. Static file, database, queue, and HTTP resource access must be declared.
+7. Selected architecture metrics may decrease, but growth fails against the accepted baseline.
 
 ## Thirty-second example
 
@@ -255,6 +257,14 @@ Use `--json` when another tool or coding agent needs structured output.
           "description": "Versioned architecture analysis output"
         }
       ],
+      "resourceContracts": [
+        {
+          "id": "runtime-db",
+          "kind": "database",
+          "access": ["read", "write"],
+          "selectors": ["app.users", "app.events"]
+        }
+      ],
       "budgets": {
         "ownedPathPatterns": 1,
         "publicSymbols": 10,
@@ -402,6 +412,7 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_PUBLIC_ENTRY_MISSING` | Declared public entry does not exist |
 | `CELLFENCE_PUBLIC_SYMBOL_MISMATCH` | Manifest symbols do not match actual public exports |
 | `CELLFENCE_UNDECLARED_ARTIFACT` | Artifact lane consumption was not declared |
+| `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH` | Public entry line count increased |
@@ -418,6 +429,7 @@ CellFence v0.x analyzes:
 - type-only imports;
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
+- selected static string resource access for file, database, queue, and HTTP patterns;
 - common TypeScript export declarations and named exports.
 
 Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
@@ -488,6 +500,7 @@ Version 0.x is deliberately narrow:
 - one public entry per cell;
 - repository-local cells only;
 - file-path artifact lanes only;
+- static resource access only; dynamic dataflow, runtime broker behavior, and live database schema drift are not inferred;
 - ownership overlap detection is conservative and does not solve arbitrary glob intersection;
 - public symbol analysis supports common TypeScript forms, not every possible re-export pattern;
 - computed dynamic imports cannot be resolved statically;

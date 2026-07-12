@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "runtime",
+      "ownedPaths": [
+        "src/runtime/**"
+      ],
+      "publicEntry": "src/runtime/public.ts",
+      "publicSymbols": [
+        "runRuntime"
+      ],
+      "consumes": [],
+      "producesArtifacts": [],
+      "resourceContracts": [
+        {
+          "id": "config-file",
+          "kind": "file",
+          "access": [
+            "read"
+          ],
+          "selectors": [
+            "data/config.json"
+          ]
+        },
+        {
+          "id": "runtime-db",
+          "kind": "database",
+          "access": [
+            "read",
+            "write"
+          ],
+          "selectors": [
+            "app.users",
+            "app.events"
+          ]
+        },
+        {
+          "id": "runtime-queue",
+          "kind": "queue",
+          "access": [
+            "publish",
+            "subscribe"
+          ],
+          "selectors": [
+            "jobs.ready",
+            "jobs.done"
+          ]
+        },
+        {
+          "id": "runtime-http",
+          "kind": "http",
+          "access": [
+            "call",
+            "serve"
+          ],
+          "selectors": [
+            "https://api.example.test/v1/status",
+            "GET /health"
+          ]
+        }
+      ]
+    }
+  ]
+}

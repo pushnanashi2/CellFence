@@ -9,6 +9,18 @@ export type ArtifactLaneManifest = {
   description?: string;
 };
 
+export type ResourceContractKind = "file" | "database" | "queue" | "http";
+
+export type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
+
+export type ResourceContractManifest = {
+  id: string;
+  kind: ResourceContractKind;
+  access: ResourceAccessMode[];
+  selectors: string[];
+  description?: string;
+};
+
 export type CellConsumerManifest = {
   cell: string;
   artifactLanes?: string[];
@@ -29,6 +41,7 @@ export type CellManifest = {
   packageName?: string;
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
+  resourceContracts?: ResourceContractManifest[];
   budgets?: ArchitecturalBudgets;
 };
 
@@ -99,6 +112,29 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
   return errors.length === 0 || typeof value.id === "string";
 }
 
+function validateResourceContract(value: unknown, location: string, errors: string[]): value is ResourceContractManifest {
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (typeof value.id !== "string" || value.id.trim().length === 0) {
+    errors.push(`${location}.id must be a non-empty string`);
+  }
+  if (!["file", "database", "queue", "http"].includes(String(value.kind))) {
+    errors.push(`${location}.kind must be file|database|queue|http`);
+  }
+  if (!isStringArray(value.access) || !value.access.every((entry) => ["read", "write", "publish", "subscribe", "call", "serve"].includes(entry))) {
+    errors.push(`${location}.access must contain read|write|publish|subscribe|call|serve`);
+  }
+  if (!isStringArray(value.selectors)) {
+    errors.push(`${location}.selectors must be an array of non-empty strings`);
+  }
+  if (!optionalString(value.description)) {
+    errors.push(`${location}.description must be a string when present`);
+  }
+  return errors.length === 0 || typeof value.id === "string";
+}
+
 function validateBudgets(value: unknown, location: string, errors: string[]): value is ArchitecturalBudgets {
   if (value === undefined) return true;
   if (!isRecord(value)) {
@@ -149,6 +185,15 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     } else {
       value.producesArtifacts.forEach((lane, laneIndex) => {
         validateArtifactLane(lane, `${location}.producesArtifacts[${laneIndex}]`, errors);
+      });
+    }
+  }
+  if (value.resourceContracts !== undefined) {
+    if (!Array.isArray(value.resourceContracts)) {
+      errors.push(`${location}.resourceContracts must be an array when present`);
+    } else {
+      value.resourceContracts.forEach((contract, contractIndex) => {
+        validateResourceContract(contract, `${location}.resourceContracts[${contractIndex}]`, errors);
       });
     }
   }
