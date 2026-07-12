@@ -10,9 +10,6 @@
   ],
   "references": [
     {
-      "path": "../plugin-api"
-    },
-    {
       "path": "../schema"
     }
   ]

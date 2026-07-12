@@ -126,9 +126,6 @@
       ],
       "consumes": [
         {
-          "cell": "plugin-api"
-        },
-        {
           "cell": "schema"
         }
       ],

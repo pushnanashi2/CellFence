@@ -14,22 +14,14 @@ import {
   type CellManifest,
   type CellConsumerManifest,
   type ResourceBaselineEntry,
+  type ResourceAccessConfidence,
+  type ResourceContractKind,
   type ResourceContractManifest,
   validateBaseline,
   validateManifest,
   validateResourceEvidence,
   type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
-import type {
-  CellFenceAdapterHelpers,
-  CellFenceFinding,
-  CellFenceImportReference,
-  CellFencePlugin,
-  CellFenceRepositoryModel,
-  CellFenceResourceAccess,
-  CellFenceRuleContext,
-  CellFenceSuggestedResolution,
-} from "@cellfence/plugin-api";
 
 export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
@@ -69,16 +61,137 @@ export type RuleId =
 
 export type Severity = "error" | "warning";
 
-export type SuggestedResolution = CellFenceSuggestedResolution;
+export type SuggestedResolution = {
+  kind: "change-code" | "change-manifest" | "update-baseline" | "ask-human";
+  title: string;
+  approvalRequired: boolean;
+  details?: Record<string, unknown>;
+};
 
-export type Finding = CellFenceFinding<RuleId | string>;
+type PluginFinding<RuleIdentifier extends string = string> = {
+  ruleId: RuleIdentifier;
+  severity: Severity;
+  message: string;
+  filePath?: string;
+  cellId?: string;
+  producerCellId?: string;
+  details?: Record<string, unknown>;
+  suggestedResolutions?: SuggestedResolution[];
+  fingerprint?: string;
+};
+
+export type Finding = PluginFinding<RuleId | string>;
+
+type PluginImportReference = {
+  importerPath: string;
+  importerCellId: string;
+  specifier: string;
+  kind: "import" | "export-from" | "require" | "dynamic-import";
+  typeOnly: boolean;
+  line: number;
+  targetPath?: string;
+  targetCellId?: string;
+  artifactLaneId?: string;
+  isExternal: boolean;
+  isPublicPackage: boolean;
+};
+
+type PluginResourceAccess = {
+  kind: ResourceContractKind;
+  access: ResourceAccessMode;
+  selector: string;
+  filePath: string;
+  line: number;
+  source: string;
+  detectedBy: string;
+  confidence: ResourceAccessConfidence;
+  cellId?: string;
+  unresolved?: boolean;
+  reason?: string;
+};
+
+type PluginRepositoryModel = {
+  rootDir: string;
+  manifest: CellFenceManifest;
+  baseline: CellFenceBaseline | null;
+  files: {
+    all: readonly string[];
+    governed: readonly string[];
+    byCell: Readonly<Record<string, readonly string[]>>;
+  };
+  imports: readonly PluginImportReference[];
+  resources: readonly PluginResourceAccess[];
+  metrics: Readonly<Record<string, CellBaselineRecord>>;
+  changedFiles: ReadonlySet<string>;
+};
+
+type PluginRuleContext = {
+  repository: PluginRepositoryModel;
+  cells: readonly CellManifest[];
+  report(finding: PluginFinding): void;
+};
+
+type PluginAdapterHelpers = {
+  getQualifiedCallName(node: ts.Node): string | undefined;
+  getStaticStringArgument(node: ts.CallExpression, index: number): string | undefined;
+  lineOf(node: ts.Node): number;
+};
+
+type PluginAdapter = {
+  name: string;
+  detect(context: {
+    repository: PluginRepositoryModel;
+    cell: CellManifest;
+    filePath: string;
+    sourceText: string;
+    sourceFile: ts.SourceFile;
+    helpers: PluginAdapterHelpers;
+  }): PluginResourceAccess[];
+};
+
+type PluginRule = {
+  id: string;
+  meta: {
+    description: string;
+    defaultSeverity: ConfiguredRuleSeverity;
+    category: string;
+    docsUrl?: string;
+  };
+  run(context: PluginRuleContext): void | PluginFinding[];
+};
+
+type PluginReporter = {
+  name: string;
+  report(context: {
+    repository: PluginRepositoryModel;
+    findings: readonly PluginFinding[];
+    warnings: readonly PluginFinding[];
+  }): string;
+};
+
+type PluginDefinition = {
+  apiVersion: 1;
+  name: string;
+  version: string;
+  capabilities?: {
+    needsAst?: boolean;
+    needsTypeChecker?: boolean;
+    needsGitDiff?: boolean;
+    needsRuntimeEvidence?: boolean;
+    needsNetwork?: boolean;
+  };
+  rules?: Record<string, PluginRule>;
+  adapters?: PluginAdapter[];
+  reporters?: PluginReporter[];
+  manifestSchema?: unknown;
+};
 
 export type CheckOptions = {
   rootDir?: string;
   manifestPath?: string;
   baselinePath?: string;
   evidencePaths?: string[];
-  plugins?: CellFencePlugin[];
+  plugins?: PluginDefinition[];
   ruleSeverities?: Record<string, ConfiguredRuleSeverity>;
   changedFiles?: string[];
 };
@@ -1644,7 +1757,7 @@ function repositoryFiles(context: AnalysisContext): readonly string[] {
   return listFiles(context.rootDir).map((filePath) => repoPath(context.rootDir, filePath));
 }
 
-function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference): CellFenceResourceAccess {
+function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference): PluginResourceAccess {
   return {
     kind: access.kind,
     access: access.access,
@@ -1660,8 +1773,8 @@ function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference
   };
 }
 
-function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessReference[]>): CellFenceResourceAccess[] {
-  const accesses: CellFenceResourceAccess[] = [];
+function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessReference[]>): PluginResourceAccess[] {
+  const accesses: PluginResourceAccess[] = [];
   for (const [cellId, cellAccesses] of accessesByCell.entries()) {
     for (const access of cellAccesses) accesses.push(resourceAccessForPlugin(cellId, access));
   }
@@ -1673,11 +1786,11 @@ function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessRefer
 function createRepositoryModel(
   context: AnalysisContext,
   baseline: CellFenceBaseline | undefined,
-  observedImports: CellFenceImportReference[],
+  observedImports: PluginImportReference[],
   accessesByCell: Map<string, ResourceAccessReference[]>,
   metrics: Record<string, CellBaselineRecord>,
   changedFiles: string[] = [],
-): CellFenceRepositoryModel {
+): PluginRepositoryModel {
   return {
     rootDir: context.rootDir,
     manifest: context.manifest,
@@ -1705,7 +1818,7 @@ function qualifiedExpressionName(node: ts.Node | undefined): string | undefined 
   return undefined;
 }
 
-function adapterHelpers(sourceFile: ts.SourceFile): CellFenceAdapterHelpers {
+function adapterHelpers(sourceFile: ts.SourceFile): PluginAdapterHelpers {
   return {
     getQualifiedCallName(node: ts.Node): string | undefined {
       if (ts.isCallExpression(node)) return qualifiedExpressionName(node.expression);
@@ -1720,7 +1833,7 @@ function adapterHelpers(sourceFile: ts.SourceFile): CellFenceAdapterHelpers {
   };
 }
 
-function pluginAccessToInternal(access: CellFenceResourceAccess): ResourceAccessReference {
+function pluginAccessToInternal(access: PluginResourceAccess): ResourceAccessReference {
   return {
     kind: access.kind,
     access: access.access,
@@ -1735,7 +1848,7 @@ function pluginAccessToInternal(access: CellFenceResourceAccess): ResourceAccess
   };
 }
 
-function validatePluginApiVersion(plugin: CellFencePlugin, findings: Finding[]): boolean {
+function validatePluginApiVersion(plugin: PluginDefinition, findings: Finding[]): boolean {
   if (plugin.apiVersion === 1) return true;
   addFinding(findings, {
     ruleId: "CELLFENCE_PLUGIN_INVALID",
@@ -1748,8 +1861,8 @@ function validatePluginApiVersion(plugin: CellFencePlugin, findings: Finding[]):
 
 function runPluginAdapters(
   context: AnalysisContext,
-  plugins: CellFencePlugin[],
-  repository: CellFenceRepositoryModel,
+  plugins: PluginDefinition[],
+  repository: PluginRepositoryModel,
   findings: Finding[],
 ): Map<string, ResourceAccessReference[]> {
   const accessesByCell = new Map<string, ResourceAccessReference[]>();
@@ -1761,7 +1874,7 @@ function runPluginAdapters(
           const sourceText = fs.readFileSync(sourceFilePath, "utf8");
           const sourceFile = ts.createSourceFile(sourceFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(sourceFilePath));
           const relativeFilePath = repoPath(context.rootDir, sourceFilePath);
-          let accesses: CellFenceResourceAccess[];
+          let accesses: PluginResourceAccess[];
           try {
             accesses = adapter.detect({
               repository,
@@ -1884,18 +1997,18 @@ function validatePluginResourceAccesses(
 
 function runPluginRules(
   context: AnalysisContext,
-  plugins: CellFencePlugin[],
-  repository: CellFenceRepositoryModel,
+  plugins: PluginDefinition[],
+  repository: PluginRepositoryModel,
   findings: Finding[],
 ): void {
   for (const plugin of plugins) {
     if (!validatePluginApiVersion(plugin, findings)) continue;
     for (const [ruleId, rule] of Object.entries(plugin.rules || {})) {
       const emittedFindings: Finding[] = [];
-      const ruleContext: CellFenceRuleContext = {
+      const ruleContext: PluginRuleContext = {
         repository,
         cells: context.manifest.cells,
-        report(finding: CellFenceFinding): void {
+        report(finding: PluginFinding): void {
           emittedFindings.push({ ...finding, ruleId: finding.ruleId || ruleId });
         },
       };
@@ -2214,7 +2327,7 @@ function validateImports(
   context: AnalysisContext,
   findings: Finding[],
   warnings: Finding[],
-  observedImports: CellFenceImportReference[] = [],
+  observedImports: PluginImportReference[] = [],
 ): Map<string, Set<string>> {
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
@@ -2786,7 +2899,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipCoverage(context, findings);
   validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
-  const observedImports: CellFenceImportReference[] = [];
+  const observedImports: PluginImportReference[] = [];
   const crossCellDependencies = validateImports(context, findings, warnings, observedImports);
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(

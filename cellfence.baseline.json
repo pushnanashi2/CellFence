@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T16:44:30.164Z",
+  "generatedAt": "2026-07-12T16:59:39.409Z",
   "cellIds": [
     "cli",
     "engine",
@@ -97,8 +97,8 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 36,
-      "publicSurfaceLines": 3438,
-      "crossCellDependencies": 2,
+      "publicSurfaceLines": 3551,
+      "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
       ],
@@ -141,9 +141,8 @@
         "WaiverRequestOptions",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "5b3cc4893c9c80c9975c67f713408289b12415f56eacc957f81d9f7dc12f9630",
+      "publicSurfaceHash": "aa04b3a8f26a967ead79204852b32d49fda178980ae6dcce9ff0ecc9d4e101c8",
       "dependencyEdges": [
-        "engine->plugin-api",
         "engine->schema"
       ],
       "artifactContracts": [],

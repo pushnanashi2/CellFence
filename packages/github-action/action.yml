@@ -24,7 +24,7 @@ runs:
           evidence_args=(--evidence "${{ inputs.evidence }}")
         fi
         if [ -n "${{ inputs.baseline }}" ]; then
-          npx --yes cellfence@0.1.7 baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}" "${evidence_args[@]}"
+          npx --yes cellfence@0.1.8 baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}" "${evidence_args[@]}"
         else
-          npx --yes cellfence@0.1.7 check --manifest "${{ inputs.manifest }}"
+          npx --yes cellfence@0.1.8 check --manifest "${{ inputs.manifest }}"
         fi
