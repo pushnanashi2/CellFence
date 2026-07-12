@@ -11,6 +11,7 @@ import {
   type CellManifest,
   type CellConsumerManifest,
   type ResourceBaselineEntry,
+  type ResourceContractManifest,
   validateBaseline,
   validateManifest,
   validateResourceEvidence,
@@ -60,6 +61,43 @@ export type CheckResult = {
   findings: Finding[];
   warnings: Finding[];
   metrics: Record<string, CellBaselineRecord>;
+};
+
+export type ContextBudgetEntry = {
+  current: number;
+  limit: number;
+  remaining: number;
+  source: "manifest-budget" | "baseline-ratchet";
+};
+
+export type ContextAllowedImport = {
+  cell: string;
+  publicEntry: string;
+  packageName?: string;
+  artifactLanes: string[];
+};
+
+type ContextBudgetMetric = "ownedPathPatterns" | "publicSymbols" | "publicSurfaceLines" | "crossCellDependencies";
+
+export type CellFenceContext = {
+  schemaVersion: "cellfence.context.v1";
+  cell: {
+    id: string;
+    packageName?: string;
+    ownedPaths: string[];
+    publicEntry: string;
+    publicSymbols: string[];
+  };
+  allowedImports: ContextAllowedImport[];
+  allowedResources: ResourceContractManifest[];
+  baselineResources: ResourceBaselineEntry[];
+  producedArtifacts: Array<{ id: string; paths: string[]; description?: string }>;
+  budgets: Partial<Record<ContextBudgetMetric, ContextBudgetEntry>>;
+  guidance: string[];
+};
+
+export type ContextOptions = CheckOptions & {
+  cellId: string;
 };
 
 type ImportKind = "import" | "export-from" | "require" | "dynamic-import";
@@ -1360,6 +1398,92 @@ export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
     schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     cells: result.metrics,
+  };
+}
+
+function loadOptionalBaseline(rootDir: string, baselinePath: string | undefined): CellFenceBaseline | undefined {
+  const resolvedBaselinePath = baselinePath
+    ? path.resolve(rootDir, baselinePath)
+    : defaultBaselinePath(rootDir);
+  if (!fs.existsSync(resolvedBaselinePath)) return undefined;
+  const validation = validateBaseline(readJsonFile(resolvedBaselinePath));
+  if (!validation.ok || !validation.value) {
+    throw new Error(`baseline is invalid: ${validation.errors.join("; ")}`);
+  }
+  return validation.value;
+}
+
+function budgetEntry(current: number, limit: number, source: ContextBudgetEntry["source"]): ContextBudgetEntry {
+  return {
+    current,
+    limit,
+    remaining: limit - current,
+    source,
+  };
+}
+
+export function createCellContext(options: ContextOptions): CellFenceContext {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const manifest = loadManifestFromFile(manifestPath);
+  const context = createContext(rootDir, manifest);
+  const cell = context.cellsById.get(options.cellId);
+  if (!cell) {
+    throw new Error(`unknown cell ${options.cellId}`);
+  }
+
+  const baseline = loadOptionalBaseline(rootDir, options.baselinePath);
+  const currentResult = checkRepository({
+    rootDir,
+    manifestPath: repoPath(rootDir, manifestPath),
+    evidencePaths: options.evidencePaths,
+  });
+  const currentMetrics = currentResult.metrics[cell.id];
+  const baselineRecord = baseline?.cells[cell.id];
+  const budgets: CellFenceContext["budgets"] = {};
+
+  for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
+    const current = currentMetrics?.[metric] ?? 0;
+    const manifestLimit = cell.budgets?.[metric];
+    if (typeof manifestLimit === "number") {
+      budgets[metric] = budgetEntry(current, manifestLimit, "manifest-budget");
+    } else if (baselineRecord && typeof baselineRecord[metric] === "number") {
+      budgets[metric] = budgetEntry(current, baselineRecord[metric], "baseline-ratchet");
+    }
+  }
+
+  const allowedImports: ContextAllowedImport[] = (cell.consumes || []).flatMap((consumer) => {
+    const producer = context.cellsById.get(consumer.cell);
+    if (!producer) return [];
+    return [{
+      cell: producer.id,
+      publicEntry: producer.publicEntry,
+      packageName: producer.packageName,
+      artifactLanes: consumer.artifactLanes || [],
+    }];
+  });
+
+  return {
+    schemaVersion: "cellfence.context.v1",
+    cell: {
+      id: cell.id,
+      packageName: cell.packageName,
+      ownedPaths: cell.ownedPaths,
+      publicEntry: cell.publicEntry,
+      publicSymbols: cell.publicSymbols,
+    },
+    allowedImports,
+    allowedResources: cell.resourceContracts || [],
+    baselineResources: baselineRecord?.resourceAccesses || [],
+    producedArtifacts: cell.producesArtifacts || [],
+    budgets,
+    guidance: [
+      "Create and edit source only inside ownedPaths unless a human changes the manifest.",
+      "Cross-cell imports must use the listed publicEntry or packageName surfaces.",
+      "Do not import another cell's internal implementation paths.",
+      "Resource access must match allowedResources or existing baselineResources.",
+      "Baseline updates expand the fence and should be treated as review-sensitive changes.",
+    ],
   };
 }
 

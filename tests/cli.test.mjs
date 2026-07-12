@@ -58,6 +58,34 @@ test("CLI evidence check rejects new runtime resource evidence", () => {
   assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
 });
 
+test("CLI context returns machine-readable cell fence before editing", () => {
+  const fixturePath = path.join(root, "fixtures/valid/public-import");
+  const result = runCli(["context", "--cell", "consumer", "--json"], fixturePath);
+  assert.equal(result.status, 0);
+  const context = JSON.parse(result.stdout);
+  assert.equal(context.schemaVersion, "cellfence.context.v1");
+  assert.equal(context.cell.id, "consumer");
+  assert.deepEqual(context.cell.ownedPaths, ["src/consumer/**"]);
+  assert.deepEqual(context.allowedImports, [
+    {
+      cell: "producer",
+      publicEntry: "src/producer/public.ts",
+      artifactLanes: [],
+    },
+  ]);
+  assert.match(context.guidance.join("\n"), /Do not import another cell's internal implementation paths/);
+});
+
+test("CLI context can render AGENTS.md-compatible guidance", () => {
+  const fixturePath = path.join(root, "fixtures/valid/resource-baseline-allows-existing");
+  const result = runCli(["context", "--cell", "runtime", "--format", "agents-md"], fixturePath);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /# CellFence Context: runtime/);
+  assert.match(result.stdout, /## Allowed Resources/);
+  assert.match(result.stdout, /database:read:app\.users \(baseline\)/);
+  assert.match(result.stdout, /publicSurfaceLines: 9\/20, remaining 11, source baseline-ratchet/);
+});
+
 test("CLI baseline create stores runtime evidence inventory", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-"));

@@ -4,7 +4,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  type CellFenceContext,
   checkRepository,
+  createCellContext,
   createBaseline,
   defaultBaselinePath,
   formatHumanResult,
@@ -15,7 +17,9 @@ type ParsedArgs = {
   command: string[];
   manifestPath?: string;
   baselinePath?: string;
+  cellId?: string;
   evidencePaths: string[];
+  format?: string;
   json: boolean;
   rootDir: string;
 };
@@ -40,6 +44,7 @@ function printUsage(): void {
 Usage:
   cellfence init
   cellfence check [--manifest cellfence.manifest.json] [--json]
+  cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
@@ -68,11 +73,21 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--baseline=")) {
       parsed.baselinePath = argument.slice("--baseline=".length);
+    } else if (argument === "--cell") {
+      parsed.cellId = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--cell=")) {
+      parsed.cellId = argument.slice("--cell=".length);
     } else if (argument === "--evidence") {
       parsed.evidencePaths.push(argv[index + 1]);
       index += 1;
     } else if (argument.startsWith("--evidence=")) {
       parsed.evidencePaths.push(argument.slice("--evidence=".length));
+    } else if (argument === "--format") {
+      parsed.format = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--format=")) {
+      parsed.format = argument.slice("--format=".length);
     } else if (argument === "--root") {
       parsed.rootDir = path.resolve(argv[index + 1]);
       index += 1;
@@ -110,6 +125,80 @@ function commandCheck(parsed: ParsedArgs): number {
   if (parsed.json) writeJson(result);
   else console.log(formatHumanResult(result));
   return result.exitCode;
+}
+
+function bulletList(values: string[], emptyValue = "(none)"): string[] {
+  return values.length > 0 ? values.map((value) => `- ${value}`) : [`- ${emptyValue}`];
+}
+
+function formatContextAsAgentsMarkdown(context: CellFenceContext): string {
+  const lines: string[] = [];
+  lines.push(`# CellFence Context: ${context.cell.id}`);
+  lines.push("");
+  lines.push("## Owned Paths");
+  lines.push(...bulletList(context.cell.ownedPaths));
+  lines.push("");
+  lines.push("## Public Surface");
+  lines.push(`- publicEntry: ${context.cell.publicEntry}`);
+  if (context.cell.packageName) lines.push(`- packageName: ${context.cell.packageName}`);
+  lines.push(...context.cell.publicSymbols.map((symbol) => `- symbol: ${symbol}`));
+  lines.push("");
+  lines.push("## Allowed Cross-Cell Imports");
+  if (context.allowedImports.length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const allowedImport of context.allowedImports) {
+      const packageSuffix = allowedImport.packageName ? ` or ${allowedImport.packageName}` : "";
+      const laneSuffix = allowedImport.artifactLanes.length > 0 ? `; artifact lanes: ${allowedImport.artifactLanes.join(", ")}` : "";
+      lines.push(`- ${allowedImport.cell}: ${allowedImport.publicEntry}${packageSuffix}${laneSuffix}`);
+    }
+  }
+  lines.push("");
+  lines.push("## Allowed Resources");
+  const resources = [
+    ...context.allowedResources.flatMap((contract) =>
+      contract.access.flatMap((access) =>
+        contract.selectors.map((selector) => `${contract.kind}:${access}:${selector} (${contract.id})`)
+      )
+    ),
+    ...context.baselineResources.map((resource) => `${resource.kind}:${resource.access}:${resource.selector} (baseline)`),
+  ];
+  lines.push(...bulletList(resources));
+  lines.push("");
+  lines.push("## Budget");
+  const budgetEntries = Object.entries(context.budgets);
+  if (budgetEntries.length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const [metric, budget] of budgetEntries) {
+      lines.push(`- ${metric}: ${budget.current}/${budget.limit}, remaining ${budget.remaining}, source ${budget.source}`);
+    }
+  }
+  lines.push("");
+  lines.push("## Guidance");
+  lines.push(...bulletList(context.guidance));
+  return lines.join("\n");
+}
+
+function commandContext(parsed: ParsedArgs): number {
+  if (!parsed.cellId) {
+    console.error("cellfence context requires --cell cell-id");
+    return 2;
+  }
+  if (parsed.format && parsed.format !== "agents-md") {
+    console.error("cellfence context supports --format agents-md");
+    return 2;
+  }
+  const context = createCellContext({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    baselinePath: parsed.baselinePath,
+    evidencePaths: parsed.evidencePaths,
+    cellId: parsed.cellId,
+  });
+  if (parsed.json) writeJson(context);
+  else console.log(formatContextAsAgentsMarkdown(context));
+  return 0;
 }
 
 function commandBaselineCreate(parsed: ParsedArgs): number {
@@ -166,6 +255,7 @@ export function main(argv = process.argv.slice(2)): number {
     const [primaryCommand, secondaryCommand] = parsed.command;
     if (primaryCommand === "init") return commandInit(parsed.rootDir);
     if (primaryCommand === "check") return commandCheck(parsed);
+    if (primaryCommand === "context") return commandContext(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "create") return commandBaselineCreate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);

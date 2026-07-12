@@ -4,11 +4,11 @@
 
 **CellFence is a manifest-driven repository architecture governance tool for TypeScript and JavaScript codebases changed by parallel AI coding agents.** It turns architectural intent into deterministic CLI and CI checks: non-overlapping cell ownership, declared cross-cell dependencies, public entry points, declared artifact lanes, static resource contracts, and one-way ratchets that reject silent boundary growth.
 
-Use CellFence to detect private cross-module imports, undeclared dependencies, overlapping ownership, public API drift, undeclared artifact imports, undeclared static file/database/queue/HTTP coupling, and architecture expansion before a change reaches `main`.
+Use CellFence to show agents the fence before they edit, then detect private cross-module imports, undeclared dependencies, overlapping ownership, public API drift, undeclared artifact imports, undeclared static file/database/queue/HTTP coupling, and architecture expansion before a change reaches `main`.
 
 When CellFence is configured as a required check behind a protected branch, it acts as a **repository architecture firewall** for AI-generated and human-written code. It does not run coding agents, grant permissions, or sandbox tool calls; it verifies the repository state they leave behind.
 
-> **Status: pre-release v0.1.0.** The schema, analysis engine, CLI, conformance fixtures, ratchets, repository-local CI, and CellFence self-check are implemented. The npm release, reusable externally pinned GitHub Action, and external root-of-trust controls are not yet configured. See [Implementation status](docs/implementation-status.md).
+> **Status: pre-release v0.x.** The schema, analysis engine, CLI, conformance fixtures, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
 
 ## Why CellFence exists
 
@@ -38,6 +38,7 @@ CellFence is designed for questions such as:
 - How do I require cross-module dependencies to use a public API?
 - How do I declare statically imported generated artifacts between batch-oriented components?
 - How do I prevent public API, dependency, or ownership scope from growing without review?
+- How do I show an agent which paths, imports, resources, and budgets are allowed before it starts editing?
 - How do I give coding agents a deterministic completion check instead of another prompt?
 
 CellFence is useful for monorepos, modular monoliths, batch systems, data pipelines, code generators, and repositories where multiple humans or agents work in separate worktrees or branches.
@@ -177,11 +178,14 @@ Install the CLI in the repository you want to check:
 ```bash
 npm install --save-dev cellfence
 npx cellfence check
+npx cellfence context --cell example --json
 npx cellfence baseline create
 npx cellfence baseline check
 ```
 
 `check` validates the manifest contract only. It is useful before a baseline exists. Once a repository adopts ratchets, use `baseline check` in CI so public surface, ownership, dependency, and resource inventory growth is rejected.
+
+`context` projects a single cell's fence before editing: owned paths, allowed public imports, declared or grandfathered resources, current budgets, and short agent guidance. Use `--json` for tools or `--format agents-md` for an AGENTS.md/CLAUDE.md fragment.
 
 Create a starter manifest in a new or disposable repository:
 
@@ -196,6 +200,7 @@ npx cellfence init
 ```text
 cellfence init
 cellfence check [--manifest <path>] [--root <path>] [--json]
+cellfence context --cell <id> [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence baseline create [--manifest <path>] [--baseline <path>] [--root <path>]
 cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence baseline update [--manifest <path>] [--baseline <path>] [--root <path>]

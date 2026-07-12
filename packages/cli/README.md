@@ -4,6 +4,7 @@ CellFence CLI for manifest-driven repository architecture governance.
 
 ```bash
 npx cellfence check
+npx cellfence context --cell example --json
 npx cellfence baseline create
 npx cellfence baseline check
 ```
