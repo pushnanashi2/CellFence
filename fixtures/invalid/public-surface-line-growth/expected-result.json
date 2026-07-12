@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

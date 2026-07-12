@@ -27,6 +27,7 @@ export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
   | "CELLFENCE_DUPLICATE_CELL_ID"
   | "CELLFENCE_OWNERSHIP_OVERLAP"
+  | "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
   | "CELLFENCE_UNOWNED_SOURCE"
   | "CELLFENCE_UNOWNED_IMPORT_TARGET"
   | "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP"
@@ -433,6 +434,9 @@ type AnalysisContext = {
   packageToCell: Map<string, CellManifest>;
   packageRoots: Map<string, string>;
   pathAliases: PathAlias[];
+  listFilesCache?: string[];
+  sourceFilesForCellCache: Map<string, string[]>;
+  prismaModelSelectorCache?: Map<string, string>;
 };
 
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
@@ -440,10 +444,7 @@ const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
-const PRISMA_MODEL_SELECTOR_CACHE = new Map<string, Map<string, string>>();
-const LIST_FILES_CACHE = new Map<string, string[]>();
 const PATTERN_REGEXP_CACHE = new Map<string, RegExp>();
-const SOURCE_FILES_FOR_CELL_CACHE = new Map<string, string[]>();
 
 type PathAlias = {
   pattern: string;
@@ -531,6 +532,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
   if (!expires || !isIsoDate(expires)) errors.push("expires must be YYYY-MM-DD");
   if (!approvedBy) errors.push("approved-by is required");
+  if (approvedBy.toUpperCase() === "PENDING") errors.push("approved-by:PENDING is a request placeholder, not an approval");
   if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
   const expired = Boolean(expires) && expires < todayIsoDate();
   if (expired) errors.push("waiver is expired");
@@ -548,9 +550,10 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
 }
 
 function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): string[] {
+  const context = createContext(rootDir, manifest);
   const files = new Set<string>();
   for (const cell of manifest.cells) {
-    for (const sourceFile of sourceFilesForCell(rootDir, cell)) {
+    for (const sourceFile of sourceFilesForCell(rootDir, cell, context)) {
       files.add(sourceFile);
     }
   }
@@ -635,9 +638,8 @@ function humanResolution(title: string, details?: Record<string, unknown>): Sugg
   return { kind: "ask-human", title, approvalRequired: true, details };
 }
 
-function listFiles(rootDir: string): string[] {
-  const cachedFiles = LIST_FILES_CACHE.get(rootDir);
-  if (cachedFiles) return cachedFiles;
+function listFiles(rootDir: string, context?: AnalysisContext): string[] {
+  if (context?.listFilesCache) return context.listFilesCache;
   const files: string[] = [];
   function visit(directoryPath: string): void {
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
@@ -652,19 +654,19 @@ function listFiles(rootDir: string): string[] {
   }
   visit(rootDir);
   const sortedFiles = files.sort((left, right) => left.localeCompare(right));
-  LIST_FILES_CACHE.set(rootDir, sortedFiles);
+  if (context) context.listFilesCache = sortedFiles;
   return sortedFiles;
 }
 
-function sourceFilesForCell(rootDir: string, cell: CellManifest): string[] {
+function sourceFilesForCell(rootDir: string, cell: CellManifest, context?: AnalysisContext): string[] {
   const cacheKey = `${rootDir}:${cell.id}:${cell.ownedPaths.join("\0")}`;
-  const cachedFiles = SOURCE_FILES_FOR_CELL_CACHE.get(cacheKey);
+  const cachedFiles = context?.sourceFilesForCellCache.get(cacheKey);
   if (cachedFiles) return cachedFiles;
-  const files = listFiles(rootDir).filter((filePath) => {
+  const files = listFiles(rootDir, context).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
     return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
   });
-  SOURCE_FILES_FOR_CELL_CACHE.set(cacheKey, files);
+  context?.sourceFilesForCellCache.set(cacheKey, files);
   return files;
 }
 
@@ -672,12 +674,12 @@ function findOwningCell(manifest: CellFenceManifest, relativePath: string): Cell
   return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
 }
 
-function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceManifest): string[] {
+function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceManifest, context?: AnalysisContext): string[] {
   const governance = manifest.governance;
   if (!governance?.requireOwnership) return [];
   const include = governance.include || [];
   const exclude = governance.exclude || [];
-  return listFiles(rootDir).filter((filePath) => {
+  return listFiles(rootDir, context).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
     return SOURCE_EXTENSIONS.includes(path.extname(filePath))
       && include.some((pattern) => matchesPattern(relativePath, pattern))
@@ -751,7 +753,15 @@ function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisCo
       if (packageRoot) packageRoots.set(cell.packageName, packageRoot);
     }
   }
-  return { rootDir, manifest, cellsById, packageToCell, packageRoots, pathAliases: readPathAliases(rootDir) };
+  return {
+    rootDir,
+    manifest,
+    cellsById,
+    packageToCell,
+    packageRoots,
+    pathAliases: readPathAliases(rootDir),
+    sourceFilesForCellCache: new Map<string, string[]>(),
+  };
 }
 
 function validateDuplicateCellIds(manifest: CellFenceManifest, findings: Finding[]): void {
@@ -794,6 +804,32 @@ function validateOwnershipOverlap(manifest: CellFenceManifest, findings: Finding
   }
 }
 
+function warnWhenOwnershipCoverageDisabled(context: AnalysisContext, warnings: Finding[]): void {
+  if (context.manifest.governance?.requireOwnership === true) return;
+  addFinding(warnings, {
+    ruleId: "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED",
+    severity: "warning",
+    message: "strict ownership coverage is disabled; source outside ownedPaths can escape CellFence checks",
+    details: {
+      governance: context.manifest.governance,
+      suggestedGovernance: {
+        requireOwnership: true,
+        include: ["src/**", "packages/**", "apps/**"],
+        exclude: ["tests/**", "fixtures/**"],
+      },
+    },
+    suggestedResolutions: [
+      manifestResolution("Enable governance.requireOwnership and include the source roots CellFence must govern", true, {
+        governance: {
+          requireOwnership: true,
+          include: ["src/**", "packages/**", "apps/**"],
+          exclude: ["tests/**", "fixtures/**"],
+        },
+      }),
+    ],
+  });
+}
+
 function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]): void {
   for (const cell of context.manifest.cells) {
     if (!pathOwnedByCell(cell, cell.publicEntry)) {
@@ -834,7 +870,7 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
     }
   }
 
-  for (const sourceFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest)) {
+  for (const sourceFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest, context)) {
     const relativePath = repoPath(context.rootDir, sourceFilePath);
     if (findOwningCell(context.manifest, relativePath)) continue;
     addFinding(findings, {
@@ -1009,11 +1045,11 @@ function sqlTableAccesses(text: string): Array<{ access: "read" | "write"; selec
   return accesses;
 }
 
-function prismaModelSelectors(rootDir: string): Map<string, string> {
-  const cachedSelectors = PRISMA_MODEL_SELECTOR_CACHE.get(rootDir);
+function prismaModelSelectors(context: AnalysisContext): Map<string, string> {
+  const cachedSelectors = context.prismaModelSelectorCache;
   if (cachedSelectors) return cachedSelectors;
   const selectors = new Map<string, string>();
-  for (const filePath of listFiles(rootDir)) {
+  for (const filePath of listFiles(context.rootDir, context)) {
     if (path.basename(filePath) !== "schema.prisma") continue;
     const schemaText = fs.readFileSync(filePath, "utf8");
     const modelPattern = /model\s+([A-Za-z_][A-Za-z0-9_]*)\s+\{([\s\S]*?)\n\}/g;
@@ -1025,7 +1061,7 @@ function prismaModelSelectors(rootDir: string): Map<string, string> {
       selectors.set(lowerFirst(modelName), mappedTable || modelName);
     }
   }
-  PRISMA_MODEL_SELECTOR_CACHE.set(rootDir, selectors);
+  context.prismaModelSelectorCache = selectors;
   return selectors;
 }
 
@@ -1230,13 +1266,13 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   return undefined;
 }
 
-function collectResourceAccesses(rootDir: string, filePath: string): ResourceAccessReference[] {
+function collectResourceAccesses(context: AnalysisContext, filePath: string): ResourceAccessReference[] {
   const sourceText = fs.readFileSync(filePath, "utf8");
   if (!RESOURCE_SCAN_HINT.test(sourceText)) return [];
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
-  const relativeFilePath = repoPath(rootDir, filePath);
+  const relativeFilePath = repoPath(context.rootDir, filePath);
   const accesses: ResourceAccessReference[] = [];
-  const prismaSelectors = prismaModelSelectors(rootDir);
+  const prismaSelectors = prismaModelSelectors(context);
   const prismaClientNames = collectPrismaClientNames(sourceFile);
   const typeOrmEntitySelectors = collectTypeOrmEntitySelectors(sourceFile);
   const typeOrmRepositories = collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors);
@@ -1632,8 +1668,8 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
   const accessesByCell = new Map<string, ResourceAccessReference[]>();
   for (const cell of context.manifest.cells) {
     const cellAccesses: ResourceAccessReference[] = [];
-    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
-      for (const access of collectResourceAccesses(context.rootDir, sourceFilePath)) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
+      for (const access of collectResourceAccesses(context, sourceFilePath)) {
         if (access.unresolved) {
           const severity: Severity = access.kind === "file" ? "warning" : "error";
           addFinding(severity === "warning" ? warnings : findings, {
@@ -1810,13 +1846,13 @@ function mergeAccessesByCell(target: Map<string, ResourceAccessReference[]>, sou
 function allSourceFilesByCell(context: AnalysisContext): Record<string, readonly string[]> {
   const byCell: Record<string, readonly string[]> = {};
   for (const cell of context.manifest.cells) {
-    byCell[cell.id] = sourceFilesForCell(context.rootDir, cell).map((filePath) => repoPath(context.rootDir, filePath));
+    byCell[cell.id] = sourceFilesForCell(context.rootDir, cell, context).map((filePath) => repoPath(context.rootDir, filePath));
   }
   return byCell;
 }
 
 function repositoryFiles(context: AnalysisContext): readonly string[] {
-  return listFiles(context.rootDir).map((filePath) => repoPath(context.rootDir, filePath));
+  return listFiles(context.rootDir, context).map((filePath) => repoPath(context.rootDir, filePath));
 }
 
 function sourceContentsByPath(context: AnalysisContext, byCell: Record<string, readonly string[]>): Record<string, string> {
@@ -1871,7 +1907,7 @@ function createRepositoryModel(
     baseline: baseline || null,
     files: {
       all: repositoryFiles(context),
-      governed: sourceFilesUnderGovernance(context.rootDir, context.manifest).map((filePath) => repoPath(context.rootDir, filePath)),
+      governed: sourceFilesUnderGovernance(context.rootDir, context.manifest, context).map((filePath) => repoPath(context.rootDir, filePath)),
       byCell,
       contents: sourceContentsByPath(context, byCell),
     },
@@ -1945,7 +1981,7 @@ function runPluginAdapters(
     if (!validatePluginApiVersion(plugin, findings)) continue;
     for (const adapter of plugin.adapters || []) {
       for (const cell of context.manifest.cells) {
-        for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
+        for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
           const relativeFilePath = repoPath(context.rootDir, sourceFilePath);
           const sourceText = repository.files.contents[relativeFilePath];
           if (sourceText === undefined) continue;
@@ -2407,7 +2443,7 @@ function validateImports(
 ): Map<string, Set<string>> {
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
-    for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell)) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell, context)) {
       const references = extractImports(context.rootDir, sourceFilePath, warnings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
@@ -2972,6 +3008,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   validateDuplicateCellIds(manifest, findings);
   validateOwnershipOverlap(manifest, findings);
+  warnWhenOwnershipCoverageDisabled(context, warnings);
   validateOwnershipCoverage(context, findings);
   validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);

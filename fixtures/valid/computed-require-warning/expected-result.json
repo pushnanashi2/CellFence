@@ -3,6 +3,7 @@
   "ok": true,
   "errorRuleIds": [],
   "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED",
     "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
   ]
 }

@@ -391,8 +391,11 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   if (value.schemaVersion !== CELLFENCE_MANIFEST_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_MANIFEST_SCHEMA_VERSION}`);
   }
-  if (value.extends !== undefined && !isStringArray(value.extends)) {
-    errors.push("extends must be an array of non-empty strings when present");
+  if (value.extends !== undefined) {
+    if (!isStringArray(value.extends)) {
+      errors.push("extends must be an array of non-empty strings when present");
+    }
+    errors.push("extends is reserved for a future manifest loader and is not supported in manifest v1");
   }
   if (value.plugins !== undefined) {
     if (!Array.isArray(value.plugins)) {
@@ -402,6 +405,7 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
         validatePluginReference(plugin, `plugins[${pluginIndex}]`, errors);
       });
     }
+    errors.push("plugins is reserved for a future trusted plugin loader and is not supported in manifest v1; pass plugins programmatically");
   }
   validateRuleSeverityMap(value.rules, "rules", errors);
   if (value.overrides !== undefined) {

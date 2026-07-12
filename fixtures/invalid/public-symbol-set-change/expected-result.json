@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

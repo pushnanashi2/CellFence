@@ -104,6 +104,60 @@ function companyPlugin() {
   });
 }
 
+function createBoundaryRepository() {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-plugin-cache-"));
+  fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+  fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const publicValue = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/producer/internal.ts"), "export const privateValue = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), "import { publicValue } from '../producer/public';\nexport const used = publicValue;\n");
+  writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+    },
+    cells: [
+      {
+        id: "producer",
+        ownedPaths: ["src/producer/**"],
+        publicEntry: "src/producer/public.ts",
+        publicSymbols: ["publicValue"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "consumer",
+        ownedPaths: ["src/consumer/**"],
+        publicEntry: "src/consumer/public.ts",
+        publicSymbols: ["used"],
+        consumes: [{ cell: "producer" }],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  return rootDir;
+}
+
+test("repeated engine checks see source files added after the first check", () => {
+  const rootDir = createBoundaryRepository();
+  try {
+    const first = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(first.ok, true);
+    assert.deepEqual(first.findings, []);
+
+    fs.writeFileSync(path.join(rootDir, "src/consumer/late-private-import.ts"), "import { privateValue } from '../producer/internal';\nexport const leaked = privateValue;\n");
+    const second = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(second.ok, false);
+    assert.ok(second.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && finding.filePath === "src/consumer/late-private-import.ts"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("plugin adapter output is governed by resource contracts", () => {
   const rootDir = createRepository();
   try {

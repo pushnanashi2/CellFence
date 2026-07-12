@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

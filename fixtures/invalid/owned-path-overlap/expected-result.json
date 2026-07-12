@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_OWNERSHIP_OVERLAP"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

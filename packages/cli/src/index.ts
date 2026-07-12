@@ -58,6 +58,11 @@ type ParsedArgs = {
 
 const INIT_MANIFEST = {
   schemaVersion: "cellfence.manifest.v1",
+  governance: {
+    requireOwnership: true,
+    include: ["src/**"],
+    exclude: [],
+  },
   cells: [
     {
       id: "example",

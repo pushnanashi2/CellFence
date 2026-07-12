@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

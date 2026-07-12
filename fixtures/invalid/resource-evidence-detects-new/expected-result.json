@@ -7,5 +7,7 @@
   "errorRuleIds": [
     "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

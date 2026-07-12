@@ -288,6 +288,56 @@ test("CLI waiver request creates an approval-oriented directive without editing 
   assert.match(request.markdown, /CellFence Waiver Request/);
 });
 
+test("CLI init enables strict ownership coverage by default", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-strict-"));
+  try {
+    const result = runCli(["init"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.governance, {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+    });
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+    const parsed = JSON.parse(checkResult.stdout);
+    assert.equal(parsed.ok, true);
+    assert.deepEqual(parsed.warnings, []);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI rejects manifest plugins and extends instead of silently ignoring them", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reserved-manifest-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      extends: ["./missing.json"],
+      plugins: ["missing-plugin"],
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    const result = runCli(["check", "--json"], tempDir);
+    assert.equal(result.status, 2);
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_MANIFEST_INVALID"));
+    assert.match(parsed.findings[0].message, /extends is reserved/);
+    assert.match(parsed.findings[0].message, /plugins is reserved/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI check emits suggested resolutions for private imports", () => {
   const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
   const result = runCli(["check", "--json"], fixturePath);
@@ -377,6 +427,33 @@ test("CLI rejects expired CellFence waivers instead of silently suppressing find
   const parsed = JSON.parse(result.stdout);
   assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_WAIVER_INVALID"));
   assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+});
+
+test("CLI rejects PENDING CellFence waivers instead of treating requests as approvals", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-pending-"));
+  try {
+    writePrivateImportProject(tempDir, { withWaiver: true });
+    const consumerPath = path.join(tempDir, "src/consumer/public.ts");
+    fs.writeFileSync(
+      consumerPath,
+      fs.readFileSync(consumerPath, "utf8").replace("approved-by:test-owner", "approved-by:PENDING"),
+    );
+
+    const result = runCli(["check", "--json"], tempDir);
+    assert.equal(result.status, 1);
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_WAIVER_INVALID"));
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+
+    const listResult = runCli(["waivers", "list", "--json"], tempDir);
+    assert.equal(listResult.status, 1);
+    const waivers = JSON.parse(listResult.stdout).waivers;
+    assert.equal(waivers[0].approvedBy, "PENDING");
+    assert.equal(waivers[0].valid, false);
+    assert.ok(waivers[0].errors.includes("approved-by:PENDING is a request placeholder, not an approval"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI changed check ignores violations already present at the base commit", () => {

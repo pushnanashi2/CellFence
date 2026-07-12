@@ -2,5 +2,7 @@
   "mode": "baseline-check",
   "ok": true,
   "errorRuleIds": [],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }

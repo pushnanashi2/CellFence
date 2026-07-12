@@ -253,6 +253,8 @@ npx cellfence init
 
 `init` creates `cellfence.manifest.json` and a small example cell. For an established repository, writing the manifest manually is usually safer.
 
+The generated manifest enables `governance.requireOwnership` for `src/**` by default. If a repository disables strict ownership coverage, checks still run but emit `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` so teams do not mistake partial coverage for a full repository fence.
+
 ## CLI
 
 ```text
@@ -292,9 +294,9 @@ Temporary suppressions must be explicit and expiring:
 // cellfence-ignore CELLFENCE_UNDECLARED_RESOURCE_ACCESS expires:2026-10-01 approved-by:owner reason:documented false positive while adapter support lands
 ```
 
-Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLFENCE_WAIVER_INVALID`.
+Expired, incomplete, wildcard, reason-free, or `approved-by:PENDING` waivers fail the check with `CELLFENCE_WAIVER_INVALID`.
 
-`waivers request` does not edit source. It creates an approval-oriented directive and markdown block so an agent can ask for a precise, expiring exception instead of inventing one inline.
+`waivers request` does not edit source. It creates an approval-oriented directive and markdown block so an agent can ask for a precise, expiring exception instead of inventing one inline. A generated request with `approved-by:PENDING` is not a valid waiver until a real approver replaces the placeholder.
 
 ## Manifest reference
 
@@ -344,7 +346,7 @@ Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLF
 
 `packageName` is optional. When present, importing the exact package name is treated as importing the declared public entry. Package subpath imports into private implementation remain violations.
 
-`governance.requireOwnership` is optional. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`.
+`governance.requireOwnership` is optional for legacy adoption, but `cellfence init` enables it. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`. When omitted or false, CellFence emits `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` as a warning.
 
 `locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
 
@@ -551,6 +553,7 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_MANIFEST_INVALID` | Invalid manifest or baseline configuration |
 | `CELLFENCE_DUPLICATE_CELL_ID` | Duplicate cell identifiers |
 | `CELLFENCE_OWNERSHIP_OVERLAP` | Overlapping declared ownership paths |
+| `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` | Strict ownership coverage is disabled, so source outside ownedPaths can escape checks |
 | `CELLFENCE_UNOWNED_SOURCE` | Strict governance found source matched by `governance.include` that no cell owns |
 | `CELLFENCE_UNOWNED_IMPORT_TARGET` | A cell imports governed source that no cell owns |
 | `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry is outside the declaring cell's owned paths |
@@ -661,7 +664,7 @@ const result = checkRepository({
 
 Plugin adapters only translate framework-specific code into common resource access records. CellFence core still performs ownership, baseline, waiver, severity, and resource-contract enforcement. Plugin rules receive a read-only repository model containing file indexes, observed imports, detected resources, metrics, baseline, and changed files.
 
-External npm/local plugin auto-loading from manifest `plugins` is intentionally not enabled in v0.x; loading arbitrary code from config needs a separate trust decision. The manifest shape already reserves `plugins`, `rules`, `overrides`, and `governance.requiredRules` so repositories can adopt the policy model without changing the CLI contract later.
+External npm/local plugin auto-loading from manifest `plugins` is intentionally not enabled in v0.x; loading arbitrary code from config needs a separate trust decision. To avoid false confidence, manifest `plugins` and `extends` are rejected in manifest v1 instead of being silently ignored. Programmatic callers can still pass plugins directly through `checkRepository({ plugins })`.
 
 ## CellFence and adjacent tools
 

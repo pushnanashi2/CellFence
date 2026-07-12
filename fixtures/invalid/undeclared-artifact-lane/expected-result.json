@@ -4,5 +4,7 @@
   "errorRuleIds": [
     "CELLFENCE_UNDECLARED_ARTIFACT"
   ],
-  "warningRuleIds": []
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
 }
