@@ -9,6 +9,6 @@ const actionYaml = fs.readFileSync(path.join(root, "packages/github-action/actio
 test("GitHub Action wrapper does not assume CellFence source checkout in consumer repositories", () => {
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.3 baseline check/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.3 check/);
+  assert.match(actionYaml, /npx --yes cellfence@0\.1\.4 baseline check/);
+  assert.match(actionYaml, /npx --yes cellfence@0\.1\.4 check/);
 });

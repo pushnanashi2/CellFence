@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "runtime",
+      "ownedPaths": [
+        "src/runtime/**"
+      ],
+      "publicEntry": "src/runtime/public.ts",
+      "publicSymbols": [
+        "runTypeOrm"
+      ],
+      "consumes": [],
+      "producesArtifacts": [],
+      "resourceContracts": [
+        {
+          "id": "app-users",
+          "kind": "database",
+          "access": [
+            "read",
+            "write"
+          ],
+          "selectors": [
+            "app_users"
+          ]
+        },
+        {
+          "id": "audit-logs",
+          "kind": "database",
+          "access": [
+            "read"
+          ],
+          "selectors": [
+            "audit_logs"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -119,6 +119,9 @@
       "publicSymbols": [
         "flushEvidence",
         "installTrace",
+        "recordDatabaseAccess",
+        "recordHttpAccess",
+        "recordQueueAccess",
         "recordResourceAccess"
       ],
       "consumes": [

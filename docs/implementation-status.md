@@ -5,16 +5,16 @@
 | Manifest shape validation | enforced | `@cellfence/schema` and `@cellfence/engine` | JSON schema is implemented by TypeScript validators, not a standalone schema file | fixture tests and `cellfence check` |
 | Duplicate cell ID detection | enforced | `@cellfence/engine` | Detects IDs inside one manifest file | invalid fixture |
 | Owned path overlap detection | partially_enforced | `@cellfence/engine` | Prefix overlap is detected; full glob intersection is conservative | invalid fixture |
-| Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports are warnings; NodeNext runtime `.js` specifiers are remapped to TypeScript source candidates | invalid fixture |
+| Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports are warnings; NodeNext runtime `.js` specifiers and root tsconfig path aliases are resolved before boundary checks | invalid fixture |
 | Undeclared consumer rejection | enforced | `@cellfence/engine` | Applies to repository-local cells | invalid fixture |
 | Public entry existence | enforced | `@cellfence/engine` | One public entry per cell in v0.x | invalid fixture |
 | Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
 | Artifact lane declaration | enforced | `@cellfence/engine` | File path lanes only in v0.x | invalid fixture |
-| Static resource contract declaration | partially_enforced | `@cellfence/engine` | Detects selected string-literal file, SQL table, queue/topic, HTTP patterns, Prisma delegates, BullMQ, and KafkaJS; general dynamic dataflow is not inferred | valid and invalid resource fixtures |
+| Static resource contract declaration | partially_enforced | `@cellfence/engine` | Detects selected string-literal file, SQL table, queue/topic, HTTP patterns, Prisma delegates, TypeORM entities/repositories/query builders, string-literal query builders, BullMQ, and KafkaJS; general dynamic dataflow is not inferred | valid and invalid resource fixtures |
 | Adapter-scoped resource detection | partially_enforced | `@cellfence/engine` | ORM, query builder, and broker-client coverage is per adapter; unsupported libraries require a dedicated adapter or runtime evidence | adapter fixtures and documentation |
 | Unresolved resource access fail-closed | enforced | `@cellfence/engine` | Unsafe raw SQL and selected dynamic SQL assembly fail instead of becoming silent blind spots | invalid dynamic SQL fixture |
 | Runtime resource evidence | enforced | `@cellfence/schema`, `@cellfence/engine`, and `cellfence evidence check` | Requires explicit evidence JSON; CellFence does not observe live infrastructure by itself | evidence fixtures and CLI tests |
-| Runtime trace hook | partially_enforced | `@cellfence/trace` | Node.js fs read/write tracing only in v0.x; source-code module loading is ignored | trace tests |
+| Runtime trace hook | partially_enforced | `@cellfence/trace` | Node.js fs read/write and fetch tracing plus explicit database/HTTP/queue helper records in v0.x; source-code module loading is ignored | trace tests |
 | Resource access baseline inventory | enforced | `@cellfence/engine` baseline metrics | Captures selected static and supplied runtime evidence inventory; arbitrary ORM and broker coupling remain outside v0.x inference | baseline resource fixtures |
 | Baseline ratchets | enforced | `@cellfence/engine` | Counts are intentionally coarse in v0.x | baseline fixture tests |
 | Locked baseline update protection | enforced | `@cellfence/engine` and `cellfence baseline update` | Enforces locked cells; locked resource contracts are context and resolution metadata in v0.x | CLI tests |

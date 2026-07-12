@@ -18,6 +18,7 @@ const originalAppendFileSync = fs.appendFileSync.bind(fs);
 const originalReadFile = fs.promises.readFile.bind(fs.promises);
 const originalWriteFile = fs.promises.writeFile.bind(fs.promises);
 const originalAppendFile = fs.promises.appendFile.bind(fs.promises);
+const originalFetch = globalThis.fetch?.bind(globalThis);
 const accesses = new Map<string, ResourceEvidenceAccess>();
 const SOURCE_FILE_EXTENSIONS = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".mts", ".cts"]);
 let installed = false;
@@ -51,6 +52,33 @@ export function recordResourceAccess(access: TraceAccessInput): void {
   accesses.set(accessKey(resolvedAccess), resolvedAccess);
 }
 
+export function recordDatabaseAccess(selector: string, access: "read" | "write" = "read", cellId?: string): void {
+  recordResourceAccess({
+    kind: "database",
+    access,
+    selector,
+    cellId,
+  });
+}
+
+export function recordHttpAccess(selector: string, access: "call" | "serve" = "call", cellId?: string): void {
+  recordResourceAccess({
+    kind: "http",
+    access,
+    selector,
+    cellId,
+  });
+}
+
+export function recordQueueAccess(selector: string, access: "publish" | "subscribe", cellId?: string): void {
+  recordResourceAccess({
+    kind: "queue",
+    access,
+    selector,
+    cellId,
+  });
+}
+
 function recordFileAccess(access: "read" | "write", selector: fs.PathOrFileDescriptor): void {
   const normalizedSelector = normalizeSelector(selector);
   if (!normalizedSelector) return;
@@ -61,6 +89,13 @@ function recordFileAccess(access: "read" | "write", selector: fs.PathOrFileDescr
     access,
     selector: normalizedSelector,
   });
+}
+
+function fetchSelector(input: Parameters<typeof fetch>[0]): string | undefined {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.toString();
+  if (typeof Request !== "undefined" && input instanceof Request) return input.url;
+  return undefined;
 }
 
 export function flushEvidence(): void {
@@ -111,6 +146,14 @@ export function installTrace(): void {
     if (!(typeof selector === "object" && "fd" in selector)) recordFileAccess("write", selector as fs.PathLike);
     return originalAppendFile(selector as Parameters<typeof fs.promises.appendFile>[0], data, ...args as [options?: Parameters<typeof fs.promises.appendFile>[2]]);
   }) as typeof fs.promises.appendFile;
+
+  if (originalFetch) {
+    globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      const selector = fetchSelector(input);
+      if (selector) recordHttpAccess(selector, "call");
+      return originalFetch(input, init);
+    }) as typeof fetch;
+  }
 
   process.once("beforeExit", flushEvidence);
   process.once("exit", flushEvidence);

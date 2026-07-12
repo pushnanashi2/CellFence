@@ -183,6 +183,7 @@ type AnalysisContext = {
   cellsById: Map<string, CellManifest>;
   packageToCell: Map<string, CellManifest>;
   packageRoots: Map<string, string>;
+  pathAliases: PathAlias[];
 };
 
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
@@ -190,6 +191,11 @@ const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
 const PRISMA_MODEL_SELECTOR_CACHE = new Map<string, Map<string, string>>();
+
+type PathAlias = {
+  pattern: string;
+  targets: string[];
+};
 
 function normalizePath(filePath: string): string {
   return filePath.split(path.sep).join("/");
@@ -413,6 +419,27 @@ function findPackageRoot(rootDir: string, publicEntry: string): string | undefin
   return undefined;
 }
 
+function readPathAliases(rootDir: string): PathAlias[] {
+  const tsconfigPath = path.join(rootDir, "tsconfig.json");
+  if (!fs.existsSync(tsconfigPath)) return [];
+  const rawConfig = readJsonFile(tsconfigPath);
+  if (typeof rawConfig !== "object" || rawConfig === null || Array.isArray(rawConfig)) return [];
+  const compilerOptions = (rawConfig as { compilerOptions?: unknown }).compilerOptions;
+  if (typeof compilerOptions !== "object" || compilerOptions === null || Array.isArray(compilerOptions)) return [];
+  const options = compilerOptions as { baseUrl?: unknown; paths?: unknown };
+  if (typeof options.paths !== "object" || options.paths === null || Array.isArray(options.paths)) return [];
+  const baseUrl = typeof options.baseUrl === "string" ? options.baseUrl : ".";
+  const aliases: PathAlias[] = [];
+  for (const [pattern, targets] of Object.entries(options.paths)) {
+    if (!Array.isArray(targets)) continue;
+    const normalizedTargets = targets
+      .filter((target): target is string => typeof target === "string" && target.trim().length > 0)
+      .map((target) => normalizePath(path.resolve(rootDir, baseUrl, target)));
+    if (normalizedTargets.length > 0) aliases.push({ pattern, targets: normalizedTargets });
+  }
+  return aliases;
+}
+
 function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisContext {
   const cellsById = new Map<string, CellManifest>();
   const packageToCell = new Map<string, CellManifest>();
@@ -425,7 +452,7 @@ function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisCo
       if (packageRoot) packageRoots.set(cell.packageName, packageRoot);
     }
   }
-  return { rootDir, manifest, cellsById, packageToCell, packageRoots };
+  return { rootDir, manifest, cellsById, packageToCell, packageRoots, pathAliases: readPathAliases(rootDir) };
 }
 
 function validateDuplicateCellIds(manifest: CellFenceManifest, findings: Finding[]): void {
@@ -540,6 +567,10 @@ function expressionContainsSqlLiteral(node: ts.Node): boolean {
 
 const PRISMA_READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "count", "aggregate", "groupBy"]);
 const PRISMA_WRITE_METHODS = new Set(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
+const TYPEORM_READ_METHODS = new Set(["find", "findBy", "findOne", "findOneBy", "count", "countBy", "exist"]);
+const TYPEORM_WRITE_METHODS = new Set(["save", "insert", "update", "upsert", "delete", "remove", "softDelete", "restore"]);
+const QUERY_BUILDER_READ_METHODS = new Set(["selectFrom", "from"]);
+const QUERY_BUILDER_WRITE_METHODS = new Set(["insertInto", "updateTable", "deleteFrom", "into", "update"]);
 const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
@@ -610,6 +641,61 @@ function collectPrismaClientNames(sourceFile: ts.SourceFile): Set<string> {
   return names;
 }
 
+function selectorFromEntityExpression(expression: ts.Expression | undefined, entitySelectors: Map<string, string>, options: { allowUnknownIdentifier: boolean }): string | undefined {
+  const literalSelector = literalText(expression);
+  if (literalSelector) return literalSelector;
+  if (expression && ts.isIdentifier(expression)) return entitySelectors.get(expression.text) || (options.allowUnknownIdentifier ? expression.text : undefined);
+  return undefined;
+}
+
+function decoratorsForNode(node: ts.Node): readonly ts.Decorator[] {
+  return ts.canHaveDecorators(node) ? ts.getDecorators(node) || [] : [];
+}
+
+function collectTypeOrmEntitySelectors(sourceFile: ts.SourceFile): Map<string, string> {
+  const selectors = new Map<string, string>();
+  function visit(node: ts.Node): void {
+    if (ts.isClassDeclaration(node) && node.name) {
+      for (const decorator of decoratorsForNode(node)) {
+        const expression = decorator.expression;
+        if (!ts.isCallExpression(expression) || expressionName(expression.expression) !== "Entity") continue;
+      const explicitName = literalText(expression.arguments[0]) || objectStringProperty(expression.arguments[0], "name");
+        selectors.set(node.name.text, explicitName || node.name.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return selectors;
+}
+
+function collectTypeOrmRepositoryVariables(sourceFile: ts.SourceFile, entitySelectors: Map<string, string>): Map<string, string> {
+  const repositories = new Map<string, string>();
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && ts.isCallExpression(node.initializer)
+      && expressionName(node.initializer.expression) === "getRepository"
+    ) {
+      const selector = selectorFromEntityExpression(node.initializer.arguments[0], entitySelectors, { allowUnknownIdentifier: true });
+      if (selector) repositories.set(node.name.text, selector);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return repositories;
+}
+
+function typeOrmRepositorySelector(expression: ts.Expression, repositoryVariables: Map<string, string>, entitySelectors: Map<string, string>): string | undefined {
+  if (ts.isIdentifier(expression)) return repositoryVariables.get(expression.text);
+  if (ts.isCallExpression(expression) && expressionName(expression.expression) === "getRepository") {
+    return selectorFromEntityExpression(expression.arguments[0], entitySelectors, { allowUnknownIdentifier: true });
+  }
+  return undefined;
+}
+
 function collectBullQueueVariables(sourceFile: ts.SourceFile): Map<string, string> {
   const queueVariables = new Map<string, string>();
   function visit(node: ts.Node): void {
@@ -647,6 +733,27 @@ function collectDynamicSqlVariables(sourceFile: ts.SourceFile): Set<string> {
   return dynamicSqlVariables;
 }
 
+function chainContainsMethod(expression: ts.Expression, methodName: string): boolean {
+  let current: ts.Expression | undefined = expression;
+  while (current) {
+    if (ts.isCallExpression(current)) {
+      const currentMethodName = propertyName(current.expression) || expressionName(current.expression);
+      if (currentMethodName === methodName) return true;
+      if (ts.isPropertyAccessExpression(current.expression)) {
+        current = current.expression.expression;
+      } else {
+        break;
+      }
+    } else if (ts.isPropertyAccessExpression(current)) {
+      if (current.name.text === methodName) return true;
+      current = current.expression;
+    } else {
+      break;
+    }
+  }
+  return false;
+}
+
 function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   const lowered = name.toLowerCase();
   if (/(?:publish|enqueue|emitevent|sendmessage)$/.test(lowered)) return "publish";
@@ -661,6 +768,8 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
   const accesses: ResourceAccessReference[] = [];
   const prismaSelectors = prismaModelSelectors(rootDir);
   const prismaClientNames = collectPrismaClientNames(sourceFile);
+  const typeOrmEntitySelectors = collectTypeOrmEntitySelectors(sourceFile);
+  const typeOrmRepositories = collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors);
   const bullQueuesByVariable = collectBullQueueVariables(sourceFile);
   const dynamicSqlVariables = collectDynamicSqlVariables(sourceFile);
 
@@ -703,6 +812,55 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
       const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
 
       if (ts.isPropertyAccessExpression(node.expression) && methodName) {
+        const typeOrmRepository = typeOrmRepositorySelector(node.expression.expression, typeOrmRepositories, typeOrmEntitySelectors);
+        const typeOrmAccess = TYPEORM_READ_METHODS.has(methodName) ? "read" : TYPEORM_WRITE_METHODS.has(methodName) ? "write" : undefined;
+        if (typeOrmRepository && typeOrmAccess) {
+          addResourceAccess(accesses, {
+            kind: "database",
+            access: typeOrmAccess,
+            selector: typeOrmRepository,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            ...resourceAccessSource(methodName, "typeorm-adapter", typeOrmEntitySelectors.size > 0 ? "high" : "medium"),
+          });
+        }
+
+        const isGenericQueryBuilderMethod = ["selectFrom", "insertInto", "updateTable", "deleteFrom"].includes(methodName);
+        const isTypeOrmQueryBuilderMethod = ["from", "into", "update"].includes(methodName)
+          && (chainContainsMethod(node.expression.expression, "createQueryBuilder")
+            || chainContainsMethod(node.expression.expression, "delete")
+            || chainContainsMethod(node.expression.expression, "insert")
+            || chainContainsMethod(node.expression.expression, "update"));
+        const queryBuilderAccess = (isGenericQueryBuilderMethod || isTypeOrmQueryBuilderMethod) && QUERY_BUILDER_WRITE_METHODS.has(methodName)
+          ? "write"
+          : (isGenericQueryBuilderMethod || isTypeOrmQueryBuilderMethod) && QUERY_BUILDER_READ_METHODS.has(methodName)
+            ? (methodName === "from" && chainContainsMethod(node.expression.expression, "delete") ? "write" : "read")
+            : undefined;
+        if (queryBuilderAccess) {
+          const selector = selectorFromEntityExpression(node.arguments[0], typeOrmEntitySelectors, { allowUnknownIdentifier: false });
+          if (selector) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: queryBuilderAccess,
+              selector,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, isGenericQueryBuilderMethod ? "query-builder-adapter" : "typeorm-adapter", typeOrmEntitySelectors.has(selector) ? "high" : "medium"),
+            });
+          } else if (node.arguments.length > 0) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: queryBuilderAccess,
+              selector: "unresolved:dynamic-query-builder-table",
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              unresolved: true,
+              reason: `${methodName} table argument is not a static literal or known entity`,
+              ...resourceAccessSource(methodName, isGenericQueryBuilderMethod ? "query-builder-adapter" : "typeorm-adapter", "low"),
+            });
+          }
+        }
+
         if (rootName && prismaClientNames.has(rootName) && ts.isPropertyAccessExpression(node.expression.expression)) {
           const delegateName = node.expression.expression.name.text;
           const selector = prismaSelectors.get(delegateName) || `prisma.${delegateName}`;
@@ -1226,6 +1384,34 @@ function resolveRelativeImport(context: AnalysisContext, importerPath: string, s
   return undefined;
 }
 
+function resolvePathAliasTarget(context: AnalysisContext, specifier: string): string | undefined {
+  for (const alias of context.pathAliases) {
+    const wildcardIndex = alias.pattern.indexOf("*");
+    let wildcardValue = "";
+    if (wildcardIndex === -1) {
+      if (alias.pattern !== specifier) continue;
+    } else {
+      const prefix = alias.pattern.slice(0, wildcardIndex);
+      const suffix = alias.pattern.slice(wildcardIndex + 1);
+      if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue;
+      wildcardValue = specifier.slice(prefix.length, specifier.length - suffix.length);
+    }
+
+    for (const target of alias.targets) {
+      const targetWildcardIndex = target.indexOf("*");
+      const baseTarget = targetWildcardIndex === -1
+        ? target
+        : `${target.slice(0, targetWildcardIndex)}${wildcardValue}${target.slice(targetWildcardIndex + 1)}`;
+      for (const candidatePath of candidateModulePaths(baseTarget)) {
+        if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
+          return repoPath(context.rootDir, candidatePath);
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 function findArtifactLaneForPath(cell: CellManifest, relativePath: string): string | undefined {
   for (const lane of cell.producesArtifacts || []) {
     if (lane.paths.some((pattern) => matchesPattern(relativePath, pattern))) return lane.id;
@@ -1240,6 +1426,13 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     const targetCell = findOwningCell(context.manifest, targetPath);
     const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, targetPath) : undefined;
     return { targetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+  }
+
+  const aliasTargetPath = resolvePathAliasTarget(context, reference.specifier);
+  if (aliasTargetPath) {
+    const targetCell = findOwningCell(context.manifest, aliasTargetPath);
+    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, aliasTargetPath) : undefined;
+    return { targetPath: aliasTargetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
   }
 
   const exactPackageCell = context.packageToCell.get(reference.specifier);
@@ -1390,12 +1583,20 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
         if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
-          addFinding(warnings, {
+          addFinding(findings, {
             ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
-            severity: "warning",
+            severity: "error",
             filePath: reference.importerPath,
             message: `relative import ${reference.specifier} could not be resolved statically at line ${reference.line}`,
             details: { line: reference.line, specifier: reference.specifier },
+            suggestedResolutions: [
+              codeResolution("Fix the import specifier so CellFence can resolve the target file", {
+                specifier: reference.specifier,
+              }),
+              humanResolution("Ask for a resolver adapter if this import uses unsupported project-specific resolution", {
+                specifier: reference.specifier,
+              }),
+            ],
           });
         }
         if (resolvedImport.isExternal || !resolvedImport.targetCell || resolvedImport.targetCell.id === importerCell.id) continue;

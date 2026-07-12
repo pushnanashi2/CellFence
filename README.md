@@ -392,7 +392,7 @@ CELLFENCE_TRACE_OUT=resource-evidence.json \
 node --import @cellfence/trace ./scripts/run-research.mjs
 ```
 
-The v0.x trace hook records selected runtime file reads and writes. It intentionally ignores source-code module loading so evidence focuses on application data resources.
+The v0.x trace hook records selected runtime file reads/writes and fetch calls. Code can also call `recordDatabaseAccess`, `recordHttpAccess`, or `recordQueueAccess` from `@cellfence/trace` for driver-level accesses that cannot be monkeypatched safely. Source-code module loading is intentionally ignored so evidence focuses on application data resources.
 
 ## AI-agent integration
 
@@ -477,7 +477,7 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
-| `CELLFENCE_UNRESOLVED_IMPORT` | Relative import could not be resolved statically; emitted as a warning |
+| `CELLFENCE_UNRESOLVED_IMPORT` | Static relative import could not be resolved; fails closed |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH` | Public entry line count increased |
@@ -494,8 +494,11 @@ CellFence v0.x analyzes:
 - type-only imports;
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
+- tsconfig `compilerOptions.paths` aliases that resolve to repository files;
 - selected static string resource access for file, database, queue, and HTTP patterns;
 - Prisma model delegate calls when `schema.prisma` is present;
+- selected TypeORM entity, repository, and query builder calls;
+- selected Kysely/Knex-style query builder table calls;
 - unsafe or dynamic raw SQL calls as fail-closed unresolved resource access;
 - selected BullMQ and KafkaJS topic or queue calls;
 - runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
@@ -503,11 +506,11 @@ CellFence v0.x analyzes:
 
 Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
 
-NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` warnings.
+NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 
-Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, query-builder semantics, runtime broker topology, or values assembled through general dataflow.
+Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM and query-builder calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, runtime broker topology, or values assembled through general dataflow.
 
-ORMs, query builders, and broker clients require explicit CellFence adapters. A detector for Prisma does not imply support for TypeORM, Sequelize, Knex, Kysely, Drizzle, or a project-local database wrapper. Each adapter must document:
+ORMs, query builders, and broker clients require explicit CellFence adapters. Prisma, TypeORM, BullMQ, KafkaJS, and selected string-literal query builders have built-in coverage; that does not imply support for Sequelize, Drizzle, every Knex/Kysely expression, or a project-local database wrapper. Each adapter must document:
 
 - the API shapes it recognizes;
 - how model, entity, table, topic, or queue names are resolved;

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "runtime",
+      "ownedPaths": [
+        "src/runtime/**"
+      ],
+      "publicEntry": "src/runtime/public.ts",
+      "publicSymbols": [
+        "runQueries"
+      ],
+      "consumes": [],
+      "producesArtifacts": [],
+      "resourceContracts": [
+        {
+          "id": "orders",
+          "kind": "database",
+          "access": [
+            "read",
+            "write"
+          ],
+          "selectors": [
+            "orders"
+          ]
+        }
+      ]
+    }
+  ]
+}
