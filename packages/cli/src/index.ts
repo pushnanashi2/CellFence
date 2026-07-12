@@ -5,11 +5,16 @@ import { fileURLToPath } from "node:url";
 
 import {
   type CellFenceContext,
+  type AutoAllocation,
   checkChangedRepository,
   checkRepository,
+  createAutoAllocation,
   createCellContext,
+  createCouplingGraph,
+  createWaiverRequest,
   createBaseline,
   defaultBaselinePath,
+  formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
   listWaivers,
@@ -26,8 +31,16 @@ type ParsedArgs = {
   json: boolean;
   rootDir: string;
   changed: boolean;
+  autoAllocate: boolean;
   baseRef?: string;
   headRef?: string;
+  task?: string;
+  ruleId?: string;
+  targetFilePath?: string;
+  line?: number;
+  expires?: string;
+  reason?: string;
+  approvedBy?: string;
 };
 
 const INIT_MANIFEST = {
@@ -52,11 +65,14 @@ Usage:
   cellfence check [--manifest cellfence.manifest.json] [--json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
+  cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
+  cellfence graph [--json|--format mermaid]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence waivers list [--manifest cellfence.manifest.json] [--json]
+  cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
 
 Exit codes:
   0  no violations
@@ -66,13 +82,15 @@ Exit codes:
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
-  const parsed: ParsedArgs = { command: [], evidencePaths: [], json: false, rootDir: process.cwd(), changed: false };
+  const parsed: ParsedArgs = { command: [], evidencePaths: [], json: false, rootDir: process.cwd(), changed: false, autoAllocate: false };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--json") {
       parsed.json = true;
     } else if (argument === "--changed") {
       parsed.changed = true;
+    } else if (argument === "--auto-allocate") {
+      parsed.autoAllocate = true;
     } else if (argument === "--base") {
       parsed.baseRef = argv[index + 1];
       index += 1;
@@ -98,6 +116,41 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--cell=")) {
       parsed.cellId = argument.slice("--cell=".length);
+    } else if (argument === "--task") {
+      parsed.task = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--task=")) {
+      parsed.task = argument.slice("--task=".length);
+    } else if (argument === "--rule") {
+      parsed.ruleId = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--rule=")) {
+      parsed.ruleId = argument.slice("--rule=".length);
+    } else if (argument === "--file") {
+      parsed.targetFilePath = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--file=")) {
+      parsed.targetFilePath = argument.slice("--file=".length);
+    } else if (argument === "--line") {
+      parsed.line = Number(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--line=")) {
+      parsed.line = Number(argument.slice("--line=".length));
+    } else if (argument === "--expires") {
+      parsed.expires = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--expires=")) {
+      parsed.expires = argument.slice("--expires=".length);
+    } else if (argument === "--reason") {
+      parsed.reason = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--reason=")) {
+      parsed.reason = argument.slice("--reason=".length);
+    } else if (argument === "--approved-by") {
+      parsed.approvedBy = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--approved-by=")) {
+      parsed.approvedBy = argument.slice("--approved-by=".length);
     } else if (argument === "--evidence") {
       parsed.evidencePaths.push(argv[index + 1]);
       index += 1;
@@ -211,7 +264,60 @@ function formatContextAsAgentsMarkdown(context: CellFenceContext): string {
   return lines.join("\n");
 }
 
+function formatAutoAllocationAsAgentsMarkdown(allocation: AutoAllocation): string {
+  const lines: string[] = [];
+  lines.push("# CellFence Auto Allocation");
+  lines.push("");
+  lines.push("## Task");
+  lines.push(allocation.task.trim().length > 0 ? allocation.task : "(none)");
+  lines.push("");
+  lines.push("## Selected Cells");
+  lines.push(...bulletList(allocation.selectedCells));
+  lines.push("");
+  lines.push("## Context Cells");
+  lines.push(...bulletList(allocation.contextCells));
+  lines.push("");
+  lines.push("## Include Paths");
+  lines.push(...bulletList(allocation.includePaths));
+  lines.push("");
+  lines.push("## Public Entries");
+  lines.push(...bulletList(allocation.publicEntries));
+  lines.push("");
+  lines.push("## Resource Selectors");
+  lines.push(...bulletList(allocation.resourceSelectors));
+  lines.push("");
+  lines.push("## Budgets");
+  const budgetLines: string[] = [];
+  for (const [cellId, budgets] of Object.entries(allocation.budgets)) {
+    for (const [metric, budget] of Object.entries(budgets)) {
+      budgetLines.push(`- ${cellId}.${metric}: ${budget.current}/${budget.limit}, remaining ${budget.remaining}, source ${budget.source}`);
+    }
+  }
+  lines.push(...(budgetLines.length > 0 ? budgetLines : ["- (none)"]));
+  lines.push("");
+  lines.push("## Guidance");
+  lines.push(...bulletList(allocation.guidance));
+  return lines.join("\n");
+}
+
 function commandContext(parsed: ParsedArgs): number {
+  if (parsed.autoAllocate) {
+    if (parsed.format && parsed.format !== "agents-md") {
+      console.error("cellfence context --auto-allocate supports --format agents-md");
+      return 2;
+    }
+    const allocation = createAutoAllocation({
+      rootDir: parsed.rootDir,
+      manifestPath: parsed.manifestPath,
+      baselinePath: parsed.baselinePath,
+      evidencePaths: parsed.evidencePaths,
+      cellId: parsed.cellId,
+      task: parsed.task,
+    });
+    if (parsed.json) writeJson(allocation);
+    else console.log(formatAutoAllocationAsAgentsMarkdown(allocation));
+    return 0;
+  }
   if (!parsed.cellId) {
     console.error("cellfence context requires --cell cell-id");
     return 2;
@@ -229,6 +335,22 @@ function commandContext(parsed: ParsedArgs): number {
   });
   if (parsed.json) writeJson(context);
   else console.log(formatContextAsAgentsMarkdown(context));
+  return 0;
+}
+
+function commandGraph(parsed: ParsedArgs): number {
+  if (parsed.format && parsed.format !== "mermaid") {
+    console.error("cellfence graph supports --format mermaid");
+    return 2;
+  }
+  const graph = createCouplingGraph({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    baselinePath: parsed.baselinePath,
+    evidencePaths: parsed.evidencePaths,
+  });
+  if (parsed.json) writeJson(graph);
+  else console.log(formatCouplingGraphMermaid(graph));
   return 0;
 }
 
@@ -311,6 +433,24 @@ function commandWaiversList(parsed: ParsedArgs): number {
   return waivers.some((waiver) => !waiver.valid) ? 1 : 0;
 }
 
+function commandWaiversRequest(parsed: ParsedArgs): number {
+  if (!parsed.ruleId || !parsed.targetFilePath || !parsed.line || !parsed.expires || !parsed.reason) {
+    console.error("cellfence waivers request requires --rule, --file, --line, --expires, and --reason");
+    return 2;
+  }
+  const request = createWaiverRequest({
+    ruleId: parsed.ruleId as Parameters<typeof createWaiverRequest>[0]["ruleId"],
+    filePath: parsed.targetFilePath,
+    line: parsed.line,
+    expires: parsed.expires,
+    approvedBy: parsed.approvedBy,
+    reason: parsed.reason,
+  });
+  if (parsed.json) writeJson(request);
+  else console.log(request.markdown);
+  return 0;
+}
+
 export function main(argv = process.argv.slice(2)): number {
   const parsed = parseArgs(argv);
   try {
@@ -322,11 +462,13 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "init") return commandInit(parsed.rootDir);
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
+    if (primaryCommand === "graph") return commandGraph(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "create") return commandBaselineCreate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
     if (primaryCommand === "waivers" && secondaryCommand === "list") return commandWaiversList(parsed);
+    if (primaryCommand === "waivers" && secondaryCommand === "request") return commandWaiversRequest(parsed);
     printUsage();
     return 2;
   } catch (error) {

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "api",
+      "ownedPaths": [
+        "src/api/**"
+      ],
+      "publicEntry": "src/api/public.ts",
+      "publicSymbols": [
+        "UsersController"
+      ],
+      "consumes": [],
+      "producesArtifacts": [],
+      "resourceContracts": [
+        {
+          "id": "users-api",
+          "kind": "http",
+          "access": [
+            "serve"
+          ],
+          "selectors": [
+            "GET /users/:id",
+            "POST /users"
+          ]
+        }
+      ]
+    }
+  ]
+}

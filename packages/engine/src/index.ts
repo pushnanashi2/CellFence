@@ -100,6 +100,39 @@ export type ContextAllowedImport = {
 
 type ContextBudgetMetric = "ownedPathPatterns" | "publicSymbols" | "publicSurfaceLines" | "crossCellDependencies";
 
+export type CouplingGraphNode = {
+  id: string;
+  label: string;
+  kind: "cell" | "resource" | "artifact";
+};
+
+export type CouplingGraphEdgeKind = "declared-consumer" | "observed-import" | "artifact-lane" | "resource-access";
+
+export type CouplingGraphEdge = {
+  from: string;
+  to: string;
+  kind: CouplingGraphEdgeKind;
+  label: string;
+};
+
+export type CouplingGraph = {
+  schemaVersion: "cellfence.coupling-graph.v1";
+  nodes: CouplingGraphNode[];
+  edges: CouplingGraphEdge[];
+};
+
+export type AutoAllocation = {
+  schemaVersion: "cellfence.auto-allocation.v1";
+  task: string;
+  selectedCells: string[];
+  contextCells: string[];
+  includePaths: string[];
+  publicEntries: string[];
+  resourceSelectors: string[];
+  budgets: Record<string, Record<string, ContextBudgetEntry>>;
+  guidance: string[];
+};
+
 export type CellFenceContext = {
   schemaVersion: "cellfence.context.v1";
   cell: {
@@ -120,6 +153,33 @@ export type CellFenceContext = {
 
 export type ContextOptions = CheckOptions & {
   cellId: string;
+};
+
+export type AutoAllocateOptions = CheckOptions & {
+  task?: string;
+  cellId?: string;
+};
+
+export type WaiverRequestOptions = {
+  ruleId: RuleId;
+  filePath: string;
+  line: number;
+  expires: string;
+  approvedBy?: string;
+  reason: string;
+};
+
+export type WaiverRequest = {
+  schemaVersion: "cellfence.waiver-request.v1";
+  directive: string;
+  markdown: string;
+  approvalRequired: true;
+  ruleId: RuleId;
+  filePath: string;
+  line: number;
+  expires: string;
+  approvedBy: string;
+  reason: string;
 };
 
 export type BaselineUpdateGuardResult = {
@@ -529,6 +589,13 @@ function expressionRootName(expression: ts.Expression): string | undefined {
   return undefined;
 }
 
+function chainRootName(expression: ts.Expression): string | undefined {
+  if (ts.isIdentifier(expression)) return expression.text;
+  if (ts.isPropertyAccessExpression(expression)) return chainRootName(expression.expression);
+  if (ts.isCallExpression(expression)) return chainRootName(expression.expression);
+  return undefined;
+}
+
 function propertyName(expression: ts.Expression): string | undefined {
   return ts.isPropertyAccessExpression(expression) ? expression.name.text : undefined;
 }
@@ -543,6 +610,34 @@ function objectStringProperty(expression: ts.Expression | undefined, propertyNam
     if (isMatch) return literalText(property.initializer);
   }
   return undefined;
+}
+
+function objectArrayStringProperty(expression: ts.Expression | undefined, propertyNameText: string): string[] {
+  if (!expression || !ts.isObjectLiteralExpression(expression)) return [];
+  for (const property of expression.properties) {
+    if (!ts.isPropertyAssignment(property)) continue;
+    const name = property.name;
+    const isMatch = (ts.isIdentifier(name) && name.text === propertyNameText)
+      || (ts.isStringLiteral(name) && name.text === propertyNameText);
+    if (!isMatch) continue;
+    if (ts.isArrayLiteralExpression(property.initializer)) {
+      return property.initializer.elements.flatMap((element) => {
+        const text = literalText(element);
+        return text ? [text] : [];
+      });
+    }
+    const text = literalText(property.initializer);
+    return text ? [text] : [];
+  }
+  return [];
+}
+
+function normalizeHttpPath(prefix: string | undefined, routePath: string | undefined): string {
+  const segments = [prefix || "", routePath || ""]
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0)
+    .map((segment) => segment.replace(/^\/+|\/+$/g, ""));
+  return `/${segments.join("/")}`.replace(/\/+/g, "/");
 }
 
 function templateLiteralText(node: ts.TemplateLiteral): string | undefined {
@@ -571,6 +666,18 @@ const TYPEORM_READ_METHODS = new Set(["find", "findBy", "findOne", "findOneBy", 
 const TYPEORM_WRITE_METHODS = new Set(["save", "insert", "update", "upsert", "delete", "remove", "softDelete", "restore"]);
 const QUERY_BUILDER_READ_METHODS = new Set(["selectFrom", "from"]);
 const QUERY_BUILDER_WRITE_METHODS = new Set(["insertInto", "updateTable", "deleteFrom", "into", "update"]);
+const DRIZZLE_TABLE_FACTORIES = new Set(["pgTable", "mysqlTable", "sqliteTable", "singlestoreTable", "table"]);
+const DRIZZLE_WRITE_METHODS = new Set(["insert", "update", "delete"]);
+const HTTP_METHOD_DECORATORS = new Map([
+  ["Get", "GET"],
+  ["Post", "POST"],
+  ["Put", "PUT"],
+  ["Patch", "PATCH"],
+  ["Delete", "DELETE"],
+  ["Options", "OPTIONS"],
+  ["Head", "HEAD"],
+  ["All", "ALL"],
+]);
 const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
@@ -659,7 +766,7 @@ function collectTypeOrmEntitySelectors(sourceFile: ts.SourceFile): Map<string, s
       for (const decorator of decoratorsForNode(node)) {
         const expression = decorator.expression;
         if (!ts.isCallExpression(expression) || expressionName(expression.expression) !== "Entity") continue;
-      const explicitName = literalText(expression.arguments[0]) || objectStringProperty(expression.arguments[0], "name");
+        const explicitName = literalText(expression.arguments[0]) || objectStringProperty(expression.arguments[0], "name");
         selectors.set(node.name.text, explicitName || node.name.text);
       }
     }
@@ -686,6 +793,25 @@ function collectTypeOrmRepositoryVariables(sourceFile: ts.SourceFile, entitySele
   }
   visit(sourceFile);
   return repositories;
+}
+
+function collectDrizzleTableSelectors(sourceFile: ts.SourceFile): Map<string, string> {
+  const selectors = new Map<string, string>();
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && ts.isCallExpression(node.initializer)
+      && DRIZZLE_TABLE_FACTORIES.has(expressionName(node.initializer.expression) || "")
+    ) {
+      const selector = literalText(node.initializer.arguments[0]);
+      if (selector) selectors.set(node.name.text, selector);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return selectors;
 }
 
 function typeOrmRepositorySelector(expression: ts.Expression, repositoryVariables: Map<string, string>, entitySelectors: Map<string, string>): string | undefined {
@@ -754,6 +880,50 @@ function chainContainsMethod(expression: ts.Expression, methodName: string): boo
   return false;
 }
 
+function decoratorCall(node: ts.Decorator): ts.CallExpression | undefined {
+  return ts.isCallExpression(node.expression) ? node.expression : undefined;
+}
+
+function collectNestRouteAccesses(sourceFile: ts.SourceFile, relativeFilePath: string): ResourceAccessReference[] {
+  const accesses: ResourceAccessReference[] = [];
+  function visit(node: ts.Node): void {
+    if (!ts.isClassDeclaration(node)) {
+      ts.forEachChild(node, visit);
+      return;
+    }
+    const controllerDecorator = decoratorsForNode(node)
+      .map(decoratorCall)
+      .find((call) => call && expressionName(call.expression) === "Controller");
+    if (!controllerDecorator) {
+      ts.forEachChild(node, visit);
+      return;
+    }
+    const controllerPrefix = literalText(controllerDecorator.arguments[0]) || "";
+    for (const member of node.members) {
+      if (!ts.isMethodDeclaration(member)) continue;
+      for (const decorator of decoratorsForNode(member)) {
+        const call = decoratorCall(decorator);
+        if (!call) continue;
+        const decoratorName = expressionName(call.expression);
+        const method = decoratorName ? HTTP_METHOD_DECORATORS.get(decoratorName) : undefined;
+        if (!method) continue;
+        const routePath = normalizeHttpPath(controllerPrefix, literalText(call.arguments[0]));
+        addResourceAccess(accesses, {
+          kind: "http",
+          access: "serve",
+          selector: `${method} ${routePath}`,
+          filePath: relativeFilePath,
+          line: getLineNumber(sourceFile, member),
+          ...resourceAccessSource(decoratorName || "Controller", "nestjs-adapter", "high"),
+        });
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return accesses;
+}
+
 function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   const lowered = name.toLowerCase();
   if (/(?:publish|enqueue|emitevent|sendmessage)$/.test(lowered)) return "publish";
@@ -770,8 +940,12 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
   const prismaClientNames = collectPrismaClientNames(sourceFile);
   const typeOrmEntitySelectors = collectTypeOrmEntitySelectors(sourceFile);
   const typeOrmRepositories = collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors);
+  const drizzleTableSelectors = collectDrizzleTableSelectors(sourceFile);
   const bullQueuesByVariable = collectBullQueueVariables(sourceFile);
   const dynamicSqlVariables = collectDynamicSqlVariables(sourceFile);
+  for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
+    addResourceAccess(accesses, access);
+  }
 
   function visit(node: ts.Node): void {
     if (ts.isTaggedTemplateExpression(node) && ts.isPropertyAccessExpression(node.tag)) {
@@ -812,6 +986,48 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
       const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
 
       if (ts.isPropertyAccessExpression(node.expression) && methodName) {
+        if (methodName === "route" && ts.isObjectLiteralExpression(node.arguments[0])) {
+          const routePath = objectStringProperty(node.arguments[0], "url") || objectStringProperty(node.arguments[0], "path");
+          const methods = objectArrayStringProperty(node.arguments[0], "method");
+          if (routePath && methods.length > 0) {
+            for (const method of methods) {
+              addResourceAccess(accesses, {
+                kind: "http",
+                access: "serve",
+                selector: `${method.toUpperCase()} ${normalizeHttpPath("", routePath)}`,
+                filePath: relativeFilePath,
+                line: getLineNumber(sourceFile, node),
+                ...resourceAccessSource(methodName, "fastify-adapter", "high"),
+              });
+            }
+          }
+        }
+
+        const drizzleSelector = selectorFromEntityExpression(node.arguments[0], drizzleTableSelectors, { allowUnknownIdentifier: false });
+        const isDrizzleRead = methodName === "from" && chainContainsMethod(node.expression.expression, "select");
+        const isDrizzleWrite = DRIZZLE_WRITE_METHODS.has(methodName);
+        if ((isDrizzleRead || isDrizzleWrite) && drizzleSelector) {
+          addResourceAccess(accesses, {
+            kind: "database",
+            access: isDrizzleWrite ? "write" : "read",
+            selector: drizzleSelector,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            ...resourceAccessSource(methodName, "drizzle-adapter", "high"),
+          });
+        } else if ((isDrizzleRead || isDrizzleWrite) && node.arguments.length > 0 && chainRootName(node.expression.expression) === "db") {
+          addResourceAccess(accesses, {
+            kind: "database",
+            access: isDrizzleWrite ? "write" : "read",
+            selector: "unresolved:dynamic-drizzle-table",
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: `${methodName} table argument is not a known Drizzle table declaration`,
+            ...resourceAccessSource(methodName, "drizzle-adapter", "low"),
+          });
+        }
+
         const typeOrmRepository = typeOrmRepositorySelector(node.expression.expression, typeOrmRepositories, typeOrmEntitySelectors);
         const typeOrmAccess = TYPEORM_READ_METHODS.has(methodName) ? "read" : TYPEORM_WRITE_METHODS.has(methodName) ? "write" : undefined;
         if (typeOrmRepository && typeOrmAccess) {
@@ -2152,6 +2368,222 @@ export function createCellContext(options: ContextOptions): CellFenceContext {
       "Resource access must match allowedResources or existing baselineResources.",
       "Baseline updates expand the fence and should be treated as review-sensitive changes.",
     ],
+  };
+}
+
+function graphNodeKey(kind: CouplingGraphNode["kind"], id: string): string {
+  return `${kind}:${id}`;
+}
+
+function addGraphNode(nodes: Map<string, CouplingGraphNode>, node: CouplingGraphNode): void {
+  nodes.set(graphNodeKey(node.kind, node.id), node);
+}
+
+function addGraphEdge(edges: Map<string, CouplingGraphEdge>, edge: CouplingGraphEdge): void {
+  edges.set(`${edge.from}->${edge.to}:${edge.kind}:${edge.label}`, edge);
+}
+
+function resourceNodeId(access: ResourceBaselineEntry): string {
+  return `${access.kind}:${access.selector}`;
+}
+
+export function createCouplingGraph(options: CheckOptions = {}): CouplingGraph {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const manifest = loadManifestFromFile(manifestPath);
+  const context = createContext(rootDir, manifest);
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  const nodes = new Map<string, CouplingGraphNode>();
+  const edges = new Map<string, CouplingGraphEdge>();
+
+  for (const cell of manifest.cells) {
+    addGraphNode(nodes, { id: cell.id, label: cell.id, kind: "cell" });
+    for (const consumer of cell.consumes || []) {
+      addGraphEdge(edges, {
+        from: cell.id,
+        to: consumer.cell,
+        kind: "declared-consumer",
+        label: "declares",
+      });
+      for (const lane of consumer.artifactLanes || []) {
+        const artifactId = `artifact:${consumer.cell}:${lane}`;
+        addGraphNode(nodes, { id: artifactId, label: lane, kind: "artifact" });
+        addGraphEdge(edges, {
+          from: consumer.cell,
+          to: artifactId,
+          kind: "artifact-lane",
+          label: "produces",
+        });
+        addGraphEdge(edges, {
+          from: cell.id,
+          to: artifactId,
+          kind: "artifact-lane",
+          label: "consumes",
+        });
+      }
+    }
+  }
+
+  const observedImports = validateImports(context, findings, warnings);
+  for (const [consumerCellId, producerCells] of observedImports.entries()) {
+    for (const producerCellId of producerCells) {
+      addGraphEdge(edges, {
+        from: consumerCellId,
+        to: producerCellId,
+        kind: "observed-import",
+        label: "imports",
+      });
+    }
+  }
+
+  const accessesByCell = validateResourceAccesses(context, findings, warnings, undefined);
+  mergeAccessesByCell(
+    accessesByCell,
+    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, undefined),
+  );
+  for (const [cellId, accesses] of accessesByCell.entries()) {
+    for (const access of sortedResourceBaselineEntries(accesses)) {
+      const nodeId = resourceNodeId(access);
+      addGraphNode(nodes, { id: nodeId, label: nodeId, kind: "resource" });
+      addGraphEdge(edges, {
+        from: cellId,
+        to: nodeId,
+        kind: "resource-access",
+        label: access.access,
+      });
+    }
+  }
+
+  return {
+    schemaVersion: "cellfence.coupling-graph.v1",
+    nodes: [...nodes.values()].sort((left, right) => graphNodeKey(left.kind, left.id).localeCompare(graphNodeKey(right.kind, right.id))),
+    edges: [...edges.values()].sort((left, right) => `${left.from}:${left.to}:${left.kind}:${left.label}`.localeCompare(`${right.from}:${right.to}:${right.kind}:${right.label}`)),
+  };
+}
+
+function mermaidId(value: string): string {
+  return value.replace(/[^A-Za-z0-9_]/g, "_");
+}
+
+export function formatCouplingGraphMermaid(graph: CouplingGraph): string {
+  const lines = ["flowchart LR"];
+  for (const node of graph.nodes) {
+    lines.push(`  ${mermaidId(node.id)}["${node.label.replace(/"/g, "'")}"]`);
+  }
+  for (const edge of graph.edges) {
+    lines.push(`  ${mermaidId(edge.from)} -- "${edge.label} (${edge.kind})" --> ${mermaidId(edge.to)}`);
+  }
+  return lines.join("\n");
+}
+
+function taskMatchesCell(task: string, cell: CellManifest): boolean {
+  const text = task.toLowerCase();
+  if (cell.id.toLowerCase().split(/[-_]/).some((part) => part.length > 2 && text.includes(part))) return true;
+  if (text.includes(cell.id.toLowerCase())) return true;
+  if (cell.packageName && text.includes(cell.packageName.toLowerCase())) return true;
+  if (cell.publicSymbols.some((symbol) => text.includes(symbol.toLowerCase()))) return true;
+  return cell.ownedPaths.some((ownedPath) => text.includes(ownedPath.toLowerCase().replace(/\*\*/g, "").replace(/\*/g, "")));
+}
+
+export function createAutoAllocation(options: AutoAllocateOptions = {}): AutoAllocation {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const manifest = loadManifestFromFile(manifestPath);
+  const graph = createCouplingGraph(options);
+  const selectedCells = new Set<string>();
+  const task = options.task || "";
+  if (options.cellId) selectedCells.add(options.cellId);
+  if (task.trim().length > 0) {
+    for (const cell of manifest.cells) {
+      if (taskMatchesCell(task, cell)) selectedCells.add(cell.id);
+    }
+  }
+
+  const contextCells = new Set(selectedCells);
+  for (const edge of graph.edges) {
+    if (selectedCells.has(edge.from) && graph.nodes.some((node) => node.kind === "cell" && node.id === edge.to)) {
+      contextCells.add(edge.to);
+    }
+  }
+
+  const includePaths = new Set<string>();
+  const publicEntries = new Set<string>();
+  const resourceSelectors = new Set<string>();
+  const budgets: Record<string, Record<string, ContextBudgetEntry>> = {};
+  for (const cell of manifest.cells) {
+    if (selectedCells.has(cell.id)) {
+      cell.ownedPaths.forEach((ownedPath) => includePaths.add(ownedPath));
+    }
+    if (contextCells.has(cell.id)) {
+      const cellContext = createCellContext({
+        rootDir,
+        manifestPath,
+        baselinePath: options.baselinePath,
+        evidencePaths: options.evidencePaths,
+        cellId: cell.id,
+      });
+      publicEntries.add(cell.publicEntry);
+      budgets[cell.id] = Object.fromEntries(Object.entries(cellContext.budgets));
+      for (const contract of cellContext.allowedResources) {
+        for (const access of contract.access) {
+          for (const selector of contract.selectors) resourceSelectors.add(`${contract.kind}:${access}:${selector}`);
+        }
+      }
+      for (const resource of cellContext.baselineResources) {
+        resourceSelectors.add(`${resource.kind}:${resource.access}:${resource.selector}`);
+      }
+    }
+  }
+
+  return {
+    schemaVersion: "cellfence.auto-allocation.v1",
+    task,
+    selectedCells: [...selectedCells].sort(),
+    contextCells: [...contextCells].sort(),
+    includePaths: [...includePaths].sort(),
+    publicEntries: [...publicEntries].sort(),
+    resourceSelectors: [...resourceSelectors].sort(),
+    budgets,
+    guidance: [
+      "Read selected cell owned paths only when implementation edits are needed.",
+      "Read context cell public entries for dependency contracts; avoid internal files from context cells.",
+      "If selectedCells is empty, ask for a target cell or a more specific task before editing.",
+    ],
+  };
+}
+
+export function createWaiverRequest(options: WaiverRequestOptions): WaiverRequest {
+  if (!isIsoDate(options.expires)) throw new Error("expires must be YYYY-MM-DD");
+  if (options.reason.trim().length < 12) throw new Error("reason must explain the waiver in at least 12 characters");
+  const approvedBy = options.approvedBy || "PENDING";
+  const directive = `// cellfence-ignore ${options.ruleId} expires:${options.expires} approved-by:${approvedBy} reason:${options.reason.trim()}`;
+  const markdown = [
+    "## CellFence Waiver Request",
+    "",
+    `- Rule: ${options.ruleId}`,
+    `- File: ${normalizePath(options.filePath)}:${options.line}`,
+    `- Expires: ${options.expires}`,
+    `- Approved by: ${approvedBy}`,
+    `- Reason: ${options.reason.trim()}`,
+    "",
+    "Approved directive:",
+    "",
+    "```ts",
+    directive,
+    "```",
+  ].join("\n");
+  return {
+    schemaVersion: "cellfence.waiver-request.v1",
+    directive,
+    markdown,
+    approvalRequired: true,
+    ruleId: options.ruleId,
+    filePath: normalizePath(options.filePath),
+    line: options.line,
+    expires: options.expires,
+    approvedBy,
+    reason: options.reason.trim(),
   };
 }
 

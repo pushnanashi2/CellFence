@@ -132,6 +132,68 @@ test("CLI context can render AGENTS.md-compatible guidance", () => {
   assert.match(result.stdout, /publicSurfaceLines: 9\/20, remaining 11, source baseline-ratchet/);
 });
 
+test("CLI context auto-allocates a minimal agent editing scope from task text", () => {
+  const fixturePath = path.join(root, "fixtures/valid/public-import");
+  const result = runCli(["context", "--auto-allocate", "--task", "change consumer behavior", "--json"], fixturePath);
+  assert.equal(result.status, 0);
+  const allocation = JSON.parse(result.stdout);
+  assert.equal(allocation.schemaVersion, "cellfence.auto-allocation.v1");
+  assert.deepEqual(allocation.selectedCells, ["consumer"]);
+  assert.deepEqual(allocation.contextCells, ["consumer", "producer"]);
+  assert.deepEqual(allocation.includePaths, ["src/consumer/**"]);
+  assert.deepEqual(allocation.publicEntries, ["src/consumer/public.ts", "src/producer/public.ts"]);
+  assert.deepEqual(allocation.budgets, { consumer: {}, producer: {} });
+});
+
+test("CLI graph returns a machine-readable coupling graph", () => {
+  const fixturePath = path.join(root, "fixtures/valid/public-import");
+  const result = runCli(["graph", "--json"], fixturePath);
+  assert.equal(result.status, 0);
+  const graph = JSON.parse(result.stdout);
+  assert.equal(graph.schemaVersion, "cellfence.coupling-graph.v1");
+  assert.ok(graph.nodes.some((node) => node.kind === "cell" && node.id === "consumer"));
+  assert.ok(graph.edges.some((edge) =>
+    edge.from === "consumer"
+    && edge.to === "producer"
+    && edge.kind === "observed-import"
+    && edge.label === "imports"
+  ));
+});
+
+test("CLI graph renders Mermaid for review dashboards", () => {
+  const fixturePath = path.join(root, "fixtures/valid/declared-resource-contracts");
+  const result = runCli(["graph", "--format", "mermaid"], fixturePath);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /^flowchart LR/);
+  assert.match(result.stdout, /runtime -- "read \(resource-access\)" --> file_data_config_json/);
+});
+
+test("CLI waiver request creates an approval-oriented directive without editing source", () => {
+  const result = runCli([
+    "waivers",
+    "request",
+    "--rule",
+    "CELLFENCE_PRIVATE_IMPORT",
+    "--file",
+    "src/consumer/public.ts",
+    "--line",
+    "7",
+    "--expires",
+    "2099-01-01",
+    "--reason",
+    "temporary architecture migration while public API is extracted",
+    "--approved-by",
+    "owner",
+    "--json",
+  ]);
+  assert.equal(result.status, 0);
+  const request = JSON.parse(result.stdout);
+  assert.equal(request.schemaVersion, "cellfence.waiver-request.v1");
+  assert.equal(request.approvalRequired, true);
+  assert.equal(request.directive, "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:owner reason:temporary architecture migration while public API is extracted");
+  assert.match(request.markdown, /CellFence Waiver Request/);
+});
+
 test("CLI check emits suggested resolutions for private imports", () => {
   const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
   const result = runCli(["check", "--json"], fixturePath);

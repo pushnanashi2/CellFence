@@ -93,17 +93,17 @@ CellFence v0.x enforces:
 - undeclared artifact lane consumption;
 - undeclared static file, database, queue, and HTTP resource access;
 - undeclared runtime resource evidence;
-- unresolved unsafe or dynamic raw SQL access;
+- unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
 - locked baseline expansion during `baseline update`;
 - ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
 
 Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.
 
-Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, selected TypeORM entity/repository/query-builder calls, selected string-literal query-builder table calls, and selected BullMQ/KafkaJS calls. Dynamic paths, arbitrary ORM metadata outside supported adapters, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
+Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, selected TypeORM entity/repository/query-builder calls, selected Drizzle table declarations and table operations, selected string-literal query-builder table calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. Dynamic paths, arbitrary ORM metadata outside supported adapters, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 
 Relative import resolution supports NodeNext runtime specifiers by remapping `.js`, `.jsx`, `.mjs`, and `.cjs` specifiers to TypeScript source candidates before checking cell boundaries. It also reads root `tsconfig.json` `compilerOptions.paths` aliases. A relative import that still cannot be resolved is not silently ignored; it produces an unresolved-import error.
 
-ORM, query builder, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma and TypeORM support does not cover Sequelize, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table or topic names, and which dynamic forms produce fail-closed unresolved findings.
+ORM, query builder, HTTP-framework, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma and TypeORM support does not cover Sequelize, Drizzle support does not cover every Drizzle expression, NestJS/Fastify support does not cover every plugin shape, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table, route, topic, or queue names, and which dynamic forms produce fail-closed unresolved findings.
 
 Unsupported library access must not be described as covered by CellFence unless it is declared through `resourceContracts`, captured in the baseline, supplied as runtime evidence, or rejected as unresolved.
 

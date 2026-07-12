@@ -180,6 +180,8 @@ npm install --save-dev cellfence
 npx cellfence check
 npx cellfence check --changed --base origin/main
 npx cellfence context --cell example --json
+npx cellfence context --auto-allocate --task "change the reporting cell" --json
+npx cellfence graph --format mermaid
 npx cellfence baseline create
 npx cellfence baseline check
 npx cellfence waivers list
@@ -190,6 +192,10 @@ npx cellfence waivers list
 `check --changed` compares findings against a base Git commit or branch and reports only newly introduced findings. It requires Git metadata and a valid base ref; if Git is unavailable, it fails instead of returning a false green result.
 
 `context` projects a single cell's fence before editing: owned paths, allowed public imports, declared or grandfathered resources, current budgets, and short agent guidance. Use `--json` for tools or `--format agents-md` for an AGENTS.md/CLAUDE.md fragment.
+
+`context --auto-allocate` accepts a task description and returns the smallest manifest-derived editing scope CellFence can infer: selected cells, context cells, source paths to include, public entries to read, and resource selectors. It is a preflight command for agents; an empty `selectedCells` result means the task is too vague or needs a human-selected `--cell`.
+
+`graph` emits the current coupling graph as JSON or Mermaid. It combines declared consumers, observed imports, artifact lanes, resource contracts, static resource detections, and supplied runtime evidence. Use it for review dashboards and architecture drift discussions; use `check` or `baseline check` for enforcement.
 
 Install `@cellfence/trace` when you want tests or batches to generate runtime evidence:
 
@@ -216,10 +222,14 @@ cellfence init
 cellfence check [--manifest <path>] [--root <path>] [--json]
 cellfence check --changed [--base <ref>] [--head <ref>] [--manifest <path>] [--root <path>] [--json]
 cellfence context --cell <id> [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
+cellfence context --auto-allocate --task <text> [--cell <id>] [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
+cellfence graph [--manifest <path>] [--baseline <path>] [--root <path>] [--evidence <path>] [--json|--format mermaid]
 cellfence baseline create [--manifest <path>] [--baseline <path>] [--root <path>]
 cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence baseline update [--manifest <path>] [--baseline <path>] [--root <path>]
+cellfence evidence check --evidence <path> [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence waivers list [--manifest <path>] [--root <path>] [--json]
+cellfence waivers request --rule <rule> --file <path> --line <n> --expires <YYYY-MM-DD> --reason <text> [--approved-by <name>] [--json]
 ```
 
 Exit codes are documented automation contracts for the current v0.x implementation:
@@ -240,6 +250,8 @@ Temporary suppressions must be explicit and expiring:
 ```
 
 Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLFENCE_WAIVER_INVALID`.
+
+`waivers request` does not edit source. It creates an approval-oriented directive and markdown block so an agent can ask for a precise, expiring exception instead of inventing one inline.
 
 ## Manifest reference
 
@@ -498,9 +510,12 @@ CellFence v0.x analyzes:
 - selected static string resource access for file, database, queue, and HTTP patterns;
 - Prisma model delegate calls when `schema.prisma` is present;
 - selected TypeORM entity, repository, and query builder calls;
+- selected Drizzle table declarations and `db.select().from(...)`, `db.insert(...)`, `db.update(...)`, and `db.delete(...)` calls;
 - selected Kysely/Knex-style query builder table calls;
 - unsafe or dynamic raw SQL calls as fail-closed unresolved resource access;
 - selected BullMQ and KafkaJS topic or queue calls;
+- selected NestJS controller method decorators;
+- selected Fastify route object registrations;
 - runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
 - common TypeScript export declarations and named exports.
 
@@ -508,9 +523,9 @@ Computed dynamic imports are reported as unsupported warnings rather than silent
 
 NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 
-Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM and query-builder calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, runtime broker topology, or values assembled through general dataflow.
+Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. It does not infer arbitrary ORM metadata, runtime broker topology, or values assembled through general dataflow.
 
-ORMs, query builders, and broker clients require explicit CellFence adapters. Prisma, TypeORM, BullMQ, KafkaJS, and selected string-literal query builders have built-in coverage; that does not imply support for Sequelize, Drizzle, every Knex/Kysely expression, or a project-local database wrapper. Each adapter must document:
+ORMs, query builders, HTTP frameworks, and broker clients require explicit CellFence adapters. Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, selected string-literal query builders, selected NestJS routes, and selected Fastify routes have built-in coverage; that does not imply support for Sequelize, every Knex/Kysely expression, every Drizzle expression, every NestJS/Fastify plugin, or a project-local database wrapper. Each adapter must document:
 
 - the API shapes it recognizes;
 - how model, entity, table, topic, or queue names are resolved;
