@@ -91,6 +91,10 @@ CellFence v0.x enforces:
 
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. Dynamic paths, arbitrary ORM metadata, query-builder semantics, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 
+ORM, query builder, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma support does not cover TypeORM or Sequelize, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table or topic names, and which dynamic forms produce fail-closed unresolved findings.
+
+Unsupported library access must not be described as covered by CellFence unless it is declared through `resourceContracts`, captured in the baseline, supplied as runtime evidence, or rejected as unresolved.
+
 ## Planned or Environment-Dependent Enforcement
 
 CellFence v0.x documents but does not fully enforce:

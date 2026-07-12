@@ -479,6 +479,15 @@ Computed dynamic imports are reported as unsupported warnings rather than silent
 
 Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, query-builder semantics, runtime broker topology, or values assembled through general dataflow.
 
+ORMs, query builders, and broker clients require explicit CellFence adapters. A detector for Prisma does not imply support for TypeORM, Sequelize, Knex, Kysely, Drizzle, or a project-local database wrapper. Each adapter must document:
+
+- the API shapes it recognizes;
+- how model, entity, table, topic, or queue names are resolved;
+- which unresolved or dynamic forms fail closed;
+- which cases remain outside static inference and must be supplied as runtime evidence.
+
+Unsupported adapters are not treated as implicitly safe. If a resource access cannot be resolved by a built-in adapter, an explicit `resourceContracts` entry, baseline evidence, runtime evidence, or a fail-closed unresolved finding is required depending on the access shape.
+
 ## CellFence and adjacent tools
 
 CellFence is intentionally complementary to existing tooling.
@@ -546,6 +555,7 @@ Version 0.x is deliberately narrow:
 - repository-local cells only;
 - file-path artifact lanes only;
 - selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred;
+- ORM, query builder, and broker-client support is adapter-scoped; unsupported libraries require a dedicated adapter or runtime evidence;
 - ownership overlap detection is conservative and does not solve arbitrary glob intersection;
 - public symbol analysis supports common TypeScript forms, not every possible re-export pattern;
 - computed dynamic imports cannot be resolved statically;

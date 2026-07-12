@@ -11,6 +11,7 @@
 | Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
 | Artifact lane declaration | enforced | `@cellfence/engine` | File path lanes only in v0.x | invalid fixture |
 | Static resource contract declaration | partially_enforced | `@cellfence/engine` | Detects selected string-literal file, SQL table, queue/topic, HTTP patterns, Prisma delegates, BullMQ, and KafkaJS; general dynamic dataflow is not inferred | valid and invalid resource fixtures |
+| Adapter-scoped resource detection | partially_enforced | `@cellfence/engine` | ORM, query builder, and broker-client coverage is per adapter; unsupported libraries require a dedicated adapter or runtime evidence | adapter fixtures and documentation |
 | Unresolved resource access fail-closed | enforced | `@cellfence/engine` | Unsafe raw SQL and selected dynamic SQL assembly fail instead of becoming silent blind spots | invalid dynamic SQL fixture |
 | Runtime resource evidence | enforced | `@cellfence/schema`, `@cellfence/engine`, and `cellfence evidence check` | Requires explicit evidence JSON; CellFence does not observe live infrastructure by itself | evidence fixtures and CLI tests |
 | Resource access baseline inventory | enforced | `@cellfence/engine` baseline metrics | Captures selected static and supplied runtime evidence inventory; arbitrary ORM and broker coupling remain outside v0.x inference | baseline resource fixtures |
