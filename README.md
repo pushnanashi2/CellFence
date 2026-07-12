@@ -288,6 +288,7 @@ A baseline captures four metrics per cell:
 - public symbol count;
 - public entry line count;
 - cross-cell dependency count.
+- static resource access inventory.
 
 Create the accepted baseline:
 
@@ -315,6 +316,15 @@ cellfence baseline update
 
 A baseline update is a governance change, not a routine way to silence a failing check. In a protected repository, review manifest and baseline changes separately from ordinary implementation changes.
 
+For large repositories, prefer this baseline-first workflow over hand-writing every resource contract:
+
+1. declare cells, public entries, and ownership in the manifest;
+2. run `cellfence baseline create` to snapshot existing static file, database, queue, and HTTP resource access;
+3. run `cellfence baseline check` in CI;
+4. review only new resource access deltas.
+
+`resourceContracts` remains useful for intentional high-value contracts, but the baseline prevents a manifest maintenance treadmill where every historical table, topic, or endpoint must be manually listed before adoption.
+
 ## Artifact contracts for batch and file-based systems
 
 Not every architecture communicates through functions or HTTP APIs. Batch systems, data pipelines, code generators, and migration tools often communicate through files.
@@ -330,7 +340,7 @@ CellFence models these flows as **artifact lanes**:
 
 The producer declares the lane. The consumer declares both the producer cell and the lane ID. In v0.x, the lane path must also fall under the producer's `ownedPaths` so the engine can resolve its owning cell. Importing a statically referenced file under an undeclared lane produces `CELLFENCE_UNDECLARED_ARTIFACT`.
 
-This makes statically imported file-based coupling visible in the same architecture contract as source-code dependencies. CellFence v0.x does not inspect arbitrary `fs.readFile`, stream, database, message-queue, or filesystem write operations.
+This makes statically imported file-based coupling visible in the same architecture contract as source-code dependencies. For selected string-literal resource access, CellFence can also snapshot current usage into the baseline and reject new static coupling during `baseline check`.
 
 ## AI-agent integration
 
@@ -433,6 +443,8 @@ CellFence v0.x analyzes:
 - common TypeScript export declarations and named exports.
 
 Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
+
+Static resource analysis is intentionally limited. It detects simple string-literal calls and SQL literals, not ORM schema metadata, query-builder semantics, runtime broker topology, or values assembled through arbitrary dataflow.
 
 ## CellFence and adjacent tools
 

@@ -1,0 +1,8 @@
+{
+  "mode": "baseline-check",
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+  ],
+  "warningRuleIds": []
+}

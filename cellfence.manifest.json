@@ -19,6 +19,7 @@
         "CellFenceManifest",
         "CellManifest",
         "EnforcementStatus",
+        "ResourceBaselineEntry",
         "ResourceAccessMode",
         "ResourceContractKind",
         "ResourceContractManifest",

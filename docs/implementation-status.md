@@ -11,6 +11,7 @@
 | Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
 | Artifact lane declaration | enforced | `@cellfence/engine` | File path lanes only in v0.x | invalid fixture |
 | Static resource contract declaration | partially_enforced | `@cellfence/engine` | Detects selected string-literal file, SQL table, queue/topic, and HTTP patterns; dynamic dataflow is not inferred | valid and invalid resource fixtures |
+| Resource access baseline inventory | enforced | `@cellfence/engine` baseline metrics | Captures static resource access inventory only; dynamic ORM and runtime broker coupling are outside v0.x inference | baseline resource fixtures |
 | Baseline ratchets | enforced | `@cellfence/engine` | Counts are intentionally coarse in v0.x | baseline fixture tests |
 | TypeScript compiler API source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |

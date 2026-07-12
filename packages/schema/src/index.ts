@@ -21,6 +21,12 @@ export type ResourceContractManifest = {
   description?: string;
 };
 
+export type ResourceBaselineEntry = {
+  kind: ResourceContractKind;
+  access: ResourceAccessMode;
+  selector: string;
+};
+
 export type CellConsumerManifest = {
   cell: string;
   artifactLanes?: string[];
@@ -55,6 +61,7 @@ export type CellBaselineRecord = {
   publicSymbols: number;
   publicSurfaceLines: number;
   crossCellDependencies: number;
+  resourceAccesses?: ResourceBaselineEntry[];
 };
 
 export type CellFenceBaseline = {
@@ -133,6 +140,23 @@ function validateResourceContract(value: unknown, location: string, errors: stri
     errors.push(`${location}.description must be a string when present`);
   }
   return errors.length === 0 || typeof value.id === "string";
+}
+
+function validateResourceBaselineEntry(value: unknown, location: string, errors: string[]): value is ResourceBaselineEntry {
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (!["file", "database", "queue", "http"].includes(String(value.kind))) {
+    errors.push(`${location}.kind must be file|database|queue|http`);
+  }
+  if (!["read", "write", "publish", "subscribe", "call", "serve"].includes(String(value.access))) {
+    errors.push(`${location}.access must be read|write|publish|subscribe|call|serve`);
+  }
+  if (typeof value.selector !== "string" || value.selector.trim().length === 0) {
+    errors.push(`${location}.selector must be a non-empty string`);
+  }
+  return true;
 }
 
 function validateBudgets(value: unknown, location: string, errors: string[]): value is ArchitecturalBudgets {
@@ -244,6 +268,15 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
         const numericValue = record[key];
         if (!Number.isInteger(numericValue) || Number(numericValue) < 0) {
           errors.push(`cells.${cellId}.${key} must be a non-negative integer`);
+        }
+      }
+      if (record.resourceAccesses !== undefined) {
+        if (!Array.isArray(record.resourceAccesses)) {
+          errors.push(`cells.${cellId}.resourceAccesses must be an array when present`);
+        } else {
+          record.resourceAccesses.forEach((entry, entryIndex) => {
+            validateResourceBaselineEntry(entry, `cells.${cellId}.resourceAccesses[${entryIndex}]`, errors);
+          });
         }
       }
     }

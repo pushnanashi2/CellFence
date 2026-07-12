@@ -9,6 +9,7 @@ import {
   type CellFenceManifest,
   type CellManifest,
   type CellConsumerManifest,
+  type ResourceBaselineEntry,
   validateBaseline,
   validateManifest,
 } from "@cellfence/schema";
@@ -385,12 +386,39 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
   return accesses;
 }
 
-function resourceAccessDeclared(cell: CellManifest, access: ResourceAccessReference): boolean {
+function resourceBaselineEntry(access: ResourceAccessReference): ResourceBaselineEntry {
+  return {
+    kind: access.kind,
+    access: access.access,
+    selector: access.selector,
+  };
+}
+
+function resourceBaselineKey(access: ResourceBaselineEntry): string {
+  return `${access.kind}:${access.access}:${access.selector}`;
+}
+
+function sortedResourceBaselineEntries(accesses: ResourceAccessReference[]): ResourceBaselineEntry[] {
+  const uniqueEntries = new Map<string, ResourceBaselineEntry>();
+  for (const access of accesses) {
+    const entry = resourceBaselineEntry(access);
+    uniqueEntries.set(resourceBaselineKey(entry), entry);
+  }
+  return [...uniqueEntries.values()].sort((left, right) => resourceBaselineKey(left).localeCompare(resourceBaselineKey(right)));
+}
+
+function resourceAccessDeclaredByManifest(cell: CellManifest, access: ResourceAccessReference): boolean {
   return (cell.resourceContracts || []).some((contract) =>
     contract.kind === access.kind
     && contract.access.includes(access.access)
     && contract.selectors.some((selector) => matchesPattern(access.selector, selector) || selector === access.selector)
   );
+}
+
+function resourceAccessDeclaredByBaseline(cell: CellManifest, baseline: CellFenceBaseline | undefined, access: ResourceAccessReference): boolean {
+  const resourceAccesses = baseline?.cells[cell.id]?.resourceAccesses || [];
+  const currentAccessKey = resourceBaselineKey(resourceBaselineEntry(access));
+  return resourceAccesses.some((entry) => resourceBaselineKey(entry) === currentAccessKey);
 }
 
 function resourceAccessVerb(access: ResourceAccessMode): string {
@@ -402,11 +430,14 @@ function resourceAccessVerb(access: ResourceAccessMode): string {
   return "writes";
 }
 
-function validateResourceAccesses(context: AnalysisContext, findings: Finding[]): void {
+function validateResourceAccesses(context: AnalysisContext, findings: Finding[], baseline: CellFenceBaseline | undefined): Map<string, ResourceAccessReference[]> {
+  const accessesByCell = new Map<string, ResourceAccessReference[]>();
   for (const cell of context.manifest.cells) {
+    const cellAccesses: ResourceAccessReference[] = [];
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
       for (const access of collectResourceAccesses(context.rootDir, sourceFilePath)) {
-        if (resourceAccessDeclared(cell, access)) continue;
+        cellAccesses.push(access);
+        if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) continue;
         addFinding(findings, {
           ruleId: "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
           severity: "error",
@@ -423,7 +454,9 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[])
         });
       }
     }
+    accessesByCell.set(cell.id, cellAccesses);
   }
+  return accessesByCell;
 }
 
 function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
@@ -707,7 +740,11 @@ function countLines(filePath: string): number {
   return content.split(/\r?\n/).length;
 }
 
-function computeMetrics(context: AnalysisContext, crossCellDependencies: Map<string, Set<string>>): Record<string, CellBaselineRecord> {
+function computeMetrics(
+  context: AnalysisContext,
+  crossCellDependencies: Map<string, Set<string>>,
+  accessesByCell: Map<string, ResourceAccessReference[]>,
+): Record<string, CellBaselineRecord> {
   const metrics: Record<string, CellBaselineRecord> = {};
   for (const cell of context.manifest.cells) {
     metrics[cell.id] = {
@@ -715,6 +752,7 @@ function computeMetrics(context: AnalysisContext, crossCellDependencies: Map<str
       publicSymbols: cell.publicSymbols.length,
       publicSurfaceLines: countLines(absolutePath(context.rootDir, cell.publicEntry)),
       crossCellDependencies: crossCellDependencies.get(cell.id)?.size || 0,
+      resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id) || []),
     };
   }
   return metrics;
@@ -797,13 +835,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   const warnings: Finding[] = [];
   const manifest = manifestValidation.value;
   const context = createContext(rootDir, manifest);
-
-  validateDuplicateCellIds(manifest, findings);
-  validateOwnershipOverlap(manifest, findings);
-  validatePublicEntries(context, findings);
-  const crossCellDependencies = validateImports(context, findings, warnings);
-  validateResourceAccesses(context, findings);
-  const metrics = computeMetrics(context, crossCellDependencies);
+  let baseline: CellFenceBaseline | undefined;
 
   if (baselinePath) {
     try {
@@ -815,7 +847,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
           message: `baseline is invalid: ${baselineValidation.errors.join("; ")}`,
         });
       } else {
-        compareBaseline(metrics, baselineValidation.value, findings);
+        baseline = baselineValidation.value;
       }
     } catch (error) {
       addFinding(findings, {
@@ -824,6 +856,17 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
         message: `failed to read baseline ${repoPath(rootDir, baselinePath)}: ${error instanceof Error ? error.message : String(error)}`,
       });
     }
+  }
+
+  validateDuplicateCellIds(manifest, findings);
+  validateOwnershipOverlap(manifest, findings);
+  validatePublicEntries(context, findings);
+  const crossCellDependencies = validateImports(context, findings, warnings);
+  const accessesByCell = validateResourceAccesses(context, findings, baseline);
+  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+
+  if (baseline) {
+    compareBaseline(metrics, baseline, findings);
   }
 
   const hasErrors = findings.some((finding) => finding.severity === "error");
