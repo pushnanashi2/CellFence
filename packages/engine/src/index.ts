@@ -121,6 +121,7 @@ type PluginRepositoryModel = {
     all: readonly string[];
     governed: readonly string[];
     byCell: Readonly<Record<string, readonly string[]>>;
+    contents: Readonly<Record<string, string>>;
   };
   imports: readonly PluginImportReference[];
   resources: readonly PluginResourceAccess[];
@@ -1818,6 +1819,17 @@ function repositoryFiles(context: AnalysisContext): readonly string[] {
   return listFiles(context.rootDir).map((filePath) => repoPath(context.rootDir, filePath));
 }
 
+function sourceContentsByPath(context: AnalysisContext, byCell: Record<string, readonly string[]>): Record<string, string> {
+  const contents: Record<string, string> = {};
+  const sourceFiles = new Set(Object.values(byCell).flat());
+  const readSourceFile = ts.sys.readFile;
+  for (const filePath of sourceFiles) {
+    const sourceText = readSourceFile(path.join(context.rootDir, filePath));
+    if (sourceText !== undefined) contents[filePath] = sourceText;
+  }
+  return contents;
+}
+
 function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference): PluginResourceAccess {
   return {
     kind: access.kind,
@@ -1852,6 +1864,7 @@ function createRepositoryModel(
   metrics: Record<string, CellBaselineRecord>,
   changedFiles: string[] = [],
 ): PluginRepositoryModel {
+  const byCell = allSourceFilesByCell(context);
   return {
     rootDir: context.rootDir,
     manifest: context.manifest,
@@ -1859,7 +1872,8 @@ function createRepositoryModel(
     files: {
       all: repositoryFiles(context),
       governed: sourceFilesUnderGovernance(context.rootDir, context.manifest).map((filePath) => repoPath(context.rootDir, filePath)),
-      byCell: allSourceFilesByCell(context),
+      byCell,
+      contents: sourceContentsByPath(context, byCell),
     },
     imports: observedImports,
     resources: flattenResourceAccesses(accessesByCell),
@@ -1932,9 +1946,10 @@ function runPluginAdapters(
     for (const adapter of plugin.adapters || []) {
       for (const cell of context.manifest.cells) {
         for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
-          const sourceText = fs.readFileSync(sourceFilePath, "utf8");
-          const sourceFile = ts.createSourceFile(sourceFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(sourceFilePath));
           const relativeFilePath = repoPath(context.rootDir, sourceFilePath);
+          const sourceText = repository.files.contents[relativeFilePath];
+          if (sourceText === undefined) continue;
+          const sourceFile = ts.createSourceFile(sourceFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(sourceFilePath));
           let accesses: PluginResourceAccess[];
           try {
             accesses = adapter.detect({

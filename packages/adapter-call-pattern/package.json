@@ -1,0 +1,46 @@
+{
+  "name": "@cellfence/adapter-call-pattern",
+  "version": "0.1.8",
+  "description": "Declarative call-pattern resource adapter for CellFence.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/adapter-call-pattern"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
+  "keywords": [
+    "architecture",
+    "governance",
+    "adapter",
+    "resource-contracts"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
+  "dependencies": {
+    "@cellfence/plugin-api": "0.1.8",
+    "@cellfence/schema": "0.1.8",
+    "typescript": "^5.5.4"
+  }
+}

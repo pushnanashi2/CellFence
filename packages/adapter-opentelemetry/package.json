@@ -1,0 +1,44 @@
+{
+  "name": "@cellfence/adapter-opentelemetry",
+  "version": "0.1.8",
+  "description": "OpenTelemetry resource evidence converter for CellFence.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/adapter-opentelemetry"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
+  "keywords": [
+    "architecture",
+    "governance",
+    "opentelemetry",
+    "runtime-evidence"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
+  "dependencies": {
+    "@cellfence/schema": "0.1.8"
+  }
+}

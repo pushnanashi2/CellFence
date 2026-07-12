@@ -47,6 +47,7 @@ export type CellFenceFileIndex = {
   all: readonly string[];
   governed: readonly string[];
   byCell: Readonly<Record<string, readonly string[]>>;
+  contents: Readonly<Record<string, string>>;
 };
 
 export type CellFenceImportReference = {

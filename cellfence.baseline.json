@@ -1,11 +1,20 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T17:15:04.345Z",
+  "generatedAt": "2026-07-12T17:41:48.198Z",
   "cellIds": [
+    "adapter-call-pattern",
+    "adapter-opentelemetry",
     "cli",
     "engine",
     "github-action",
+    "plugin-agent-budget",
     "plugin-api",
+    "plugin-blast-radius",
+    "plugin-dependency-sovereignty",
+    "plugin-geo-purity",
+    "plugin-legacy-strangler",
+    "plugin-quants-trend",
+    "reporter-economy-matrix",
     "schema",
     "trace"
   ],
@@ -56,7 +65,7 @@
     "plugin-api": {
       "ownedPathPatterns": 1,
       "publicSymbols": 23,
-      "publicSurfaceLines": 173,
+      "publicSurfaceLines": 174,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-api/**"
@@ -87,7 +96,7 @@
         "defineReporter",
         "defineRule"
       ],
-      "publicSurfaceHash": "e4373621f1d84ea947a0d5258b0c6d21d7926fe9d39898ef9bcea99d0becd234",
+      "publicSurfaceHash": "4acb2c58335cd0bd319779bf41d86cada513c331dbfcc9c6959413dd5f74bb9c",
       "dependencyEdges": [
         "plugin-api->schema"
       ],
@@ -97,7 +106,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 45,
-      "publicSurfaceLines": 4059,
+      "publicSurfaceLines": 4074,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -215,6 +224,192 @@
       "publicSurfaceHash": "28a8fcb53db3d5276949483038ef1df8c65b087bde96c39c043c9211a6df8c5d",
       "dependencyEdges": [
         "trace->schema"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "adapter-call-pattern": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 3,
+      "publicSurfaceLines": 54,
+      "crossCellDependencies": 2,
+      "ownedPathSet": [
+        "packages/adapter-call-pattern/**"
+      ],
+      "publicEntryPath": "packages/adapter-call-pattern/src/index.ts",
+      "publicSymbolSet": [
+        "CallPattern",
+        "callPatternAdapter",
+        "CallPatternAdapterOptions"
+      ],
+      "publicSurfaceHash": "95d8a86f9e6654249d7bb88a18260881edd3b008695cef6439dd2dfbd91ec5fa",
+      "dependencyEdges": [
+        "adapter-call-pattern->plugin-api",
+        "adapter-call-pattern->schema"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "adapter-opentelemetry": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 117,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/adapter-opentelemetry/**"
+      ],
+      "publicEntryPath": "packages/adapter-opentelemetry/src/index.ts",
+      "publicSymbolSet": [
+        "OpenTelemetryEvidenceOptions",
+        "openTelemetryToResourceEvidence"
+      ],
+      "publicSurfaceHash": "f80e55caedb71b4f3b6001193d41349593b722ab422f5ebf52041d6166d57236",
+      "dependencyEdges": [
+        "adapter-opentelemetry->schema"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-agent-budget": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 134,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-agent-budget/**"
+      ],
+      "publicEntryPath": "packages/plugin-agent-budget/src/index.ts",
+      "publicSymbolSet": [
+        "AgentBudgetOptions",
+        "agentBudgetPlugin"
+      ],
+      "publicSurfaceHash": "59212ef14d62dae1e1b73f8d29f30fa022cdb77d7e96c053734daf919dd1797c",
+      "dependencyEdges": [
+        "plugin-agent-budget->plugin-api"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-blast-radius": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 106,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-blast-radius/**"
+      ],
+      "publicEntryPath": "packages/plugin-blast-radius/src/index.ts",
+      "publicSymbolSet": [
+        "BlastRadiusOptions",
+        "blastRadiusPlugin"
+      ],
+      "publicSurfaceHash": "747f6d65e5fd9b62d1ed34f4d86a5516dd107bc6f3f72e092f17ec5d1966a294",
+      "dependencyEdges": [
+        "plugin-blast-radius->plugin-api"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-dependency-sovereignty": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 90,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-dependency-sovereignty/**"
+      ],
+      "publicEntryPath": "packages/plugin-dependency-sovereignty/src/index.ts",
+      "publicSymbolSet": [
+        "DependencySovereigntyOptions",
+        "dependencySovereigntyPlugin"
+      ],
+      "publicSurfaceHash": "2f465d06cb1e049f139a498a97896670ee8e1c07440f4cf49feff29225550f6d",
+      "dependencyEdges": [
+        "plugin-dependency-sovereignty->plugin-api"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-geo-purity": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 98,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-geo-purity/**"
+      ],
+      "publicEntryPath": "packages/plugin-geo-purity/src/index.ts",
+      "publicSymbolSet": [
+        "GeoPurityOptions",
+        "geoPurityPlugin"
+      ],
+      "publicSurfaceHash": "eb181feab623bd0c4dd0df612009fe5dc570826de453fb82db989ae80d088040",
+      "dependencyEdges": [
+        "plugin-geo-purity->plugin-api"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-legacy-strangler": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 2,
+      "publicSurfaceLines": 87,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-legacy-strangler/**"
+      ],
+      "publicEntryPath": "packages/plugin-legacy-strangler/src/index.ts",
+      "publicSymbolSet": [
+        "LegacyStranglerOptions",
+        "legacyStranglerPlugin"
+      ],
+      "publicSurfaceHash": "3cbaf9d8fb167507d1552299456807c7fc5c2652ca184af3847a48dbd91ec44e",
+      "dependencyEdges": [
+        "plugin-legacy-strangler->plugin-api"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-quants-trend": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 3,
+      "publicSurfaceLines": 75,
+      "crossCellDependencies": 2,
+      "ownedPathSet": [
+        "packages/plugin-quants-trend/**"
+      ],
+      "publicEntryPath": "packages/plugin-quants-trend/src/index.ts",
+      "publicSymbolSet": [
+        "QuantsTrendOptions",
+        "quantsTrendPlugin",
+        "TrendMetric"
+      ],
+      "publicSurfaceHash": "8aa91b6e262b5fcdbf1178458643a8521ee85e1e0faa7952efc9f509662a11ed",
+      "dependencyEdges": [
+        "plugin-quants-trend->plugin-api",
+        "plugin-quants-trend->schema"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "reporter-economy-matrix": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 4,
+      "publicSurfaceLines": 59,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/reporter-economy-matrix/**"
+      ],
+      "publicEntryPath": "packages/reporter-economy-matrix/src/index.ts",
+      "publicSymbolSet": [
+        "createEconomyMatrix",
+        "economyMatrixPlugin",
+        "economyMatrixReporter",
+        "EconomyMatrixRow"
+      ],
+      "publicSurfaceHash": "0c28a00845d20fde70ce3314ac3158d8f3bdb8bc81353049fe035f99151d6afb",
+      "dependencyEdges": [
+        "reporter-economy-matrix->plugin-api"
       ],
       "artifactContracts": [],
       "resourceAccesses": []

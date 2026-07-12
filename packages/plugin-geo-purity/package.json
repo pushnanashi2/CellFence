@@ -1,0 +1,44 @@
+{
+  "name": "@cellfence/plugin-geo-purity",
+  "version": "0.1.8",
+  "description": "CellFence rule plugin for AI-context purity and public API documentation.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/plugin-geo-purity"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
+  "keywords": [
+    "architecture",
+    "governance",
+    "ai-agents",
+    "context"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
+  "dependencies": {
+    "@cellfence/plugin-api": "0.1.8"
+  }
+}

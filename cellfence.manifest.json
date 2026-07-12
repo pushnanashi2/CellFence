@@ -195,6 +195,178 @@
         }
       ],
       "producesArtifacts": []
+    },
+    {
+      "id": "adapter-call-pattern",
+      "packageName": "@cellfence/adapter-call-pattern",
+      "ownedPaths": [
+        "packages/adapter-call-pattern/**"
+      ],
+      "publicEntry": "packages/adapter-call-pattern/src/index.ts",
+      "publicSymbols": [
+        "CallPattern",
+        "CallPatternAdapterOptions",
+        "callPatternAdapter"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        },
+        {
+          "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "adapter-opentelemetry",
+      "packageName": "@cellfence/adapter-opentelemetry",
+      "ownedPaths": [
+        "packages/adapter-opentelemetry/**"
+      ],
+      "publicEntry": "packages/adapter-opentelemetry/src/index.ts",
+      "publicSymbols": [
+        "OpenTelemetryEvidenceOptions",
+        "openTelemetryToResourceEvidence"
+      ],
+      "consumes": [
+        {
+          "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-agent-budget",
+      "packageName": "@cellfence/plugin-agent-budget",
+      "ownedPaths": [
+        "packages/plugin-agent-budget/**"
+      ],
+      "publicEntry": "packages/plugin-agent-budget/src/index.ts",
+      "publicSymbols": [
+        "AgentBudgetOptions",
+        "agentBudgetPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-blast-radius",
+      "packageName": "@cellfence/plugin-blast-radius",
+      "ownedPaths": [
+        "packages/plugin-blast-radius/**"
+      ],
+      "publicEntry": "packages/plugin-blast-radius/src/index.ts",
+      "publicSymbols": [
+        "BlastRadiusOptions",
+        "blastRadiusPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-dependency-sovereignty",
+      "packageName": "@cellfence/plugin-dependency-sovereignty",
+      "ownedPaths": [
+        "packages/plugin-dependency-sovereignty/**"
+      ],
+      "publicEntry": "packages/plugin-dependency-sovereignty/src/index.ts",
+      "publicSymbols": [
+        "DependencySovereigntyOptions",
+        "dependencySovereigntyPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-geo-purity",
+      "packageName": "@cellfence/plugin-geo-purity",
+      "ownedPaths": [
+        "packages/plugin-geo-purity/**"
+      ],
+      "publicEntry": "packages/plugin-geo-purity/src/index.ts",
+      "publicSymbols": [
+        "GeoPurityOptions",
+        "geoPurityPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-legacy-strangler",
+      "packageName": "@cellfence/plugin-legacy-strangler",
+      "ownedPaths": [
+        "packages/plugin-legacy-strangler/**"
+      ],
+      "publicEntry": "packages/plugin-legacy-strangler/src/index.ts",
+      "publicSymbols": [
+        "LegacyStranglerOptions",
+        "legacyStranglerPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-quants-trend",
+      "packageName": "@cellfence/plugin-quants-trend",
+      "ownedPaths": [
+        "packages/plugin-quants-trend/**"
+      ],
+      "publicEntry": "packages/plugin-quants-trend/src/index.ts",
+      "publicSymbols": [
+        "TrendMetric",
+        "QuantsTrendOptions",
+        "quantsTrendPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        },
+        {
+          "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reporter-economy-matrix",
+      "packageName": "@cellfence/reporter-economy-matrix",
+      "ownedPaths": [
+        "packages/reporter-economy-matrix/**"
+      ],
+      "publicEntry": "packages/reporter-economy-matrix/src/index.ts",
+      "publicSymbols": [
+        "EconomyMatrixRow",
+        "createEconomyMatrix",
+        "economyMatrixReporter",
+        "economyMatrixPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "plugin-api"
+        }
+      ],
+      "producesArtifacts": []
     }
   ]
 }

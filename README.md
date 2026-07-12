@@ -8,7 +8,7 @@ Use CellFence to show agents the fence before they edit, then detect private cro
 
 When CellFence is configured as a required check behind a protected branch, it acts as a **repository architecture firewall** for AI-generated and human-written code. It does not run coding agents, grant permissions, or sandbox tool calls; it verifies the repository state they leave behind.
 
-> **Status: pre-release v0.x.** The schema, plugin API v1 types, analysis engine, CLI, conformance fixtures, claim leases, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
+> **Status: pre-release v0.x.** The schema, plugin API v1 types, analysis engine, CLI, conformance fixtures, claim leases, ratchets, official programmatic plugins, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
 
 ## Why CellFence exists
 
@@ -228,6 +228,22 @@ CELLFENCE_TRACE_OUT=resource-evidence.json \
 node --import @cellfence/trace ./your-test-or-batch.js
 npx cellfence evidence check --evidence resource-evidence.json
 ```
+
+Official extension packages are available for programmatic callers that use `checkRepository({ plugins })`:
+
+| package | purpose |
+|---|---|
+| `@cellfence/plugin-agent-budget` | Confines agent changes to allowed cells, paths, dependency growth, and public-symbol budgets |
+| `@cellfence/plugin-blast-radius` | Computes downstream cell impact from changed files and import graph edges |
+| `@cellfence/plugin-legacy-strangler` | Rejects new dependencies into legacy cells during strangler migrations |
+| `@cellfence/plugin-quants-trend` | Warns when public API or dependency growth accelerates beyond baseline history |
+| `@cellfence/plugin-geo-purity` | Checks AI-context shape: large owned files, large public entries, and undocumented public exports |
+| `@cellfence/plugin-dependency-sovereignty` | Requires approval for new dependencies into cells owned by another team |
+| `@cellfence/reporter-economy-matrix` | Renders producer/consumer load across public API, artifacts, imports, and resources |
+| `@cellfence/adapter-call-pattern` | Converts declared call patterns such as `internalDb.write("T_ORDER")` into resource access records |
+| `@cellfence/adapter-opentelemetry` | Converts OpenTelemetry-style spans into `resource-evidence.v1` records |
+
+These packages share the Plugin API v1 model. In v0.x they are loaded explicitly by code; manifest-driven npm/local plugin auto-loading is intentionally deferred.
 
 Create a starter manifest in a new or disposable repository:
 

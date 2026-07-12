@@ -17,8 +17,35 @@
       "@cellfence/plugin-api": [
         "./packages/plugin-api/src/index.ts"
       ],
+      "@cellfence/adapter-call-pattern": [
+        "./packages/adapter-call-pattern/src/index.ts"
+      ],
+      "@cellfence/adapter-opentelemetry": [
+        "./packages/adapter-opentelemetry/src/index.ts"
+      ],
       "@cellfence/engine": [
         "./packages/engine/src/index.ts"
+      ],
+      "@cellfence/plugin-agent-budget": [
+        "./packages/plugin-agent-budget/src/index.ts"
+      ],
+      "@cellfence/plugin-blast-radius": [
+        "./packages/plugin-blast-radius/src/index.ts"
+      ],
+      "@cellfence/plugin-dependency-sovereignty": [
+        "./packages/plugin-dependency-sovereignty/src/index.ts"
+      ],
+      "@cellfence/plugin-geo-purity": [
+        "./packages/plugin-geo-purity/src/index.ts"
+      ],
+      "@cellfence/plugin-legacy-strangler": [
+        "./packages/plugin-legacy-strangler/src/index.ts"
+      ],
+      "@cellfence/plugin-quants-trend": [
+        "./packages/plugin-quants-trend/src/index.ts"
+      ],
+      "@cellfence/reporter-economy-matrix": [
+        "./packages/reporter-economy-matrix/src/index.ts"
       ],
       "@cellfence/trace": [
         "./packages/trace/src/index.ts"

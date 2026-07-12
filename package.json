@@ -9,10 +9,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -b packages/schema packages/plugin-api packages/engine packages/cli packages/github-action packages/trace",
+    "build": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/cli packages/github-action packages/trace",
     "clean": "node scripts/clean.mjs",
     "lint": "node scripts/lint.mjs",
-    "typecheck": "tsc -b packages/schema packages/plugin-api packages/engine packages/cli packages/github-action packages/trace --pretty false",
+    "typecheck": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/cli packages/github-action packages/trace --pretty false",
     "test": "npm run build && node --test tests/*.test.mjs",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",
     "benchmark:scale": "npm run build && node scripts/scale-benchmark.mjs",
