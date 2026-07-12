@@ -104,6 +104,25 @@
         }
       ],
       "producesArtifacts": []
+    },
+    {
+      "id": "trace",
+      "packageName": "@cellfence/trace",
+      "ownedPaths": [
+        "packages/trace/**"
+      ],
+      "publicEntry": "packages/trace/src/index.ts",
+      "publicSymbols": [
+        "flushEvidence",
+        "installTrace",
+        "recordResourceAccess"
+      ],
+      "consumes": [
+        {
+          "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
     }
   ]
 }

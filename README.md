@@ -187,6 +187,16 @@ npx cellfence baseline check
 
 `context` projects a single cell's fence before editing: owned paths, allowed public imports, declared or grandfathered resources, current budgets, and short agent guidance. Use `--json` for tools or `--format agents-md` for an AGENTS.md/CLAUDE.md fragment.
 
+Install `@cellfence/trace` when you want tests or batches to generate runtime evidence:
+
+```bash
+npm install --save-dev @cellfence/trace
+CELLFENCE_TRACE_CELL=runtime \
+CELLFENCE_TRACE_OUT=resource-evidence.json \
+node --import @cellfence/trace ./your-test-or-batch.js
+npx cellfence evidence check --evidence resource-evidence.json
+```
+
 Create a starter manifest in a new or disposable repository:
 
 ```bash
@@ -359,6 +369,16 @@ cellfence evidence check --evidence resource-evidence.json
 ```
 
 `baseline create` and `baseline update` also accept `--evidence`, so static and runtime resource inventories can be stored in the same baseline.
+
+For Node.js tests and batches, `@cellfence/trace` can generate this evidence automatically:
+
+```bash
+CELLFENCE_TRACE_CELL=research \
+CELLFENCE_TRACE_OUT=resource-evidence.json \
+node --import @cellfence/trace ./scripts/run-research.mjs
+```
+
+The v0.x trace hook records selected runtime file reads and writes. It intentionally ignores source-code module loading so evidence focuses on application data resources.
 
 ## AI-agent integration
 

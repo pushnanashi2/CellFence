@@ -107,6 +107,8 @@ ORM, query builder, and broker-client support is adapter-scoped. Adding one adap
 
 Unsupported library access must not be described as covered by CellFence unless it is declared through `resourceContracts`, captured in the baseline, supplied as runtime evidence, or rejected as unresolved.
 
+`@cellfence/trace` can generate runtime evidence for selected Node.js file reads and writes via `node --import @cellfence/trace`. In v0.x it is a runtime evidence producer, not a sandbox: it observes supported operations and writes `cellfence.resource-evidence.v1` JSON for later `cellfence evidence check`.
+
 ## Planned or Environment-Dependent Enforcement
 
 CellFence v0.x documents but does not fully enforce:

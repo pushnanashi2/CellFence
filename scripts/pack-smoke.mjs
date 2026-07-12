@@ -8,7 +8,8 @@ const workspacePackages = [
   "packages/schema",
   "packages/engine",
   "packages/cli",
-  "packages/github-action"
+  "packages/github-action",
+  "packages/trace"
 ];
 
 function run(command, args, options = {}) {

@@ -14,6 +14,7 @@
 | Adapter-scoped resource detection | partially_enforced | `@cellfence/engine` | ORM, query builder, and broker-client coverage is per adapter; unsupported libraries require a dedicated adapter or runtime evidence | adapter fixtures and documentation |
 | Unresolved resource access fail-closed | enforced | `@cellfence/engine` | Unsafe raw SQL and selected dynamic SQL assembly fail instead of becoming silent blind spots | invalid dynamic SQL fixture |
 | Runtime resource evidence | enforced | `@cellfence/schema`, `@cellfence/engine`, and `cellfence evidence check` | Requires explicit evidence JSON; CellFence does not observe live infrastructure by itself | evidence fixtures and CLI tests |
+| Runtime trace hook | partially_enforced | `@cellfence/trace` | Node.js fs read/write tracing only in v0.x; source-code module loading is ignored | trace tests |
 | Resource access baseline inventory | enforced | `@cellfence/engine` baseline metrics | Captures selected static and supplied runtime evidence inventory; arbitrary ORM and broker coupling remain outside v0.x inference | baseline resource fixtures |
 | Baseline ratchets | enforced | `@cellfence/engine` | Counts are intentionally coarse in v0.x | baseline fixture tests |
 | Locked baseline update protection | enforced | `@cellfence/engine` and `cellfence baseline update` | Enforces locked cells; locked resource contracts are context and resolution metadata in v0.x | CLI tests |

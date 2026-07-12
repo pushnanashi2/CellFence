@@ -16,6 +16,9 @@
       ],
       "@cellfence/engine": [
         "./packages/engine/src/index.ts"
+      ],
+      "@cellfence/trace": [
+        "./packages/trace/src/index.ts"
       ]
     }
   }

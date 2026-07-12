@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T14:14:28.942Z",
+  "generatedAt": "2026-07-12T14:19:34.310Z",
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
@@ -27,6 +27,13 @@
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
       "publicSurfaceLines": 32,
+      "crossCellDependencies": 1,
+      "resourceAccesses": []
+    },
+    "trace": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 3,
+      "publicSurfaceLines": 120,
       "crossCellDependencies": 1,
       "resourceAccesses": []
     }

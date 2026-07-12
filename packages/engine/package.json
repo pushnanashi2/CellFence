@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/engine",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CellFence repository analysis engine.",
   "license": "Apache-2.0",
   "type": "module",
@@ -40,7 +40,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/schema": "0.1.1",
+    "@cellfence/schema": "0.1.2",
     "typescript": "^5.5.4"
   }
 }
