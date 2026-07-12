@@ -8,7 +8,7 @@ Use CellFence to show agents the fence before they edit, then detect private cro
 
 When CellFence is configured as a required check behind a protected branch, it acts as a **repository architecture firewall** for AI-generated and human-written code. It does not run coding agents, grant permissions, or sandbox tool calls; it verifies the repository state they leave behind.
 
-> **Status: pre-release v0.x.** The schema, analysis engine, CLI, conformance fixtures, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
+> **Status: pre-release v0.x.** The schema, plugin API v1 types, analysis engine, CLI, conformance fixtures, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
 
 ## Why CellFence exists
 
@@ -98,6 +98,7 @@ CellFence currently enforces these invariants:
 7. When strict ownership is enabled, governed source must be owned by exactly one cell.
 8. Public entries and produced artifact lanes must live inside the declaring cell's ownership scope.
 9. Selected architecture contracts may shrink, but new cells, broader ownership, new public symbols, new dependency edges, public entry changes, artifact contract changes, and public signature changes fail against the accepted baseline.
+10. Required rules declared in governance cannot be weakened through repository, cell, override, or CLI severity configuration.
 
 ## Thirty-second example
 
@@ -121,8 +122,20 @@ Manifest:
   "governance": {
     "requireOwnership": true,
     "include": ["src/**", "packages/**", "apps/**"],
-    "exclude": ["**/*.test.ts", "generated/**"]
+    "exclude": ["**/*.test.ts", "generated/**"],
+    "requiredRules": ["CELLFENCE_OWNERSHIP_OVERLAP", "CELLFENCE_UNOWNED_SOURCE"]
   },
+  "rules": {
+    "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": "warning"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": "off"
+      }
+    }
+  ],
   "cells": [
     {
       "id": "parser",
@@ -311,6 +324,22 @@ Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLF
 `governance.requireOwnership` is optional. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`.
 
 `locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
+
+Rule severity configuration is optional and follows a fixed precedence:
+
+```text
+CLI ruleSeverities
+>
+path overrides
+>
+cell rules
+>
+repository rules
+>
+rule default
+```
+
+`governance.requiredRules` prevents a repository, cell, path override, or CLI caller from weakening selected rules below `error`.
 
 See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
 
@@ -511,6 +540,8 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
+| `CELLFENCE_PLUGIN_INVALID` | A programmatic plugin has an unsupported API version, throws, or emits invalid references |
+| `CELLFENCE_REQUIRED_RULE_DISABLED` | A configured `governance.requiredRules` rule was weakened |
 | `CELLFENCE_UNRESOLVED_IMPORT` | Static relative import could not be resolved; fails closed |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
@@ -565,6 +596,46 @@ ORMs, query builders, HTTP frameworks, and broker clients require explicit CellF
 - which cases remain outside static inference and must be supplied as runtime evidence.
 
 Unsupported adapters are not treated as implicitly safe. If a resource access cannot be resolved by a built-in adapter, an explicit `resourceContracts` entry, baseline evidence, runtime evidence, or a fail-closed unresolved finding is required depending on the access shape.
+
+## Plugin API v1
+
+CellFence v0.x includes `@cellfence/plugin-api`, a small stable API for programmatic rules, resource adapters, and reporters. The default CLI still works without plugin configuration:
+
+```bash
+npx cellfence check
+```
+
+Programmatic callers can pass plugins to `checkRepository`:
+
+```ts
+import { checkRepository } from "@cellfence/engine";
+import { defineAdapter, definePlugin } from "@cellfence/plugin-api";
+
+const companyDatabase = defineAdapter({
+  name: "company-database",
+  detect(context) {
+    const accesses = [];
+    // Inspect context.sourceFile with context.helpers and return CellFenceResourceAccess records.
+    return accesses;
+  }
+});
+
+const result = checkRepository({
+  plugins: [
+    definePlugin({
+      apiVersion: 1,
+      name: "@company/cellfence-plugin",
+      version: "1.0.0",
+      capabilities: { needsAst: true },
+      adapters: [companyDatabase]
+    })
+  ]
+});
+```
+
+Plugin adapters only translate framework-specific code into common resource access records. CellFence core still performs ownership, baseline, waiver, severity, and resource-contract enforcement. Plugin rules receive a read-only repository model containing file indexes, observed imports, detected resources, metrics, baseline, and changed files.
+
+External npm/local plugin auto-loading from manifest `plugins` is intentionally not enabled in v0.x; loading arbitrary code from config needs a separate trust decision. The manifest shape already reserves `plugins`, `rules`, `overrides`, and `governance.requiredRules` so repositories can adopt the policy model without changing the CLI contract later.
 
 ## CellFence and adjacent tools
 

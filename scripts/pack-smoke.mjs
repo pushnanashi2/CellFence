@@ -6,6 +6,7 @@ import path from "node:path";
 const root = process.cwd();
 const workspacePackages = [
   "packages/schema",
+  "packages/plugin-api",
   "packages/engine",
   "packages/cli",
   "packages/github-action",

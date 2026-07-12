@@ -1,13 +1,13 @@
 {
-  "name": "cellfence",
+  "name": "@cellfence/plugin-api",
   "version": "0.1.7",
-  "description": "Public CellFence CLI.",
+  "description": "Stable CellFence plugin API types and helpers.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pushnanashi2/CellFence.git",
-    "directory": "packages/cli"
+    "directory": "packages/plugin-api"
   },
   "bugs": {
     "url": "https://github.com/pushnanashi2/CellFence/issues"
@@ -18,13 +18,13 @@
     "governance",
     "monorepo",
     "ai-agents",
-    "cli"
+    "plugins"
   ],
   "engines": {
     "node": ">=20"
   },
-  "bin": {
-    "cellfence": "dist/index.js"
+  "publishConfig": {
+    "access": "public"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -41,6 +41,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.7"
+    "@cellfence/schema": "0.1.7",
+    "typescript": "^5.5.4"
   }
 }

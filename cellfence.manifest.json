@@ -22,18 +22,61 @@
         "CellManifest",
         "EnforcementStatus",
         "ManifestGovernance",
+        "PluginReference",
         "ResourceAccessConfidence",
         "ResourceBaselineEntry",
         "ResourceAccessMode",
         "ResourceContractKind",
         "ResourceContractManifest",
         "ResourceEvidenceAccess",
+        "RuleOverride",
+        "RuleSeverity",
+        "RuleSeverityMap",
         "ValidationResult",
         "validateBaseline",
         "validateManifest",
         "validateResourceEvidence"
       ],
       "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-api",
+      "packageName": "@cellfence/plugin-api",
+      "ownedPaths": [
+        "packages/plugin-api/**"
+      ],
+      "publicEntry": "packages/plugin-api/src/index.ts",
+      "publicSymbols": [
+        "CellFenceAdapter",
+        "CellFenceAdapterContext",
+        "CellFenceAdapterHelpers",
+        "CellFenceCapability",
+        "CELLFENCE_PLUGIN_API_VERSION",
+        "CellFenceFileIndex",
+        "CellFenceFinding",
+        "CellFenceFindingSeverity",
+        "CellFenceImportReference",
+        "CellFencePlugin",
+        "CellFencePluginCapabilities",
+        "CellFenceReporter",
+        "CellFenceReporterContext",
+        "CellFenceRepositoryModel",
+        "CellFenceResourceAccess",
+        "CellFenceRule",
+        "CellFenceRuleContext",
+        "CellFenceRuleSeverity",
+        "CellFenceSuggestedResolution",
+        "defineAdapter",
+        "definePlugin",
+        "defineReporter",
+        "defineRule"
+      ],
+      "consumes": [
+        {
+          "cell": "schema"
+        }
+      ],
       "producesArtifacts": []
     },
     {
@@ -82,6 +125,9 @@
         "writeBaselineFile"
       ],
       "consumes": [
+        {
+          "cell": "plugin-api"
+        },
         {
           "cell": "schema"
         }

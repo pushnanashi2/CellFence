@@ -8,8 +8,12 @@ The CellFence manifest is JSON and starts with:
   "governance": {
     "requireOwnership": true,
     "include": ["src/**", "packages/**", "apps/**"],
-    "exclude": ["**/*.test.ts", "generated/**"]
+    "exclude": ["**/*.test.ts", "generated/**"],
+    "requiredRules": ["CELLFENCE_OWNERSHIP_OVERLAP"]
   },
+  "plugins": [],
+  "rules": {},
+  "overrides": [],
   "cells": []
 }
 ```
@@ -39,6 +43,10 @@ Ratchet: a check that permits reductions but rejects silent growth beyond a base
 Locked cell: a cell whose accepted baseline cannot be expanded by `baseline update`.
 
 Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
+
+Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. `governance.requiredRules` prevents selected rules from being weakened below `error`.
+
+Plugin reference: a reserved manifest entry for future npm or local plugin loading. In v0.x, the programmatic plugin API is implemented, but manifest-driven arbitrary-code loading is not enabled.
 
 Sealed source: files that require explicit human authorization before modification. In v0.x this is documented, not cryptographically enforced.
 
@@ -75,6 +83,9 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
     "publicSymbols": 10,
     "publicSurfaceLines": 80,
     "crossCellDependencies": 1
+  },
+  "rules": {
+    "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": "warning"
   }
 }
 ```
@@ -88,6 +99,22 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 `locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
+
+Rule severity precedence is fixed:
+
+```text
+CLI ruleSeverities
+>
+path overrides
+>
+cell rules
+>
+repository rules
+>
+rule default
+```
+
+Path overrides use CellFence's glob-like path matching. A rule listed in `governance.requiredRules` must remain `error`; attempts to set it to `warning` or `off` produce `CELLFENCE_REQUIRED_RULE_DISABLED`.
 
 ## Active Enforcement
 
@@ -108,6 +135,9 @@ CellFence v0.x enforces:
 - undeclared artifact lane consumption;
 - undeclared static file, database, queue, and HTTP resource access;
 - undeclared runtime resource evidence;
+- required rules weakened by repository, cell, override, or CLI configuration;
+- programmatic plugin adapter outputs as ordinary resource access records;
+- programmatic plugin rule findings as ordinary findings subject to severity policy and waivers;
 - unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;
@@ -125,6 +155,8 @@ ORM, query builder, HTTP-framework, and broker-client support is adapter-scoped.
 Unsupported library access must not be described as covered by CellFence unless it is declared through `resourceContracts`, captured in the baseline, supplied as runtime evidence, or rejected as unresolved.
 
 `@cellfence/trace` can generate runtime evidence for selected Node.js file reads and writes, fetch calls, and explicit database/HTTP/queue helper records via `node --import @cellfence/trace`. In v0.x it is a runtime evidence producer, not a sandbox: it observes supported operations and writes `cellfence.resource-evidence.v1` JSON for later `cellfence evidence check`.
+
+`@cellfence/plugin-api` defines Plugin API v1 for programmatic rules, adapters, and reporters. In v0.x, callers can pass plugin objects directly to `checkRepository`. Manifest `plugins` entries are validated as shape only; the CLI does not auto-load arbitrary npm or local plugin code from the manifest.
 
 ## Planned or Environment-Dependent Enforcement
 

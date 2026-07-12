@@ -32,6 +32,21 @@ export type ResourceBaselineEntry = {
   confidence?: ResourceAccessConfidence;
 };
 
+export type RuleSeverity = "off" | "warning" | "error";
+export type RuleSeverityMap = Record<string, RuleSeverity>;
+
+export type RuleOverride = {
+  files: string[];
+  rules: RuleSeverityMap;
+};
+
+export type PluginReference =
+  | string
+  | {
+    package: string;
+    options?: Record<string, unknown>;
+  };
+
 export type ResourceEvidenceAccess = ResourceBaselineEntry & {
   cellId?: string;
   observedAt?: string;
@@ -61,6 +76,7 @@ export type ManifestGovernance = {
   requireOwnership?: boolean;
   include?: string[];
   exclude?: string[];
+  requiredRules?: string[];
 };
 
 export type CellManifest = {
@@ -74,11 +90,16 @@ export type CellManifest = {
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
   budgets?: ArchitecturalBudgets;
+  rules?: RuleSeverityMap;
 };
 
 export type CellFenceManifest = {
   schemaVersion: typeof CELLFENCE_MANIFEST_SCHEMA_VERSION;
+  extends?: string[];
+  plugins?: PluginReference[];
   governance?: ManifestGovernance;
+  rules?: RuleSeverityMap;
+  overrides?: RuleOverride[];
   cells: CellManifest[];
 };
 
@@ -115,6 +136,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === "string" && entry.trim().length > 0);
+}
+
+function isRuleSeverity(value: unknown): value is RuleSeverity {
+  return value === "off" || value === "warning" || value === "error";
 }
 
 function optionalString(value: unknown): value is string | undefined {
@@ -247,9 +272,59 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
   if (value.exclude !== undefined && !isStringArray(value.exclude)) {
     errors.push(`${location}.exclude must be an array of non-empty strings when present`);
   }
+  if (value.requiredRules !== undefined && !isStringArray(value.requiredRules)) {
+    errors.push(`${location}.requiredRules must be an array of non-empty strings when present`);
+  }
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
     errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);
   }
+  return true;
+}
+
+function validateRuleSeverityMap(value: unknown, location: string, errors: string[]): value is RuleSeverityMap {
+  if (value === undefined) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object mapping rule ids to off|warning|error`);
+    return false;
+  }
+  for (const [ruleId, severity] of Object.entries(value)) {
+    if (ruleId.trim().length === 0) {
+      errors.push(`${location} contains an empty rule id`);
+    }
+    if (!isRuleSeverity(severity)) {
+      errors.push(`${location}.${ruleId} must be off|warning|error`);
+    }
+  }
+  return true;
+}
+
+function validatePluginReference(value: unknown, location: string, errors: string[]): value is PluginReference {
+  if (typeof value === "string" && value.trim().length > 0) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be a package string or an object like {"package":"plugin-name"}`);
+    return false;
+  }
+  if (typeof value.package !== "string" || value.package.trim().length === 0) {
+    errors.push(`${location}.package must be a non-empty string`);
+  }
+  if (value.options !== undefined && !isRecord(value.options)) {
+    errors.push(`${location}.options must be an object when present`);
+  }
+  return true;
+}
+
+function validateRuleOverride(value: unknown, location: string, errors: string[]): value is RuleOverride {
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (!isStringArray(value.files)) {
+    errors.push(`${location}.files must be an array of non-empty strings`);
+  }
+  if (value.rules === undefined) {
+    errors.push(`${location}.rules is required`);
+  }
+  validateRuleSeverityMap(value.rules, `${location}.rules`, errors);
   return true;
 }
 
@@ -304,6 +379,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     }
   }
   validateBudgets(value.budgets, `${location}.budgets`, errors);
+  validateRuleSeverityMap(value.rules, `${location}.rules`, errors);
   return true;
 }
 
@@ -314,6 +390,28 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   }
   if (value.schemaVersion !== CELLFENCE_MANIFEST_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_MANIFEST_SCHEMA_VERSION}`);
+  }
+  if (value.extends !== undefined && !isStringArray(value.extends)) {
+    errors.push("extends must be an array of non-empty strings when present");
+  }
+  if (value.plugins !== undefined) {
+    if (!Array.isArray(value.plugins)) {
+      errors.push("plugins must be an array when present");
+    } else {
+      value.plugins.forEach((plugin, pluginIndex) => {
+        validatePluginReference(plugin, `plugins[${pluginIndex}]`, errors);
+      });
+    }
+  }
+  validateRuleSeverityMap(value.rules, "rules", errors);
+  if (value.overrides !== undefined) {
+    if (!Array.isArray(value.overrides)) {
+      errors.push("overrides must be an array when present");
+    } else {
+      value.overrides.forEach((override, overrideIndex) => {
+        validateRuleOverride(override, `overrides[${overrideIndex}]`, errors);
+      });
+    }
   }
   if (!Array.isArray(value.cells)) {
     errors.push("cells must be an array");

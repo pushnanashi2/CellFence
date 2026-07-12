@@ -1,18 +1,19 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T15:55:06.817Z",
+  "generatedAt": "2026-07-12T16:44:30.164Z",
   "cellIds": [
     "cli",
     "engine",
     "github-action",
+    "plugin-api",
     "schema",
     "trace"
   ],
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 23,
-      "publicSurfaceLines": 417,
+      "publicSymbols": 27,
+      "publicSurfaceLines": 515,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -32,27 +33,72 @@
         "CellManifest",
         "EnforcementStatus",
         "ManifestGovernance",
+        "PluginReference",
         "ResourceAccessConfidence",
         "ResourceAccessMode",
         "ResourceBaselineEntry",
         "ResourceContractKind",
         "ResourceContractManifest",
         "ResourceEvidenceAccess",
+        "RuleOverride",
+        "RuleSeverity",
+        "RuleSeverityMap",
         "validateBaseline",
         "validateManifest",
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "ea81999511875c6081776e889bc3429e4032f0f927b824dd0d7f8537e7fc2485",
+      "publicSurfaceHash": "561655ae3a29f57fda5aad3a44633e4eda8088256f969ca4c5e4dabab7ce7e81",
       "dependencyEdges": [],
+      "artifactContracts": [],
+      "resourceAccesses": []
+    },
+    "plugin-api": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 23,
+      "publicSurfaceLines": 173,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/plugin-api/**"
+      ],
+      "publicEntryPath": "packages/plugin-api/src/index.ts",
+      "publicSymbolSet": [
+        "CELLFENCE_PLUGIN_API_VERSION",
+        "CellFenceAdapter",
+        "CellFenceAdapterContext",
+        "CellFenceAdapterHelpers",
+        "CellFenceCapability",
+        "CellFenceFileIndex",
+        "CellFenceFinding",
+        "CellFenceFindingSeverity",
+        "CellFenceImportReference",
+        "CellFencePlugin",
+        "CellFencePluginCapabilities",
+        "CellFenceReporter",
+        "CellFenceReporterContext",
+        "CellFenceRepositoryModel",
+        "CellFenceResourceAccess",
+        "CellFenceRule",
+        "CellFenceRuleContext",
+        "CellFenceRuleSeverity",
+        "CellFenceSuggestedResolution",
+        "defineAdapter",
+        "definePlugin",
+        "defineReporter",
+        "defineRule"
+      ],
+      "publicSurfaceHash": "e4373621f1d84ea947a0d5258b0c6d21d7926fe9d39898ef9bcea99d0becd234",
+      "dependencyEdges": [
+        "plugin-api->schema"
+      ],
       "artifactContracts": [],
       "resourceAccesses": []
     },
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 36,
-      "publicSurfaceLines": 3008,
-      "crossCellDependencies": 1,
+      "publicSurfaceLines": 3438,
+      "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/engine/**"
       ],
@@ -95,8 +141,9 @@
         "WaiverRequestOptions",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "70441a9f8e1de9d46890231fd4925d7ee56db6c724e4dd2f7ef43dd1a071285c",
+      "publicSurfaceHash": "5b3cc4893c9c80c9975c67f713408289b12415f56eacc957f81d9f7dc12f9630",
       "dependencyEdges": [
+        "engine->plugin-api",
         "engine->schema"
       ],
       "artifactContracts": [],

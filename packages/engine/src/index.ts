@@ -18,7 +18,18 @@ import {
   validateBaseline,
   validateManifest,
   validateResourceEvidence,
+  type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
+import type {
+  CellFenceAdapterHelpers,
+  CellFenceFinding,
+  CellFenceImportReference,
+  CellFencePlugin,
+  CellFenceRepositoryModel,
+  CellFenceResourceAccess,
+  CellFenceRuleContext,
+  CellFenceSuggestedResolution,
+} from "@cellfence/plugin-api";
 
 export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
@@ -47,6 +58,8 @@ export type RuleId =
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+  | "CELLFENCE_PLUGIN_INVALID"
+  | "CELLFENCE_REQUIRED_RULE_DISABLED"
   | "CELLFENCE_UNRESOLVED_IMPORT"
   | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
   | "CELLFENCE_WAIVER_INVALID"
@@ -56,29 +69,18 @@ export type RuleId =
 
 export type Severity = "error" | "warning";
 
-export type SuggestedResolution = {
-  kind: "change-code" | "change-manifest" | "update-baseline" | "ask-human";
-  title: string;
-  approvalRequired: boolean;
-  details?: Record<string, unknown>;
-};
+export type SuggestedResolution = CellFenceSuggestedResolution;
 
-export type Finding = {
-  ruleId: RuleId;
-  severity: Severity;
-  message: string;
-  filePath?: string;
-  cellId?: string;
-  producerCellId?: string;
-  details?: Record<string, unknown>;
-  suggestedResolutions?: SuggestedResolution[];
-};
+export type Finding = CellFenceFinding<RuleId | string>;
 
 export type CheckOptions = {
   rootDir?: string;
   manifestPath?: string;
   baselinePath?: string;
   evidencePaths?: string[];
+  plugins?: CellFencePlugin[];
+  ruleSeverities?: Record<string, ConfiguredRuleSeverity>;
+  changedFiles?: string[];
 };
 
 export type CheckResult = {
@@ -1630,6 +1632,290 @@ function mergeAccessesByCell(target: Map<string, ResourceAccessReference[]>, sou
   }
 }
 
+function allSourceFilesByCell(context: AnalysisContext): Record<string, readonly string[]> {
+  const byCell: Record<string, readonly string[]> = {};
+  for (const cell of context.manifest.cells) {
+    byCell[cell.id] = sourceFilesForCell(context.rootDir, cell).map((filePath) => repoPath(context.rootDir, filePath));
+  }
+  return byCell;
+}
+
+function repositoryFiles(context: AnalysisContext): readonly string[] {
+  return listFiles(context.rootDir).map((filePath) => repoPath(context.rootDir, filePath));
+}
+
+function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference): CellFenceResourceAccess {
+  return {
+    kind: access.kind,
+    access: access.access,
+    selector: access.selector,
+    filePath: access.filePath,
+    line: access.line,
+    source: access.source,
+    detectedBy: access.detectedBy,
+    confidence: access.confidence,
+    cellId,
+    unresolved: access.unresolved,
+    reason: access.reason,
+  };
+}
+
+function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessReference[]>): CellFenceResourceAccess[] {
+  const accesses: CellFenceResourceAccess[] = [];
+  for (const [cellId, cellAccesses] of accessesByCell.entries()) {
+    for (const access of cellAccesses) accesses.push(resourceAccessForPlugin(cellId, access));
+  }
+  return accesses.sort((left, right) =>
+    `${left.cellId}:${left.kind}:${left.access}:${left.selector}:${left.filePath}:${left.line}`
+      .localeCompare(`${right.cellId}:${right.kind}:${right.access}:${right.selector}:${right.filePath}:${right.line}`));
+}
+
+function createRepositoryModel(
+  context: AnalysisContext,
+  baseline: CellFenceBaseline | undefined,
+  observedImports: CellFenceImportReference[],
+  accessesByCell: Map<string, ResourceAccessReference[]>,
+  metrics: Record<string, CellBaselineRecord>,
+  changedFiles: string[] = [],
+): CellFenceRepositoryModel {
+  return {
+    rootDir: context.rootDir,
+    manifest: context.manifest,
+    baseline: baseline || null,
+    files: {
+      all: repositoryFiles(context),
+      governed: sourceFilesUnderGovernance(context.rootDir, context.manifest).map((filePath) => repoPath(context.rootDir, filePath)),
+      byCell: allSourceFilesByCell(context),
+    },
+    imports: observedImports,
+    resources: flattenResourceAccesses(accessesByCell),
+    metrics,
+    changedFiles: new Set(changedFiles.map(normalizePath)),
+  };
+}
+
+function qualifiedExpressionName(node: ts.Node | undefined): string | undefined {
+  if (!node) return undefined;
+  if (ts.isIdentifier(node)) return node.text;
+  if (ts.isPropertyAccessExpression(node)) {
+    const root = qualifiedExpressionName(node.expression);
+    return root ? `${root}.${node.name.text}` : node.name.text;
+  }
+  if (ts.isCallExpression(node)) return qualifiedExpressionName(node.expression);
+  return undefined;
+}
+
+function adapterHelpers(sourceFile: ts.SourceFile): CellFenceAdapterHelpers {
+  return {
+    getQualifiedCallName(node: ts.Node): string | undefined {
+      if (ts.isCallExpression(node)) return qualifiedExpressionName(node.expression);
+      return qualifiedExpressionName(node);
+    },
+    getStaticStringArgument(node: ts.CallExpression, index: number): string | undefined {
+      return literalText(node.arguments[index]);
+    },
+    lineOf(node: ts.Node): number {
+      return getLineNumber(sourceFile, node);
+    },
+  };
+}
+
+function pluginAccessToInternal(access: CellFenceResourceAccess): ResourceAccessReference {
+  return {
+    kind: access.kind,
+    access: access.access,
+    selector: access.selector,
+    filePath: normalizePath(access.filePath),
+    line: access.line,
+    source: access.source,
+    detectedBy: access.detectedBy,
+    confidence: access.confidence,
+    unresolved: access.unresolved,
+    reason: access.reason,
+  };
+}
+
+function validatePluginApiVersion(plugin: CellFencePlugin, findings: Finding[]): boolean {
+  if (plugin.apiVersion === 1) return true;
+  addFinding(findings, {
+    ruleId: "CELLFENCE_PLUGIN_INVALID",
+    severity: "error",
+    message: `plugin ${plugin.name || "(unnamed)"} requires unsupported CellFence plugin API version ${String(plugin.apiVersion)}`,
+    details: { plugin: plugin.name, apiVersion: plugin.apiVersion, supportedApiVersion: 1 },
+  });
+  return false;
+}
+
+function runPluginAdapters(
+  context: AnalysisContext,
+  plugins: CellFencePlugin[],
+  repository: CellFenceRepositoryModel,
+  findings: Finding[],
+): Map<string, ResourceAccessReference[]> {
+  const accessesByCell = new Map<string, ResourceAccessReference[]>();
+  for (const plugin of plugins) {
+    if (!validatePluginApiVersion(plugin, findings)) continue;
+    for (const adapter of plugin.adapters || []) {
+      for (const cell of context.manifest.cells) {
+        for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
+          const sourceText = fs.readFileSync(sourceFilePath, "utf8");
+          const sourceFile = ts.createSourceFile(sourceFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(sourceFilePath));
+          const relativeFilePath = repoPath(context.rootDir, sourceFilePath);
+          let accesses: CellFenceResourceAccess[];
+          try {
+            accesses = adapter.detect({
+              repository,
+              cell,
+              filePath: relativeFilePath,
+              sourceText,
+              sourceFile,
+              helpers: adapterHelpers(sourceFile),
+            });
+          } catch (error) {
+            addFinding(findings, {
+              ruleId: "CELLFENCE_PLUGIN_INVALID",
+              severity: "error",
+              cellId: cell.id,
+              filePath: relativeFilePath,
+              message: `plugin adapter ${plugin.name}/${adapter.name} failed: ${error instanceof Error ? error.message : String(error)}`,
+              details: { plugin: plugin.name, adapter: adapter.name },
+            });
+            continue;
+          }
+          for (const access of accesses) {
+            const cellId = access.cellId || cell.id;
+            if (!context.cellsById.has(cellId)) {
+              addFinding(findings, {
+                ruleId: "CELLFENCE_PLUGIN_INVALID",
+                severity: "error",
+                cellId: cell.id,
+                filePath: relativeFilePath,
+                message: `plugin adapter ${plugin.name}/${adapter.name} emitted access for unknown cell ${cellId}`,
+                details: { plugin: plugin.name, adapter: adapter.name, cellId },
+              });
+              continue;
+            }
+            addAccessToCell(accessesByCell, cellId, pluginAccessToInternal({
+              ...access,
+              filePath: access.filePath || relativeFilePath,
+              line: access.line || 1,
+              source: access.source || adapter.name,
+              detectedBy: access.detectedBy || adapter.name,
+            }));
+          }
+        }
+      }
+    }
+  }
+  return accessesByCell;
+}
+
+function validatePluginResourceAccesses(
+  context: AnalysisContext,
+  findings: Finding[],
+  warnings: Finding[],
+  baseline: CellFenceBaseline | undefined,
+  accessesByCell: Map<string, ResourceAccessReference[]>,
+): Map<string, ResourceAccessReference[]> {
+  const acceptedAccessesByCell = new Map<string, ResourceAccessReference[]>();
+  for (const [cellId, accesses] of accessesByCell.entries()) {
+    const cell = context.cellsById.get(cellId);
+    if (!cell) continue;
+    for (const access of accesses) {
+      if (access.unresolved) {
+        const severity: Severity = access.kind === "file" ? "warning" : "error";
+        addFinding(severity === "warning" ? warnings : findings, {
+          ruleId: "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+          severity,
+          cellId,
+          filePath: access.filePath,
+          message: `${cellId} has unresolved ${access.kind} resource access at line ${access.line}: ${access.reason || "resource access is not statically resolvable"}`,
+          details: {
+            kind: access.kind,
+            access: access.access,
+            selector: access.selector,
+            line: access.line,
+            source: access.source,
+            detectedBy: access.detectedBy,
+            confidence: access.confidence,
+            reason: access.reason,
+          },
+        });
+        continue;
+      }
+
+      addAccessToCell(acceptedAccessesByCell, cellId, access);
+      if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) continue;
+      addFinding(findings, {
+        ruleId: "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+        severity: "error",
+        cellId,
+        filePath: access.filePath,
+        message: `${cellId} ${resourceAccessVerb(access.access)} undeclared ${access.kind} resource ${access.selector}`,
+        details: {
+          kind: access.kind,
+          access: access.access,
+          selector: access.selector,
+          line: access.line,
+          source: access.source,
+          detectedBy: access.detectedBy,
+          confidence: access.confidence,
+        },
+        suggestedResolutions: [
+          codeResolution(`Remove or route this ${access.kind} access through an allowed owner`, {
+            kind: access.kind,
+            access: access.access,
+            selector: access.selector,
+          }),
+          manifestResolution(`Declare ${access.kind} ${access.access} access for ${access.selector}`, Boolean(cell.locked), {
+            cell: cell.id,
+            resourceContract: {
+              kind: access.kind,
+              access: [access.access],
+              selectors: [access.selector],
+            },
+          }),
+        ],
+      });
+    }
+  }
+  return acceptedAccessesByCell;
+}
+
+function runPluginRules(
+  context: AnalysisContext,
+  plugins: CellFencePlugin[],
+  repository: CellFenceRepositoryModel,
+  findings: Finding[],
+): void {
+  for (const plugin of plugins) {
+    if (!validatePluginApiVersion(plugin, findings)) continue;
+    for (const [ruleId, rule] of Object.entries(plugin.rules || {})) {
+      const emittedFindings: Finding[] = [];
+      const ruleContext: CellFenceRuleContext = {
+        repository,
+        cells: context.manifest.cells,
+        report(finding: CellFenceFinding): void {
+          emittedFindings.push({ ...finding, ruleId: finding.ruleId || ruleId });
+        },
+      };
+      try {
+        const returnedFindings = rule.run(ruleContext) || [];
+        for (const finding of returnedFindings) emittedFindings.push({ ...finding, ruleId: finding.ruleId || ruleId });
+      } catch (error) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_PLUGIN_INVALID",
+          severity: "error",
+          message: `plugin rule ${plugin.name}/${ruleId} failed: ${error instanceof Error ? error.message : String(error)}`,
+          details: { plugin: plugin.name, ruleId },
+        });
+        continue;
+      }
+      for (const finding of emittedFindings) addFinding(findings, finding);
+    }
+  }
+}
+
 function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
   const sourceText = fs.readFileSync(filePath, "utf8");
   if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
@@ -1924,13 +2210,31 @@ function extractPublicSymbols(filePath: string, visitedFiles = new Set<string>()
   return symbols;
 }
 
-function validateImports(context: AnalysisContext, findings: Finding[], warnings: Finding[]): Map<string, Set<string>> {
+function validateImports(
+  context: AnalysisContext,
+  findings: Finding[],
+  warnings: Finding[],
+  observedImports: CellFenceImportReference[] = [],
+): Map<string, Set<string>> {
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell)) {
       const references = extractImports(context.rootDir, sourceFilePath, warnings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
+        observedImports.push({
+          importerPath: reference.importerPath,
+          importerCellId: importerCell.id,
+          specifier: reference.specifier,
+          kind: reference.kind,
+          typeOnly: reference.typeOnly,
+          line: reference.line,
+          targetPath: resolvedImport.targetPath ? normalizePath(resolvedImport.targetPath) : undefined,
+          targetCellId: resolvedImport.targetCell?.id,
+          artifactLaneId: resolvedImport.artifactLaneId,
+          isExternal: resolvedImport.isExternal,
+          isPublicPackage: resolvedImport.isPublicPackage,
+        });
         if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
           addFinding(findings, {
             ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
@@ -2339,6 +2643,91 @@ function manifestInvalidResult(message: string): CheckResult {
   return { ok: false, exitCode: 2, findings: [finding], warnings: [], metrics: {} };
 }
 
+function configuredRuleSeverity(
+  context: AnalysisContext,
+  finding: Finding,
+  cliRuleSeverities: Record<string, ConfiguredRuleSeverity> | undefined,
+): ConfiguredRuleSeverity | undefined {
+  let severity = context.manifest.rules?.[finding.ruleId];
+  if (finding.cellId) {
+    const cellSeverity = context.cellsById.get(finding.cellId)?.rules?.[finding.ruleId];
+    if (cellSeverity) severity = cellSeverity;
+  }
+  if (finding.filePath) {
+    for (const override of context.manifest.overrides || []) {
+      if (override.files.some((pattern) => matchesPattern(finding.filePath || "", pattern))) {
+        const overrideSeverity = override.rules[finding.ruleId];
+        if (overrideSeverity) severity = overrideSeverity;
+      }
+    }
+  }
+  return cliRuleSeverities?.[finding.ruleId] || severity;
+}
+
+function ruleIsRequired(context: AnalysisContext, ruleId: string): boolean {
+  return new Set(context.manifest.governance?.requiredRules || []).has(ruleId);
+}
+
+function validateRequiredRuleConfiguration(
+  context: AnalysisContext,
+  cliRuleSeverities: Record<string, ConfiguredRuleSeverity> | undefined,
+  findings: Finding[],
+): void {
+  const requiredRules = new Set(context.manifest.governance?.requiredRules || []);
+  if (requiredRules.size === 0) return;
+  const checkMap = (source: string, rules: Record<string, ConfiguredRuleSeverity> | undefined, filePath?: string, cellId?: string): void => {
+    for (const [ruleId, severity] of Object.entries(rules || {})) {
+      if (!requiredRules.has(ruleId) || severity === "error") continue;
+      addFinding(findings, {
+        ruleId: "CELLFENCE_REQUIRED_RULE_DISABLED",
+        severity: "error",
+        cellId,
+        filePath,
+        message: `${source} weakens required rule ${ruleId} to ${severity}`,
+        details: { source, ruleId, severity },
+      });
+    }
+  };
+  checkMap("repository rules", context.manifest.rules);
+  for (const cell of context.manifest.cells) checkMap(`cell ${cell.id} rules`, cell.rules, cell.publicEntry, cell.id);
+  for (const [overrideIndex, override] of (context.manifest.overrides || []).entries()) {
+    checkMap(`override ${overrideIndex}`, override.rules, override.files.join(","));
+  }
+  checkMap("CLI ruleSeverities", cliRuleSeverities);
+}
+
+function applyRuleSeverityPolicy(
+  context: AnalysisContext,
+  findings: Finding[],
+  warnings: Finding[],
+  cliRuleSeverities: Record<string, ConfiguredRuleSeverity> | undefined,
+): { findings: Finding[]; warnings: Finding[] } {
+  const nextFindings: Finding[] = [];
+  const nextWarnings: Finding[] = [];
+  for (const finding of [...findings, ...warnings]) {
+    const configuredSeverity = configuredRuleSeverity(context, finding, cliRuleSeverities);
+    if (configuredSeverity === "off") {
+      if (ruleIsRequired(context, finding.ruleId)) {
+        nextFindings.push({
+          ruleId: "CELLFENCE_REQUIRED_RULE_DISABLED",
+          severity: "error",
+          cellId: finding.cellId,
+          filePath: finding.filePath,
+          message: `required rule ${finding.ruleId} cannot be disabled`,
+          details: { ruleId: finding.ruleId },
+        });
+        nextFindings.push(finding);
+      }
+      continue;
+    }
+    const severity = configuredSeverity || finding.severity;
+    const normalizedFinding: Finding = { ...finding, severity };
+    if (severity === "warning") nextWarnings.push(normalizedFinding);
+    else nextFindings.push(normalizedFinding);
+  }
+  return { findings: nextFindings, warnings: nextWarnings };
+}
+
 export function loadManifestFromFile(manifestPath: string): CellFenceManifest {
   const validation = validateManifest(readJsonFile(manifestPath));
   if (!validation.ok || !validation.value) {
@@ -2368,6 +2757,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   const warnings: Finding[] = [];
   const manifest = manifestValidation.value;
   const context = createContext(rootDir, manifest);
+  const plugins = options.plugins || [];
   let baseline: CellFenceBaseline | undefined;
 
   if (baselinePath) {
@@ -2395,19 +2785,44 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipOverlap(manifest, findings);
   validateOwnershipCoverage(context, findings);
   validatePublicEntries(context, findings);
-  const crossCellDependencies = validateImports(context, findings, warnings);
+  validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
+  const observedImports: CellFenceImportReference[] = [];
+  const crossCellDependencies = validateImports(context, findings, warnings, observedImports);
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(
     accessesByCell,
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
   );
+  const prePluginMetrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const pluginRepositoryModel = createRepositoryModel(
+    context,
+    baseline,
+    observedImports,
+    accessesByCell,
+    prePluginMetrics,
+    options.changedFiles,
+  );
+  mergeAccessesByCell(
+    accessesByCell,
+    validatePluginResourceAccesses(
+      context,
+      findings,
+      warnings,
+      baseline,
+      runPluginAdapters(context, plugins, pluginRepositoryModel, findings),
+    ),
+  );
   const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const repositoryModel = createRepositoryModel(context, baseline, observedImports, accessesByCell, metrics, options.changedFiles);
 
   if (baseline) {
     compareBaseline(context, metrics, baseline, findings);
   }
 
-  const active = applyWaiversToFindings(context, findings, warnings);
+  runPluginRules(context, plugins, repositoryModel, findings);
+
+  const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
+  const active = applyWaiversToFindings(context, severityAdjusted.findings, severityAdjusted.warnings);
   const hasErrors = active.findings.some((finding) => finding.severity === "error");
   return {
     ok: !hasErrors,
@@ -2520,7 +2935,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
     const baseCommit = assertGitCommit(rootDir, baseRef);
     if (options.headRef) assertGitCommit(rootDir, options.headRef);
     const changedFiles = changedFilesForRefs(rootDir, baseRef, options.headRef);
-    const currentResult = checkRepository(options);
+    const currentResult = checkRepository({ ...options, changedFiles });
     if (currentResult.exitCode === 2 || currentResult.exitCode === 3) {
       return { ...currentResult, changedFiles };
     }
