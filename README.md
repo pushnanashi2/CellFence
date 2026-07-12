@@ -178,12 +178,16 @@ Install the CLI in the repository you want to check:
 ```bash
 npm install --save-dev cellfence
 npx cellfence check
+npx cellfence check --changed --base origin/main
 npx cellfence context --cell example --json
 npx cellfence baseline create
 npx cellfence baseline check
+npx cellfence waivers list
 ```
 
 `check` validates the manifest contract only. It is useful before a baseline exists. Once a repository adopts ratchets, use `baseline check` in CI so public surface, ownership, dependency, and resource inventory growth is rejected.
+
+`check --changed` compares findings against a base Git commit or branch and reports only newly introduced findings. It requires Git metadata and a valid base ref; if Git is unavailable, it fails instead of returning a false green result.
 
 `context` projects a single cell's fence before editing: owned paths, allowed public imports, declared or grandfathered resources, current budgets, and short agent guidance. Use `--json` for tools or `--format agents-md` for an AGENTS.md/CLAUDE.md fragment.
 
@@ -210,10 +214,12 @@ npx cellfence init
 ```text
 cellfence init
 cellfence check [--manifest <path>] [--root <path>] [--json]
+cellfence check --changed [--base <ref>] [--head <ref>] [--manifest <path>] [--root <path>] [--json]
 cellfence context --cell <id> [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence baseline create [--manifest <path>] [--baseline <path>] [--root <path>]
 cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence baseline update [--manifest <path>] [--baseline <path>] [--root <path>]
+cellfence waivers list [--manifest <path>] [--root <path>] [--json]
 ```
 
 Exit codes are documented automation contracts for the current v0.x implementation:
@@ -226,6 +232,14 @@ Exit codes are documented automation contracts for the current v0.x implementati
 | `3` | Internal tool error |
 
 Use `--json` when another tool or coding agent needs structured output. JSON findings include `suggestedResolutions` when CellFence can identify safe next moves, distinguishing code changes from manifest changes, baseline updates, and human approval paths.
+
+Temporary suppressions must be explicit and expiring:
+
+```ts
+// cellfence-ignore CELLFENCE_UNDECLARED_RESOURCE_ACCESS expires:2026-10-01 approved-by:owner reason:documented false positive while adapter support lands
+```
+
+Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLFENCE_WAIVER_INVALID`.
 
 ## Manifest reference
 

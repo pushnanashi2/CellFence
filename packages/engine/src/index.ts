@@ -1,5 +1,7 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 import {
@@ -35,6 +37,8 @@ export type RuleId =
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
   | "CELLFENCE_UNRESOLVED_IMPORT"
   | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
+  | "CELLFENCE_WAIVER_INVALID"
+  | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
@@ -70,6 +74,13 @@ export type CheckResult = {
   findings: Finding[];
   warnings: Finding[];
   metrics: Record<string, CellBaselineRecord>;
+  changedFiles?: string[];
+  baseFindingCount?: number;
+};
+
+export type ChangedCheckOptions = CheckOptions & {
+  baseRef?: string;
+  headRef?: string;
 };
 
 export type ContextBudgetEntry = {
@@ -118,6 +129,18 @@ export type BaselineUpdateGuardResult = {
 
 export type BaselineUpdateGuardOptions = CheckOptions & {
   nextBaseline: CellFenceBaseline;
+};
+
+export type CellFenceWaiver = {
+  ruleId: string;
+  filePath: string;
+  line: number;
+  expires: string;
+  approvedBy: string;
+  reason: string;
+  expired: boolean;
+  valid: boolean;
+  errors: string[];
 };
 
 type ImportKind = "import" | "export-from" | "require" | "dynamic-import";
@@ -219,6 +242,118 @@ function literalPrefix(pattern: string): string {
 
 function addFinding(findings: Finding[], finding: Finding): void {
   findings.push(finding);
+}
+
+const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
+
+function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isIsoDate(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
+}
+
+function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string): CellFenceWaiver | undefined {
+  const match = WAIVER_PATTERN.exec(text);
+  if (!match) return undefined;
+  const [, ruleId, suffix] = match;
+  const expiresMatch = /\bexpires:(\d{4}-\d{2}-\d{2})\b/.exec(suffix);
+  const approvedByMatch = /\bapproved-by:([^\s]+)/.exec(suffix);
+  const reasonMatch = /\breason:(.+)$/.exec(suffix);
+  const expires = expiresMatch?.[1] || "";
+  const approvedBy = approvedByMatch?.[1] || "";
+  const reason = reasonMatch?.[1]?.trim() || "";
+  const errors: string[] = [];
+  if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
+  if (!expires || !isIsoDate(expires)) errors.push("expires must be YYYY-MM-DD");
+  if (!approvedBy) errors.push("approved-by is required");
+  if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
+  const expired = Boolean(expires) && expires < todayIsoDate();
+  if (expired) errors.push("waiver is expired");
+  return {
+    ruleId,
+    filePath: repoPath(rootDir, filePath),
+    line,
+    expires,
+    approvedBy,
+    reason,
+    expired,
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): string[] {
+  const files = new Set<string>();
+  for (const cell of manifest.cells) {
+    for (const sourceFile of sourceFilesForCell(rootDir, cell)) {
+      files.add(sourceFile);
+    }
+  }
+  return [...files].sort((left, right) => left.localeCompare(right));
+}
+
+function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest): CellFenceWaiver[] {
+  const waivers: CellFenceWaiver[] = [];
+  for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
+    const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
+    for (const [index, line] of lines.entries()) {
+      const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line);
+      if (waiver) waivers.push(waiver);
+    }
+  }
+  return waivers;
+}
+
+export function listWaivers(options: CheckOptions = {}): CellFenceWaiver[] {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const manifest = loadManifestFromFile(manifestPath);
+  return collectWaiversForManifest(rootDir, manifest);
+}
+
+function lineForFinding(finding: Finding): number | undefined {
+  const line = finding.details?.line;
+  return Number.isInteger(line) ? Number(line) : undefined;
+}
+
+function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
+  if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
+  if (waiver.ruleId !== finding.ruleId) return false;
+  const findingLine = lineForFinding(finding);
+  if (!findingLine) return true;
+  return waiver.line === findingLine || waiver.line === findingLine - 1;
+}
+
+function applyWaiversToFindings(
+  context: AnalysisContext,
+  findings: Finding[],
+  warnings: Finding[],
+): { findings: Finding[]; warnings: Finding[] } {
+  const waivers = collectWaiversForManifest(context.rootDir, context.manifest);
+  const validWaivers = waivers.filter((waiver) => waiver.valid);
+  const waiverFindings = waivers
+    .filter((waiver) => !waiver.valid)
+    .map((waiver): Finding => ({
+      ruleId: "CELLFENCE_WAIVER_INVALID",
+      severity: "error",
+      filePath: waiver.filePath,
+      message: `invalid CellFence waiver at line ${waiver.line}: ${waiver.errors.join("; ")}`,
+      details: {
+        line: waiver.line,
+        ruleId: waiver.ruleId,
+        expires: waiver.expires,
+        approvedBy: waiver.approvedBy,
+        reason: waiver.reason,
+      },
+    }));
+
+  const isWaived = (finding: Finding) => validWaivers.some((waiver) => waiverMatchesFinding(waiver, finding));
+  return {
+    findings: [...findings.filter((finding) => !isWaived(finding)), ...waiverFindings],
+    warnings: warnings.filter((warning) => !isWaived(warning)),
+  };
 }
 
 function codeResolution(title: string, details?: Record<string, unknown>): SuggestedResolution {
@@ -1506,14 +1641,151 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     compareBaseline(context, metrics, baseline, findings);
   }
 
-  const hasErrors = findings.some((finding) => finding.severity === "error");
+  const active = applyWaiversToFindings(context, findings, warnings);
+  const hasErrors = active.findings.some((finding) => finding.severity === "error");
   return {
     ok: !hasErrors,
     exitCode: hasErrors ? 1 : 0,
-    findings,
-    warnings,
+    findings: active.findings,
+    warnings: active.warnings,
     metrics,
   };
+}
+
+function gitCommand(rootDir: string, args: string[]): string {
+  try {
+    return execFileSync("git", args, {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  } catch (error) {
+    const failure = error as { stderr?: unknown; message?: unknown };
+    const stderr = typeof failure.stderr === "string" ? failure.stderr.trim() : "";
+    const message = stderr || (typeof failure.message === "string" ? failure.message : "git command failed");
+    throw new Error(message);
+  }
+}
+
+function gitMetadataFailure(message: string): CheckResult {
+  return {
+    ok: false,
+    exitCode: 2,
+    findings: [
+      {
+        ruleId: "CELLFENCE_GIT_METADATA_UNAVAILABLE",
+        severity: "error",
+        message,
+      },
+    ],
+    warnings: [],
+    metrics: {},
+  };
+}
+
+function assertGitCommit(rootDir: string, ref: string): string {
+  return gitCommand(rootDir, ["rev-parse", "--verify", `${ref}^{commit}`]);
+}
+
+function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
+  const files = new Set<string>();
+  const addDiff = (args: string[]): void => {
+    const output = gitCommand(rootDir, args);
+    for (const entry of output.split(/\r?\n/)) {
+      const normalized = normalizePath(entry.trim());
+      if (normalized) files.add(normalized);
+    }
+  };
+  if (headRef) {
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...${headRef}`]);
+  } else {
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", "--cached"]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR"]);
+  }
+  return [...files].sort((left, right) => left.localeCompare(right));
+}
+
+function withBaseWorktree<T>(rootDir: string, baseCommit: string, callback: (baseRootDir: string) => T): T {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-base-"));
+  const baseRootDir = path.join(tempRoot, "repo");
+  try {
+    gitCommand(rootDir, ["worktree", "add", "--detach", "--quiet", baseRootDir, baseCommit]);
+    return callback(baseRootDir);
+  } finally {
+    try {
+      if (fs.existsSync(baseRootDir)) gitCommand(rootDir, ["worktree", "remove", "--force", baseRootDir]);
+    } catch {
+      // Best-effort cleanup. The main check result should not be hidden by worktree removal noise.
+    }
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function checkOptionsForBase(baseRootDir: string, options: ChangedCheckOptions): CheckOptions {
+  const baseOptions: CheckOptions = {
+    rootDir: baseRootDir,
+    manifestPath: options.manifestPath,
+  };
+  if (options.baselinePath && fs.existsSync(path.resolve(baseRootDir, options.baselinePath))) {
+    baseOptions.baselinePath = options.baselinePath;
+  }
+  const evidencePaths = (options.evidencePaths || []).filter((evidencePath) => fs.existsSync(path.resolve(baseRootDir, evidencePath)));
+  if (evidencePaths.length > 0) baseOptions.evidencePaths = evidencePaths;
+  return baseOptions;
+}
+
+function findingKey(finding: Finding): string {
+  return JSON.stringify({
+    ruleId: finding.ruleId,
+    severity: finding.severity,
+    filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
+    cellId: finding.cellId,
+    producerCellId: finding.producerCellId,
+    message: finding.message,
+  });
+}
+
+export function checkChangedRepository(options: ChangedCheckOptions = {}): CheckResult {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const baseRef = options.baseRef || "origin/main";
+  try {
+    gitCommand(rootDir, ["rev-parse", "--is-inside-work-tree"]);
+    const baseCommit = assertGitCommit(rootDir, baseRef);
+    if (options.headRef) assertGitCommit(rootDir, options.headRef);
+    const changedFiles = changedFilesForRefs(rootDir, baseRef, options.headRef);
+    const currentResult = checkRepository(options);
+    if (currentResult.exitCode === 2 || currentResult.exitCode === 3) {
+      return { ...currentResult, changedFiles };
+    }
+    const baseResult = withBaseWorktree(rootDir, baseCommit, (baseRootDir) => checkRepository(checkOptionsForBase(baseRootDir, options)));
+    if (baseResult.exitCode === 2 || baseResult.exitCode === 3) {
+      return {
+        ...baseResult,
+        findings: baseResult.findings.map((finding) => ({
+          ...finding,
+          message: `base check failed before changed-finding diff could be computed: ${finding.message}`,
+        })),
+        changedFiles,
+      };
+    }
+    const baseFindingKeys = new Set(baseResult.findings.map(findingKey));
+    const baseWarningKeys = new Set(baseResult.warnings.map(findingKey));
+    const findings = currentResult.findings.filter((finding) => !baseFindingKeys.has(findingKey(finding)));
+    const warnings = currentResult.warnings.filter((warning) => !baseWarningKeys.has(findingKey(warning)));
+    const hasErrors = findings.some((finding) => finding.severity === "error");
+    return {
+      ...currentResult,
+      ok: !hasErrors,
+      exitCode: hasErrors ? 1 : 0,
+      findings,
+      warnings,
+      changedFiles,
+      baseFindingCount: baseResult.findings.length,
+    };
+  } catch (error) {
+    return gitMetadataFailure(`changed check requires git metadata and a valid base ref: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {

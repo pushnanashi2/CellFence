@@ -20,6 +20,8 @@
 | Locked baseline update protection | enforced | `@cellfence/engine` and `cellfence baseline update` | Enforces locked cells; locked resource contracts are context and resolution metadata in v0.x | CLI tests |
 | Agent context projection | enforced | `@cellfence/engine` and `cellfence context` | Projects manifest and baseline state; it does not grant permissions or approve contract expansion | CLI tests |
 | Suggested resolutions | enforced | `@cellfence/engine` JSON findings | Nonbinding; callers choose whether to apply code, manifest, baseline, or human-review paths | CLI tests |
+| Changed findings diff | enforced | `@cellfence/engine` and `cellfence check --changed` | Uses a temporary Git worktree and compares finding identities; it still performs full repository analysis in v0.x | CLI tests |
+| Expiring waivers | enforced | `@cellfence/engine` and `cellfence waivers list` | Line-local source comments only; missing expiry, approver, concrete rule, or reason fails the check | CLI tests |
 | TypeScript compiler API source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
 | Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |

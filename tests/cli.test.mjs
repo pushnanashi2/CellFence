@@ -23,6 +23,51 @@ function runExecutable(command, args, cwd = root) {
   });
 }
 
+function runGit(args, cwd) {
+  const result = spawnSync("git", args, {
+    cwd,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  return result;
+}
+
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function writePrivateImportProject(tempDir, { withWaiver = false, waiverExpires = "2099-01-01" } = {}) {
+  fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const exposed = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/producer/internal.ts"), "export const hidden = true;\n");
+  const waiverLine = withWaiver
+    ? `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${waiverExpires} approved-by:test-owner reason:temporary test fixture waiver\n`
+    : "";
+  fs.writeFileSync(path.join(tempDir, "src/consumer/public.ts"), `${waiverLine}import { hidden } from "../producer/internal";\nexport const used = hidden;\n`);
+  writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      {
+        id: "producer",
+        ownedPaths: ["src/producer/**"],
+        publicEntry: "src/producer/public.ts",
+        publicSymbols: ["exposed"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "consumer",
+        ownedPaths: ["src/consumer/**"],
+        publicEntry: "src/consumer/public.ts",
+        publicSymbols: ["used"],
+        consumes: [{ cell: "producer" }],
+        producesArtifacts: [],
+      },
+    ],
+  });
+}
+
 test("CLI check returns zero for a valid fixture", () => {
   const fixturePath = path.join(root, "fixtures/valid/single-cell");
   const result = runCli(["check", "--json"], fixturePath);
@@ -148,6 +193,104 @@ test("CLI baseline update refuses to expand locked cell baselines", () => {
   assert.match(result.stdout, /CELLFENCE_LOCKED_BASELINE_EXPANSION/);
   const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
   assert.equal(baseline.cells.core.publicSymbols, 1);
+});
+
+test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-valid-"));
+  writePrivateImportProject(tempDir, { withWaiver: true });
+
+  const checkResult = runCli(["check", "--json"], tempDir);
+  assert.equal(checkResult.status, 0);
+  assert.match(checkResult.stdout, /"ok": true/);
+
+  const listResult = runCli(["waivers", "list", "--json"], tempDir);
+  assert.equal(listResult.status, 0);
+  const parsed = JSON.parse(listResult.stdout);
+  assert.equal(parsed.schemaVersion, "cellfence.waivers.v1");
+  assert.equal(parsed.waivers.length, 1);
+  assert.equal(parsed.waivers[0].ruleId, "CELLFENCE_PRIVATE_IMPORT");
+  assert.equal(parsed.waivers[0].valid, true);
+});
+
+test("CLI rejects expired CellFence waivers instead of silently suppressing findings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-expired-"));
+  writePrivateImportProject(tempDir, { withWaiver: true, waiverExpires: "2020-01-01" });
+
+  const result = runCli(["check", "--json"], tempDir);
+  assert.equal(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_WAIVER_INVALID"));
+  assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+});
+
+test("CLI changed check ignores violations already present at the base commit", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-changed-existing-"));
+  writePrivateImportProject(tempDir);
+  runGit(["init"], tempDir);
+  runGit(["config", "user.email", "cellfence@example.invalid"], tempDir);
+  runGit(["config", "user.name", "CellFence Test"], tempDir);
+  runGit(["add", "."], tempDir);
+  runGit(["commit", "-m", "base"], tempDir);
+
+  const result = runCli(["check", "--changed", "--base", "HEAD", "--json"], tempDir);
+  assert.equal(result.status, 0);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.findings, []);
+  assert.equal(parsed.baseFindingCount, 1);
+});
+
+test("CLI changed check fails on new findings introduced after the base commit", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-changed-new-"));
+  fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const exposed = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/producer/internal.ts"), "export const hidden = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/consumer/public.ts"), "import { exposed } from \"../producer/public\";\nexport const used = exposed;\n");
+  writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      {
+        id: "producer",
+        ownedPaths: ["src/producer/**"],
+        publicEntry: "src/producer/public.ts",
+        publicSymbols: ["exposed"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "consumer",
+        ownedPaths: ["src/consumer/**"],
+        publicEntry: "src/consumer/public.ts",
+        publicSymbols: ["used"],
+        consumes: [{ cell: "producer" }],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  runGit(["init"], tempDir);
+  runGit(["config", "user.email", "cellfence@example.invalid"], tempDir);
+  runGit(["config", "user.name", "CellFence Test"], tempDir);
+  runGit(["add", "."], tempDir);
+  runGit(["commit", "-m", "base"], tempDir);
+
+  fs.writeFileSync(path.join(tempDir, "src/consumer/public.ts"), "import { hidden } from \"../producer/internal\";\nexport const used = hidden;\n");
+
+  const result = runCli(["check", "--changed", "--base", "HEAD", "--json"], tempDir);
+  assert.equal(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert.deepEqual(parsed.findings.map((finding) => finding.ruleId), ["CELLFENCE_PRIVATE_IMPORT"]);
+  assert.deepEqual(parsed.changedFiles, ["src/consumer/public.ts"]);
+});
+
+test("CLI changed check fails closed without git metadata", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-changed-nogit-"));
+  writePrivateImportProject(tempDir);
+
+  const result = runCli(["check", "--changed", "--base", "HEAD", "--json"], tempDir);
+  assert.equal(result.status, 2);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.findings[0].ruleId, "CELLFENCE_GIT_METADATA_UNAVAILABLE");
 });
 
 test("CLI baseline create stores runtime evidence inventory", () => {

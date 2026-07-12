@@ -5,12 +5,14 @@ import { fileURLToPath } from "node:url";
 
 import {
   type CellFenceContext,
+  checkChangedRepository,
   checkRepository,
   createCellContext,
   createBaseline,
   defaultBaselinePath,
   formatHumanResult,
   guardBaselineUpdate,
+  listWaivers,
   writeBaselineFile,
 } from "@cellfence/engine";
 
@@ -23,6 +25,9 @@ type ParsedArgs = {
   format?: string;
   json: boolean;
   rootDir: string;
+  changed: boolean;
+  baseRef?: string;
+  headRef?: string;
 };
 
 const INIT_MANIFEST = {
@@ -45,11 +50,13 @@ function printUsage(): void {
 Usage:
   cellfence init
   cellfence check [--manifest cellfence.manifest.json] [--json]
+  cellfence check --changed [--base origin/main] [--head HEAD] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence waivers list [--manifest cellfence.manifest.json] [--json]
 
 Exit codes:
   0  no violations
@@ -59,11 +66,23 @@ Exit codes:
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
-  const parsed: ParsedArgs = { command: [], evidencePaths: [], json: false, rootDir: process.cwd() };
+  const parsed: ParsedArgs = { command: [], evidencePaths: [], json: false, rootDir: process.cwd(), changed: false };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--json") {
       parsed.json = true;
+    } else if (argument === "--changed") {
+      parsed.changed = true;
+    } else if (argument === "--base") {
+      parsed.baseRef = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--base=")) {
+      parsed.baseRef = argument.slice("--base=".length);
+    } else if (argument === "--head") {
+      parsed.headRef = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--head=")) {
+      parsed.headRef = argument.slice("--head=".length);
     } else if (argument === "--manifest") {
       parsed.manifestPath = argv[index + 1];
       index += 1;
@@ -119,10 +138,19 @@ function commandInit(rootDir: string): number {
 }
 
 function commandCheck(parsed: ParsedArgs): number {
-  const result = checkRepository({
+  const options = {
     rootDir: parsed.rootDir,
     manifestPath: parsed.manifestPath,
-  });
+  };
+  const result = parsed.changed
+    ? checkChangedRepository({
+      ...options,
+      baselinePath: parsed.baselinePath,
+      evidencePaths: parsed.evidencePaths,
+      baseRef: parsed.baseRef,
+      headRef: parsed.headRef,
+    })
+    : checkRepository(options);
   if (parsed.json) writeJson(result);
   else console.log(formatHumanResult(result));
   return result.exitCode;
@@ -265,6 +293,24 @@ function commandEvidenceCheck(parsed: ParsedArgs): number {
   return commandBaselineCheck(parsed);
 }
 
+function commandWaiversList(parsed: ParsedArgs): number {
+  const waivers = listWaivers({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+  });
+  if (parsed.json) {
+    writeJson({ schemaVersion: "cellfence.waivers.v1", waivers });
+  } else if (waivers.length === 0) {
+    console.log("No CellFence waivers found.");
+  } else {
+    for (const waiver of waivers) {
+      const status = waiver.valid ? "valid" : "invalid";
+      console.log(`${status} ${waiver.ruleId} ${waiver.filePath}:${waiver.line} expires:${waiver.expires} approved-by:${waiver.approvedBy}`);
+    }
+  }
+  return waivers.some((waiver) => !waiver.valid) ? 1 : 0;
+}
+
 export function main(argv = process.argv.slice(2)): number {
   const parsed = parseArgs(argv);
   try {
@@ -280,6 +326,7 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
+    if (primaryCommand === "waivers" && secondaryCommand === "list") return commandWaiversList(parsed);
     printUsage();
     return 2;
   } catch (error) {
