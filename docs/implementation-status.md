@@ -5,7 +5,9 @@
 | Manifest shape validation | enforced | `@cellfence/schema` and `@cellfence/engine` | JSON schema is implemented by TypeScript validators, not a standalone schema file | fixture tests and `cellfence check` |
 | Duplicate cell ID detection | enforced | `@cellfence/engine` | Detects IDs inside one manifest file | invalid fixture |
 | Owned path overlap detection | partially_enforced | `@cellfence/engine` | Prefix overlap is detected; full glob intersection is conservative | invalid fixture |
-| Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports are warnings; NodeNext runtime `.js` specifiers and root tsconfig path aliases are resolved before boundary checks | invalid fixture |
+| Strict governed-source ownership | enforced | `@cellfence/engine` with `manifest.governance.requireOwnership` | Enforces that included source files are owned by a cell and imports cannot target governed unowned source; opt-in for compatibility | strict ownership fixtures |
+| Public entry and artifact ownership | enforced | `@cellfence/engine` | Public entries and produced artifact lanes must be covered by the declaring cell's `ownedPaths`; glob containment is conservative | ownership fixtures |
+| Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports and computed `require()` calls are warnings; NodeNext runtime `.js` specifiers and tsconfig path aliases, including `extends`, are resolved before boundary checks | invalid fixture |
 | Undeclared consumer rejection | enforced | `@cellfence/engine` | Applies to repository-local cells | invalid fixture |
 | Public entry existence | enforced | `@cellfence/engine` | One public entry per cell in v0.x | invalid fixture |
 | Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
@@ -16,8 +18,8 @@
 | Runtime resource evidence | enforced | `@cellfence/schema`, `@cellfence/engine`, and `cellfence evidence check` | Requires explicit evidence JSON; CellFence does not observe live infrastructure by itself | evidence fixtures and CLI tests |
 | Runtime trace hook | partially_enforced | `@cellfence/trace` | Node.js fs read/write and fetch tracing plus explicit database/HTTP/queue helper records in v0.x; source-code module loading is ignored | trace tests |
 | Resource access baseline inventory | enforced | `@cellfence/engine` baseline metrics | Captures selected static and supplied runtime evidence inventory; arbitrary ORM and broker coupling remain outside v0.x inference | baseline resource fixtures |
-| Baseline ratchets | enforced | `@cellfence/engine` | Counts are intentionally coarse in v0.x | baseline fixture tests |
-| Locked baseline update protection | enforced | `@cellfence/engine` and `cellfence baseline update` | Enforces locked cells; locked resource contracts are context and resolution metadata in v0.x | CLI tests |
+| Baseline ratchets | enforced | `@cellfence/engine` | New baselines store accepted cell IDs, ownership sets, public entry paths, public symbol sets, public signature hashes, dependency edges, artifact contracts, and resource inventory; legacy count fields remain for compatibility | baseline fixture tests |
+| Locked baseline update protection | enforced | `@cellfence/engine` and `cellfence baseline update` | Enforces locked cells across count metrics, semantic contract sets, public signature hash, and resource inventory; locked resource contracts are context and resolution metadata in v0.x | CLI tests |
 | Agent context projection | enforced | `@cellfence/engine` and `cellfence context` | Projects manifest and baseline state; it does not grant permissions or approve contract expansion | CLI tests |
 | Agent auto-allocation projection | enforced | `@cellfence/engine` and `cellfence context --auto-allocate` | Heuristic task-to-cell matching from manifest text; empty selections require a human-selected cell or clearer task | CLI tests |
 | Coupling graph output | enforced | `@cellfence/engine` and `cellfence graph` | Emits observed and declared coupling as JSON or Mermaid; visualization is not an enforcement substitute | CLI tests |
@@ -37,3 +39,4 @@
 | Credential separation | documented | external repository and npm settings | Not enforceable by package code | root-of-trust document |
 | npm trusted publishing | planned | npm and GitHub OIDC settings | Publishing workflow is intentionally absent | release verification |
 | Provenance or forbidden-source scan | enforced | `scripts/forbidden-source-scan.mjs` | Term list is conservative and project-owned | lint and CI |
+| Scale benchmark | enforced | `scripts/scale-benchmark.mjs` and CI `scale-benchmark` job | Synthetic hardlinked-file benchmark for 10k/20, 50k/100, and 100k/300 scenarios; not a substitute for consumer-repo profiling | CI benchmark |

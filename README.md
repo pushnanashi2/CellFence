@@ -95,7 +95,9 @@ CellFence currently enforces these invariants:
 4. An imported artifact lane must be declared by both producer and consumer.
 5. The symbols in a cell manifest must match the exports in its public entry.
 6. Static file, database, queue, and HTTP resource access must be declared.
-7. Selected architecture metrics may decrease, but growth fails against the accepted baseline.
+7. When strict ownership is enabled, governed source must be owned by exactly one cell.
+8. Public entries and produced artifact lanes must live inside the declaring cell's ownership scope.
+9. Selected architecture contracts may shrink, but new cells, broader ownership, new public symbols, new dependency edges, public entry changes, artifact contract changes, and public signature changes fail against the accepted baseline.
 
 ## Thirty-second example
 
@@ -116,6 +118,11 @@ Manifest:
 ```json
 {
   "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": ["src/**", "packages/**", "apps/**"],
+    "exclude": ["**/*.test.ts", "generated/**"]
+  },
   "cells": [
     {
       "id": "parser",
@@ -301,19 +308,28 @@ Expired, incomplete, wildcard, or reason-free waivers fail the check with `CELLF
 
 `packageName` is optional. When present, importing the exact package name is treated as importing the declared public entry. Package subpath imports into private implementation remain violations.
 
+`governance.requireOwnership` is optional. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`.
+
 `locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
 
 See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
 
 ## Architectural ratchets
 
-A baseline captures four metrics per cell:
+A baseline captures both compatibility metrics and normalized architectural contract sets per cell:
 
 - owned path pattern count;
 - public symbol count;
 - public entry line count;
 - cross-cell dependency count.
-- static resource access inventory.
+- accepted cell IDs;
+- owned path set;
+- public entry path;
+- public symbol set;
+- exported public surface signature hash;
+- dependency edge set;
+- artifact contract set;
+- static and runtime resource access inventory.
 
 Create the accepted baseline:
 
@@ -327,10 +343,12 @@ Check a change against it:
 cellfence baseline check
 ```
 
-Reductions pass. Growth fails with a rule such as:
+Reductions pass. Silent expansion or identity changes fail with rules such as:
 
 ```text
-CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH
+CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE
+CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE
+CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE
 ```
 
 Update the baseline only when the architecture expansion is intentional and reviewed:
@@ -341,7 +359,7 @@ cellfence baseline update
 
 A baseline update is a governance change, not a routine way to silence a failing check. In a protected repository, review manifest and baseline changes separately from ordinary implementation changes.
 
-If a cell has `"locked": true`, `baseline update` fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase public symbols, public surface lines, cross-cell dependencies, owned path patterns, or grandfathered resource access for that cell. A human owner must either reduce the change or explicitly review the contract expansion.
+If a cell has `"locked": true`, `baseline update` fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access for that cell. A human owner must either reduce the change or explicitly review the contract expansion.
 
 For large repositories, prefer this baseline-first workflow over hand-writing every resource contract:
 
@@ -481,6 +499,10 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_MANIFEST_INVALID` | Invalid manifest or baseline configuration |
 | `CELLFENCE_DUPLICATE_CELL_ID` | Duplicate cell identifiers |
 | `CELLFENCE_OWNERSHIP_OVERLAP` | Overlapping declared ownership paths |
+| `CELLFENCE_UNOWNED_SOURCE` | Strict governance found source matched by `governance.include` that no cell owns |
+| `CELLFENCE_UNOWNED_IMPORT_TARGET` | A cell imports governed source that no cell owns |
+| `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry is outside the declaring cell's owned paths |
+| `CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP` | A produced artifact lane is outside the producer's owned paths |
 | `CELLFENCE_PRIVATE_IMPORT` | Cross-cell import of private implementation |
 | `CELLFENCE_UNDECLARED_CONSUMER` | Cross-cell dependency missing from the consumer manifest |
 | `CELLFENCE_PUBLIC_ENTRY_MISSING` | Declared public entry does not exist |
@@ -494,6 +516,14 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH` | Public entry line count increased |
 | `CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH` | Cross-cell dependency count increased |
+| `CELLFENCE_RATCHET_CELL_SET_GROWTH` | A cell was added outside the accepted baseline cell set |
+| `CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE` | An owned path shifted or broadened outside the accepted baseline scope |
+| `CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE` | A new public symbol appeared outside the accepted baseline set |
+| `CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE` | A new dependency edge appeared outside the accepted baseline set |
+| `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE` | A cell's public entry path changed |
+| `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE` | A new artifact producer/consumer contract appeared |
+| `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Exported public signatures changed beyond formatting/comment noise |
+| `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a warning |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a warning |
 
 ## Supported source analysis
@@ -506,7 +536,7 @@ CellFence v0.x analyzes:
 - type-only imports;
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
-- tsconfig `compilerOptions.paths` aliases that resolve to repository files;
+- tsconfig `compilerOptions.paths` aliases, including aliases inherited through `extends`, that resolve to repository files;
 - selected static string resource access for file, database, queue, and HTTP patterns;
 - Prisma model delegate calls when `schema.prisma` is present;
 - selected TypeORM entity, repository, and query builder calls;
@@ -519,9 +549,11 @@ CellFence v0.x analyzes:
 - runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
 - common TypeScript export declarations and named exports.
 
-Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
+Computed dynamic imports and computed CommonJS `require()` calls are reported as unsupported warnings rather than silently ignored.
 
 NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
+
+The repository CI includes a synthetic scale benchmark for 10,000 files / 20 cells, 50,000 files / 100 cells, and 100,000 files / 300 cells. It is a regression tripwire for file discovery, ownership indexing, and low-signal source scanning; it is not a universal performance guarantee for every monorepo shape.
 
 Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. It does not infer arbitrary ORM metadata, runtime broker topology, or values assembled through general dataflow.
 

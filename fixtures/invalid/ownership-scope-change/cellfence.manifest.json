@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "a",
+      "ownedPaths": [
+        "src/**"
+      ],
+      "publicEntry": "src/a/public.ts",
+      "publicSymbols": [
+        "a"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

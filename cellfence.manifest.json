@@ -21,6 +21,7 @@
         "CellFenceResourceEvidence",
         "CellManifest",
         "EnforcementStatus",
+        "ManifestGovernance",
         "ResourceAccessConfidence",
         "ResourceBaselineEntry",
         "ResourceAccessMode",

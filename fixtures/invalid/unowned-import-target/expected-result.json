@@ -1,0 +1,9 @@
+{
+  "mode": "check",
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_UNOWNED_IMPORT_TARGET",
+    "CELLFENCE_UNOWNED_SOURCE"
+  ],
+  "warningRuleIds": []
+}

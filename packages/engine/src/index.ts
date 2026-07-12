@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
@@ -23,6 +24,10 @@ export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
   | "CELLFENCE_DUPLICATE_CELL_ID"
   | "CELLFENCE_OWNERSHIP_OVERLAP"
+  | "CELLFENCE_UNOWNED_SOURCE"
+  | "CELLFENCE_UNOWNED_IMPORT_TARGET"
+  | "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP"
+  | "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
   | "CELLFENCE_PRIVATE_IMPORT"
   | "CELLFENCE_UNDECLARED_CONSUMER"
   | "CELLFENCE_PUBLIC_ENTRY_MISSING"
@@ -32,6 +37,13 @@ export type RuleId =
   | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH"
   | "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
   | "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH"
+  | "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+  | "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE"
+  | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE"
+  | "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE"
+  | "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE"
+  | "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE"
+  | "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
@@ -39,6 +51,7 @@ export type RuleId =
   | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
   | "CELLFENCE_WAIVER_INVALID"
   | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
+  | "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
@@ -251,6 +264,9 @@ const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
 const PRISMA_MODEL_SELECTOR_CACHE = new Map<string, Map<string, string>>();
+const LIST_FILES_CACHE = new Map<string, string[]>();
+const PATTERN_REGEXP_CACHE = new Map<string, RegExp>();
+const SOURCE_FILES_FOR_CELL_CACHE = new Map<string, string[]>();
 
 type PathAlias = {
   pattern: string;
@@ -278,6 +294,8 @@ function escapeRegExp(text: string): string {
 }
 
 function patternToRegExp(pattern: string): RegExp {
+  const cachedPattern = PATTERN_REGEXP_CACHE.get(pattern);
+  if (cachedPattern) return cachedPattern;
   const normalized = normalizePath(pattern);
   let expression = "";
   for (let index = 0; index < normalized.length; index += 1) {
@@ -292,7 +310,9 @@ function patternToRegExp(pattern: string): RegExp {
       expression += escapeRegExp(character);
     }
   }
-  return new RegExp(`^${expression}$`);
+  const regexp = new RegExp(`^${expression}$`);
+  PATTERN_REGEXP_CACHE.set(pattern, regexp);
+  return regexp;
 }
 
 function matchesPattern(relativePath: string, pattern: string): boolean {
@@ -439,6 +459,8 @@ function humanResolution(title: string, details?: Record<string, unknown>): Sugg
 }
 
 function listFiles(rootDir: string): string[] {
+  const cachedFiles = LIST_FILES_CACHE.get(rootDir);
+  if (cachedFiles) return cachedFiles;
   const files: string[] = [];
   function visit(directoryPath: string): void {
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
@@ -452,18 +474,60 @@ function listFiles(rootDir: string): string[] {
     }
   }
   visit(rootDir);
-  return files;
+  const sortedFiles = files.sort((left, right) => left.localeCompare(right));
+  LIST_FILES_CACHE.set(rootDir, sortedFiles);
+  return sortedFiles;
 }
 
 function sourceFilesForCell(rootDir: string, cell: CellManifest): string[] {
-  return listFiles(rootDir).filter((filePath) => {
+  const cacheKey = `${rootDir}:${cell.id}:${cell.ownedPaths.join("\0")}`;
+  const cachedFiles = SOURCE_FILES_FOR_CELL_CACHE.get(cacheKey);
+  if (cachedFiles) return cachedFiles;
+  const files = listFiles(rootDir).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
     return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
   });
+  SOURCE_FILES_FOR_CELL_CACHE.set(cacheKey, files);
+  return files;
 }
 
 function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
   return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
+}
+
+function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceManifest): string[] {
+  const governance = manifest.governance;
+  if (!governance?.requireOwnership) return [];
+  const include = governance.include || [];
+  const exclude = governance.exclude || [];
+  return listFiles(rootDir).filter((filePath) => {
+    const relativePath = repoPath(rootDir, filePath);
+    return SOURCE_EXTENSIONS.includes(path.extname(filePath))
+      && include.some((pattern) => matchesPattern(relativePath, pattern))
+      && !exclude.some((pattern) => matchesPattern(relativePath, pattern));
+  });
+}
+
+function pathIsGoverned(manifest: CellFenceManifest, relativePath: string): boolean {
+  const governance = manifest.governance;
+  if (!governance?.requireOwnership) return false;
+  const include = governance.include || [];
+  const exclude = governance.exclude || [];
+  return include.some((pattern) => matchesPattern(relativePath, pattern))
+    && !exclude.some((pattern) => matchesPattern(relativePath, pattern));
+}
+
+function pathOwnedByCell(cell: CellManifest, relativePath: string): boolean {
+  return cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+}
+
+function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {
+  const targetPrefix = literalPrefix(pattern) || normalizePath(pattern);
+  return ownedPaths.some((ownedPath) => {
+    if (matchesPattern(targetPrefix, ownedPath)) return true;
+    const ownedPrefix = literalPrefix(ownedPath);
+    return Boolean(ownedPrefix) && (targetPrefix === ownedPrefix || targetPrefix.startsWith(`${ownedPrefix}/`));
+  });
 }
 
 function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {
@@ -482,19 +546,17 @@ function findPackageRoot(rootDir: string, publicEntry: string): string | undefin
 function readPathAliases(rootDir: string): PathAlias[] {
   const tsconfigPath = path.join(rootDir, "tsconfig.json");
   if (!fs.existsSync(tsconfigPath)) return [];
-  const rawConfig = readJsonFile(tsconfigPath);
-  if (typeof rawConfig !== "object" || rawConfig === null || Array.isArray(rawConfig)) return [];
-  const compilerOptions = (rawConfig as { compilerOptions?: unknown }).compilerOptions;
-  if (typeof compilerOptions !== "object" || compilerOptions === null || Array.isArray(compilerOptions)) return [];
-  const options = compilerOptions as { baseUrl?: unknown; paths?: unknown };
-  if (typeof options.paths !== "object" || options.paths === null || Array.isArray(options.paths)) return [];
-  const baseUrl = typeof options.baseUrl === "string" ? options.baseUrl : ".";
+  const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+  if (configFile.error) return [];
+  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, rootDir);
+  const paths = parsedConfig.options.paths;
+  if (!paths) return [];
+  const baseUrl = parsedConfig.options.baseUrl || rootDir;
   const aliases: PathAlias[] = [];
-  for (const [pattern, targets] of Object.entries(options.paths)) {
-    if (!Array.isArray(targets)) continue;
+  for (const [pattern, targets] of Object.entries(paths)) {
     const normalizedTargets = targets
-      .filter((target): target is string => typeof target === "string" && target.trim().length > 0)
-      .map((target) => normalizePath(path.resolve(rootDir, baseUrl, target)));
+      .filter((target) => target.trim().length > 0)
+      .map((target) => normalizePath(path.resolve(baseUrl, target)));
     if (normalizedTargets.length > 0) aliases.push({ pattern, targets: normalizedTargets });
   }
   return aliases;
@@ -552,6 +614,64 @@ function validateOwnershipOverlap(manifest: CellFenceManifest, findings: Finding
         }
       }
     }
+  }
+}
+
+function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]): void {
+  for (const cell of context.manifest.cells) {
+    if (!pathOwnedByCell(cell, cell.publicEntry)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+        severity: "error",
+        cellId: cell.id,
+        filePath: cell.publicEntry,
+        message: `${cell.id} public entry is outside its ownedPaths: ${cell.publicEntry}`,
+        details: { publicEntry: cell.publicEntry, ownedPaths: cell.ownedPaths },
+        suggestedResolutions: [
+          manifestResolution("Move publicEntry under an owned path or narrow the manifest to the real owner", Boolean(cell.locked), {
+            cell: cell.id,
+            publicEntry: cell.publicEntry,
+          }),
+        ],
+      });
+    }
+
+    for (const artifactLane of cell.producesArtifacts || []) {
+      for (const artifactPath of artifactLane.paths) {
+        if (patternCoveredByOwnedPaths(artifactPath, cell.ownedPaths)) continue;
+        addFinding(findings, {
+          ruleId: "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+          severity: "error",
+          cellId: cell.id,
+          filePath: artifactPath,
+          message: `${cell.id} artifact lane ${artifactLane.id} is outside its ownedPaths: ${artifactPath}`,
+          details: { artifactLaneId: artifactLane.id, artifactPath, ownedPaths: cell.ownedPaths },
+          suggestedResolutions: [
+            manifestResolution("Move the artifact lane under the producer ownedPaths or assign the artifact to the owning cell", Boolean(cell.locked), {
+              cell: cell.id,
+              artifactLane: artifactLane.id,
+            }),
+          ],
+        });
+      }
+    }
+  }
+
+  for (const sourceFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest)) {
+    const relativePath = repoPath(context.rootDir, sourceFilePath);
+    if (findOwningCell(context.manifest, relativePath)) continue;
+    addFinding(findings, {
+      ruleId: "CELLFENCE_UNOWNED_SOURCE",
+      severity: "error",
+      filePath: relativePath,
+      message: `governed source file is not owned by any cell: ${relativePath}`,
+      details: { path: relativePath, governance: context.manifest.governance },
+      suggestedResolutions: [
+        manifestResolution("Assign this source path to exactly one cell or exclude it from governance", true, {
+          path: relativePath,
+        }),
+      ],
+    });
   }
 }
 
@@ -682,6 +802,8 @@ const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
 const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
+const IMPORT_SCAN_HINT = /\b(?:import|export|require)\b/;
+const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|Queue|Worker|fetch|request|query|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
 
 function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
   return { source, detectedBy, confidence };
@@ -933,6 +1055,7 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
 
 function collectResourceAccesses(rootDir: string, filePath: string): ResourceAccessReference[] {
   const sourceText = fs.readFileSync(filePath, "utf8");
+  if (!RESOURCE_SCAN_HINT.test(sourceText)) return [];
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const relativeFilePath = repoPath(rootDir, filePath);
   const accesses: ResourceAccessReference[] = [];
@@ -1509,6 +1632,7 @@ function mergeAccessesByCell(target: Map<string, ResourceAccessReference[]>, sou
 
 function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
   const sourceText = fs.readFileSync(filePath, "utf8");
+  if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const references: ImportReference[] = [];
   const importerPath = repoPath(rootDir, filePath);
@@ -1533,9 +1657,18 @@ function extractImports(rootDir: string, filePath: string, warnings: Finding[]):
       && ts.isIdentifier(node.expression)
       && node.expression.text === "require"
       && node.arguments.length === 1
-      && ts.isStringLiteral(node.arguments[0])
     ) {
-      addReference(node.arguments[0].text, "require", node, false);
+      if (ts.isStringLiteral(node.arguments[0])) {
+        addReference(node.arguments[0].text, "require", node, false);
+      } else {
+        addFinding(warnings, {
+          ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+          severity: "warning",
+          filePath: importerPath,
+          message: `computed require() cannot be resolved statically at line ${getLineNumber(sourceFile, node)}`,
+          details: { line: getLineNumber(sourceFile, node) },
+        });
+      }
     } else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
       const [specifierNode] = node.arguments;
       if (specifierNode && ts.isStringLiteral(specifierNode)) {
@@ -1815,6 +1948,30 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
             ],
           });
         }
+        if (
+          resolvedImport.targetPath
+          && !resolvedImport.targetCell
+          && pathIsGoverned(context.manifest, resolvedImport.targetPath)
+        ) {
+          addFinding(findings, {
+            ruleId: "CELLFENCE_UNOWNED_IMPORT_TARGET",
+            severity: "error",
+            cellId: importerCell.id,
+            filePath: reference.importerPath,
+            message: `${importerCell.id} imports governed but unowned source ${resolvedImport.targetPath}`,
+            details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+            suggestedResolutions: [
+              codeResolution("Move the helper into an owned cell and import through that cell's public entry", {
+                specifier: reference.specifier,
+                targetPath: resolvedImport.targetPath,
+              }),
+              manifestResolution("Assign the target path to exactly one cell if it is intentional source", true, {
+                targetPath: resolvedImport.targetPath,
+              }),
+            ],
+          });
+          continue;
+        }
         if (resolvedImport.isExternal || !resolvedImport.targetCell || resolvedImport.targetCell.id === importerCell.id) continue;
         const producerCell = resolvedImport.targetCell;
         const declaration = consumerDeclaration(importerCell, producerCell.id);
@@ -1903,6 +2060,78 @@ function countLines(filePath: string): number {
   return content.split(/\r?\n/).length;
 }
 
+function normalizeWhitespace(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function publicSurfaceSignatureParts(filePath: string): string[] {
+  if (!fs.existsSync(filePath)) return [];
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const parts: string[] = [];
+
+  function hasExportModifier(node: ts.Node): boolean {
+    return Boolean(ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export);
+  }
+
+  function typeText(node: ts.Node | undefined): string {
+    return node ? normalizeWhitespace(node.getText(sourceFile)) : "";
+  }
+
+  function visit(node: ts.Node): void {
+    if (ts.isFunctionDeclaration(node) && hasExportModifier(node)) {
+      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name);
+      if (name) {
+        const params = node.parameters.map((parameter) => `${typeText(parameter.name)}:${typeText(parameter.type)}`).join(",");
+        parts.push(`function:${name}(${params}):${typeText(node.type)}`);
+      }
+    } else if ((ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
+      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name);
+      if (name) parts.push(`${ts.SyntaxKind[node.kind]}:${name}:${normalizeWhitespace(node.getText(sourceFile))}`);
+    } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
+      for (const declaration of node.declarationList.declarations) {
+        const name = exportedNameFromDeclarationName(declaration.name);
+        if (name) parts.push(`variable:${name}:${typeText(declaration.type)}`);
+      }
+    } else if (ts.isExportAssignment(node)) {
+      parts.push("export:default");
+    } else if (ts.isExportDeclaration(node)) {
+      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        for (const element of node.exportClause.elements) parts.push(`export:${element.name.text}`);
+      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
+        parts.push(`namespace:${node.exportClause.name.text}`);
+      } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+        parts.push(`export-star:${node.moduleSpecifier.text}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return parts.sort((left, right) => left.localeCompare(right));
+}
+
+function publicSurfaceHash(filePath: string): string {
+  return crypto.createHash("sha256").update(publicSurfaceSignatureParts(filePath).join("\n")).digest("hex");
+}
+
+function artifactContractsForCell(cell: CellManifest): string[] {
+  const contracts: string[] = [];
+  for (const lane of cell.producesArtifacts || []) {
+    for (const artifactPath of lane.paths) contracts.push(`produce:${lane.id}:${normalizePath(artifactPath)}`);
+  }
+  for (const consumer of cell.consumes || []) {
+    for (const lane of consumer.artifactLanes || []) contracts.push(`consume:${consumer.cell}:${lane}`);
+  }
+  return contracts.sort((left, right) => left.localeCompare(right));
+}
+
+function dependencyEdgesForCell(cellId: string, dependencies: Set<string> | undefined): string[] {
+  return [...(dependencies || new Set<string>())]
+    .map((dependency) => `${cellId}->${dependency}`)
+    .sort((left, right) => left.localeCompare(right));
+}
+
 function computeMetrics(
   context: AnalysisContext,
   crossCellDependencies: Map<string, Set<string>>,
@@ -1910,11 +2139,18 @@ function computeMetrics(
 ): Record<string, CellBaselineRecord> {
   const metrics: Record<string, CellBaselineRecord> = {};
   for (const cell of context.manifest.cells) {
+    const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
     metrics[cell.id] = {
       ownedPathPatterns: cell.ownedPaths.length,
       publicSymbols: cell.publicSymbols.length,
       publicSurfaceLines: countLines(absolutePath(context.rootDir, cell.publicEntry)),
       crossCellDependencies: crossCellDependencies.get(cell.id)?.size || 0,
+      ownedPathSet: [...cell.ownedPaths].map(normalizePath).sort((left, right) => left.localeCompare(right)),
+      publicEntryPath: normalizePath(cell.publicEntry),
+      publicSymbolSet: [...cell.publicSymbols].sort((left, right) => left.localeCompare(right)),
+      publicSurfaceHash: publicSurfaceHash(publicEntryPath),
+      dependencyEdges: dependencyEdgesForCell(cell.id, crossCellDependencies.get(cell.id)),
+      artifactContracts: artifactContractsForCell(cell),
       resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id) || []),
     };
   }
@@ -1927,10 +2163,122 @@ function compareBaseline(
   baseline: CellFenceBaseline,
   findings: Finding[],
 ): void {
+  const baselineCellIds = new Set(baseline.cellIds || Object.keys(baseline.cells));
   for (const [cellId, metric] of Object.entries(metrics)) {
     const locked = Boolean(context.cellsById.get(cellId)?.locked);
     const baselineRecord = baseline.cells[cellId];
-    if (!baselineRecord) continue;
+    if (!baselineRecord || !baselineCellIds.has(cellId)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        severity: "error",
+        cellId,
+        message: `${cellId} is not present in the accepted baseline cell set`,
+        suggestedResolutions: [
+          codeResolution("Move the new source under an existing accepted cell if this is not an intentional architecture addition"),
+          baselineResolution("Accept the new cell in the baseline", locked, { cell: cellId }),
+        ],
+      });
+      continue;
+    }
+
+    if (baselineRecord.publicEntryPath && metric.publicEntryPath !== baselineRecord.publicEntryPath) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE",
+        severity: "error",
+        cellId,
+        message: `${cellId} public entry changed from ${baselineRecord.publicEntryPath} to ${metric.publicEntryPath}`,
+        suggestedResolutions: [
+          codeResolution("Keep the existing public entry path and move implementation detail behind it"),
+          baselineResolution("Accept the public entry contract change in the baseline", locked, { cell: cellId, previous: baselineRecord.publicEntryPath, current: metric.publicEntryPath }),
+        ],
+      });
+    }
+
+    if (baselineRecord.ownedPathSet) {
+      const uncovered = (metric.ownedPathSet || []).filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, baselineRecord.ownedPathSet || []));
+      if (uncovered.length > 0) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE",
+          severity: "error",
+          cellId,
+          message: `${cellId} ownership scope expanded or shifted outside the accepted baseline: ${uncovered.join(", ")}`,
+          details: { previous: baselineRecord.ownedPathSet, current: metric.ownedPathSet, uncovered },
+          suggestedResolutions: [
+            codeResolution("Keep new source inside an existing accepted ownership scope or create a reviewed cell change"),
+            baselineResolution("Accept the ownership scope change in the baseline", locked, { cell: cellId, uncovered }),
+          ],
+        });
+      }
+    }
+
+    if (baselineRecord.publicSymbolSet) {
+      const previousSymbols = new Set(baselineRecord.publicSymbolSet);
+      const addedSymbols = (metric.publicSymbolSet || []).filter((symbol) => !previousSymbols.has(symbol));
+      if (addedSymbols.length > 0) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+          severity: "error",
+          cellId,
+          message: `${cellId} added public symbols outside the accepted baseline: ${addedSymbols.join(", ")}`,
+          details: { previous: baselineRecord.publicSymbolSet, current: metric.publicSymbolSet, addedSymbols },
+          suggestedResolutions: [
+            codeResolution("Keep the new API internal or route through an existing public symbol"),
+            baselineResolution("Accept the public symbol set change in the baseline", locked, { cell: cellId, addedSymbols }),
+          ],
+        });
+      }
+    }
+
+    if (baselineRecord.dependencyEdges) {
+      const previousEdges = new Set(baselineRecord.dependencyEdges);
+      const addedEdges = (metric.dependencyEdges || []).filter((edge) => !previousEdges.has(edge));
+      if (addedEdges.length > 0) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
+          severity: "error",
+          cellId,
+          message: `${cellId} added dependency edges outside the accepted baseline: ${addedEdges.join(", ")}`,
+          details: { previous: baselineRecord.dependencyEdges, current: metric.dependencyEdges, addedEdges },
+          suggestedResolutions: [
+            codeResolution("Remove the new dependency edge or depend on an existing accepted cell"),
+            baselineResolution("Accept the dependency edge change in the baseline", locked, { cell: cellId, addedEdges }),
+          ],
+        });
+      }
+    }
+
+    if (baselineRecord.artifactContracts) {
+      const previousArtifacts = new Set(baselineRecord.artifactContracts);
+      const addedArtifacts = (metric.artifactContracts || []).filter((artifact) => !previousArtifacts.has(artifact));
+      if (addedArtifacts.length > 0) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE",
+          severity: "error",
+          cellId,
+          message: `${cellId} added artifact contracts outside the accepted baseline: ${addedArtifacts.join(", ")}`,
+          details: { previous: baselineRecord.artifactContracts, current: metric.artifactContracts, addedArtifacts },
+          suggestedResolutions: [
+            codeResolution("Avoid the new artifact lane or reuse an accepted artifact contract"),
+            baselineResolution("Accept the artifact contract change in the baseline", locked, { cell: cellId, addedArtifacts }),
+          ],
+        });
+      }
+    }
+
+    if (baselineRecord.publicSurfaceHash && metric.publicSurfaceHash !== baselineRecord.publicSurfaceHash) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE",
+        severity: "error",
+        cellId,
+        message: `${cellId} public surface signature hash changed from ${baselineRecord.publicSurfaceHash} to ${metric.publicSurfaceHash}`,
+        details: { previous: baselineRecord.publicSurfaceHash, current: metric.publicSurfaceHash },
+        suggestedResolutions: [
+          codeResolution("Keep the public type/signature contract stable or move changes behind existing exports"),
+          baselineResolution("Accept the public signature change in the baseline", locked, { cell: cellId }),
+        ],
+      });
+    }
+
     if (metric.ownedPathPatterns > baselineRecord.ownedPathPatterns) {
       addFinding(findings, {
         ruleId: "CELLFENCE_RATCHET_OWNED_PATH_GROWTH",
@@ -1955,7 +2303,7 @@ function compareBaseline(
         ],
       });
     }
-    if (metric.publicSurfaceLines > baselineRecord.publicSurfaceLines) {
+    if (!baselineRecord.publicSurfaceHash && metric.publicSurfaceLines > baselineRecord.publicSurfaceLines) {
       addFinding(findings, {
         ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
         severity: "error",
@@ -2045,6 +2393,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   validateDuplicateCellIds(manifest, findings);
   validateOwnershipOverlap(manifest, findings);
+  validateOwnershipCoverage(context, findings);
   validatePublicEntries(context, findings);
   const crossCellDependencies = validateImports(context, findings, warnings);
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
@@ -2213,6 +2562,7 @@ export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
   return {
     schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
+    cellIds: Object.keys(result.metrics).sort((left, right) => left.localeCompare(right)),
     cells: result.metrics,
   };
 }
@@ -2265,6 +2615,72 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
           { cell: cell.id, metric, previous: previous[metric], current: current[metric] },
         );
       }
+    }
+
+    const scopeExpansion = current.ownedPathSet && previous.ownedPathSet
+      ? current.ownedPathSet.filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet || []))
+      : [];
+    if (scopeExpansion.length > 0) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and ownership scope would expand or shift: ${scopeExpansion.join(", ")}`,
+        { cell: cell.id, metric: "ownedPathSet", previous: previous.ownedPathSet, current: current.ownedPathSet, scopeExpansion },
+      );
+    }
+
+    if (current.publicEntryPath && previous.publicEntryPath && current.publicEntryPath !== previous.publicEntryPath) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and public entry would change from ${previous.publicEntryPath} to ${current.publicEntryPath}`,
+        { cell: cell.id, metric: "publicEntryPath", previous: previous.publicEntryPath, current: current.publicEntryPath },
+      );
+    }
+
+    const addedPublicSymbols = current.publicSymbolSet && previous.publicSymbolSet
+      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet || []).includes(symbol))
+      : [];
+    if (addedPublicSymbols.length > 0) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and public symbols would be added: ${addedPublicSymbols.join(", ")}`,
+        { cell: cell.id, metric: "publicSymbolSet", addedPublicSymbols },
+      );
+    }
+
+    const addedDependencyEdges = current.dependencyEdges && previous.dependencyEdges
+      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges || []).includes(edge))
+      : [];
+    if (addedDependencyEdges.length > 0) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and dependency edges would be added: ${addedDependencyEdges.join(", ")}`,
+        { cell: cell.id, metric: "dependencyEdges", addedDependencyEdges },
+      );
+    }
+
+    const addedArtifacts = current.artifactContracts && previous.artifactContracts
+      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts || []).includes(artifact))
+      : [];
+    if (addedArtifacts.length > 0) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and artifact contracts would be added: ${addedArtifacts.join(", ")}`,
+        { cell: cell.id, metric: "artifactContracts", addedArtifacts },
+      );
+    }
+
+    if (current.publicSurfaceHash && previous.publicSurfaceHash && current.publicSurfaceHash !== previous.publicSurfaceHash) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and public surface signature hash would change`,
+        { cell: cell.id, metric: "publicSurfaceHash", previous: previous.publicSurfaceHash, current: current.publicSurfaceHash },
+      );
     }
 
     const previousResourceKeys = new Set((previous.resourceAccesses || []).map(resourceBaselineKey));

@@ -5,6 +5,11 @@ The CellFence manifest is JSON and starts with:
 ```json
 {
   "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": ["src/**", "packages/**", "apps/**"],
+    "exclude": ["**/*.test.ts", "generated/**"]
+  },
   "cells": []
 }
 ```
@@ -32,6 +37,8 @@ Baseline: a captured measurement of architectural surface area.
 Ratchet: a check that permits reductions but rejects silent growth beyond a baseline.
 
 Locked cell: a cell whose accepted baseline cannot be expanded by `baseline update`.
+
+Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
 
 Sealed source: files that require explicit human authorization before modification. In v0.x this is documented, not cryptographically enforced.
 
@@ -74,7 +81,11 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 
 `packageName` is optional. When present, imports of the exact package name are treated as imports of the declared public entry.
 
-`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase owned path patterns, public symbols, public surface lines, cross-cell dependencies, or grandfathered resource access for a locked cell. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
+`governance` is optional for compatibility. When `requireOwnership` is true, `include` must contain at least one glob-like pattern. Governed source files that are not covered by exactly one cell produce ownership findings, and imports to governed unowned targets are rejected.
+
+`publicEntry` must be covered by the declaring cell's `ownedPaths`. Each produced artifact lane path must also be covered by the producer's `ownedPaths`.
+
+`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
 
@@ -85,8 +96,12 @@ CellFence v0.x enforces:
 - manifest shape;
 - duplicate cell IDs;
 - overlapping owned path prefixes;
+- strict governed-source ownership when enabled;
+- public entries outside declared ownership;
+- artifact lanes outside declared ownership;
 - private cross-cell imports;
-- unresolved relative imports as warnings;
+- unresolved relative imports as errors;
+- computed dynamic imports and computed `require()` calls as warnings;
 - undeclared consumers;
 - missing public entry files;
 - declared public symbols versus actual exported symbols;
@@ -95,13 +110,15 @@ CellFence v0.x enforces:
 - undeclared runtime resource evidence;
 - unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
 - locked baseline expansion during `baseline update`;
-- ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
+- accepted baseline cell set growth;
+- semantic baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and public surface signatures;
+- legacy ratchet growth for owned path counts, public symbol counts, public entry line counts, and cross-cell dependency counts when reading old baselines.
 
 Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.
 
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, selected TypeORM entity/repository/query-builder calls, selected Drizzle table declarations and table operations, selected string-literal query-builder table calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. Dynamic paths, arbitrary ORM metadata outside supported adapters, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 
-Relative import resolution supports NodeNext runtime specifiers by remapping `.js`, `.jsx`, `.mjs`, and `.cjs` specifiers to TypeScript source candidates before checking cell boundaries. It also reads root `tsconfig.json` `compilerOptions.paths` aliases. A relative import that still cannot be resolved is not silently ignored; it produces an unresolved-import error.
+Relative import resolution supports NodeNext runtime specifiers by remapping `.js`, `.jsx`, `.mjs`, and `.cjs` specifiers to TypeScript source candidates before checking cell boundaries. It uses the TypeScript config parser, so `compilerOptions.paths` inherited through `extends` are included. A relative import that still cannot be resolved is not silently ignored; it produces an unresolved-import error.
 
 ORM, query builder, HTTP-framework, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma and TypeORM support does not cover Sequelize, Drizzle support does not cover every Drizzle expression, NestJS/Fastify support does not cover every plugin shape, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table, route, topic, or queue names, and which dynamic forms produce fail-closed unresolved findings.
 

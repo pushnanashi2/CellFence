@@ -1,6 +1,6 @@
 {
   "name": "cellfence-workspace",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Manifest-driven repository governance for parallel coding agents.",
   "license": "Apache-2.0",
@@ -15,6 +15,7 @@
     "typecheck": "tsc -b packages/schema packages/engine packages/cli packages/github-action packages/trace --pretty false",
     "test": "npm run build && node --test tests/*.test.mjs",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",
+    "benchmark:scale": "npm run build && node scripts/scale-benchmark.mjs",
     "pack:smoke": "node scripts/pack-smoke.mjs",
     "provenance:scan": "node scripts/forbidden-source-scan.mjs",
     "release:verify": "node scripts/release-verify.mjs"

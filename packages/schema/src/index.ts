@@ -57,6 +57,12 @@ export type ArchitecturalBudgets = {
   crossCellDependencies?: number;
 };
 
+export type ManifestGovernance = {
+  requireOwnership?: boolean;
+  include?: string[];
+  exclude?: string[];
+};
+
 export type CellManifest = {
   id: string;
   ownedPaths: string[];
@@ -72,6 +78,7 @@ export type CellManifest = {
 
 export type CellFenceManifest = {
   schemaVersion: typeof CELLFENCE_MANIFEST_SCHEMA_VERSION;
+  governance?: ManifestGovernance;
   cells: CellManifest[];
 };
 
@@ -80,12 +87,19 @@ export type CellBaselineRecord = {
   publicSymbols: number;
   publicSurfaceLines: number;
   crossCellDependencies: number;
+  ownedPathSet?: string[];
+  publicEntryPath?: string;
+  publicSymbolSet?: string[];
+  publicSurfaceHash?: string;
+  dependencyEdges?: string[];
+  artifactContracts?: string[];
   resourceAccesses?: ResourceBaselineEntry[];
 };
 
 export type CellFenceBaseline = {
   schemaVersion: typeof CELLFENCE_BASELINE_SCHEMA_VERSION;
   generatedAt: string;
+  cellIds?: string[];
   cells: Record<string, CellBaselineRecord>;
 };
 
@@ -218,6 +232,27 @@ function validateBudgets(value: unknown, location: string, errors: string[]): va
   return true;
 }
 
+function validateGovernance(value: unknown, location: string, errors: string[]): value is ManifestGovernance {
+  if (value === undefined) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (!optionalBoolean(value.requireOwnership)) {
+    errors.push(`${location}.requireOwnership must be a boolean when present`);
+  }
+  if (value.include !== undefined && !isStringArray(value.include)) {
+    errors.push(`${location}.include must be an array of non-empty strings when present`);
+  }
+  if (value.exclude !== undefined && !isStringArray(value.exclude)) {
+    errors.push(`${location}.exclude must be an array of non-empty strings when present`);
+  }
+  if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
+    errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);
+  }
+  return true;
+}
+
 function validateCell(value: unknown, location: string, errors: string[]): value is CellManifest {
   if (!isRecord(value)) {
     errors.push(`${location} must be an object`);
@@ -287,6 +322,7 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
       validateCell(cell, `cells[${cellIndex}]`, errors);
     });
   }
+  validateGovernance(value.governance, "governance", errors);
   return errors.length === 0
     ? { ok: true, value: value as CellFenceManifest, errors: [] }
     : { ok: false, errors };
@@ -303,6 +339,9 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   if (typeof value.generatedAt !== "string" || value.generatedAt.trim().length === 0) {
     errors.push("generatedAt must be a non-empty string");
   }
+  if (value.cellIds !== undefined && !isStringArray(value.cellIds)) {
+    errors.push("cellIds must be an array of non-empty strings when present");
+  }
   if (!isRecord(value.cells)) {
     errors.push("cells must be an object");
   } else {
@@ -316,6 +355,17 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
         if (!Number.isInteger(numericValue) || Number(numericValue) < 0) {
           errors.push(`cells.${cellId}.${key} must be a non-negative integer`);
         }
+      }
+      for (const key of ["ownedPathSet", "publicSymbolSet", "dependencyEdges", "artifactContracts"]) {
+        if (record[key] !== undefined && !isStringArray(record[key])) {
+          errors.push(`cells.${cellId}.${key} must be an array of non-empty strings when present`);
+        }
+      }
+      if (!optionalString(record.publicEntryPath)) {
+        errors.push(`cells.${cellId}.publicEntryPath must be a string when present`);
+      }
+      if (!optionalString(record.publicSurfaceHash)) {
+        errors.push(`cells.${cellId}.publicSurfaceHash must be a string when present`);
       }
       if (record.resourceAccesses !== undefined) {
         if (!Array.isArray(record.resourceAccesses)) {

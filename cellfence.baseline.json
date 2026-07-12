@@ -1,19 +1,105 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T15:09:48.738Z",
+  "generatedAt": "2026-07-12T15:55:06.817Z",
+  "cellIds": [
+    "cli",
+    "engine",
+    "github-action",
+    "schema",
+    "trace"
+  ],
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 22,
-      "publicSurfaceLines": 367,
+      "publicSymbols": 23,
+      "publicSurfaceLines": 417,
       "crossCellDependencies": 0,
+      "ownedPathSet": [
+        "packages/schema/**"
+      ],
+      "publicEntryPath": "packages/schema/src/index.ts",
+      "publicSymbolSet": [
+        "ArchitecturalBudgets",
+        "ArtifactLaneManifest",
+        "CellBaselineRecord",
+        "CellConsumerManifest",
+        "CELLFENCE_BASELINE_SCHEMA_VERSION",
+        "CELLFENCE_MANIFEST_SCHEMA_VERSION",
+        "CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION",
+        "CellFenceBaseline",
+        "CellFenceManifest",
+        "CellFenceResourceEvidence",
+        "CellManifest",
+        "EnforcementStatus",
+        "ManifestGovernance",
+        "ResourceAccessConfidence",
+        "ResourceAccessMode",
+        "ResourceBaselineEntry",
+        "ResourceContractKind",
+        "ResourceContractManifest",
+        "ResourceEvidenceAccess",
+        "validateBaseline",
+        "validateManifest",
+        "validateResourceEvidence",
+        "ValidationResult"
+      ],
+      "publicSurfaceHash": "ea81999511875c6081776e889bc3429e4032f0f927b824dd0d7f8537e7fc2485",
+      "dependencyEdges": [],
+      "artifactContracts": [],
       "resourceAccesses": []
     },
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 36,
-      "publicSurfaceLines": 2607,
+      "publicSurfaceLines": 3008,
       "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/engine/**"
+      ],
+      "publicEntryPath": "packages/engine/src/index.ts",
+      "publicSymbolSet": [
+        "AutoAllocateOptions",
+        "AutoAllocation",
+        "BaselineUpdateGuardOptions",
+        "BaselineUpdateGuardResult",
+        "CellFenceContext",
+        "CellFenceWaiver",
+        "ChangedCheckOptions",
+        "checkChangedRepository",
+        "CheckOptions",
+        "checkRepository",
+        "CheckResult",
+        "ContextAllowedImport",
+        "ContextBudgetEntry",
+        "ContextOptions",
+        "CouplingGraph",
+        "CouplingGraphEdge",
+        "CouplingGraphEdgeKind",
+        "CouplingGraphNode",
+        "createAutoAllocation",
+        "createBaseline",
+        "createCellContext",
+        "createCouplingGraph",
+        "createWaiverRequest",
+        "defaultBaselinePath",
+        "Finding",
+        "formatCouplingGraphMermaid",
+        "formatHumanResult",
+        "guardBaselineUpdate",
+        "listWaivers",
+        "loadManifestFromFile",
+        "RuleId",
+        "Severity",
+        "SuggestedResolution",
+        "WaiverRequest",
+        "WaiverRequestOptions",
+        "writeBaselineFile"
+      ],
+      "publicSurfaceHash": "70441a9f8e1de9d46890231fd4925d7ee56db6c724e4dd2f7ef43dd1a071285c",
+      "dependencyEdges": [
+        "engine->schema"
+      ],
+      "artifactContracts": [],
       "resourceAccesses": []
     },
     "cli": {
@@ -21,6 +107,18 @@
       "publicSymbols": 1,
       "publicSurfaceLines": 492,
       "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/cli/**"
+      ],
+      "publicEntryPath": "packages/cli/src/index.ts",
+      "publicSymbolSet": [
+        "main"
+      ],
+      "publicSurfaceHash": "2498d26c682a45adc76dedb63cff78904fc730a08c44944468467d6bc928c131",
+      "dependencyEdges": [
+        "cli->engine"
+      ],
+      "artifactContracts": [],
       "resourceAccesses": []
     },
     "github-action": {
@@ -28,6 +126,18 @@
       "publicSymbols": 1,
       "publicSurfaceLines": 32,
       "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/github-action/**"
+      ],
+      "publicEntryPath": "packages/github-action/src/index.ts",
+      "publicSymbolSet": [
+        "main"
+      ],
+      "publicSurfaceHash": "4cb4850871112ebcc78d4c1d35008513220731839ef77205d0f46b38885ccb49",
+      "dependencyEdges": [
+        "github-action->engine"
+      ],
+      "artifactContracts": [],
       "resourceAccesses": []
     },
     "trace": {
@@ -35,6 +145,23 @@
       "publicSymbols": 6,
       "publicSurfaceLines": 163,
       "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/trace/**"
+      ],
+      "publicEntryPath": "packages/trace/src/index.ts",
+      "publicSymbolSet": [
+        "flushEvidence",
+        "installTrace",
+        "recordDatabaseAccess",
+        "recordHttpAccess",
+        "recordQueueAccess",
+        "recordResourceAccess"
+      ],
+      "publicSurfaceHash": "28a8fcb53db3d5276949483038ef1df8c65b087bde96c39c043c9211a6df8c5d",
+      "dependencyEdges": [
+        "trace->schema"
+      ],
+      "artifactContracts": [],
       "resourceAccesses": []
     }
   }

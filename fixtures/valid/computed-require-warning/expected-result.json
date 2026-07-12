@@ -1,0 +1,8 @@
+{
+  "mode": "check",
+  "ok": true,
+  "errorRuleIds": [],
+  "warningRuleIds": [
+    "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+  ]
+}
