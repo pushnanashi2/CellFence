@@ -156,7 +156,7 @@ test("CLI exits nonzero when executed through a node_modules bin symlink", () =>
   fs.symlinkSync(cliPath, binPath);
 
   const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
-  const result = runExecutable(binPath, ["check", "--json"], fixturePath);
+  const result = runExecutable(process.execPath, [binPath, "check", "--json"], fixturePath);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /CELLFENCE_PRIVATE_IMPORT/);
 });
