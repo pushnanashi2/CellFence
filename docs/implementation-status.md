@@ -15,6 +15,7 @@
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
 | Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |
 | GitHub Actions support | partially_enforced | `.github/workflows` and action wrapper | Required-check configuration must be set externally | workflow files and self-check |
+| npm package smoke verification | enforced | `scripts/pack-smoke.mjs` and CI `pack-smoke` job | Uses local tarballs before public npm release; registry publishing remains external | `npm run pack:smoke` |
 | CODEOWNERS | documented | `.github/CODEOWNERS` | Enforcement requires repository settings | root-of-trust document |
 | Protected branches | documented | external repository settings | Not enforceable by repository files alone | root-of-trust document |
 | External immutable checker | planned | external service or pinned workflow | Not implemented in v0.x | root-of-trust document |

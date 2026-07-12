@@ -401,7 +401,19 @@ function exportedNameFromDeclarationName(name: ts.DeclarationName | undefined): 
   return undefined;
 }
 
-function extractPublicSymbols(filePath: string): Set<string> {
+function resolveLocalModuleFile(fromFilePath: string, specifier: string): string | undefined {
+  if (!specifier.startsWith(".") && !specifier.startsWith("/")) return undefined;
+  const basePath = path.resolve(path.dirname(fromFilePath), specifier);
+  for (const candidatePath of candidateModulePaths(basePath)) {
+    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) return candidatePath;
+  }
+  return undefined;
+}
+
+function extractPublicSymbols(filePath: string, visitedFiles = new Set<string>()): Set<string> {
+  const normalizedFilePath = path.resolve(filePath);
+  if (visitedFiles.has(normalizedFilePath)) return new Set<string>();
+  visitedFiles.add(normalizedFilePath);
   const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const symbols = new Set<string>();
@@ -425,9 +437,20 @@ function extractPublicSymbols(filePath: string): Set<string> {
       }
     } else if (ts.isExportAssignment(node)) {
       symbols.add("default");
-    } else if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
-      for (const element of node.exportClause.elements) {
-        symbols.add(element.name.text);
+    } else if (ts.isExportDeclaration(node)) {
+      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        for (const element of node.exportClause.elements) {
+          symbols.add(element.name.text);
+        }
+      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
+        symbols.add(node.exportClause.name.text);
+      } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+        const targetFilePath = resolveLocalModuleFile(filePath, node.moduleSpecifier.text);
+        if (targetFilePath) {
+          for (const exportedSymbol of extractPublicSymbols(targetFilePath, visitedFiles)) {
+            if (exportedSymbol !== "default") symbols.add(exportedSymbol);
+          }
+        }
       }
     }
     ts.forEachChild(node, visit);
