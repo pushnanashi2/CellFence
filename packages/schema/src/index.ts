@@ -1,5 +1,6 @@
 export const CELLFENCE_MANIFEST_SCHEMA_VERSION = "cellfence.manifest.v1";
 export const CELLFENCE_BASELINE_SCHEMA_VERSION = "cellfence.baseline.v1";
+export const CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION = "cellfence.resource-evidence.v1";
 
 export type EnforcementStatus = "enforced" | "partially_enforced" | "documented" | "planned";
 
@@ -12,6 +13,7 @@ export type ArtifactLaneManifest = {
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
 
 export type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
+export type ResourceAccessConfidence = "high" | "medium" | "low" | "runtime";
 
 export type ResourceContractManifest = {
   id: string;
@@ -25,6 +27,21 @@ export type ResourceBaselineEntry = {
   kind: ResourceContractKind;
   access: ResourceAccessMode;
   selector: string;
+  detectedBy?: string;
+  confidence?: ResourceAccessConfidence;
+};
+
+export type ResourceEvidenceAccess = ResourceBaselineEntry & {
+  cellId?: string;
+  observedAt?: string;
+};
+
+export type CellFenceResourceEvidence = {
+  schemaVersion: typeof CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION;
+  commitSha?: string;
+  generatedAt?: string;
+  cellId?: string;
+  accesses: ResourceEvidenceAccess[];
 };
 
 export type CellConsumerManifest = {
@@ -156,6 +173,24 @@ function validateResourceBaselineEntry(value: unknown, location: string, errors:
   if (typeof value.selector !== "string" || value.selector.trim().length === 0) {
     errors.push(`${location}.selector must be a non-empty string`);
   }
+  if (!optionalString(value.detectedBy)) {
+    errors.push(`${location}.detectedBy must be a string when present`);
+  }
+  if (value.confidence !== undefined && !["high", "medium", "low", "runtime"].includes(String(value.confidence))) {
+    errors.push(`${location}.confidence must be high|medium|low|runtime when present`);
+  }
+  return true;
+}
+
+function validateResourceEvidenceAccess(value: unknown, location: string, errors: string[]): value is ResourceEvidenceAccess {
+  validateResourceBaselineEntry(value, location, errors);
+  if (!isRecord(value)) return false;
+  if (!optionalString(value.cellId)) {
+    errors.push(`${location}.cellId must be a string when present`);
+  }
+  if (!optionalString(value.observedAt)) {
+    errors.push(`${location}.observedAt must be a string when present`);
+  }
   return true;
 }
 
@@ -283,5 +318,37 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   }
   return errors.length === 0
     ? { ok: true, value: value as CellFenceBaseline, errors: [] }
+    : { ok: false, errors };
+}
+
+export function validateResourceEvidence(value: unknown): ValidationResult<CellFenceResourceEvidence> {
+  const errors: string[] = [];
+  if (!isRecord(value)) {
+    return { ok: false, errors: ["resource evidence must be an object"] };
+  }
+  if (value.schemaVersion !== CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION) {
+    errors.push(`schemaVersion must be ${CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION}`);
+  }
+  if (!optionalString(value.commitSha)) {
+    errors.push("commitSha must be a string when present");
+  }
+  if (!optionalString(value.generatedAt)) {
+    errors.push("generatedAt must be a string when present");
+  }
+  if (!optionalString(value.cellId)) {
+    errors.push("cellId must be a string when present");
+  }
+  if (!Array.isArray(value.accesses)) {
+    errors.push("accesses must be an array");
+  } else {
+    value.accesses.forEach((entry, entryIndex) => {
+      validateResourceEvidenceAccess(entry, `accesses[${entryIndex}]`, errors);
+      if (isRecord(entry) && typeof entry.cellId !== "string" && typeof value.cellId !== "string") {
+        errors.push(`accesses[${entryIndex}].cellId is required when top-level cellId is absent`);
+      }
+    });
+  }
+  return errors.length === 0
+    ? { ok: true, value: value as CellFenceResourceEvidence, errors: [] }
     : { ok: false, errors };
 }

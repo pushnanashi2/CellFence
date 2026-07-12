@@ -320,8 +320,9 @@ For large repositories, prefer this baseline-first workflow over hand-writing ev
 
 1. declare cells, public entries, and ownership in the manifest;
 2. run `cellfence baseline create` to snapshot existing static file, database, queue, and HTTP resource access;
-3. run `cellfence baseline check` in CI;
-4. review only new resource access deltas.
+3. optionally pass runtime evidence with `--evidence resource-evidence.json`;
+4. run `cellfence baseline check` in CI;
+5. review only new resource access deltas.
 
 `resourceContracts` remains useful for intentional high-value contracts, but the baseline prevents a manifest maintenance treadmill where every historical table, topic, or endpoint must be manually listed before adoption.
 
@@ -341,6 +342,32 @@ CellFence models these flows as **artifact lanes**:
 The producer declares the lane. The consumer declares both the producer cell and the lane ID. In v0.x, the lane path must also fall under the producer's `ownedPaths` so the engine can resolve its owning cell. Importing a statically referenced file under an undeclared lane produces `CELLFENCE_UNDECLARED_ARTIFACT`.
 
 This makes statically imported file-based coupling visible in the same architecture contract as source-code dependencies. For selected string-literal resource access, CellFence can also snapshot current usage into the baseline and reject new static coupling during `baseline check`.
+
+Runtime systems can provide observed resource access as `cellfence.resource-evidence.v1` JSON:
+
+```json
+{
+  "schemaVersion": "cellfence.resource-evidence.v1",
+  "cellId": "research",
+  "accesses": [
+    {
+      "kind": "database",
+      "access": "read",
+      "selector": "mysql.research_runs",
+      "detectedBy": "runtime-evidence",
+      "confidence": "runtime"
+    }
+  ]
+}
+```
+
+Check runtime evidence without treating a PR body or markdown changelog as the source of truth:
+
+```bash
+cellfence evidence check --evidence resource-evidence.json
+```
+
+`baseline create` and `baseline update` also accept `--evidence`, so static and runtime resource inventories can be stored in the same baseline.
 
 ## AI-agent integration
 
@@ -423,6 +450,8 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_PUBLIC_SYMBOL_MISMATCH` | Manifest symbols do not match actual public exports |
 | `CELLFENCE_UNDECLARED_ARTIFACT` | Artifact lane consumption was not declared |
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
+| `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
+| `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH` | Public entry line count increased |
@@ -440,11 +469,15 @@ CellFence v0.x analyzes:
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
 - selected static string resource access for file, database, queue, and HTTP patterns;
+- Prisma model delegate calls when `schema.prisma` is present;
+- unsafe or dynamic raw SQL calls as fail-closed unresolved resource access;
+- selected BullMQ and KafkaJS topic or queue calls;
+- runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
 - common TypeScript export declarations and named exports.
 
 Computed dynamic imports are reported as unsupported warnings rather than silently ignored.
 
-Static resource analysis is intentionally limited. It detects simple string-literal calls and SQL literals, not ORM schema metadata, query-builder semantics, runtime broker topology, or values assembled through arbitrary dataflow.
+Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. It does not infer arbitrary ORM metadata, query-builder semantics, runtime broker topology, or values assembled through general dataflow.
 
 ## CellFence and adjacent tools
 
@@ -512,7 +545,7 @@ Version 0.x is deliberately narrow:
 - one public entry per cell;
 - repository-local cells only;
 - file-path artifact lanes only;
-- static resource access only; dynamic dataflow, runtime broker behavior, and live database schema drift are not inferred;
+- selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred;
 - ownership overlap detection is conservative and does not solve arbitrary glob intersection;
 - public symbol analysis supports common TypeScript forms, not every possible re-export pattern;
 - computed dynamic imports cannot be resolved statically;

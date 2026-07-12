@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "cellfence.resource-evidence.v1",
+  "commitSha": "0000000000000000000000000000000000000000",
+  "cellId": "runtime",
+  "accesses": [
+    {
+      "kind": "database",
+      "access": "read",
+      "selector": "runtime.orders",
+      "detectedBy": "runtime-evidence",
+      "confidence": "runtime"
+    }
+  ]
+}

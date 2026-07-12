@@ -70,7 +70,7 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 
 `packageName` is optional. When present, imports of the exact package name are treated as imports of the declared public entry.
 
-Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest.
+Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
 
 ## Active Enforcement
 
@@ -85,9 +85,11 @@ CellFence v0.x enforces:
 - declared public symbols versus actual exported symbols;
 - undeclared artifact lane consumption;
 - undeclared static file, database, queue, and HTTP resource access;
+- undeclared runtime resource evidence;
+- unresolved unsafe or dynamic raw SQL access;
 - ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
 
-Static resource access is deliberately partial. The engine recognizes selected string-literal patterns. Dynamic paths, ORM metadata, query-builder calls, and runtime infrastructure state are outside v0.x static inference.
+Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. Dynamic paths, arbitrary ORM metadata, query-builder semantics, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 
 ## Planned or Environment-Dependent Enforcement
 

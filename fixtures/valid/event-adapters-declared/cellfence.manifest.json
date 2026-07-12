@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "cells": [
+    {
+      "id": "runtime",
+      "ownedPaths": [
+        "src/runtime/**"
+      ],
+      "publicEntry": "src/runtime/public.ts",
+      "publicSymbols": [
+        "runRuntime"
+      ],
+      "consumes": [],
+      "producesArtifacts": [],
+      "resourceContracts": [
+        {
+          "id": "bullmq-jobs",
+          "kind": "queue",
+          "access": [
+            "publish",
+            "subscribe"
+          ],
+          "selectors": [
+            "bullmq:nightly-research"
+          ]
+        },
+        {
+          "id": "kafka-research",
+          "kind": "queue",
+          "access": [
+            "publish",
+            "subscribe"
+          ],
+          "selectors": [
+            "kafka:research.events"
+          ]
+        }
+      ]
+    }
+  ]
+}

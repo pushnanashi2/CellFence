@@ -32,6 +32,7 @@ for (const group of ["valid", "invalid"]) {
         rootDir: fixturePath,
         manifestPath: "cellfence.manifest.json",
         baselinePath: expected.mode === "baseline-check" ? "cellfence.baseline.json" : undefined,
+        evidencePaths: expected.evidencePaths || [],
       });
 
       assert.equal(result.ok, expected.ok);

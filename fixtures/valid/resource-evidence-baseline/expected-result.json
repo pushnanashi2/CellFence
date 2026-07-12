@@ -1,0 +1,9 @@
+{
+  "mode": "baseline-check",
+  "evidencePaths": [
+    "resource-evidence.json"
+  ],
+  "ok": true,
+  "errorRuleIds": [],
+  "warningRuleIds": []
+}

@@ -1,0 +1,11 @@
+{
+  "mode": "baseline-check",
+  "evidencePaths": [
+    "resource-evidence.json"
+  ],
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+  ],
+  "warningRuleIds": []
+}

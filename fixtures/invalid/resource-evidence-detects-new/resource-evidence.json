@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "cellfence.resource-evidence.v1",
+  "commitSha": "0000000000000000000000000000000000000000",
+  "cellId": "runtime",
+  "accesses": [
+    {
+      "kind": "queue",
+      "access": "publish",
+      "selector": "runtime.new-topic",
+      "detectedBy": "runtime-evidence",
+      "confidence": "runtime"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import ts from "typescript";
 
 import {
   CELLFENCE_BASELINE_SCHEMA_VERSION,
+  type CellFenceResourceEvidence,
   type CellBaselineRecord,
   type CellFenceBaseline,
   type CellFenceManifest,
@@ -12,6 +13,7 @@ import {
   type ResourceBaselineEntry,
   validateBaseline,
   validateManifest,
+  validateResourceEvidence,
 } from "@cellfence/schema";
 
 export type RuleId =
@@ -28,6 +30,8 @@ export type RuleId =
   | "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
   | "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH"
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+  | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
+  | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
@@ -46,6 +50,7 @@ export type CheckOptions = {
   rootDir?: string;
   manifestPath?: string;
   baselinePath?: string;
+  evidencePaths?: string[];
 };
 
 export type CheckResult = {
@@ -76,6 +81,10 @@ type ResourceAccessReference = {
   filePath: string;
   line: number;
   source: string;
+  detectedBy: string;
+  confidence: "high" | "medium" | "low" | "runtime";
+  unresolved?: boolean;
+  reason?: string;
 };
 
 type ResolvedImport = {
@@ -98,6 +107,7 @@ const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
 const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
+const PRISMA_MODEL_SELECTOR_CACHE = new Map<string, Map<string, string>>();
 
 function normalizePath(filePath: string): string {
   return filePath.split(path.sep).join("/");
@@ -272,6 +282,61 @@ function literalText(node: ts.Node | undefined): string | undefined {
   return undefined;
 }
 
+function lowerFirst(text: string): string {
+  return text.length === 0 ? text : `${text[0].toLowerCase()}${text.slice(1)}`;
+}
+
+function expressionRootName(expression: ts.Expression): string | undefined {
+  if (ts.isIdentifier(expression)) return expression.text;
+  if (ts.isPropertyAccessExpression(expression)) return expressionRootName(expression.expression);
+  return undefined;
+}
+
+function propertyName(expression: ts.Expression): string | undefined {
+  return ts.isPropertyAccessExpression(expression) ? expression.name.text : undefined;
+}
+
+function objectStringProperty(expression: ts.Expression | undefined, propertyNameText: string): string | undefined {
+  if (!expression || !ts.isObjectLiteralExpression(expression)) return undefined;
+  for (const property of expression.properties) {
+    if (!ts.isPropertyAssignment(property)) continue;
+    const name = property.name;
+    const isMatch = (ts.isIdentifier(name) && name.text === propertyNameText)
+      || (ts.isStringLiteral(name) && name.text === propertyNameText);
+    if (isMatch) return literalText(property.initializer);
+  }
+  return undefined;
+}
+
+function templateLiteralText(node: ts.TemplateLiteral): string | undefined {
+  if (ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  return undefined;
+}
+
+function expressionContainsSqlLiteral(node: ts.Node): boolean {
+  let found = false;
+  function visit(candidate: ts.Node): void {
+    if (found) return;
+    const text = literalText(candidate);
+    if (text && /\b(select|insert|update|delete|from|join|into)\b/i.test(text)) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(candidate, visit);
+  }
+  visit(node);
+  return found;
+}
+
+const PRISMA_READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "count", "aggregate", "groupBy"]);
+const PRISMA_WRITE_METHODS = new Set(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
+const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
+const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
+
+function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
+  return { source, detectedBy, confidence };
+}
+
 function addResourceAccess(accesses: ResourceAccessReference[], access: ResourceAccessReference): void {
   const duplicate = accesses.some((candidate) =>
     candidate.kind === access.kind
@@ -295,6 +360,81 @@ function sqlTableAccesses(text: string): Array<{ access: "read" | "write"; selec
   return accesses;
 }
 
+function prismaModelSelectors(rootDir: string): Map<string, string> {
+  const cachedSelectors = PRISMA_MODEL_SELECTOR_CACHE.get(rootDir);
+  if (cachedSelectors) return cachedSelectors;
+  const selectors = new Map<string, string>();
+  for (const filePath of listFiles(rootDir)) {
+    if (path.basename(filePath) !== "schema.prisma") continue;
+    const schemaText = fs.readFileSync(filePath, "utf8");
+    const modelPattern = /model\s+([A-Za-z_][A-Za-z0-9_]*)\s+\{([\s\S]*?)\n\}/g;
+    let match: RegExpExecArray | null;
+    while ((match = modelPattern.exec(schemaText)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      const mappedTable = /@@map\(\s*"([^"]+)"\s*\)/.exec(modelBody)?.[1];
+      selectors.set(lowerFirst(modelName), mappedTable || modelName);
+    }
+  }
+  PRISMA_MODEL_SELECTOR_CACHE.set(rootDir, selectors);
+  return selectors;
+}
+
+function collectPrismaClientNames(sourceFile: ts.SourceFile): Set<string> {
+  const names = new Set<string>(["prisma"]);
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && ts.isNewExpression(node.initializer)
+      && expressionName(node.initializer.expression) === "PrismaClient"
+    ) {
+      names.add(node.name.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return names;
+}
+
+function collectBullQueueVariables(sourceFile: ts.SourceFile): Map<string, string> {
+  const queueVariables = new Map<string, string>();
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && ts.isNewExpression(node.initializer)
+      && expressionName(node.initializer.expression) === "Queue"
+    ) {
+      const queueName = literalText(node.initializer.arguments?.[0]);
+      if (queueName) queueVariables.set(node.name.text, `bullmq:${queueName}`);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return queueVariables;
+}
+
+function collectDynamicSqlVariables(sourceFile: ts.SourceFile): Set<string> {
+  const dynamicSqlVariables = new Set<string>();
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.initializer
+      && !literalText(node.initializer)
+      && expressionContainsSqlLiteral(node.initializer)
+    ) {
+      dynamicSqlVariables.add(node.name.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return dynamicSqlVariables;
+}
+
 function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   const lowered = name.toLowerCase();
   if (/(?:publish|enqueue|emitevent|sendmessage)$/.test(lowered)) return "publish";
@@ -307,6 +447,10 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const relativeFilePath = repoPath(rootDir, filePath);
   const accesses: ResourceAccessReference[] = [];
+  const prismaSelectors = prismaModelSelectors(rootDir);
+  const prismaClientNames = collectPrismaClientNames(sourceFile);
+  const bullQueuesByVariable = collectBullQueueVariables(sourceFile);
+  const dynamicSqlVariables = collectDynamicSqlVariables(sourceFile);
 
   function visit(node: ts.Node): void {
     const text = literalText(node);
@@ -318,14 +462,158 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
           selector: sqlAccess.selector,
           filePath: relativeFilePath,
           line: getLineNumber(sourceFile, node),
-          source: "sql-literal",
+          ...resourceAccessSource("sql-literal", "sql-literal", "medium"),
         });
+      }
+    }
+
+    if (ts.isTaggedTemplateExpression(node) && ts.isPropertyAccessExpression(node.tag)) {
+      const methodName = node.tag.name.text;
+      const rootName = expressionRootName(node.tag.expression);
+      if (rootName && prismaClientNames.has(rootName) && (RAW_SQL_METHODS.has(methodName) || UNSAFE_RAW_SQL_METHODS.has(methodName))) {
+        const templateText = templateLiteralText(node.template);
+        if (UNSAFE_RAW_SQL_METHODS.has(methodName) || templateText === undefined) {
+          addResourceAccess(accesses, {
+            kind: "database",
+            access: "read",
+            selector: "unresolved:dynamic-sql",
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: UNSAFE_RAW_SQL_METHODS.has(methodName) ? "unsafe raw SQL call" : "raw SQL template contains dynamic interpolation",
+            ...resourceAccessSource(methodName, "prisma-adapter", "low"),
+          });
+        } else {
+          for (const sqlAccess of sqlTableAccesses(templateText)) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: sqlAccess.access,
+              selector: sqlAccess.selector,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, "prisma-adapter", "medium"),
+            });
+          }
+        }
       }
     }
 
     if (ts.isCallExpression(node)) {
       const name = expressionName(node.expression);
       const firstArgumentText = literalText(node.arguments[0]);
+      const methodName = propertyName(node.expression);
+      const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
+
+      if (ts.isPropertyAccessExpression(node.expression) && methodName) {
+        if (rootName && prismaClientNames.has(rootName) && ts.isPropertyAccessExpression(node.expression.expression)) {
+          const delegateName = node.expression.expression.name.text;
+          const selector = prismaSelectors.get(delegateName) || `prisma.${delegateName}`;
+          const access = PRISMA_READ_METHODS.has(methodName) ? "read" : PRISMA_WRITE_METHODS.has(methodName) ? "write" : undefined;
+          if (access) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access,
+              selector,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, "prisma-adapter", prismaSelectors.has(delegateName) ? "high" : "medium"),
+            });
+          }
+        }
+
+        if (rootName && prismaClientNames.has(rootName) && (RAW_SQL_METHODS.has(methodName) || UNSAFE_RAW_SQL_METHODS.has(methodName))) {
+          if (UNSAFE_RAW_SQL_METHODS.has(methodName)) {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: "read",
+              selector: "unresolved:dynamic-sql",
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              unresolved: true,
+              reason: "unsafe raw SQL call",
+              ...resourceAccessSource(methodName, "prisma-adapter", "low"),
+            });
+          } else if (firstArgumentText) {
+            for (const sqlAccess of sqlTableAccesses(firstArgumentText)) {
+              addResourceAccess(accesses, {
+                kind: "database",
+                access: sqlAccess.access,
+                selector: sqlAccess.selector,
+                filePath: relativeFilePath,
+                line: getLineNumber(sourceFile, node),
+                ...resourceAccessSource(methodName, "prisma-adapter", "medium"),
+              });
+            }
+          } else {
+            addResourceAccess(accesses, {
+              kind: "database",
+              access: "read",
+              selector: "unresolved:dynamic-sql",
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              unresolved: true,
+              reason: "raw SQL argument is not a static literal",
+              ...resourceAccessSource(methodName, "prisma-adapter", "low"),
+            });
+          }
+        } else if (
+          methodName === "query"
+          && !firstArgumentText
+          && (expressionContainsSqlLiteral(node.arguments[0]) || (ts.isIdentifier(node.arguments[0]) && dynamicSqlVariables.has(node.arguments[0].text)))
+        ) {
+          addResourceAccess(accesses, {
+            kind: "database",
+            access: "read",
+            selector: "unresolved:dynamic-sql",
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: "SQL query is assembled dynamically",
+            ...resourceAccessSource(methodName, "sql-literal", "low"),
+          });
+        }
+
+        if (methodName === "add" && ts.isPropertyAccessExpression(node.expression)) {
+          const queueSelector = expressionRootName(node.expression.expression);
+          if (queueSelector && bullQueuesByVariable.has(queueSelector)) {
+            addResourceAccess(accesses, {
+              kind: "queue",
+              access: "publish",
+              selector: bullQueuesByVariable.get(queueSelector) || queueSelector,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, "bullmq-adapter", "high"),
+            });
+          }
+        }
+
+        if (methodName === "send") {
+          const topic = objectStringProperty(node.arguments[0], "topic");
+          if (topic) {
+            addResourceAccess(accesses, {
+              kind: "queue",
+              access: "publish",
+              selector: `kafka:${topic}`,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, "kafkajs-adapter", "medium"),
+            });
+          }
+        } else if (methodName === "subscribe") {
+          const topic = objectStringProperty(node.arguments[0], "topic");
+          if (topic) {
+            addResourceAccess(accesses, {
+              kind: "queue",
+              access: "subscribe",
+              selector: `kafka:${topic}`,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(methodName, "kafkajs-adapter", "medium"),
+            });
+          }
+        }
+      }
+
       if (name && firstArgumentText) {
         if (["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"].includes(name)) {
           addResourceAccess(accesses, {
@@ -334,7 +622,7 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             selector: normalizePath(firstArgumentText),
             filePath: relativeFilePath,
             line: getLineNumber(sourceFile, node),
-            source: name,
+            ...resourceAccessSource(name),
           });
         } else if (["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"].includes(name)) {
           addResourceAccess(accesses, {
@@ -343,7 +631,7 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             selector: normalizePath(firstArgumentText),
             filePath: relativeFilePath,
             line: getLineNumber(sourceFile, node),
-            source: name,
+            ...resourceAccessSource(name),
           });
         } else if ((name === "fetch" || name === "request") && /^https?:\/\//.test(firstArgumentText)) {
           addResourceAccess(accesses, {
@@ -352,7 +640,7 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             selector: firstArgumentText,
             filePath: relativeFilePath,
             line: getLineNumber(sourceFile, node),
-            source: name,
+            ...resourceAccessSource(name),
           });
         } else if (["get", "post", "put", "patch", "delete"].includes(name) && firstArgumentText.startsWith("/")) {
           addResourceAccess(accesses, {
@@ -361,7 +649,7 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             selector: `${name.toUpperCase()} ${firstArgumentText}`,
             filePath: relativeFilePath,
             line: getLineNumber(sourceFile, node),
-            source: name,
+            ...resourceAccessSource(name),
           });
         }
 
@@ -373,9 +661,23 @@ function collectResourceAccesses(rootDir: string, filePath: string): ResourceAcc
             selector: firstArgumentText,
             filePath: relativeFilePath,
             line: getLineNumber(sourceFile, node),
-            source: name,
+            ...resourceAccessSource(name),
           });
         }
+      }
+    }
+
+    if (ts.isNewExpression(node) && expressionName(node.expression) === "Worker") {
+      const queueName = literalText(node.arguments?.[0]);
+      if (queueName) {
+        addResourceAccess(accesses, {
+          kind: "queue",
+          access: "subscribe",
+          selector: `bullmq:${queueName}`,
+          filePath: relativeFilePath,
+          line: getLineNumber(sourceFile, node),
+          ...resourceAccessSource("Worker", "bullmq-adapter", "high"),
+        });
       }
     }
 
@@ -391,6 +693,8 @@ function resourceBaselineEntry(access: ResourceAccessReference): ResourceBaselin
     kind: access.kind,
     access: access.access,
     selector: access.selector,
+    detectedBy: access.detectedBy,
+    confidence: access.confidence,
   };
 }
 
@@ -436,6 +740,26 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
     const cellAccesses: ResourceAccessReference[] = [];
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell)) {
       for (const access of collectResourceAccesses(context.rootDir, sourceFilePath)) {
+        if (access.unresolved) {
+          addFinding(findings, {
+            ruleId: "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+            severity: "error",
+            cellId: cell.id,
+            filePath: access.filePath,
+            message: `${cell.id} has unresolved ${access.kind} resource access at line ${access.line}: ${access.reason || "resource access is not statically resolvable"}`,
+            details: {
+              kind: access.kind,
+              access: access.access,
+              selector: access.selector,
+              line: access.line,
+              source: access.source,
+              detectedBy: access.detectedBy,
+              confidence: access.confidence,
+              reason: access.reason,
+            },
+          });
+          continue;
+        }
         cellAccesses.push(access);
         if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) continue;
         addFinding(findings, {
@@ -450,6 +774,8 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
             selector: access.selector,
             line: access.line,
             source: access.source,
+            detectedBy: access.detectedBy,
+            confidence: access.confidence,
           },
         });
       }
@@ -457,6 +783,103 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
     accessesByCell.set(cell.id, cellAccesses);
   }
   return accessesByCell;
+}
+
+function addAccessToCell(accessesByCell: Map<string, ResourceAccessReference[]>, cellId: string, access: ResourceAccessReference): void {
+  const currentAccesses = accessesByCell.get(cellId) || [];
+  addResourceAccess(currentAccesses, access);
+  accessesByCell.set(cellId, currentAccesses);
+}
+
+function evidencePathsForOptions(rootDir: string, evidencePaths: string[] | undefined): string[] {
+  return (evidencePaths || []).map((evidencePath) => path.resolve(rootDir, evidencePath));
+}
+
+function resourceEvidenceAccesses(
+  context: AnalysisContext,
+  evidencePaths: string[],
+  findings: Finding[],
+  baseline: CellFenceBaseline | undefined,
+): Map<string, ResourceAccessReference[]> {
+  const accessesByCell = new Map<string, ResourceAccessReference[]>();
+  for (const evidencePath of evidencePaths) {
+    let evidence: CellFenceResourceEvidence;
+    try {
+      const validation = validateResourceEvidence(readJsonFile(evidencePath));
+      if (!validation.ok || !validation.value) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+          severity: "error",
+          filePath: repoPath(context.rootDir, evidencePath),
+          message: `resource evidence is invalid: ${validation.errors.join("; ")}`,
+        });
+        continue;
+      }
+      evidence = validation.value;
+    } catch (error) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+        severity: "error",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: `failed to read resource evidence: ${error instanceof Error ? error.message : String(error)}`,
+      });
+      continue;
+    }
+
+    for (const [entryIndex, entry] of evidence.accesses.entries()) {
+      const cellId = entry.cellId || evidence.cellId;
+      if (!cellId || !context.cellsById.has(cellId)) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+          severity: "error",
+          filePath: repoPath(context.rootDir, evidencePath),
+          message: `resource evidence access ${entryIndex} references unknown cell ${cellId || "(missing)"}`,
+          details: { entryIndex, cellId },
+        });
+        continue;
+      }
+
+      const cell = context.cellsById.get(cellId);
+      if (!cell) continue;
+      const access: ResourceAccessReference = {
+        kind: entry.kind,
+        access: entry.access,
+        selector: entry.selector,
+        filePath: repoPath(context.rootDir, evidencePath),
+        line: 1,
+        source: entry.detectedBy || "resource-evidence",
+        detectedBy: entry.detectedBy || "runtime-evidence",
+        confidence: entry.confidence || "runtime",
+      };
+      addAccessToCell(accessesByCell, cellId, access);
+
+      if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) continue;
+      addFinding(findings, {
+        ruleId: "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+        severity: "error",
+        cellId,
+        filePath: access.filePath,
+        message: `${cellId} ${resourceAccessVerb(access.access)} undeclared runtime ${access.kind} resource ${access.selector}`,
+        details: {
+          kind: access.kind,
+          access: access.access,
+          selector: access.selector,
+          source: access.source,
+          detectedBy: access.detectedBy,
+          confidence: access.confidence,
+        },
+      });
+    }
+  }
+  return accessesByCell;
+}
+
+function mergeAccessesByCell(target: Map<string, ResourceAccessReference[]>, source: Map<string, ResourceAccessReference[]>): void {
+  for (const [cellId, accesses] of source.entries()) {
+    for (const access of accesses) {
+      addAccessToCell(target, cellId, access);
+    }
+  }
 }
 
 function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
@@ -863,6 +1286,10 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validatePublicEntries(context, findings);
   const crossCellDependencies = validateImports(context, findings, warnings);
   const accessesByCell = validateResourceAccesses(context, findings, baseline);
+  mergeAccessesByCell(
+    accessesByCell,
+    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
+  );
   const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
 
   if (baseline) {

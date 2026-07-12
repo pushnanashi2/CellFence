@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "cellfence.baseline.v1",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "cells": {
+    "runtime": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 1,
+      "publicSurfaceLines": 20,
+      "crossCellDependencies": 0,
+      "resourceAccesses": [
+        {
+          "kind": "database",
+          "access": "read",
+          "selector": "app_users",
+          "detectedBy": "prisma-adapter",
+          "confidence": "high"
+        },
+        {
+          "kind": "database",
+          "access": "write",
+          "selector": "app_users",
+          "detectedBy": "prisma-adapter",
+          "confidence": "high"
+        }
+      ]
+    }
+  }
+}

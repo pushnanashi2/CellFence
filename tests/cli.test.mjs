@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
@@ -32,4 +34,108 @@ test("CLI check returns two for manifest configuration errors", () => {
   const result = runCli(["check", "--json"], fixturePath);
   assert.equal(result.status, 2);
   assert.match(result.stdout, /CELLFENCE_MANIFEST_INVALID/);
+});
+
+test("CLI evidence check accepts baseline-approved runtime evidence", () => {
+  const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
+  const result = runCli(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /"ok": true/);
+});
+
+test("CLI evidence check rejects new runtime resource evidence", () => {
+  const fixturePath = path.join(root, "fixtures/invalid/resource-evidence-detects-new");
+  const result = runCli(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
+});
+
+test("CLI baseline create stores runtime evidence inventory", () => {
+  const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+  fs.rmSync(path.join(tempDir, "cellfence.baseline.json"));
+
+  const result = runCli(["baseline", "create", "--evidence", "resource-evidence.json"], tempDir);
+  assert.equal(result.status, 0);
+
+  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+  assert.deepEqual(baseline.cells.runtime.resourceAccesses, [
+    {
+      kind: "database",
+      access: "read",
+      selector: "runtime.orders",
+      detectedBy: "runtime-evidence",
+      confidence: "runtime",
+    },
+  ]);
+});
+
+test("CLI baseline create stores Prisma delegate inventory", () => {
+  const fixturePath = path.join(root, "fixtures/valid/prisma-resource-baseline");
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-prisma-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+  fs.rmSync(path.join(tempDir, "cellfence.baseline.json"));
+
+  const result = runCli(["baseline", "create"], tempDir);
+  assert.equal(result.status, 0);
+
+  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+  assert.deepEqual(baseline.cells.runtime.resourceAccesses, [
+    {
+      kind: "database",
+      access: "read",
+      selector: "app_users",
+      detectedBy: "prisma-adapter",
+      confidence: "high",
+    },
+    {
+      kind: "database",
+      access: "write",
+      selector: "app_users",
+      detectedBy: "prisma-adapter",
+      confidence: "high",
+    },
+  ]);
+});
+
+test("CLI baseline create stores BullMQ and KafkaJS inventory", () => {
+  const fixturePath = path.join(root, "fixtures/valid/event-adapters-declared");
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-events-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+
+  const result = runCli(["baseline", "create"], tempDir);
+  assert.equal(result.status, 0);
+
+  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+  assert.deepEqual(baseline.cells.runtime.resourceAccesses, [
+    {
+      kind: "queue",
+      access: "publish",
+      selector: "bullmq:nightly-research",
+      detectedBy: "bullmq-adapter",
+      confidence: "high",
+    },
+    {
+      kind: "queue",
+      access: "publish",
+      selector: "kafka:research.events",
+      detectedBy: "kafkajs-adapter",
+      confidence: "medium",
+    },
+    {
+      kind: "queue",
+      access: "subscribe",
+      selector: "bullmq:nightly-research",
+      detectedBy: "bullmq-adapter",
+      confidence: "high",
+    },
+    {
+      kind: "queue",
+      access: "subscribe",
+      selector: "kafka:research.events",
+      detectedBy: "kafkajs-adapter",
+      confidence: "medium",
+    },
+  ]);
 });
