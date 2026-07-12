@@ -28,9 +28,23 @@ function run(command, args, options = {}) {
 
 function packageTarball(packageDir, tarballDir) {
   const before = new Set(fs.readdirSync(tarballDir));
-  run("npm", ["pack", "--pack-destination", tarballDir], {
+  const packOutput = run("npm", ["pack", "--json", "--pack-destination", tarballDir], {
     cwd: path.join(root, packageDir)
   });
+  const [packInfo] = JSON.parse(packOutput);
+  if (!packInfo || !Array.isArray(packInfo.files)) {
+    throw new Error(`npm pack did not return file metadata for ${packageDir}`);
+  }
+  const packedFiles = packInfo.files.map((file) => file.path).sort();
+  const forbiddenFile = packedFiles.find((filePath) => filePath.endsWith(".tsbuildinfo"));
+  if (forbiddenFile) {
+    throw new Error(`${packageDir} package includes forbidden build info file ${forbiddenFile}`);
+  }
+  for (const requiredFile of ["README.md", "package.json", "dist/index.js", "dist/index.d.ts"]) {
+    if (!packedFiles.includes(requiredFile)) {
+      throw new Error(`${packageDir} package is missing ${requiredFile}`);
+    }
+  }
   const created = fs
     .readdirSync(tarballDir)
     .filter((entry) => entry.endsWith(".tgz") && !before.has(entry));

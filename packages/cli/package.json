@@ -4,13 +4,26 @@
   "description": "Public CellFence CLI.",
   "license": "Apache-2.0",
   "type": "module",
+  "keywords": [
+    "architecture",
+    "governance",
+    "monorepo",
+    "ai-agents",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "cellfence": "dist/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js.map",
+    "README.md"
   ],
   "dependencies": {
     "@cellfence/engine": "0.1.0"
