@@ -43,6 +43,8 @@
       ],
       "publicEntry": "packages/engine/src/index.ts",
       "publicSymbols": [
+        "BaselineUpdateGuardOptions",
+        "BaselineUpdateGuardResult",
         "CellFenceContext",
         "CheckOptions",
         "CheckResult",
@@ -52,11 +54,13 @@
         "Finding",
         "RuleId",
         "Severity",
+        "SuggestedResolution",
         "createCellContext",
         "checkRepository",
         "createBaseline",
         "defaultBaselinePath",
         "formatHumanResult",
+        "guardBaselineUpdate",
         "loadManifestFromFile",
         "writeBaselineFile"
       ],

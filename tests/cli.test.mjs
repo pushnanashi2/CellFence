@@ -70,6 +70,7 @@ test("CLI context returns machine-readable cell fence before editing", () => {
     {
       cell: "producer",
       publicEntry: "src/producer/public.ts",
+      locked: false,
       artifactLanes: [],
     },
   ]);
@@ -84,6 +85,69 @@ test("CLI context can render AGENTS.md-compatible guidance", () => {
   assert.match(result.stdout, /## Allowed Resources/);
   assert.match(result.stdout, /database:read:app\.users \(baseline\)/);
   assert.match(result.stdout, /publicSurfaceLines: 9\/20, remaining 11, source baseline-ratchet/);
+});
+
+test("CLI check emits suggested resolutions for private imports", () => {
+  const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
+  const result = runCli(["check", "--json"], fixturePath);
+  assert.equal(result.status, 1);
+  const checkResult = JSON.parse(result.stdout);
+  const privateImportFinding = checkResult.findings.find((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT");
+  assert.ok(privateImportFinding);
+  assert.deepEqual(
+    privateImportFinding.suggestedResolutions.map((resolution) => resolution.kind),
+    ["change-code", "ask-human"],
+  );
+  assert.equal(privateImportFinding.suggestedResolutions[0].approvalRequired, false);
+  assert.equal(privateImportFinding.suggestedResolutions[1].approvalRequired, true);
+  assert.equal(privateImportFinding.suggestedResolutions[0].details.publicEntry, "src/producer/public.ts");
+});
+
+test("CLI baseline update refuses to expand locked cell baselines", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-locked-"));
+  fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const a = 1;\nexport const b = 2;\n");
+  fs.writeFileSync(path.join(tempDir, "cellfence.manifest.json"), `${JSON.stringify({
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      {
+        id: "core",
+        locked: true,
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["a", "b"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(tempDir, "cellfence.baseline.json"), `${JSON.stringify({
+    schemaVersion: "cellfence.baseline.v1",
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    cells: {
+      core: {
+        ownedPathPatterns: 1,
+        publicSymbols: 1,
+        publicSurfaceLines: 20,
+        crossCellDependencies: 0,
+        resourceAccesses: [],
+      },
+    },
+  }, null, 2)}\n`);
+
+  const checkResult = runCli(["baseline", "check", "--json"], tempDir);
+  assert.equal(checkResult.status, 1);
+  const parsedCheckResult = JSON.parse(checkResult.stdout);
+  const ratchetFinding = parsedCheckResult.findings.find((finding) => finding.ruleId === "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH");
+  assert.ok(ratchetFinding);
+  const baselineSuggestion = ratchetFinding.suggestedResolutions.find((resolution) => resolution.kind === "update-baseline");
+  assert.equal(baselineSuggestion.approvalRequired, true);
+
+  const result = runCli(["baseline", "update"], tempDir);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /CELLFENCE_LOCKED_BASELINE_EXPANSION/);
+  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+  assert.equal(baseline.cells.core.publicSymbols, 1);
 });
 
 test("CLI baseline create stores runtime evidence inventory", () => {

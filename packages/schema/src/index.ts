@@ -20,6 +20,7 @@ export type ResourceContractManifest = {
   kind: ResourceContractKind;
   access: ResourceAccessMode[];
   selectors: string[];
+  locked?: boolean;
   description?: string;
 };
 
@@ -62,6 +63,7 @@ export type CellManifest = {
   publicEntry: string;
   publicSymbols: string[];
   packageName?: string;
+  locked?: boolean;
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
@@ -105,6 +107,10 @@ function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === "string";
 }
 
+function optionalBoolean(value: unknown): value is boolean | undefined {
+  return value === undefined || typeof value === "boolean";
+}
+
 function validateConsumer(value: unknown, location: string, errors: string[]): value is CellConsumerManifest {
   if (!isRecord(value)) {
     errors.push(`${location} must be an object like {"cell":"producer-cell"}`);
@@ -132,6 +138,9 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
   }
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);
+  }
+  if (!optionalBoolean(value.locked)) {
+    errors.push(`${location}.locked must be a boolean when present`);
   }
   return errors.length === 0 || typeof value.id === "string";
 }
@@ -228,6 +237,9 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (!optionalString(value.packageName)) {
     errors.push(`${location}.packageName must be a string when present`);
+  }
+  if (!optionalBoolean(value.locked)) {
+    errors.push(`${location}.locked must be a boolean when present`);
   }
   if (value.consumes !== undefined) {
     if (!Array.isArray(value.consumes)) {

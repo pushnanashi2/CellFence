@@ -34,9 +34,17 @@ export type RuleId =
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
   | "CELLFENCE_UNRESOLVED_IMPORT"
+  | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
 
 export type Severity = "error" | "warning";
+
+export type SuggestedResolution = {
+  kind: "change-code" | "change-manifest" | "update-baseline" | "ask-human";
+  title: string;
+  approvalRequired: boolean;
+  details?: Record<string, unknown>;
+};
 
 export type Finding = {
   ruleId: RuleId;
@@ -46,6 +54,7 @@ export type Finding = {
   cellId?: string;
   producerCellId?: string;
   details?: Record<string, unknown>;
+  suggestedResolutions?: SuggestedResolution[];
 };
 
 export type CheckOptions = {
@@ -74,6 +83,7 @@ export type ContextAllowedImport = {
   cell: string;
   publicEntry: string;
   packageName?: string;
+  locked?: boolean;
   artifactLanes: string[];
 };
 
@@ -84,6 +94,7 @@ export type CellFenceContext = {
   cell: {
     id: string;
     packageName?: string;
+    locked: boolean;
     ownedPaths: string[];
     publicEntry: string;
     publicSymbols: string[];
@@ -98,6 +109,15 @@ export type CellFenceContext = {
 
 export type ContextOptions = CheckOptions & {
   cellId: string;
+};
+
+export type BaselineUpdateGuardResult = {
+  ok: boolean;
+  findings: Finding[];
+};
+
+export type BaselineUpdateGuardOptions = CheckOptions & {
+  nextBaseline: CellFenceBaseline;
 };
 
 type ImportKind = "import" | "export-from" | "require" | "dynamic-import";
@@ -199,6 +219,22 @@ function literalPrefix(pattern: string): string {
 
 function addFinding(findings: Finding[], finding: Finding): void {
   findings.push(finding);
+}
+
+function codeResolution(title: string, details?: Record<string, unknown>): SuggestedResolution {
+  return { kind: "change-code", title, approvalRequired: false, details };
+}
+
+function manifestResolution(title: string, approvalRequired: boolean, details?: Record<string, unknown>): SuggestedResolution {
+  return { kind: "change-manifest", title, approvalRequired, details };
+}
+
+function baselineResolution(title: string, approvalRequired: boolean, details?: Record<string, unknown>): SuggestedResolution {
+  return { kind: "update-baseline", title, approvalRequired, details };
+}
+
+function humanResolution(title: string, details?: Record<string, unknown>): SuggestedResolution {
+  return { kind: "ask-human", title, approvalRequired: true, details };
 }
 
 function listFiles(rootDir: string): string[] {
@@ -827,6 +863,21 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
             detectedBy: access.detectedBy,
             confidence: access.confidence,
           },
+          suggestedResolutions: [
+            codeResolution(`Remove or route this ${access.kind} access through an allowed owner`, {
+              kind: access.kind,
+              access: access.access,
+              selector: access.selector,
+            }),
+            manifestResolution(`Declare ${access.kind} ${access.access} access for ${access.selector}`, Boolean(cell.locked), {
+              cell: cell.id,
+              resourceContract: {
+                kind: access.kind,
+                access: [access.access],
+                selectors: [access.selector],
+              },
+            }),
+          ],
         });
       }
     }
@@ -918,6 +969,21 @@ function resourceEvidenceAccesses(
           detectedBy: access.detectedBy,
           confidence: access.confidence,
         },
+        suggestedResolutions: [
+          codeResolution(`Stop emitting runtime evidence for undeclared ${access.kind} access if it is accidental`, {
+            kind: access.kind,
+            access: access.access,
+            selector: access.selector,
+          }),
+          manifestResolution(`Declare runtime ${access.kind} ${access.access} access for ${access.selector}`, Boolean(cell.locked), {
+            cell: cell.id,
+            resourceContract: {
+              kind: access.kind,
+              access: [access.access],
+              selectors: [access.selector],
+            },
+          }),
+        ],
       });
     }
   }
@@ -1100,6 +1166,17 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
         filePath: cell.publicEntry,
         message: `public symbols for cell ${cell.id} do not match manifest (${mismatchParts.join("; ")})`,
         details: { missingSymbols, undeclaredSymbols },
+        suggestedResolutions: [
+          codeResolution("Change the public entry exports to match the manifest", {
+            publicEntry: cell.publicEntry,
+            expectedSymbols: cell.publicSymbols,
+          }),
+          manifestResolution("Update publicSymbols in the manifest to match the public entry", Boolean(cell.locked), {
+            cell: cell.id,
+            missingSymbols,
+            undeclaredSymbols,
+          }),
+        ],
       });
     }
   }
@@ -1202,6 +1279,15 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
             filePath: reference.importerPath,
             message: `${importerCell.id} imports ${producerCell.id} without declaring a consumer relationship`,
             details: { specifier: reference.specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
+            suggestedResolutions: [
+              codeResolution(`Remove the ${producerCell.id} import or move the code behind an existing allowed cell`, {
+                specifier: reference.specifier,
+              }),
+              manifestResolution(`Declare ${importerCell.id} as a consumer of ${producerCell.id}`, Boolean(importerCell.locked), {
+                cell: importerCell.id,
+                consumes: { cell: producerCell.id },
+              }),
+            ],
           });
         }
 
@@ -1216,6 +1302,15 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
               filePath: reference.importerPath,
               message: `${importerCell.id} imports artifact lane ${resolvedImport.artifactLaneId} from ${producerCell.id} without declaring it`,
               details: { specifier: reference.specifier, artifactLaneId: resolvedImport.artifactLaneId, line: reference.line },
+              suggestedResolutions: [
+                codeResolution("Stop importing the artifact lane directly if this is not an intended artifact dependency", {
+                  specifier: reference.specifier,
+                }),
+                manifestResolution(`Declare artifact lane ${resolvedImport.artifactLaneId} on the consumer relationship`, Boolean(importerCell.locked), {
+                  cell: importerCell.id,
+                  consumes: { cell: producerCell.id, artifactLanes: [resolvedImport.artifactLaneId] },
+                }),
+              ],
             });
           }
           continue;
@@ -1231,6 +1326,16 @@ function validateImports(context: AnalysisContext, findings: Finding[], warnings
             filePath: reference.importerPath,
             message: `${importerCell.id} imports private implementation from ${producerCell.id}`,
             details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+            suggestedResolutions: [
+              codeResolution(`Import from ${producerCell.publicEntry} instead of ${resolvedImport.targetPath || reference.specifier}`, {
+                publicEntry: producerCell.publicEntry,
+                packageName: producerCell.packageName,
+              }),
+              humanResolution(`Ask ${producerCell.id}'s owner to expose the needed symbol through its public entry`, {
+                producerCell: producerCell.id,
+                publicEntry: producerCell.publicEntry,
+              }),
+            ],
           });
         }
       }
@@ -1264,8 +1369,14 @@ function computeMetrics(
   return metrics;
 }
 
-function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: CellFenceBaseline, findings: Finding[]): void {
+function compareBaseline(
+  context: AnalysisContext,
+  metrics: Record<string, CellBaselineRecord>,
+  baseline: CellFenceBaseline,
+  findings: Finding[],
+): void {
   for (const [cellId, metric] of Object.entries(metrics)) {
+    const locked = Boolean(context.cellsById.get(cellId)?.locked);
     const baselineRecord = baseline.cells[cellId];
     if (!baselineRecord) continue;
     if (metric.ownedPathPatterns > baselineRecord.ownedPathPatterns) {
@@ -1274,6 +1385,10 @@ function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: 
         severity: "error",
         cellId,
         message: `${cellId} owned path patterns grew from ${baselineRecord.ownedPathPatterns} to ${metric.ownedPathPatterns}`,
+        suggestedResolutions: [
+          codeResolution("Move new files under existing owned path patterns or reduce the owned path expansion"),
+          baselineResolution("Accept the owned path growth in the baseline", locked, { cell: cellId, metric: "ownedPathPatterns" }),
+        ],
       });
     }
     if (metric.publicSymbols > baselineRecord.publicSymbols) {
@@ -1282,6 +1397,10 @@ function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: 
         severity: "error",
         cellId,
         message: `${cellId} public symbols grew from ${baselineRecord.publicSymbols} to ${metric.publicSymbols}`,
+        suggestedResolutions: [
+          codeResolution("Keep the new API internal or remove public exports that are not part of the intended contract"),
+          baselineResolution("Accept the public symbol growth in the baseline", locked, { cell: cellId, metric: "publicSymbols" }),
+        ],
       });
     }
     if (metric.publicSurfaceLines > baselineRecord.publicSurfaceLines) {
@@ -1290,6 +1409,10 @@ function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: 
         severity: "error",
         cellId,
         message: `${cellId} public surface lines grew from ${baselineRecord.publicSurfaceLines} to ${metric.publicSurfaceLines}`,
+        suggestedResolutions: [
+          codeResolution("Move implementation detail out of the public entry or reduce public surface size"),
+          baselineResolution("Accept the public surface growth in the baseline", locked, { cell: cellId, metric: "publicSurfaceLines" }),
+        ],
       });
     }
     if (metric.crossCellDependencies > baselineRecord.crossCellDependencies) {
@@ -1298,6 +1421,10 @@ function compareBaseline(metrics: Record<string, CellBaselineRecord>, baseline: 
         severity: "error",
         cellId,
         message: `${cellId} cross-cell dependencies grew from ${baselineRecord.crossCellDependencies} to ${metric.crossCellDependencies}`,
+        suggestedResolutions: [
+          codeResolution("Remove the new cross-cell dependency or route it through an existing allowed dependency"),
+          baselineResolution("Accept the cross-cell dependency growth in the baseline", locked, { cell: cellId, metric: "crossCellDependencies" }),
+        ],
       });
     }
   }
@@ -1376,7 +1503,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
 
   if (baseline) {
-    compareBaseline(metrics, baseline, findings);
+    compareBaseline(context, metrics, baseline, findings);
   }
 
   const hasErrors = findings.some((finding) => finding.severity === "error");
@@ -1399,6 +1526,72 @@ export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
     generatedAt: new Date().toISOString(),
     cells: result.metrics,
   };
+}
+
+function addLockedBaselineFinding(
+  findings: Finding[],
+  cellId: string,
+  message: string,
+  details: Record<string, unknown>,
+): void {
+  addFinding(findings, {
+    ruleId: "CELLFENCE_LOCKED_BASELINE_EXPANSION",
+    severity: "error",
+    cellId,
+    message,
+    details,
+    suggestedResolutions: [
+      codeResolution("Reduce the change so the locked cell stays within the accepted baseline", details),
+      humanResolution("Ask a human owner to review and unlock or manually accept this architectural expansion", details),
+    ],
+  });
+}
+
+export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): BaselineUpdateGuardResult {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const baselinePath = path.resolve(rootDir, options.baselinePath || defaultBaselinePath(rootDir));
+  if (!fs.existsSync(baselinePath)) return { ok: true, findings: [] };
+
+  const manifest = loadManifestFromFile(manifestPath);
+  const existingBaselineValidation = validateBaseline(readJsonFile(baselinePath));
+  if (!existingBaselineValidation.ok || !existingBaselineValidation.value) {
+    throw new Error(`baseline is invalid: ${existingBaselineValidation.errors.join("; ")}`);
+  }
+
+  const findings: Finding[] = [];
+  const existingBaseline = existingBaselineValidation.value;
+  for (const cell of manifest.cells) {
+    if (!cell.locked) continue;
+    const current = options.nextBaseline.cells[cell.id];
+    const previous = existingBaseline.cells[cell.id];
+    if (!current || !previous) continue;
+
+    for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
+      if (current[metric] > previous[metric]) {
+        addLockedBaselineFinding(
+          findings,
+          cell.id,
+          `${cell.id} is locked and ${metric} would grow from ${previous[metric]} to ${current[metric]}`,
+          { cell: cell.id, metric, previous: previous[metric], current: current[metric] },
+        );
+      }
+    }
+
+    const previousResourceKeys = new Set((previous.resourceAccesses || []).map(resourceBaselineKey));
+    for (const resourceAccess of current.resourceAccesses || []) {
+      const resourceKey = resourceBaselineKey(resourceAccess);
+      if (previousResourceKeys.has(resourceKey)) continue;
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and baseline update would grandfather ${resourceAccess.kind} ${resourceAccess.access} ${resourceAccess.selector}`,
+        { cell: cell.id, resourceAccess },
+      );
+    }
+  }
+
+  return { ok: findings.length === 0, findings };
 }
 
 function loadOptionalBaseline(rootDir: string, baselinePath: string | undefined): CellFenceBaseline | undefined {
@@ -1459,6 +1652,7 @@ export function createCellContext(options: ContextOptions): CellFenceContext {
       cell: producer.id,
       publicEntry: producer.publicEntry,
       packageName: producer.packageName,
+      locked: Boolean(producer.locked),
       artifactLanes: consumer.artifactLanes || [],
     }];
   });
@@ -1468,6 +1662,7 @@ export function createCellContext(options: ContextOptions): CellFenceContext {
     cell: {
       id: cell.id,
       packageName: cell.packageName,
+      locked: Boolean(cell.locked),
       ownedPaths: cell.ownedPaths,
       publicEntry: cell.publicEntry,
       publicSymbols: cell.publicSymbols,

@@ -215,7 +215,7 @@ Exit codes are documented automation contracts for the current v0.x implementati
 | `2` | Manifest read or manifest validation error before repository analysis |
 | `3` | Internal tool error |
 
-Use `--json` when another tool or coding agent needs structured output.
+Use `--json` when another tool or coding agent needs structured output. JSON findings include `suggestedResolutions` when CellFence can identify safe next moves, distinguishing code changes from manifest changes, baseline updates, and human approval paths.
 
 ## Manifest reference
 
@@ -226,6 +226,7 @@ Use `--json` when another tool or coding agent needs structured output.
     {
       "id": "engine",
       "packageName": "@example/engine",
+      "locked": true,
       "ownedPaths": ["packages/engine/**"],
       "publicEntry": "packages/engine/src/index.ts",
       "publicSymbols": ["checkRepository"],
@@ -245,6 +246,7 @@ Use `--json` when another tool or coding agent needs structured output.
       "resourceContracts": [
         {
           "id": "runtime-db",
+          "locked": true,
           "kind": "database",
           "access": ["read", "write"],
           "selectors": ["app.users", "app.events"]
@@ -262,6 +264,8 @@ Use `--json` when another tool or coding agent needs structured output.
 ```
 
 `packageName` is optional. When present, importing the exact package name is treated as importing the declared public entry. Package subpath imports into private implementation remain violations.
+
+`locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
 
 See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
 
@@ -300,6 +304,8 @@ cellfence baseline update
 ```
 
 A baseline update is a governance change, not a routine way to silence a failing check. In a protected repository, review manifest and baseline changes separately from ordinary implementation changes.
+
+If a cell has `"locked": true`, `baseline update` fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase public symbols, public surface lines, cross-cell dependencies, owned path patterns, or grandfathered resource access for that cell. A human owner must either reduce the change or explicitly review the contract expansion.
 
 For large repositories, prefer this baseline-first workflow over hand-writing every resource contract:
 

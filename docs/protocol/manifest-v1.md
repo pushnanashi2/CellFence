@@ -31,6 +31,8 @@ Baseline: a captured measurement of architectural surface area.
 
 Ratchet: a check that permits reductions but rejects silent growth beyond a baseline.
 
+Locked cell: a cell whose accepted baseline cannot be expanded by `baseline update`.
+
 Sealed source: files that require explicit human authorization before modification. In v0.x this is documented, not cryptographically enforced.
 
 Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `planned`.
@@ -41,6 +43,7 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 {
   "id": "engine",
   "packageName": "@cellfence/engine",
+  "locked": true,
   "ownedPaths": ["packages/engine/**"],
   "publicEntry": "packages/engine/src/index.ts",
   "publicSymbols": ["checkRepository"],
@@ -54,6 +57,7 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
   "resourceContracts": [
     {
       "id": "runtime-db",
+      "locked": true,
       "kind": "database",
       "access": ["read", "write"],
       "selectors": ["app.users", "app.events"]
@@ -69,6 +73,8 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 ```
 
 `packageName` is optional. When present, imports of the exact package name are treated as imports of the declared public entry.
+
+`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase owned path patterns, public symbols, public surface lines, cross-cell dependencies, or grandfathered resource access for a locked cell. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
 
@@ -88,7 +94,10 @@ CellFence v0.x enforces:
 - undeclared static file, database, queue, and HTTP resource access;
 - undeclared runtime resource evidence;
 - unresolved unsafe or dynamic raw SQL access;
+- locked baseline expansion during `baseline update`;
 - ratchet growth for owned paths, public symbols, public entry line count, and cross-cell dependencies.
+
+Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.
 
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, and selected BullMQ/KafkaJS calls. Dynamic paths, arbitrary ORM metadata, query-builder semantics, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 

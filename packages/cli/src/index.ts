@@ -10,6 +10,7 @@ import {
   createBaseline,
   defaultBaselinePath,
   formatHumanResult,
+  guardBaselineUpdate,
   writeBaselineFile,
 } from "@cellfence/engine";
 
@@ -141,6 +142,7 @@ function formatContextAsAgentsMarkdown(context: CellFenceContext): string {
   lines.push("## Public Surface");
   lines.push(`- publicEntry: ${context.cell.publicEntry}`);
   if (context.cell.packageName) lines.push(`- packageName: ${context.cell.packageName}`);
+  lines.push(`- locked: ${context.cell.locked ? "true" : "false"}`);
   lines.push(...context.cell.publicSymbols.map((symbol) => `- symbol: ${symbol}`));
   lines.push("");
   lines.push("## Allowed Cross-Cell Imports");
@@ -150,7 +152,8 @@ function formatContextAsAgentsMarkdown(context: CellFenceContext): string {
     for (const allowedImport of context.allowedImports) {
       const packageSuffix = allowedImport.packageName ? ` or ${allowedImport.packageName}` : "";
       const laneSuffix = allowedImport.artifactLanes.length > 0 ? `; artifact lanes: ${allowedImport.artifactLanes.join(", ")}` : "";
-      lines.push(`- ${allowedImport.cell}: ${allowedImport.publicEntry}${packageSuffix}${laneSuffix}`);
+      const lockedSuffix = allowedImport.locked ? "; locked" : "";
+      lines.push(`- ${allowedImport.cell}: ${allowedImport.publicEntry}${packageSuffix}${laneSuffix}${lockedSuffix}`);
     }
   }
   lines.push("");
@@ -232,6 +235,23 @@ function commandBaselineUpdate(parsed: ParsedArgs): number {
     evidencePaths: parsed.evidencePaths,
   });
   const baselinePath = path.resolve(parsed.rootDir, parsed.baselinePath || defaultBaselinePath(parsed.rootDir));
+  const guard = guardBaselineUpdate({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    baselinePath,
+    evidencePaths: parsed.evidencePaths,
+    nextBaseline: baseline,
+  });
+  if (!guard.ok) {
+    console.log(formatHumanResult({
+      ok: false,
+      exitCode: 1,
+      findings: guard.findings,
+      warnings: [],
+      metrics: baseline.cells,
+    }));
+    return 1;
+  }
   writeBaselineFile(baselinePath, baseline);
   console.log(`updated ${baselinePath}`);
   return 0;
