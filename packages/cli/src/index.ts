@@ -6,8 +6,11 @@ import { fileURLToPath } from "node:url";
 import {
   type CellFenceContext,
   type AutoAllocation,
+  type ClaimCheckResult,
   checkChangedRepository,
+  checkClaims,
   checkRepository,
+  createClaim,
   createAutoAllocation,
   createCellContext,
   createCouplingGraph,
@@ -17,6 +20,7 @@ import {
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
+  listClaims,
   listWaivers,
   writeBaselineFile,
 } from "@cellfence/engine";
@@ -26,7 +30,15 @@ type ParsedArgs = {
   manifestPath?: string;
   baselinePath?: string;
   cellId?: string;
+  claimId?: string;
+  claimsPath?: string;
+  agent?: string;
   evidencePaths: string[];
+  claimCells: string[];
+  claimPaths: string[];
+  symbols: string[];
+  resources: string[];
+  artifactLanes: string[];
   format?: string;
   json: boolean;
   rootDir: string;
@@ -39,6 +51,7 @@ type ParsedArgs = {
   targetFilePath?: string;
   line?: number;
   expires?: string;
+  ttl?: string;
   reason?: string;
   approvedBy?: string;
 };
@@ -67,6 +80,9 @@ Usage:
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
   cellfence graph [--json|--format mermaid]
+  cellfence claim create --agent agent-id --cell cell-id [--path glob] [--ttl 2h] [--claims .cellfence/claims.json] [--json]
+  cellfence claim check [--agent agent-id] [--base origin/main] [--head HEAD] [--claims .cellfence/claims.json] [--json]
+  cellfence claim list [--claims .cellfence/claims.json] [--json]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
@@ -82,7 +98,19 @@ Exit codes:
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
-  const parsed: ParsedArgs = { command: [], evidencePaths: [], json: false, rootDir: process.cwd(), changed: false, autoAllocate: false };
+  const parsed: ParsedArgs = {
+    command: [],
+    evidencePaths: [],
+    claimCells: [],
+    claimPaths: [],
+    symbols: [],
+    resources: [],
+    artifactLanes: [],
+    json: false,
+    rootDir: process.cwd(),
+    changed: false,
+    autoAllocate: false,
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--json") {
@@ -113,9 +141,46 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.baselinePath = argument.slice("--baseline=".length);
     } else if (argument === "--cell") {
       parsed.cellId = argv[index + 1];
+      parsed.claimCells.push(argv[index + 1]);
       index += 1;
     } else if (argument.startsWith("--cell=")) {
       parsed.cellId = argument.slice("--cell=".length);
+      parsed.claimCells.push(parsed.cellId);
+    } else if (argument === "--agent") {
+      parsed.agent = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--agent=")) {
+      parsed.agent = argument.slice("--agent=".length);
+    } else if (argument === "--claim-id") {
+      parsed.claimId = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--claim-id=")) {
+      parsed.claimId = argument.slice("--claim-id=".length);
+    } else if (argument === "--claims") {
+      parsed.claimsPath = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--claims=")) {
+      parsed.claimsPath = argument.slice("--claims=".length);
+    } else if (argument === "--path") {
+      parsed.claimPaths.push(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--path=")) {
+      parsed.claimPaths.push(argument.slice("--path=".length));
+    } else if (argument === "--symbol") {
+      parsed.symbols.push(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--symbol=")) {
+      parsed.symbols.push(argument.slice("--symbol=".length));
+    } else if (argument === "--resource") {
+      parsed.resources.push(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--resource=")) {
+      parsed.resources.push(argument.slice("--resource=".length));
+    } else if (argument === "--artifact") {
+      parsed.artifactLanes.push(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--artifact=")) {
+      parsed.artifactLanes.push(argument.slice("--artifact=".length));
     } else if (argument === "--task") {
       parsed.task = argv[index + 1];
       index += 1;
@@ -141,6 +206,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--expires=")) {
       parsed.expires = argument.slice("--expires=".length);
+    } else if (argument === "--ttl") {
+      parsed.ttl = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--ttl=")) {
+      parsed.ttl = argument.slice("--ttl=".length);
     } else if (argument === "--reason") {
       parsed.reason = argv[index + 1];
       index += 1;
@@ -354,6 +424,82 @@ function commandGraph(parsed: ParsedArgs): number {
   return 0;
 }
 
+function formatClaimResult(result: ClaimCheckResult, createdClaimId?: string): string {
+  const lines: string[] = [];
+  lines.push(result.ok ? "CellFence claim check passed." : "CellFence claim check failed.");
+  if (createdClaimId) lines.push(`Created claim: ${createdClaimId}`);
+  lines.push(`Active claims: ${result.activeClaims.length}`);
+  if (result.changedFiles) lines.push(`Changed files: ${result.changedFiles.length}`);
+  for (const finding of [...result.findings, ...result.warnings]) {
+    const location = finding.filePath ? ` ${finding.filePath}` : "";
+    lines.push(`[${finding.severity}] ${finding.ruleId}${location}: ${finding.message}`);
+  }
+  return lines.join("\n");
+}
+
+function commandClaimCreate(parsed: ParsedArgs): number {
+  if (!parsed.agent) {
+    console.error("cellfence claim create requires --agent agent-id");
+    return 2;
+  }
+  const result = createClaim({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    claimsPath: parsed.claimsPath,
+    claimId: parsed.claimId,
+    agent: parsed.agent,
+    task: parsed.task,
+    ttl: parsed.ttl,
+    expiresAt: parsed.expires,
+    cells: parsed.claimCells,
+    paths: parsed.claimPaths,
+    symbols: parsed.symbols,
+    resources: parsed.resources,
+    artifactLanes: parsed.artifactLanes,
+  });
+  if (parsed.json) writeJson(result);
+  else console.log(formatClaimResult(result, result.createdClaim?.id));
+  return result.exitCode;
+}
+
+function commandClaimCheck(parsed: ParsedArgs): number {
+  const result = checkClaims({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    claimsPath: parsed.claimsPath,
+    agent: parsed.agent,
+    baseRef: parsed.baseRef,
+    headRef: parsed.headRef,
+  });
+  if (parsed.json) writeJson(result);
+  else console.log(formatClaimResult(result));
+  return result.exitCode;
+}
+
+function commandClaimList(parsed: ParsedArgs): number {
+  const result = listClaims({
+    rootDir: parsed.rootDir,
+    claimsPath: parsed.claimsPath,
+  });
+  if (parsed.json) {
+    writeJson({
+      schemaVersion: "cellfence.claims.v1",
+      claims: result.claims,
+      activeClaims: result.activeClaims,
+      findings: result.findings,
+      warnings: result.warnings,
+    });
+  } else if (result.claims.length === 0) {
+    console.log("No CellFence claims found.");
+  } else {
+    for (const claim of result.claims) {
+      const active = result.activeClaims.some((activeClaim) => activeClaim.id === claim.id) ? "active" : "expired";
+      console.log(`${active} ${claim.id} agent:${claim.agent} cells:${claim.cells.join(",") || "(none)"} expires:${claim.expiresAt}`);
+    }
+  }
+  return result.exitCode;
+}
+
 function commandBaselineCreate(parsed: ParsedArgs): number {
   const baseline = createBaseline({
     rootDir: parsed.rootDir,
@@ -463,6 +609,9 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
+    if (primaryCommand === "claim" && secondaryCommand === "create") return commandClaimCreate(parsed);
+    if (primaryCommand === "claim" && secondaryCommand === "check") return commandClaimCheck(parsed);
+    if (primaryCommand === "claim" && secondaryCommand === "list") return commandClaimList(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "create") return commandBaselineCreate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);

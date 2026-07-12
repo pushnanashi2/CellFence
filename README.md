@@ -8,7 +8,7 @@ Use CellFence to show agents the fence before they edit, then detect private cro
 
 When CellFence is configured as a required check behind a protected branch, it acts as a **repository architecture firewall** for AI-generated and human-written code. It does not run coding agents, grant permissions, or sandbox tool calls; it verifies the repository state they leave behind.
 
-> **Status: pre-release v0.x.** The schema, plugin API v1 types, analysis engine, CLI, conformance fixtures, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
+> **Status: pre-release v0.x.** The schema, plugin API v1 types, analysis engine, CLI, conformance fixtures, claim leases, ratchets, repository-local CI, npm packages, reusable GitHub Action wrapper, and CellFence self-check are implemented. External root-of-trust controls such as protected-branch rules and trusted publishing must still be configured outside this repository. See [Implementation status](docs/implementation-status.md).
 
 ## Why CellFence exists
 
@@ -202,6 +202,8 @@ npx cellfence check --changed --base origin/main
 npx cellfence context --cell example --json
 npx cellfence context --auto-allocate --task "change the reporting cell" --json
 npx cellfence graph --format mermaid
+npx cellfence claim create --agent codex-1 --cell example --ttl 2h
+npx cellfence claim check --agent codex-1
 npx cellfence baseline create
 npx cellfence baseline check
 npx cellfence waivers list
@@ -244,6 +246,9 @@ cellfence check --changed [--base <ref>] [--head <ref>] [--manifest <path>] [--r
 cellfence context --cell <id> [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence context --auto-allocate --task <text> [--cell <id>] [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence graph [--manifest <path>] [--baseline <path>] [--root <path>] [--evidence <path>] [--json|--format mermaid]
+cellfence claim create --agent <id> --cell <id> [--path <glob>] [--symbol <name>] [--resource <key>] [--artifact <lane>] [--ttl <2h>] [--expires <ISO>] [--claims <path>] [--json]
+cellfence claim check [--agent <id>] [--base <ref>] [--head <ref>] [--claims <path>] [--json]
+cellfence claim list [--claims <path>] [--json]
 cellfence baseline create [--manifest <path>] [--baseline <path>] [--root <path>]
 cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence baseline update [--manifest <path>] [--baseline <path>] [--root <path>]
@@ -262,6 +267,8 @@ Exit codes are documented automation contracts for the current v0.x implementati
 | `3` | Internal tool error |
 
 Use `--json` when another tool or coding agent needs structured output. JSON findings include `suggestedResolutions` when CellFence can identify safe next moves, distinguishing code changes from manifest changes, baseline updates, and human approval paths.
+
+Claim leases are short-lived coordination state for parallel agents. By default they are stored in `.cellfence/claims.json`; use `--claims` to place them in a runner-local path. A claim can reserve cells, path globs, public symbols, resource keys, or artifact lanes. `claim create` refuses active overlapping claims with `CELLFENCE_ACTIVE_CLAIM_CONFLICT`; `claim check --agent` also inspects the current Git diff or a `--base/--head` range and rejects files not covered by that agent's active claim with `CELLFENCE_UNCLAIMED_CHANGE`.
 
 Temporary suppressions must be explicit and expiring:
 
@@ -542,6 +549,9 @@ For real enforcement, configure the architecture job as a required status check 
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
 | `CELLFENCE_PLUGIN_INVALID` | A programmatic plugin has an unsupported API version, throws, or emits invalid references |
 | `CELLFENCE_REQUIRED_RULE_DISABLED` | A configured `governance.requiredRules` rule was weakened |
+| `CELLFENCE_CLAIM_INVALID` | Claim store or claim request is malformed, expired metadata is invalid, or a claim references unknown cells |
+| `CELLFENCE_ACTIVE_CLAIM_CONFLICT` | Two active claim leases reserve overlapping cells, paths, symbols, resources, or artifact lanes |
+| `CELLFENCE_UNCLAIMED_CHANGE` | `claim check --agent` found a changed file outside that agent's active claim |
 | `CELLFENCE_UNRESOLVED_IMPORT` | Static relative import could not be resolved; fails closed |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |

@@ -68,6 +68,39 @@ function writePrivateImportProject(tempDir, { withWaiver = false, waiverExpires 
   });
 }
 
+function writeClaimProject(tempDir) {
+  fs.mkdirSync(path.join(tempDir, "src/billing"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, "src/reporting"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/billing/public.ts"), "export const invoice = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/reporting/public.ts"), "export const report = true;\n");
+  writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+    },
+    cells: [
+      {
+        id: "billing",
+        ownedPaths: ["src/billing/**"],
+        publicEntry: "src/billing/public.ts",
+        publicSymbols: ["invoice"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "reporting",
+        ownedPaths: ["src/reporting/**"],
+        publicEntry: "src/reporting/public.ts",
+        publicSymbols: ["report"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  });
+}
+
 test("CLI check returns zero for a valid fixture", () => {
   const fixturePath = path.join(root, "fixtures/valid/single-cell");
   const result = runCli(["check", "--json"], fixturePath);
@@ -166,6 +199,67 @@ test("CLI graph renders Mermaid for review dashboards", () => {
   assert.equal(result.status, 0);
   assert.match(result.stdout, /^flowchart LR/);
   assert.match(result.stdout, /runtime -- "read \(resource-access\)" --> file_data_config_json/);
+});
+
+test("CLI claim create writes an active lease before editing", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-create-"));
+  writeClaimProject(tempDir);
+  const result = runCli([
+    "claim",
+    "create",
+    "--agent",
+    "codex-a",
+    "--cell",
+    "billing",
+    "--path",
+    "src/billing/**",
+    "--ttl",
+    "2h",
+    "--json",
+  ], tempDir);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.schemaVersion, "cellfence.claim-check.v1");
+  assert.equal(parsed.createdClaim.agent, "codex-a");
+  assert.deepEqual(parsed.createdClaim.cells, ["billing"]);
+  const store = JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/claims.json"), "utf8"));
+  assert.equal(store.schemaVersion, "cellfence.claims.v1");
+  assert.equal(store.claims.length, 1);
+});
+
+test("CLI claim create rejects an active same-cell conflict", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-conflict-"));
+  writeClaimProject(tempDir);
+  const first = runCli(["claim", "create", "--agent", "codex-a", "--cell", "billing", "--ttl", "2h"], tempDir);
+  assert.equal(first.status, 0, first.stderr || first.stdout);
+  const second = runCli(["claim", "create", "--agent", "codex-b", "--cell", "billing", "--ttl", "2h", "--json"], tempDir);
+  assert.equal(second.status, 1);
+  const parsed = JSON.parse(second.stdout);
+  assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_ACTIVE_CLAIM_CONFLICT"));
+  assert.equal(JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/claims.json"), "utf8")).claims.length, 1);
+});
+
+test("CLI claim check fails unclaimed agent changes and passes claimed changes", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-diff-"));
+  writeClaimProject(tempDir);
+  runGit(["init"], tempDir);
+  runGit(["config", "user.email", "test@example.com"], tempDir);
+  runGit(["config", "user.name", "Test User"], tempDir);
+  runGit(["add", "."], tempDir);
+  runGit(["commit", "-m", "initial"], tempDir);
+  fs.appendFileSync(path.join(tempDir, "src/billing/public.ts"), "export const nextInvoice = true;\n");
+
+  const unclaimed = runCli(["claim", "check", "--agent", "codex-a", "--json"], tempDir);
+  assert.equal(unclaimed.status, 1);
+  const unclaimedResult = JSON.parse(unclaimed.stdout);
+  assert.ok(unclaimedResult.findings.some((finding) => finding.ruleId === "CELLFENCE_UNCLAIMED_CHANGE"));
+
+  const create = runCli(["claim", "create", "--agent", "codex-a", "--cell", "billing", "--ttl", "2h"], tempDir);
+  assert.equal(create.status, 0, create.stderr || create.stdout);
+  const claimed = runCli(["claim", "check", "--agent", "codex-a", "--json"], tempDir);
+  assert.equal(claimed.status, 0, claimed.stderr || claimed.stdout);
+  const claimedResult = JSON.parse(claimed.stdout);
+  assert.deepEqual(claimedResult.changedFiles, ["src/billing/public.ts"]);
 });
 
 test("CLI waiver request creates an approval-oriented directive without editing source", () => {

@@ -8,6 +8,8 @@ npx cellfence check --changed --base origin/main
 npx cellfence context --cell example --json
 npx cellfence context --auto-allocate --task "change the reporting cell" --json
 npx cellfence graph --format mermaid
+npx cellfence claim create --agent codex-1 --cell example --ttl 2h
+npx cellfence claim check --agent codex-1
 npx cellfence baseline create
 npx cellfence baseline check
 npx cellfence waivers list

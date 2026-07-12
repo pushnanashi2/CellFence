@@ -40,6 +40,8 @@ Baseline: a captured measurement of architectural surface area.
 
 Ratchet: a check that permits reductions but rejects silent growth beyond a baseline.
 
+Claim lease: short-lived coordination state, stored outside the manifest by default, that reserves cells, paths, public symbols, resources, or artifact lanes for one agent before it edits.
+
 Locked cell: a cell whose accepted baseline cannot be expanded by `baseline update`.
 
 Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
@@ -138,6 +140,7 @@ CellFence v0.x enforces:
 - required rules weakened by repository, cell, override, or CLI configuration;
 - programmatic plugin adapter outputs as ordinary resource access records;
 - programmatic plugin rule findings as ordinary findings subject to severity policy and waivers;
+- active claim lease conflicts and unclaimed agent changes through `cellfence claim create/check`;
 - unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;

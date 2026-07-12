@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T16:59:39.409Z",
+  "generatedAt": "2026-07-12T17:15:04.345Z",
   "cellIds": [
     "cli",
     "engine",
@@ -96,8 +96,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 36,
-      "publicSurfaceLines": 3551,
+      "publicSymbols": 45,
+      "publicSurfaceLines": 4059,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -108,13 +108,20 @@
         "AutoAllocation",
         "BaselineUpdateGuardOptions",
         "BaselineUpdateGuardResult",
+        "CellFenceClaim",
+        "CellFenceClaimStore",
         "CellFenceContext",
         "CellFenceWaiver",
         "ChangedCheckOptions",
         "checkChangedRepository",
+        "checkClaims",
         "CheckOptions",
         "checkRepository",
         "CheckResult",
+        "ClaimCheckOptions",
+        "ClaimCheckResult",
+        "ClaimCreateOptions",
+        "ClaimCreateResult",
         "ContextAllowedImport",
         "ContextBudgetEntry",
         "ContextOptions",
@@ -125,6 +132,7 @@
         "createAutoAllocation",
         "createBaseline",
         "createCellContext",
+        "createClaim",
         "createCouplingGraph",
         "createWaiverRequest",
         "defaultBaselinePath",
@@ -132,6 +140,7 @@
         "formatCouplingGraphMermaid",
         "formatHumanResult",
         "guardBaselineUpdate",
+        "listClaims",
         "listWaivers",
         "loadManifestFromFile",
         "RuleId",
@@ -141,7 +150,7 @@
         "WaiverRequestOptions",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "aa04b3a8f26a967ead79204852b32d49fda178980ae6dcce9ff0ecc9d4e101c8",
+      "publicSurfaceHash": "fcbd95336e4acae2ba7c7096d3998ce7c0665a26759639844a26e862b643ffd7",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -151,7 +160,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 492,
+      "publicSurfaceLines": 641,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
