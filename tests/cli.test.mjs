@@ -456,6 +456,43 @@ test("CLI rejects PENDING CellFence waivers instead of treating requests as appr
   }
 });
 
+test("CLI check writes audit JSONL and summary JSON artifacts", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-audit-artifacts-"));
+  try {
+    writePrivateImportProject(tempDir);
+    const auditPath = path.join("tmp", "cellfence-audit.jsonl");
+    const summaryPath = path.join("tmp", "cellfence-summary.json");
+    const result = runCli(["check", "--json", "--audit-log", auditPath, "--summary-json", summaryPath], tempDir);
+    assert.equal(result.status, 1);
+
+    const auditLines = fs.readFileSync(path.join(tempDir, auditPath), "utf8").trim().split("\n").map((line) => JSON.parse(line));
+    assert.equal(auditLines[0].schemaVersion, "cellfence.audit-event.v1");
+    assert.equal(auditLines[0].event, "check.started");
+    assert.equal(auditLines[0].command, "check");
+    assert.equal(auditLines.at(-1).event, "check.completed");
+    assert.equal(auditLines.at(-1).ok, false);
+
+    const privateImportEvent = auditLines.find((event) => event.event === "finding.detected" && event.ruleId === "CELLFENCE_PRIVATE_IMPORT");
+    assert.ok(privateImportEvent);
+    assert.equal(privateImportEvent.outcome, "rejected");
+    assert.equal(privateImportEvent.filePath, "src/consumer/public.ts");
+    assert.match(privateImportEvent.fingerprint, /^[a-f0-9]{64}$/);
+    assert.ok(auditLines.some((event) => event.event === "finding.detected" && event.ruleId === "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"));
+
+    const summary = JSON.parse(fs.readFileSync(path.join(tempDir, summaryPath), "utf8"));
+    assert.equal(summary.schemaVersion, "cellfence.summary.v1");
+    assert.equal(summary.command, "check");
+    assert.equal(summary.ok, false);
+    assert.equal(summary.exitCode, 1);
+    assert.deepEqual(summary.failedRules, ["CELLFENCE_PRIVATE_IMPORT"]);
+    assert.equal(summary.findingsByRule.CELLFENCE_PRIVATE_IMPORT, 1);
+    assert.equal(summary.warningsByRule.CELLFENCE_OWNERSHIP_COVERAGE_DISABLED, 1);
+    assert.equal(summary.findingFingerprints.length, 1);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI changed check ignores violations already present at the base commit", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-changed-existing-"));
   writePrivateImportProject(tempDir);

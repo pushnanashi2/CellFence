@@ -259,8 +259,8 @@ The generated manifest enables `governance.requireOwnership` for `src/**` by def
 
 ```text
 cellfence init
-cellfence check [--manifest <path>] [--root <path>] [--json]
-cellfence check --changed [--base <ref>] [--head <ref>] [--manifest <path>] [--root <path>] [--json]
+cellfence check [--manifest <path>] [--root <path>] [--json] [--audit-log <jsonl>] [--summary-json <json>]
+cellfence check --changed [--base <ref>] [--head <ref>] [--manifest <path>] [--root <path>] [--json] [--audit-log <jsonl>] [--summary-json <json>]
 cellfence context --cell <id> [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence context --auto-allocate --task <text> [--cell <id>] [--manifest <path>] [--baseline <path>] [--root <path>] [--json|--format agents-md]
 cellfence graph [--manifest <path>] [--baseline <path>] [--root <path>] [--evidence <path>] [--json|--format mermaid]
@@ -268,7 +268,7 @@ cellfence claim create --agent <id> --cell <id> [--path <glob>] [--symbol <name>
 cellfence claim check [--agent <id>] [--base <ref>] [--head <ref>] [--claims <path>] [--json]
 cellfence claim list [--claims <path>] [--json]
 cellfence baseline create [--manifest <path>] [--baseline <path>] [--root <path>]
-cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
+cellfence baseline check [--manifest <path>] [--baseline <path>] [--root <path>] [--json] [--audit-log <jsonl>] [--summary-json <json>]
 cellfence baseline update [--manifest <path>] [--baseline <path>] [--root <path>]
 cellfence evidence check --evidence <path> [--manifest <path>] [--baseline <path>] [--root <path>] [--json]
 cellfence waivers list [--manifest <path>] [--root <path>] [--json]
@@ -285,6 +285,8 @@ Exit codes are documented automation contracts for the current v0.x implementati
 | `3` | Internal tool error |
 
 Use `--json` when another tool or coding agent needs structured output. JSON findings include `suggestedResolutions` when CellFence can identify safe next moves, distinguishing code changes from manifest changes, baseline updates, and human approval paths.
+
+Use `--audit-log` and `--summary-json` when CI needs durable evidence of what CellFence rejected. The audit log is JSONL with one `cellfence.audit-event.v1` event per line, including `check.started`, `finding.detected`, `baseline.compared`, `changed_files.computed`, and `check.completed`. The summary file is `cellfence.summary.v1` and aggregates failed rules, warning rules, findings by cell, stable finding fingerprints, exit code, commit, and timing. These files are intended for CI artifacts or external storage, not for committing back to the repository.
 
 Claim leases are short-lived coordination state for parallel agents. By default they are stored in `.cellfence/claims.json`; use `--claims` to place them in a runner-local path. A claim can reserve cells, path globs, public symbols, resource keys, or artifact lanes. `claim create` refuses active overlapping claims with `CELLFENCE_ACTIVE_CLAIM_CONFLICT`; `claim check --agent` also inspects the current Git diff or a `--base/--head` range and rejects files not covered by that agent's active claim with `CELLFENCE_UNCLAIMED_CHANGE`.
 
@@ -537,9 +539,17 @@ jobs:
       - run: npm ci
       - name: Enforce CellFence architecture
         run: |
+          mkdir -p tmp/cellfence
           npx cellfence baseline check \
             --manifest cellfence.manifest.json \
-            --baseline cellfence.baseline.json
+            --baseline cellfence.baseline.json \
+            --audit-log tmp/cellfence/audit.jsonl \
+            --summary-json tmp/cellfence/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cellfence-audit-${{ github.sha }}
+          path: tmp/cellfence/
 ```
 
 The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release.
