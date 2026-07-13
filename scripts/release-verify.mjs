@@ -1,8 +1,24 @@
 import fs from "node:fs";
 
+const requiredFiles = [
+  "README.md",
+  "AGENTS.md",
+  "CONTRIBUTING.md",
+  "SECURITY.md",
+  "LICENSE",
+  "docs/architecture.md",
+  "docs/threat-model.md",
+  "docs/root-of-trust.md",
+  "docs/implementation-status.md",
+];
+const findings = [];
+
+for (const requiredFile of requiredFiles) {
+  if (!fs.existsSync(requiredFile)) findings.push(`missing required file: ${requiredFile}`);
+}
+
 const statusDocument = fs.readFileSync("docs/implementation-status.md", "utf8");
 const allowedStatuses = new Set(["enforced", "partially_enforced", "documented", "planned"]);
-const findings = [];
 
 for (const line of statusDocument.split(/\r?\n/)) {
   if (!line.startsWith("|") || line.includes("---") || line.includes("mechanism")) continue;
