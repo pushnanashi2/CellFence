@@ -13,6 +13,7 @@ import {
   type CellFenceManifest,
   type CellManifest,
   type CellConsumerManifest,
+  type BuiltInResourceAdapter,
   type ResourceBaselineEntry,
   type ResourceAccessConfidence,
   type ResourceContractKind,
@@ -1155,25 +1156,43 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   return undefined;
 }
 
+function resourceAdapterEnabled(context: AnalysisContext, adapter: BuiltInResourceAdapter): boolean {
+  return context.manifest.governance?.resourceAdapters?.[adapter] !== "off";
+}
+
 function collectResourceAccesses(context: AnalysisContext, filePath: string): ResourceAccessReference[] {
   const sourceText = readSourceText(context, filePath);
   if (!RESOURCE_SCAN_HINT.test(sourceText)) return [];
   const sourceFile = parseSourceFile(context, filePath);
   const relativeFilePath = repoPath(context.rootDir, filePath);
   const accesses: ResourceAccessReference[] = [];
-  const prismaSelectors = prismaModelSelectors(context);
-  const prismaClientNames = collectPrismaClientNames(sourceFile);
-  const typeOrmEntitySelectors = collectTypeOrmEntitySelectors(sourceFile);
-  const typeOrmRepositories = collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors);
-  const drizzleTableSelectors = collectDrizzleTableSelectors(sourceFile);
-  const bullQueuesByVariable = collectBullQueueVariables(sourceFile);
-  const dynamicSqlVariables = collectDynamicSqlVariables(sourceFile);
-  for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
-    addResourceAccess(accesses, access);
+  const prismaEnabled = resourceAdapterEnabled(context, "prisma");
+  const typeOrmEnabled = resourceAdapterEnabled(context, "typeorm");
+  const drizzleEnabled = resourceAdapterEnabled(context, "drizzle");
+  const queryBuilderEnabled = resourceAdapterEnabled(context, "query-builder");
+  const bullmqEnabled = resourceAdapterEnabled(context, "bullmq");
+  const kafkajsEnabled = resourceAdapterEnabled(context, "kafkajs");
+  const nestjsEnabled = resourceAdapterEnabled(context, "nestjs");
+  const fastifyEnabled = resourceAdapterEnabled(context, "fastify");
+  const sqlLiteralEnabled = resourceAdapterEnabled(context, "sql-literal");
+  const fileEnabled = resourceAdapterEnabled(context, "file");
+  const httpEnabled = resourceAdapterEnabled(context, "http");
+  const queueEnabled = resourceAdapterEnabled(context, "queue");
+  const prismaSelectors = prismaEnabled ? prismaModelSelectors(context) : new Map<string, string>();
+  const prismaClientNames = prismaEnabled ? collectPrismaClientNames(sourceFile) : new Set<string>();
+  const typeOrmEntitySelectors = typeOrmEnabled ? collectTypeOrmEntitySelectors(sourceFile) : new Map<string, string>();
+  const typeOrmRepositories = typeOrmEnabled ? collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors) : new Map<string, string>();
+  const drizzleTableSelectors = drizzleEnabled ? collectDrizzleTableSelectors(sourceFile) : new Map<string, string>();
+  const bullQueuesByVariable = bullmqEnabled ? collectBullQueueVariables(sourceFile) : new Map<string, string>();
+  const dynamicSqlVariables = sqlLiteralEnabled ? collectDynamicSqlVariables(sourceFile) : new Set<string>();
+  if (nestjsEnabled) {
+    for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
+      addResourceAccess(accesses, access);
+    }
   }
 
   function visit(node: ts.Node): void {
-    if (ts.isTaggedTemplateExpression(node) && ts.isPropertyAccessExpression(node.tag)) {
+    if (prismaEnabled && ts.isTaggedTemplateExpression(node) && ts.isPropertyAccessExpression(node.tag)) {
       const methodName = node.tag.name.text;
       const rootName = expressionRootName(node.tag.expression);
       if (rootName && prismaClientNames.has(rootName) && (RAW_SQL_METHODS.has(methodName) || UNSAFE_RAW_SQL_METHODS.has(methodName))) {
@@ -1211,7 +1230,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
       const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
 
       if (ts.isPropertyAccessExpression(node.expression) && methodName) {
-        if (methodName === "route" && ts.isObjectLiteralExpression(node.arguments[0])) {
+        if (fastifyEnabled && methodName === "route" && ts.isObjectLiteralExpression(node.arguments[0])) {
           const routePath = objectStringProperty(node.arguments[0], "url") || objectStringProperty(node.arguments[0], "path");
           const methods = objectArrayStringProperty(node.arguments[0], "method");
           if (routePath && methods.length > 0) {
@@ -1228,10 +1247,10 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           }
         }
 
-        const drizzleSelector = selectorFromEntityExpression(node.arguments[0], drizzleTableSelectors, { allowUnknownIdentifier: false });
+        const drizzleSelector = drizzleEnabled ? selectorFromEntityExpression(node.arguments[0], drizzleTableSelectors, { allowUnknownIdentifier: false }) : undefined;
         const isDrizzleRead = methodName === "from" && chainContainsMethod(node.expression.expression, "select");
         const isDrizzleWrite = DRIZZLE_WRITE_METHODS.has(methodName);
-        if ((isDrizzleRead || isDrizzleWrite) && drizzleSelector) {
+        if (drizzleEnabled && (isDrizzleRead || isDrizzleWrite) && drizzleSelector) {
           addResourceAccess(accesses, {
             kind: "database",
             access: isDrizzleWrite ? "write" : "read",
@@ -1240,7 +1259,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
             line: getLineNumber(sourceFile, node),
             ...resourceAccessSource(methodName, "drizzle-adapter", "high"),
           });
-        } else if ((isDrizzleRead || isDrizzleWrite) && node.arguments.length > 0 && chainRootName(node.expression.expression) === "db") {
+        } else if (drizzleEnabled && (isDrizzleRead || isDrizzleWrite) && node.arguments.length > 0 && chainRootName(node.expression.expression) === "db") {
           addResourceAccess(accesses, {
             kind: "database",
             access: isDrizzleWrite ? "write" : "read",
@@ -1253,9 +1272,9 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           });
         }
 
-        const typeOrmRepository = typeOrmRepositorySelector(node.expression.expression, typeOrmRepositories, typeOrmEntitySelectors);
+        const typeOrmRepository = typeOrmEnabled ? typeOrmRepositorySelector(node.expression.expression, typeOrmRepositories, typeOrmEntitySelectors) : undefined;
         const typeOrmAccess = TYPEORM_READ_METHODS.has(methodName) ? "read" : TYPEORM_WRITE_METHODS.has(methodName) ? "write" : undefined;
-        if (typeOrmRepository && typeOrmAccess) {
+        if (typeOrmEnabled && typeOrmRepository && typeOrmAccess) {
           addResourceAccess(accesses, {
             kind: "database",
             access: typeOrmAccess,
@@ -1266,8 +1285,8 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           });
         }
 
-        const isGenericQueryBuilderMethod = ["selectFrom", "insertInto", "updateTable", "deleteFrom"].includes(methodName);
-        const isTypeOrmQueryBuilderMethod = ["from", "into", "update"].includes(methodName)
+        const isGenericQueryBuilderMethod = queryBuilderEnabled && ["selectFrom", "insertInto", "updateTable", "deleteFrom"].includes(methodName);
+        const isTypeOrmQueryBuilderMethod = typeOrmEnabled && ["from", "into", "update"].includes(methodName)
           && (chainContainsMethod(node.expression.expression, "createQueryBuilder")
             || chainContainsMethod(node.expression.expression, "delete")
             || chainContainsMethod(node.expression.expression, "insert")
@@ -1302,7 +1321,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           }
         }
 
-        if (rootName && prismaClientNames.has(rootName) && ts.isPropertyAccessExpression(node.expression.expression)) {
+        if (prismaEnabled && rootName && prismaClientNames.has(rootName) && ts.isPropertyAccessExpression(node.expression.expression)) {
           const delegateName = node.expression.expression.name.text;
           const selector = prismaSelectors.get(delegateName) || `prisma.${delegateName}`;
           const access = PRISMA_READ_METHODS.has(methodName) ? "read" : PRISMA_WRITE_METHODS.has(methodName) ? "write" : undefined;
@@ -1318,7 +1337,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           }
         }
 
-        if (rootName && prismaClientNames.has(rootName) && (RAW_SQL_METHODS.has(methodName) || UNSAFE_RAW_SQL_METHODS.has(methodName))) {
+        if (prismaEnabled && rootName && prismaClientNames.has(rootName) && (RAW_SQL_METHODS.has(methodName) || UNSAFE_RAW_SQL_METHODS.has(methodName))) {
           if (UNSAFE_RAW_SQL_METHODS.has(methodName)) {
             addResourceAccess(accesses, {
               kind: "database",
@@ -1353,7 +1372,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
               ...resourceAccessSource(methodName, "prisma-adapter", "low"),
             });
           }
-        } else if (methodName === "query") {
+        } else if (sqlLiteralEnabled && methodName === "query") {
           if (firstArgumentText) {
             for (const sqlAccess of sqlTableAccesses(firstArgumentText)) {
               addResourceAccess(accesses, {
@@ -1379,7 +1398,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           }
         }
 
-        if (methodName === "add" && ts.isPropertyAccessExpression(node.expression)) {
+        if (bullmqEnabled && methodName === "add" && ts.isPropertyAccessExpression(node.expression)) {
           const queueSelector = expressionRootName(node.expression.expression);
           if (queueSelector && bullQueuesByVariable.has(queueSelector)) {
             addResourceAccess(accesses, {
@@ -1393,7 +1412,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
           }
         }
 
-        if (methodName === "send") {
+        if (kafkajsEnabled && methodName === "send") {
           const topic = objectStringProperty(node.arguments[0], "topic");
           if (topic) {
             addResourceAccess(accesses, {
@@ -1405,7 +1424,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
               ...resourceAccessSource(methodName, "kafkajs-adapter", "medium"),
             });
           }
-        } else if (methodName === "subscribe") {
+        } else if (kafkajsEnabled && methodName === "subscribe") {
           const topic = objectStringProperty(node.arguments[0], "topic");
           if (topic) {
             addResourceAccess(accesses, {
@@ -1420,7 +1439,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
         }
       }
 
-      if (name && (FILE_READ_METHODS.has(name) || FILE_WRITE_METHODS.has(name)) && !firstArgumentText && node.arguments.length > 0) {
+      if (fileEnabled && name && (FILE_READ_METHODS.has(name) || FILE_WRITE_METHODS.has(name)) && !firstArgumentText && node.arguments.length > 0) {
         addResourceAccess(accesses, {
           kind: "file",
           access: FILE_READ_METHODS.has(name) ? "read" : "write",
@@ -1435,45 +1454,53 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
 
       if (name && firstArgumentText) {
         if (FILE_READ_METHODS.has(name)) {
-          addResourceAccess(accesses, {
-            kind: "file",
-            access: "read",
-            selector: normalizePath(firstArgumentText),
-            filePath: relativeFilePath,
-            line: getLineNumber(sourceFile, node),
-            ...resourceAccessSource(name),
-          });
+          if (fileEnabled) {
+            addResourceAccess(accesses, {
+              kind: "file",
+              access: "read",
+              selector: normalizePath(firstArgumentText),
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(name),
+            });
+          }
         } else if (FILE_WRITE_METHODS.has(name)) {
-          addResourceAccess(accesses, {
-            kind: "file",
-            access: "write",
-            selector: normalizePath(firstArgumentText),
-            filePath: relativeFilePath,
-            line: getLineNumber(sourceFile, node),
-            ...resourceAccessSource(name),
-          });
+          if (fileEnabled) {
+            addResourceAccess(accesses, {
+              kind: "file",
+              access: "write",
+              selector: normalizePath(firstArgumentText),
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(name),
+            });
+          }
         } else if ((name === "fetch" || name === "request") && /^https?:\/\//.test(firstArgumentText)) {
-          addResourceAccess(accesses, {
-            kind: "http",
-            access: "call",
-            selector: firstArgumentText,
-            filePath: relativeFilePath,
-            line: getLineNumber(sourceFile, node),
-            ...resourceAccessSource(name),
-          });
+          if (httpEnabled) {
+            addResourceAccess(accesses, {
+              kind: "http",
+              access: "call",
+              selector: firstArgumentText,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(name),
+            });
+          }
         } else if (["get", "post", "put", "patch", "delete"].includes(name) && firstArgumentText.startsWith("/")) {
-          addResourceAccess(accesses, {
-            kind: "http",
-            access: "serve",
-            selector: `${name.toUpperCase()} ${firstArgumentText}`,
-            filePath: relativeFilePath,
-            line: getLineNumber(sourceFile, node),
-            ...resourceAccessSource(name),
-          });
+          if (httpEnabled) {
+            addResourceAccess(accesses, {
+              kind: "http",
+              access: "serve",
+              selector: `${name.toUpperCase()} ${firstArgumentText}`,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(name),
+            });
+          }
         }
 
         const queueMode = queueAccessMode(name);
-        if (queueMode && !firstArgumentText.startsWith("/") && !/^https?:\/\//.test(firstArgumentText)) {
+        if (queueEnabled && queueMode && !firstArgumentText.startsWith("/") && !/^https?:\/\//.test(firstArgumentText)) {
           addResourceAccess(accesses, {
             kind: "queue",
             access: queueMode,
@@ -1486,7 +1513,7 @@ function collectResourceAccesses(context: AnalysisContext, filePath: string): Re
       }
     }
 
-    if (ts.isNewExpression(node) && expressionName(node.expression) === "Worker") {
+    if (bullmqEnabled && ts.isNewExpression(node) && expressionName(node.expression) === "Worker") {
       const queueName = literalText(node.arguments?.[0]);
       if (queueName) {
         addResourceAccess(accesses, {

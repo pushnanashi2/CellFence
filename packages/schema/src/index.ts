@@ -14,6 +14,21 @@ export type ResourceContractKind = "file" | "database" | "queue" | "http";
 
 export type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
 export type ResourceAccessConfidence = "high" | "medium" | "low" | "runtime";
+export type BuiltInResourceAdapter =
+  | "file"
+  | "http"
+  | "queue"
+  | "sql-literal"
+  | "prisma"
+  | "typeorm"
+  | "drizzle"
+  | "query-builder"
+  | "bullmq"
+  | "kafkajs"
+  | "nestjs"
+  | "fastify";
+export type ResourceAdapterStatus = "on" | "off";
+export type ResourceAdapterMap = Partial<Record<BuiltInResourceAdapter, ResourceAdapterStatus>>;
 
 export type ResourceContractManifest = {
   id: string;
@@ -77,6 +92,7 @@ export type ManifestGovernance = {
   include?: string[];
   exclude?: string[];
   requiredRules?: string[];
+  resourceAdapters?: ResourceAdapterMap;
 };
 
 export type CellManifest = {
@@ -141,6 +157,21 @@ function isStringArray(value: unknown): value is string[] {
 function isRuleSeverity(value: unknown): value is RuleSeverity {
   return value === "off" || value === "warning" || value === "error";
 }
+
+const BUILT_IN_RESOURCE_ADAPTERS = new Set([
+  "file",
+  "http",
+  "queue",
+  "sql-literal",
+  "prisma",
+  "typeorm",
+  "drizzle",
+  "query-builder",
+  "bullmq",
+  "kafkajs",
+  "nestjs",
+  "fastify",
+]);
 
 function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === "string";
@@ -274,6 +305,20 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
   }
   if (value.requiredRules !== undefined && !isStringArray(value.requiredRules)) {
     errors.push(`${location}.requiredRules must be an array of non-empty strings when present`);
+  }
+  if (value.resourceAdapters !== undefined) {
+    if (!isRecord(value.resourceAdapters)) {
+      errors.push(`${location}.resourceAdapters must be an object when present`);
+    } else {
+      for (const [adapterName, status] of Object.entries(value.resourceAdapters)) {
+        if (!BUILT_IN_RESOURCE_ADAPTERS.has(adapterName)) {
+          errors.push(`${location}.resourceAdapters.${adapterName} must be a known built-in adapter`);
+        }
+        if (status !== "on" && status !== "off") {
+          errors.push(`${location}.resourceAdapters.${adapterName} must be on|off`);
+        }
+      }
+    }
   }
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
     errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);

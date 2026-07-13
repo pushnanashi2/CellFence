@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-12T18:00:02.326Z",
+  "generatedAt": "2026-07-13T13:03:21.642Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -21,8 +21,8 @@
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 27,
-      "publicSurfaceLines": 519,
+      "publicSymbols": 30,
+      "publicSurfaceLines": 564,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -31,6 +31,7 @@
       "publicSymbolSet": [
         "ArchitecturalBudgets",
         "ArtifactLaneManifest",
+        "BuiltInResourceAdapter",
         "CellBaselineRecord",
         "CellConsumerManifest",
         "CELLFENCE_BASELINE_SCHEMA_VERSION",
@@ -45,6 +46,8 @@
         "PluginReference",
         "ResourceAccessConfidence",
         "ResourceAccessMode",
+        "ResourceAdapterMap",
+        "ResourceAdapterStatus",
         "ResourceBaselineEntry",
         "ResourceContractKind",
         "ResourceContractManifest",
@@ -57,7 +60,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "561655ae3a29f57fda5aad3a44633e4eda8088256f969ca4c5e4dabab7ce7e81",
+      "publicSurfaceHash": "e840766b97a15754549e08b9fc14291091bc15f18f1fd682d5618f72a04eb5b2",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -106,7 +109,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 45,
-      "publicSurfaceLines": 4111,
+      "publicSurfaceLines": 4033,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -164,12 +167,27 @@
         "engine->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "read",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        },
+        {
+          "kind": "file",
+          "access": "write",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        }
+      ]
     },
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 646,
+      "publicSurfaceLines": 865,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
@@ -183,7 +201,15 @@
         "cli->engine"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "write",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        }
+      ]
     },
     "github-action": {
       "ownedPathPatterns": 1,

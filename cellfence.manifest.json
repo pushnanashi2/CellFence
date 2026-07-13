@@ -5,7 +5,20 @@
     "include": [
       "packages/**"
     ],
-    "exclude": []
+    "exclude": [],
+    "resourceAdapters": {
+      "bullmq": "off",
+      "drizzle": "off",
+      "fastify": "off",
+      "http": "off",
+      "kafkajs": "off",
+      "nestjs": "off",
+      "prisma": "off",
+      "queue": "off",
+      "query-builder": "off",
+      "sql-literal": "off",
+      "typeorm": "off"
+    }
   },
   "cells": [
     {
@@ -18,6 +31,7 @@
       "publicSymbols": [
         "ArchitecturalBudgets",
         "ArtifactLaneManifest",
+        "BuiltInResourceAdapter",
         "CELLFENCE_BASELINE_SCHEMA_VERSION",
         "CELLFENCE_MANIFEST_SCHEMA_VERSION",
         "CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION",
@@ -31,8 +45,10 @@
         "ManifestGovernance",
         "PluginReference",
         "ResourceAccessConfidence",
-        "ResourceBaselineEntry",
         "ResourceAccessMode",
+        "ResourceAdapterMap",
+        "ResourceAdapterStatus",
+        "ResourceBaselineEntry",
         "ResourceContractKind",
         "ResourceContractManifest",
         "ResourceEvidenceAccess",

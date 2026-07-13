@@ -157,6 +157,8 @@ ORM, query builder, HTTP-framework, and broker-client support is adapter-scoped.
 
 Unsupported library access must not be described as covered by CellFence unless it is declared through `resourceContracts`, captured in the baseline, supplied as runtime evidence, or rejected as unresolved.
 
+`governance.resourceAdapters` can disable built-in resource adapters that a repository does not use. Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, and `fastify`; values are `on` or `off`, and omitted adapters default to `on`. Disabling an adapter prevents that detector from emitting resource access records; it does not mark unsupported framework usage as safe.
+
 `@cellfence/trace` can generate runtime evidence for selected Node.js file reads and writes, fetch calls, and explicit database/HTTP/queue helper records via `node --import @cellfence/trace`. In v0.x it is a runtime evidence producer, not a sandbox: it observes supported operations and writes `cellfence.resource-evidence.v1` JSON for later `cellfence evidence check`.
 
 `@cellfence/plugin-api` defines Plugin API v1 for programmatic rules, adapters, and reporters. In v0.x, callers can pass plugin objects directly to `checkRepository`. Manifest `plugins` entries are validated as shape only; the CLI does not auto-load arbitrary npm or local plugin code from the manifest.

@@ -217,6 +217,89 @@ test("declared unresolved file access is recorded without warning", () => {
   }
 });
 
+test("built-in resource adapters can be disabled when unused by a repository", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-adapter-off-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src/core/public.ts"),
+      [
+        "declare const db: { query(sql: string): unknown };",
+        "export function docOnlyQueryExample(): unknown {",
+        "  return db.query(\"select * from T_CUSTOMER\");",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        exclude: [],
+        resourceAdapters: {
+          "sql-literal": "off",
+        },
+      },
+      cells: [
+        {
+          id: "core",
+          ownedPaths: ["src/core/**"],
+          publicEntry: "src/core/public.ts",
+          publicSymbols: ["docOnlyQueryExample"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+      ],
+    });
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.findings, []);
+    assert.deepEqual(result.warnings, []);
+    assert.deepEqual(result.metrics.core.resourceAccesses, []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("unknown built-in resource adapter names are rejected", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-adapter-typo-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        exclude: [],
+        resourceAdapters: {
+          express: "off",
+        },
+      },
+      cells: [
+        {
+          id: "core",
+          ownedPaths: ["src/core/**"],
+          publicEntry: "src/core/public.ts",
+          publicSymbols: ["core"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+      ],
+    });
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.ok, false);
+    assert.equal(result.exitCode, 2);
+    assert.equal(result.findings[0].ruleId, "CELLFENCE_MANIFEST_INVALID");
+    assert.match(result.findings[0].message, /resourceAdapters\.express/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("plugin adapter output is governed by resource contracts", () => {
   const rootDir = createRepository();
   try {

@@ -636,6 +636,28 @@ ORMs, query builders, HTTP frameworks, and broker clients require explicit CellF
 
 Unsupported adapters are not treated as implicitly safe. If a resource access cannot be resolved by a built-in adapter, an explicit `resourceContracts` entry, baseline evidence, runtime evidence, or a fail-closed unresolved finding is required depending on the access shape.
 
+Repositories can disable unused built-in resource adapters so CellFence does not infer framework contracts for stacks the repository does not run:
+
+```json
+{
+  "governance": {
+    "resourceAdapters": {
+      "prisma": "off",
+      "typeorm": "off",
+      "drizzle": "off",
+      "bullmq": "off",
+      "kafkajs": "off",
+      "nestjs": "off",
+      "fastify": "off",
+      "queue": "off",
+      "sql-literal": "off"
+    }
+  }
+}
+```
+
+Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, and `fastify`. Omitted adapters default to `on`.
+
 ## Plugin API v1
 
 CellFence v0.x includes `@cellfence/plugin-api`, a small stable API for programmatic rules, resource adapters, and reporters. The default CLI still works without plugin configuration:
