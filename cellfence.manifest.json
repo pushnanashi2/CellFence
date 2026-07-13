@@ -140,6 +140,20 @@
         "loadManifestFromFile",
         "writeBaselineFile"
       ],
+      "resourceContracts": [
+        {
+          "id": "engine-caller-supplied-file-io",
+          "kind": "file",
+          "access": [
+            "read",
+            "write"
+          ],
+          "selectors": [
+            "unresolved:dynamic-file-path"
+          ],
+          "description": "Engine reads manifests, source files, evidence, claims, and baselines from caller-supplied repository paths and writes caller-selected governance artifacts."
+        }
+      ],
       "consumes": [
         {
           "cell": "schema"
@@ -156,6 +170,19 @@
       "publicEntry": "packages/cli/src/index.ts",
       "publicSymbols": [
         "main"
+      ],
+      "resourceContracts": [
+        {
+          "id": "cli-command-output-and-init-file-io",
+          "kind": "file",
+          "access": [
+            "write"
+          ],
+          "selectors": [
+            "unresolved:dynamic-file-path"
+          ],
+          "description": "CLI writes user-requested output artifacts and init files to command-line selected repository paths."
+        }
       ],
       "consumes": [
         {

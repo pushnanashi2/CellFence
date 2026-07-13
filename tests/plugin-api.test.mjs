@@ -158,6 +158,65 @@ test("repeated engine checks see source files added after the first check", () =
   }
 });
 
+test("declared unresolved file access is recorded without warning", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-dynamic-file-contract-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src/core/public.ts"),
+      [
+        "import fs from 'node:fs';",
+        "export function readConfigured(filePath: string): string {",
+        "  return fs.readFileSync(filePath, 'utf8');",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        exclude: [],
+      },
+      cells: [
+        {
+          id: "core",
+          ownedPaths: ["src/core/**"],
+          publicEntry: "src/core/public.ts",
+          publicSymbols: ["readConfigured"],
+          consumes: [],
+          producesArtifacts: [],
+          resourceContracts: [
+            {
+              id: "caller-supplied-file-read",
+              kind: "file",
+              access: ["read"],
+              selectors: ["unresolved:dynamic-file-path"],
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.findings, []);
+    assert.deepEqual(result.warnings, []);
+    assert.deepEqual(result.metrics.core.resourceAccesses, [
+      {
+        kind: "file",
+        access: "read",
+        selector: "unresolved:dynamic-file-path",
+        detectedBy: "file-call",
+        confidence: "low",
+      },
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("plugin adapter output is governed by resource contracts", () => {
   const rootDir = createRepository();
   try {

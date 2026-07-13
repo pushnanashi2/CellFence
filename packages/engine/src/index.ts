@@ -22,6 +22,24 @@ import {
   validateResourceEvidence,
   type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
+import {
+  absolutePath,
+  listFiles,
+  literalPrefix,
+  matchesPattern,
+  normalizePath,
+  parseSourceFile,
+  pathIsGoverned,
+  pathOwnedByCell,
+  patternCoveredByOwnedPaths,
+  readSourceText,
+  repoPath,
+  SOURCE_EXTENSIONS,
+  type FileIndexContext,
+  sourceFilesForCell,
+  sourceFilesUnderGovernance,
+  sourceKindForPath,
+} from "./file-index.js";
 
 export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
@@ -427,81 +445,25 @@ type ResolvedImport = {
   isPublicPackage: boolean;
 };
 
-type AnalysisContext = {
-  rootDir: string;
-  manifest: CellFenceManifest;
+type AnalysisContext = FileIndexContext & {
   cellsById: Map<string, CellManifest>;
   packageToCell: Map<string, CellManifest>;
   packageRoots: Map<string, string>;
   pathAliases: PathAlias[];
-  listFilesCache?: string[];
-  sourceFilesForCellCache: Map<string, string[]>;
   prismaModelSelectorCache?: Map<string, string>;
 };
 
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
 const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
-const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
-const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
-const PATTERN_REGEXP_CACHE = new Map<string, RegExp>();
 
 type PathAlias = {
   pattern: string;
   targets: string[];
 };
 
-function normalizePath(filePath: string): string {
-  return filePath.split(path.sep).join("/");
-}
-
-function repoPath(rootDir: string, filePath: string): string {
-  return normalizePath(path.relative(rootDir, filePath));
-}
-
-function absolutePath(rootDir: string, relativePath: string): string {
-  return path.resolve(rootDir, relativePath);
-}
-
 function readJsonFile(filePath: string): unknown {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
-
-function escapeRegExp(text: string): string {
-  return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-}
-
-function patternToRegExp(pattern: string): RegExp {
-  const cachedPattern = PATTERN_REGEXP_CACHE.get(pattern);
-  if (cachedPattern) return cachedPattern;
-  const normalized = normalizePath(pattern);
-  let expression = "";
-  for (let index = 0; index < normalized.length; index += 1) {
-    const character = normalized[index];
-    const nextCharacter = normalized[index + 1];
-    if (character === "*" && nextCharacter === "*") {
-      expression += ".*";
-      index += 1;
-    } else if (character === "*") {
-      expression += "[^/]*";
-    } else {
-      expression += escapeRegExp(character);
-    }
-  }
-  const regexp = new RegExp(`^${expression}$`);
-  PATTERN_REGEXP_CACHE.set(pattern, regexp);
-  return regexp;
-}
-
-function matchesPattern(relativePath: string, pattern: string): boolean {
-  return patternToRegExp(pattern).test(normalizePath(relativePath));
-}
-
-function literalPrefix(pattern: string): string {
-  const normalized = normalizePath(pattern);
-  const wildcardIndex = normalized.search(/[*?]/);
-  const prefix = wildcardIndex === -1 ? normalized : normalized.slice(0, wildcardIndex);
-  return prefix.replace(/\/+$/, "");
 }
 
 function addFinding(findings: Finding[], finding: Finding): void {
@@ -638,75 +600,8 @@ function humanResolution(title: string, details?: Record<string, unknown>): Sugg
   return { kind: "ask-human", title, approvalRequired: true, details };
 }
 
-function listFiles(rootDir: string, context?: AnalysisContext): string[] {
-  if (context?.listFilesCache) return context.listFilesCache;
-  const files: string[] = [];
-  function visit(directoryPath: string): void {
-    for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
-      if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
-      const entryPath = path.join(directoryPath, entry.name);
-      if (entry.isDirectory()) {
-        visit(entryPath);
-      } else if (entry.isFile()) {
-        files.push(entryPath);
-      }
-    }
-  }
-  visit(rootDir);
-  const sortedFiles = files.sort((left, right) => left.localeCompare(right));
-  if (context) context.listFilesCache = sortedFiles;
-  return sortedFiles;
-}
-
-function sourceFilesForCell(rootDir: string, cell: CellManifest, context?: AnalysisContext): string[] {
-  const cacheKey = `${rootDir}:${cell.id}:${cell.ownedPaths.join("\0")}`;
-  const cachedFiles = context?.sourceFilesForCellCache.get(cacheKey);
-  if (cachedFiles) return cachedFiles;
-  const files = listFiles(rootDir, context).filter((filePath) => {
-    const relativePath = repoPath(rootDir, filePath);
-    return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
-  });
-  context?.sourceFilesForCellCache.set(cacheKey, files);
-  return files;
-}
-
 function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
   return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
-}
-
-function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceManifest, context?: AnalysisContext): string[] {
-  const governance = manifest.governance;
-  if (!governance?.requireOwnership) return [];
-  const include = governance.include || [];
-  const exclude = governance.exclude || [];
-  return listFiles(rootDir, context).filter((filePath) => {
-    const relativePath = repoPath(rootDir, filePath);
-    return SOURCE_EXTENSIONS.includes(path.extname(filePath))
-      && include.some((pattern) => matchesPattern(relativePath, pattern))
-      && !exclude.some((pattern) => matchesPattern(relativePath, pattern));
-  });
-}
-
-function pathIsGoverned(manifest: CellFenceManifest, relativePath: string): boolean {
-  const governance = manifest.governance;
-  if (!governance?.requireOwnership) return false;
-  const include = governance.include || [];
-  const exclude = governance.exclude || [];
-  return include.some((pattern) => matchesPattern(relativePath, pattern))
-    && !exclude.some((pattern) => matchesPattern(relativePath, pattern));
-}
-
-function pathOwnedByCell(cell: CellManifest, relativePath: string): boolean {
-  return cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
-}
-
-function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {
-  const targetPrefix = literalPrefix(pattern) || normalizePath(pattern);
-  return ownedPaths.some((ownedPath) => {
-    if (matchesPattern(targetPrefix, ownedPath)) return true;
-    const ownedPrefix = literalPrefix(ownedPath);
-    return Boolean(ownedPrefix) && (targetPrefix === ownedPrefix || targetPrefix.startsWith(`${ownedPrefix}/`));
-  });
 }
 
 function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {
@@ -761,6 +656,8 @@ function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisCo
     packageRoots,
     pathAliases: readPathAliases(rootDir),
     sourceFilesForCellCache: new Map<string, string[]>(),
+    sourceTextCache: new Map<string, string>(),
+    sourceFileCache: new Map<string, ts.SourceFile>(),
   };
 }
 
@@ -886,14 +783,6 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
       ],
     });
   }
-}
-
-function sourceKindForPath(filePath: string): ts.ScriptKind {
-  const extension = path.extname(filePath);
-  if (extension === ".tsx") return ts.ScriptKind.TSX;
-  if (extension === ".jsx") return ts.ScriptKind.JSX;
-  if (extension === ".js" || extension === ".mjs" || extension === ".cjs") return ts.ScriptKind.JS;
-  return ts.ScriptKind.TS;
 }
 
 function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
@@ -1267,9 +1156,9 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
 }
 
 function collectResourceAccesses(context: AnalysisContext, filePath: string): ResourceAccessReference[] {
-  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceText = readSourceText(context, filePath);
   if (!RESOURCE_SCAN_HINT.test(sourceText)) return [];
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const sourceFile = parseSourceFile(context, filePath);
   const relativeFilePath = repoPath(context.rootDir, filePath);
   const accesses: ResourceAccessReference[] = [];
   const prismaSelectors = prismaModelSelectors(context);
@@ -1671,6 +1560,10 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
       for (const access of collectResourceAccesses(context, sourceFilePath)) {
         if (access.unresolved) {
+          if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) {
+            cellAccesses.push(access);
+            continue;
+          }
           const severity: Severity = access.kind === "file" ? "warning" : "error";
           addFinding(severity === "warning" ? warnings : findings, {
             ruleId: "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
@@ -1858,10 +1751,8 @@ function repositoryFiles(context: AnalysisContext): readonly string[] {
 function sourceContentsByPath(context: AnalysisContext, byCell: Record<string, readonly string[]>): Record<string, string> {
   const contents: Record<string, string> = {};
   const sourceFiles = new Set(Object.values(byCell).flat());
-  const readSourceFile = ts.sys.readFile;
   for (const filePath of sourceFiles) {
-    const sourceText = readSourceFile(path.join(context.rootDir, filePath));
-    if (sourceText !== undefined) contents[filePath] = sourceText;
+    contents[filePath] = readSourceText(context, path.join(context.rootDir, filePath));
   }
   return contents;
 }
@@ -2048,6 +1939,10 @@ function validatePluginResourceAccesses(
     if (!cell) continue;
     for (const access of accesses) {
       if (access.unresolved) {
+        if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) {
+          addAccessToCell(acceptedAccessesByCell, cellId, access);
+          continue;
+        }
         const severity: Severity = access.kind === "file" ? "warning" : "error";
         addFinding(severity === "warning" ? warnings : findings, {
           ruleId: "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
@@ -2141,12 +2036,12 @@ function runPluginRules(
   }
 }
 
-function extractImports(rootDir: string, filePath: string, warnings: Finding[]): ImportReference[] {
-  const sourceText = fs.readFileSync(filePath, "utf8");
+function extractImports(context: AnalysisContext, filePath: string, warnings: Finding[]): ImportReference[] {
+  const sourceText = readSourceText(context, filePath);
   if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const sourceFile = parseSourceFile(context, filePath);
   const references: ImportReference[] = [];
-  const importerPath = repoPath(rootDir, filePath);
+  const importerPath = repoPath(context.rootDir, filePath);
 
   function addReference(specifier: string, kind: ImportKind, node: ts.Node, typeOnly: boolean): void {
     references.push({
@@ -2444,7 +2339,7 @@ function validateImports(
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell, context)) {
-      const references = extractImports(context.rootDir, sourceFilePath, warnings);
+      const references = extractImports(context, sourceFilePath, warnings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
         observedImports.push({
