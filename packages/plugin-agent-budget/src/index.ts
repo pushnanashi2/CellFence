@@ -16,9 +16,12 @@ export type AgentBudgetOptions = {
   severity?: "warning" | "error";
 };
 
+// Stryker disable next-line Regex: non-star chunk splitting preserves the same token stream for supported * and ** globs.
+const GLOB_TOKEN_PATTERN = /([*]{1,2})/g;
+
 function patternToRegExp(pattern: string): RegExp {
   const escaped = pattern
-    .split(/([*]{1,2})/g)
+    .split(GLOB_TOKEN_PATTERN)
     .map((part) => {
       if (part === "**") return ".*";
       if (part === "*") return "[^/]*";
@@ -69,6 +72,7 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
         run(context) {
           const findings: CellFenceFinding[] = [];
           const changedFiles = [...context.repository.changedFiles].sort();
+          // Stryker disable next-line ConditionalExpression: replacing only the optional-budget guard with true is equivalent because `n > undefined` is false.
           if (options.maxFiles !== undefined && changedFiles.length > options.maxFiles) {
             findings.push({
               ruleId: "agent-budget/change-budget",
@@ -79,13 +83,14 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
           }
 
           for (const filePath of changedFiles) {
-            if ((options.forbiddenPaths || []).some((pattern) => matchesPattern(filePath, pattern))) {
+            const forbiddenPaths = options.forbiddenPaths || [];
+            if (forbiddenPaths.some((pattern) => matchesPattern(filePath, pattern))) {
               findings.push({
                 ruleId: "agent-budget/forbidden-path",
                 severity,
                 filePath,
                 message: `${filePath} is forbidden by the agent budget`,
-                details: { forbiddenPaths: options.forbiddenPaths || [] },
+                details: { forbiddenPaths },
               });
             }
             const cellId = cellForFile(context.repository, filePath);
@@ -105,6 +110,7 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
             const previous = baselineRecord(context.repository, cellId);
             if (!previous) continue;
             const publicSymbolsAdded = addedCount(record.publicSymbolSet, previous.publicSymbolSet);
+            // Stryker disable next-line ConditionalExpression: replacing only the optional-budget guard with true is equivalent because `n > undefined` is false.
             if (options.maxPublicSymbolsAdded !== undefined && publicSymbolsAdded > options.maxPublicSymbolsAdded) {
               findings.push({
                 ruleId: "agent-budget/public-symbol-budget",
@@ -115,6 +121,7 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
               });
             }
             const dependencyEdgesAdded = addedCount(record.dependencyEdges, previous.dependencyEdges);
+            // Stryker disable next-line ConditionalExpression: replacing only the optional-budget guard with true is equivalent because `n > undefined` is false.
             if (options.maxDependencyEdgesAdded !== undefined && dependencyEdgesAdded > options.maxDependencyEdgesAdded) {
               findings.push({
                 ruleId: "agent-budget/dependency-budget",

@@ -7,7 +7,7 @@ import test from "node:test";
 import ts from "typescript";
 
 import { checkRepository } from "../packages/engine/dist/index.js";
-import { defineAdapter, definePlugin, defineRule } from "../packages/plugin-api/dist/index.js";
+import { defineAdapter, definePlugin, defineReporter, defineRule } from "../packages/plugin-api/dist/index.js";
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
@@ -89,6 +89,20 @@ const requiredFileRule = defineRule({
       message: "core is missing src/core/required.ts",
     }];
   },
+});
+
+test("plugin API define helpers return the exact objects passed in", () => {
+  const reporter = {
+    name: "company/reporter",
+    report() {
+      return "ok";
+    },
+  };
+  assert.equal(defineAdapter(companyDatabaseAdapter), companyDatabaseAdapter);
+  assert.equal(defineRule(requiredFileRule), requiredFileRule);
+  assert.equal(defineReporter(reporter), reporter);
+  const plugin = companyPlugin();
+  assert.equal(definePlugin(plugin), plugin);
 });
 
 function companyPlugin() {
@@ -402,6 +416,182 @@ test("requiredRules fail when a plugin rule is disabled", () => {
     const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", plugins: [companyPlugin()] });
     assert.equal(result.ok, false);
     assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_REQUIRED_RULE_DISABLED"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("plugin runtime fails closed for invalid plugin APIs, adapters, and rules", () => {
+  const rootDir = createRepository();
+  const unsupportedApiPlugin = {
+    apiVersion: 999,
+    name: "@company/unsupported-plugin",
+    version: "1.0.0",
+    rules: {},
+  };
+  const unnamedUnsupportedApiPlugin = {
+    apiVersion: 999,
+    rules: {},
+  };
+  const throwingAdapterPlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/throwing-adapter",
+    version: "1.0.0",
+    adapters: [defineAdapter({
+      name: "throwing",
+      detect() {
+        throw new Error("adapter boom");
+      },
+    })],
+  });
+  const stringThrowingAdapterPlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/string-throwing-adapter",
+    version: "1.0.0",
+    adapters: [defineAdapter({
+      name: "string-throwing",
+      detect() {
+        throw "string adapter boom";
+      },
+    })],
+  });
+  const unknownCellAdapterPlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/unknown-cell-adapter",
+    version: "1.0.0",
+    adapters: [defineAdapter({
+      name: "unknown-cell",
+      detect(context) {
+        return [{
+          kind: "database",
+          access: "read",
+          selector: "T_UNKNOWN",
+          filePath: context.filePath,
+          line: 1,
+          source: "unknown-cell",
+          detectedBy: "unknown-cell",
+          confidence: "high",
+          cellId: "missing-cell",
+        }];
+      },
+    })],
+  });
+  const fallbackAccessAdapterPlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/fallback-access-adapter",
+    version: "1.0.0",
+    adapters: [defineAdapter({
+      name: "fallback-access",
+      detect() {
+        return [{
+          kind: "file",
+          access: "read",
+          selector: "unresolved:fallback-access",
+          confidence: "low",
+          unresolved: true,
+        }];
+      },
+    })],
+  });
+  const rulePlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/rule-plugin",
+    version: "1.0.0",
+    rules: {
+      "company/reported": defineRule({
+        id: "company/reported",
+        meta: {
+          description: "Reports a finding through both supported rule channels.",
+          defaultSeverity: "error",
+          category: "test",
+        },
+        run(context) {
+          context.report({
+            severity: "error",
+            message: "reported finding",
+          });
+          return [{
+            severity: "error",
+          message: "returned finding",
+        }];
+      },
+    }),
+      "company/undefined": defineRule({
+        id: "company/undefined",
+        meta: {
+          description: "Returns undefined to verify optional rule output is treated as empty.",
+          defaultSeverity: "error",
+          category: "test",
+        },
+        run() {
+          return undefined;
+        },
+      }),
+      "company/throws": defineRule({
+        id: "company/throws",
+        meta: {
+          description: "Throws to verify plugin rule failures are findings.",
+          defaultSeverity: "error",
+          category: "test",
+        },
+        run() {
+          throw new Error("rule boom");
+        },
+      }),
+      "company/string-throws": defineRule({
+        id: "company/string-throws",
+        meta: {
+          description: "Throws a non-Error value to verify safe message rendering.",
+          defaultSeverity: "error",
+          category: "test",
+        },
+        run() {
+          throw "string rule boom";
+        },
+      }),
+    },
+  });
+
+  try {
+    const result = checkRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      plugins: [
+        unsupportedApiPlugin,
+        unnamedUnsupportedApiPlugin,
+        throwingAdapterPlugin,
+        stringThrowingAdapterPlugin,
+        unknownCellAdapterPlugin,
+        fallbackAccessAdapterPlugin,
+        rulePlugin,
+      ],
+    });
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /unsupported CellFence plugin API/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /adapter boom/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /plugin \(unnamed\)/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /string adapter boom/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /unknown cell missing-cell/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /rule boom/.test(finding.message)));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PLUGIN_INVALID"
+      && /string rule boom/.test(finding.message)));
+    assert.ok(result.warnings.some((finding) =>
+      finding.ruleId === "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
+      && /resource access is not statically resolvable/.test(finding.message)));
+    assert.equal(result.findings.filter((finding) => finding.ruleId === "company/reported").length, 2);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

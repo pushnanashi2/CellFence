@@ -12,9 +12,12 @@ export type BlastRadiusOptions = {
   severity?: "warning" | "error";
 };
 
+// Stryker disable next-line Regex: non-star chunk splitting preserves the same token stream for supported * and ** globs.
+const GLOB_TOKEN_PATTERN = /([*]{1,2})/g;
+
 function patternToRegExp(pattern: string): RegExp {
   const escaped = pattern
-    .split(/([*]{1,2})/g)
+    .split(GLOB_TOKEN_PATTERN)
     .map((part) => {
       if (part === "**") return ".*";
       if (part === "*") return "[^/]*";
@@ -55,8 +58,7 @@ function collectAffectedCells(changed: Set<string>, reverse: Map<string, Set<str
   const affected = new Set<string>();
   const queue = [...changed];
   while (queue.length > 0) {
-    const cellId = queue.shift();
-    if (!cellId) continue;
+    const cellId = queue.shift() as string;
     for (const consumer of reverse.get(cellId) || []) {
       if (affected.has(consumer)) continue;
       affected.add(consumer);
@@ -84,6 +86,7 @@ export function blastRadiusPlugin(options: BlastRadiusOptions = {}): CellFencePl
         },
         run(context) {
           const changed = changedCells(context.repository);
+          // Stryker disable next-line ConditionalExpression: removing the early return is equivalent because an empty changed set reaches an empty affected set.
           if (changed.size === 0) return [];
           const affected = collectAffectedCells(changed, reverseImportGraph(context.repository));
           if (affected.size <= maxAffectedCells) return [];

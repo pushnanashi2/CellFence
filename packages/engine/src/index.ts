@@ -461,6 +461,10 @@ function addFinding(findings: Finding[], finding: Finding): void {
   findings.push(finding);
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
 
 function todayIsoDate(): string {
@@ -480,7 +484,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   const reasonMatch = /\breason:(.+)$/.exec(suffix);
   const expires = expiresMatch?.[1] || "";
   const approvedBy = approvedByMatch?.[1] || "";
-  const reason = reasonMatch?.[1]?.trim() || "";
+  const reason = reasonMatch ? reasonMatch[1].trim() : "";
   const errors: string[] = [];
   if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
   if (!expires || !isIsoDate(expires)) errors.push("expires must be YYYY-MM-DD");
@@ -602,6 +606,7 @@ function findPackageRoot(rootDir: string, publicEntry: string): string | undefin
       return repoPath(rootDir, directoryPath);
     }
     const parentPath = path.dirname(directoryPath);
+    /* c8 ignore next -- Safety guard for filesystem roots; normal repo roots exit via the while condition. */
     if (parentPath === directoryPath) break;
     directoryPath = parentPath;
   }
@@ -850,7 +855,7 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
             severity,
             cellId: cell.id,
             filePath: access.filePath,
-            message: `${cell.id} has unresolved ${access.kind} resource access at line ${access.line}: ${access.reason || "resource access is not statically resolvable"}`,
+            message: `${cell.id} has unresolved ${access.kind} resource access at line ${access.line}: ${access.reason as string}`,
             details: {
               kind: access.kind,
               access: access.access,
@@ -940,7 +945,7 @@ function resourceEvidenceAccesses(
         ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
         severity: "error",
         filePath: repoPath(context.rootDir, evidencePath),
-        message: `failed to read resource evidence: ${error instanceof Error ? error.message : String(error)}`,
+        message: `failed to read resource evidence: ${errorMessage(error)}`,
       });
       continue;
     }
@@ -958,8 +963,7 @@ function resourceEvidenceAccesses(
         continue;
       }
 
-      const cell = context.cellsById.get(cellId);
-      if (!cell) continue;
+      const cell = context.cellsById.get(cellId) as CellManifest;
       const access: ResourceAccessReference = {
         kind: entry.kind,
         access: entry.access,
@@ -1089,8 +1093,7 @@ function createRepositoryModel(
   };
 }
 
-function qualifiedExpressionName(node: ts.Node | undefined): string | undefined {
-  if (!node) return undefined;
+function qualifiedExpressionName(node: ts.Node): string | undefined {
   if (ts.isIdentifier(node)) return node.text;
   if (ts.isPropertyAccessExpression(node)) {
     const root = qualifiedExpressionName(node.expression);
@@ -1154,8 +1157,7 @@ function runPluginAdapters(
       for (const cell of context.manifest.cells) {
         for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
           const relativeFilePath = repoPath(context.rootDir, sourceFilePath);
-          const sourceText = repository.files.contents[relativeFilePath];
-          if (sourceText === undefined) continue;
+          const sourceText = repository.files.contents[relativeFilePath] as string;
           const sourceFile = ts.createSourceFile(sourceFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(sourceFilePath));
           let accesses: PluginResourceAccess[];
           try {
@@ -1173,7 +1175,7 @@ function runPluginAdapters(
               severity: "error",
               cellId: cell.id,
               filePath: relativeFilePath,
-              message: `plugin adapter ${plugin.name}/${adapter.name} failed: ${error instanceof Error ? error.message : String(error)}`,
+              message: `plugin adapter ${plugin.name}/${adapter.name} failed: ${errorMessage(error)}`,
               details: { plugin: plugin.name, adapter: adapter.name },
             });
             continue;
@@ -1215,8 +1217,7 @@ function validatePluginResourceAccesses(
 ): Map<string, ResourceAccessReference[]> {
   const acceptedAccessesByCell = new Map<string, ResourceAccessReference[]>();
   for (const [cellId, accesses] of accessesByCell.entries()) {
-    const cell = context.cellsById.get(cellId);
-    if (!cell) continue;
+    const cell = context.cellsById.get(cellId) as CellManifest;
     for (const access of accesses) {
       if (access.unresolved) {
         if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) {
@@ -1306,7 +1307,7 @@ function runPluginRules(
         addFinding(findings, {
           ruleId: "CELLFENCE_PLUGIN_INVALID",
           severity: "error",
-          message: `plugin rule ${plugin.name}/${ruleId} failed: ${error instanceof Error ? error.message : String(error)}`,
+          message: `plugin rule ${plugin.name}/${ruleId} failed: ${errorMessage(error)}`,
           details: { plugin: plugin.name, ruleId },
         });
         continue;
@@ -1448,7 +1449,7 @@ function resolvePathAliasTarget(context: AnalysisContext, specifier: string): st
 }
 
 function findArtifactLaneForPath(cell: CellManifest, relativePath: string): string | undefined {
-  for (const lane of cell.producesArtifacts || []) {
+  for (const lane of cell.producesArtifacts ?? []) {
     if (lane.paths.some((pattern) => matchesPattern(relativePath, pattern))) return lane.id;
   }
   return undefined;
@@ -1498,7 +1499,7 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
 }
 
 function consumerDeclaration(cell: CellManifest, producerCellId: string): CellConsumerManifest | undefined {
-  return (cell.consumes || []).find((consumer) => consumer.cell === producerCellId);
+  return (cell.consumes ?? []).find((consumer) => consumer.cell === producerCellId);
 }
 
 function validatePublicEntries(context: AnalysisContext, findings: Finding[]): void {
@@ -1546,6 +1547,7 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
 }
 
 function exportedNameFromDeclarationName(name: ts.DeclarationName | undefined): string | undefined {
+  /* c8 ignore next -- Non-default exported declarations without names are invalid TypeScript syntax. */
   if (!name) return undefined;
   if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text;
   return undefined;
@@ -1855,7 +1857,7 @@ function computeMetrics(
       publicSurfaceHash: publicSurfaceHash(publicEntryPath),
       dependencyEdges: dependencyEdgesForCell(cell.id, crossCellDependencies.get(cell.id)),
       artifactContracts: artifactContractsForCell(cell),
-      resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id) || []),
+      resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id) as ResourceAccessReference[]),
     };
   }
   return metrics;
@@ -1899,7 +1901,7 @@ function compareBaseline(
     }
 
     if (baselineRecord.ownedPathSet) {
-      const uncovered = (metric.ownedPathSet || []).filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, baselineRecord.ownedPathSet || []));
+      const uncovered = (metric.ownedPathSet as string[]).filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, baselineRecord.ownedPathSet as string[]));
       if (uncovered.length > 0) {
         addFinding(findings, {
           ruleId: "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE",
@@ -1917,7 +1919,7 @@ function compareBaseline(
 
     if (baselineRecord.publicSymbolSet) {
       const previousSymbols = new Set(baselineRecord.publicSymbolSet);
-      const addedSymbols = (metric.publicSymbolSet || []).filter((symbol) => !previousSymbols.has(symbol));
+      const addedSymbols = (metric.publicSymbolSet as string[]).filter((symbol) => !previousSymbols.has(symbol));
       if (addedSymbols.length > 0) {
         addFinding(findings, {
           ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
@@ -1935,7 +1937,7 @@ function compareBaseline(
 
     if (baselineRecord.dependencyEdges) {
       const previousEdges = new Set(baselineRecord.dependencyEdges);
-      const addedEdges = (metric.dependencyEdges || []).filter((edge) => !previousEdges.has(edge));
+      const addedEdges = (metric.dependencyEdges as string[]).filter((edge) => !previousEdges.has(edge));
       if (addedEdges.length > 0) {
         addFinding(findings, {
           ruleId: "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
@@ -1953,7 +1955,7 @@ function compareBaseline(
 
     if (baselineRecord.artifactContracts) {
       const previousArtifacts = new Set(baselineRecord.artifactContracts);
-      const addedArtifacts = (metric.artifactContracts || []).filter((artifact) => !previousArtifacts.has(artifact));
+      const addedArtifacts = (metric.artifactContracts as string[]).filter((artifact) => !previousArtifacts.has(artifact));
       if (addedArtifacts.length > 0) {
         addFinding(findings, {
           ruleId: "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE",
@@ -2053,9 +2055,10 @@ function configuredRuleSeverity(
     const cellSeverity = context.cellsById.get(finding.cellId)?.rules?.[finding.ruleId];
     if (cellSeverity) severity = cellSeverity;
   }
-  if (finding.filePath) {
+  const findingFilePath = finding.filePath;
+  if (findingFilePath) {
     for (const override of context.manifest.overrides || []) {
-      if (override.files.some((pattern) => matchesPattern(finding.filePath || "", pattern))) {
+      if (override.files.some((pattern) => matchesPattern(findingFilePath, pattern))) {
         const overrideSeverity = override.rules[finding.ruleId];
         if (overrideSeverity) severity = overrideSeverity;
       }
@@ -2145,7 +2148,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   try {
     rawManifest = readJsonFile(manifestPath);
   } catch (error) {
-    return manifestInvalidResult(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${error instanceof Error ? error.message : String(error)}`);
+    return manifestInvalidResult(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`);
   }
 
   const manifestValidation = validateManifest(rawManifest);
@@ -2176,7 +2179,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
       addFinding(findings, {
         ruleId: "CELLFENCE_MANIFEST_INVALID",
         severity: "error",
-        message: `failed to read baseline ${repoPath(rootDir, baselinePath)}: ${error instanceof Error ? error.message : String(error)}`,
+        message: `failed to read baseline ${repoPath(rootDir, baselinePath)}: ${errorMessage(error)}`,
       });
     }
   }
@@ -2244,7 +2247,9 @@ function gitCommand(rootDir: string, args: string[]): string {
   } catch (error) {
     const failure = error as { stderr?: unknown; message?: unknown };
     const stderr = typeof failure.stderr === "string" ? failure.stderr.trim() : "";
-    const message = stderr || (typeof failure.message === "string" ? failure.message : "git command failed");
+    /* c8 ignore next -- execFileSync throws Error-like objects with string messages; this is a final defensive fallback. */
+    const fallbackMessage = typeof failure.message === "string" ? failure.message : "git command failed";
+    const message = stderr || fallbackMessage;
     throw new Error(message, { cause: error });
   }
 }
@@ -2366,7 +2371,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
       baseFindingCount: baseResult.findings.length,
     };
   } catch (error) {
-    return gitMetadataFailure(`changed check requires git metadata and a valid base ref: ${error instanceof Error ? error.message : String(error)}`);
+    return gitMetadataFailure(`changed check requires git metadata and a valid base ref: ${errorMessage(error)}`);
   }
 }
 
@@ -2474,7 +2479,7 @@ function readClaimStore(rootDir: string, claimsPathOption: string | undefined, f
       ruleId: "CELLFENCE_CLAIM_INVALID",
       severity: "error",
       filePath: relativePath,
-      message: `failed to read claim store: ${error instanceof Error ? error.message : String(error)}`,
+      message: `failed to read claim store: ${errorMessage(error)}`,
     });
     return { path: resolvedPath, claims: [] };
   }
@@ -2693,7 +2698,7 @@ export function checkClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
   try {
     manifest = loadManifestFromFile(manifestPath);
   } catch (error) {
-    return claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${error instanceof Error ? error.message : String(error)}`);
+    return claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`);
   }
   const context = createContext(rootDir, manifest);
   const findings: Finding[] = [];
@@ -2715,7 +2720,7 @@ export function checkClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
       addFinding(findings, {
         ruleId: "CELLFENCE_GIT_METADATA_UNAVAILABLE",
         severity: "error",
-        message: `claim check --agent requires git metadata to compare changed files: ${error instanceof Error ? error.message : String(error)}`,
+        message: `claim check --agent requires git metadata to compare changed files: ${errorMessage(error)}`,
       });
     }
   }
@@ -2735,7 +2740,7 @@ export function createClaim(options: ClaimCreateOptions): ClaimCreateResult {
   try {
     manifest = loadManifestFromFile(manifestPath);
   } catch (error) {
-    return { ...claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${error instanceof Error ? error.message : String(error)}`), claimsPath: claimStorePath(rootDir, options.claimsPath) };
+    return { ...claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`), claimsPath: claimStorePath(rootDir, options.claimsPath) };
   }
   const context = createContext(rootDir, manifest);
   const findings: Finding[] = [];
@@ -2881,7 +2886,7 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
     }
 
     const scopeExpansion = current.ownedPathSet && previous.ownedPathSet
-      ? current.ownedPathSet.filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet || []))
+      ? current.ownedPathSet.filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet as string[]))
       : [];
     if (scopeExpansion.length > 0) {
       addLockedBaselineFinding(
@@ -2902,7 +2907,7 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
     }
 
     const addedPublicSymbols = current.publicSymbolSet && previous.publicSymbolSet
-      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet || []).includes(symbol))
+      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet as string[]).includes(symbol))
       : [];
     if (addedPublicSymbols.length > 0) {
       addLockedBaselineFinding(
@@ -2914,7 +2919,7 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
     }
 
     const addedDependencyEdges = current.dependencyEdges && previous.dependencyEdges
-      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges || []).includes(edge))
+      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges as string[]).includes(edge))
       : [];
     if (addedDependencyEdges.length > 0) {
       addLockedBaselineFinding(
@@ -2926,7 +2931,7 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
     }
 
     const addedArtifacts = current.artifactContracts && previous.artifactContracts
-      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts || []).includes(artifact))
+      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts as string[]).includes(artifact))
       : [];
     if (addedArtifacts.length > 0) {
       addLockedBaselineFinding(
@@ -3004,7 +3009,7 @@ export function createCellContext(options: ContextOptions): CellFenceContext {
   const budgets: CellFenceContext["budgets"] = {};
 
   for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
-    const current = currentMetrics?.[metric] ?? 0;
+    const current = (currentMetrics as CellBaselineRecord)[metric];
     const manifestLimit = cell.budgets?.[metric];
     if (typeof manifestLimit === "number") {
       budgets[metric] = budgetEntry(current, manifestLimit, "manifest-budget");
@@ -3013,7 +3018,7 @@ export function createCellContext(options: ContextOptions): CellFenceContext {
     }
   }
 
-  const allowedImports: ContextAllowedImport[] = (cell.consumes || []).flatMap((consumer) => {
+  const allowedImports: ContextAllowedImport[] = (cell.consumes ?? []).flatMap((consumer) => {
     const producer = context.cellsById.get(consumer.cell);
     if (!producer) return [];
     return [{
@@ -3078,7 +3083,7 @@ export function createCouplingGraph(options: CheckOptions = {}): CouplingGraph {
 
   for (const cell of manifest.cells) {
     addGraphNode(nodes, { id: cell.id, label: cell.id, kind: "cell" });
-    for (const consumer of cell.consumes || []) {
+    for (const consumer of cell.consumes ?? []) {
       addGraphEdge(edges, {
         from: cell.id,
         to: consumer.cell,

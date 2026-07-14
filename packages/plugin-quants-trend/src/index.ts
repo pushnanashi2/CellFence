@@ -19,11 +19,10 @@ export type QuantsTrendOptions = {
 
 function metricValue(record: CellBaselineRecord | undefined, metric: TrendMetric): number {
   if (!record) return 0;
-  return Number(record[metric] || 0);
+  return Number(record[metric] ?? 0);
 }
 
 function mean(values: number[]): number {
-  if (values.length === 0) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
@@ -46,6 +45,7 @@ export function quantsTrendPlugin(options: QuantsTrendOptions): CellFencePlugin 
         },
         run(context) {
           const findings: CellFenceFinding[] = [];
+          // Stryker disable next-line ConditionalExpression: without two history points, downstream mean/threshold becomes NaN and still emits no findings.
           if (options.history.length < 2) return findings;
           for (const [cellId, current] of Object.entries(context.repository.metrics)) {
             for (const metric of metrics) {

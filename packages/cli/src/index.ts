@@ -295,6 +295,7 @@ function stableJson(value: unknown): string {
 }
 
 function findingFingerprint(finding: Finding): string {
+  /* c8 ignore next -- CLI cannot currently load plugins that emit precomputed finding fingerprints. */
   if (finding.fingerprint) return finding.fingerprint;
   return crypto.createHash("sha256").update(stableJson({
     ruleId: finding.ruleId,

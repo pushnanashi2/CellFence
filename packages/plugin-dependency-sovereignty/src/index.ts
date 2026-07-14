@@ -45,9 +45,11 @@ export function dependencySovereigntyPlugin(options: DependencySovereigntyOption
           const protectedCells = new Set(options.protectedCells || Object.keys(options.cellOwners));
           const baselineEdges = new Set<string>();
           for (const record of Object.values(context.repository.baseline?.cells || {})) {
+            // Stryker disable next-line ArrayDeclaration: fallback sentinel cannot match normalized dependency edges shaped as consumer->producer.
             for (const edge of record.dependencyEdges || []) baselineEdges.add(edge);
           }
           const changedImporters = new Set<string>();
+          // Stryker disable next-line ConditionalExpression: forcing this collection on is equivalent unless the later changedOnly gate is also enabled.
           if (options.changedOnly) {
             for (const changedFile of context.repository.changedFiles) {
               for (const [cellId, files] of Object.entries(context.repository.files.byCell)) {

@@ -1,0 +1,55 @@
+const mutationTestFiles = [
+  "tests/file-index.test.mjs",
+  "tests/resource-access-coverage.test.mjs",
+  "tests/schema-validation.test.mjs",
+  "tests/plugin-api.test.mjs",
+  "tests/official-plugins.test.mjs",
+  "tests/trace.test.mjs",
+];
+
+export default {
+  packageManager: "npm",
+  testRunner: "command",
+  commandRunner: {
+    command: `node --test ${mutationTestFiles.join(" ")}`,
+  },
+  mutate: [
+    "packages/schema/dist/index.js",
+    "packages/plugin-api/dist/index.js",
+    "packages/adapter-call-pattern/dist/index.js",
+    "packages/adapter-opentelemetry/dist/index.js",
+    "packages/plugin-agent-budget/dist/index.js",
+    "packages/plugin-blast-radius/dist/index.js",
+    "packages/plugin-dependency-sovereignty/dist/index.js",
+    "packages/plugin-geo-purity/dist/index.js",
+    "packages/plugin-legacy-strangler/dist/index.js",
+    "packages/plugin-quants-trend/dist/index.js",
+    "packages/reporter-economy-matrix/dist/index.js",
+    "packages/trace/dist/index.js",
+    "packages/engine/dist/file-index.js",
+    "packages/engine/dist/resource-access.js",
+  ],
+  reporters: ["clear-text", "progress", "json"],
+  jsonReporter: {
+    fileName: "reports/mutation/mutation.json",
+  },
+  coverageAnalysis: "off",
+  ignoreStatic: false,
+  incremental: false,
+  incrementalFile: "reports/mutation/stryker-incremental.json",
+  thresholds: {
+    high: 100,
+    low: 100,
+    break: 100,
+  },
+  concurrency: 2,
+  timeoutMS: 20000,
+  dryRunTimeoutMinutes: 3,
+  cleanTempDir: true,
+  tempDirName: ".stryker-tmp",
+  ignorePatterns: [
+    "/coverage",
+    "/reports/mutation",
+    "cellfence-*.tgz",
+  ],
+};

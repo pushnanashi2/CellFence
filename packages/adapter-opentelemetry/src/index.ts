@@ -46,13 +46,17 @@ function normalizeOperation(kind: ResourceContractKind, value: string | undefine
 
 function flattenSpans(input: unknown): SpanLike[] {
   if (Array.isArray(input)) return input.flatMap(flattenSpans);
+  // Stryker disable all: non-record fallback values are discarded by accessFromSpan, so fake spans are observationally equivalent.
   if (!isRecord(input)) return [];
+  // Stryker restore all
   if (Array.isArray(input.spans)) return input.spans.flatMap(flattenSpans);
   if (Array.isArray(input.resourceSpans)) return input.resourceSpans.flatMap(flattenSpans);
   if (Array.isArray(input.scopeSpans)) return input.scopeSpans.flatMap(flattenSpans);
   if (Array.isArray(input.instrumentationLibrarySpans)) return input.instrumentationLibrarySpans.flatMap(flattenSpans);
+  // Stryker disable all: plain container objects without span fields produce no access either way.
   if (input.name || input.attributes) return [input as SpanLike];
   return [];
+  // Stryker restore all
 }
 
 function spanAttributes(span: SpanLike): Record<string, unknown> {

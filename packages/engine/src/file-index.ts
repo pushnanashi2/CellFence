@@ -37,6 +37,7 @@ function escapeRegExp(text: string): string {
 
 function patternToRegExp(pattern: string): RegExp {
   const cachedPattern = PATTERN_REGEXP_CACHE.get(pattern);
+  // Stryker disable next-line ConditionalExpression: cache-hit removal only changes performance, not matcher semantics.
   if (cachedPattern) return cachedPattern;
   const normalized = normalizePath(pattern);
   let expression = "";
@@ -97,6 +98,7 @@ function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifes
     if (!SOURCE_EXTENSIONS.includes(path.extname(filePath))) continue;
     for (const cell of manifest.cells) {
       if (!cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern))) continue;
+      // Stryker disable next-line OptionalChaining: the map is initialized for every manifest cell before iteration.
       index.get(cell.id)?.push(filePath);
     }
   }
@@ -120,7 +122,9 @@ export function sourceFilesForCell(rootDir: string, cell: CellManifest, context?
 export function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceManifest, context?: FileIndexContext): string[] {
   const governance = manifest.governance;
   if (!governance?.requireOwnership) return [];
+  // Stryker disable next-line ArrayDeclaration: a synthetic exact "Stryker was here" include cannot match any source-extension file.
   const include = governance.include || [];
+  // Stryker disable next-line ArrayDeclaration: a synthetic exact "Stryker was here" exclude cannot match any source-extension file.
   const exclude = governance.exclude || [];
   return listFiles(rootDir, context).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
