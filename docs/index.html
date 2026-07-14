@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="CellFence turns architectural intent into deterministic CI checks for AI-assisted TypeScript and JavaScript repositories."
+    />
+    <meta property="og:title" content="CellFence" />
+    <meta
+      property="og:description"
+      content="Repository architecture governance for parallel AI coding agents."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/hero-cellfence.png" />
+    <title>CellFence</title>
+    <link rel="preload" href="assets/hero-cellfence.png" as="image" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #08090a;
+        --ink: #f0f2f4;
+        --muted: #8f959a;
+        --dim: #575d63;
+        --line: rgba(255, 255, 255, 0.15);
+        --panel: rgba(255, 255, 255, 0.045);
+        --cyan: #74f2ff;
+        --red: #ff4d5e;
+        --green: #a8ffbf;
+        --max: 1180px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 18rem),
+          linear-gradient(90deg, rgba(116, 242, 255, 0.035), transparent 36%, transparent 64%, rgba(255, 77, 94, 0.03)),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        letter-spacing: 0;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        pointer-events: none;
+        content: "";
+        opacity: 0.48;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(circle at center, black, transparent 78%);
+      }
+
+      body::after {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        content: "";
+        opacity: 0.19;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-header {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 30px clamp(22px, 4vw, 54px);
+        color: rgba(255, 255, 255, 0.9);
+        mix-blend-mode: screen;
+      }
+
+      .mark {
+        display: inline-flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .mark-symbol {
+        position: relative;
+        width: 18px;
+        height: 18px;
+      }
+
+      .mark-symbol::before,
+      .mark-symbol::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.84);
+        transform: rotate(45deg);
+      }
+
+      .mark-symbol::after {
+        inset: 5px;
+        border-color: rgba(116, 242, 255, 0.85);
+      }
+
+      .menu {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+
+      .menu a {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .hamburger {
+        display: none;
+        width: 23px;
+        height: 16px;
+        border: 0;
+        border-top: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        background: transparent;
+        color: white;
+      }
+
+      .hamburger::before {
+        display: block;
+        width: 100%;
+        height: 2px;
+        margin-top: 5px;
+        background: currentColor;
+        content: "";
+      }
+
+      .hero {
+        position: relative;
+        display: grid;
+        min-height: 92vh;
+        padding: 104px 22px 72px;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .hero-link {
+        position: absolute;
+        top: 18vh;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .hero-link::after {
+        display: block;
+        width: 100%;
+        height: 1px;
+        margin-top: 7px;
+        background: rgba(255, 255, 255, 0.34);
+        content: "";
+      }
+
+      .hero-stage {
+        position: relative;
+        display: grid;
+        width: min(900px, 100%);
+        min-height: 64vh;
+        place-items: center;
+        transform-style: preserve-3d;
+      }
+
+      .hero-object {
+        position: absolute;
+        width: min(520px, 78vw);
+        max-height: 68vh;
+        object-fit: contain;
+        opacity: 0.72;
+        filter: contrast(1.12) saturate(0.86) drop-shadow(0 0 26px rgba(116, 242, 255, 0.08));
+        transform: translate3d(var(--mx, 0), var(--my, 0), 0) scale(1.02);
+        transition: transform 0.2s ease-out;
+        user-select: none;
+      }
+
+      .hero-title {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 6.4rem;
+        font-weight: 200;
+        line-height: 0.93;
+        text-align: center;
+        text-wrap: balance;
+      }
+
+      .hero-title span {
+        display: block;
+      }
+
+      .hero-copy {
+        position: absolute;
+        right: clamp(20px, 6vw, 86px);
+        bottom: 11vh;
+        max-width: 330px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .hold {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        color: rgba(255, 255, 255, 0.33);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        transform: translateX(-50%);
+      }
+
+      .signature {
+        position: fixed;
+        right: 28px;
+        bottom: 22px;
+        z-index: 10;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 22px;
+        font-weight: 300;
+        font-style: italic;
+        letter-spacing: 0;
+      }
+
+      main {
+        overflow: hidden;
+      }
+
+      .section {
+        padding: clamp(72px, 10vw, 136px) 22px;
+      }
+
+      .inner {
+        width: min(var(--max), 100%);
+        margin: 0 auto;
+      }
+
+      .eyebrow {
+        margin: 0 0 20px;
+        color: rgba(255, 255, 255, 0.52);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .section-title {
+        max-width: 890px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 4.6rem;
+        font-weight: 220;
+        line-height: 1.03;
+        text-wrap: balance;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        gap: clamp(38px, 7vw, 92px);
+        align-items: start;
+      }
+
+      .lead {
+        margin: 28px 0 0;
+        color: rgba(255, 255, 255, 0.64);
+        font-size: 1.16rem;
+        line-height: 1.78;
+      }
+
+      .rules {
+        display: grid;
+        gap: 1px;
+        margin-top: 10px;
+        border-top: 1px solid var(--line);
+      }
+
+      .rule {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 20px;
+        padding: 24px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .rule code {
+        color: var(--green);
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .rule h3 {
+        margin: 0 0 8px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .rule p,
+      .terminal p,
+      .project p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.57);
+        font-size: 14px;
+        line-height: 1.72;
+      }
+
+      .terminal {
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.32);
+      }
+
+      .terminal-head {
+        display: flex;
+        gap: 7px;
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.36);
+      }
+
+      pre {
+        margin: 0;
+        padding: 22px;
+        overflow: auto;
+        color: rgba(255, 255, 255, 0.84);
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .bad {
+        color: var(--red);
+      }
+
+      .good {
+        color: var(--cyan);
+      }
+
+      .projects {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        margin-top: 54px;
+        border: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .project {
+        min-height: 250px;
+        padding: 26px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+          #090a0b;
+      }
+
+      .project strong {
+        display: block;
+        margin-bottom: 54px;
+        color: rgba(255, 255, 255, 0.48);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .project h3 {
+        margin: 0 0 14px;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 24px;
+        font-weight: 300;
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 36px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .button.primary {
+        border-color: rgba(116, 242, 255, 0.5);
+        background: rgba(116, 242, 255, 0.08);
+      }
+
+      footer {
+        padding: 34px 22px 46px;
+        border-top: 1px solid var(--line);
+        color: rgba(255, 255, 255, 0.42);
+      }
+
+      .footer-inner {
+        display: flex;
+        width: min(var(--max), 100%);
+        margin: 0 auto;
+        justify-content: space-between;
+        gap: 24px;
+        font-size: 12px;
+      }
+
+      @media (max-width: 850px) {
+        .site-header {
+          padding: 24px 22px;
+        }
+
+        .menu a {
+          display: none;
+        }
+
+        .hamburger {
+          display: block;
+        }
+
+        .hero {
+          min-height: 91vh;
+          padding-top: 86px;
+        }
+
+        .hero-link {
+          top: 14vh;
+          white-space: nowrap;
+        }
+
+        .hero-stage {
+          min-height: 58vh;
+        }
+
+        .hero-object {
+          width: min(440px, 92vw);
+          opacity: 0.7;
+        }
+
+        .hero-title {
+          font-size: 3.25rem;
+        }
+
+        .section-title {
+          font-size: 2.45rem;
+        }
+
+        .lead {
+          font-size: 1rem;
+        }
+
+        .hero-copy {
+          position: relative;
+          right: auto;
+          bottom: auto;
+          max-width: 560px;
+          margin: -48px auto 0;
+          text-align: center;
+        }
+
+        .split,
+        .projects {
+          grid-template-columns: 1fr;
+        }
+
+        .project {
+          min-height: 210px;
+        }
+
+        .footer-inner {
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 430px) {
+        .hero-title {
+          font-size: 2.55rem;
+        }
+
+        .section-title {
+          font-size: 2rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .hero-object {
+          animation: drift 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+          from {
+            rotate: -1.4deg;
+          }
+          to {
+            rotate: 1.8deg;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" aria-label="Site header">
+      <a class="mark" href="#top" aria-label="CellFence home">
+        <span class="mark-symbol" aria-hidden="true"></span>
+        <span>CellFence</span>
+      </a>
+      <nav class="menu" aria-label="Primary navigation">
+        <a href="#model">Model</a>
+        <a href="#checks">Checks</a>
+        <a href="#install">Install</a>
+        <button class="hamburger" type="button" aria-label="Menu"></button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <a class="hero-link" href="#checks">View all checks</a>
+        <div class="hero-stage">
+          <img class="hero-object" src="assets/hero-cellfence.png" alt="" aria-hidden="true" />
+          <h1 class="hero-title" id="hero-title">
+            <span>CellFence</span>
+            <span>Architecture Firewall</span>
+          </h1>
+        </div>
+        <p class="hero-copy">
+          Manifest-driven repository governance for TypeScript and JavaScript codebases
+          changed by parallel AI coding agents.
+        </p>
+        <div class="hold">Click &amp; hold</div>
+      </section>
+
+      <section class="section" id="model">
+        <div class="inner split">
+          <div>
+            <p class="eyebrow">The fence before the edit</p>
+            <h2 class="section-title">
+              Turn architecture from prose into deterministic CI pressure.
+            </h2>
+            <p class="lead">
+              CellFence describes repository cells, ownership paths, public entries,
+              artifact lanes, resource contracts, and baseline ratchets. Agents and humans
+              can still move fast, but private imports, undeclared coupling, and silent
+              boundary growth become explicit failures.
+            </p>
+          </div>
+          <div class="terminal" aria-label="CellFence command example">
+            <div class="terminal-head" aria-hidden="true">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <pre><code>$ npx cellfence baseline check \
+  --manifest cellfence.manifest.json \
+  --baseline cellfence.baseline.json
+
+<span class="bad">reject</span> private cross-cell import
+<span class="bad">reject</span> undeclared artifact lane
+<span class="good">accept</span> public entry dependency</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="checks">
+        <div class="inner">
+          <p class="eyebrow">Governed surfaces</p>
+          <h2 class="section-title">
+            The checks are small, sharp, and hard to negotiate with.
+          </h2>
+          <div class="projects">
+            <article class="project">
+              <strong>01 / ownership</strong>
+              <h3>Cells own paths</h3>
+              <p>
+                No overlapping scopes. Strict mode can require every governed source file
+                to belong to exactly one cell.
+              </p>
+            </article>
+            <article class="project">
+              <strong>02 / entrypoints</strong>
+              <h3>Public APIs stay public</h3>
+              <p>
+                Cross-cell dependencies must be declared and must target the producer's
+                public entry instead of internal files.
+              </p>
+            </article>
+            <article class="project">
+              <strong>03 / ratchets</strong>
+              <h3>Architecture cannot drift quietly</h3>
+              <p>
+                Baselines allow shrinkage, but new cells, edges, symbols, lanes, and
+                signature changes fail until reviewed.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="install">
+        <div class="inner split">
+          <div>
+            <p class="eyebrow">GitHub Pages ready</p>
+            <h2 class="section-title">Ship it as a static site, wire the tool into CI.</h2>
+            <p class="lead">
+              Publish this page from the repository's <code>docs/</code> folder in GitHub
+              Pages. Keep CellFence itself in the required check path behind protected
+              branches, where it can reject architectural changes before merge.
+            </p>
+            <div class="cta">
+              <a class="button primary" href="https://github.com/pushnanashi2/CellFence#readme">
+                Read the README
+              </a>
+              <a
+                class="button"
+                href="https://github.com/pushnanashi2/CellFence/blob/main/docs/protocol/manifest-v1.md"
+              >
+                Manifest protocol
+              </a>
+            </div>
+          </div>
+          <div class="rules">
+            <div class="rule">
+              <code>init</code>
+              <div>
+                <h3>Declare cells</h3>
+                <p>Define ownership, public entries, consumers, artifact lanes, and resources.</p>
+              </div>
+            </div>
+            <div class="rule">
+              <code>check</code>
+              <div>
+                <h3>Run in CI</h3>
+                <p>Make CellFence a required status check before branch protection matters.</p>
+              </div>
+            </div>
+            <div class="rule">
+              <code>ratchet</code>
+              <div>
+                <h3>Review expansion</h3>
+                <p>Let architecture shrink freely, but force growth into an intentional diff.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span>CellFence · pre-release v0.x</span>
+        <span>Repository architecture governance for agentic codebases.</span>
+      </div>
+    </footer>
+    <div class="signature" aria-hidden="true">cf</div>
+
+    <script>
+      const stage = document.querySelector(".hero-stage");
+      const object = document.querySelector(".hero-object");
+
+      if (stage && object) {
+        stage.addEventListener("pointermove", (event) => {
+          const rect = stage.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width - 0.5;
+          const y = (event.clientY - rect.top) / rect.height - 0.5;
+          object.style.setProperty("--mx", `${x * 18}px`);
+          object.style.setProperty("--my", `${y * 18}px`);
+        });
+
+        stage.addEventListener("pointerleave", () => {
+          object.style.setProperty("--mx", "0px");
+          object.style.setProperty("--my", "0px");
+        });
+
+        stage.addEventListener("pointerdown", () => {
+          object.style.filter =
+            "contrast(1.2) saturate(1.15) drop-shadow(0 0 38px rgba(116, 242, 255, 0.22))";
+        });
+
+        stage.addEventListener("pointerup", () => {
+          object.style.filter =
+            "contrast(1.12) saturate(0.86) drop-shadow(0 0 26px rgba(116, 242, 255, 0.08))";
+        });
+      }
+    </script>
+  </body>
+</html>
