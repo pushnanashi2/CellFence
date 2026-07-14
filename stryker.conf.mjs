@@ -2,6 +2,7 @@ const mutationTestFiles = [
   "tests/file-index.test.mjs",
   "tests/resource-access-coverage.test.mjs",
   "tests/schema-validation.test.mjs",
+  "tests/github-action.test.mjs",
   "tests/plugin-api.test.mjs",
   "tests/official-plugins.test.mjs",
   "tests/trace.test.mjs",
@@ -28,6 +29,7 @@ export default {
     "packages/trace/dist/index.js",
     "packages/engine/dist/file-index.js",
     "packages/engine/dist/resource-access.js",
+    "packages/github-action/dist/index.js",
   ],
   reporters: ["clear-text", "progress", "json"],
   jsonReporter: {
