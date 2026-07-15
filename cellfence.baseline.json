@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-14T23:05:37.125Z",
+  "generatedAt": "2026-07-15T01:20:35.169Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -108,8 +108,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 47,
-      "publicSurfaceLines": 3039,
+      "publicSymbols": 51,
+      "publicSurfaceLines": 3274,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -146,6 +146,7 @@
         "createCellContext",
         "createClaim",
         "createCouplingGraph",
+        "createPruneReport",
         "createWaiverRequest",
         "defaultBaselinePath",
         "Finding",
@@ -157,6 +158,9 @@
         "listClaims",
         "listWaivers",
         "loadManifestFromFile",
+        "PruneCandidate",
+        "PruneCandidateKind",
+        "PruneReport",
         "RuleId",
         "Severity",
         "SuggestedResolution",
@@ -164,7 +168,7 @@
         "WaiverRequestOptions",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "d16ace2ec9457c785b09b3e374e24ef72a18554c90ce66ed96769811a26a4b1b",
+      "publicSurfaceHash": "478221ebf6d9b41fca87d90b4b5a008827fb5100b8df5437b0d2f66b6560ec7f",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -189,7 +193,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 851,
+      "publicSurfaceLines": 1567,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
@@ -204,6 +208,13 @@
       ],
       "artifactContracts": [],
       "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "read",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        },
         {
           "kind": "file",
           "access": "write",

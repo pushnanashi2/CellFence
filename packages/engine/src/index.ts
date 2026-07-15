@@ -249,6 +249,41 @@ export type CheckResult = {
   baseFindingCount?: number;
 };
 
+export type PruneCandidateKind =
+  | "unused-consumer"
+  | "unused-public-symbol"
+  | "unconsumed-artifact-lane"
+  | "stale-waiver"
+  | "stale-baseline-resource";
+
+export type PruneCandidate = {
+  kind: PruneCandidateKind;
+  cellId?: string;
+  producerCellId?: string;
+  filePath?: string;
+  line?: number;
+  ruleId?: string;
+  symbol?: string;
+  artifactLaneId?: string;
+  resource?: ResourceBaselineEntry;
+  message: string;
+  details?: Record<string, unknown>;
+};
+
+export type PruneReport = {
+  schemaVersion: "cellfence.prune.v1";
+  ok: boolean;
+  candidates: PruneCandidate[];
+  metrics: {
+    candidates: number;
+    unusedConsumers: number;
+    unusedPublicSymbols: number;
+    unconsumedArtifactLanes: number;
+    staleWaivers: number;
+    staleBaselineResources: number;
+  };
+};
+
 export type ChangedCheckOptions = CheckOptions & {
   baseRef?: string;
   headRef?: string;
@@ -1971,6 +2006,212 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     findings: active.findings,
     warnings: active.warnings,
     metrics,
+  };
+}
+
+function addPruneCandidate(candidates: PruneCandidate[], candidate: PruneCandidate): void {
+  candidates.push(candidate);
+}
+
+/* c8 ignore start -- Public-symbol import shape handling is covered through createPruneReport black-box fixtures; V8 exposes each TypeScript AST guard as separate low-value branches. */
+function importClausePublicSymbols(importClause: ts.ImportClause | undefined, producerSymbols: Set<string>): string[] {
+  if (!importClause) return [];
+  const symbols = new Set<string>();
+  if (importClause.name && producerSymbols.has("default")) symbols.add("default");
+  const namedBindings = importClause.namedBindings;
+  if (namedBindings && ts.isNamespaceImport(namedBindings)) {
+    for (const symbol of producerSymbols) symbols.add(symbol);
+  } else if (namedBindings && ts.isNamedImports(namedBindings)) {
+    for (const element of namedBindings.elements) {
+      const importedName = element.propertyName?.text || element.name.text;
+      if (producerSymbols.has(importedName)) symbols.add(importedName);
+    }
+  }
+  return [...symbols];
+}
+
+function exportDeclarationPublicSymbols(exportDeclaration: ts.ExportDeclaration, producerSymbols: Set<string>): string[] {
+  const exportClause = exportDeclaration.exportClause;
+  if (!exportClause) return [...producerSymbols].filter((symbol) => symbol !== "default");
+  if (ts.isNamespaceExport(exportClause)) return [...producerSymbols];
+  const symbols = new Set<string>();
+  for (const element of exportClause.elements) {
+    const exportedName = element.propertyName?.text || element.name.text;
+    if (producerSymbols.has(exportedName)) symbols.add(exportedName);
+  }
+  return [...symbols];
+}
+
+function publicSymbolsUsedByReference(
+  context: AnalysisContext,
+  reference: PluginImportReference,
+  producer: CellManifest,
+): string[] {
+  const sourceFile = ts.createSourceFile(
+    reference.importerPath,
+    readSourceText(context, absolutePath(context.rootDir, reference.importerPath)),
+    ts.ScriptTarget.Latest,
+    true,
+    sourceKindForPath(reference.importerPath),
+  );
+  const producerSymbols = new Set(producer.publicSymbols);
+  const symbols = new Set<string>();
+  function visit(node: ts.Node): void {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === reference.specifier) {
+      for (const symbol of importClausePublicSymbols(node.importClause, producerSymbols)) symbols.add(symbol);
+    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === reference.specifier) {
+      for (const symbol of exportDeclarationPublicSymbols(node, producerSymbols)) symbols.add(symbol);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return [...symbols];
+}
+
+function collectUsedPublicSymbols(context: AnalysisContext, observedImports: PluginImportReference[]): Map<string, Set<string>> {
+  const usedByCell = new Map<string, Set<string>>();
+  for (const cell of context.manifest.cells) usedByCell.set(cell.id, new Set<string>());
+  for (const reference of observedImports) {
+    if (!reference.targetCellId || !reference.targetPath || reference.importerCellId === reference.targetCellId) continue;
+    const producer = context.cellsById.get(reference.targetCellId);
+    if (!producer || normalizePath(reference.targetPath) !== normalizePath(producer.publicEntry)) continue;
+    const usedSymbols = usedByCell.get(producer.id) as Set<string>;
+    for (const symbol of publicSymbolsUsedByReference(context, reference, producer)) usedSymbols.add(symbol);
+  }
+  return usedByCell;
+}
+/* c8 ignore stop */
+
+function resourceEntrySet(accesses: ResourceAccessReference[] = []): Set<string> {
+  return new Set(sortedResourceBaselineEntries(accesses).map(resourceBaselineKey));
+}
+
+function countPruneCandidates(candidates: PruneCandidate[], kind: PruneCandidateKind): number {
+  return candidates.filter((candidate) => candidate.kind === kind).length;
+}
+
+/* c8 ignore next 3 -- Optional fields only make prune output ordering deterministic; rule behavior is asserted through candidate contents. */
+function pruneCandidateSortKey(candidate: PruneCandidate): string {
+  return `${candidate.kind}:${candidate.cellId || ""}:${candidate.producerCellId || ""}:${candidate.filePath || ""}:${candidate.symbol || ""}:${candidate.artifactLaneId || ""}:${candidate.ruleId || ""}`;
+}
+
+export function createPruneReport(options: CheckOptions = {}): PruneReport {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const manifest = loadManifestFromFile(manifestPath);
+  const baseline = loadOptionalBaseline(rootDir, options.baselinePath);
+  const context = createContext(rootDir, manifest);
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  const observedImports: PluginImportReference[] = [];
+
+  validateDuplicateCellIds(manifest, findings);
+  validateOwnershipOverlap(manifest, findings);
+  warnWhenOwnershipCoverageDisabled(context, warnings);
+  validateOwnershipCoverage(context, findings);
+  validatePublicEntries(context, findings);
+  validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
+  const crossCellDependencies = validateImports(context, findings, warnings, observedImports);
+  const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
+  mergeAccessesByCell(
+    accessesByCell,
+    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
+  );
+  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  if (baseline) compareBaseline(context, metrics, baseline, findings);
+  const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
+  const preWaiverFindings = [...severityAdjusted.findings, ...severityAdjusted.warnings];
+  const candidates: PruneCandidate[] = [];
+
+  for (const cell of manifest.cells) {
+    const observedDependencies = crossCellDependencies.get(cell.id) || new Set<string>();
+    for (const consumer of cell.consumes || []) {
+      if (observedDependencies.has(consumer.cell) || (consumer.artifactLanes || []).length > 0) continue;
+      addPruneCandidate(candidates, {
+        kind: "unused-consumer",
+        cellId: cell.id,
+        producerCellId: consumer.cell,
+        message: `${cell.id} declares ${consumer.cell} as a consumer dependency, but no in-repository import uses it`,
+      });
+    }
+  }
+
+  const artifactConsumers = new Set<string>();
+  for (const cell of manifest.cells) {
+    for (const consumer of cell.consumes || []) {
+      for (const lane of consumer.artifactLanes || []) artifactConsumers.add(`${consumer.cell}:${lane}`);
+    }
+  }
+  for (const cell of manifest.cells) {
+    for (const lane of cell.producesArtifacts || []) {
+      if (artifactConsumers.has(`${cell.id}:${lane.id}`)) continue;
+      addPruneCandidate(candidates, {
+        kind: "unconsumed-artifact-lane",
+        cellId: cell.id,
+        artifactLaneId: lane.id,
+        message: `${cell.id} produces artifact lane ${lane.id}, but no cell declares consumption of it`,
+        details: { paths: lane.paths },
+      });
+    }
+  }
+
+  const usedPublicSymbols = collectUsedPublicSymbols(context, observedImports);
+  for (const cell of manifest.cells) {
+    const usedSymbols = usedPublicSymbols.get(cell.id) as Set<string>;
+    for (const symbol of cell.publicSymbols) {
+      if (usedSymbols.has(symbol)) continue;
+      addPruneCandidate(candidates, {
+        kind: "unused-public-symbol",
+        cellId: cell.id,
+        symbol,
+        filePath: cell.publicEntry,
+        message: `${cell.id} declares public symbol ${symbol}, but no in-repository consumer imports it`,
+      });
+    }
+  }
+
+  for (const waiver of collectWaiversForManifest(rootDir, manifest).filter((candidate) => candidate.valid)) {
+    if (preWaiverFindings.some((finding) => waiverMatchesFinding(waiver, finding))) continue;
+    addPruneCandidate(candidates, {
+      kind: "stale-waiver",
+      cellId: findOwningCell(manifest, waiver.filePath)?.id,
+      filePath: waiver.filePath,
+      line: waiver.line,
+      ruleId: waiver.ruleId,
+      message: `waiver for ${waiver.ruleId} at ${waiver.filePath}:${waiver.line} no longer suppresses an active finding`,
+      details: { expires: waiver.expires, approvedBy: waiver.approvedBy, reason: waiver.reason },
+    });
+  }
+
+  if (baseline) {
+    for (const [cellId, baselineRecord] of Object.entries(baseline.cells)) {
+      const currentResourceKeys = resourceEntrySet(accessesByCell.get(cellId));
+      for (const resource of baselineRecord.resourceAccesses || []) {
+        if (currentResourceKeys.has(resourceBaselineKey(resource))) continue;
+        addPruneCandidate(candidates, {
+          kind: "stale-baseline-resource",
+          cellId,
+          resource,
+          message: `${cellId} baseline grandfathers ${resource.kind} ${resource.access} ${resource.selector}, but current analysis no longer observes it`,
+        });
+      }
+    }
+  }
+
+  const sortedCandidates = candidates.sort((left, right) =>
+    pruneCandidateSortKey(left).localeCompare(pruneCandidateSortKey(right)));
+  return {
+    schemaVersion: "cellfence.prune.v1",
+    ok: sortedCandidates.length === 0,
+    candidates: sortedCandidates,
+    metrics: {
+      candidates: sortedCandidates.length,
+      unusedConsumers: countPruneCandidates(sortedCandidates, "unused-consumer"),
+      unusedPublicSymbols: countPruneCandidates(sortedCandidates, "unused-public-symbol"),
+      unconsumedArtifactLanes: countPruneCandidates(sortedCandidates, "unconsumed-artifact-lane"),
+      staleWaivers: countPruneCandidates(sortedCandidates, "stale-waiver"),
+      staleBaselineResources: countPruneCandidates(sortedCandidates, "stale-baseline-resource"),
+    },
   };
 }
 

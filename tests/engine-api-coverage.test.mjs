@@ -14,6 +14,7 @@ import {
   createCellContext,
   createClaim,
   createCouplingGraph,
+  createPruneReport,
   createWaiverRequest,
   formatCouplingGraphMermaid,
   formatHumanResult,
@@ -1058,6 +1059,191 @@ test("engine context and graph APIs expose artifact lanes, resources, and error 
     } finally {
       process.chdir(previousCwd);
     }
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine prune report detects dead manifest declarations and stale governance exceptions", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-prune-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/unused"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/bare"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src/producer/public.ts"),
+      "export const used = true;\nexport const unused = true;\n",
+    );
+    fs.writeFileSync(
+      path.join(rootDir, "src/consumer/public.ts"),
+      [
+        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:test-owner reason:temporary stale waiver fixture",
+        "import { used } from '../producer/public';",
+        "export const consumer = used;",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(path.join(rootDir, "src/unused/public.ts"), "export const unusedCell = true;\n");
+    writeManifest(rootDir, [
+      baseCell("producer", {
+        publicSymbols: ["used", "unused"],
+        producesArtifacts: [
+          { id: "snapshots", paths: ["src/producer/artifacts/**"] },
+          { id: "used-lane", paths: ["src/producer/used/**"] },
+        ],
+      }),
+      baseCell("consumer", {
+        publicSymbols: ["consumer"],
+        consumes: [{ cell: "producer", artifactLanes: ["used-lane"] }, { cell: "unused" }],
+      }),
+      baseCell("unused", { publicSymbols: ["unusedCell"] }),
+      {
+        id: "bare",
+        ownedPaths: ["src/bare/**"],
+        publicEntry: "src/bare/public.ts",
+        publicSymbols: [],
+      },
+    ]);
+    fs.writeFileSync(path.join(rootDir, "src/bare/public.ts"), "\n");
+    writeJson(path.join(rootDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        producer: {
+          ownedPathPatterns: 1,
+          publicSymbols: 2,
+          publicSurfaceLines: 20,
+          crossCellDependencies: 0,
+          resourceAccesses: [{ kind: "file", access: "read", selector: "data/current.json" }],
+        },
+        consumer: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 20,
+          crossCellDependencies: 1,
+          resourceAccesses: [{ kind: "database", access: "read", selector: "app.old" }],
+        },
+        unused: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 20,
+          crossCellDependencies: 0,
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "resource-evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v1",
+      cellId: "producer",
+      accesses: [{ kind: "file", access: "read", selector: "data/current.json" }],
+    });
+
+    const report = createPruneReport({ rootDir, baselinePath: "cellfence.baseline.json", evidencePaths: ["resource-evidence.json"] });
+    assert.equal(report.ok, false);
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "unused-consumer"
+      && candidate.cellId === "consumer"
+      && candidate.producerCellId === "unused"));
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "unconsumed-artifact-lane"
+      && candidate.cellId === "producer"
+      && candidate.artifactLaneId === "snapshots"));
+    assert.equal(report.candidates.some((candidate) =>
+      candidate.kind === "unconsumed-artifact-lane"
+      && candidate.cellId === "producer"
+      && candidate.artifactLaneId === "used-lane"), false);
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "unused-public-symbol"
+      && candidate.cellId === "producer"
+      && candidate.symbol === "unused"));
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "stale-waiver"
+      && candidate.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && candidate.filePath === "src/consumer/public.ts"));
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "stale-baseline-resource"
+      && candidate.cellId === "consumer"
+      && candidate.resource?.selector === "app.old"));
+    assert.equal(report.candidates.some((candidate) =>
+      candidate.kind === "stale-baseline-resource"
+      && candidate.cellId === "producer"
+      && candidate.resource?.selector === "data/current.json"), false);
+    assert.equal(report.metrics.candidates, report.candidates.length);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine prune report keeps active waivers out of stale-waiver candidates", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-prune-active-waiver-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src/core/public.ts"),
+      [
+        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2099-01-01 approved-by:test-owner reason:temporary public symbol mismatch fixture",
+        "export const extra = true;",
+        "",
+      ].join("\n"),
+    );
+    writeManifest(rootDir, [baseCell("core", { publicSymbols: [] })]);
+    const report = createPruneReport({ rootDir });
+    assert.equal(report.candidates.some((candidate) => candidate.kind === "stale-waiver"), false, JSON.stringify(report.candidates));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine prune report uses the current working directory when rootDir is omitted", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-prune-cwd-"));
+  const previousCwd = process.cwd();
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const core = true;\n");
+    writeManifest(rootDir, [baseCell("core")]);
+    process.chdir(rootDir);
+    const report = createPruneReport();
+    assert.equal(report.schemaVersion, "cellfence.prune.v1");
+    assert.equal(report.ok, false);
+    assert.ok(report.candidates.some((candidate) =>
+      candidate.kind === "unused-public-symbol"
+      && candidate.cellId === "core"
+      && candidate.symbol === "core"));
+  } finally {
+    process.chdir(previousCwd);
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine prune report recognizes public symbol use through default imports and re-exports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-prune-exports-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(
+      path.join(rootDir, "src/producer/public.ts"),
+      "export default function run() { return true; }\nexport const named = true;\nexport const other = true;\n",
+    );
+    fs.writeFileSync(
+      path.join(rootDir, "src/consumer/public.ts"),
+      [
+        "import run, * as producer from '../producer/public';",
+        "export { named as renamed } from '../producer/public';",
+        "export * from '../producer/public';",
+        "export * as producerNamespace from '../producer/public';",
+        "export const consumer = run() && producer.named;",
+        "",
+      ].join("\n"),
+    );
+    writeManifest(rootDir, [
+      baseCell("producer", { publicSymbols: ["default", "named", "other"] }),
+      baseCell("consumer", { publicSymbols: ["consumer", "renamed", "named", "other", "producerNamespace"], consumes: [{ cell: "producer" }] }),
+    ]);
+
+    const report = createPruneReport({ rootDir });
+    assert.equal(report.candidates.some((candidate) =>
+      candidate.kind === "unused-public-symbol"
+      && candidate.cellId === "producer"), false, JSON.stringify(report.candidates));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

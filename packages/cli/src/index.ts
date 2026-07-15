@@ -2,6 +2,7 @@
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -17,6 +18,7 @@ import {
   createAutoAllocation,
   createCellContext,
   createCouplingGraph,
+  createPruneReport,
   createWaiverRequest,
   createBaseline,
   defaultBaselinePath,
@@ -56,6 +58,9 @@ type ParsedArgs = {
   headRef?: string;
   task?: string;
   installTarget?: string;
+  repo?: string;
+  branch?: string;
+  requiredCheck?: string;
   ruleId?: string;
   targetFilePath?: string;
   line?: number;
@@ -80,6 +85,9 @@ Usage:
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
   cellfence serve --mcp
   cellfence graph [--json|--format mermaid]
+  cellfence prune [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
+  cellfence doctor [--repo owner/name] [--branch main] [--required-check "CellFence"] [--json]
+  cellfence lab [--json]
   cellfence claim create --agent agent-id --cell cell-id [--path glob] [--ttl 2h] [--claims .cellfence/claims.json] [--json]
   cellfence claim check [--agent agent-id] [--base origin/main] [--head HEAD] [--claims .cellfence/claims.json] [--json]
   cellfence claim list [--claims .cellfence/claims.json] [--json]
@@ -210,6 +218,21 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--target=")) {
       parsed.installTarget = argument.slice("--target=".length);
+    } else if (argument === "--repo") {
+      parsed.repo = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--repo=")) {
+      parsed.repo = argument.slice("--repo=".length);
+    } else if (argument === "--branch") {
+      parsed.branch = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--branch=")) {
+      parsed.branch = argument.slice("--branch=".length);
+    } else if (argument === "--required-check") {
+      parsed.requiredCheck = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--required-check=")) {
+      parsed.requiredCheck = argument.slice("--required-check=".length);
     } else if (argument === "--rule") {
       parsed.ruleId = argv[index + 1];
       index += 1;
@@ -652,6 +675,27 @@ function commandGraph(parsed: ParsedArgs): number {
   return 0;
 }
 
+function commandPrune(parsed: ParsedArgs): number {
+  const report = createPruneReport({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    baselinePath: parsed.baselinePath,
+    evidencePaths: parsed.evidencePaths,
+  });
+  if (parsed.json) {
+    writeJson(report);
+  } else if (report.candidates.length === 0) {
+    console.log("CellFence prune found no dead declarations.");
+  } else {
+    console.log(`CellFence prune found ${report.candidates.length} dead declaration candidate(s).`);
+    for (const candidate of report.candidates) {
+      const location = candidate.filePath ? ` ${candidate.filePath}${candidate.line ? `:${candidate.line}` : ""}` : "";
+      console.log(`[${candidate.kind}]${location} ${candidate.message}`);
+    }
+  }
+  return report.ok ? 0 : 1;
+}
+
 function formatClaimResult(result: ClaimCheckResult, createdClaimId?: string): string {
   const lines: string[] = [];
   lines.push(result.ok ? "CellFence claim check passed." : "CellFence claim check failed.");
@@ -968,6 +1012,327 @@ function commandInstall(parsed: ParsedArgs): number {
   return result.ok ? 0 : 1;
 }
 
+type DoctorStatus = "pass" | "warning" | "fail";
+
+type DoctorCheck = {
+  id: string;
+  status: DoctorStatus;
+  message: string;
+  details?: Record<string, unknown>;
+};
+
+type DoctorResult = {
+  schemaVersion: "cellfence.doctor.v1";
+  ok: boolean;
+  checks: DoctorCheck[];
+};
+
+function githubRepoFromRemote(rootDir: string): string | undefined {
+  let remote: string;
+  try {
+    remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return undefined;
+  }
+  const httpsMatch = /^https:\/\/github\.com\/([^/]+\/[^/.]+)(?:\.git)?$/.exec(remote);
+  if (httpsMatch) return httpsMatch[1];
+  const sshMatch = /^git@github\.com:([^/]+\/[^/.]+)(?:\.git)?$/.exec(remote);
+  return sshMatch?.[1];
+}
+
+function ghCliAvailable(rootDir: string): boolean {
+  try {
+    execFileSync("gh", ["--version"], {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function requiredCheckNames(protection: Record<string, unknown>): string[] {
+  const requiredStatusChecks = protection.required_status_checks;
+  if (!isRecord(requiredStatusChecks)) return [];
+  const contexts = Array.isArray(requiredStatusChecks.contexts)
+    ? requiredStatusChecks.contexts.filter((value): value is string => typeof value === "string")
+    : [];
+  const checks = Array.isArray(requiredStatusChecks.checks)
+    ? requiredStatusChecks.checks.flatMap((entry) => isRecord(entry) && typeof entry.context === "string" ? [entry.context] : [])
+    : [];
+  return [...new Set([...contexts, ...checks])].sort((left, right) => left.localeCompare(right));
+}
+
+function addDoctorCheck(checks: DoctorCheck[], check: DoctorCheck): void {
+  checks.push(check);
+}
+
+function commandDoctor(parsed: ParsedArgs): number {
+  const checks: DoctorCheck[] = [];
+  const manifestPath = resolveOutputPath(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json");
+  if (fs.existsSync(manifestPath)) {
+    addDoctorCheck(checks, { id: "manifest-present", status: "pass", message: "cellfence.manifest.json is present" });
+  } else {
+    addDoctorCheck(checks, { id: "manifest-present", status: "fail", message: "cellfence.manifest.json is missing" });
+  }
+
+  const instructionFiles = ["AGENTS.md", "CLAUDE.md"]
+    .map((filePath) => ({ filePath, absolutePath: resolveOutputPath(parsed.rootDir, filePath) }))
+    .filter((entry) => fs.existsSync(entry.absolutePath));
+  const managedBlocks = instructionFiles.flatMap((entry) => {
+    const text = fs.readFileSync(entry.absolutePath, "utf8");
+    const block = installManagedBlock(text);
+    return block ? [{ ...entry, block }] : [];
+  });
+  if (managedBlocks.length === 0) {
+    addDoctorCheck(checks, {
+      id: "agent-instructions-installed",
+      status: "warning",
+      message: "no CellFence managed block found in AGENTS.md or CLAUDE.md",
+    });
+  } else {
+    const drifted = managedBlocks.filter((entry) => installChecksumFromBlock(entry.block) !== installChecksum(installBodyFromBlock(entry.block)));
+    addDoctorCheck(checks, {
+      id: "agent-instructions-installed",
+      status: drifted.length === 0 ? "pass" : "fail",
+      message: drifted.length === 0
+        ? "CellFence managed agent instruction block is installed"
+        : "CellFence managed agent instruction block checksum is drifted",
+      details: { files: managedBlocks.map((entry) => entry.filePath), drifted: drifted.map((entry) => entry.filePath) },
+    });
+  }
+
+  const repo = parsed.repo || githubRepoFromRemote(parsed.rootDir);
+  const branch = parsed.branch || "main";
+  if (!repo) {
+    addDoctorCheck(checks, {
+      id: "github-repository",
+      status: "warning",
+      message: "GitHub repository could not be inferred; pass --repo owner/name to verify branch protection",
+    });
+  } else if (!ghCliAvailable(parsed.rootDir)) {
+    addDoctorCheck(checks, {
+      id: "github-branch-protection",
+      status: "warning",
+      message: "GitHub CLI is not available; branch protection could not be verified",
+      details: { repo, branch },
+    });
+  } else {
+    try {
+      const protection = JSON.parse(execFileSync("gh", ["api", `repos/${repo}/branches/${branch}/protection`], {
+        cwd: parsed.rootDir,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      })) as Record<string, unknown>;
+      const requiredChecks = requiredCheckNames(protection);
+      addDoctorCheck(checks, {
+        id: "github-branch-protection",
+        status: "pass",
+        message: `GitHub branch protection is enabled for ${repo}:${branch}`,
+        details: { repo, branch, requiredChecks },
+      });
+      if (parsed.requiredCheck) {
+        addDoctorCheck(checks, {
+          id: "github-required-check",
+          status: requiredChecks.includes(parsed.requiredCheck) ? "pass" : "fail",
+          message: requiredChecks.includes(parsed.requiredCheck)
+            ? `required check ${parsed.requiredCheck} is configured`
+            : `required check ${parsed.requiredCheck} is not configured`,
+          details: { repo, branch, requiredChecks },
+        });
+      }
+    } catch (error) {
+      addDoctorCheck(checks, {
+        id: "github-branch-protection",
+        status: "fail",
+        message: `GitHub branch protection could not be verified for ${repo}:${branch}: ${errorMessage(error)}`,
+        details: { repo, branch },
+      });
+    }
+  }
+
+  const result: DoctorResult = {
+    schemaVersion: "cellfence.doctor.v1",
+    ok: checks.every((check) => check.status !== "fail"),
+    checks,
+  };
+  if (parsed.json) {
+    writeJson(result);
+  } else {
+    for (const check of checks) console.log(`${check.status.toUpperCase()} ${check.id}: ${check.message}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+type LabScenario = {
+  id: string;
+  title: string;
+  ok: boolean;
+  blockedBy: string[];
+  message: string;
+};
+
+type LabResult = {
+  schemaVersion: "cellfence.lab.v1";
+  ok: boolean;
+  scenarios: LabScenario[];
+};
+
+function writeLabJson(filePath: string, value: unknown): void {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function labCell(cellId: string, patch: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: cellId,
+    ownedPaths: [`src/${cellId}/**`],
+    publicEntry: `src/${cellId}/public.ts`,
+    publicSymbols: [cellId],
+    consumes: [],
+    producesArtifacts: [],
+    ...patch,
+  };
+}
+
+function writeLabPrivateImportFixture(rootDir: string, waiver = ""): void {
+  fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+  fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const producer = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/producer/internal.ts"), "export const secret = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), `${waiver}import { secret } from "../producer/internal";\nexport const consumer = secret;\n`);
+  writeLabJson(path.join(rootDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      labCell("producer"),
+      labCell("consumer", { publicSymbols: ["consumer"], consumes: [{ cell: "producer" }] }),
+    ],
+  });
+}
+
+function labScenarioPrivateImport(): LabScenario {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-lab-private-"));
+  try {
+    writeLabPrivateImportFixture(rootDir);
+    const result = checkRepository({ rootDir });
+    const blockedBy = result.findings.map((finding) => finding.ruleId);
+    const ok = !result.ok && blockedBy.includes("CELLFENCE_PRIVATE_IMPORT");
+    return {
+      id: "private-import",
+      title: "Private implementation import is rejected",
+      ok,
+      blockedBy,
+      /* c8 ignore next -- The false branch is exercised only when the red-team scenario catches a CellFence regression. */
+      message: ok ? "private cross-cell import was blocked" : "private cross-cell import bypassed the fence",
+    };
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+}
+
+function labScenarioPendingWaiver(): LabScenario {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-lab-waiver-"));
+  try {
+    const pendingDirective = [
+      "// cellfence",
+      "-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:PENDING reason:temporary migration request only\n",
+    ].join("");
+    writeLabPrivateImportFixture(rootDir, pendingDirective);
+    const result = checkRepository({ rootDir });
+    const blockedBy = result.findings.map((finding) => finding.ruleId);
+    const ok = !result.ok && blockedBy.includes("CELLFENCE_WAIVER_INVALID") && blockedBy.includes("CELLFENCE_PRIVATE_IMPORT");
+    return {
+      id: "pending-waiver",
+      title: "PENDING waiver cannot approve its own bypass",
+      ok,
+      blockedBy,
+      /* c8 ignore next -- The false branch is exercised only when the red-team scenario catches a CellFence regression. */
+      message: ok ? "PENDING waiver was rejected and the original finding remained active" : "PENDING waiver suppressed a violation",
+    };
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+}
+
+function labScenarioLockedBaselineExpansion(): LabScenario {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-lab-baseline-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const core = true;\nexport const extra = true;\n");
+    writeLabJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [labCell("core", { locked: true, publicSymbols: ["core", "extra"] })],
+    });
+    writeLabJson(path.join(rootDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cellIds: ["core"],
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          ownedPathSet: ["src/core/**"],
+          publicEntryPath: "src/core/public.ts",
+          publicSymbolSet: ["core"],
+          dependencyEdges: [],
+          artifactContracts: [],
+          resourceAccesses: [],
+        },
+      },
+    });
+    const guard = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "cellfence.baseline.json",
+      nextBaseline: createBaseline({ rootDir }),
+    });
+    const blockedBy = guard.findings.map((finding) => finding.ruleId);
+    const ok = !guard.ok && blockedBy.includes("CELLFENCE_LOCKED_BASELINE_EXPANSION");
+    return {
+      id: "locked-baseline-expansion",
+      title: "Locked baseline cannot be widened by an agent",
+      ok,
+      blockedBy,
+      /* c8 ignore next -- The false branch is exercised only when the red-team scenario catches a CellFence regression. */
+      message: ok ? "locked baseline expansion was blocked" : "locked baseline expansion was accepted",
+    };
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+}
+
+function commandLab(parsed: ParsedArgs): number {
+  const scenarios = [
+    labScenarioPrivateImport(),
+    labScenarioPendingWaiver(),
+    labScenarioLockedBaselineExpansion(),
+  ];
+  const result: LabResult = {
+    schemaVersion: "cellfence.lab.v1",
+    ok: scenarios.every((scenario) => scenario.ok),
+    scenarios,
+  };
+  if (parsed.json) {
+    writeJson(result);
+  } else {
+    for (const scenario of scenarios) {
+      /* c8 ignore next -- Built-in lab scenarios should pass; FAIL is a regression diagnostic label. */
+      console.log(`${scenario.ok ? "PASS" : "FAIL"} ${scenario.id}: ${scenario.message}`);
+    }
+  }
+  /* c8 ignore next -- A nonzero lab result means the built-in regression harness found a CellFence bypass. */
+  if (!result.ok) return 1;
+  return 0;
+}
+
 type JsonRpcId = string | number | null;
 type JsonRpcRequest = {
   jsonrpc?: "2.0";
@@ -1173,6 +1538,9 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "install") return commandInstall(parsed);
     if (primaryCommand === "serve") return commandServe(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
+    if (primaryCommand === "prune") return commandPrune(parsed);
+    if (primaryCommand === "doctor") return commandDoctor(parsed);
+    if (primaryCommand === "lab") return commandLab(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "create") return commandClaimCreate(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "check") return commandClaimCheck(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "list") return commandClaimList(parsed);

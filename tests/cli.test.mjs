@@ -1020,6 +1020,318 @@ test("CLI rejects PENDING CellFence waivers instead of treating requests as appr
   }
 });
 
+test("CLI prune reports dead declarations from manifest, waivers, and baseline", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-prune-cli-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/unused"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const used = true;\nexport const unused = true;\n");
+    fs.writeFileSync(
+      path.join(tempDir, "src/consumer/public.ts"),
+      [
+        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:test-owner reason:temporary stale prune fixture",
+        "import { used } from '../producer/public';",
+        "export const consumer = used;",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(path.join(tempDir, "src/unused/public.ts"), "export const unusedCell = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "producer",
+        ownedPaths: ["src/producer/**"],
+        publicEntry: "src/producer/public.ts",
+        publicSymbols: ["used", "unused"],
+        consumes: [],
+        producesArtifacts: [{ id: "snapshots", paths: ["src/producer/artifacts/**"] }],
+      }, {
+        id: "consumer",
+        ownedPaths: ["src/consumer/**"],
+        publicEntry: "src/consumer/public.ts",
+        publicSymbols: ["consumer"],
+        consumes: [{ cell: "producer" }, { cell: "unused" }],
+        producesArtifacts: [],
+      }, {
+        id: "unused",
+        ownedPaths: ["src/unused/**"],
+        publicEntry: "src/unused/public.ts",
+        publicSymbols: ["unusedCell"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        consumer: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 20,
+          crossCellDependencies: 1,
+          resourceAccesses: [{ kind: "database", access: "read", selector: "app.old" }],
+        },
+      },
+    });
+
+    const result = runCli(["prune", "--baseline", "cellfence.baseline.json", "--json"], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.schemaVersion, "cellfence.prune.v1");
+    assert.equal(report.ok, false);
+    assert.ok(report.candidates.some((candidate) => candidate.kind === "unused-consumer" && candidate.producerCellId === "unused"));
+    assert.ok(report.candidates.some((candidate) => candidate.kind === "unused-public-symbol" && candidate.symbol === "unused"));
+    assert.ok(report.candidates.some((candidate) => candidate.kind === "unconsumed-artifact-lane" && candidate.artifactLaneId === "snapshots"));
+    assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-waiver"));
+    assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-baseline-resource" && candidate.resource.selector === "app.old"));
+
+    const human = runCli(["prune", "--baseline", "cellfence.baseline.json"], tempDir);
+    assert.equal(human.status, 1);
+    assert.match(human.stdout, /CellFence prune found/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI prune reports a clean human result when declarations are all trimmed", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-prune-clean-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: [],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    const result = runCli(["prune"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(result.stdout, /found no dead declarations/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+function writeFakeGh(binDir, protection) {
+  fs.mkdirSync(binDir, { recursive: true });
+  const script = [
+    "#!/usr/bin/env node",
+    "if (process.argv.includes('--version')) { console.log('gh version test'); process.exit(0); }",
+    "if (process.env.CELLFENCE_FAKE_GH_FAIL === '1') { console.error('protection missing'); process.exit(1); }",
+    "if (process.argv[2] === 'api') { console.log(process.env.CELLFENCE_FAKE_PROTECTION); process.exit(0); }",
+    "process.exit(1);",
+    "",
+  ].join("\n");
+  fs.writeFileSync(path.join(binDir, "gh"), script);
+  fs.chmodSync(path.join(binDir, "gh"), 0o755);
+  return {
+    PATH: `${binDir}${path.delimiter}${process.env.PATH}`,
+    CELLFENCE_FAKE_PROTECTION: JSON.stringify(protection),
+  };
+}
+
+test("CLI doctor verifies local fence state and GitHub required checks", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-cli-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    assert.equal(runCli(["install", "--json"], tempDir).status, 0);
+    const env = writeFakeGh(path.join(tempDir, "bin"), {
+      required_status_checks: {
+        contexts: ["CellFence"],
+        checks: [{ context: "coverage" }],
+      },
+    });
+    const result = runCliWithEnv(["doctor", "--repo", "owner/repo", "--branch", "main", "--required-check", "CellFence", "--json"], tempDir, env);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const parsed = JSON.parse(result.stdout);
+    assert.equal(parsed.schemaVersion, "cellfence.doctor.v1");
+    assert.ok(parsed.checks.some((check) => check.id === "github-required-check" && check.status === "pass"));
+
+    const missing = runCliWithEnv(["doctor", "--repo", "owner/repo", "--required-check", "missing", "--json"], tempDir, env);
+    assert.equal(missing.status, 1);
+    assert.ok(JSON.parse(missing.stdout).checks.some((check) => check.id === "github-required-check" && check.status === "fail"));
+
+    const contextsOnlyEnv = writeFakeGh(path.join(tempDir, "contexts-only-bin"), {
+      required_status_checks: {
+        contexts: ["CellFence"],
+      },
+    });
+    const contextsOnly = runCliWithEnv(["doctor", "--repo", "owner/repo", "--required-check", "CellFence", "--json"], tempDir, contextsOnlyEnv);
+    assert.equal(contextsOnly.status, 0, contextsOnly.stderr || contextsOnly.stdout);
+    assert.ok(JSON.parse(contextsOnly.stdout).checks.some((check) => check.id === "github-required-check" && check.status === "pass"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI doctor reports GitHub verification failures and human-readable output", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-failure-"));
+  try {
+    const env = {
+      ...writeFakeGh(path.join(tempDir, "bin"), {}),
+      CELLFENCE_FAKE_GH_FAIL: "1",
+    };
+    const result = runCliWithEnv(["doctor", "--repo", "owner/repo"], tempDir, env);
+    assert.equal(result.status, 1);
+    assert.match(result.stdout, /FAIL manifest-present/);
+    assert.match(result.stdout, /FAIL github-branch-protection/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI doctor handles unavailable gh and inferred GitHub remotes", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-remote-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "empty-bin"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    runGit(["init"], tempDir);
+    runGit(["remote", "add", "origin", "https://github.com/owner/repo.git"], tempDir);
+    const noGhResult = runCliWithEnv(["doctor", "--repo", "owner/repo", "--json"], tempDir, { PATH: path.join(tempDir, "empty-bin") });
+    assert.equal(noGhResult.status, 0, noGhResult.stderr || noGhResult.stdout);
+    assert.ok(JSON.parse(noGhResult.stdout).checks.some((check) =>
+      check.id === "github-branch-protection"
+      && check.status === "warning"
+      && check.details.repo === "owner/repo"));
+
+    const httpsEnv = writeFakeGh(path.join(tempDir, "https-bin"), {});
+    const inferredHttps = runCliWithEnv(["doctor", "--json"], tempDir, httpsEnv);
+    assert.equal(inferredHttps.status, 0, inferredHttps.stderr || inferredHttps.stdout);
+    assert.ok(JSON.parse(inferredHttps.stdout).checks.some((check) =>
+      check.id === "github-branch-protection"
+      && check.details.repo === "owner/repo"));
+
+    runGit(["remote", "set-url", "origin", "git@github.com:owner/ssh-repo.git"], tempDir);
+    const env = writeFakeGh(path.join(tempDir, "bin"), {
+      required_status_checks: {
+        checks: [{}, "invalid-check-entry", { context: 42 }],
+      },
+    });
+    const inferredSsh = runCliWithEnv(["doctor", "--json"], tempDir, env);
+    assert.equal(inferredSsh.status, 0, inferredSsh.stderr || inferredSsh.stdout);
+    assert.ok(JSON.parse(inferredSsh.stdout).checks.some((check) =>
+      check.id === "github-branch-protection"
+      && check.details.repo === "owner/ssh-repo"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI doctor catches drifted managed blocks and unmanaged instruction files", () => {
+  const unmanagedDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-unmanaged-"));
+  const driftedDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-drifted-"));
+  try {
+    for (const tempDir of [unmanagedDir, driftedDir]) {
+      fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+      fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+      writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+        schemaVersion: "cellfence.manifest.v1",
+        cells: [{
+          id: "core",
+          ownedPaths: ["src/core/**"],
+          publicEntry: "src/core/public.ts",
+          publicSymbols: ["core"],
+          consumes: [],
+          producesArtifacts: [],
+        }],
+      });
+    }
+
+    fs.writeFileSync(path.join(unmanagedDir, "AGENTS.md"), "plain agent instruction file\n");
+    const unmanaged = runCli(["doctor", "--json"], unmanagedDir);
+    assert.equal(unmanaged.status, 0, unmanaged.stderr || unmanaged.stdout);
+    assert.ok(JSON.parse(unmanaged.stdout).checks.some((check) =>
+      check.id === "agent-instructions-installed"
+      && check.status === "warning"));
+
+    assert.equal(runCli(["install", "--json"], driftedDir).status, 0);
+    const agentsPath = path.join(driftedDir, "AGENTS.md");
+    fs.writeFileSync(agentsPath, fs.readFileSync(agentsPath, "utf8").replace("Before editing", "Before editing carefully"));
+    const drifted = runCli(["doctor", "--json"], driftedDir);
+    assert.equal(drifted.status, 1);
+    assert.ok(JSON.parse(drifted.stdout).checks.some((check) =>
+      check.id === "agent-instructions-installed"
+      && check.status === "fail"));
+  } finally {
+    fs.rmSync(unmanagedDir, { recursive: true, force: true });
+    fs.rmSync(driftedDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI doctor remains useful without GitHub metadata", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-doctor-local-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    const result = runCli(["doctor", "--json"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(parsed.checks.some((check) => check.id === "github-repository" && check.status === "warning"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI lab runs built-in red-team scenarios", () => {
+  const result = runCli(["lab", "--json"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.schemaVersion, "cellfence.lab.v1");
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.scenarios.map((scenario) => scenario.id), [
+    "private-import",
+    "pending-waiver",
+    "locked-baseline-expansion",
+  ]);
+  assert.ok(parsed.scenarios.every((scenario) => scenario.ok));
+
+  const human = runCli(["lab"]);
+  assert.equal(human.status, 0);
+  assert.match(human.stdout, /PASS private-import/);
+});
+
 test("CLI check writes audit JSONL and summary JSON artifacts", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-audit-artifacts-"));
   try {
@@ -1404,6 +1716,9 @@ test("CLI returns usage for unknown commands", () => {
     "--approved-by=owner",
     "--format=agents-md",
     "--evidence=resource-evidence.json",
+    "--repo=owner/repo",
+    "--branch=main",
+    "--required-check=CellFence",
   ]);
   assert.equal(result.status, 2);
   assert.match(result.stdout, /Usage:/);
