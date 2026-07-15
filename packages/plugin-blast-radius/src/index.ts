@@ -57,9 +57,11 @@ function reverseImportGraph(repository: CellFenceRepositoryModel): Map<string, S
 function collectAffectedCells(changed: Set<string>, reverse: Map<string, Set<string>>): Set<string> {
   const affected = new Set<string>();
   const queue = [...changed];
+  // Stryker disable next-line EqualityOperator,BlockStatement: mutating the queue loop can remove the only progress step and non-terminate; transitive closure behavior is covered by cycle and threshold tests.
   while (queue.length > 0) {
     const cellId = queue.shift() as string;
     for (const consumer of reverse.get(cellId) || []) {
+      // Stryker disable next-line ConditionalExpression: removing the visited guard makes cyclic dependency graphs non-terminating; cycle handling is covered by blast-radius boundary tests.
       if (affected.has(consumer)) continue;
       affected.add(consumer);
       queue.push(consumer);

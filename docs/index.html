@@ -5,29 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="CellFence turns architectural intent into deterministic CI checks for AI-assisted TypeScript and JavaScript repositories."
+      content="Declare ownership, public entries, and dependency edges in one manifest. CellFence enforces them as deterministic CI checks."
     />
     <meta property="og:title" content="CellFence" />
     <meta
       property="og:description"
-      content="Repository architecture governance for parallel AI coding agents."
+      content="Stop coding agents from crossing lines you didn't know existed."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="assets/hero-cellfence.png" />
+    <meta property="og:image" content="assets/cellfence-gem.png?v=2" />
     <title>CellFence</title>
-    <link rel="preload" href="assets/hero-cellfence.png" as="image" />
+    <link rel="preload" href="assets/cellfence-gem.png?v=2" as="image" />
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
+
       :root {
         color-scheme: dark;
-        --bg: #08090a;
-        --ink: #f0f2f4;
-        --muted: #8f959a;
-        --dim: #575d63;
-        --line: rgba(255, 255, 255, 0.15);
-        --panel: rgba(255, 255, 255, 0.045);
-        --cyan: #74f2ff;
-        --red: #ff4d5e;
-        --green: #a8ffbf;
+        --bg: #030405;
+        --ink: #eff2f5;
+        --soft: rgba(239, 242, 245, 0.64);
+        --dim: rgba(239, 242, 245, 0.34);
+        --line: rgba(255, 255, 255, 0.16);
+        --cyan: #7df5ff;
+        --red: #ff5065;
+        --green: #9effba;
         --max: 1180px;
       }
 
@@ -42,29 +43,12 @@
       body {
         margin: 0;
         min-width: 320px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 18rem),
-          linear-gradient(90deg, rgba(116, 242, 255, 0.035), transparent 36%, transparent 64%, rgba(255, 77, 94, 0.03)),
-          var(--bg);
+        background: #000;
         color: var(--ink);
         font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
+          Geist, "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
         letter-spacing: 0;
-      }
-
-      body::before {
-        position: fixed;
-        inset: 0;
-        z-index: -2;
-        pointer-events: none;
-        content: "";
-        opacity: 0.48;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-        background-size: 42px 42px;
-        mask-image: radial-gradient(circle at center, black, transparent 78%);
+        overflow-x: hidden;
       }
 
       body::after {
@@ -73,8 +57,8 @@
         z-index: -1;
         pointer-events: none;
         content: "";
-        opacity: 0.19;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+        opacity: 0.055;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 170 170' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
       }
 
       a {
@@ -84,63 +68,86 @@
 
       .site-header {
         position: fixed;
+        z-index: 20;
         top: 0;
         right: 0;
         left: 0;
-        z-index: 20;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 30px clamp(22px, 4vw, 54px);
+        padding: 30px 44px;
         color: rgba(255, 255, 255, 0.9);
         mix-blend-mode: screen;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 1.1s ease, transform 1.1s ease;
       }
 
-      .mark {
+      .hero.copy-ready .site-header,
+      body.copy-ready .site-header {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .brand,
+      .nav a,
+      .project-link,
+      .hold-label,
+      .status-readout {
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+      }
+
+      .brand {
         display: inline-flex;
         gap: 12px;
         align-items: center;
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-transform: none;
       }
 
-      .mark-symbol {
+      .brand-mark {
         position: relative;
-        width: 18px;
-        height: 18px;
-      }
-
-      .mark-symbol::before,
-      .mark-symbol::after {
-        position: absolute;
-        inset: 0;
-        content: "";
-        border: 1px solid rgba(255, 255, 255, 0.84);
+        width: 22px;
+        height: 22px;
         transform: rotate(45deg);
       }
 
-      .mark-symbol::after {
-        inset: 5px;
-        border-color: rgba(116, 242, 255, 0.85);
+      .brand-mark::before,
+      .brand-mark::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.72);
       }
 
-      .menu {
+      .brand-mark::after {
+        inset: 5px;
+        border-color: rgba(125, 245, 255, 0.86);
+        box-shadow: 0 0 10px rgba(125, 245, 255, 0.26);
+      }
+
+      .brand-mark i {
+        position: absolute;
+        inset: 8px;
+        display: block;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(125, 245, 255, 0.22));
+        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      }
+
+      .nav {
         display: flex;
-        gap: 18px;
+        gap: 22px;
         align-items: center;
       }
 
-      .menu a {
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
+      .nav a {
+        color: rgba(255, 255, 255, 0.68);
       }
 
-      .hamburger {
+      .menu-icon {
         display: none;
         width: 23px;
         height: 16px;
@@ -151,7 +158,7 @@
         color: white;
       }
 
-      .hamburger::before {
+      .menu-icon::before {
         display: block;
         width: 100%;
         height: 2px;
@@ -162,113 +169,705 @@
 
       .hero {
         position: relative;
-        display: grid;
-        min-height: 92vh;
-        padding: 104px 22px 72px;
-        place-items: center;
+        min-height: 100svh;
         overflow: hidden;
+        isolation: isolate;
+        cursor: crosshair;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 220px),
+          #000;
       }
 
-      .hero-link {
+      .hero::after {
         position: absolute;
-        top: 18vh;
-        left: 50%;
-        transform: translateX(-50%);
-        color: rgba(255, 255, 255, 0.86);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
+        inset: 0;
+        z-index: 6;
+        content: "";
+        pointer-events: none;
+        opacity: 0.42;
+        background:
+          radial-gradient(ellipse at center, transparent 38%, rgba(0, 0, 0, 0.34) 72%, rgba(0, 0, 0, 0.76) 100%),
+          linear-gradient(90deg, rgba(125, 245, 255, 0.055), transparent 30%, transparent 70%, rgba(255, 80, 101, 0.035));
+        mix-blend-mode: screen;
       }
 
-      .hero-link::after {
-        display: block;
+      .lens {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        pointer-events: none;
+      }
+
+      .lens::before {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(860px, 78vw);
+        aspect-ratio: 1;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.055);
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 42% 34%, rgba(255, 255, 255, 0.08), transparent 7%),
+          radial-gradient(circle at 58% 54%, rgba(125, 245, 255, 0.048), transparent 22%),
+          radial-gradient(circle at center, transparent 48%, rgba(255, 255, 255, 0.035) 63%, transparent 67%),
+          radial-gradient(circle at center, rgba(255, 255, 255, 0.035), transparent 58%);
+        box-shadow:
+          inset 0 0 44px rgba(255, 255, 255, 0.035),
+          inset 0 0 150px rgba(0, 0, 0, 0.64),
+          0 0 130px rgba(0, 0, 0, 0.7);
+        opacity: 0.86;
+        transform:
+          translate(-50%, -50%)
+          translate3d(calc(var(--mx, 0) * -10px), calc(var(--my, 0) * -10px), 0)
+          scale(calc(1 + var(--charge, 0) * 0.018));
+      }
+
+      .lens::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        opacity: 0.42;
+        background:
+          radial-gradient(circle at center, transparent 0 40%, rgba(0, 0, 0, 0.22) 68%, rgba(0, 0, 0, 0.88) 100%),
+          linear-gradient(110deg, transparent 0 41%, rgba(255, 255, 255, 0.045) 42%, transparent 43% 100%),
+          linear-gradient(72deg, transparent 0 57%, rgba(125, 245, 255, 0.026) 58%, transparent 59% 100%);
+        mix-blend-mode: screen;
+      }
+
+      .field {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
         width: 100%;
+        height: 100%;
+        opacity: 0.58;
+        pointer-events: none;
+      }
+
+      .choice-layer {
+        display: none;
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+      }
+
+      .hero.is-unlocked .choice-layer {
+        opacity: 1;
+      }
+
+      .choice {
+        position: absolute;
+        display: flex;
+        width: auto;
+        min-width: 188px;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 0;
+        border: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+        background: transparent;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 15px;
+        font-weight: 520;
+        letter-spacing: 0.045em;
+        line-height: 1;
+        pointer-events: auto;
+        text-transform: none;
+        transform: translate(var(--enter-x), var(--enter-y)) scale(0.94);
+        transition:
+          border-color 0.28s ease,
+          background 0.28s ease,
+          color 0.28s ease,
+          opacity 0.8s cubic-bezier(0.18, 0.72, 0.18, 1),
+          transform 0.8s cubic-bezier(0.18, 0.72, 0.18, 1);
+      }
+
+      .choice::before {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        flex: 0 0 auto;
+        border: 1px solid rgba(125, 245, 255, 0.5);
+        color: rgba(125, 245, 255, 0.72);
+        content: attr(data-index);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        transform: rotate(45deg) scale(0.82);
+        transition:
+          border-color 0.28s ease,
+          color 0.28s ease,
+          box-shadow 0.28s ease,
+          transform 0.45s cubic-bezier(0.18, 0.72, 0.18, 1);
+      }
+
+      .choice::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        width: 0;
         height: 1px;
-        margin-top: 7px;
+        content: "";
+        background: rgba(125, 245, 255, 0.86);
+        box-shadow: 0 0 12px rgba(125, 245, 255, 0.42);
+        transition: width 0.28s ease;
+      }
+
+      .choice:hover {
+        border-color: rgba(255, 255, 255, 0.76);
+        background: transparent;
+        color: #fff;
+      }
+
+      .choice:hover::before {
+        border-color: rgba(125, 245, 255, 0.95);
+        color: #fff;
+        box-shadow: 0 0 14px rgba(125, 245, 255, 0.28);
+        transform: rotate(45deg) scale(1);
+      }
+
+      .choice:hover::after {
+        width: 100%;
+      }
+
+      .hero.is-unlocked .choice {
+        transform: translate(0, 0) scale(1);
+      }
+
+      .hero.is-unlocked .choice::before {
+        transform: rotate(45deg) scale(0.92);
+      }
+
+      .choice--nw {
+        --enter-x: 34px;
+        --enter-y: 30px;
+        top: 22vh;
+        left: calc(50% - 520px);
+      }
+
+      .choice--ne {
+        --enter-x: -34px;
+        --enter-y: 30px;
+        top: 22vh;
+        right: calc(50% - 520px);
+      }
+
+      .choice--sw {
+        --enter-x: 34px;
+        --enter-y: -30px;
+        bottom: 18vh;
+        left: calc(50% - 520px);
+      }
+
+      .choice--se {
+        --enter-x: -34px;
+        --enter-y: -30px;
+        right: calc(50% - 520px);
+        bottom: 18vh;
+      }
+
+      .choice-line {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: clamp(72px, 9vw, 148px);
+        height: 1px;
+        background: rgba(255, 255, 255, 0.44);
+        opacity: 0;
+        transform-origin: center;
+        transition:
+          opacity 0.7s ease 0.12s,
+          transform 0.9s cubic-bezier(0.18, 0.72, 0.18, 1) 0.12s;
+      }
+
+      .choice-line--nw {
+        transform: translate(-250px, -120px) rotate(-35deg) scaleX(0.18);
+      }
+
+      .choice-line--ne {
+        transform: translate(134px, -120px) rotate(35deg) scaleX(0.18);
+      }
+
+      .choice-line--sw {
+        transform: translate(-250px, 158px) rotate(35deg) scaleX(0.18);
+      }
+
+      .choice-line--se {
+        transform: translate(134px, 158px) rotate(-35deg) scaleX(0.18);
+      }
+
+      .hero.is-unlocked .choice-line {
+        opacity: 0.52;
+      }
+
+      .hero.is-unlocked .choice-line--nw {
+        transform: translate(-250px, -120px) rotate(-35deg) scaleX(1);
+      }
+
+      .hero.is-unlocked .choice-line--ne {
+        transform: translate(134px, -120px) rotate(35deg) scaleX(1);
+      }
+
+      .hero.is-unlocked .choice-line--sw {
+        transform: translate(-250px, 158px) rotate(35deg) scaleX(1);
+      }
+
+      .hero.is-unlocked .choice-line--se {
+        transform: translate(134px, 158px) rotate(-35deg) scaleX(1);
+      }
+
+      .project-link {
+        position: absolute;
+        z-index: 4;
+        top: 17.8vh;
+        left: 50%;
+        color: rgba(255, 255, 255, 0.86);
+        opacity: 0;
+        transform: translateX(-50%);
+        transition: opacity 1.1s ease 0.12s;
+        white-space: nowrap;
+      }
+
+      .hero.copy-ready .project-link {
+        opacity: 1;
+      }
+
+      .project-link::after {
+        display: block;
+        height: 1px;
+        margin-top: 8px;
         background: rgba(255, 255, 255, 0.34);
         content: "";
       }
 
-      .hero-stage {
-        position: relative;
+      .stage {
+        position: absolute;
+        inset: 0;
         display: grid;
-        width: min(900px, 100%);
-        min-height: 64vh;
         place-items: center;
+        perspective: 1200px;
+        pointer-events: none;
+      }
+
+      .gem-wrap {
+        position: relative;
+        width: 520px;
+        height: 650px;
+        max-width: 82vw;
+        max-height: 74vh;
+        transform:
+          translate3d(calc(var(--mx, 0) * 18px), calc(var(--my, 0) * 18px), 0)
+          rotateX(calc(var(--my, 0) * -7deg))
+          rotateY(calc(var(--mx, 0) * 9deg))
+          scale(var(--charge-scale, 1));
+        transform-style: preserve-3d;
+        transition: transform 0.18s ease-out, filter 0.2s ease-out;
+        filter: drop-shadow(0 0 34px rgba(125, 245, 255, 0.05));
+      }
+
+      .gem-wrap::before,
+      .gem-wrap::after {
+        position: absolute;
+        inset: 13% 10%;
+        z-index: -1;
+        content: "";
+        opacity: calc(0.08 + var(--charge, 0) * 0.52);
+        border: 1px solid rgba(125, 245, 255, 0.34);
+        transform: rotate(45deg) scale(calc(0.86 + var(--charge, 0) * 0.2));
+      }
+
+      .gem-wrap::after {
+        border-color: rgba(255, 80, 101, 0.24);
+        transform: rotate(0deg) scale(calc(0.72 + var(--charge, 0) * 0.2));
+      }
+
+      .hero.copy-ready .gem-wrap::before,
+      .hero.copy-ready .gem-wrap::after {
+        animation: invite-ring 2.8s ease-in-out infinite alternate;
+      }
+
+      .gem {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+        -webkit-mask-image: radial-gradient(ellipse at center, #000 52%, rgba(0, 0, 0, 0.82) 67%, transparent 86%);
+        mask-image: radial-gradient(ellipse at center, #000 52%, rgba(0, 0, 0, 0.82) 67%, transparent 86%);
+      }
+
+      .gem-spin {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+        transform-style: preserve-3d;
+        pointer-events: none;
+      }
+
+      .gem.base {
+        opacity: 0.78;
+        mix-blend-mode: normal;
+        filter: contrast(1.16) brightness(0.84) saturate(0.82);
+      }
+
+      .gem.cyan {
+        opacity: 0.16;
+        mix-blend-mode: screen;
+        filter: contrast(1.4) brightness(0.7) sepia(1) hue-rotate(132deg) saturate(3);
+        transform: translate3d(calc(-1px - var(--charge, 0) * 6px), 1px, 26px);
+      }
+
+      .gem.red {
+        opacity: 0.14;
+        mix-blend-mode: screen;
+        filter: contrast(1.4) brightness(0.7) sepia(1) hue-rotate(305deg) saturate(3);
+        transform: translate3d(calc(1px + var(--charge, 0) * 6px), -1px, 20px);
+      }
+
+      .core {
+        position: absolute;
+        z-index: 3;
+        top: 50.4%;
+        left: 50.1%;
+        width: 96px;
+        height: 96px;
+        pointer-events: none;
+        transform:
+          translate(-50%, -50%)
+          translate3d(calc(var(--mx, 0) * -5px), calc(var(--my, 0) * -5px), 44px)
+          scale(calc(0.86 + var(--charge, 0) * 0.18));
+        transform-style: preserve-3d;
+        mix-blend-mode: screen;
+        opacity: 0.58;
+        filter:
+          drop-shadow(0 0 12px rgba(125, 245, 255, 0.42))
+          drop-shadow(0 0 24px rgba(255, 80, 101, 0.12));
+      }
+
+      .core::before {
+        position: absolute;
+        inset: 22px;
+        content: "";
+        opacity: calc(0.45 + var(--charge, 0) * 0.45);
+        background: radial-gradient(circle, rgba(210, 255, 255, 0.96), rgba(125, 245, 255, 0.26) 34%, transparent 66%);
+        filter: blur(1px);
+      }
+
+      .core-ring {
+        position: absolute;
+        inset: 14px;
+        border: 1px solid rgba(160, 255, 255, 0.48);
+        transform: rotate(45deg);
+        box-shadow:
+          0 0 10px rgba(125, 245, 255, 0.2),
+          inset 0 0 12px rgba(125, 245, 255, 0.12);
+      }
+
+      .core-ring::before,
+      .core-ring::after {
+        position: absolute;
+        inset: 11px;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.35);
+      }
+
+      .core-ring::after {
+        inset: 22px;
+        border-color: rgba(255, 80, 101, 0.32);
+      }
+
+      .core-diamond {
+        position: absolute;
+        inset: 30px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(125, 245, 255, 0.18) 42%, rgba(0, 0, 0, 0.2) 72%),
+          rgba(125, 245, 255, 0.22);
+        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
         transform-style: preserve-3d;
       }
 
-      .hero-object {
+      .title {
+        display: none;
+      }
+
+      .hero-copygrid {
         position: absolute;
-        width: min(520px, 78vw);
-        max-height: 68vh;
-        object-fit: contain;
-        opacity: 0.72;
-        filter: contrast(1.12) saturate(0.86) drop-shadow(0 0 26px rgba(116, 242, 255, 0.08));
-        transform: translate3d(var(--mx, 0), var(--my, 0), 0) scale(1.02);
-        transition: transform 0.2s ease-out;
-        user-select: none;
-      }
-
-      .hero-title {
-        position: relative;
-        z-index: 2;
-        max-width: 900px;
-        margin: 0;
-        color: rgba(255, 255, 255, 0.92);
-        font-size: 6.4rem;
-        font-weight: 200;
-        line-height: 0.93;
-        text-align: center;
-        text-wrap: balance;
-      }
-
-      .hero-title span {
-        display: block;
-      }
-
-      .hero-copy {
-        position: absolute;
-        right: clamp(20px, 6vw, 86px);
-        bottom: 11vh;
-        max-width: 330px;
-        margin: 0;
-        color: rgba(255, 255, 255, 0.62);
-        font-size: 13px;
-        line-height: 1.8;
-      }
-
-      .hold {
-        position: absolute;
-        bottom: 30px;
+        z-index: 5;
+        top: 50%;
         left: 50%;
-        color: rgba(255, 255, 255, 0.33);
-        font-size: 10px;
+        display: grid;
+        width: min(1320px, calc(100vw - 72px));
+        grid-template-columns: minmax(390px, 0.74fr) minmax(390px, 1fr) minmax(250px, 0.64fr);
+        align-items: center;
+        gap: clamp(28px, 5vw, 76px);
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -43%) scale(1.012);
+        transition: opacity 1.25s ease 0.18s, transform 1.25s ease 0.18s;
+      }
+
+      .hero.copy-ready .hero-copygrid {
+        opacity: 1;
+        transform: translate(-50%, -45%) scale(1);
+      }
+
+      .hero-wordmark {
+        grid-column: 1;
+        max-width: 430px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: clamp(2.35rem, 3.2vw, 3.2rem);
+        font-weight: 210;
+        letter-spacing: -0.01em;
+        line-height: 1.04;
+        text-wrap: pretty;
+      }
+
+      .hero-wordmark span {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .hero-subcopy {
+        grid-column: 1;
+        max-width: 430px;
+        margin: 24px 0 0;
+        color: rgba(239, 242, 245, 0.7);
+        font-size: clamp(0.96rem, 1.18vw, 1.08rem);
+        line-height: 1.75;
+      }
+
+      .hero-statements {
+        grid-column: 3;
+        display: grid;
+        gap: 18px;
+        justify-self: end;
+        color: rgba(255, 255, 255, 0.72);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: clamp(0.82rem, 1.2vw, 0.98rem);
         font-weight: 800;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.14em;
+        line-height: 1.25;
         text-transform: uppercase;
-        transform: translateX(-50%);
       }
 
-      .signature {
-        position: fixed;
-        right: 28px;
-        bottom: 22px;
-        z-index: 10;
+      .hero-statements span {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .hero-statements span:nth-child(2) {
         color: rgba(255, 255, 255, 0.88);
-        font-size: 22px;
-        font-weight: 300;
-        font-style: italic;
-        letter-spacing: 0;
       }
 
-      main {
+      .hero-statements span:nth-child(3) {
+        color: rgba(125, 245, 255, 0.72);
+      }
+
+      .hero-actions {
+        position: absolute;
+        z-index: 6;
+        bottom: 94px;
+        left: 50%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        transform: translate(-50%, 12px);
+        transition: opacity 1s ease 0.22s, transform 1s ease 0.22s;
+      }
+
+      .hero.copy-ready .hero-actions {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .button,
+      .command-chip {
+        min-height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.035);
+        color: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(10px);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+      }
+
+      .button.primary {
+        border-color: rgba(125, 245, 255, 0.58);
+        color: rgba(255, 255, 255, 0.92);
+        background:
+          linear-gradient(90deg, rgba(125, 245, 255, 0.14), rgba(255, 255, 255, 0.06)),
+          rgba(255, 255, 255, 0.045);
+        box-shadow:
+          0 0 22px rgba(125, 245, 255, 0.14),
+          inset 0 0 18px rgba(255, 255, 255, 0.04);
+        position: relative;
         overflow: hidden;
       }
 
+      .button.primary::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background: linear-gradient(105deg, transparent 0 34%, rgba(255, 255, 255, 0.34) 47%, transparent 60% 100%);
+        opacity: 0;
+        transform: translateX(-120%);
+      }
+
+      .button:hover {
+        border-color: rgba(255, 255, 255, 0.72);
+        background: rgba(255, 255, 255, 0.075);
+        color: #fff;
+      }
+
+      .button.primary:hover::after {
+        animation: button-sheen 0.78s ease;
+      }
+
+      .deploy-hint {
+        position: absolute;
+        z-index: 6;
+        bottom: 145px;
+        left: 50%;
+        color: rgba(125, 245, 255, 0.62);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        opacity: 0;
+        text-transform: uppercase;
+        transform: translate(-50%, 10px);
+        transition: opacity 1s ease 0.32s, transform 1s ease 0.32s;
+        white-space: nowrap;
+      }
+
+      .hero.copy-ready .deploy-hint {
+        opacity: 0.86;
+        transform: translate(-50%, 0);
+      }
+
+      .command-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0 14px;
+        color: rgba(190, 247, 255, 0.82);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .hero-meta {
+        position: absolute;
+        z-index: 6;
+        bottom: 58px;
+        left: 50%;
+        color: rgba(255, 255, 255, 0.42);
+        font-size: 11px;
+        font-weight: 760;
+        letter-spacing: 0.12em;
+        opacity: 0;
+        text-transform: uppercase;
+        transform: translate(-50%, 8px);
+        transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+        white-space: nowrap;
+      }
+
+      .hero.copy-ready .hero-meta {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .hold-ui {
+        position: absolute;
+        z-index: 6;
+        bottom: 42px;
+        left: 50%;
+        display: grid;
+        gap: 11px;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.36);
+        opacity: 0;
+        transform: translateX(-50%);
+        transition: opacity 1.1s ease 0.3s;
+      }
+
+      .hero.copy-ready .hold-ui {
+        opacity: 1;
+      }
+
+      .hold-meter {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      .hero.is-holding .hold-meter {
+        opacity: 1;
+      }
+
+      .hold-meter svg {
+        display: block;
+        width: 42px;
+        height: 42px;
+        transform: rotate(-90deg);
+      }
+
+      .hold-meter circle {
+        fill: none;
+        stroke-width: 1.4;
+      }
+
+      .hold-meter .track {
+        stroke: rgba(255, 255, 255, 0.16);
+      }
+
+      .hold-meter .progress {
+        stroke: rgba(125, 245, 255, 0.88);
+        stroke-dasharray: 119;
+        stroke-dashoffset: calc(119 - 119 * var(--charge, 0));
+      }
+
+      .status-readout {
+        position: absolute;
+        z-index: 5;
+        right: 34px;
+        bottom: 28px;
+        color: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        writing-mode: vertical-rl;
+        transition: opacity 1.1s ease 0.3s;
+      }
+
+      .hero.copy-ready .status-readout {
+        opacity: 1;
+      }
+
       .section {
-        padding: clamp(72px, 10vw, 136px) 22px;
+        padding: 118px 44px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background:
+          linear-gradient(180deg, #000, rgba(3, 4, 5, 0.98) 220px),
+          #030405;
       }
 
       .inner {
@@ -278,174 +877,247 @@
 
       .eyebrow {
         margin: 0 0 20px;
-        color: rgba(255, 255, 255, 0.52);
+        color: var(--dim);
         font-size: 11px;
-        font-weight: 900;
+        font-weight: 850;
         letter-spacing: 0.18em;
         text-transform: uppercase;
       }
 
       .section-title {
-        max-width: 890px;
+        max-width: 980px;
         margin: 0;
-        color: rgba(255, 255, 255, 0.92);
-        font-size: 4.6rem;
-        font-weight: 220;
-        line-height: 1.03;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 3.6rem;
+        font-weight: 180;
+        line-height: 1.08;
         text-wrap: balance;
       }
 
-      .split {
-        display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-        gap: clamp(38px, 7vw, 92px);
-        align-items: start;
-      }
-
       .lead {
+        max-width: 740px;
         margin: 28px 0 0;
-        color: rgba(255, 255, 255, 0.64);
-        font-size: 1.16rem;
+        color: rgba(239, 242, 245, 0.72);
+        font-size: 1.1rem;
         line-height: 1.78;
       }
 
-      .rules {
-        display: grid;
-        gap: 1px;
-        margin-top: 10px;
-        border-top: 1px solid var(--line);
-      }
-
-      .rule {
-        display: grid;
-        grid-template-columns: 64px 1fr;
-        gap: 20px;
-        padding: 24px 0;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .rule code {
-        color: var(--green);
-        font-family: "SFMono-Regular", Consolas, monospace;
-        font-size: 13px;
-      }
-
-      .rule h3 {
-        margin: 0 0 8px;
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 18px;
-        font-weight: 500;
-      }
-
-      .rule p,
-      .terminal p,
-      .project p {
-        margin: 0;
-        color: rgba(255, 255, 255, 0.57);
-        font-size: 14px;
-        line-height: 1.72;
-      }
-
-      .terminal {
-        border: 1px solid var(--line);
-        background: rgba(0, 0, 0, 0.32);
-      }
-
-      .terminal-head {
-        display: flex;
-        gap: 7px;
-        padding: 15px 18px;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.36);
-      }
-
-      pre {
-        margin: 0;
-        padding: 22px;
-        overflow: auto;
-        color: rgba(255, 255, 255, 0.84);
-        font-family: "SFMono-Regular", Consolas, monospace;
-        font-size: 13px;
-        line-height: 1.7;
-      }
-
-      .bad {
-        color: var(--red);
-      }
-
-      .good {
-        color: var(--cyan);
-      }
-
-      .projects {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        margin-top: 54px;
-        border: 1px solid var(--line);
-        background: var(--line);
-      }
-
-      .project {
-        min-height: 250px;
-        padding: 26px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-          #090a0b;
-      }
-
-      .project strong {
+      .checks {
         display: block;
-        margin-bottom: 54px;
-        color: rgba(255, 255, 255, 0.48);
+        width: min(1000px, 100%);
+        margin-top: 62px;
+        margin-left: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .check {
+        display: grid;
+        min-height: 118px;
+        grid-template-columns: 120px minmax(230px, 0.5fr) minmax(300px, 1fr);
+        gap: 28px;
+        align-items: center;
+        padding: 25px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background: transparent;
+      }
+
+      .check strong {
+        display: block;
+        margin-bottom: 0;
+        color: rgba(125, 245, 255, 0.58);
         font-size: 11px;
         letter-spacing: 0.16em;
         text-transform: uppercase;
       }
 
-      .project h3 {
-        margin: 0 0 14px;
-        color: rgba(255, 255, 255, 0.92);
-        font-size: 24px;
-        font-weight: 300;
+      .check h2 {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.75rem;
+        font-weight: 180;
       }
 
-      .cta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-        margin-top: 36px;
+      .check p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.66);
+        font-size: 0.92rem;
+        line-height: 1.7;
       }
 
-      .button {
-        display: inline-flex;
-        min-height: 46px;
-        align-items: center;
-        justify-content: center;
-        padding: 0 18px;
-        border: 1px solid rgba(255, 255, 255, 0.24);
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 11px;
+      .check:hover h2 {
+        color: rgba(255, 255, 255, 0.94);
+      }
+
+      .check:hover strong {
+        color: rgba(125, 245, 255, 0.62);
+      }
+
+      .split-section {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
+        gap: clamp(42px, 7vw, 90px);
+        align-items: start;
+      }
+
+      .steps {
+        display: grid;
+        gap: 18px;
+        margin-top: 38px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 18px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+      }
+
+      .step span {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border: 1px solid rgba(125, 245, 255, 0.46);
+        color: rgba(125, 245, 255, 0.74);
+        font-size: 10px;
         font-weight: 900;
-        letter-spacing: 0.14em;
+        transform: rotate(45deg);
+      }
+
+      .step span i {
+        display: block;
+        font-style: normal;
+        transform: rotate(-45deg);
+      }
+
+      .step h3 {
+        margin: 0 0 8px;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 1.05rem;
+        font-weight: 560;
+      }
+
+      .step p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.64);
+        font-size: 0.94rem;
+        line-height: 1.7;
+      }
+
+      .code-panel {
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background:
+          linear-gradient(180deg, rgba(125, 245, 255, 0.04), transparent 120px),
+          rgba(255, 255, 255, 0.025);
+      }
+
+      .code-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
       }
 
-      .button.primary {
-        border-color: rgba(116, 242, 255, 0.5);
-        background: rgba(116, 242, 255, 0.08);
+      pre {
+        margin: 0;
+        padding: 22px;
+        overflow-x: auto;
+        color: rgba(235, 244, 246, 0.82);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.82rem;
+        line-height: 1.72;
+      }
+
+      code {
+        font-family: inherit;
+      }
+
+      .token-good {
+        color: rgba(158, 255, 186, 0.9);
+      }
+
+      .token-warn {
+        color: rgba(255, 154, 168, 0.88);
+      }
+
+      .cta-strip {
+        display: flex;
+        justify-content: space-between;
+        gap: 28px;
+        align-items: center;
+        padding: 34px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .cta-strip h2 {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: clamp(1.5rem, 3vw, 2.4rem);
+        font-weight: 180;
+      }
+
+      .cta-strip p {
+        max-width: 520px;
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.64);
+        line-height: 1.7;
+      }
+
+      .compare {
+        display: grid;
+        margin-top: 52px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .compare-row {
+        display: grid;
+        grid-template-columns: minmax(160px, 0.6fr) repeat(3, minmax(160px, 1fr));
+        gap: 22px;
+        align-items: start;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .compare-row strong {
+        color: rgba(125, 245, 255, 0.72);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .compare-row span {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+
+      .footer-links a {
+        color: rgba(255, 255, 255, 0.58);
+      }
+
+      .footer-links a:hover {
+        color: rgba(125, 245, 255, 0.82);
       }
 
       footer {
-        padding: 34px 22px 46px;
-        border-top: 1px solid var(--line);
+        padding: 32px 24px 44px;
         color: rgba(255, 255, 255, 0.42);
+        font-size: 12px;
       }
 
       .footer-inner {
@@ -453,8 +1125,7 @@
         width: min(var(--max), 100%);
         margin: 0 auto;
         justify-content: space-between;
-        gap: 24px;
-        font-size: 12px;
+        gap: 20px;
       }
 
       @media (max-width: 850px) {
@@ -462,233 +1133,497 @@
           padding: 24px 22px;
         }
 
-        .menu a {
+        .nav a {
           display: none;
         }
 
-        .hamburger {
+        .menu-icon {
           display: block;
         }
 
-        .hero {
-          min-height: 91vh;
-          padding-top: 86px;
-        }
-
-        .hero-link {
+        .project-link {
           top: 14vh;
-          white-space: nowrap;
         }
 
-        .hero-stage {
-          min-height: 58vh;
+        .gem-wrap {
+          width: 430px;
+          height: 538px;
+          max-width: 94vw;
+          max-height: 68vh;
         }
 
-        .hero-object {
-          width: min(440px, 92vw);
-          opacity: 0.7;
+        .title {
+          font-size: 2.65rem;
         }
 
-        .hero-title {
-          font-size: 3.25rem;
+        .hero-copygrid {
+          top: auto;
+          bottom: 142px;
+          width: calc(100vw - 44px);
+          grid-template-columns: 1fr;
+          gap: 18px;
+          transform: translate(-50%, 0);
+        }
+
+        .hero.copy-ready .hero-copygrid {
+          transform: translate(-50%, 0);
+        }
+
+        .hero-wordmark {
+          font-size: 2.7rem;
+        }
+
+        .hero-statements {
+          justify-self: start;
+          gap: 9px;
+          font-size: 0.72rem;
+        }
+
+        .hero-subcopy {
+          max-width: 100%;
+          margin-top: 14px;
+        }
+
+        .status-readout {
+          display: none;
+        }
+
+        .choice-layer {
+          display: none;
+        }
+
+        .hero-actions {
+          bottom: 88px;
+          width: calc(100vw - 44px);
+          flex-direction: column;
+        }
+
+        .button,
+        .command-chip {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .deploy-hint {
+          bottom: 238px;
+        }
+
+        .hero-meta {
+          bottom: 36px;
+          width: calc(100vw - 44px);
+          text-align: center;
+          white-space: normal;
+        }
+
+        .section {
+          padding: 78px 22px;
         }
 
         .section-title {
-          font-size: 2.45rem;
+          font-size: 2.35rem;
         }
 
-        .lead {
-          font-size: 1rem;
+        .check {
+          grid-template-columns: 1fr;
+          gap: 14px;
+          align-items: start;
+          padding: 24px 0;
         }
 
-        .hero-copy {
-          position: relative;
-          right: auto;
-          bottom: auto;
-          max-width: 560px;
-          margin: -48px auto 0;
-          text-align: center;
-        }
-
-        .split,
-        .projects {
+        .split-section {
           grid-template-columns: 1fr;
         }
 
-        .project {
-          min-height: 210px;
+        .cta-strip {
+          display: grid;
         }
 
-        .footer-inner {
-          flex-direction: column;
+        .compare-row {
+          grid-template-columns: 1fr;
+          gap: 8px;
         }
       }
 
       @media (max-width: 430px) {
-        .hero-title {
-          font-size: 2.55rem;
+        .title {
+          font-size: 2.1rem;
         }
 
-        .section-title {
-          font-size: 2rem;
+        .gem-wrap {
+          width: 350px;
+          height: 438px;
         }
       }
 
       @media (prefers-reduced-motion: no-preference) {
-        .hero-object {
-          animation: drift 8s ease-in-out infinite alternate;
+        .gem-wrap {
+          animation: float 8s ease-in-out infinite alternate;
         }
 
-        @keyframes drift {
+        .gem-spin {
+          animation: outer-drift 18s ease-in-out infinite alternate;
+        }
+
+        .core {
+          animation: core-pulse 3.8s ease-in-out infinite alternate;
+        }
+
+        .core-ring {
+          animation: core-spin 6s linear infinite;
+        }
+
+        .core-diamond {
+          animation: core-counter 4.5s linear infinite;
+        }
+
+        .hero.copy-ready .title span::before {
+          animation: title-drift-a 2.7s steps(2, end) infinite;
+        }
+
+        .hero.copy-ready .title span::after {
+          animation: title-drift-b 3.1s steps(2, end) infinite;
+        }
+
+        @keyframes float {
           from {
-            rotate: -1.4deg;
+            translate: 0 -8px;
           }
           to {
-            rotate: 1.8deg;
+            translate: 0 10px;
+          }
+        }
+
+        @keyframes invite-ring {
+          from {
+            opacity: 0.08;
+          }
+          to {
+            opacity: 0.2;
+          }
+        }
+
+        @keyframes outer-drift {
+          from {
+            rotate: -1.6deg;
+            transform: scale(1);
+          }
+          50% {
+            rotate: 1.2deg;
+            transform: scale(1.006);
+          }
+          to {
+            rotate: 2.2deg;
+            transform: scale(0.998);
+          }
+        }
+
+        @keyframes core-spin {
+          to {
+            rotate: 360deg;
+          }
+        }
+
+        @keyframes core-counter {
+          to {
+            rotate: -360deg;
+          }
+        }
+
+        @keyframes core-pulse {
+          from {
+            opacity: 0.42;
+            filter:
+              drop-shadow(0 0 9px rgba(125, 245, 255, 0.32))
+              drop-shadow(0 0 18px rgba(255, 80, 101, 0.08));
+          }
+          to {
+            opacity: 0.72;
+            filter:
+              drop-shadow(0 0 16px rgba(125, 245, 255, 0.58))
+              drop-shadow(0 0 30px rgba(255, 80, 101, 0.16));
+          }
+        }
+
+        @keyframes title-drift-a {
+          0%,
+          88%,
+          100% {
+            transform: translateX(calc(-50% - 2px));
+          }
+          92% {
+            transform: translateX(calc(-50% - 5px));
+          }
+        }
+
+        @keyframes title-drift-b {
+          0%,
+          84%,
+          100% {
+            transform: translateX(calc(-50% + 2px));
+          }
+          90% {
+            transform: translateX(calc(-50% + 5px));
+          }
+        }
+
+        @keyframes button-sheen {
+          0% {
+            opacity: 0;
+            transform: translateX(-120%);
+          }
+          25% {
+            opacity: 0.72;
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(120%);
+          }
+        }
+
+        .hero.copy-ready .button.primary {
+          animation: deploy-pulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes deploy-pulse {
+          0%,
+          100% {
+            box-shadow:
+              0 0 22px rgba(125, 245, 255, 0.14),
+              inset 0 0 18px rgba(255, 255, 255, 0.04);
+          }
+          50% {
+            box-shadow:
+              0 0 34px rgba(125, 245, 255, 0.26),
+              inset 0 0 22px rgba(255, 255, 255, 0.07);
           }
         }
       }
     </style>
   </head>
   <body>
-    <header class="site-header" aria-label="Site header">
-      <a class="mark" href="#top" aria-label="CellFence home">
-        <span class="mark-symbol" aria-hidden="true"></span>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="CellFence home">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
         <span>CellFence</span>
       </a>
-      <nav class="menu" aria-label="Primary navigation">
-        <a href="#model">Model</a>
+      <nav class="nav" aria-label="Primary navigation">
         <a href="#checks">Checks</a>
-        <a href="#install">Install</a>
-        <button class="hamburger" type="button" aria-label="Menu"></button>
+        <a href="#model">Model</a>
+        <button class="menu-icon" type="button" aria-label="Menu"></button>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
-        <a class="hero-link" href="#checks">View all checks</a>
-        <div class="hero-stage">
-          <img class="hero-object" src="assets/hero-cellfence.png" alt="" aria-hidden="true" />
-          <h1 class="hero-title" id="hero-title">
-            <span>CellFence</span>
-            <span>Architecture Firewall</span>
-          </h1>
-        </div>
-        <p class="hero-copy">
-          Manifest-driven repository governance for TypeScript and JavaScript codebases
-          changed by parallel AI coding agents.
-        </p>
-        <div class="hold">Click &amp; hold</div>
-      </section>
-
-      <section class="section" id="model">
-        <div class="inner split">
-          <div>
-            <p class="eyebrow">The fence before the edit</p>
-            <h2 class="section-title">
-              Turn architecture from prose into deterministic CI pressure.
-            </h2>
-            <p class="lead">
-              CellFence describes repository cells, ownership paths, public entries,
-              artifact lanes, resource contracts, and baseline ratchets. Agents and humans
-              can still move fast, but private imports, undeclared coupling, and silent
-              boundary growth become explicit failures.
-            </p>
-          </div>
-          <div class="terminal" aria-label="CellFence command example">
-            <div class="terminal-head" aria-hidden="true">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <canvas class="field" aria-hidden="true"></canvas>
+        <div class="lens" aria-hidden="true"></div>
+        <a class="project-link" href="#checks">View all checks</a>
+        <div class="stage" aria-hidden="true">
+          <div class="gem-wrap">
+            <div class="gem-spin" aria-hidden="true">
+              <img class="gem cyan" src="assets/cellfence-gem.png?v=2" alt="" />
+              <img class="gem red" src="assets/cellfence-gem.png?v=2" alt="" />
+              <img class="gem base" src="assets/cellfence-gem.png?v=2" alt="" />
             </div>
-            <pre><code>$ npx cellfence baseline check \
-  --manifest cellfence.manifest.json \
-  --baseline cellfence.baseline.json
-
-<span class="bad">reject</span> private cross-cell import
-<span class="bad">reject</span> undeclared artifact lane
-<span class="good">accept</span> public entry dependency</code></pre>
+            <div class="core" aria-hidden="true">
+              <div class="core-ring"></div>
+              <div class="core-diamond"></div>
+            </div>
           </div>
         </div>
+        <div class="choice-layer" aria-label="CellFence areas">
+          <span class="choice-line choice-line--nw" aria-hidden="true"></span>
+          <span class="choice-line choice-line--ne" aria-hidden="true"></span>
+          <span class="choice-line choice-line--sw" aria-hidden="true"></span>
+          <span class="choice-line choice-line--se" aria-hidden="true"></span>
+          <a class="choice choice--nw" data-index="01" href="#checks">Ownership</a>
+          <a class="choice choice--ne" data-index="02" href="#checks">Entrypoints</a>
+          <a class="choice choice--sw" data-index="03" href="#checks">Dependencies</a>
+          <a class="choice choice--se" data-index="04" href="#model">Ratchets</a>
+        </div>
+        <div class="hero-copygrid">
+          <h1 class="hero-wordmark" id="hero-title">
+            <span>Stop coding agents</span>
+            <span>from crossing lines</span>
+            <span>you didn't know existed.</span>
+          </h1>
+          <p class="hero-subcopy">
+            Declare ownership, public entries, and dependency edges in one manifest.
+            CellFence enforces them as a required CI check. Deterministic. No LLM.
+          </p>
+          <div class="hero-statements" aria-label="CellFence positioning">
+            <span>Ownership</span>
+            <span>Public entries</span>
+            <span>Ratchets in CI</span>
+          </div>
+        </div>
+        <div class="hero-actions" aria-label="Primary actions">
+          <code class="command-chip">npm i -D cellfence</code>
+          <a class="button primary" href="https://github.com/pushnanashi2/CellFence#readme">Star on GitHub</a>
+          <a class="button" href="#model">Read the model</a>
+        </div>
+        <div class="deploy-hint" aria-hidden="true">required check ready</div>
+        <div class="hero-meta">MIT · zero config · Node 18+</div>
+        <div class="hold-ui" aria-hidden="true">
+          <div class="hold-meter">
+            <svg viewBox="0 0 42 42">
+              <circle class="track" cx="21" cy="21" r="19"></circle>
+              <circle class="progress" cx="21" cy="21" r="19"></circle>
+            </svg>
+          </div>
+          <div class="hold-label">Click &amp; hold</div>
+        </div>
+        <div class="status-readout">manifest locked</div>
       </section>
 
       <section class="section" id="checks">
         <div class="inner">
-          <p class="eyebrow">Governed surfaces</p>
+          <p class="eyebrow">Machine-checkable boundaries</p>
           <h2 class="section-title">
-            The checks are small, sharp, and hard to negotiate with.
+            A repository firewall your agents can see before they edit.
           </h2>
-          <div class="projects">
-            <article class="project">
+          <p class="lead">
+            Machine-checkable boundaries for monorepos in the age of Cursor and Claude Code.
+            Prompts explain the architecture. CellFence enforces it.
+          </p>
+          <div class="checks">
+            <article class="check">
               <strong>01 / ownership</strong>
-              <h3>Cells own paths</h3>
-              <p>
-                No overlapping scopes. Strict mode can require every governed source file
-                to belong to exactly one cell.
-              </p>
+              <h2>Cells own paths</h2>
+              <p>Reject overlapping scopes and unowned governed source before it lands.</p>
             </article>
-            <article class="project">
+            <article class="check">
               <strong>02 / entrypoints</strong>
-              <h3>Public APIs stay public</h3>
-              <p>
-                Cross-cell dependencies must be declared and must target the producer's
-                public entry instead of internal files.
-              </p>
+              <h2>Public means public</h2>
+              <p>Cross-cell imports must target declared public entries, not private files.</p>
             </article>
-            <article class="project">
+            <article class="check">
               <strong>03 / ratchets</strong>
-              <h3>Architecture cannot drift quietly</h3>
-              <p>
-                Baselines allow shrinkage, but new cells, edges, symbols, lanes, and
-                signature changes fail until reviewed.
-              </p>
+              <h2>No quiet expansion</h2>
+              <p>Architecture may shrink freely, but growth has to show up as reviewable intent.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="section" id="install">
-        <div class="inner split">
+      <section class="section" id="model">
+        <div class="inner split-section">
           <div>
-            <p class="eyebrow">GitHub Pages ready</p>
-            <h2 class="section-title">Ship it as a static site, wire the tool into CI.</h2>
+            <p class="eyebrow">How it works</p>
+            <h2 class="section-title">Deterministic checks, not another prompt.</h2>
             <p class="lead">
-              Publish this page from the repository's <code>docs/</code> folder in GitHub
-              Pages. Keep CellFence itself in the required check path behind protected
-              branches, where it can reject architectural changes before merge.
+              CellFence evaluates paths, declared public entries, dependency edges, and ratchet
+              baselines from repository state. The decision path is repeatable in local CLI and CI.
             </p>
-            <div class="cta">
-              <a class="button primary" href="https://github.com/pushnanashi2/CellFence#readme">
-                Read the README
-              </a>
-              <a
-                class="button"
-                href="https://github.com/pushnanashi2/CellFence/blob/main/docs/protocol/manifest-v1.md"
-              >
-                Manifest protocol
-              </a>
+            <div class="steps">
+              <article class="step">
+                <span><i>1</i></span>
+                <div>
+                  <h3>Declare governed cells</h3>
+                  <p>Map source paths to ownership, public entry points, consumers, resources, and artifact lanes in one manifest.</p>
+                </div>
+              </article>
+              <article class="step">
+                <span><i>2</i></span>
+                <div>
+                  <h3>Run deterministic checks</h3>
+                  <p>Fail private cross-cell imports, unowned source, undeclared lanes, and dependency drift without calling an LLM.</p>
+                </div>
+              </article>
+              <article class="step">
+                <span><i>3</i></span>
+                <div>
+                  <h3>Ratchet expansion</h3>
+                  <p>Let architecture shrink without ceremony, but force new edges, entries, and surfaces into review.</p>
+                </div>
+              </article>
             </div>
           </div>
-          <div class="rules">
-            <div class="rule">
-              <code>init</code>
-              <div>
-                <h3>Declare cells</h3>
-                <p>Define ownership, public entries, consumers, artifact lanes, and resources.</p>
-              </div>
+          <div class="code-panel" aria-label="CellFence CLI example">
+            <div class="code-head">
+              <span>CLI</span>
+              <span>required check</span>
             </div>
-            <div class="rule">
-              <code>check</code>
-              <div>
-                <h3>Run in CI</h3>
-                <p>Make CellFence a required status check before branch protection matters.</p>
-              </div>
+            <pre><code>$ npx cellfence check --manifest cellfence.manifest.json
+
+<span class="token-good">accept</span> ownership map
+<span class="token-good">accept</span> public entry dependencies
+<span class="token-warn">reject</span> private import across cells
+<span class="token-warn">reject</span> undeclared artifact lane</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="ci">
+        <div class="inner split-section">
+          <div>
+            <p class="eyebrow">CI integration</p>
+            <h2 class="section-title">Make the fence visible before merge.</h2>
+            <p class="lead">
+              Run CellFence in pull requests and mark it required. The manifest becomes a
+              reviewable contract instead of a paragraph in a team document.
+            </p>
+          </div>
+          <div class="code-panel" aria-label="GitHub Actions example">
+            <div class="code-head">
+              <span>GitHub Actions</span>
+              <span>yaml</span>
             </div>
-            <div class="rule">
-              <code>ratchet</code>
-              <div>
-                <h3>Review expansion</h3>
-                <p>Let architecture shrink freely, but force growth into an intentional diff.</p>
-              </div>
+            <pre><code>name: cellfence
+on: [pull_request]
+
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npx cellfence check</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="compare">
+        <div class="inner">
+          <p class="eyebrow">Comparison</p>
+          <h2 class="section-title">Different from linters, Nx, dependency-cruiser, and good-fences.</h2>
+          <p class="lead">
+            CellFence is focused on manifest-driven repository governance: who owns paths,
+            what is public, which edges are allowed, and what expansion must be reviewed.
+          </p>
+          <div class="compare" role="table" aria-label="CellFence comparison">
+            <div class="compare-row" role="row">
+              <strong role="cell">CellFence</strong>
+              <span role="cell">Ownership, public entries, dependency edges, artifact lanes, resources, and ratchets.</span>
+              <span role="cell">Designed as a required CI check for agent-edited repositories.</span>
+              <span role="cell">Deterministic path and manifest checks. No LLM decision step.</span>
             </div>
+            <div class="compare-row" role="row">
+              <strong role="cell">good-fences</strong>
+              <span role="cell">A TypeScript dependency boundary tool organized around conceptual areas.</span>
+              <span role="cell">Useful prior art for boundaries; CellFence adds manifest ownership and ratchet posture.</span>
+              <span role="cell">Mentioned explicitly to avoid SEO and positioning confusion.</span>
+            </div>
+            <div class="compare-row" role="row">
+              <strong role="cell">Nx / dep-cruiser</strong>
+              <span role="cell">Great graph and dependency tooling for workspaces and import rules.</span>
+              <span role="cell">CellFence is narrower: repository governance as one reviewable contract.</span>
+              <span role="cell">Use alongside them when their graph data is useful.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="start">
+        <div class="inner">
+          <div class="cta-strip">
+            <div>
+              <h2>Give coding agents a boundary they cannot hand-wave.</h2>
+              <p>Install CellFence, declare one manifest, and make architectural drift fail before merge.</p>
+            </div>
+            <a class="button primary" href="https://github.com/pushnanashi2/CellFence#readme">Star on GitHub</a>
           </div>
         </div>
       </section>
@@ -697,39 +1632,164 @@
     <footer>
       <div class="footer-inner">
         <span>CellFence · pre-release v0.x</span>
-        <span>Repository architecture governance for agentic codebases.</span>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="https://github.com/pushnanashi2/CellFence#readme">GitHub</a>
+          <a href="#checks">Checks</a>
+          <a href="#model">Docs</a>
+          <a href="#ci">CI</a>
+        </nav>
       </div>
     </footer>
-    <div class="signature" aria-hidden="true">cf</div>
 
     <script>
-      const stage = document.querySelector(".hero-stage");
-      const object = document.querySelector(".hero-object");
+      const hero = document.querySelector(".hero");
+      const gem = document.querySelector(".gem-wrap");
+      const canvas = document.querySelector(".field");
+      const ctx = canvas.getContext("2d", { alpha: true });
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let charge = 0;
+      let targetCharge = 0;
+      let holding = false;
+      let copyReady = false;
+      let unlocked = false;
+      let pointerX = 0;
+      let pointerY = 0;
+      let droplets = [];
 
-      if (stage && object) {
-        stage.addEventListener("pointermove", (event) => {
-          const rect = stage.getBoundingClientRect();
-          const x = (event.clientX - rect.left) / rect.width - 0.5;
-          const y = (event.clientY - rect.top) / rect.height - 0.5;
-          object.style.setProperty("--mx", `${x * 18}px`);
-          object.style.setProperty("--my", `${y * 18}px`);
-        });
-
-        stage.addEventListener("pointerleave", () => {
-          object.style.setProperty("--mx", "0px");
-          object.style.setProperty("--my", "0px");
-        });
-
-        stage.addEventListener("pointerdown", () => {
-          object.style.filter =
-            "contrast(1.2) saturate(1.15) drop-shadow(0 0 38px rgba(116, 242, 255, 0.22))";
-        });
-
-        stage.addEventListener("pointerup", () => {
-          object.style.filter =
-            "contrast(1.12) saturate(0.86) drop-shadow(0 0 26px rgba(116, 242, 255, 0.08))";
-        });
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        droplets = Array.from({ length: window.innerWidth < 700 ? 70 : 130 }, () => ({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          z: Math.random() * 0.9 + 0.1,
+          l: Math.random() * 90 + 16,
+          v: Math.random() * 0.8 + 0.25,
+          r: Math.random() * 2.2 + 0.4,
+          glass: Math.random() > 0.72,
+          sway: Math.random() * Math.PI * 2,
+        }));
       }
+
+      function setPointer(event) {
+        const x = event.clientX / window.innerWidth - 0.5;
+        const y = event.clientY / window.innerHeight - 0.5;
+        pointerX += (x - pointerX) * 0.45;
+        pointerY += (y - pointerY) * 0.45;
+        hero.style.setProperty("--mx", pointerX.toFixed(4));
+        hero.style.setProperty("--my", pointerY.toFixed(4));
+      }
+
+      function setHolding(value) {
+        holding = value;
+        targetCharge = value ? 1 : 0;
+        hero.classList.toggle("is-holding", value);
+      }
+
+      function revealCopy() {
+        if (copyReady) return;
+        copyReady = true;
+        hero.classList.add("copy-ready");
+        document.body.classList.add("copy-ready");
+      }
+
+      function unlockHero() {
+        if (unlocked) return;
+        unlocked = true;
+        hero.classList.add("is-unlocked");
+      }
+
+      function draw() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalCompositeOperation = "source-over";
+
+        const haze = ctx.createRadialGradient(w * 0.5, h * 0.42, 40, w * 0.5, h * 0.42, Math.max(w, h) * 0.58);
+        haze.addColorStop(0, `rgba(170,220,220,${0.035 + charge * 0.018})`);
+        haze.addColorStop(0.55, "rgba(40,70,72,0.025)");
+        haze.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = haze;
+        ctx.fillRect(0, 0, w, h);
+
+        for (const p of droplets) {
+          p.y += p.v * (p.glass ? 0.32 : 1.2 + p.z * 2.2) * (holding ? 1.8 : 1);
+          p.x += Math.sin(p.sway + p.y * 0.01) * (p.glass ? 0.022 : 0.08);
+          if (p.y - p.l > h + 20) {
+            p.y = -Math.random() * h * 0.35;
+            p.x = Math.random() * w;
+          }
+
+          const x = p.x + pointerX * 18 * p.z;
+          const y = p.y + pointerY * 12 * p.z;
+          const alpha = (0.035 + p.z * 0.11) * (1 + charge * 0.6);
+
+          if (p.glass) {
+            const lensDx = (x - w * 0.5) / (w * 0.5);
+            const lensDy = (y - h * 0.5) / (h * 0.5);
+            const insideLens = lensDx * lensDx + lensDy * lensDy < 0.72;
+            if (!insideLens) continue;
+            const g = ctx.createRadialGradient(x, y, 0, x, y, p.r * 6);
+            g.addColorStop(0, `rgba(235,255,255,${alpha * 1.9})`);
+            g.addColorStop(0.22, `rgba(160,245,255,${alpha * 0.62})`);
+            g.addColorStop(0.5, `rgba(255,255,255,${alpha * 0.18})`);
+            g.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.ellipse(x, y, p.r * 1.5, p.r * (3.8 + p.z * 5), -0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + p.r * 0.5, y + p.r * 2.2);
+            ctx.lineTo(x + 1.8, y + p.l * 0.42);
+            ctx.strokeStyle = `rgba(230,255,255,${alpha * 0.52})`;
+            ctx.lineWidth = 0.45;
+            ctx.stroke();
+          } else if (p.z > 0.72) {
+            const g = ctx.createRadialGradient(x, y, 0, x, y, p.r * 4);
+            g.addColorStop(0, `rgba(230,255,255,${alpha * 0.9})`);
+            g.addColorStop(0.38, `rgba(125,245,255,${alpha * 0.28})`);
+            g.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.ellipse(x, y, p.r * 1.2, p.r * 3.5, 0.16, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 5 * p.z, y + p.l * p.z);
+            ctx.strokeStyle = `rgba(190,235,235,${alpha})`;
+            ctx.lineWidth = 0.55 + p.z * 0.55;
+            ctx.stroke();
+          }
+        }
+
+        charge += (targetCharge - charge) * 0.08;
+        hero.style.setProperty("--charge", charge.toFixed(4));
+        hero.style.setProperty("--charge-scale", (1 + charge * 0.035).toFixed(4));
+
+        if (!reduceMotion) requestAnimationFrame(draw);
+      }
+
+      window.addEventListener("resize", resize);
+      window.addEventListener("pointermove", setPointer);
+      window.addEventListener("pointerdown", () => {
+        revealCopy();
+        unlockHero();
+        setHolding(true);
+      });
+      window.addEventListener("keydown", revealCopy, { once: true });
+      window.addEventListener("pointerup", () => setHolding(false));
+      window.addEventListener("pointercancel", () => setHolding(false));
+      window.addEventListener("blur", () => setHolding(false));
+
+      resize();
+      window.setTimeout(revealCopy, 5000);
+      if (!reduceMotion) draw();
+      else hero.style.setProperty("--charge", "0");
     </script>
   </body>
 </html>

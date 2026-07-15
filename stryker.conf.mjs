@@ -1,5 +1,6 @@
 const mutationTestFiles = [
   "tests/file-index.test.mjs",
+  "tests/module-resolution.test.mjs",
   "tests/resource-access-coverage.test.mjs",
   "tests/schema-validation.test.mjs",
   "tests/github-action.test.mjs",
@@ -27,6 +28,7 @@ export default {
     "packages/plugin-quants-trend/dist/index.js",
     "packages/reporter-economy-matrix/dist/index.js",
     "packages/trace/dist/index.js",
+    "packages/engine/dist/module-resolution.js",
     "packages/engine/dist/file-index.js",
     "packages/engine/dist/resource-access.js",
     "packages/github-action/dist/index.js",

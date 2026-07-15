@@ -1,0 +1,20 @@
+# CellFence
+
+> Manifest-driven repository architecture governance for TypeScript and JavaScript codebases edited by parallel AI coding agents. Declares cell ownership, public entry points, dependencies, and resource contracts, then enforces them as deterministic CLI and CI checks with one-way growth ratchets.
+
+CellFence answers questions like: how to stop AI coding agents from importing private modules, how to enforce module boundaries in an AI-assisted monorepo, how to prevent public API or dependency growth without review, and how to give a coding agent a deterministic completion check.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/pushnanashi2/CellFence/main/README.md): overview, sixty-second start, comparison table, CLI reference
+- [Threat model](https://raw.githubusercontent.com/pushnanashi2/CellFence/main/docs/threat-model.md): in-scope and out-of-scope threats
+- [Implementation status](https://raw.githubusercontent.com/pushnanashi2/CellFence/main/docs/implementation-status.md): shipped vs pending
+- [Architecture](https://raw.githubusercontent.com/pushnanashi2/CellFence/main/docs/architecture.md): package layout
+
+## Quick facts
+
+- Install: `npm install --save-dev cellfence` (Node.js >= 20)
+- Start: `npx cellfence init` then `npx cellfence check`
+- Agent context: `npx cellfence context --cell <id> --format agents-md`
+- CI gate: `npx cellfence baseline check` (exit 0 = pass)
+- License: Apache-2.0 · npm: https://www.npmjs.com/package/cellfence

@@ -352,6 +352,10 @@ test("file index ownership and coverage helpers accept any matching owned path w
   assert.equal(patternCoveredByOwnedPaths("src/core/nested/**", ["src/core/**"]), true);
   assert.equal(patternCoveredByOwnedPaths("src/core/nested/**", ["src/core"]), true);
   assert.equal(patternCoveredByOwnedPaths("src/core/**", ["src/core/**"]), true);
+  assert.equal(patternCoveredByOwnedPaths("src/core/**", ["src/core"]), true);
+  assert.equal(patternCoveredByOwnedPaths("src/core*", ["src/core/**"]), false);
+  assert.equal(patternCoveredByOwnedPaths("src/core/**", ["*.ts"]), false);
+  assert.equal(patternCoveredByOwnedPaths("src/a*/**", ["src/a/**"]), false);
   assert.equal(patternCoveredByOwnedPaths("src/corex/**", ["src/core/**"]), false);
   assert.equal(patternCoveredByOwnedPaths("src/core/**", ["src/core/private/**"]), false);
 });

@@ -18,6 +18,7 @@ import {
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
+  inferManifest,
   listClaims,
   listWaivers,
   loadManifestFromFile,
@@ -945,6 +946,18 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
       },
     });
     assert.equal(legacyCompatible.ok, true, JSON.stringify(legacyCompatible.findings));
+
+    const shrinkCompatible = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "legacy-baseline.json",
+      nextBaseline: {
+        schemaVersion: "cellfence.baseline.v1",
+        generatedAt: "2026-01-04T00:00:00.000Z",
+        cells: {},
+      },
+    });
+    assert.equal(shrinkCompatible.ok, true, JSON.stringify(shrinkCompatible.findings));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1045,6 +1058,35 @@ test("engine context and graph APIs expose artifact lanes, resources, and error 
     } finally {
       process.chdir(previousCwd);
     }
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine does not let artifact lanes legitimize private source imports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-artifact-private-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const producer = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/private.ts"), "export const secret = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), "import { secret } from '../producer/private';\nexport const consumer = secret;\n");
+    writeManifest(rootDir, [
+      baseCell("producer", {
+        publicSymbols: ["producer"],
+        producesArtifacts: [{ id: "source-lane", paths: ["src/producer/**"] }],
+      }),
+      baseCell("consumer", {
+        publicSymbols: ["consumer"],
+        consumes: [{ cell: "producer", artifactLanes: ["source-lane"] }],
+      }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && finding.details?.specifier === "../producer/private"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1380,6 +1422,36 @@ test("engine auto allocation matches package names, public symbols, owned path h
     assert.deepEqual(createAutoAllocation({ rootDir, manifestPath: "cellfence.manifest.json", task: "xy" }).selectedCells, ["xy"]);
     assert.deepEqual(createAutoAllocation({ rootDir, manifestPath: "cellfence.manifest.json", task: "touch @acme/package-only" }).selectedCells, ["zz"]);
   } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine inferManifest handles malformed workspaces and src root fallback through cwd", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-infer-api-"));
+  const previousCwd = process.cwd();
+  try {
+    writeJson(path.join(rootDir, "package.json"), { workspaces: "packages/*" });
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/helper.ts"), "export const helper = true;\n");
+    process.chdir(rootDir);
+    const manifest = inferManifest();
+    assert.deepEqual(manifest.governance, {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+    });
+    assert.deepEqual(manifest.cells, [
+      {
+        id: "src-root",
+        ownedPaths: ["src/*"],
+        publicEntry: "src/helper.ts",
+        publicSymbols: ["helper"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ]);
+  } finally {
+    process.chdir(previousCwd);
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });

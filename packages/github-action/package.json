@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/github-action",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "GitHub Action entrypoint for CellFence checks.",
   "license": "Apache-2.0",
   "type": "module",
@@ -35,6 +35,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.9"
+    "@cellfence/engine": "0.1.10"
   }
 }

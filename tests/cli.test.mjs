@@ -509,6 +509,116 @@ test("CLI init enables strict ownership coverage by default", () => {
   }
 });
 
+test("CLI init infers src cells, workspace cells, public entries, and consumers", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-infer-"));
+  try {
+    writeJson(path.join(tempDir, "package.json"), {
+      workspaces: ["packages/*"],
+    });
+    writeJson(path.join(tempDir, "tsconfig.json"), {
+      compilerOptions: {
+        baseUrl: ".",
+        paths: {
+          "@parser/*": ["src/parser/*"],
+        },
+      },
+    });
+    fs.mkdirSync(path.join(tempDir, "src/parser"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/reporting"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "packages/worker/src"), { recursive: true });
+    writeJson(path.join(tempDir, "packages/worker/package.json"), { name: "@demo/worker" });
+    fs.writeFileSync(path.join(tempDir, "src/parser/public.ts"), "export function parse(value: string): string { return value; }\n");
+    fs.writeFileSync(path.join(tempDir, "src/reporting/index.ts"), "import 'node:fs';\nimport { parse } from '@parser/public.js';\nexport const report = parse('ok');\n");
+    fs.writeFileSync(path.join(tempDir, "packages/worker/src/index.ts"), "import { parse } from '../../../src/parser/public.js';\nexport const run = () => parse('job');\n");
+
+    const result = runCli(["init"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.governance, {
+      requireOwnership: true,
+      include: ["packages/worker/src/**", "src/**"],
+      exclude: [],
+    });
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["parser", "reporting", "worker"]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.publicEntry]), [
+      ["parser", "src/parser/public.ts"],
+      ["reporting", "src/reporting/index.ts"],
+      ["worker", "packages/worker/src/index.ts"],
+    ]);
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "parser").publicSymbols, ["parse"]);
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "reporting").consumes, [{ cell: "parser" }]);
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "worker").packageName, "@demo/worker");
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "worker").consumes, [{ cell: "parser" }]);
+
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+    assert.equal(JSON.parse(checkResult.stdout).ok, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init infers object workspaces, exact workspaces, duplicate ids, and src root files", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-workspaces-"));
+  try {
+    writeJson(path.join(tempDir, "package.json"), {
+      workspaces: {
+        packages: ["*", "libs/core", "packages/*", "packages/dup-a", "missing", "missing/*"],
+      },
+    });
+    fs.mkdirSync(path.join(tempDir, "src"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "loose/src"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "libs/core/src"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "packages/dup-a/src"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "packages/dup-b/src"), { recursive: true });
+    writeJson(path.join(tempDir, "libs/core/package.json"), { name: "" });
+    writeJson(path.join(tempDir, "loose/package.json"), { name: "/" });
+    writeJson(path.join(tempDir, "packages/dup-a/package.json"), { name: "@demo/dup" });
+    writeJson(path.join(tempDir, "packages/dup-b/package.json"), { name: "@demo/dup" });
+    fs.writeFileSync(path.join(tempDir, "src/index.ts"), "export const root = true;\n");
+    fs.writeFileSync(path.join(tempDir, "loose/src/index.ts"), "export const loose = true;\n");
+    fs.writeFileSync(path.join(tempDir, "libs/core/src/custom.ts"), "export const core = true;\n");
+    fs.writeFileSync(path.join(tempDir, "packages/dup-a/src/index.ts"), "export const first = true;\n");
+    fs.writeFileSync(path.join(tempDir, "packages/dup-b/src/index.ts"), "export const second = true;\n");
+
+    const result = runCli(["init"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["cell", "core", "dup", "dup-2", "src-root"]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths[0], cell.publicEntry]), [
+      ["cell", "loose/src/**", "loose/src/index.ts"],
+      ["core", "libs/core/src/**", "libs/core/src/custom.ts"],
+      ["dup", "packages/dup-a/src/**", "packages/dup-a/src/index.ts"],
+      ["dup-2", "packages/dup-b/src/**", "packages/dup-b/src/index.ts"],
+      ["src-root", "src/*", "src/index.ts"],
+    ]);
+    assert.equal(manifest.cells.find((cell) => cell.id === "dup").packageName, "@demo/dup");
+    assert.equal(manifest.cells.find((cell) => cell.id === "dup-2").packageName, "@demo/dup");
+
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+    assert.equal(JSON.parse(checkResult.stdout).ok, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init falls back to the example cell when repository metadata is malformed and no sources exist", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-malformed-"));
+  try {
+    fs.writeFileSync(path.join(tempDir, "package.json"), "{");
+    const result = runCli(["init"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["example"]);
+    assert.equal(fs.existsSync(path.join(tempDir, "src/example/public.ts")), true);
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI init refuses to overwrite an existing manifest", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-existing-"));
   try {
@@ -612,6 +722,55 @@ test("CLI baseline update refuses to expand locked cell baselines", () => {
   assert.match(result.stdout, /CELLFENCE_LOCKED_BASELINE_EXPANSION/);
   const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
   assert.equal(baseline.cells.core.publicSymbols, 1);
+});
+
+test("CLI baseline update refuses to add a locked cell missing from the accepted baseline", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-locked-new-cell-"));
+  fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, "src/newcell"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/newcell/public.ts"), "export const newcell = true;\n");
+  fs.writeFileSync(path.join(tempDir, "cellfence.manifest.json"), `${JSON.stringify({
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      {
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "newcell",
+        locked: true,
+        ownedPaths: ["src/newcell/**"],
+        publicEntry: "src/newcell/public.ts",
+        publicSymbols: ["newcell"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  }, null, 2)}\n`);
+  fs.writeFileSync(path.join(tempDir, "cellfence.baseline.json"), `${JSON.stringify({
+    schemaVersion: "cellfence.baseline.v1",
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    cellIds: ["core"],
+    cells: {
+      core: {
+        ownedPathPatterns: 1,
+        publicSymbols: 1,
+        publicSurfaceLines: 1,
+        crossCellDependencies: 0,
+      },
+    },
+  }, null, 2)}\n`);
+
+  const result = runCli(["baseline", "update"], tempDir);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /newcell is locked and is absent from the existing baseline/);
+  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+  assert.equal(baseline.cells.newcell, undefined);
 });
 
 test("CLI accepts a valid line-local CellFence waiver and lists it", () => {

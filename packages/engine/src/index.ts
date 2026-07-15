@@ -28,7 +28,6 @@ import {
   literalPrefix,
   matchesPattern,
   normalizePath,
-  parseSourceFile,
   pathIsGoverned,
   pathOwnedByCell,
   patternCoveredByOwnedPaths,
@@ -41,11 +40,26 @@ import {
   sourceKindForPath,
 } from "./file-index.js";
 import {
+  extractImports,
+  extractPublicSymbols,
+  getLineNumber,
+  literalText,
+  publicSurfaceHash,
+  readPathAliases,
+  resolvePathAliasTarget,
+  resolveRelativeImport,
+  type ImportReference,
+  type ImportWarning,
+  type PathAlias,
+} from "./module-resolution.js";
+import {
   addResourceAccess,
   collectResourceAccesses,
   type ResourceAccessMode,
   type ResourceAccessReference,
 } from "./resource-access.js";
+
+export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
 
 export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
@@ -417,16 +431,6 @@ export type CellFenceWaiver = {
   errors: string[];
 };
 
-type ImportKind = "import" | "export-from" | "require" | "dynamic-import";
-
-type ImportReference = {
-  importerPath: string;
-  specifier: string;
-  kind: ImportKind;
-  typeOnly: boolean;
-  line: number;
-};
-
 type ResolvedImport = {
   targetPath?: string;
   targetCell?: CellManifest;
@@ -445,13 +449,6 @@ type AnalysisContext = FileIndexContext & {
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
 const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
-
-type PathAlias = {
-  pattern: string;
-  targets: string[];
-};
-
-const IMPORT_SCAN_HINT = /\b(?:import|export|require)\b/;
 
 function readJsonFile(filePath: string): unknown {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -613,25 +610,6 @@ function findPackageRoot(rootDir: string, publicEntry: string): string | undefin
   return undefined;
 }
 
-function readPathAliases(rootDir: string): PathAlias[] {
-  const tsconfigPath = path.join(rootDir, "tsconfig.json");
-  if (!fs.existsSync(tsconfigPath)) return [];
-  const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
-  if (configFile.error) return [];
-  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, rootDir);
-  const paths = parsedConfig.options.paths;
-  if (!paths) return [];
-  const baseUrl = parsedConfig.options.baseUrl || rootDir;
-  const aliases: PathAlias[] = [];
-  for (const [pattern, targets] of Object.entries(paths)) {
-    const normalizedTargets = targets
-      .filter((target) => target.trim().length > 0)
-      .map((target) => normalizePath(path.resolve(baseUrl, target)));
-    if (normalizedTargets.length > 0) aliases.push({ pattern, targets: normalizedTargets });
-  }
-  return aliases;
-}
-
 function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisContext {
   const cellsById = new Map<string, CellManifest>();
   const packageToCell = new Map<string, CellManifest>();
@@ -780,17 +758,6 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
     });
   }
 }
-
-function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
-  return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
-}
-
-function literalText(node: ts.Node | undefined): string | undefined {
-  if (!node) return undefined;
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
-  return undefined;
-}
-
 
 function resourceBaselineEntry(access: ResourceAccessReference): ResourceBaselineEntry {
   return {
@@ -1317,137 +1284,6 @@ function runPluginRules(
   }
 }
 
-function extractImports(context: AnalysisContext, filePath: string, warnings: Finding[]): ImportReference[] {
-  const sourceText = readSourceText(context, filePath);
-  if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
-  const sourceFile = parseSourceFile(context, filePath);
-  const references: ImportReference[] = [];
-  const importerPath = repoPath(context.rootDir, filePath);
-
-  function addReference(specifier: string, kind: ImportKind, node: ts.Node, typeOnly: boolean): void {
-    references.push({
-      importerPath,
-      specifier,
-      kind,
-      typeOnly,
-      line: getLineNumber(sourceFile, node),
-    });
-  }
-
-  function visit(node: ts.Node): void {
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      addReference(node.moduleSpecifier.text, "import", node, Boolean(node.importClause?.isTypeOnly));
-    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-      addReference(node.moduleSpecifier.text, "export-from", node, Boolean(node.isTypeOnly));
-    } else if (
-      ts.isCallExpression(node)
-      && ts.isIdentifier(node.expression)
-      && node.expression.text === "require"
-      && node.arguments.length === 1
-    ) {
-      if (ts.isStringLiteral(node.arguments[0])) {
-        addReference(node.arguments[0].text, "require", node, false);
-      } else {
-        addFinding(warnings, {
-          ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
-          severity: "warning",
-          filePath: importerPath,
-          message: `computed require() cannot be resolved statically at line ${getLineNumber(sourceFile, node)}`,
-          details: { line: getLineNumber(sourceFile, node) },
-        });
-      }
-    } else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
-      const [specifierNode] = node.arguments;
-      if (specifierNode && ts.isStringLiteral(specifierNode)) {
-        addReference(specifierNode.text, "dynamic-import", node, false);
-      } else {
-        addFinding(warnings, {
-          ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
-          severity: "warning",
-          filePath: importerPath,
-          message: `computed dynamic import cannot be resolved statically at line ${getLineNumber(sourceFile, node)}`,
-          details: { line: getLineNumber(sourceFile, node) },
-        });
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return references;
-}
-
-function addUniquePath(candidates: string[], candidatePath: string): void {
-  if (!candidates.includes(candidatePath)) candidates.push(candidatePath);
-}
-
-function sourceExtensionsForRuntimeSpecifier(extension: string): string[] {
-  if (extension === ".js") return [".ts", ".tsx", ".js", ".jsx"];
-  if (extension === ".jsx") return [".tsx", ".jsx"];
-  if (extension === ".mjs") return [".mts", ".mjs"];
-  if (extension === ".cjs") return [".cts", ".cjs"];
-  return [];
-}
-
-function candidateModulePaths(basePath: string): string[] {
-  const candidates: string[] = [];
-  const extension = path.extname(basePath);
-  addUniquePath(candidates, basePath);
-  if (extension) {
-    const basePathWithoutExtension = basePath.slice(0, -extension.length);
-    for (const sourceExtension of sourceExtensionsForRuntimeSpecifier(extension)) {
-      addUniquePath(candidates, `${basePathWithoutExtension}${sourceExtension}`);
-    }
-    return candidates;
-  }
-  for (const sourceExtension of SOURCE_EXTENSIONS) {
-    addUniquePath(candidates, `${basePath}${sourceExtension}`);
-  }
-  for (const sourceExtension of SOURCE_EXTENSIONS) {
-    addUniquePath(candidates, path.join(basePath, `index${sourceExtension}`));
-  }
-  return candidates;
-}
-
-function resolveRelativeImport(context: AnalysisContext, importerPath: string, specifier: string): string | undefined {
-  const importerAbsolutePath = absolutePath(context.rootDir, importerPath);
-  const basePath = path.resolve(path.dirname(importerAbsolutePath), specifier);
-  for (const candidatePath of candidateModulePaths(basePath)) {
-    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
-      return repoPath(context.rootDir, candidatePath);
-    }
-  }
-  return undefined;
-}
-
-function resolvePathAliasTarget(context: AnalysisContext, specifier: string): string | undefined {
-  for (const alias of context.pathAliases) {
-    const wildcardIndex = alias.pattern.indexOf("*");
-    let wildcardValue = "";
-    if (wildcardIndex === -1) {
-      if (alias.pattern !== specifier) continue;
-    } else {
-      const prefix = alias.pattern.slice(0, wildcardIndex);
-      const suffix = alias.pattern.slice(wildcardIndex + 1);
-      if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue;
-      wildcardValue = specifier.slice(prefix.length, specifier.length - suffix.length);
-    }
-
-    for (const target of alias.targets) {
-      const targetWildcardIndex = target.indexOf("*");
-      const baseTarget = targetWildcardIndex === -1
-        ? target
-        : `${target.slice(0, targetWildcardIndex)}${wildcardValue}${target.slice(targetWildcardIndex + 1)}`;
-      for (const candidatePath of candidateModulePaths(baseTarget)) {
-        if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
-          return repoPath(context.rootDir, candidatePath);
-        }
-      }
-    }
-  }
-  return undefined;
-}
-
 function findArtifactLaneForPath(cell: CellManifest, relativePath: string): string | undefined {
   for (const lane of cell.producesArtifacts ?? []) {
     if (lane.paths.some((pattern) => matchesPattern(relativePath, pattern))) return lane.id;
@@ -1457,7 +1293,7 @@ function findArtifactLaneForPath(cell: CellManifest, relativePath: string): stri
 
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
   if (reference.specifier.startsWith(".") || reference.specifier.startsWith("/")) {
-    const targetPath = resolveRelativeImport(context, reference.importerPath, reference.specifier);
+    const targetPath = resolveRelativeImport(context.rootDir, reference.importerPath, reference.specifier);
     if (!targetPath) return { isExternal: false, isPublicPackage: false };
     const targetCell = findOwningCell(context.manifest, targetPath);
     const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, targetPath) : undefined;
@@ -1502,6 +1338,40 @@ function consumerDeclaration(cell: CellManifest, producerCellId: string): CellCo
   return (cell.consumes ?? []).find((consumer) => consumer.cell === producerCellId);
 }
 
+function importTargetsPrivateImplementation(resolvedImport: ResolvedImport, producerCell: CellManifest): boolean {
+  const targetIsPublicEntry = normalizePath(resolvedImport.targetPath || "") === normalizePath(producerCell.publicEntry);
+  if (targetIsPublicEntry) return false;
+  return true;
+}
+
+function addPrivateImportFinding(
+  findings: Finding[],
+  importerCell: CellManifest,
+  producerCell: CellManifest,
+  reference: ImportReference,
+  resolvedImport: ResolvedImport,
+): void {
+  addFinding(findings, {
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    severity: "error",
+    cellId: importerCell.id,
+    producerCellId: producerCell.id,
+    filePath: reference.importerPath,
+    message: `${importerCell.id} imports private implementation from ${producerCell.id}`,
+    details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+    suggestedResolutions: [
+      codeResolution(`Import from ${producerCell.publicEntry} instead of ${resolvedImport.targetPath || reference.specifier}`, {
+        publicEntry: producerCell.publicEntry,
+        packageName: producerCell.packageName,
+      }),
+      humanResolution(`Ask ${producerCell.id}'s owner to expose the needed symbol through its public entry`, {
+        producerCell: producerCell.id,
+        publicEntry: producerCell.publicEntry,
+      }),
+    ],
+  });
+}
+
 function validatePublicEntries(context: AnalysisContext, findings: Finding[]): void {
   for (const cell of context.manifest.cells) {
     const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
@@ -1544,72 +1414,6 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
       });
     }
   }
-}
-
-function exportedNameFromDeclarationName(name: ts.DeclarationName | undefined): string | undefined {
-  /* c8 ignore next -- Non-default exported declarations without names are invalid TypeScript syntax. */
-  if (!name) return undefined;
-  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text;
-  return undefined;
-}
-
-function resolveLocalModuleFile(fromFilePath: string, specifier: string): string | undefined {
-  if (!specifier.startsWith(".") && !specifier.startsWith("/")) return undefined;
-  const basePath = path.resolve(path.dirname(fromFilePath), specifier);
-  for (const candidatePath of candidateModulePaths(basePath)) {
-    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) return candidatePath;
-  }
-  return undefined;
-}
-
-function extractPublicSymbols(filePath: string, visitedFiles = new Set<string>()): Set<string> {
-  const normalizedFilePath = path.resolve(filePath);
-  if (visitedFiles.has(normalizedFilePath)) return new Set<string>();
-  visitedFiles.add(normalizedFilePath);
-  const sourceText = fs.readFileSync(filePath, "utf8");
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
-  const symbols = new Set<string>();
-
-  function hasExportModifier(node: ts.Node): boolean {
-    return Boolean(ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export);
-  }
-
-  function visit(node: ts.Node): void {
-    if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
-      if (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Default) {
-        symbols.add("default");
-      } else {
-        const exportedName = exportedNameFromDeclarationName(node.name);
-        if (exportedName) symbols.add(exportedName);
-      }
-    } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
-      for (const declaration of node.declarationList.declarations) {
-        const exportedName = exportedNameFromDeclarationName(declaration.name);
-        if (exportedName) symbols.add(exportedName);
-      }
-    } else if (ts.isExportAssignment(node)) {
-      symbols.add("default");
-    } else if (ts.isExportDeclaration(node)) {
-      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
-        for (const element of node.exportClause.elements) {
-          symbols.add(element.name.text);
-        }
-      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
-        symbols.add(node.exportClause.name.text);
-      } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-        const targetFilePath = resolveLocalModuleFile(filePath, node.moduleSpecifier.text);
-        if (targetFilePath) {
-          for (const exportedSymbol of extractPublicSymbols(targetFilePath, visitedFiles)) {
-            if (exportedSymbol !== "default") symbols.add(exportedSymbol);
-          }
-        }
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return symbols;
 }
 
 function validateImports(
@@ -1707,6 +1511,13 @@ function validateImports(
         }
 
         if (resolvedImport.artifactLaneId) {
+          if (
+            resolvedImport.targetPath
+            && SOURCE_EXTENSIONS.includes(path.extname(resolvedImport.targetPath))
+            && importTargetsPrivateImplementation(resolvedImport, producerCell)
+          ) {
+            addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
+          }
           const declaredArtifactLanes = new Set(declaration?.artifactLanes || []);
           if (!declaredArtifactLanes.has(resolvedImport.artifactLaneId)) {
             addFinding(findings, {
@@ -1731,27 +1542,8 @@ function validateImports(
           continue;
         }
 
-        const targetIsPublicEntry = normalizePath(resolvedImport.targetPath || "") === normalizePath(producerCell.publicEntry);
-        if (!targetIsPublicEntry || (!resolvedImport.isPublicPackage && reference.specifier.includes("/src/"))) {
-          addFinding(findings, {
-            ruleId: "CELLFENCE_PRIVATE_IMPORT",
-            severity: "error",
-            cellId: importerCell.id,
-            producerCellId: producerCell.id,
-            filePath: reference.importerPath,
-            message: `${importerCell.id} imports private implementation from ${producerCell.id}`,
-            details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
-            suggestedResolutions: [
-              codeResolution(`Import from ${producerCell.publicEntry} instead of ${resolvedImport.targetPath || reference.specifier}`, {
-                publicEntry: producerCell.publicEntry,
-                packageName: producerCell.packageName,
-              }),
-              humanResolution(`Ask ${producerCell.id}'s owner to expose the needed symbol through its public entry`, {
-                producerCell: producerCell.id,
-                publicEntry: producerCell.publicEntry,
-              }),
-            ],
-          });
+        if (importTargetsPrivateImplementation(resolvedImport, producerCell)) {
+          addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
         }
       }
     }
@@ -1764,61 +1556,6 @@ function countLines(filePath: string): number {
   const content = fs.readFileSync(filePath, "utf8");
   if (content.length === 0) return 0;
   return content.split(/\r?\n/).length;
-}
-
-function normalizeWhitespace(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
-}
-
-function publicSurfaceSignatureParts(filePath: string): string[] {
-  if (!fs.existsSync(filePath)) return [];
-  const sourceText = fs.readFileSync(filePath, "utf8");
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
-  const parts: string[] = [];
-
-  function hasExportModifier(node: ts.Node): boolean {
-    return Boolean(ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export);
-  }
-
-  function typeText(node: ts.Node | undefined): string {
-    return node ? normalizeWhitespace(node.getText(sourceFile)) : "";
-  }
-
-  function visit(node: ts.Node): void {
-    if (ts.isFunctionDeclaration(node) && hasExportModifier(node)) {
-      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name);
-      if (name) {
-        const params = node.parameters.map((parameter) => `${typeText(parameter.name)}:${typeText(parameter.type)}`).join(",");
-        parts.push(`function:${name}(${params}):${typeText(node.type)}`);
-      }
-    } else if ((ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
-      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name);
-      if (name) parts.push(`${ts.SyntaxKind[node.kind]}:${name}:${normalizeWhitespace(node.getText(sourceFile))}`);
-    } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
-      for (const declaration of node.declarationList.declarations) {
-        const name = exportedNameFromDeclarationName(declaration.name);
-        if (name) parts.push(`variable:${name}:${typeText(declaration.type)}`);
-      }
-    } else if (ts.isExportAssignment(node)) {
-      parts.push("export:default");
-    } else if (ts.isExportDeclaration(node)) {
-      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
-        for (const element of node.exportClause.elements) parts.push(`export:${element.name.text}`);
-      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
-        parts.push(`namespace:${node.exportClause.name.text}`);
-      } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-        parts.push(`export-star:${node.moduleSpecifier.text}`);
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return parts.sort((left, right) => left.localeCompare(right));
-}
-
-function publicSurfaceHash(filePath: string): string {
-  return crypto.createHash("sha256").update(publicSurfaceSignatureParts(filePath).join("\n")).digest("hex");
 }
 
 function artifactContractsForCell(cell: CellManifest): string[] {
@@ -2872,7 +2609,18 @@ export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): Baseli
     if (!cell.locked) continue;
     const current = options.nextBaseline.cells[cell.id];
     const previous = existingBaseline.cells[cell.id];
-    if (!current || !previous) continue;
+    if (!previous) {
+      if (current) {
+        addLockedBaselineFinding(
+          findings,
+          cell.id,
+          `${cell.id} is locked and is absent from the existing baseline`,
+          { cell: cell.id, metric: "cellIds", previous: null, current: true },
+        );
+      }
+      continue;
+    }
+    if (!current) continue;
 
     for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
       if (current[metric] > previous[metric]) {

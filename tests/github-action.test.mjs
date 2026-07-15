@@ -39,8 +39,9 @@ function writeValidProject(tempDir, { writeDefaultManifest = false } = {}) {
 test("GitHub Action wrapper does not assume CellFence source checkout in consumer repositories", () => {
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.8 baseline check/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.8 check/);
+  assert.match(actionYaml, /npx --yes cellfence@0\.1\.9 baseline check/);
+  assert.match(actionYaml, /npx --yes cellfence@0\.1\.9 check/);
+  assert.match(actionYaml, /check --manifest "\$\{\{ inputs\.manifest \}\}" "\$\{evidence_args\[@\]\}"/);
 });
 
 test("GitHub Action entrypoint reads action inputs and runs the repository check", () => {

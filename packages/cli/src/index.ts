@@ -22,6 +22,7 @@ import {
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
+  inferManifest,
   listClaims,
   listWaivers,
   type CheckResult,
@@ -60,25 +61,6 @@ type ParsedArgs = {
   ttl?: string;
   reason?: string;
   approvedBy?: string;
-};
-
-const INIT_MANIFEST = {
-  schemaVersion: "cellfence.manifest.v1",
-  governance: {
-    requireOwnership: true,
-    include: ["src/**"],
-    exclude: [],
-  },
-  cells: [
-    {
-      id: "example",
-      ownedPaths: ["src/example/**"],
-      publicEntry: "src/example/public.ts",
-      publicSymbols: ["example"],
-      consumes: [],
-      producesArtifacts: [],
-    },
-  ],
 };
 
 function printUsage(): void {
@@ -468,9 +450,12 @@ function commandInit(rootDir: string): number {
     console.error("cellfence.manifest.json already exists");
     return 2;
   }
-  fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
-  fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
-  fs.writeFileSync(manifestPath, `${JSON.stringify(INIT_MANIFEST, null, 2)}\n`);
+  const manifest = inferManifest({ rootDir });
+  if (manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
+    fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
+  }
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(`created ${manifestPath}`);
   return 0;
 }

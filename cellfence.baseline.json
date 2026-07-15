@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-13T13:03:21.642Z",
+  "generatedAt": "2026-07-14T23:05:37.125Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -22,7 +22,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 30,
-      "publicSurfaceLines": 564,
+      "publicSurfaceLines": 566,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -108,8 +108,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 45,
-      "publicSurfaceLines": 4033,
+      "publicSymbols": 47,
+      "publicSurfaceLines": 3039,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -152,6 +152,8 @@
         "formatCouplingGraphMermaid",
         "formatHumanResult",
         "guardBaselineUpdate",
+        "inferManifest",
+        "InferManifestOptions",
         "listClaims",
         "listWaivers",
         "loadManifestFromFile",
@@ -162,7 +164,7 @@
         "WaiverRequestOptions",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "9c192fc01c13be895967c8991f5c9ba1bbd386b21e4a329f7e1c4fa7d3bb560b",
+      "publicSurfaceHash": "d16ace2ec9457c785b09b3e374e24ef72a18554c90ce66ed96769811a26a4b1b",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -187,7 +189,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 865,
+      "publicSurfaceLines": 851,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
@@ -214,7 +216,7 @@
     "github-action": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 32,
+      "publicSurfaceLines": 37,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/github-action/**"
@@ -279,7 +281,7 @@
     "adapter-opentelemetry": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 117,
+      "publicSurfaceLines": 121,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/adapter-opentelemetry/**"
@@ -299,7 +301,7 @@
     "plugin-agent-budget": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 134,
+      "publicSurfaceLines": 141,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-agent-budget/**"
@@ -319,7 +321,7 @@
     "plugin-blast-radius": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 106,
+      "publicSurfaceLines": 111,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-blast-radius/**"
@@ -339,7 +341,7 @@
     "plugin-dependency-sovereignty": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 90,
+      "publicSurfaceLines": 92,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-dependency-sovereignty/**"
@@ -379,7 +381,7 @@
     "plugin-legacy-strangler": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 87,
+      "publicSurfaceLines": 94,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-legacy-strangler/**"

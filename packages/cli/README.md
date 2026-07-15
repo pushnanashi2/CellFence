@@ -1,19 +1,55 @@
 # cellfence
 
-CellFence CLI for manifest-driven repository architecture governance.
+> **AI coding agents do not need more prompts. They need enforceable architectural boundaries.**
+
+CellFence turns architectural intent into deterministic CLI and CI checks for TypeScript and JavaScript repositories edited by parallel coding agents and humans: cell ownership, declared dependencies, public entry points, resource contracts, and one-way growth ratchets.
+
+## Sixty seconds
 
 ```bash
+npm install --save-dev cellfence
+npx cellfence init                              # writes cellfence.manifest.json
+mkdir -p src/example
+echo 'export const example = 1;' > src/example/public.ts
 npx cellfence check
-npx cellfence check --changed --base origin/main
-npx cellfence context --cell example --json
-npx cellfence context --auto-allocate --task "change the reporting cell" --json
-npx cellfence graph --format mermaid
-npx cellfence claim create --agent codex-1 --cell example --ttl 2h
-npx cellfence claim check --agent codex-1
-npx cellfence baseline create
-npx cellfence baseline check
-npx cellfence waivers list
-npx cellfence waivers request --rule CELLFENCE_PRIVATE_IMPORT --file src/example.ts --line 7 --expires 2099-01-01 --reason "temporary migration"
 ```
 
-See the main CellFence README: https://github.com/pushnanashi2/CellFence#readme
+```text
+CellFence check passed.
+```
+
+When a cell imports another cell's internals instead of its declared public entry:
+
+```text
+CellFence check failed.
+[error] CELLFENCE_PRIVATE_IMPORT src/reporting/bad.ts: reporting imports private implementation from parser
+```
+
+## Commands
+
+<!-- Keep in sync with `cellfence --help`; a drift here already shipped once -->
+
+```bash
+npx cellfence init
+npx cellfence check [--changed --base origin/main] [--json]
+npx cellfence context --cell <id> [--json|--format agents-md]
+npx cellfence context --auto-allocate --task "task text" [--json]
+npx cellfence graph [--format mermaid|--json]
+npx cellfence claim create --agent <id> --cell <id> --ttl 2h
+npx cellfence claim check --agent <id>
+npx cellfence baseline create|check|update
+npx cellfence evidence check --evidence resource-evidence.json
+npx cellfence waivers list|request
+```
+
+Exit codes: `0` no violations · `1` governance violations · `2` configuration or manifest error · `3` internal tool error.
+
+## For coding agents
+
+`context --format agents-md` emits a per-cell contract (owned paths, allowed imports, allowed resources, guidance) ready to paste into an agent's context. `check` and `baseline check` give agents a deterministic completion signal instead of another prompt.
+
+## Learn more
+
+Full documentation, comparison with adjacent tools, ratchet design, and threat model: **https://github.com/pushnanashi2/CellFence#readme**
+
+Requires Node.js ≥ 20. License: Apache-2.0.

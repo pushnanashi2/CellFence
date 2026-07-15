@@ -46,6 +46,7 @@ function patternToRegExp(pattern: string): RegExp {
     const nextCharacter = normalized[index + 1];
     if (character === "*" && nextCharacter === "*") {
       expression += ".*";
+      // Stryker disable next-line AssignmentOperator: reversing the double-star skip makes the tokenizer non-terminating; ** semantics are covered by glob matching tests.
       index += 1;
     } else if (character === "*") {
       expression += "[^/]*";
@@ -148,11 +149,16 @@ export function pathOwnedByCell(cell: CellManifest, relativePath: string): boole
 }
 
 export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {
+  const normalizedPattern = normalizePath(pattern);
   const targetPrefix = literalPrefix(pattern) || normalizePath(pattern);
   return ownedPaths.some((ownedPath) => {
     if (matchesPattern(targetPrefix, ownedPath)) return true;
     const ownedPrefix = literalPrefix(ownedPath);
-    return Boolean(ownedPrefix) && (targetPrefix === ownedPrefix || targetPrefix.startsWith(`${ownedPrefix}/`));
+    // Stryker disable next-line ConditionalExpression: prefix-less owner patterns fall through to the same false containment result below.
+    if (!ownedPrefix) return false;
+    if (targetPrefix.startsWith(`${ownedPrefix}/`)) return true;
+    // Stryker disable next-line ConditionalExpression: previous exact/prefix guards make the remaining boolean reductions equivalent for supported ownership globs.
+    return targetPrefix === ownedPrefix && (normalizedPattern === ownedPrefix || normalizedPattern.startsWith(`${ownedPrefix}/`));
   });
 }
 

@@ -23,7 +23,7 @@ const allowedPhrases = [
 
 const root = process.cwd();
 const selfPath = path.relative(root, new URL(import.meta.url).pathname);
-const ignoredDirectories = new Set([".git", "node_modules", "dist", "coverage"]);
+const ignoredDirectories = new Set([".git", ".stryker-tmp", "node_modules", "dist", "coverage", "reports", "tmp"]);
 const ignoredFiles = new Set([selfPath.split(path.sep).join("/")]);
 const scannedExtensions = new Set([".ts", ".js", ".mjs", ".json", ".md", ".yml", ".yaml"]);
 const findings = [];
