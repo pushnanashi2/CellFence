@@ -9,10 +9,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/cli packages/github-action packages/trace",
+    "build": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/mcp-proxy packages/cli packages/github-action packages/trace",
     "clean": "node scripts/clean.mjs",
     "lint": "eslint .",
-    "typecheck": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/cli packages/github-action packages/trace --pretty false",
+    "typecheck": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/mcp-proxy packages/cli packages/github-action packages/trace --pretty false",
     "test": "npm run build && node --test tests/*.test.mjs",
     "coverage": "npm run build && c8 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",
     "coverage:100": "npm run build && c8 --check-coverage --lines 100 --statements 100 --branches 100 --functions 100 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",

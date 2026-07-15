@@ -396,6 +396,34 @@ export type ClaimCreateResult = ClaimCheckResult & {
   claimsPath: string;
 };
 
+export type WriteAccessPathDecision = {
+  requestedPath: string;
+  relativePath?: string;
+  canonicalPath?: string;
+  allowed: boolean;
+  reason: string;
+  cellId?: string;
+  claimIds: string[];
+};
+
+export type WriteAccessOptions = CheckOptions & {
+  agent: string;
+  paths: string[];
+  claimsPath?: string;
+  now?: Date;
+};
+
+export type WriteAccessResult = {
+  schemaVersion: "cellfence.write-access.v1";
+  ok: boolean;
+  exitCode: 0 | 1 | 2 | 3;
+  agent: string;
+  paths: WriteAccessPathDecision[];
+  findings: Finding[];
+  warnings: Finding[];
+  activeClaims: CellFenceClaim[];
+};
+
 export type CellFenceContext = {
   schemaVersion: "cellfence.context.v1";
   cell: {
@@ -2607,6 +2635,197 @@ function claimCoversFile(manifest: CellFenceManifest, claim: CellFenceClaim, rel
     const cell = manifest.cells.find((candidate) => candidate.id === cellId);
     return cell ? cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)) : false;
   });
+}
+
+function canonicalizePotentialPath(targetPath: string): string {
+  const resolvedPath = path.resolve(targetPath);
+  const parsedPath = path.parse(resolvedPath);
+  const relativeParts = path.relative(parsedPath.root, resolvedPath).split(path.sep).filter(Boolean);
+  let currentPath = parsedPath.root;
+  let firstMissingIndex = relativeParts.length;
+  for (let index = 0; index < relativeParts.length; index += 1) {
+    const nextPath = path.join(currentPath, relativeParts[index]);
+    if (!fs.existsSync(nextPath)) {
+      firstMissingIndex = index;
+      break;
+    }
+    currentPath = fs.realpathSync(nextPath);
+  }
+  return path.resolve(currentPath, ...relativeParts.slice(firstMissingIndex));
+}
+
+function normalizeWriteAccessPath(rootDir: string, requestedPath: string): { relativePath: string; canonicalPath: string } {
+  if (requestedPath.trim().length === 0) throw new Error("path is empty");
+  const rootRealPath = fs.realpathSync(rootDir);
+  const targetPath = path.isAbsolute(requestedPath)
+    ? path.resolve(requestedPath)
+    : path.resolve(rootDir, requestedPath);
+  const canonicalPath = canonicalizePotentialPath(targetPath);
+  const relativeFromRoot = path.relative(rootRealPath, canonicalPath);
+  if (relativeFromRoot === "" || relativeFromRoot.startsWith("..") || path.isAbsolute(relativeFromRoot)) {
+    throw new Error(`path escapes repository root: ${requestedPath}`);
+  }
+  return {
+    relativePath: normalizePath(relativeFromRoot),
+    canonicalPath,
+  };
+}
+
+function writeAccessResult(
+  agent: string,
+  pathDecisions: WriteAccessPathDecision[],
+  findings: Finding[],
+  warnings: Finding[],
+  activeClaims: CellFenceClaim[],
+): WriteAccessResult {
+  const hasErrors = findings.some((finding) => finding.severity === "error");
+  return {
+    schemaVersion: "cellfence.write-access.v1",
+    ok: !hasErrors && pathDecisions.every((decision) => decision.allowed),
+    exitCode: hasErrors || pathDecisions.some((decision) => !decision.allowed) ? 1 : 0,
+    agent,
+    paths: pathDecisions,
+    findings,
+    warnings,
+    activeClaims,
+  };
+}
+
+export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const agent = options.agent.trim();
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  if (agent.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      message: "write access check requires a non-empty agent",
+    });
+  }
+  if (options.paths.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
+      severity: "error",
+      message: "write access check requires at least one path",
+    });
+  }
+
+  let manifest: CellFenceManifest;
+  try {
+    manifest = loadManifestFromFile(manifestPath);
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_MANIFEST_INVALID",
+      severity: "error",
+      message: `failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`,
+    });
+    return writeAccessResult(agent, options.paths.map((requestedPath) => ({
+      requestedPath,
+      allowed: false,
+      reason: "manifest is unavailable",
+      claimIds: [],
+    })), findings, warnings, []);
+  }
+
+  const claimResultForPolicy = checkClaims({
+    rootDir,
+    manifestPath: repoPath(rootDir, manifestPath),
+    claimsPath: options.claimsPath,
+    now: options.now,
+  });
+  findings.push(...claimResultForPolicy.findings);
+  warnings.push(...claimResultForPolicy.warnings);
+  const activeClaims = claimResultForPolicy.activeClaims;
+  const agentClaims = activeClaims.filter((claim) => claim.agent === agent);
+  const otherClaims = activeClaims.filter((claim) => claim.agent !== agent);
+
+  const pathDecisions = options.paths.map((requestedPath): WriteAccessPathDecision => {
+    let normalizedPath: { relativePath: string; canonicalPath: string };
+    try {
+      normalizedPath = normalizeWriteAccessPath(rootDir, requestedPath);
+    } catch (error) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
+        severity: "error",
+        message: `write access denied for ${requestedPath}: ${errorMessage(error)}`,
+        details: { requestedPath },
+      });
+      return {
+        requestedPath,
+        allowed: false,
+        reason: errorMessage(error),
+        claimIds: [],
+      };
+    }
+
+    if (!claimResultForPolicy.ok) {
+      return {
+        requestedPath,
+        relativePath: normalizedPath.relativePath,
+        canonicalPath: normalizedPath.canonicalPath,
+        allowed: false,
+        reason: "claim policy is invalid or conflicting",
+        claimIds: agentClaims.map((claim) => claim.id),
+      };
+    }
+
+    const conflictingClaim = otherClaims.find((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
+    if (conflictingClaim) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_ACTIVE_CLAIM_CONFLICT",
+        severity: "error",
+        filePath: normalizedPath.relativePath,
+        message: `${agent} cannot write ${normalizedPath.relativePath}; active claim ${conflictingClaim.id} belongs to ${conflictingClaim.agent}`,
+        details: { agent, requestedPath, relativePath: normalizedPath.relativePath, conflictingClaim },
+      });
+      return {
+        requestedPath,
+        relativePath: normalizedPath.relativePath,
+        canonicalPath: normalizedPath.canonicalPath,
+        allowed: false,
+        reason: `active claim ${conflictingClaim.id} belongs to ${conflictingClaim.agent}`,
+        claimIds: agentClaims.map((claim) => claim.id),
+      };
+    }
+
+    const coveringClaims = agentClaims.filter((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
+    if (coveringClaims.length === 0) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
+        severity: "error",
+        filePath: normalizedPath.relativePath,
+        message: `${agent} cannot write ${normalizedPath.relativePath}; no active claim covers that path`,
+        details: { agent, requestedPath, relativePath: normalizedPath.relativePath, activeClaimIds: agentClaims.map((claim) => claim.id) },
+      });
+      return {
+        requestedPath,
+        relativePath: normalizedPath.relativePath,
+        canonicalPath: normalizedPath.canonicalPath,
+        allowed: false,
+        reason: "no active claim covers that path",
+        claimIds: agentClaims.map((claim) => claim.id),
+      };
+    }
+
+    const firstClaim = coveringClaims[0];
+    const firstCellId = firstClaim.cells.find((cellId) => {
+      const cell = manifest.cells.find((candidate) => candidate.id === cellId);
+      return cell ? pathOwnedByCell(cell, normalizedPath.relativePath) : false;
+    });
+    return {
+      requestedPath,
+      relativePath: normalizedPath.relativePath,
+      canonicalPath: normalizedPath.canonicalPath,
+      allowed: true,
+      reason: `covered by active claim ${firstClaim.id}`,
+      cellId: firstCellId,
+      claimIds: coveringClaims.map((claim) => claim.id),
+    };
+  });
+
+  return writeAccessResult(agent, pathDecisions, findings, warnings, activeClaims);
 }
 
 function validateAgentChangedFiles(

@@ -1,12 +1,13 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-15T01:20:35.169Z",
+  "generatedAt": "2026-07-15T17:14:39.592Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
     "cli",
     "engine",
     "github-action",
+    "mcp-proxy",
     "plugin-agent-budget",
     "plugin-api",
     "plugin-blast-radius",
@@ -108,8 +109,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 51,
-      "publicSurfaceLines": 3274,
+      "publicSymbols": 55,
+      "publicSurfaceLines": 3499,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -130,6 +131,7 @@
         "CheckOptions",
         "checkRepository",
         "CheckResult",
+        "checkWriteAccess",
         "ClaimCheckOptions",
         "ClaimCheckResult",
         "ClaimCreateOptions",
@@ -166,11 +168,56 @@
         "SuggestedResolution",
         "WaiverRequest",
         "WaiverRequestOptions",
+        "WriteAccessOptions",
+        "WriteAccessPathDecision",
+        "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "478221ebf6d9b41fca87d90b4b5a008827fb5100b8df5437b0d2f66b6560ec7f",
+      "publicSurfaceHash": "e38a73a234d1fc0964bb8429f39e91c5b68aa9aad054cf83f26bccf0ea1cfe15",
       "dependencyEdges": [
         "engine->schema"
+      ],
+      "artifactContracts": [],
+      "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "read",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        },
+        {
+          "kind": "file",
+          "access": "write",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        }
+      ]
+    },
+    "mcp-proxy": {
+      "ownedPathPatterns": 1,
+      "publicSymbols": 9,
+      "publicSurfaceLines": 424,
+      "crossCellDependencies": 1,
+      "ownedPathSet": [
+        "packages/mcp-proxy/**"
+      ],
+      "publicEntryPath": "packages/mcp-proxy/src/index.ts",
+      "publicSymbolSet": [
+        "decideToolCall",
+        "FailMode",
+        "main",
+        "parseProxyArgs",
+        "pathsForToolCall",
+        "ProxyMode",
+        "ProxyOptions",
+        "runProxy",
+        "WriteToolConfig"
+      ],
+      "publicSurfaceHash": "5d062e564217f3559690c10e9fec83f003667970067ced8c91550c9e51fc8dfc",
+      "dependencyEdges": [
+        "mcp-proxy->engine"
       ],
       "artifactContracts": [],
       "resourceAccesses": [
@@ -193,7 +240,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 1567,
+      "publicSurfaceLines": 1573,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"

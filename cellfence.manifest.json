@@ -124,6 +124,7 @@
         "CheckOptions",
         "checkRepository",
         "CheckResult",
+        "checkWriteAccess",
         "ClaimCheckOptions",
         "ClaimCheckResult",
         "ClaimCreateOptions",
@@ -160,6 +161,9 @@
         "SuggestedResolution",
         "WaiverRequest",
         "WaiverRequestOptions",
+        "WriteAccessOptions",
+        "WriteAccessPathDecision",
+        "WriteAccessResult",
         "writeBaselineFile"
       ],
       "resourceContracts": [
@@ -179,6 +183,45 @@
       "consumes": [
         {
           "cell": "schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp-proxy",
+      "packageName": "@cellfence/mcp-proxy",
+      "ownedPaths": [
+        "packages/mcp-proxy/**"
+      ],
+      "publicEntry": "packages/mcp-proxy/src/index.ts",
+      "publicSymbols": [
+        "decideToolCall",
+        "FailMode",
+        "main",
+        "parseProxyArgs",
+        "pathsForToolCall",
+        "ProxyMode",
+        "ProxyOptions",
+        "runProxy",
+        "WriteToolConfig"
+      ],
+      "resourceContracts": [
+        {
+          "id": "mcp-proxy-config-and-audit-file-io",
+          "kind": "file",
+          "access": [
+            "read",
+            "write"
+          ],
+          "selectors": [
+            "unresolved:dynamic-file-path"
+          ],
+          "description": "MCP proxy reads operator-selected tool config files and appends decision audit logs at caller-selected paths."
+        }
+      ],
+      "consumes": [
+        {
+          "cell": "engine"
         }
       ],
       "producesArtifacts": []

@@ -1,0 +1,49 @@
+{
+  "name": "@cellfence/mcp-proxy",
+  "version": "0.1.11",
+  "description": "CellFence runtime guard for MCP tool calls.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushnanashi2/CellFence.git",
+    "directory": "packages/mcp-proxy"
+  },
+  "bugs": {
+    "url": "https://github.com/pushnanashi2/CellFence/issues"
+  },
+  "homepage": "https://github.com/pushnanashi2/CellFence#readme",
+  "keywords": [
+    "architecture",
+    "governance",
+    "mcp",
+    "ai-agents"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "cellfence-mcp-proxy": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@cellfence/engine": "0.1.11",
+    "@modelcontextprotocol/sdk": "1.29.0"
+  }
+}

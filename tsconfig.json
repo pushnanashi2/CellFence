@@ -26,6 +26,9 @@
       "@cellfence/engine": [
         "./packages/engine/src/index.ts"
       ],
+      "@cellfence/mcp-proxy": [
+        "./packages/mcp-proxy/src/index.ts"
+      ],
       "@cellfence/plugin-agent-budget": [
         "./packages/plugin-agent-budget/src/index.ts"
       ],
