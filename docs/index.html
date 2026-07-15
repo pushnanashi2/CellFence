@@ -241,6 +241,7 @@
         z-index: 0;
         width: 100%;
         height: 100%;
+        contain: strict;
         opacity: 0.58;
         pointer-events: none;
       }
@@ -466,8 +467,7 @@
           rotateY(calc(var(--mx, 0) * 9deg))
           scale(var(--charge-scale, 1));
         transform-style: preserve-3d;
-        transition: transform 0.18s ease-out, filter 0.2s ease-out;
-        filter: drop-shadow(0 0 34px rgba(125, 245, 255, 0.05));
+        transition: transform 0.18s ease-out;
       }
 
       .gem-wrap::before,
@@ -515,20 +515,6 @@
         opacity: 0.78;
         mix-blend-mode: normal;
         filter: contrast(1.16) brightness(0.84) saturate(0.82);
-      }
-
-      .gem.cyan {
-        opacity: 0.16;
-        mix-blend-mode: screen;
-        filter: contrast(1.4) brightness(0.7) sepia(1) hue-rotate(132deg) saturate(3);
-        transform: translate3d(calc(-1px - var(--charge, 0) * 6px), 1px, 26px);
-      }
-
-      .gem.red {
-        opacity: 0.14;
-        mix-blend-mode: screen;
-        filter: contrast(1.4) brightness(0.7) sepia(1) hue-rotate(305deg) saturate(3);
-        transform: translate3d(calc(1px + var(--charge, 0) * 6px), -1px, 20px);
       }
 
       .core {
@@ -868,6 +854,8 @@
         background:
           linear-gradient(180deg, #000, rgba(3, 4, 5, 0.98) 220px),
           #030405;
+        content-visibility: auto;
+        contain-intrinsic-size: auto 760px;
       }
 
       .inner {
@@ -1332,15 +1320,9 @@
         @keyframes core-pulse {
           from {
             opacity: 0.42;
-            filter:
-              drop-shadow(0 0 9px rgba(125, 245, 255, 0.32))
-              drop-shadow(0 0 18px rgba(255, 80, 101, 0.08));
           }
           to {
             opacity: 0.72;
-            filter:
-              drop-shadow(0 0 16px rgba(125, 245, 255, 0.58))
-              drop-shadow(0 0 30px rgba(255, 80, 101, 0.16));
           }
         }
 
@@ -1421,9 +1403,7 @@
         <div class="stage" aria-hidden="true">
           <div class="gem-wrap">
             <div class="gem-spin" aria-hidden="true">
-              <img class="gem cyan" src="assets/cellfence-gem.png?v=2" alt="" />
-              <img class="gem red" src="assets/cellfence-gem.png?v=2" alt="" />
-              <img class="gem base" src="assets/cellfence-gem.png?v=2" alt="" />
+              <img class="gem base" src="assets/cellfence-gem.png?v=2" alt="" decoding="async" fetchpriority="high" />
             </div>
             <div class="core" aria-hidden="true">
               <div class="core-ring"></div>
@@ -1647,25 +1627,47 @@ jobs:
       const canvas = document.querySelector(".field");
       const ctx = canvas.getContext("2d", { alpha: true });
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const frameInterval = 1000 / 30;
       let charge = 0;
       let targetCharge = 0;
       let holding = false;
       let copyReady = false;
       let unlocked = false;
+      let heroVisible = true;
       let pointerX = 0;
       let pointerY = 0;
       let droplets = [];
+      let canvasWidth = 0;
+      let canvasHeight = 0;
+      let haze = null;
+      let animationFrame = null;
+      let resizeFrame = null;
+      let lastFrameAt = 0;
 
       function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.floor(window.innerWidth * dpr);
-        canvas.height = Math.floor(window.innerHeight * dpr);
-        canvas.style.width = `${window.innerWidth}px`;
-        canvas.style.height = `${window.innerHeight}px`;
+        canvasWidth = hero.clientWidth || window.innerWidth;
+        canvasHeight = hero.clientHeight || window.innerHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+        canvas.width = Math.floor(canvasWidth * dpr);
+        canvas.height = Math.floor(canvasHeight * dpr);
+        canvas.style.width = `${canvasWidth}px`;
+        canvas.style.height = `${canvasHeight}px`;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        droplets = Array.from({ length: window.innerWidth < 700 ? 70 : 130 }, () => ({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
+        haze = ctx.createRadialGradient(
+          canvasWidth * 0.5,
+          canvasHeight * 0.42,
+          40,
+          canvasWidth * 0.5,
+          canvasHeight * 0.42,
+          Math.max(canvasWidth, canvasHeight) * 0.58,
+        );
+        haze.addColorStop(0, "rgba(170,220,220,0.04)");
+        haze.addColorStop(0.55, "rgba(40,70,72,0.025)");
+        haze.addColorStop(1, "rgba(0,0,0,0)");
+        const dropletCount = canvasWidth < 700 ? 24 : 48;
+        droplets = Array.from({ length: dropletCount }, () => ({
+          x: Math.random() * canvasWidth,
+          y: Math.random() * canvasHeight,
           z: Math.random() * 0.9 + 0.1,
           l: Math.random() * 90 + 16,
           v: Math.random() * 0.8 + 0.25,
@@ -1673,6 +1675,7 @@ jobs:
           glass: Math.random() > 0.72,
           sway: Math.random() * Math.PI * 2,
         }));
+        renderFrame(false);
       }
 
       function setPointer(event) {
@@ -1703,25 +1706,22 @@ jobs:
         hero.classList.add("is-unlocked");
       }
 
-      function draw() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+      function renderFrame(advance) {
+        const w = canvasWidth;
+        const h = canvasHeight;
         ctx.clearRect(0, 0, w, h);
         ctx.globalCompositeOperation = "source-over";
-
-        const haze = ctx.createRadialGradient(w * 0.5, h * 0.42, 40, w * 0.5, h * 0.42, Math.max(w, h) * 0.58);
-        haze.addColorStop(0, `rgba(170,220,220,${0.035 + charge * 0.018})`);
-        haze.addColorStop(0.55, "rgba(40,70,72,0.025)");
-        haze.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = haze;
         ctx.fillRect(0, 0, w, h);
 
         for (const p of droplets) {
-          p.y += p.v * (p.glass ? 0.32 : 1.2 + p.z * 2.2) * (holding ? 1.8 : 1);
-          p.x += Math.sin(p.sway + p.y * 0.01) * (p.glass ? 0.022 : 0.08);
-          if (p.y - p.l > h + 20) {
-            p.y = -Math.random() * h * 0.35;
-            p.x = Math.random() * w;
+          if (advance) {
+            p.y += p.v * (p.glass ? 0.32 : 1.2 + p.z * 2.2) * (holding ? 1.8 : 1);
+            p.x += Math.sin(p.sway + p.y * 0.01) * (p.glass ? 0.022 : 0.08);
+            if (p.y - p.l > h + 20) {
+              p.y = -Math.random() * h * 0.35;
+              p.x = Math.random() * w;
+            }
           }
 
           const x = p.x + pointerX * 18 * p.z;
@@ -1733,12 +1733,7 @@ jobs:
             const lensDy = (y - h * 0.5) / (h * 0.5);
             const insideLens = lensDx * lensDx + lensDy * lensDy < 0.72;
             if (!insideLens) continue;
-            const g = ctx.createRadialGradient(x, y, 0, x, y, p.r * 6);
-            g.addColorStop(0, `rgba(235,255,255,${alpha * 1.9})`);
-            g.addColorStop(0.22, `rgba(160,245,255,${alpha * 0.62})`);
-            g.addColorStop(0.5, `rgba(255,255,255,${alpha * 0.18})`);
-            g.addColorStop(1, "rgba(0,0,0,0)");
-            ctx.fillStyle = g;
+            ctx.fillStyle = `rgba(215,250,255,${alpha * 0.48})`;
             ctx.beginPath();
             ctx.ellipse(x, y, p.r * 1.5, p.r * (3.8 + p.z * 5), -0.1, 0, Math.PI * 2);
             ctx.fill();
@@ -1749,11 +1744,7 @@ jobs:
             ctx.lineWidth = 0.45;
             ctx.stroke();
           } else if (p.z > 0.72) {
-            const g = ctx.createRadialGradient(x, y, 0, x, y, p.r * 4);
-            g.addColorStop(0, `rgba(230,255,255,${alpha * 0.9})`);
-            g.addColorStop(0.38, `rgba(125,245,255,${alpha * 0.28})`);
-            g.addColorStop(1, "rgba(0,0,0,0)");
-            ctx.fillStyle = g;
+            ctx.fillStyle = `rgba(180,245,255,${alpha * 0.42})`;
             ctx.beginPath();
             ctx.ellipse(x, y, p.r * 1.2, p.r * 3.5, 0.16, 0, Math.PI * 2);
             ctx.fill();
@@ -1767,29 +1758,76 @@ jobs:
           }
         }
 
-        charge += (targetCharge - charge) * 0.08;
-        hero.style.setProperty("--charge", charge.toFixed(4));
-        hero.style.setProperty("--charge-scale", (1 + charge * 0.035).toFixed(4));
-
-        if (!reduceMotion) requestAnimationFrame(draw);
+        const nextCharge = charge + (targetCharge - charge) * 0.08;
+        if (Math.abs(nextCharge - charge) > 0.0001) {
+          charge = nextCharge;
+          hero.style.setProperty("--charge", charge.toFixed(4));
+          hero.style.setProperty("--charge-scale", (1 + charge * 0.035).toFixed(4));
+        }
       }
 
-      window.addEventListener("resize", resize);
-      window.addEventListener("pointermove", setPointer);
+      function canAnimate() {
+        return !reduceMotion && heroVisible && !document.hidden;
+      }
+
+      function scheduleFrame() {
+        if (animationFrame !== null || !canAnimate()) return;
+        animationFrame = requestAnimationFrame(draw);
+      }
+
+      function draw(timestamp) {
+        animationFrame = null;
+        if (!canAnimate()) return;
+        if (timestamp - lastFrameAt >= frameInterval) {
+          renderFrame(true);
+          lastFrameAt = timestamp;
+        }
+        scheduleFrame();
+      }
+
+      function updateAnimationState() {
+        if (canAnimate()) {
+          lastFrameAt = 0;
+          scheduleFrame();
+        } else if (animationFrame !== null) {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = null;
+        }
+      }
+
+      function queueResize() {
+        if (resizeFrame !== null) return;
+        resizeFrame = requestAnimationFrame(() => {
+          resizeFrame = null;
+          resize();
+          updateAnimationState();
+        });
+      }
+
+      window.addEventListener("resize", queueResize, { passive: true });
+      window.addEventListener("pointermove", setPointer, { passive: true });
       window.addEventListener("pointerdown", () => {
         revealCopy();
         unlockHero();
         setHolding(true);
-      });
+      }, { passive: true });
       window.addEventListener("keydown", revealCopy, { once: true });
-      window.addEventListener("pointerup", () => setHolding(false));
-      window.addEventListener("pointercancel", () => setHolding(false));
+      window.addEventListener("pointerup", () => setHolding(false), { passive: true });
+      window.addEventListener("pointercancel", () => setHolding(false), { passive: true });
       window.addEventListener("blur", () => setHolding(false));
+      document.addEventListener("visibilitychange", updateAnimationState);
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(([entry]) => {
+          heroVisible = entry.isIntersecting;
+          updateAnimationState();
+        }, { threshold: 0.01 });
+        observer.observe(hero);
+      }
 
       resize();
       window.setTimeout(revealCopy, 5000);
-      if (!reduceMotion) draw();
-      else hero.style.setProperty("--charge", "0");
+      updateAnimationState();
     </script>
   </body>
 </html>
