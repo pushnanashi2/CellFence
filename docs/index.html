@@ -1647,7 +1647,7 @@ jobs:
       function resize() {
         canvasWidth = hero.clientWidth || window.innerWidth;
         canvasHeight = hero.clientHeight || window.innerHeight;
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+        const dpr = Math.min(window.devicePixelRatio || 1, 1);
         canvas.width = Math.floor(canvasWidth * dpr);
         canvas.height = Math.floor(canvasHeight * dpr);
         canvas.style.width = `${canvasWidth}px`;
@@ -1679,6 +1679,7 @@ jobs:
       }
 
       function setPointer(event) {
+        if (!heroVisible) return;
         const x = event.clientX / window.innerWidth - 0.5;
         const y = event.clientY / window.innerHeight - 0.5;
         pointerX += (x - pointerX) * 0.45;
@@ -1826,7 +1827,7 @@ jobs:
       }
 
       resize();
-      window.setTimeout(revealCopy, 5000);
+      window.setTimeout(revealCopy, 350);
       updateAnimationState();
     </script>
   </body>
