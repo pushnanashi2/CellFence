@@ -29,6 +29,14 @@ function runCliWithEnv(args, cwd, envPatch) {
   });
 }
 
+function runCliWithInput(args, cwd, input) {
+  return spawnSync(process.execPath, [cliPath, ...args], {
+    cwd,
+    encoding: "utf8",
+    input,
+  });
+}
+
 function runExecutable(command, args, cwd = root) {
   return spawnSync(command, args, {
     cwd,
@@ -277,6 +285,157 @@ test("CLI context auto-allocation agent markdown lists budget entries", () => {
   const result = runCli(["context", "--auto-allocate", "--task", "runtime", "--format", "agents-md"], fixturePath);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /runtime\.publicSurfaceLines: 9\/20, remaining 11, source baseline-ratchet/);
+});
+
+test("CLI install writes, checks, repairs, and uninstalls managed agent instruction blocks", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-install-"));
+  try {
+    const missing = runCli(["install", "--check", "--json"], tempDir);
+    assert.equal(missing.status, 1);
+    assert.match(missing.stdout, /missing CellFence managed block/);
+
+    const invalidTarget = runCli(["install", "--target", "cursor"], tempDir);
+    assert.equal(invalidTarget.status, 2);
+    assert.match(invalidTarget.stderr, /supports --target/);
+
+    const conflict = runCli(["install", "--check", "--uninstall"], tempDir);
+    assert.equal(conflict.status, 2);
+    assert.match(conflict.stderr, /cannot use --check and --uninstall together/);
+
+    const install = runCli(["install", "--json"], tempDir);
+    assert.equal(install.status, 0, install.stderr || install.stdout);
+    const installed = JSON.parse(install.stdout);
+    assert.equal(installed.schemaVersion, "cellfence.install.v1");
+    assert.equal(installed.changed, true);
+    const agentsPath = path.join(tempDir, "AGENTS.md");
+    const agentsText = fs.readFileSync(agentsPath, "utf8");
+    assert.match(agentsText, /<!-- cellfence:start target:agents-md checksum:[a-f0-9]{64} -->/);
+    assert.match(agentsText, /npx cellfence install --check/);
+
+    const secondInstall = runCli(["install", "--json"], tempDir);
+    assert.equal(secondInstall.status, 0, secondInstall.stderr || secondInstall.stdout);
+    assert.equal(JSON.parse(secondInstall.stdout).changed, false);
+
+    const check = runCli(["install", "--check", "--json"], tempDir);
+    assert.equal(check.status, 0, check.stderr || check.stdout);
+    assert.equal(JSON.parse(check.stdout).ok, true);
+
+    const notesPath = path.join(tempDir, "NOTES.md");
+    fs.writeFileSync(notesPath, "Existing notes\n");
+    const append = runCli(["install", "--file", "NOTES.md", "--json"], tempDir);
+    assert.equal(append.status, 0, append.stderr || append.stdout);
+    assert.match(fs.readFileSync(notesPath, "utf8"), /Existing notes\n\n<!-- cellfence:start/);
+    const uninstallOnlyBlock = runCli(["install", "--file", "NOTES.md", "--uninstall", "--json"], tempDir);
+    assert.equal(uninstallOnlyBlock.status, 0, uninstallOnlyBlock.stderr || uninstallOnlyBlock.stdout);
+    assert.equal(JSON.parse(uninstallOnlyBlock.stdout).changed, true);
+    assert.equal(fs.readFileSync(notesPath, "utf8"), "Existing notes\n");
+
+    const onlyPath = path.join(tempDir, "ONLY.md");
+    const onlyInstall = runCli(["install", "--file", "ONLY.md", "--json"], tempDir);
+    assert.equal(onlyInstall.status, 0, onlyInstall.stderr || onlyInstall.stdout);
+    const onlyUninstall = runCli(["install", "--file", "ONLY.md", "--uninstall", "--json"], tempDir);
+    assert.equal(onlyUninstall.status, 0, onlyUninstall.stderr || onlyUninstall.stdout);
+    assert.equal(fs.readFileSync(onlyPath, "utf8"), "");
+
+    fs.writeFileSync(agentsPath, agentsText.replace(/checksum:[a-f0-9]{64}/, `checksum:${"0".repeat(64)}`));
+    const checksumDrift = runCli(["install", "--check"], tempDir);
+    assert.equal(checksumDrift.status, 1);
+    assert.match(checksumDrift.stdout, /checksum does not match/);
+
+    const repair = runCli(["install"], tempDir);
+    assert.equal(repair.status, 0, repair.stderr || repair.stdout);
+    fs.appendFileSync(agentsPath, "\n### Architecture fence (CellFence)\nold unmanaged copy\n");
+    const unmanaged = runCli(["install", "--check"], tempDir);
+    assert.equal(unmanaged.status, 1);
+    assert.match(unmanaged.stdout, /unmanaged CellFence instruction text/);
+
+    const uninstall = runCli(["install", "--uninstall", "--json"], tempDir);
+    assert.equal(uninstall.status, 0, uninstall.stderr || uninstall.stdout);
+    assert.equal(JSON.parse(uninstall.stdout).changed, true);
+    assert.doesNotMatch(fs.readFileSync(agentsPath, "utf8"), /cellfence:start/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI install supports Claude target and explicit files", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-install-claude-"));
+  try {
+    const install = runCli(["install", "--target=claude-md", "--json"], tempDir);
+    assert.equal(install.status, 0, install.stderr || install.stdout);
+    assert.equal(JSON.parse(install.stdout).filePath, "CLAUDE.md");
+    assert.match(fs.readFileSync(path.join(tempDir, "CLAUDE.md"), "utf8"), /CellFence for Claude/);
+
+    const explicit = runCli(["install", "--target=agents-md", "--file", "docs/AGENT-FENCE.md", "--json"], tempDir);
+    assert.equal(explicit.status, 0, explicit.stderr || explicit.stdout);
+    assert.equal(JSON.parse(explicit.stdout).filePath, "docs/AGENT-FENCE.md");
+    assert.match(fs.readFileSync(path.join(tempDir, "docs/AGENT-FENCE.md"), "utf8"), /target:agents-md/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI MCP server exposes context, checks, claims, and finding explanations", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-"));
+  try {
+    writeClaimProject(tempDir);
+    const input = [
+      "   ",
+      JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "get_cell_context", arguments: { cellId: "billing", format: "agents-md" } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "check_change", arguments: {} } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "check_change", arguments: { changed: true, baseRef: "HEAD", headRef: "HEAD" } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "create_claim", arguments: { agent: "codex-a", cellId: "billing", ttl: "2h" } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/call", params: { name: "explain_finding", arguments: { finding: { ruleId: "CELLFENCE_PRIVATE_IMPORT", message: "private import", suggestedResolutions: [{ kind: "change-code", title: "Use public entry", approvalRequired: false }] } } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 8, method: "tools/call", params: { name: "explain_finding", arguments: { finding: { ruleId: "CELLFENCE_PRIVATE_IMPORT", message: "private import" } } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name: "create_claim", arguments: { agent: "codex-a" } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 10, method: "tools/call", params: { name: "explain_finding", arguments: {} } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 11, method: "tools/call", params: { name: "get_cell_context", arguments: { cellId: "billing" } } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 12, method: "tools/call", params: { name: "get_cell_context", arguments: {} } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 13, method: "tools/call", params: { name: "missing_tool", arguments: {} } }),
+      JSON.stringify({ jsonrpc: "2.0", id: 14, method: "tools/call", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", id: 15, method: "unknown/method", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", id: 16, method: "tools/call", params: "bad-params" }),
+      JSON.stringify({ jsonrpc: "2.0", id: 17, params: {} }),
+      "{not-json}",
+      "",
+    ].join("\n");
+    const result = runCliWithInput(["serve", "--mcp"], tempDir, input);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const responses = result.stdout.trim().split(/\n/).map((line) => JSON.parse(line));
+    assert.equal(responses.length, 18);
+    assert.equal(responses[0].result.serverInfo.name, "cellfence");
+    assert.ok(responses[1].result.tools.some((tool) => tool.name === "get_cell_context"));
+    assert.match(responses[2].result.content[0].text, /# CellFence Context: billing/);
+    assert.match(responses[3].result.content[0].text, /"ok": true/);
+    assert.match(responses[4].result.content[0].text, /CELLFENCE_GIT_METADATA_UNAVAILABLE/);
+    assert.match(responses[5].result.content[0].text, /"createdClaim"/);
+    assert.match(responses[6].result.content[0].text, /Use public entry/);
+    assert.match(responses[7].result.content[0].text, /"suggestedResolutions": \[\]/);
+    assert.equal(responses[8].result.isError, true);
+    assert.match(responses[8].result.content[0].text, /create_claim requires agent and cellId/);
+    assert.equal(responses[9].result.isError, true);
+    assert.match(responses[9].result.content[0].text, /explain_finding requires finding object/);
+    assert.match(responses[10].result.content[0].text, /"schemaVersion": "cellfence.context.v1"/);
+    assert.equal(responses[11].result.isError, true);
+    assert.match(responses[11].result.content[0].text, /get_cell_context requires cellId/);
+    assert.equal(responses[12].result.isError, true);
+    assert.match(responses[12].result.content[0].text, /unknown CellFence MCP tool/);
+    assert.equal(responses[13].error.code, -32602);
+    assert.equal(responses[14].error.code, -32601);
+    assert.equal(responses[15].error.code, -32602);
+    assert.equal(responses[16].error.code, -32601);
+    assert.match(responses[16].error.message, /\(missing\)/);
+    assert.equal(responses[17].error.code, -32700);
+
+    const notMcp = runCli(["serve"], tempDir);
+    assert.equal(notMcp.status, 2);
+    assert.match(notMcp.stderr, /requires --mcp/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI graph returns a machine-readable coupling graph", () => {

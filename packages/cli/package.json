@@ -1,6 +1,6 @@
 {
   "name": "cellfence",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Public CellFence CLI.",
   "license": "Apache-2.0",
   "type": "module",
@@ -41,6 +41,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.10"
+    "@cellfence/engine": "0.1.11"
   }
 }

@@ -5,18 +5,14 @@
 
 CellFence is agent-agnostic. It can be used with Codex, Claude Code, Cursor, custom coding agents, CI bots, or human developers as long as the workflow can run a command before accepting a change.
 
-Add a completion rule to `AGENTS.md` or the equivalent agent instruction file:
+Install the completion rule into `AGENTS.md` or the equivalent agent instruction file:
 
-```md
-## Architecture completion check
-
-Before completing a code change:
-
-1. Run `npx cellfence baseline check --json`.
-2. Fix implementation violations; do not weaken CellFence checks.
-3. Do not edit `cellfence.manifest.json` or `cellfence.baseline.json` merely to make the check pass.
-4. When an architectural boundary must grow, explain the reason and submit the manifest or baseline change for explicit human review.
+```bash
+npx cellfence install --target agents-md --file AGENTS.md
+npx cellfence install --target claude-md --file CLAUDE.md
 ```
+
+The generated block is checksumed. `cellfence install --check` fails when the block is missing, hand-edited, stale against the current CLI, or duplicated as unmanaged CellFence instructions elsewhere in the file.
 
 For the current source build, replace `npx cellfence` with:
 
@@ -58,6 +54,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Verify agent-facing CellFence instructions
+        run: npx cellfence install --check --file AGENTS.md
       - name: Enforce CellFence architecture
         run: |
           mkdir -p tmp/cellfence

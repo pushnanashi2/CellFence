@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/plugin-quants-trend",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "CellFence rule plugin for architecture momentum monitoring.",
   "license": "Apache-2.0",
   "type": "module",
@@ -39,7 +39,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/plugin-api": "0.1.10",
-    "@cellfence/schema": "0.1.10"
+    "@cellfence/plugin-api": "0.1.11",
+    "@cellfence/schema": "0.1.11"
   }
 }

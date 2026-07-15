@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -54,6 +55,7 @@ type ParsedArgs = {
   baseRef?: string;
   headRef?: string;
   task?: string;
+  installTarget?: string;
   ruleId?: string;
   targetFilePath?: string;
   line?: number;
@@ -61,6 +63,9 @@ type ParsedArgs = {
   ttl?: string;
   reason?: string;
   approvedBy?: string;
+  checkInstall: boolean;
+  uninstall: boolean;
+  mcp: boolean;
 };
 
 function printUsage(): void {
@@ -72,6 +77,8 @@ Usage:
   cellfence check --changed [--base origin/main] [--head HEAD] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
+  cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
+  cellfence serve --mcp
   cellfence graph [--json|--format mermaid]
   cellfence claim create --agent agent-id --cell cell-id [--path glob] [--ttl 2h] [--claims .cellfence/claims.json] [--json]
   cellfence claim check [--agent agent-id] [--base origin/main] [--head HEAD] [--claims .cellfence/claims.json] [--json]
@@ -103,6 +110,9 @@ function parseArgs(argv: string[]): ParsedArgs {
     rootDir: process.cwd(),
     changed: false,
     autoAllocate: false,
+    checkInstall: false,
+    uninstall: false,
+    mcp: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -112,6 +122,12 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.changed = true;
     } else if (argument === "--auto-allocate") {
       parsed.autoAllocate = true;
+    } else if (argument === "--check") {
+      parsed.checkInstall = true;
+    } else if (argument === "--uninstall") {
+      parsed.uninstall = true;
+    } else if (argument === "--mcp") {
+      parsed.mcp = true;
     } else if (argument === "--base") {
       parsed.baseRef = argv[index + 1];
       index += 1;
@@ -189,6 +205,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--task=")) {
       parsed.task = argument.slice("--task=".length);
+    } else if (argument === "--target") {
+      parsed.installTarget = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--target=")) {
+      parsed.installTarget = argument.slice("--target=".length);
     } else if (argument === "--rule") {
       parsed.ruleId = argv[index + 1];
       index += 1;
@@ -248,6 +269,10 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 function writeJson(value: unknown): void {
   console.log(JSON.stringify(value, null, 2));
+}
+
+function errorMessage(error: unknown): string {
+  return String(error).replace(/^[A-Za-z]*Error: /, "");
 }
 
 type CheckRunMetadata = {
@@ -807,6 +832,333 @@ function commandWaiversRequest(parsed: ParsedArgs): number {
   return 0;
 }
 
+const INSTALL_MARKER_START = "<!-- cellfence:start";
+const INSTALL_MARKER_END = "<!-- cellfence:end -->";
+
+type InstallTarget = "agents-md" | "claude-md";
+
+type InstallResult = {
+  schemaVersion: "cellfence.install.v1";
+  ok: boolean;
+  action: "install" | "check" | "uninstall";
+  target: InstallTarget;
+  filePath: string;
+  findings: string[];
+  changed: boolean;
+};
+
+function defaultInstallFile(target: InstallTarget): string {
+  return target === "claude-md" ? "CLAUDE.md" : "AGENTS.md";
+}
+
+function parseInstallTarget(value: string | undefined): InstallTarget | undefined {
+  if (value === undefined || value === "agents-md") return "agents-md";
+  if (value === "claude-md") return "claude-md";
+  return undefined;
+}
+
+function generatedInstallBody(target: InstallTarget): string {
+  const heading = target === "claude-md" ? "### Architecture fence (CellFence for Claude)" : "### Architecture fence (CellFence)";
+  return [
+    heading,
+    "",
+    "- Before editing, run `npx cellfence context --cell <cell-id> --format agents-md` and follow the returned ownership, import, resource, and budget guidance.",
+    "- Stay inside the assigned cell's owned paths. Cross-cell imports must target the producer's declared public entry or package name.",
+    "- After editing, `npx cellfence check` must exit 0. When a baseline exists, `npx cellfence baseline check` must also exit 0.",
+    "- Treat `cellfence.manifest.json` and `cellfence.baseline.json` as review-gated files. Do not edit them merely to make a check pass.",
+    "- Keep this managed block intact. Run `npx cellfence install --check` to verify that the agent-facing instructions have not drifted.",
+  ].join("\n");
+}
+
+function installChecksum(body: string): string {
+  return crypto.createHash("sha256").update(body).digest("hex");
+}
+
+function generatedInstallBlock(target: InstallTarget): string {
+  const body = generatedInstallBody(target);
+  return `${INSTALL_MARKER_START} target:${target} checksum:${installChecksum(body)} -->\n${body}\n${INSTALL_MARKER_END}`;
+}
+
+function installBlockPattern(): RegExp {
+  return /<!-- cellfence:start[^\n]*-->\n[\s\S]*?\n<!-- cellfence:end -->/m;
+}
+
+function installManagedBlock(text: string): string | undefined {
+  return installBlockPattern().exec(text)?.[0];
+}
+
+function installBodyFromBlock(block: string): string {
+  const lines = block.split(/\r?\n/);
+  return lines.slice(1, -1).join("\n");
+}
+
+function installChecksumFromBlock(block: string): string | undefined {
+  return /checksum:([a-f0-9]{64})\b/.exec(block)?.[1];
+}
+
+function oldFenceTextOutsideBlock(text: string): boolean {
+  const unmanaged = text.replace(installBlockPattern(), "");
+  return /Architecture fence \(CellFence/.test(unmanaged) || /cellfence context --cell/.test(unmanaged);
+}
+
+function commandInstall(parsed: ParsedArgs): number {
+  const target = parseInstallTarget(parsed.installTarget);
+  if (!target) {
+    console.error("cellfence install supports --target agents-md or --target claude-md");
+    return 2;
+  }
+  if (parsed.checkInstall && parsed.uninstall) {
+    console.error("cellfence install cannot use --check and --uninstall together");
+    return 2;
+  }
+
+  const relativeFilePath = parsed.targetFilePath || defaultInstallFile(target);
+  const absoluteFilePath = resolveOutputPath(parsed.rootDir, relativeFilePath);
+  const expectedBlock = generatedInstallBlock(target);
+  const action: InstallResult["action"] = parsed.uninstall ? "uninstall" : parsed.checkInstall ? "check" : "install";
+  const currentText = fs.existsSync(absoluteFilePath) ? fs.readFileSync(absoluteFilePath, "utf8") : "";
+  const currentBlock = installManagedBlock(currentText);
+  const findings: string[] = [];
+  let changed = false;
+
+  if (parsed.checkInstall) {
+    if (!currentBlock) {
+      findings.push("missing CellFence managed block");
+    } else {
+      const currentBody = installBodyFromBlock(currentBlock);
+      const declaredChecksum = installChecksumFromBlock(currentBlock);
+      if (!declaredChecksum || declaredChecksum !== installChecksum(currentBody)) {
+        findings.push("managed block checksum does not match its body");
+      }
+      if (currentBlock !== expectedBlock) {
+        findings.push("managed block content differs from the generated CellFence instructions");
+      }
+    }
+    if (oldFenceTextOutsideBlock(currentText)) {
+      findings.push("unmanaged CellFence instruction text exists outside the managed block");
+    }
+  } else if (parsed.uninstall) {
+    if (currentBlock) {
+      const nextText = currentText.replace(installBlockPattern(), "").replace(/\n{3,}/g, "\n\n").trimEnd();
+      writeFileEnsuringDirectory(absoluteFilePath, nextText.length > 0 ? `${nextText}\n` : "");
+      changed = true;
+    }
+  } else {
+    const nextText = currentBlock
+      ? currentText.replace(installBlockPattern(), expectedBlock)
+      : `${currentText.trimEnd()}${currentText.trimEnd().length > 0 ? "\n\n" : ""}${expectedBlock}\n`;
+    if (nextText !== currentText) {
+      writeFileEnsuringDirectory(absoluteFilePath, nextText);
+      changed = true;
+    }
+  }
+
+  const result: InstallResult = {
+    schemaVersion: "cellfence.install.v1",
+    ok: findings.length === 0,
+    action,
+    target,
+    filePath: relativeFilePath,
+    findings,
+    changed,
+  };
+  if (parsed.json) writeJson(result);
+  else if (result.ok) console.log(`CellFence install ${action} passed for ${relativeFilePath}.`);
+  else console.log(`CellFence install ${action} failed for ${relativeFilePath}.\n${findings.map((finding) => `- ${finding}`).join("\n")}`);
+  return result.ok ? 0 : 1;
+}
+
+type JsonRpcId = string | number | null;
+type JsonRpcRequest = {
+  jsonrpc?: "2.0";
+  id?: JsonRpcId;
+  method?: string;
+  params?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringParam(params: Record<string, unknown>, key: string): string | undefined {
+  const value = params[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function booleanParam(params: Record<string, unknown>, key: string): boolean | undefined {
+  const value = params[key];
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function mcpTextResult(value: unknown): { content: { type: "text"; text: string }[] } {
+  return { content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] };
+}
+
+function mcpToolDefinitions(): Record<string, unknown>[] {
+  return [{
+    name: "get_cell_context",
+    description: "Return CellFence context for one cell before an agent edits it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cellId: { type: "string" },
+        rootDir: { type: "string" },
+        manifestPath: { type: "string" },
+        baselinePath: { type: "string" },
+        format: { type: "string", enum: ["json", "agents-md"] },
+      },
+      required: ["cellId"],
+    },
+  }, {
+    name: "check_change",
+    description: "Run CellFence check or changed-check and return the structured result.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        rootDir: { type: "string" },
+        manifestPath: { type: "string" },
+        baselinePath: { type: "string" },
+        changed: { type: "boolean" },
+        baseRef: { type: "string" },
+        headRef: { type: "string" },
+      },
+    },
+  }, {
+    name: "create_claim",
+    description: "Create a CellFence claim lease for a parallel coding agent.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent: { type: "string" },
+        cellId: { type: "string" },
+        rootDir: { type: "string" },
+        manifestPath: { type: "string" },
+        claimsPath: { type: "string" },
+        ttl: { type: "string" },
+      },
+      required: ["agent", "cellId"],
+    },
+  }, {
+    name: "explain_finding",
+    description: "Explain one CellFence finding and return its suggested resolutions.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        finding: { type: "object" },
+      },
+      required: ["finding"],
+    },
+  }];
+}
+
+function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootDir: string): unknown {
+  const rootDir = path.resolve(stringParam(params, "rootDir") || defaultRootDir);
+  if (name === "get_cell_context") {
+    const cellId = stringParam(params, "cellId");
+    if (!cellId) throw new Error("get_cell_context requires cellId");
+    const context = createCellContext({
+      rootDir,
+      manifestPath: stringParam(params, "manifestPath"),
+      baselinePath: stringParam(params, "baselinePath"),
+      cellId,
+    });
+    return mcpTextResult(params.format === "agents-md" ? formatContextAsAgentsMarkdown(context) : context);
+  }
+  if (name === "check_change") {
+    const changed = booleanParam(params, "changed") === true;
+    const options = {
+      rootDir,
+      manifestPath: stringParam(params, "manifestPath"),
+      baselinePath: stringParam(params, "baselinePath"),
+    };
+    return mcpTextResult(changed
+      ? checkChangedRepository({
+        ...options,
+        baseRef: stringParam(params, "baseRef"),
+        headRef: stringParam(params, "headRef"),
+      })
+      : checkRepository(options));
+  }
+  if (name === "create_claim") {
+    const agent = stringParam(params, "agent");
+    const cellId = stringParam(params, "cellId");
+    if (!agent || !cellId) throw new Error("create_claim requires agent and cellId");
+    return mcpTextResult(createClaim({
+      rootDir,
+      manifestPath: stringParam(params, "manifestPath"),
+      claimsPath: stringParam(params, "claimsPath"),
+      agent,
+      ttl: stringParam(params, "ttl"),
+      cells: [cellId],
+    }));
+  }
+  if (name === "explain_finding") {
+    const finding = params.finding;
+    if (!isRecord(finding)) throw new Error("explain_finding requires finding object");
+    return mcpTextResult({
+      ruleId: finding.ruleId,
+      message: finding.message,
+      suggestedResolutions: finding.suggestedResolutions || [],
+    });
+  }
+  throw new Error(`unknown CellFence MCP tool: ${name}`);
+}
+
+function mcpResponse(id: JsonRpcId | undefined, result: unknown): string {
+  return JSON.stringify({ jsonrpc: "2.0", id, result });
+}
+
+function mcpError(id: JsonRpcId | undefined, code: number, message: string): string {
+  return JSON.stringify({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
+}
+
+function handleMcpRequest(request: JsonRpcRequest, defaultRootDir: string): string | undefined {
+  if (request.id === undefined) return undefined;
+  if (request.method === "initialize") {
+    return mcpResponse(request.id, {
+      protocolVersion: "2024-11-05",
+      capabilities: { tools: {} },
+      serverInfo: { name: "cellfence", version: "0.1.10" },
+    });
+  }
+  if (request.method === "tools/list") {
+    return mcpResponse(request.id, { tools: mcpToolDefinitions() });
+  }
+  if (request.method === "tools/call") {
+    const params = isRecord(request.params) ? request.params : {};
+    const name = stringParam(params, "name");
+    const args = isRecord(params.arguments) ? params.arguments : {};
+    if (!name) return mcpError(request.id, -32602, "tools/call requires a string name");
+    try {
+      return mcpResponse(request.id, mcpToolCall(name, args, defaultRootDir));
+    } catch (error) {
+      return mcpResponse(request.id, {
+        isError: true,
+        content: [{ type: "text", text: errorMessage(error) }],
+      });
+    }
+  }
+  return mcpError(request.id, -32601, `unknown method: ${request.method || "(missing)"}`);
+}
+
+function commandServe(parsed: ParsedArgs): number {
+  if (!parsed.mcp) {
+    console.error("cellfence serve currently requires --mcp");
+    return 2;
+  }
+  const input = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+  input.on("line", (line) => {
+    if (line.trim().length === 0) return;
+    try {
+      const response = handleMcpRequest(JSON.parse(line) as JsonRpcRequest, parsed.rootDir);
+      if (response) process.stdout.write(`${response}\n`);
+    } catch (error) {
+      process.stdout.write(`${mcpError(null, -32700, errorMessage(error))}\n`);
+    }
+  });
+  return 0;
+}
+
 export function main(argv = process.argv.slice(2)): number {
   const parsed = parseArgs(argv);
   try {
@@ -818,6 +1170,8 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "init") return commandInit(parsed.rootDir);
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
+    if (primaryCommand === "install") return commandInstall(parsed);
+    if (primaryCommand === "serve") return commandServe(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "create") return commandClaimCreate(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "check") return commandClaimCheck(parsed);

@@ -34,6 +34,8 @@ npx cellfence init
 npx cellfence check [--changed --base origin/main] [--json]
 npx cellfence context --cell <id> [--json|--format agents-md]
 npx cellfence context --auto-allocate --task "task text" [--json]
+npx cellfence install --target agents-md --file AGENTS.md [--check|--uninstall]
+npx cellfence serve --mcp
 npx cellfence graph [--format mermaid|--json]
 npx cellfence claim create --agent <id> --cell <id> --ttl 2h
 npx cellfence claim check --agent <id>
@@ -46,7 +48,9 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## For coding agents
 
-`context --format agents-md` emits a per-cell contract (owned paths, allowed imports, allowed resources, guidance) ready to paste into an agent's context. `check` and `baseline check` give agents a deterministic completion signal instead of another prompt.
+`context --format agents-md` emits a per-cell contract (owned paths, allowed imports, allowed resources, guidance) ready to pass into an agent's context. `install` writes a checksumed managed block into `AGENTS.md` or `CLAUDE.md`, and `install --check` fails when that block drifts or unmanaged CellFence instructions appear outside it.
+
+MCP-capable agents can run `cellfence serve --mcp` and call `get_cell_context`, `check_change`, `create_claim`, and `explain_finding` over stdio. `check` and `baseline check` remain the deterministic completion signal.
 
 ## Learn more
 

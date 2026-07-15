@@ -117,16 +117,23 @@ npx cellfence context --cell reporting --format agents-md   # ready-to-read Mark
 npx cellfence context --auto-allocate --task "change the reporting cell" --json
 ```
 
-Paste this into your repository's `AGENTS.md` or `CLAUDE.md`:
+Install the agent-facing instructions instead of hand-maintaining another prompt block:
 
-```markdown
-### Architecture fence (CellFence)
-
-- Before editing, run `npx cellfence context --cell <cell-id> --format agents-md` and follow its guidance.
-- Stay inside your cell's owned paths. Cross-cell imports must target the producer's declared public entry.
-- After editing, `npx cellfence check` must exit 0. When a baseline exists, `npx cellfence baseline check` must also exit 0.
-- Treat `cellfence.manifest.json` and `cellfence.baseline.json` as review-gated files. Never edit them to make a check pass.
+```bash
+npx cellfence install --target agents-md --file AGENTS.md
+npx cellfence install --target claude-md --file CLAUDE.md
+npx cellfence install --check
 ```
+
+`install` writes a checksumed CellFence block. `install --check` fails if the block is missing, edited by hand, stale against the current CLI, or duplicated as unmanaged fence text elsewhere in the file. `install --uninstall` removes only the managed block.
+
+Agents that support MCP can query the same contract over stdio:
+
+```bash
+npx cellfence serve --mcp
+```
+
+The MCP surface exposes `get_cell_context`, `check_change`, `create_claim`, and `explain_finding`, so an agent can ask for the fence before editing, check the result after editing, reserve a claim, and receive structured remediation guidance without scraping human CLI text.
 
 For parallel agents, claim leases provide coordination-only mutual exclusion over cells and paths:
 
@@ -243,6 +250,8 @@ Recipes, required-check setup, and the reusable action: [docs/ci.md](docs/ci.md)
 - How do I enforce module boundaries in an AI-assisted monorepo?
 - How do I prevent public API, dependency, or ownership growth without review?
 - How do I show an agent its allowed paths, imports, and resources before it edits?
+- How do I install and drift-check CellFence instructions in AGENTS.md or CLAUDE.md?
+- How do I expose architecture checks to MCP-capable coding agents?
 - How do I give a coding agent a deterministic completion check instead of another prompt?
 
 ## Do not use CellFence as
@@ -263,6 +272,8 @@ Threat model: [docs/threat-model.md](docs/threat-model.md).
 | `cellfence init` | Write a starter manifest |
 | `cellfence check [--changed --base <ref>] [--json]` | Validate the manifest contract |
 | `cellfence context --cell <id> [--json\|--format agents-md]` | Emit a cell's contract for humans or agents |
+| `cellfence install [--target agents-md\|claude-md] [--check\|--uninstall]` | Manage checksumed agent instruction blocks |
+| `cellfence serve --mcp` | Expose CellFence context, checks, claims, and explanations over MCP stdio |
 | `cellfence graph [--format mermaid\|--json]` | Render the declared and observed dependency graph |
 | `cellfence claim create\|check\|list` | Coordination leases for parallel agents |
 | `cellfence baseline create\|check\|update` | Manage the architectural ratchet |

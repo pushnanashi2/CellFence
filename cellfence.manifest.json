@@ -194,12 +194,13 @@
           "id": "cli-command-output-and-init-file-io",
           "kind": "file",
           "access": [
+            "read",
             "write"
           ],
           "selectors": [
             "unresolved:dynamic-file-path"
           ],
-          "description": "CLI writes user-requested output artifacts and init files to command-line selected repository paths."
+          "description": "CLI reads and writes user-requested output artifacts, agent instruction files, and init files at command-line selected repository paths."
         }
       ],
       "consumes": [

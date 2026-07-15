@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/plugin-legacy-strangler",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "CellFence rule plugin for legacy strangler migration ratchets.",
   "license": "Apache-2.0",
   "type": "module",
@@ -39,6 +39,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/plugin-api": "0.1.10"
+    "@cellfence/plugin-api": "0.1.11"
   }
 }
