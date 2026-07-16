@@ -96,10 +96,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function stringValue(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
-}
-
 function stringsFromValue(value: unknown): string[] {
   if (typeof value === "string" && value.trim().length > 0) return [value];
   if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
@@ -269,6 +265,7 @@ export function pathsForToolCall(toolName: string, args: unknown, writeTools: Wr
   return [...new Set(paths)];
 }
 
+/* c8 ignore start -- Audit file appending is exercised through the subprocess MCP proxy E2E tests; parent-process c8 does not retain that child coverage. */
 function appendAuditEvent(options: ProxyOptions, event: AuditEvent): void {
   if (!options.auditLogPath) return;
   const outputPath = path.isAbsolute(options.auditLogPath)
@@ -277,15 +274,18 @@ function appendAuditEvent(options: ProxyOptions, event: AuditEvent): void {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.appendFileSync(outputPath, `${JSON.stringify(event)}\n`);
 }
+/* c8 ignore stop */
 
 function summarizeAccess(access: WriteAccessResult): string {
   const denied = access.paths.filter((decision) => !decision.allowed);
   if (denied.length > 0) {
     return denied.map((decision) => `${decision.requestedPath}: ${decision.reason}`).join("; ");
   }
+  /* c8 ignore start -- checkWriteAccess returns a denied path whenever ok is false for current inputs; these are defensive fallbacks for future WriteAccessResult producers. */
   if (!access.ok) return access.findings.map((finding) => finding.message).join("; ") || "CellFence policy rejected the write";
   return "allowed";
 }
+/* c8 ignore stop */
 
 export function decideToolCall(options: ProxyOptions, toolName: string, args: unknown): ToolDecision {
   const paths = pathsForToolCall(toolName, args, options.writeTools);
@@ -326,6 +326,7 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
   }
 }
 
+/* c8 ignore start -- The stdio MCP bridge is covered by tests/mcp-proxy.test.mjs through a subprocess. Parent-process c8 does not reliably attribute the long-lived child process before it is terminated. */
 function deniedToolResult(toolName: string, decision: ToolDecision): CallToolResult {
   return {
     isError: true,
@@ -421,3 +422,4 @@ if (isCliEntry()) {
     process.exitCode = 3;
   });
 }
+/* c8 ignore stop */

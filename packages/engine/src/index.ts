@@ -58,6 +58,12 @@ import {
   type ResourceAccessMode,
   type ResourceAccessReference,
 } from "./resource-access.js";
+import { assessEvidence } from "./governance/evidence-assessment.js";
+import { createRawObservationReport } from "./governance/observation-report.js";
+import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
+import { evaluateGovernance } from "./governance/evaluator.js";
+import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
+import type { FileObservation, ObservationFamily } from "./governance/model.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
 
@@ -1123,6 +1129,94 @@ function createRepositoryModel(
   };
 }
 
+function addGovernanceSubjectFile(
+  subjectFiles: Map<string, SubjectSnapshotInputFile>,
+  rootDir: string,
+  relativePath: string,
+  role: SubjectSnapshotInputFile["role"],
+): void {
+  const normalizedPath = normalizePath(relativePath);
+  if (subjectFiles.has(normalizedPath)) return;
+  const absoluteFilePath = absolutePath(rootDir, normalizedPath);
+  if (!fs.existsSync(absoluteFilePath) || !fs.statSync(absoluteFilePath).isFile()) return;
+  subjectFiles.set(normalizedPath, {
+    path: normalizedPath,
+    content: fs.readFileSync(absoluteFilePath, "utf8"),
+    role,
+  });
+}
+
+function governanceSubjectFiles(
+  context: AnalysisContext,
+  manifestPath: string,
+  baselinePath: string | undefined,
+  evidencePaths: string[],
+): SubjectSnapshotInputFile[] {
+  const subjectFiles = new Map<string, SubjectSnapshotInputFile>();
+  addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, manifestPath), "manifest");
+  if (baselinePath) addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, baselinePath), "baseline");
+  const tsconfigPath = path.join(context.rootDir, "tsconfig.json");
+  addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, tsconfigPath), "config");
+  for (const evidencePath of evidencePaths) addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, evidencePath), "runtime-evidence");
+  for (const cell of context.manifest.cells) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
+      addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, sourceFilePath), "source");
+    }
+  }
+  for (const governedFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest, context)) {
+    addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, governedFilePath), "source");
+  }
+  return [...subjectFiles.values()].sort((left, right) => left.path.localeCompare(right.path));
+}
+
+function requiredGovernanceFamilies(baselinePath: string | undefined): ObservationFamily[] {
+  const families: ObservationFamily[] = ["manifest", "ownership", "public-surface", "imports", "resources"];
+  if (baselinePath) families.push("baseline");
+  return families;
+}
+
+function governanceEvidenceForCheck(
+  context: AnalysisContext,
+  manifestPath: string,
+  baselinePath: string | undefined,
+  evidencePaths: string[],
+  observedImports: PluginImportReference[],
+  accessesByCell: Map<string, ResourceAccessReference[]>,
+): ReturnType<typeof assessEvidence> {
+  const snapshot = createSubjectSnapshotFromFiles(governanceSubjectFiles(context, manifestPath, baselinePath, evidencePaths));
+  const statuses: FileObservation[] = snapshot.files.flatMap((file): FileObservation[] => {
+    if (file.role === "manifest") {
+      return [
+        { filePath: file.path, family: "manifest" as const, status: "processed" as const },
+        { filePath: file.path, family: "ownership" as const, status: "processed" as const },
+      ];
+    }
+    if (file.role === "baseline") return [{ filePath: file.path, family: "baseline" as const, status: "processed" as const }];
+    if (file.role === "runtime-evidence") return [{ filePath: file.path, family: "resources" as const, status: "processed" as const }];
+    if (file.role === "source") {
+      return [
+        { filePath: file.path, family: "imports" as const, status: "processed" as const },
+        { filePath: file.path, family: "public-surface" as const, status: "processed" as const },
+        { filePath: file.path, family: "resources" as const, status: "processed" as const },
+      ];
+    }
+    return [{ filePath: file.path, family: "imports" as const, status: "not-applicable" as const }];
+  });
+  const resourceObservationCount = [...accessesByCell.values()].reduce(
+    (count, accesses) => count + accesses.length,
+    0,
+  );
+  const report = createRawObservationReport({
+    observer: "cellfence-engine",
+    snapshot,
+    statuses,
+    importObservationCount: observedImports.length,
+    resourceObservationCount,
+    publicSurfaceObservationCount: context.manifest.cells.length,
+  });
+  return assessEvidence(snapshot, report, { requiredFamilies: requiredGovernanceFamilies(baselinePath) });
+}
+
 function qualifiedExpressionName(node: ts.Node): string | undefined {
   if (ts.isIdentifier(node)) return node.text;
   if (ts.isPropertyAccessExpression(node)) {
@@ -2027,13 +2121,28 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const active = applyWaiversToFindings(context, severityAdjusted.findings, severityAdjusted.warnings);
-  const hasErrors = active.findings.some((finding) => finding.severity === "error");
-  return {
-    ok: !hasErrors,
-    exitCode: hasErrors ? 1 : 0,
+  const evidence = governanceEvidenceForCheck(
+    context,
+    manifestPath,
+    baselinePath,
+    evidencePathsForOptions(rootDir, options.evidencePaths),
+    observedImports,
+    accessesByCell,
+  );
+  const evaluation = evaluateGovernance({
+    evidence,
     findings: active.findings,
     warnings: active.warnings,
     metrics,
+    requiredRules: context.manifest.governance?.requiredRules || [],
+  });
+  const decision = legacyDecisionFromEvaluation(evaluation);
+  return {
+    ok: decision.ok,
+    exitCode: decision.exitCode,
+    findings: decision.findings,
+    warnings: decision.warnings,
+    metrics: decision.metrics,
   };
 }
 
@@ -2771,6 +2880,7 @@ export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult
       };
     }
 
+    /* c8 ignore start -- checkClaims rejects overlapping active claims before write-path evaluation; this branch remains as a defensive guard for externally supplied policy results. */
     const conflictingClaim = otherClaims.find((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
     if (conflictingClaim) {
       addFinding(findings, {
@@ -2789,6 +2899,7 @@ export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult
         claimIds: agentClaims.map((claim) => claim.id),
       };
     }
+    /* c8 ignore stop */
 
     const coveringClaims = agentClaims.filter((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
     if (coveringClaims.length === 0) {
@@ -2811,7 +2922,9 @@ export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult
 
     const firstClaim = coveringClaims[0];
     const firstCellId = firstClaim.cells.find((cellId) => {
+      /* c8 ignore next -- checkClaims validates claim cell references before write access computes the accepted cell id. */
       const cell = manifest.cells.find((candidate) => candidate.id === cellId);
+      /* c8 ignore next -- checkClaims validates claim cell references before write access computes the accepted cell id. */
       return cell ? pathOwnedByCell(cell, normalizedPath.relativePath) : false;
     });
     return {
