@@ -4,7 +4,7 @@ import ts from "typescript";
 
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
 
-export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"];
+export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
 
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
 const PATTERN_REGEXP_CACHE = new Map<string, RegExp>();
@@ -167,6 +167,7 @@ export function sourceKindForPath(filePath: string): ts.ScriptKind {
   if (extension === ".tsx") return ts.ScriptKind.TSX;
   if (extension === ".jsx") return ts.ScriptKind.JSX;
   if (extension === ".js" || extension === ".mjs" || extension === ".cjs") return ts.ScriptKind.JS;
+  if (extension === ".py") return ts.ScriptKind.Unknown;
   return ts.ScriptKind.TS;
 }
 

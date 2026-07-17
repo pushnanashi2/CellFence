@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_PRIVATE_IMPORT"
+  ],
+  "warningRuleIds": []
+}

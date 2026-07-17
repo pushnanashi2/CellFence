@@ -15,6 +15,7 @@ import {
   publicSurfaceHash,
   readPathAliases,
   resolvePathAliasTarget,
+  resolvePythonImport,
   resolveRelativeImport,
 } from "../packages/engine/dist/module-resolution.js";
 
@@ -94,7 +95,10 @@ test("module resolution candidate paths preserve runtime and source extension or
     "dir/file.mjs",
     "dir/file.cjs",
   ]);
-  assert.deepEqual(noExtension.slice(9), [
+  assert.deepEqual(noExtension.slice(9, 10), [
+    "dir/file.py",
+  ]);
+  assert.deepEqual(noExtension.slice(10), [
     "dir/file/index.ts",
     "dir/file/index.tsx",
     "dir/file/index.js",
@@ -103,6 +107,7 @@ test("module resolution candidate paths preserve runtime and source extension or
     "dir/file/index.cts",
     "dir/file/index.mjs",
     "dir/file/index.cjs",
+    "dir/file/index.py",
   ]);
 });
 
@@ -219,6 +224,41 @@ test("module resolution extracts imports and reports computed module loading", (
   }
 });
 
+test("module resolution extracts and resolves Python imports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-imports-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/public.py"), "__all__ = ['exposed']\nfrom .internal import exposed\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/internal.py"), "def exposed():\n    return True\n");
+    const consumerPath = path.join(rootDir, "src/consumer/public.py");
+    fs.writeFileSync(
+      consumerPath,
+      [
+        "from producer.internal import exposed as _hidden",
+        "from .helpers import local_helper",
+        "import producer.public as producer_public",
+        "def used():",
+        "    return _hidden()",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(path.join(rootDir, "src/consumer/helpers.py"), "def local_helper():\n    return True\n");
+
+    const references = extractImports(context(rootDir), consumerPath, []);
+    assert.deepEqual(references.map((reference) => [reference.specifier, reference.line]), [
+      ["producer.internal", 1],
+      [".helpers", 2],
+      ["producer.public", 3],
+    ]);
+    assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", "producer.internal", ["src"]), "src/producer/internal.py");
+    assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", ".helpers", ["src"]), "src/consumer/helpers.py");
+    assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", "external.package", ["src"]), undefined);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution exposes literal and line helpers exactly", () => {
   const sourceFile = ts.createSourceFile(
     "sample.ts",
@@ -269,6 +309,47 @@ test("module resolution public symbols and signature hashes react to exported co
       ].join("\n"),
     );
     assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution extracts Python public symbols and surface hashes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-public-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    const allPath = path.join(rootDir, "src/core/public.py");
+    fs.writeFileSync(allPath, "__all__ = ['run', 'Box']\nfrom .impl import run, Box, hidden\n");
+    assert.deepEqual([...extractPublicSymbols(allPath)].sort(), ["Box", "run"]);
+    const allHash = publicSurfaceHash(allPath);
+    fs.writeFileSync(allPath, "__all__ = ['run', 'Box', 'Mode']\nfrom .impl import run, Box, Mode\n");
+    assert.notEqual(publicSurfaceHash(allPath), allHash);
+
+    const inferredPath = path.join(rootDir, "src/core/inferred.py");
+    fs.writeFileSync(
+      inferredPath,
+      [
+        "from .impl import helper as public_helper, hidden as _hidden",
+        "VERSION: str = '1'",
+        "_private = True",
+        "async def fetch(value, limit=1):",
+        "    return value",
+        "def run(value):",
+        "    return value",
+        "class Box(Base):",
+        "    pass",
+        "",
+      ].join("\n"),
+    );
+    assert.deepEqual([...extractPublicSymbols(inferredPath)].sort(), ["Box", "VERSION", "fetch", "public_helper", "run"]);
+    const expectedParts = [
+      "py:class:Box(Base)",
+      "py:function:fetch(value, limit=1)",
+      "py:function:run(value)",
+      "py:import:public_helper",
+      "py:variable:VERSION:str",
+    ].sort((left, right) => left.localeCompare(right));
+    assert.equal(publicSurfaceHash(inferredPath), sha256(expectedParts.join("\n")));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

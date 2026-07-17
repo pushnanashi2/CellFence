@@ -10,7 +10,7 @@
 | Private cross-cell import rejection | enforced | `@cellfence/engine` | Static analysis only; computed dynamic imports and computed `require()` calls are warnings; NodeNext runtime `.js` specifiers and tsconfig path aliases, including `extends`, are resolved before boundary checks | invalid fixture |
 | Undeclared consumer rejection | enforced | `@cellfence/engine` | Applies to repository-local cells | invalid fixture |
 | Public entry existence | enforced | `@cellfence/engine` | One public entry per cell in v0.x | invalid fixture |
-| Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations and named exports | invalid fixture |
+| Public symbol match | enforced | `@cellfence/engine` | Export forms are limited to common TypeScript declarations/named exports and common Python `__all__` or top-level declarations | invalid fixture and Python fixtures |
 | Artifact lane declaration | enforced | `@cellfence/engine` | File path lanes only in v0.x | invalid fixture |
 | Static resource contract declaration | partially_enforced | `@cellfence/engine` | Detects selected string-literal file, SQL table, queue/topic, HTTP patterns, Prisma delegates, TypeORM entities/repositories/query builders, Drizzle table operations, string-literal query builders, BullMQ, KafkaJS, NestJS routes, and Fastify routes; general dynamic dataflow is not inferred | valid and invalid resource fixtures |
 | Adapter-scoped resource detection | partially_enforced | `@cellfence/engine` | ORM, query builder, HTTP-framework, and broker-client coverage is per adapter; unsupported libraries require a dedicated adapter or runtime evidence | adapter fixtures and documentation |
@@ -35,7 +35,8 @@
 | Changed findings diff | enforced | `@cellfence/engine` and `cellfence check --changed` | Uses a temporary Git worktree and compares finding identities; it still performs full repository analysis in v0.x | CLI tests |
 | Expiring waivers | enforced | `@cellfence/engine` and `cellfence waivers list` | Line-local source comments only; missing expiry, approver, concrete rule, or reason fails the check | CLI tests |
 | Waiver request generation | enforced | `@cellfence/engine` and `cellfence waivers request` | Generates approval text only; it never edits source or grants an exception by itself | CLI tests |
-| TypeScript compiler API source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
+| TypeScript/JavaScript source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
+| Python source analysis | partially_enforced | `@cellfence/engine` | `.py` files are governed source; common `import` and `from ... import ...` forms resolve through known source roots; public surface uses `__all__` or top-level declarations; no full Python AST/dataflow in v0.x | Python import and public-surface fixtures |
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
 | Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |
 | GitHub Actions support | partially_enforced | `.github/workflows` and action wrapper | Required-check configuration must be set externally; action wrapper invokes the published CLI with `npx` | workflow files and self-check |

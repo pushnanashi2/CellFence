@@ -6,14 +6,14 @@
 Version 0.x is deliberately narrow:
 
 - Node.js 20 or later;
-- TypeScript and JavaScript repositories only;
+- strongest static source analysis for TypeScript and JavaScript; initial Python support covers `.py` source ownership, import resolution, public symbols, and public-surface hashes;
 - one public entry per cell;
 - repository-local cells only;
 - file-path artifact lanes only;
 - selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred;
 - ORM, query builder, and broker-client support is adapter-scoped; unsupported libraries require a dedicated adapter or runtime evidence;
 - ownership overlap detection is conservative and does not solve arbitrary glob intersection;
-- public symbol analysis supports common TypeScript forms, not every possible re-export pattern;
+- public symbol analysis supports common TypeScript forms and common Python `__all__` / top-level declarations, not every possible dynamic export pattern;
 - computed dynamic imports cannot be resolved statically;
 - SARIF output is not implemented;
 - a reusable externally pinned GitHub Action is not yet released;

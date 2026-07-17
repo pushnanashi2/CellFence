@@ -45,6 +45,7 @@ import {
   getLineNumber,
   literalText,
   publicSurfaceHash,
+  resolvePythonImport,
   readPathAliases,
   resolvePathAliasTarget,
   resolveRelativeImport,
@@ -1486,7 +1487,40 @@ function findArtifactLaneForPath(cell: CellManifest, relativePath: string): stri
   return undefined;
 }
 
+function parentPrefix(relativePath: string): string {
+  const normalized = normalizePath(relativePath);
+  const parent = path.dirname(normalized);
+  return parent === "." ? "" : parent;
+}
+
+function pythonSourceRoots(manifest: CellFenceManifest): string[] {
+  const roots = new Set<string>(["", "src"]);
+  for (const cell of manifest.cells) {
+    if (path.extname(cell.publicEntry) === ".py") {
+      const parent = parentPrefix(cell.publicEntry);
+      const packageRoot = parentPrefix(parent);
+      roots.add(packageRoot);
+    }
+    for (const pattern of cell.ownedPaths) {
+      const prefix = literalPrefix(pattern);
+      if (!prefix) continue;
+      roots.add(parentPrefix(prefix));
+    }
+  }
+  return [...roots].sort((left, right) => left.localeCompare(right));
+}
+
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
+  if (path.extname(reference.importerPath) === ".py") {
+    const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, reference.specifier, pythonSourceRoots(context.manifest));
+    if (pythonTargetPath) {
+      const targetCell = findOwningCell(context.manifest, pythonTargetPath);
+      const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, pythonTargetPath) : undefined;
+      return { targetPath: pythonTargetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+    }
+    if (reference.specifier.startsWith(".")) return { isExternal: false, isPublicPackage: false };
+  }
+
   if (reference.specifier.startsWith(".") || reference.specifier.startsWith("/")) {
     const targetPath = resolveRelativeImport(context.rootDir, reference.importerPath, reference.specifier);
     if (!targetPath) return { isExternal: false, isPublicPackage: false };

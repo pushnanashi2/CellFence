@@ -124,6 +124,7 @@ test("file index exposes the full supported source extension set", () => {
     ".cts",
     ".mjs",
     ".cjs",
+    ".py",
   ]);
 });
 

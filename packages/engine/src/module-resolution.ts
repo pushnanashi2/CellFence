@@ -46,7 +46,7 @@ type PathAliasContext = {
   pathAliases: PathAlias[];
 };
 
-const IMPORT_SCAN_HINT = /\b(?:import|export|require)\b/;
+const IMPORT_SCAN_HINT = /\b(?:from|import|export|require)\b/;
 
 export function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
@@ -111,15 +111,56 @@ export function candidateModulePaths(basePath: string): string[] {
   return candidates;
 }
 
-export function resolveRelativeImport(rootDir: string, importerPath: string, specifier: string): string | undefined {
-  const importerAbsolutePath = absolutePath(rootDir, importerPath);
-  const basePath = path.resolve(path.dirname(importerAbsolutePath), specifier);
-  for (const candidatePath of candidateModulePaths(basePath)) {
-    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
-      return repoPath(rootDir, candidatePath);
-    }
+function candidatePythonModulePaths(basePath: string): string[] {
+  return [`${basePath}.py`, path.join(basePath, "__init__.py")];
+}
+
+function existingFileFromCandidates(candidates: string[]): string | undefined {
+  for (const candidatePath of candidates) {
+    if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) return candidatePath;
   }
   return undefined;
+}
+
+function isPythonPath(filePath: string): boolean {
+  return path.extname(filePath) === ".py";
+}
+
+function resolvePythonRelativeModule(rootDir: string, importerPath: string, specifier: string): string | undefined {
+  const match = specifier.match(/^(\.+)(.*)$/);
+  if (!match) return undefined;
+  const dotCount = match[1].length;
+  const moduleName = match[2].replace(/^\./, "");
+  let baseDir = path.dirname(absolutePath(rootDir, importerPath));
+  for (let index = 1; index < dotCount; index += 1) baseDir = path.dirname(baseDir);
+  const modulePath = moduleName.length > 0
+    ? path.join(baseDir, ...moduleName.split(".").filter(Boolean))
+    : baseDir;
+  const target = existingFileFromCandidates(candidatePythonModulePaths(modulePath));
+  return target ? repoPath(rootDir, target) : undefined;
+}
+
+export function resolvePythonImport(rootDir: string, importerPath: string, specifier: string, sourceRoots: string[] = []): string | undefined {
+  if (!isPythonPath(importerPath)) return undefined;
+  if (specifier.startsWith(".")) return resolvePythonRelativeModule(rootDir, importerPath, specifier);
+  const moduleParts = specifier.split(".").filter(Boolean);
+  if (moduleParts.length === 0) return undefined;
+  for (const sourceRoot of ["", ...sourceRoots]) {
+    const basePath = path.resolve(rootDir, sourceRoot, ...moduleParts);
+    const target = existingFileFromCandidates(candidatePythonModulePaths(basePath));
+    if (target) return repoPath(rootDir, target);
+  }
+  return undefined;
+}
+
+export function resolveRelativeImport(rootDir: string, importerPath: string, specifier: string): string | undefined {
+  if (isPythonPath(importerPath) && specifier.startsWith(".") && !specifier.startsWith("./") && !specifier.startsWith("../")) {
+    return resolvePythonRelativeModule(rootDir, importerPath, specifier);
+  }
+  const importerAbsolutePath = absolutePath(rootDir, importerPath);
+  const basePath = path.resolve(path.dirname(importerAbsolutePath), specifier);
+  const target = existingFileFromCandidates(candidateModulePaths(basePath));
+  return target ? repoPath(rootDir, target) : undefined;
 }
 
 export function resolvePathAliasTarget(context: PathAliasContext, specifier: string): string | undefined {
@@ -143,20 +184,89 @@ export function resolvePathAliasTarget(context: PathAliasContext, specifier: str
       const baseTarget = targetWildcardIndex === -1
         ? target
         : `${target.slice(0, targetWildcardIndex)}${wildcardValue}${target.slice(targetWildcardIndex + 1)}`;
-      for (const candidatePath of candidateModulePaths(baseTarget)) {
-        if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) {
-          return context.rootDir ? repoPath(context.rootDir, candidatePath) : normalizePath(candidatePath);
-        }
+      const targetPath = existingFileFromCandidates(candidateModulePaths(baseTarget));
+      if (targetPath) {
+        return context.rootDir ? repoPath(context.rootDir, targetPath) : normalizePath(targetPath);
       }
     }
   }
   return undefined;
 }
 
+function stripPythonComment(line: string): string {
+  let quote: string | undefined;
+  let escaped = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = undefined;
+      continue;
+    }
+    if (character === "'" || character === "\"") {
+      quote = character;
+      continue;
+    }
+    if (character === "#") return line.slice(0, index);
+  }
+  return line;
+}
+
+function importedPythonNames(importList: string): string[] {
+  return importList
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0 && part !== "*")
+    .map((part) => {
+      const aliasMatch = part.match(/\s+as\s+([A-Za-z_][A-Za-z0-9_]*)$/);
+      return aliasMatch ? aliasMatch[1] : part.split(/\s+/)[0];
+    })
+    .filter((name) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(name));
+}
+
+function extractPythonImports(context: ImportScanContext, filePath: string): ImportReference[] {
+  const references: ImportReference[] = [];
+  const importerPath = repoPath(context.rootDir, filePath);
+  const sourceText = readSourceText(context, filePath);
+  const lines = sourceText.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const lineNumber = index + 1;
+    const line = stripPythonComment(lines[index]).trim();
+    if (!line) continue;
+    const importMatch = line.match(/^import\s+(.+)$/);
+    if (importMatch) {
+      for (const part of importMatch[1].split(",")) {
+        const moduleName = part.trim().split(/\s+as\s+/)[0]?.trim();
+        if (moduleName) references.push({ importerPath, specifier: moduleName, kind: "import", typeOnly: false, line: lineNumber });
+      }
+      continue;
+    }
+    const fromMatch = line.match(/^from\s+([A-Za-z0-9_.]+|\.+[A-Za-z0-9_.]*)\s+import\s+(.+)$/);
+    if (!fromMatch) continue;
+    const moduleName = fromMatch[1];
+    const names = importedPythonNames(fromMatch[2]);
+    if (moduleName.match(/^\.+$/)) {
+      for (const name of names) references.push({ importerPath, specifier: `${moduleName}${name}`, kind: "import", typeOnly: false, line: lineNumber });
+    } else {
+      references.push({ importerPath, specifier: moduleName, kind: "import", typeOnly: false, line: lineNumber });
+    }
+  }
+  return references;
+}
+
 export function extractImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
   const sourceText = readSourceText(context, filePath);
   // Stryker disable next-line ConditionalExpression,ArrayDeclaration: the hint is a performance prefilter; parsing no-import files still returns no references.
   if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
+  if (isPythonPath(filePath)) return extractPythonImports(context, filePath);
   const sourceFile = parseSourceFile(context, filePath);
   const references: ImportReference[] = [];
   const importerPath = repoPath(context.rootDir, filePath);
@@ -230,11 +340,46 @@ function resolveLocalModuleFile(fromFilePath: string, specifier: string): string
   return undefined;
 }
 
+function pythonAllSymbols(sourceText: string): Set<string> | undefined {
+  const match = sourceText.match(/__all__\s*=\s*\[([\s\S]*?)\]/m);
+  if (!match) return undefined;
+  return new Set([...match[1].matchAll(/["']([^"']+)["']/g)].map((item) => item[1]).filter((name) => name.length > 0));
+}
+
+function extractPythonPublicSymbolsFromText(sourceText: string): Set<string> {
+  const allSymbols = pythonAllSymbols(sourceText);
+  if (allSymbols) return allSymbols;
+  const symbols = new Set<string>();
+  for (const rawLine of sourceText.split(/\r?\n/)) {
+    if (/^\s/.test(rawLine)) continue;
+    const line = stripPythonComment(rawLine).trim();
+    if (!line) continue;
+    const declaration = line.match(/^(?:async\s+def|def|class)\s+([A-Za-z_][A-Za-z0-9_]*)\b/);
+    if (declaration && !declaration[1].startsWith("_")) {
+      symbols.add(declaration[1]);
+      continue;
+    }
+    const assignment = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(?::[^=]+)?=/);
+    if (assignment && assignment[1] !== "__all__" && !assignment[1].startsWith("_")) {
+      symbols.add(assignment[1]);
+      continue;
+    }
+    const fromMatch = line.match(/^from\s+([A-Za-z0-9_.]+|\.+[A-Za-z0-9_.]*)\s+import\s+(.+)$/);
+    if (fromMatch) {
+      for (const name of importedPythonNames(fromMatch[2])) {
+        if (!name.startsWith("_")) symbols.add(name);
+      }
+    }
+  }
+  return symbols;
+}
+
 export function extractPublicSymbols(filePath: string, visitedFiles = new Set<string>()): Set<string> {
   const normalizedFilePath = path.resolve(filePath);
   if (visitedFiles.has(normalizedFilePath)) return new Set<string>();
   visitedFiles.add(normalizedFilePath);
   const sourceText = fs.readFileSync(filePath, "utf8");
+  if (isPythonPath(filePath)) return extractPythonPublicSymbolsFromText(sourceText);
   // Stryker disable next-line BooleanLiteral: parent pointers are not used by public-symbol extraction.
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const symbols = new Set<string>();
@@ -297,6 +442,7 @@ function normalizeWhitespace(text: string): string {
 function publicSurfaceSignatureParts(filePath: string): string[] {
   if (!fs.existsSync(filePath)) return [];
   const sourceText = fs.readFileSync(filePath, "utf8");
+  if (isPythonPath(filePath)) return pythonPublicSurfaceSignatureParts(sourceText);
   // Stryker disable next-line BooleanLiteral: parent pointers are not used by public-surface signature extraction.
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
   const parts: string[] = [];
@@ -347,6 +493,43 @@ function publicSurfaceSignatureParts(filePath: string): string[] {
   }
 
   visit(sourceFile);
+  return parts.sort((left, right) => left.localeCompare(right));
+}
+
+function normalizePythonSignature(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function pythonPublicSurfaceSignatureParts(sourceText: string): string[] {
+  const allSymbols = pythonAllSymbols(sourceText);
+  if (allSymbols) return [`py:__all__:${[...allSymbols].sort((left, right) => left.localeCompare(right)).join(",")}`];
+  const parts: string[] = [];
+  for (const rawLine of sourceText.split(/\r?\n/)) {
+    if (/^\s/.test(rawLine)) continue;
+    const line = stripPythonComment(rawLine).trim();
+    if (!line) continue;
+    const functionMatch = line.match(/^(async\s+def|def)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/);
+    if (functionMatch && !functionMatch[2].startsWith("_")) {
+      parts.push(`py:function:${functionMatch[2]}(${normalizePythonSignature(functionMatch[3])})`);
+      continue;
+    }
+    const classMatch = line.match(/^class\s+([A-Za-z_][A-Za-z0-9_]*)(?:\(([^)]*)\))?/);
+    if (classMatch && !classMatch[1].startsWith("_")) {
+      parts.push(`py:class:${classMatch[1]}(${normalizePythonSignature(classMatch[2] || "")})`);
+      continue;
+    }
+    const assignment = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(?::\s*([^=]+))?=/);
+    if (assignment && assignment[1] !== "__all__" && !assignment[1].startsWith("_")) {
+      parts.push(`py:variable:${assignment[1]}:${normalizePythonSignature(assignment[2] || "")}`);
+      continue;
+    }
+    const fromMatch = line.match(/^from\s+([A-Za-z0-9_.]+|\.+[A-Za-z0-9_.]*)\s+import\s+(.+)$/);
+    if (fromMatch) {
+      for (const name of importedPythonNames(fromMatch[2])) {
+        if (!name.startsWith("_")) parts.push(`py:import:${name}`);
+      }
+    }
+  }
   return parts.sort((left, right) => left.localeCompare(right));
 }
 
