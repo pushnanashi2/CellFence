@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "cellfence.semantic-detector-freeze.v1",
+  "detectorVersion": "v3.2",
+  "frozenAt": "2026-07-17",
+  "sample": {
+    "attemptedRepositories": 200,
+    "okRepositories": 190,
+    "failedRepositories": 10,
+    "nonMergeCommitsAnalyzed": 11987,
+    "recentHeadLineageClusters": 190
+  },
+  "comparableControlTombstones": {
+    "total": 113,
+    "removedFalsePositive": 113,
+    "removedTruePositive": 0,
+    "unclear": 0,
+    "byKind": {
+      "action_reference": 72,
+      "failure_enforcement": 41
+    }
+  },
+  "comparableEventTombstones": {
+    "total": 22,
+    "removedFalsePositive": 22,
+    "removedTruePositive": 0,
+    "unclear": 0,
+    "byEvent": {
+      "workflow_and_governance_control_event": 11,
+      "workflow_action_reference_change": 11
+    }
+  },
+  "windowDrift": {
+    "controlRows": 298,
+    "eventRows": 187,
+    "excludedFromRecallRegressionDenominator": true
+  },
+  "regressionFixtures": [
+    "workflow-deletion",
+    "suppression-replacement"
+  ]
+}

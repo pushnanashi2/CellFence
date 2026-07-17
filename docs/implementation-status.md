@@ -39,6 +39,7 @@
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
 | Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |
 | GitHub Actions support | partially_enforced | `.github/workflows` and action wrapper | Required-check configuration must be set externally; action wrapper invokes the published CLI with `npx` | workflow files and self-check |
+| Semantic workflow-control detector v3.2 | partially_enforced | `@cellfence/engine` reference detector and research fixtures | Dependency-free reference implementation freezes workflow deletion and suppression replacement behavior; full YAML-aware protected-path enforcement is a follow-up | `tests/workflow-controls.test.mjs` and research freeze docs |
 | npm package smoke verification | enforced | `scripts/pack-smoke.mjs` and CI `pack-smoke` job | Uses local tarballs to validate npm install, CLI execution, README/LICENSE inclusion, and forbidden generated metadata exclusion before registry publish | `npm run pack:smoke` |
 | CODEOWNERS | documented | `.github/CODEOWNERS` | Enforcement requires repository settings | root-of-trust document |
 | Protected branches | documented | external repository settings | Not enforceable by repository files alone | root-of-trust document |
