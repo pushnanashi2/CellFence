@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/cellfence-readme-hero.png" alt="CellFence" width="853" />
+</p>
+
 # CellFence
 
 > **AI coding agents do not need more prompts. They need enforceable architectural boundaries.**
