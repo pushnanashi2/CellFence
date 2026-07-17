@@ -12,15 +12,21 @@ import {
   type AutoAllocation,
   type ClaimCheckResult,
   checkChangedRepository,
+  checkCommitEvidence,
   checkClaims,
+  checkDesignDocs,
+  checkMutationReport,
   checkRepository,
+  checkTaskManifest,
   createClaim,
   createAutoAllocation,
+  createBaselineAudit,
   createCellContext,
   createCouplingGraph,
   createPruneReport,
   createWaiverRequest,
   createBaseline,
+  createManifestFromServiceManifests,
   defaultBaselinePath,
   formatCouplingGraphMermaid,
   formatHumanResult,
@@ -28,6 +34,11 @@ import {
   inferManifest,
   listClaims,
   listWaivers,
+  loadManifestFromFile,
+  profileConfig,
+  profileRuleSeverities,
+  stampDesignDoc,
+  verifyManifestFromServiceManifests,
   type CheckResult,
   type Finding,
   writeBaselineFile,
@@ -44,6 +55,8 @@ type ParsedArgs = {
   claimsPath?: string;
   agent?: string;
   evidencePaths: string[];
+  fromPaths: string[];
+  docPaths: string[];
   claimCells: string[];
   claimPaths: string[];
   symbols: string[];
@@ -56,7 +69,11 @@ type ParsedArgs = {
   autoAllocate: boolean;
   baseRef?: string;
   headRef?: string;
+  commitRef?: string;
   task?: string;
+  profile?: string;
+  reportPath?: string;
+  minScore?: number;
   installTarget?: string;
   repo?: string;
   branch?: string;
@@ -78,8 +95,10 @@ function printUsage(): void {
 
 Usage:
   cellfence init
+  cellfence init --from systems/*/service.json
   cellfence check [--manifest cellfence.manifest.json] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
-  cellfence check --changed [--base origin/main] [--head HEAD] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence manifest verify --from systems/*/service.json [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
@@ -91,10 +110,16 @@ Usage:
   cellfence claim create --agent agent-id --cell cell-id [--path glob] [--ttl 2h] [--claims .cellfence/claims.json] [--json]
   cellfence claim check [--agent agent-id] [--base origin/main] [--head HEAD] [--claims .cellfence/claims.json] [--json]
   cellfence claim list [--claims .cellfence/claims.json] [--json]
+  cellfence task check --task .cellfence/tasks/task.json [--base origin/main] [--head HEAD] [--json]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
+  cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
+  cellfence docs check [--file docs/design/cell.md] [--json]
+  cellfence docs stamp --cell cell-id --file docs/design/cell.md [--json]
+  cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
   cellfence waivers list [--manifest cellfence.manifest.json] [--json]
   cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
 
@@ -109,6 +134,8 @@ function parseArgs(argv: string[]): ParsedArgs {
   const parsed: ParsedArgs = {
     command: [],
     evidencePaths: [],
+    fromPaths: [],
+    docPaths: [],
     claimCells: [],
     claimPaths: [],
     symbols: [],
@@ -146,6 +173,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--head=")) {
       parsed.headRef = argument.slice("--head=".length);
+    } else if (argument === "--commit") {
+      parsed.commitRef = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--commit=")) {
+      parsed.commitRef = argument.slice("--commit=".length);
     } else if (argument === "--manifest") {
       parsed.manifestPath = argv[index + 1];
       index += 1;
@@ -240,9 +272,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.ruleId = argument.slice("--rule=".length);
     } else if (argument === "--file") {
       parsed.targetFilePath = argv[index + 1];
+      parsed.docPaths.push(argv[index + 1]);
       index += 1;
     } else if (argument.startsWith("--file=")) {
       parsed.targetFilePath = argument.slice("--file=".length);
+      parsed.docPaths.push(parsed.targetFilePath);
     } else if (argument === "--line") {
       parsed.line = Number(argv[index + 1]);
       index += 1;
@@ -273,6 +307,26 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--evidence=")) {
       parsed.evidencePaths.push(argument.slice("--evidence=".length));
+    } else if (argument === "--from") {
+      parsed.fromPaths.push(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--from=")) {
+      parsed.fromPaths.push(argument.slice("--from=".length));
+    } else if (argument === "--profile") {
+      parsed.profile = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--profile=")) {
+      parsed.profile = argument.slice("--profile=".length);
+    } else if (argument === "--report") {
+      parsed.reportPath = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--report=")) {
+      parsed.reportPath = argument.slice("--report=".length);
+    } else if (argument === "--min-score") {
+      parsed.minScore = Number(argv[index + 1]);
+      index += 1;
+    } else if (argument.startsWith("--min-score=")) {
+      parsed.minScore = Number(argument.slice("--min-score=".length));
     } else if (argument === "--format") {
       parsed.format = argv[index + 1];
       index += 1;
@@ -492,30 +546,48 @@ function writeCheckArtifacts(parsed: ParsedArgs, result: CheckResult, metadata: 
   }
 }
 
-function commandInit(rootDir: string): number {
+function commandInit(parsed: ParsedArgs): number {
+  const rootDir = parsed.rootDir;
   const manifestPath = path.join(rootDir, "cellfence.manifest.json");
   if (fs.existsSync(manifestPath)) {
     console.error("cellfence.manifest.json already exists");
     return 2;
   }
-  const manifest = inferManifest({ rootDir });
+  const imported = parsed.fromPaths.length > 0
+    ? createManifestFromServiceManifests({ rootDir, serviceManifestPaths: parsed.fromPaths })
+    : undefined;
+  const manifest = imported?.manifest || inferManifest({ rootDir });
   if (manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
     fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(`created ${manifestPath}`);
+  if (imported && imported.warnings.length > 0) {
+    for (const warning of imported.warnings) console.error(`[warn] ${warning.serviceId}.${warning.field}: ${warning.message}`);
+  }
   return 0;
 }
 
 function commandCheck(parsed: ParsedArgs): number {
+  const manifest = parsed.profile ? loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json")) : undefined;
+  const profile = manifest ? profileConfig(manifest, parsed.profile) : undefined;
+  if (parsed.profile && !profile) {
+    console.error(`unknown CellFence profile: ${parsed.profile}`);
+    return 2;
+  }
+  const ruleSeverities = {
+    ...(manifest ? profileRuleSeverities(manifest, parsed.profile) : {}),
+  };
   const options = {
     rootDir: parsed.rootDir,
     manifestPath: parsed.manifestPath,
+    ruleSeverities,
   };
   const startedAtMs = Date.now();
   const startedAt = new Date(startedAtMs).toISOString();
-  const result = parsed.changed
+  const shouldRunChanged = parsed.changed || Boolean(profile?.changedOnly);
+  const result = shouldRunChanged
     ? checkChangedRepository({
       ...options,
       baselinePath: parsed.baselinePath,
@@ -524,10 +596,143 @@ function commandCheck(parsed: ParsedArgs): number {
       headRef: parsed.headRef,
     })
     : checkRepository(options);
-  writeCheckArtifacts(parsed, result, createRunMetadata(parsed.changed ? "check --changed" : "check", parsed.rootDir, startedAtMs, startedAt));
+  const effectiveResult: CheckResult = profile?.reportOnly
+    ? {
+      ...result,
+      ok: true,
+      exitCode: 0,
+      findings: [],
+      warnings: [
+        ...result.warnings,
+        ...result.findings.map((finding) => ({ ...finding, severity: "warning" as const })),
+      ],
+    }
+    : result;
+  writeCheckArtifacts(parsed, effectiveResult, createRunMetadata(shouldRunChanged ? "check --changed" : "check", parsed.rootDir, startedAtMs, startedAt));
+  if (parsed.json) writeJson(effectiveResult);
+  else console.log(formatHumanResult(effectiveResult));
+  return effectiveResult.exitCode;
+}
+
+function commandManifestVerify(parsed: ParsedArgs): number {
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = verifyManifestFromServiceManifests({
+    rootDir: parsed.rootDir,
+    manifest,
+    serviceManifestPaths: parsed.fromPaths,
+  });
   if (parsed.json) writeJson(result);
-  else console.log(formatHumanResult(result));
-  return result.exitCode;
+  else {
+    console.log(result.ok ? "CellFence manifest service-manifest drift check passed." : "CellFence manifest service-manifest drift check failed.");
+    for (const finding of result.findings) console.log(`[${finding.severity}] ${finding.ruleId}: ${finding.message}`);
+    for (const warning of result.warnings) console.log(`[warn] ${warning.serviceId}.${warning.field}: ${warning.message}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+function commandBaselineAudit(parsed: ParsedArgs): number {
+  const result = createBaselineAudit({
+    rootDir: parsed.rootDir,
+    baselinePath: parsed.baselinePath,
+  });
+  if (parsed.json) writeJson(result);
+  else {
+    console.log(`CellFence baseline audit scanned ${result.commitsScanned} commit(s).`);
+    console.log(`Baseline touches: ${result.touches}; baseline-only commits: ${result.baselineOnlyCommits}`);
+    for (const recommendation of result.recommendations) console.log(`[recommendation] ${recommendation}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+function commandEvidenceCommit(parsed: ParsedArgs): number {
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = checkCommitEvidence({
+    rootDir: parsed.rootDir,
+    manifest,
+    baseRef: parsed.baseRef,
+    headRef: parsed.headRef,
+    commit: parsed.commitRef,
+  });
+  if (parsed.json) writeJson(result);
+  else {
+    console.log(result.ok ? "CellFence commit evidence check passed." : "CellFence commit evidence check failed.");
+    for (const finding of result.findings) console.log(`[${finding.severity}] ${finding.ruleId}: ${finding.message}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+function commandTaskCheck(parsed: ParsedArgs): number {
+  if (!parsed.task) {
+    console.error("cellfence task check requires --task task-manifest.json");
+    return 2;
+  }
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = checkTaskManifest({
+    rootDir: parsed.rootDir,
+    manifest,
+    taskPath: parsed.task,
+    baseRef: parsed.baseRef,
+    headRef: parsed.headRef,
+  });
+  if (parsed.json) writeJson(result);
+  else {
+    console.log(result.ok ? "CellFence task check passed." : "CellFence task check failed.");
+    for (const finding of result.findings) console.log(`[${finding.severity}] ${finding.ruleId}: ${finding.message}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+function commandDocsCheck(parsed: ParsedArgs): number {
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = checkDesignDocs({
+    rootDir: parsed.rootDir,
+    manifest,
+    docPaths: parsed.docPaths,
+  });
+  if (parsed.json) writeJson(result);
+  else {
+    console.log(result.ok ? `CellFence docs check passed (${result.checkedDocs} doc(s)).` : "CellFence docs check failed.");
+    for (const finding of result.findings) console.log(`[${finding.severity}] ${finding.ruleId}: ${finding.message}`);
+  }
+  return result.ok ? 0 : 1;
+}
+
+function commandDocsStamp(parsed: ParsedArgs): number {
+  if (!parsed.cellId || !parsed.targetFilePath) {
+    console.error("cellfence docs stamp requires --cell and --file");
+    return 2;
+  }
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = stampDesignDoc({
+    rootDir: parsed.rootDir,
+    manifest,
+    cellId: parsed.cellId,
+    docPath: parsed.targetFilePath,
+  });
+  if (parsed.json) writeJson(result);
+  else console.log(result.ok ? `stamped ${parsed.targetFilePath}` : "CellFence docs stamp failed.");
+  return result.ok ? 0 : 1;
+}
+
+function commandMutationCheck(parsed: ParsedArgs): number {
+  if (!parsed.reportPath) {
+    console.error("cellfence mutation check requires --report mutation.json");
+    return 2;
+  }
+  const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+  const result = checkMutationReport({
+    rootDir: parsed.rootDir,
+    manifest,
+    reportPath: parsed.reportPath,
+    minScore: parsed.minScore,
+  });
+  if (parsed.json) writeJson(result);
+  else {
+    console.log(result.ok ? "CellFence mutation report check passed." : "CellFence mutation report check failed.");
+    for (const [cellId, cell] of Object.entries(result.cells)) console.log(`${cellId}: ${cell.score.toFixed(2)} (${cell.killed} killed, ${cell.survived} survived, ${cell.ignored} ignored)`);
+    for (const finding of result.findings) console.log(`[${finding.severity}] ${finding.ruleId}: ${finding.message}`);
+  }
+  return result.ok ? 0 : 1;
 }
 
 function bulletList(values: string[], emptyValue = "(none)"): string[] {
@@ -1532,8 +1737,9 @@ export function main(argv = process.argv.slice(2)): number {
       return 0;
     }
     const [primaryCommand, secondaryCommand] = parsed.command;
-    if (primaryCommand === "init") return commandInit(parsed.rootDir);
+    if (primaryCommand === "init") return commandInit(parsed);
     if (primaryCommand === "check") return commandCheck(parsed);
+    if (primaryCommand === "manifest" && secondaryCommand === "verify") return commandManifestVerify(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
     if (primaryCommand === "install") return commandInstall(parsed);
     if (primaryCommand === "serve") return commandServe(parsed);
@@ -1544,10 +1750,16 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "claim" && secondaryCommand === "create") return commandClaimCreate(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "check") return commandClaimCheck(parsed);
     if (primaryCommand === "claim" && secondaryCommand === "list") return commandClaimList(parsed);
+    if (primaryCommand === "task" && secondaryCommand === "check") return commandTaskCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "create") return commandBaselineCreate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
+    if (primaryCommand === "baseline" && secondaryCommand === "audit") return commandBaselineAudit(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
+    if (primaryCommand === "evidence" && secondaryCommand === "commit") return commandEvidenceCommit(parsed);
+    if (primaryCommand === "docs" && secondaryCommand === "check") return commandDocsCheck(parsed);
+    if (primaryCommand === "docs" && secondaryCommand === "stamp") return commandDocsStamp(parsed);
+    if (primaryCommand === "mutation" && secondaryCommand === "check") return commandMutationCheck(parsed);
     if (primaryCommand === "waivers" && secondaryCommand === "list") return commandWaiversList(parsed);
     if (primaryCommand === "waivers" && secondaryCommand === "request") return commandWaiversRequest(parsed);
     printUsage();

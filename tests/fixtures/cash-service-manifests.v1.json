@@ -1,0 +1,1875 @@
+{
+  "source": "sanitized koenoki-backend-cash systems/*/service.json",
+  "serviceCount": 18,
+  "manifests": [
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "admin-api",
+      "ownerAgent": "admin-api-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own admin UI, API routes, and browser-facing operational views.",
+      "ownedPaths": [
+        "data/systems/admin-api/**",
+        "docs/adr/0004-feature-survival-smoke.md",
+        "systems/admin-api/**",
+        "systems/admin-api/bin/benchmark-echo-dashboard-render.ts",
+        "systems/admin-api/bin/server.ts",
+        "systems/admin-api/lib/controllers/echoDashboardController.ts",
+        "systems/admin-api/lib/middleware/auth.ts",
+        "systems/admin-api/lib/middleware/echoDashboardAccess.ts",
+        "systems/admin-api/lib/middleware/errorHandler.ts",
+        "systems/admin-api/lib/middleware/internalOpsGuard.ts",
+        "systems/admin-api/lib/middleware/rateLimit.ts",
+        "systems/admin-api/lib/middleware/security.ts",
+        "systems/admin-api/lib/middleware/validate.ts",
+        "systems/admin-api/lib/routes/admin/biotechAutopilotRoutes.ts",
+        "systems/admin-api/lib/routes/admin/claudeStatusRoutes.ts",
+        "systems/admin-api/lib/routes/admin/sessionRoutes.ts"
+      ],
+      "allowedServiceImports": [
+        "alpha-review",
+        "disclosure-ingestion",
+        "earnings-eval",
+        "experiment-evaluation",
+        "llm-gateway",
+        "market-data",
+        "ops-runtime",
+        "platform",
+        "portfolio-state",
+        "reporting-briefing",
+        "sec-eval"
+      ],
+      "consumes": {
+        "systems": [
+          "alpha-review",
+          "disclosure-ingestion",
+          "earnings-eval",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "ops-runtime",
+          "platform",
+          "portfolio-state",
+          "reporting-briefing",
+          "sec-eval"
+        ],
+        "artifacts": [
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          },
+          {
+            "id": "-",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          },
+          {
+            "id": "portfolio-state",
+            "schema": "portfolio.v1",
+            "path": "data/systems/portfolio-state/**",
+            "producer": "portfolio-state"
+          }
+        ],
+        "kernel": [
+          "runtime-config"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/admin-api/public.ts",
+          "symbols": [],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "admin-api",
+            "schema": "admin-api-produced.v1",
+            "path": "data/systems/admin-api/**"
+          },
+          {
+            "id": "systems:admin-api:RUNBOOK.md",
+            "schema": "admin-api-produced.v1",
+            "path": "systems/admin-api/RUNBOOK.md"
+          },
+          {
+            "id": "systems:admin-api:package.json",
+            "schema": "admin-api-produced.v1",
+            "path": "systems/admin-api/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/admin-api/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/*/**",
+        "data/qualitative-thesis-forward/**",
+        "data/systems/portfolio-state/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "agent-autopilot",
+      "ownerAgent": "agent-autopilot-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own the coding-agent board, service boundaries, run-state controls, and cross-service governance without owning domain research logic.",
+      "ownedPaths": [
+        "README.md",
+        "data/biotech-autopilot/**",
+        "data/systems/agent-autopilot/**",
+        "docs/adr/0013-cell-architecture-for-parallel-agents.md",
+        "docs/agent-board/**",
+        "docs/agent-board/PARALLEL_WORKTREES.md",
+        "systems/agent-autopilot/bin/agent-board/retire-cell-worktree.sh",
+        "systems/agent-autopilot/bin/agent-board/spawn-cell-worktree.sh",
+        "systems/agent-autopilot/bin/biotech-autopilot/audit-run-state.ts",
+        "systems/agent-autopilot/bin/verify-cash-boundary.sh",
+        "systems/agent-autopilot/**",
+        "systems/agent-autopilot/PARALLEL_AI_READINESS.md",
+        "systems/agent-autopilot/bin/agent-board/**",
+        "systems/agent-autopilot/bin/sector-autopilot/rotate-to-next-direction.ts",
+        "systems/agent-autopilot/lib/biotech-autopilot/reviewerClient.ts",
+        "systems/agent-autopilot/lib/sector-autopilot/direction.ts"
+      ],
+      "allowedServiceImports": [
+        "platform"
+      ],
+      "consumes": {
+        "systems": [
+          "llm-gateway",
+          "market-data",
+          "ops-runtime",
+          "platform",
+          "portfolio-state",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "-",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          },
+          {
+            "id": "systems:-",
+            "schema": "agent-autopilot-consumed.v1",
+            "path": "systems/*/**"
+          },
+          {
+            "id": "small-software-frozen-pre-return-manifest",
+            "schema": "sector-autopilot-frozen-pre-return-manifest.v1",
+            "path": "data/systems/agent-autopilot/output-lanes/tenant_feature_family/small-software-autopilot/**"
+          },
+          {
+            "id": "earnings-live-pre-return-context",
+            "schema": "earnings-live-consumed.v1",
+            "path": "data/earnings-live/**"
+          }
+        ],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/agent-autopilot/public.ts",
+          "symbols": [],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "biotech-autopilot",
+            "schema": "agent-autopilot-produced.v1",
+            "path": "data/biotech-autopilot/**"
+          },
+          {
+            "id": "agent-autopilot",
+            "schema": "agent-autopilot-produced.v1",
+            "path": "data/systems/agent-autopilot/**"
+          },
+          {
+            "id": "systems:agent-autopilot:RUNBOOK.md",
+            "schema": "agent-autopilot-produced.v1",
+            "path": "systems/agent-autopilot/RUNBOOK.md"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/agent-autopilot/**",
+        "data/biotech-autopilot/**"
+      ],
+      "readOnlyArtifacts": [
+        "systems/*/**",
+        "data/systems/*/**"
+      ],
+      "writePaths": [
+        "docs/DATA_MODEL.md",
+        "docs/THREAT_MODEL.md",
+        "docs/adr/0005-dashboard-token-cookie-model.md",
+        "packages/core/src/path-registry.ts"
+      ],
+      "scheduled": [
+        "biotech-autopilot-status",
+        "biotech-autopilot-cycle"
+      ]
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "alpha-discovery",
+      "ownerAgent": "alpha-discovery-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Generate alpha search-space, expectation-gap, baseline, forecast, source-reliability, edge-decay, and review-court control-plane artifacts from existing point-in-time evidence.",
+      "ownedPaths": [
+        "systems/alpha-discovery/**",
+        "data/systems/alpha-discovery/**",
+        "data/systems/research-evidence/**",
+        "data/systems/agent-review/**",
+        "tests/contracts/alpha-discovery/**"
+      ],
+      "allowedServiceImports": [
+        "platform"
+      ],
+      "consumes": {
+        "systems": [
+          "platform"
+        ],
+        "artifacts": [
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          },
+          {
+            "id": "systems-artifacts",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/alpha-discovery/public.ts",
+          "symbols": [
+            "ALPHA_CONTROL_PLANE_ENTRYPOINT",
+            "ALPHA_DISCOVERY_SERVICE_ID"
+          ],
+          "values": [
+            "ALPHA_CONTROL_PLANE_ENTRYPOINT",
+            "ALPHA_DISCOVERY_SERVICE_ID"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "alpha-discovery",
+            "schema": "alpha-control-plane.v1",
+            "path": "data/systems/alpha-discovery/**"
+          },
+          {
+            "id": "research-evidence",
+            "schema": "source-reliability.v1",
+            "path": "data/systems/research-evidence/**"
+          },
+          {
+            "id": "agent-review",
+            "schema": "alpha-review-court.v1",
+            "path": "data/systems/agent-review/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/alpha-discovery/**",
+        "data/systems/research-evidence/**",
+        "data/systems/agent-review/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/systems/*/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "alpha-review",
+      "ownerAgent": "alpha-review-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Prepare and apply human-reviewed alpha evidence sidecars while keeping strict promotion guards separate from collection.",
+      "ownedPaths": [
+        "systems/alpha-review/lib/advisor/adminAdvisorBaselineData.ts",
+        "systems/alpha-review/lib/advisor/adminAdvisorBaselineIds.ts",
+        "systems/alpha-review/lib/advisor/adminAdvisorBaselineText.ts",
+        "systems/alpha-review/lib/advisor/adminAdvisorReviewOptions.ts",
+        "systems/alpha-review/lib/advisor/adminAdvisorReviewParser.ts",
+        "data/systems/alpha-review/**",
+        "systems/alpha-review/bin/adjudicate-commercial-precursor-external-evidence.ts",
+        "systems/alpha-review/bin/apply-commercial-external-candidate-human-review-v1.ts",
+        "systems/alpha-review/bin/apply-customer-funded-development-v2-manual-review.ts",
+        "systems/alpha-review/bin/xbrl/audit-xbrl-commercial-production-registry-verified-v1.ts",
+        "systems/alpha-review/bin/xbrl/audit-xbrl-commercial-registry-human-review-v1.ts",
+        "systems/alpha-review/bin/build-customer-funded-development-v2-review-packets.ts",
+        "systems/alpha-review/bin/xbrl/build-xbrl-commercial-production-registry-verified-v1.ts",
+        "systems/alpha-review/bin/xbrl/build-xbrl-commercial-registry-human-review-v1.ts",
+        "systems/alpha-review/bin/material/export-material-event-adjudication-csv.ts",
+        "systems/alpha-review/bin/xbrl/export-xbrl-commercial-registry-human-review-csv.ts"
+      ],
+      "allowedServiceImports": [
+        "experiment-evaluation",
+        "platform",
+        "research-pipelines"
+      ],
+      "consumes": {
+        "systems": [
+          "experiment-evaluation",
+          "platform",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "experiment-evaluation",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/systems/experiment-evaluation/**",
+            "producer": "experiment-evaluation"
+          },
+          {
+            "id": "research-pipelines",
+            "schema": "research-pipelines-consumed.v1",
+            "path": "data/systems/research-pipelines/**",
+            "producer": "research-pipelines"
+          }
+        ],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/alpha-review/public.ts",
+          "symbols": [
+            "ADVISOR_BASELINE_DIR",
+            "ADVISOR_EXPERIMENTAL_DIR",
+            "ADVISOR_HUMAN_REVIEW_DIR",
+            "ADVISOR_LABELING_INPUT_DIR",
+            "ADVISOR_RUNS_DIR",
+            "REVIEW_DECISION_OPTIONS",
+            "REVIEW_OVERALL_OPTIONS",
+            "REVIEW_TAG_OPTIONS",
+            "attachAdvisorBaselineReviews",
+            "attachAdvisorExperimentalReviews",
+            "buildAdvisorBaselineExport",
+            "buildAdvisorExperimentalLabelingText",
+            "buildAdvisorPendingReviewInputText",
+            "isFailedAdvisorBaselineBatch",
+            "isFailedAdvisorExperimentalBatch",
+            "loadAdvisorBaseline",
+            "loadAdvisorBaselineBatches",
+            "loadAdvisorExperimentalBatch",
+            "loadAdvisorExperimentalBatches",
+            "loadAdvisorOkStocks"
+          ],
+          "values": [
+            "ADVISOR_BASELINE_DIR",
+            "ADVISOR_EXPERIMENTAL_DIR",
+            "ADVISOR_HUMAN_REVIEW_DIR",
+            "ADVISOR_LABELING_INPUT_DIR",
+            "ADVISOR_RUNS_DIR",
+            "REVIEW_DECISION_OPTIONS",
+            "REVIEW_OVERALL_OPTIONS",
+            "REVIEW_TAG_OPTIONS"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "qualitative-thesis-forward:retained-commercial-candidates--",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/retained-commercial-candidates-*"
+          },
+          {
+            "id": "alpha-review",
+            "schema": "alpha-review-produced.v1",
+            "path": "data/systems/alpha-review/**"
+          },
+          {
+            "id": "systems:alpha-review:RUNBOOK.md",
+            "schema": "alpha-review-produced.v1",
+            "path": "systems/alpha-review/RUNBOOK.md"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/alpha-review/**",
+        "data/qualitative-thesis-forward/retained-commercial-candidates-*"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/research-pipelines/**",
+        "data/systems/experiment-evaluation/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "disclosure-ingestion",
+      "ownerAgent": "disclosure-ingestion-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own SEC, XBRL, IR, ClinicalTrials, and source capture ingestion jobs.",
+      "ownedPaths": [
+        "systems/disclosure-ingestion/lib/irDisclosureFeedService.ts",
+        "systems/disclosure-ingestion/lib/secFilingService.ts",
+        "systems/disclosure-ingestion/lib/secFiveYearCompletedTickers.ts",
+        "systems/disclosure-ingestion/lib/secUserAgent.ts",
+        "data/sec/**",
+        "data/systems/disclosure-ingestion/**",
+        "data/xbrl/**",
+        "systems/disclosure-ingestion/bin/xbrl/audit-xbrl-fact-source-v1.ts",
+        "systems/disclosure-ingestion/bin/xbrl/build-xbrl-fact-source-v1.ts",
+        "systems/disclosure-ingestion/bin/sec/fetch-qualitative-thesis-sec-filings.ts",
+        "systems/disclosure-ingestion/bin/sec/probe-sec-five-year-structural-trends.ts",
+        "systems/disclosure-ingestion/**",
+        "systems/disclosure-ingestion/bin/sec/build-sec-fetch-universe.ts",
+        "systems/disclosure-ingestion/bin/sec/merge-sec-five-year-probes.ts",
+        "systems/disclosure-ingestion/bin/sec/build-advisor-sec-map.ts",
+        "systems/disclosure-ingestion/lib/advisorSecMap.ts"
+      ],
+      "allowedServiceImports": [
+        "platform",
+        "market-data",
+        "portfolio-state",
+        "research-pipelines"
+      ],
+      "consumes": {
+        "systems": [
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "entity-master",
+            "schema": "entity-master-consumed.v1",
+            "path": "data/systems/entity-master/**",
+            "producer": "entity-master"
+          }
+        ],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/disclosure-ingestion/public.ts",
+          "symbols": [
+            "advisorSecFiveYearProbeArtifactPath",
+            "collectIrItemsForQuotes",
+            "collectSecFilingsForSymbols",
+            "extractSecQualitativeText",
+            "extractSecStructuralSignals",
+            "fetchLatestSecFiling",
+            "fetchLatestSecFilingWithQualitative",
+            "fetchSecQualitative",
+            "fetchSecSubmissionByCik",
+            "fetchSecTickerIndex",
+            "irDisclosureBaselineArtifactPath",
+            "registerSecLiveRoutes",
+            "secFetchUniverseArtifactPath",
+            "secFilingTitle",
+            "secFilingToCheckedLink",
+            "secFilingToDisclosureItem",
+            "secFilingUrl",
+            "secUserAgent",
+            "secUserAgentStatus",
+            "stripSecHtmlText"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "disclosure-ingestion",
+            "schema": "disclosure-ingestion-produced.v1",
+            "path": "data/systems/disclosure-ingestion/**"
+          },
+          {
+            "id": "systems:disclosure-ingestion:RUNBOOK.md",
+            "schema": "disclosure-ingestion-produced.v1",
+            "path": "systems/disclosure-ingestion/RUNBOOK.md"
+          },
+          {
+            "id": "systems:disclosure-ingestion:package.json",
+            "schema": "disclosure-ingestion-produced.v1",
+            "path": "systems/disclosure-ingestion/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/disclosure-ingestion/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/entity-master/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "earnings-eval",
+      "ownerAgent": "earnings-eval-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Evaluate earnings prediction datasets, policies, ledgers, and dashboard summaries.",
+      "ownedPaths": [
+        "data/systems/earnings-eval/**",
+        "systems/earnings-eval/**",
+        "tests/contracts/earningsArtifacts.contract.ts",
+        "tests/earningsPointInTimeContract.test.ts",
+        "systems/earnings-eval/public.ts"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "experiment-evaluation",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "portfolio-state",
+        "research-pipelines",
+        "sec-eval"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "research-pipelines",
+          "sec-eval"
+        ],
+        "artifacts": [
+          {
+            "id": "advisor-sec-five-year-probes",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/advisor-sec-five-year-probes/**"
+          },
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/earnings-eval/public.ts",
+          "symbols": [
+            "advisorBaselineRunsArtifactPath",
+            "advisorExperimentalRunsArtifactPath",
+            "advisorExperimentalTickerPoolArtifactPath",
+            "advisorHumanReviewsArtifactPath",
+            "advisorImprovementsArtifactPath",
+            "advisorLatestArtifactPath",
+            "advisorObsidianBaselineArtifactPath",
+            "advisorRegressionCasesArtifactPath",
+            "advisorRunsArtifactPath",
+            "advisorStructuralValueBacktestsArtifactPath",
+            "advisorStructuralValueCandidatesArtifactPath",
+            "advisorStructuralValueRunsArtifactPath",
+            "closeNear",
+            "dailyReturns",
+            "directionalReturn",
+            "earningsArtifactPath",
+            "earningsBacktests2024V3ArtifactPath",
+            "earningsLiveArtifactPath",
+            "earningsPostReadMergedArtifactPath",
+            "earningsPredictionMergedArtifactPath"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "earnings-eval",
+            "schema": "earnings-eval.v1",
+            "path": "data/systems/earnings-eval/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/earnings-eval/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/advisor-sec-five-year-probes/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "entity-master",
+      "ownerAgent": "entity-master-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own ticker, CIK, issuer, drug, NCT, and corporate-action normalization.",
+      "ownedPaths": [
+        "systems/entity-master/**",
+        "data/systems/entity-master/**",
+        "data/entity-master/**",
+        "systems/entity-master/public.ts"
+      ],
+      "allowedServiceImports": [
+        "platform"
+      ],
+      "consumes": {
+        "systems": [
+          "platform"
+        ],
+        "artifacts": [],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/entity-master/public.ts",
+          "symbols": [],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "entity-master",
+            "schema": "entity-master-produced.v1",
+            "path": "data/systems/entity-master/**"
+          },
+          {
+            "id": "systems:entity-master:RUNBOOK.md",
+            "schema": "entity-master-produced.v1",
+            "path": "systems/entity-master/RUNBOOK.md"
+          },
+          {
+            "id": "systems:entity-master:package.json",
+            "schema": "entity-master-produced.v1",
+            "path": "systems/entity-master/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/entity-master/**"
+      ],
+      "readOnlyArtifacts": [],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "experiment-evaluation",
+      "ownerAgent": "experiment-evaluation-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Evaluate signal edge and forward-return diagnostics without owning upstream research collection.",
+      "ownedPaths": [
+        "systems/experiment-evaluation/bin/advisor/generate-advisor-cache.ts",
+        "systems/experiment-evaluation/lib/advisor/advisorImprovementLoop.ts",
+        "systems/experiment-evaluation/lib/advisor/advisorStructuralValue.ts",
+        "systems/experiment-evaluation/lib/advisorStructuralValueBacktest.ts",
+        "data/systems/experiment-evaluation/**",
+        "docs/research/signal-edge-trial-evaluation.md",
+        "systems/experiment-evaluation/bin/advisor/advisor-experimental-pipeline.ts",
+        "systems/experiment-evaluation/bin/advisor/backfill-advisor-review-decisions.ts",
+        "systems/experiment-evaluation/**",
+        "systems/experiment-evaluation/README.md",
+        "tests/contracts/signalEdgeEvaluation.contract.ts",
+        "tests/contracts/signalEdgeEvaluation.part-001.ts",
+        "tests/contracts/signalEdgeEvaluation.part-002.ts",
+        "tests/postReadTargetBasis.test.ts",
+        "systems/experiment-evaluation/bin/advisor/advisor-collect-baseline-runs.ts",
+        "systems/experiment-evaluation/public.ts"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "earnings-eval",
+        "factor-eval",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "portfolio-state",
+        "qualitative-eval",
+        "research-pipelines",
+        "sec-eval"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "earnings-eval",
+          "factor-eval",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "qualitative-eval",
+          "research-pipelines",
+          "sec-eval"
+        ],
+        "artifacts": [
+          {
+            "id": "advisor-sec-five-year-probes",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/advisor-sec-five-year-probes/**"
+          },
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/experiment-evaluation/public.ts",
+          "symbols": [
+            "advisorBaselineRunsArtifactPath",
+            "advisorExperimentalRunsArtifactPath",
+            "advisorExperimentalTickerPoolArtifactPath",
+            "advisorHumanReviewsArtifactPath",
+            "advisorImprovementsArtifactPath",
+            "advisorLatestArtifactPath",
+            "advisorObsidianBaselineArtifactPath",
+            "advisorRegressionCasesArtifactPath",
+            "advisorRunsArtifactPath",
+            "advisorStructuralValueBacktestsArtifactPath",
+            "advisorStructuralValueCandidatesArtifactPath",
+            "advisorStructuralValueRunsArtifactPath",
+            "earningsArtifactPath",
+            "earningsBacktests2024V3ArtifactPath",
+            "earningsLiveArtifactPath",
+            "earningsPostReadMergedArtifactPath",
+            "earningsPredictionMergedArtifactPath",
+            "factorResearchArtifactPath",
+            "performanceArtifactPath",
+            "ragEvalArtifactPath"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "experiment-evaluation",
+            "schema": "experiment-evaluation-produced.v1",
+            "path": "data/systems/experiment-evaluation/**"
+          },
+          {
+            "id": "systems:experiment-evaluation:RUNBOOK.md",
+            "schema": "experiment-evaluation-produced.v1",
+            "path": "systems/experiment-evaluation/RUNBOOK.md"
+          },
+          {
+            "id": "systems:experiment-evaluation:package.json",
+            "schema": "experiment-evaluation-produced.v1",
+            "path": "systems/experiment-evaluation/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/experiment-evaluation/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/advisor-sec-five-year-probes/**"
+      ],
+      "writePaths": [],
+      "scheduled": [
+        "earnings-point-in-time-check",
+        "earnings-model-loop-check",
+        "advisor-experimental"
+      ]
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "factor-eval",
+      "ownerAgent": "factor-eval-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Evaluate factor research, monthly factor backtests, and signal-edge diagnostics.",
+      "ownedPaths": [
+        "systems/factor-eval/**",
+        "data/systems/factor-eval/**",
+        "systems/factor-eval/lib/monthlyFactorBacktest/io.ts",
+        "systems/factor-eval/lib/signal-edge/cli.ts",
+        "systems/factor-eval/lib/signal-edge/diagnostics.ts",
+        "systems/factor-eval/lib/signal-edge/issuer.ts",
+        "systems/factor-eval/lib/signal-edge/markdown.ts",
+        "systems/factor-eval/lib/signal-edge/permutation.ts",
+        "systems/factor-eval/lib/signal-edge/returns.ts",
+        "systems/factor-eval/public.ts",
+        "systems/factor-eval/bin/analyze-monthly-factor-backtest.ts",
+        "systems/factor-eval/bin/evaluate-signal-edge.mts"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "experiment-evaluation",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "portfolio-state",
+        "research-pipelines"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "advisor-sec-five-year-probes",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/advisor-sec-five-year-probes/**"
+          },
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/factor-eval/public.ts",
+          "symbols": [
+            "advisorBaselineRunsArtifactPath",
+            "advisorExperimentalRunsArtifactPath",
+            "advisorExperimentalTickerPoolArtifactPath",
+            "advisorHumanReviewsArtifactPath",
+            "advisorImprovementsArtifactPath",
+            "advisorLatestArtifactPath",
+            "advisorObsidianBaselineArtifactPath",
+            "advisorRegressionCasesArtifactPath",
+            "advisorRunsArtifactPath",
+            "advisorStructuralValueBacktestsArtifactPath",
+            "advisorStructuralValueCandidatesArtifactPath",
+            "advisorStructuralValueRunsArtifactPath",
+            "aliasGroups",
+            "assertSelectedFieldIsPreReturn",
+            "coerceComparable",
+            "combinationsCapped",
+            "countUnknownEvidence",
+            "datePeriodKey",
+            "earningsArtifactPath",
+            "earningsBacktests2024V3ArtifactPath"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "factor-eval",
+            "schema": "factor-eval.v1",
+            "path": "data/systems/factor-eval/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/factor-eval/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/advisor-sec-five-year-probes/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "llm-gateway",
+      "ownerAgent": "llm-gateway-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own LLM calls, usage accounting, token budgets, and cost controls.",
+      "ownedPaths": [
+        "systems/llm-gateway/lib/schemas/externalDataSchemas.ts",
+        "systems/llm-gateway/lib/schemas/llmOutputSchemas.ts",
+        "systems/llm-gateway/lib/advisorGeminiService.ts",
+        "systems/llm-gateway/lib/advisorLocalModelService.ts",
+        "systems/llm-gateway/lib/advisorPromptService.ts",
+        "systems/llm-gateway/lib/llmPipelineContractService.ts",
+        "systems/llm-gateway/lib/llmRoutingPolicyService.ts",
+        "systems/llm-gateway/lib/advisorAudit.ts",
+        "systems/llm-gateway/lib/utils/advisorLogSections.ts",
+        "systems/llm-gateway/lib/advisorReturnMath.ts",
+        "systems/llm-gateway/lib/advisorStepGuards.ts",
+        "systems/llm-gateway/lib/advisorTableValidation.ts",
+        "systems/llm-gateway/lib/advisorValidation.ts",
+        "systems/llm-gateway/lib/llmOutputValidator.ts",
+        "systems/llm-gateway/lib/llmRoutingPolicy.ts",
+        "data/systems/llm-gateway/**"
+      ],
+      "allowedServiceImports": [
+        "platform",
+        "portfolio-state",
+        "market-data",
+        "experiment-evaluation",
+        "disclosure-ingestion"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "market-data",
+          "platform",
+          "portfolio-state"
+        ],
+        "artifacts": [
+          {
+            "id": "-",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          }
+        ],
+        "kernel": [
+          "logging"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/llm-gateway/public.ts",
+          "symbols": [
+            "ADVISOR_DATA_TEMPLATE",
+            "ADVISOR_GUIDANCE_GARBAGE_PATTERNS",
+            "ADVISOR_INVALID_VALUES",
+            "ADVISOR_OPTIONAL_FIELD_KEYS",
+            "ADVISOR_REQUIRED_FIELDS",
+            "ADVISOR_RISK_GARBAGE_PATTERNS",
+            "DEFAULT_ADVISOR_PROMPT",
+            "DEFAULT_MARKET_CAP_FILTER",
+            "HARD_AUDIT_ESCAPE_PHRASES",
+            "LLM_PIPELINE_CONTRACTS",
+            "QR_FORBIDDEN",
+            "SAMPLE_VERIFIED_TABLE",
+            "STEP1_DELISTED_TICKERS",
+            "STEP1_FORBIDDEN_TICKERS",
+            "STEP1_MISMATCH_RULES",
+            "STEP2_FORBIDDEN_PATTERNS",
+            "UNAUTHORIZED_SOURCES",
+            "advisorCostBudgetStatus",
+            "advisorLlmCostArtifactPath",
+            "advisorModelCacheArtifactPath"
+          ],
+          "values": [
+            "ADVISOR_DATA_TEMPLATE",
+            "ADVISOR_GUIDANCE_GARBAGE_PATTERNS",
+            "ADVISOR_INVALID_VALUES",
+            "ADVISOR_OPTIONAL_FIELD_KEYS",
+            "ADVISOR_REQUIRED_FIELDS",
+            "ADVISOR_RISK_GARBAGE_PATTERNS",
+            "DEFAULT_ADVISOR_PROMPT",
+            "DEFAULT_MARKET_CAP_FILTER"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "llm-gateway",
+            "schema": "llm-gateway-produced.v1",
+            "path": "data/systems/llm-gateway/**"
+          },
+          {
+            "id": "systems:llm-gateway:RUNBOOK.md",
+            "schema": "llm-gateway-produced.v1",
+            "path": "systems/llm-gateway/RUNBOOK.md"
+          },
+          {
+            "id": "systems:llm-gateway:package.json",
+            "schema": "llm-gateway-produced.v1",
+            "path": "systems/llm-gateway/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/llm-gateway/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/*/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "market-data",
+      "ownerAgent": "market-data-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own price, return, benchmark, calendar, and market data normalization artifacts.",
+      "ownedPaths": [
+        "systems/market-data/lib/openMeteoClient.ts",
+        "systems/market-data/lib/stockAnalysisClient.ts",
+        "systems/market-data/lib/yahooFinanceClient.ts",
+        "systems/market-data/lib/advisorVerifiedDataService.ts",
+        "systems/market-data/lib/marketDataService.ts",
+        "systems/market-data/lib/weatherService.ts",
+        "systems/market-data/lib/advisorTargetUniverse.ts",
+        "systems/market-data/lib/advisorUniverse.ts",
+        "systems/market-data/lib/dailyMarketDataCache.ts",
+        "data/market-data/**",
+        "data/systems/market-data/**",
+        "systems/market-data/bin/build-advisor-target-universe.ts",
+        "systems/market-data/bin/build-advisor-universe.ts",
+        "systems/market-data/bin/collect-earnings-estimate-snapshots.ts",
+        "systems/market-data/**",
+        "systems/market-data/bin/refresh-dashboard-earnings-cache.ts"
+      ],
+      "allowedServiceImports": [
+        "platform",
+        "disclosure-ingestion",
+        "portfolio-state"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "platform",
+          "portfolio-state"
+        ],
+        "artifacts": [
+          {
+            "id": "entity-master",
+            "schema": "entity-master-consumed.v1",
+            "path": "data/systems/entity-master/**",
+            "producer": "entity-master"
+          }
+        ],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/market-data/public.ts",
+          "symbols": [
+            "WATCH_WINDOW",
+            "advisorMarketDataArtifactPath",
+            "advisorStructuralValueArtifactPath",
+            "buildAdvisorUniverse",
+            "buildVerifiedDataFromFreeSources",
+            "cachePathForUrl",
+            "dailyMarketDataCacheEnabled",
+            "dashboardEarningsCacheArtifactPath",
+            "earningsEstimatesArtifactPath",
+            "extractPassedTickers",
+            "fetchDailyChartPoints",
+            "fetchStockAnalysisStockRows",
+            "fetchYahooChartMeta",
+            "fetchYahooDailyPrices",
+            "fetchYahooDailyVolumes",
+            "fetchYahooEarningsDate",
+            "fetchYahooMarketCap",
+            "fetchYahooQuoteRows",
+            "fetchYahooRssItems",
+            "formatAdvisorUniverseMarkdown"
+          ],
+          "values": [
+            "WATCH_WINDOW"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "market-data",
+            "schema": "market-data-produced.v1",
+            "path": "data/systems/market-data/**"
+          },
+          {
+            "id": "systems:market-data:RUNBOOK.md",
+            "schema": "market-data-produced.v1",
+            "path": "systems/market-data/RUNBOOK.md"
+          },
+          {
+            "id": "systems:market-data:package.json",
+            "schema": "market-data-produced.v1",
+            "path": "systems/market-data/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/market-data/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/entity-master/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "ops-runtime",
+      "ownerAgent": "ops-runtime-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own cron, batch jobs, runtime controls, locks, systemd, Docker, and operational readiness.",
+      "ownedPaths": [
+        ".github/workflows/**",
+        "Dockerfile",
+        "systems/ops-runtime/lib/adminOpsArtifactService.ts",
+        "systems/ops-runtime/lib/adminOpsRerunService.ts",
+        "systems/ops-runtime/lib/adminSecLiveModel.ts",
+        "systems/ops-runtime/lib/adminSecLiveService.ts",
+        "systems/ops-runtime/lib/adminSystemMonitorService.ts",
+        "systems/ops-runtime/lib/claudeStatusMonitorService.ts",
+        "systems/ops-runtime/lib/dependencyHealthService.ts",
+        "data/systems/ops-runtime/**",
+        "docs/ops/**",
+        "ops/**",
+        "systems/ops-runtime/bin/analyze-run-durations.ts",
+        "systems/ops-runtime/bin/archive-cold-data-artifacts.ts",
+        "systems/ops-runtime/bin/backup-mysql.sh",
+        "systems/ops-runtime/bin/backup-object-storage.sh"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "experiment-evaluation",
+        "llm-gateway",
+        "platform",
+        "portfolio-state",
+        "reporting-briefing"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "llm-gateway",
+          "platform",
+          "portfolio-state",
+          "reporting-briefing"
+        ],
+        "artifacts": [
+          {
+            "id": "-",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/ops-runtime/public.ts",
+          "symbols": [
+            "OPS_SERVICE_LABELS",
+            "buildSecLiveSummary",
+            "canRerunOpsService",
+            "checkDependencyHealth",
+            "createOpsRunLogStream",
+            "describeOpsRerunCommand",
+            "formatOpsRunSummaryLog",
+            "getClaudeStatusDashboardPayload",
+            "getStatusHistory",
+            "loadAdminOperationalSummaries",
+            "loadAdminOpsHistory",
+            "loadAdminOpsRuns",
+            "loadSecLiveDashboard",
+            "loadSecLiveSignalSummary",
+            "loadSystemMonitorSnapshot",
+            "opsArtifactPath",
+            "opsCostPriority",
+            "opsDisplayStatus",
+            "opsLabel",
+            "opsStatusClass"
+          ],
+          "values": [
+            "OPS_SERVICE_LABELS"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "ops-runtime",
+            "schema": "ops-runtime-produced.v1",
+            "path": "data/systems/ops-runtime/**"
+          },
+          {
+            "id": "systems:ops-runtime:RUNBOOK.md",
+            "schema": "ops-runtime-produced.v1",
+            "path": "systems/ops-runtime/RUNBOOK.md"
+          },
+          {
+            "id": "systems:ops-runtime:package.json",
+            "schema": "ops-runtime-produced.v1",
+            "path": "systems/ops-runtime/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/ops-runtime/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/*/**"
+      ],
+      "writePaths": [],
+      "scheduled": [
+        "ops-readiness",
+        "ops-batch-catalog",
+        "storage-janitor"
+      ]
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "platform",
+      "ownerAgent": "platform-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own shared contracts, library substrate, package policy, dependency policy, and cross-service technical infrastructure.",
+      "ownedPaths": [
+        ".dockerignore",
+        ".gitattributes",
+        ".node-version",
+        ".nvmrc",
+        "coverage-thresholds.json",
+        "requirements-mlops.txt",
+        "systems/catalog.v1.json",
+        "docs/architecture/repository-topology.md",
+        "data/systems/platform/**",
+        "eslint.config.ts",
+        "playwright.config.ts",
+        "systems/platform/**",
+        "systems/platform/audit-public.ts",
+        "systems/platform/bin/apply-investment-notes-deleted-at-schema.ts",
+        "systems/platform/bin/audit-static-governance.ts",
+        "systems/platform/bin/audit-strict-null-checks.ts"
+      ],
+      "allowedServiceImports": [],
+      "consumes": {
+        "systems": [],
+        "artifacts": [
+          {
+            "id": "-",
+            "schema": "*-consumed.v1",
+            "path": "data/systems/*/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog",
+          "runtime-config"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/platform/public.ts",
+          "symbols": [
+            "_setPoolForTest",
+            "_setRedisForTest",
+            "acquireJobLock",
+            "addDays",
+            "annualizedSharpeDaily",
+            "annualizedSharpeMonthly",
+            "appendArtifactFile",
+            "appendArtifactFileSync",
+            "appendDedupedJsonl",
+            "appendJsonl",
+            "appendResearchTrial",
+            "applyInvestmentNotesDeletedAtSchema",
+            "argValue",
+            "artifactCacheEnabled",
+            "artifactCacheHit",
+            "artifactCacheRecordPath",
+            "asRecord",
+            "assertSafeDirectoryForRecursiveRemove",
+            "assessRuntimeProfile",
+            "atomicWriteFile"
+          ],
+          "values": [
+            "AUDIO_LINK_TTL_SEC",
+            "BCRYPT_SALT_ROUNDS",
+            "DAILY_EMAIL_LIMIT",
+            "DANGEROUS_VALUES",
+            "DAY_MS",
+            "DEFAULT_OFFSET",
+            "DEFAULT_PAGE_LIMIT",
+            "EMAIL_REDIS_KEY"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "platform",
+            "schema": "platform-produced.v1",
+            "path": "data/systems/platform/**"
+          },
+          {
+            "id": "systems:platform:RUNBOOK.md",
+            "schema": "platform-produced.v1",
+            "path": "systems/platform/RUNBOOK.md"
+          },
+          {
+            "id": "systems:platform:package.json",
+            "schema": "platform-produced.v1",
+            "path": "systems/platform/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/platform/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/*/**"
+      ],
+      "writePaths": [
+        "systems/platform/config/koenoki-cli.v1.json",
+        "systems/platform/config/script-capabilities.v1.json"
+      ],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "portfolio-state",
+      "ownerAgent": "portfolio-state-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Own holdings, thesis notes, portfolio history, and portfolio-facing state artifacts.",
+      "ownedPaths": [
+        "systems/portfolio-state/lib/investmentNotesRepository.ts",
+        "systems/portfolio-state/lib/adminInvestmentService.ts",
+        "systems/portfolio-state/lib/dashboardHoldingsService.ts",
+        "systems/portfolio-state/lib/fundNavService.ts",
+        "systems/portfolio-state/lib/portfolioDashboardService.ts",
+        "systems/portfolio-state/lib/advisorLastResult.ts",
+        "systems/portfolio-state/lib/advisorNGList.ts",
+        "systems/portfolio-state/lib/dashboardBriefingView.ts",
+        "systems/portfolio-state/lib/dashboardDisplayContract.ts",
+        "systems/portfolio-state/lib/investmentDataStorage.ts",
+        "systems/portfolio-state/lib/obsidianInvestmentRecords.ts",
+        "systems/portfolio-state/lib/obsidianLinking.ts",
+        "systems/portfolio-state/lib/portfolioMetrics.ts",
+        "systems/portfolio-state/lib/userInvestmentDecisions.ts",
+        "data/portfolio/**",
+        "data/systems/portfolio-state/**"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "reporting-briefing"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "reporting-briefing"
+        ],
+        "artifacts": [
+          {
+            "id": "disclosure-ingestion",
+            "schema": "disclosure-ingestion-consumed.v1",
+            "path": "data/systems/disclosure-ingestion/**",
+            "producer": "disclosure-ingestion"
+          },
+          {
+            "id": "entity-master",
+            "schema": "entity-master-consumed.v1",
+            "path": "data/systems/entity-master/**",
+            "producer": "entity-master"
+          },
+          {
+            "id": "market-data",
+            "schema": "market-data-consumed.v1",
+            "path": "data/systems/market-data/**",
+            "producer": "market-data"
+          },
+          {
+            "id": "reporting-briefing",
+            "schema": "reporting-briefing-consumed.v1",
+            "path": "data/systems/reporting-briefing/**",
+            "producer": "reporting-briefing"
+          }
+        ],
+        "kernel": []
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/portfolio-state/public.ts",
+          "symbols": [
+            "DASHBOARD_DISPLAY",
+            "DASHBOARD_TEXT_NORMALIZATION_RULES",
+            "FIXED_QUOTES",
+            "PORTFOLIO_HISTORY_SHORT_DAYS",
+            "PORTFOLIO_HISTORY_YEAR_DAYS",
+            "aggregateFundCsvRows",
+            "appendInvestmentDataJsonl",
+            "applyDashboardPortfolioSnapshot",
+            "buildQuoteTargets",
+            "buyActionDisplayText",
+            "clearLastResult",
+            "collectBriefingSymbols",
+            "collectSymbolsFromText",
+            "csvEscape",
+            "dashboardBriefingRows",
+            "dashboardMailText",
+            "dashboardText",
+            "decodeCsvBuffer",
+            "finiteNumber",
+            "formatJpy"
+          ],
+          "values": [
+            "DASHBOARD_DISPLAY",
+            "DASHBOARD_TEXT_NORMALIZATION_RULES",
+            "FIXED_QUOTES",
+            "PORTFOLIO_HISTORY_SHORT_DAYS",
+            "PORTFOLIO_HISTORY_YEAR_DAYS"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "portfolio-state",
+            "schema": "portfolio.v1",
+            "path": "data/systems/portfolio-state/**"
+          },
+          {
+            "id": "systems:portfolio-state:RUNBOOK.md",
+            "schema": "portfolio.v1",
+            "path": "systems/portfolio-state/RUNBOOK.md"
+          },
+          {
+            "id": "systems:portfolio-state:package.json",
+            "schema": "portfolio.v1",
+            "path": "systems/portfolio-state/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/portfolio-state/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/market-data/**",
+        "data/systems/entity-master/**",
+        "data/systems/disclosure-ingestion/**",
+        "data/systems/reporting-briefing/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "qualitative-eval",
+      "ownerAgent": "qualitative-eval-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Evaluate qualitative thesis evidence, forward-return overlays, and structural cross-check diagnostics.",
+      "ownedPaths": [
+        "systems/qualitative-eval/**",
+        "data/systems/qualitative-eval/**",
+        "systems/qualitative-eval/public.ts",
+        "tests/qualitativeForwardReturns.test.ts"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "experiment-evaluation",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "portfolio-state",
+        "research-pipelines"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "advisor-sec-five-year-probes",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/advisor-sec-five-year-probes/**"
+          },
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/qualitative-eval/public.ts",
+          "symbols": [
+            "SAMPLE_THRESHOLD",
+            "STRUCTURAL_CROSS_POLICY_V2",
+            "STRUCTURAL_CROSS_POLICY_V3",
+            "STRUCTURAL_CROSS_V3_DIAGNOSTIC",
+            "addDays",
+            "advisorBaselineRunsArtifactPath",
+            "advisorExperimentalRunsArtifactPath",
+            "advisorExperimentalTickerPoolArtifactPath",
+            "advisorHumanReviewsArtifactPath",
+            "advisorImprovementsArtifactPath",
+            "advisorLatestArtifactPath",
+            "advisorObsidianBaselineArtifactPath",
+            "advisorRegressionCasesArtifactPath",
+            "advisorRunsArtifactPath",
+            "advisorStructuralValueBacktestsArtifactPath",
+            "advisorStructuralValueCandidatesArtifactPath",
+            "advisorStructuralValueRunsArtifactPath",
+            "blockStabilityColumns",
+            "buildForwardReturnsForTask",
+            "chunkStabilityColumns"
+          ],
+          "values": [
+            "SAMPLE_THRESHOLD",
+            "STRUCTURAL_CROSS_POLICY_V2",
+            "STRUCTURAL_CROSS_POLICY_V3",
+            "STRUCTURAL_CROSS_V3_DIAGNOSTIC"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "qualitative-eval",
+            "schema": "qualitative-eval.v1",
+            "path": "data/systems/qualitative-eval/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/qualitative-eval/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/advisor-sec-five-year-probes/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "reporting-briefing",
+      "ownerAgent": "reporting-briefing-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Generate investment briefing outputs while keeping reporting side effects out of research and evaluation services.",
+      "ownedPaths": [
+        "systems/reporting-briefing/bin/backfill-obsidian-investment-links.ts",
+        "systems/reporting-briefing/bin/export-investment-obsidian.ts",
+        "systems/reporting-briefing/lib/newsDisclosureService.ts",
+        "systems/reporting-briefing/lib/newsFeedService.ts",
+        "systems/reporting-briefing/lib/investmentBriefingFormatter.ts",
+        "systems/reporting-briefing/lib/obsidianBriefingRecords.ts",
+        "systems/reporting-briefing/lib/obsidianInvestmentNotes.ts",
+        "data/systems/reporting-briefing/**",
+        "systems/reporting-briefing/bin/benchmark-openai-briefing-batch.ts",
+        "systems/reporting-briefing/bin/export-briefing-obsidian-daily.ts",
+        "systems/reporting-briefing/bin/generate-investment-briefing.ts",
+        "systems/reporting-briefing/bin/refresh-disclosure-news-cache.ts",
+        "systems/reporting-briefing/bin/run-investment-briefing-and-export.sh",
+        "systems/reporting-briefing/bin/run-investment-briefing-with-503-retry.sh",
+        "systems/reporting-briefing/bin/run-investment-obsidian-export.sh",
+        "systems/reporting-briefing/bin/advisor/send-advisor-batch-notification.ts"
+      ],
+      "allowedServiceImports": [
+        "platform",
+        "llm-gateway",
+        "disclosure-ingestion",
+        "portfolio-state",
+        "market-data",
+        "experiment-evaluation",
+        "ops-runtime"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "ops-runtime",
+          "platform",
+          "portfolio-state"
+        ],
+        "artifacts": [
+          {
+            "id": "alpha-review",
+            "schema": "alpha-review-consumed.v1",
+            "path": "data/systems/alpha-review/**",
+            "producer": "alpha-review"
+          },
+          {
+            "id": "experiment-evaluation",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/systems/experiment-evaluation/**",
+            "producer": "experiment-evaluation"
+          }
+        ],
+        "kernel": [
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/reporting-briefing/public.ts",
+          "symbols": [
+            "excludedNewsItem",
+            "loadBriefing",
+            "loadDashboardBriefingView",
+            "loadGeminiBriefing",
+            "loadHeaderFeed",
+            "newsForQuote",
+            "newsTs",
+            "obsidianInvestmentArtifactPath",
+            "obsidianVaultArtifactPath",
+            "ragArtifactPath",
+            "reportingArtifactPath",
+            "toSsml"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "investment-briefing-cost.json",
+            "schema": "briefing.v4",
+            "path": "data/investment-briefing-cost.json"
+          },
+          {
+            "id": "investment-briefing.json",
+            "schema": "briefing.v4",
+            "path": "data/investment-briefing.json"
+          },
+          {
+            "id": "reporting-briefing",
+            "schema": "reporting-briefing-produced.v1",
+            "path": "data/systems/reporting-briefing/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/reporting-briefing/**",
+        "data/investment-briefing.json",
+        "data/investment-briefing-cost.json"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/experiment-evaluation/**",
+        "data/systems/alpha-review/**"
+      ],
+      "writePaths": [],
+      "scheduled": [
+        "investment-briefing",
+        "investment-briefing-mail",
+        "gemini-daily-report",
+        "hourly-sec-live-recommendations-mail"
+      ]
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "research-pipelines",
+      "ownerAgent": "research-pipelines-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Build research and prediction cross-check artifacts without owning evaluation policy or human review application.",
+      "ownedPaths": [
+        "data/qualitative-thesis-forward/**",
+        "data/systems/research-pipelines/**",
+        "systems/research-pipelines/**",
+        "tests/contracts/research-pipelines/**",
+        "config/qualitative-thesis-forward/**",
+        "systems/research-pipelines/public.ts",
+        "systems/research-pipelines/README.md"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "platform",
+        "llm-gateway"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "llm-gateway",
+          "platform"
+        ],
+        "artifacts": [
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          },
+          {
+            "id": "experiment-evaluation",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/systems/experiment-evaluation/**",
+            "producer": "experiment-evaluation"
+          }
+        ],
+        "kernel": [
+          "artifact-paths"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/research-pipelines/public.ts",
+          "symbols": [
+            "QUALITATIVE_ALPHA_SAFE_DISCOVERY_LOOP_ARTIFACT_NAMES",
+            "QUALITATIVE_COHORT_SPLIT_ARTIFACT_NAMES",
+            "QUALITATIVE_RAW_POSITIVE_QUALITY_ARTIFACT_NAMES",
+            "QUALITATIVE_REVIEW_PACK_ARTIFACT_NAMES",
+            "loadResearchGoals",
+            "qualitativeAlphaSafeDiscoveryLoopArtifactPaths",
+            "qualitativeCohortSplitArtifactPaths",
+            "qualitativeGoalArtifactPaths",
+            "qualitativeGoalStatus",
+            "qualitativeRawPositiveQualityArtifactPaths",
+            "qualitativeReviewPackArtifactCandidates",
+            "qualitativeThesisForwardArtifactPath",
+            "qualitativeThesisForwardArtifactPaths"
+          ],
+          "values": [
+            "QUALITATIVE_ALPHA_SAFE_DISCOVERY_LOOP_ARTIFACT_NAMES",
+            "QUALITATIVE_COHORT_SPLIT_ARTIFACT_NAMES",
+            "QUALITATIVE_RAW_POSITIVE_QUALITY_ARTIFACT_NAMES",
+            "QUALITATIVE_REVIEW_PACK_ARTIFACT_NAMES"
+          ]
+        },
+        "artifacts": [
+          {
+            "id": "research-pipelines",
+            "schema": "research-pipelines-produced.v1",
+            "path": "data/systems/research-pipelines/**"
+          },
+          {
+            "id": "systems:research-pipelines:RUNBOOK.md",
+            "schema": "research-pipelines-produced.v1",
+            "path": "systems/research-pipelines/RUNBOOK.md"
+          },
+          {
+            "id": "systems:research-pipelines:package.json",
+            "schema": "research-pipelines-produced.v1",
+            "path": "systems/research-pipelines/package.json"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/research-pipelines/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/systems/experiment-evaluation/**",
+        "data/qualitative-thesis-forward/**"
+      ],
+      "writePaths": [],
+      "scheduled": [
+        "qualitative-active-goal"
+      ]
+    },
+    {
+      "schemaVersion": "service_manifest_v1",
+      "serviceId": "sec-eval",
+      "ownerAgent": "sec-eval-coder",
+      "independenceStatus": "enforced",
+      "purpose": "Evaluate SEC five-year, live filing, and v3 action policy outputs.",
+      "ownedPaths": [
+        "systems/sec-eval/**",
+        "data/systems/sec-eval/**",
+        "systems/sec-eval/lib/dailySecLiveFilingKeys.ts",
+        "systems/sec-eval/lib/dailySecLiveMarkdown.ts",
+        "systems/sec-eval/lib/v3TargetPriceReportIo.ts",
+        "systems/sec-eval/bin/build-daily-sec-live-dataset.ts",
+        "systems/sec-eval/bin/build-sec-event-outcomes.ts",
+        "systems/sec-eval/lib/http/secFiveYearRoutes.ts",
+        "systems/sec-eval/public.ts"
+      ],
+      "allowedServiceImports": [
+        "disclosure-ingestion",
+        "earnings-eval",
+        "experiment-evaluation",
+        "llm-gateway",
+        "market-data",
+        "platform",
+        "portfolio-state",
+        "research-pipelines"
+      ],
+      "consumes": {
+        "systems": [
+          "disclosure-ingestion",
+          "earnings-eval",
+          "experiment-evaluation",
+          "llm-gateway",
+          "market-data",
+          "platform",
+          "portfolio-state",
+          "research-pipelines"
+        ],
+        "artifacts": [
+          {
+            "id": "advisor-sec-five-year-probes",
+            "schema": "experiment-evaluation-consumed.v1",
+            "path": "data/advisor-sec-five-year-probes/**"
+          },
+          {
+            "id": "qualitative-thesis-forward",
+            "schema": "qualitative-artifact.v1",
+            "path": "data/qualitative-thesis-forward/**"
+          }
+        ],
+        "kernel": [
+          "artifact-paths",
+          "logging",
+          "runlog"
+        ]
+      },
+      "produces": {
+        "exports": {
+          "entry": "systems/sec-eval/public.ts",
+          "symbols": [
+            "loadSecFiveYearBatchDetail",
+            "loadSecFiveYearBatchSummary",
+            "loadSecFiveYearBatches",
+            "loadStructuralCrossCheckArtifacts",
+            "normalizeSecFiveYearRunOptions",
+            "readSecFiveYearArtifact",
+            "readStructuralCrossCheckArtifact",
+            "registerSecFiveYearRoutes",
+            "safeSecFiveYearBatchId",
+            "startSecFiveYearPipelineRun"
+          ],
+          "values": []
+        },
+        "artifacts": [
+          {
+            "id": "sec-eval",
+            "schema": "sec-eval.v1",
+            "path": "data/systems/sec-eval/**"
+          }
+        ],
+        "http": []
+      },
+      "ownedData": [
+        "data/systems/sec-eval/**"
+      ],
+      "readOnlyArtifacts": [
+        "data/qualitative-thesis-forward/**",
+        "data/advisor-sec-five-year-probes/**"
+      ],
+      "writePaths": [],
+      "scheduled": []
+    }
+  ]
+}

@@ -64,8 +64,28 @@ import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from ".
 import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import type { FileObservation, ObservationFamily } from "./governance/model.js";
+import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
+export {
+  checkCommitEvidence,
+  checkDesignDocs,
+  checkMutationReport,
+  checkTaskManifest,
+  createBaselineAudit,
+  createManifestFromServiceManifests,
+  profileConfig,
+  profileRuleSeverities,
+  stampDesignDoc,
+  verifyManifestFromServiceManifests,
+  type BaselineAuditResult,
+  type CommitEvidenceResult,
+  type DocsCheckResult,
+  type MutationCheckResult,
+  type ServiceManifestImportResult,
+  type ServiceManifestVerifyResult,
+  type TaskCheckResult,
+} from "./advanced-governance.js";
 
 export type RuleId =
   | "CELLFENCE_MANIFEST_INVALID"
@@ -105,7 +125,24 @@ export type RuleId =
   | "CELLFENCE_WAIVER_INVALID"
   | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
-  | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
+  | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+  | "CELLFENCE_SOURCE_IMPORTS_RUNTIME"
+  | "CELLFENCE_MIXED_SOURCE_RUNTIME_CHANGE"
+  | "CELLFENCE_GENERATED_PATH_CHANGED"
+  | "CELLFENCE_SERVICE_MANIFEST_DRIFT"
+  | "CELLFENCE_COMMIT_EVIDENCE_MISSING"
+  | "CELLFENCE_COMMIT_TRAILER_MISSING"
+  | "CELLFENCE_COMMIT_CHANGED_CELLS_MISMATCH"
+  | "CELLFENCE_COMMIT_TEST_EVIDENCE_MISMATCH"
+  | "CELLFENCE_COMMIT_TEST_REASON_REQUIRED"
+  | "CELLFENCE_COMMIT_TEST_WEAKENING"
+  | "CELLFENCE_TASK_INVALID"
+  | "CELLFENCE_TASK_WRITE_OUTSIDE_ALLOWLIST"
+  | "CELLFENCE_TASK_FORBIDDEN_PATH"
+  | "CELLFENCE_TASK_CHANGE_BUDGET_EXCEEDED"
+  | "CELLFENCE_DOC_UNKNOWN_CELL"
+  | "CELLFENCE_DOC_SURFACE_STALE"
+  | "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD";
 
 export type Severity = "error" | "warning";
 
@@ -2086,6 +2123,22 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
   const observedImports: PluginImportReference[] = [];
   const crossCellDependencies = validateImports(context, findings, warnings, observedImports);
+  for (const finding of validatePathClassImports({
+    pathClasses: manifest.governance?.pathClasses,
+    imports: observedImports.map((reference) => ({
+      importerPath: reference.importerPath,
+      targetPath: reference.targetPath,
+      importerCellId: reference.importerCellId,
+    })),
+  })) {
+    addFinding(findings, finding);
+  }
+  for (const finding of validateChangedPathClasses({
+    pathClasses: manifest.governance?.pathClasses,
+    changedFiles: options.changedFiles,
+  })) {
+    addFinding(finding.severity === "error" ? findings : warnings, finding);
+  }
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(
     accessesByCell,

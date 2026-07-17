@@ -55,6 +55,30 @@ export type RuleOverride = {
   rules: RuleSeverityMap;
 };
 
+export type PathClassKind = "source" | "runtime" | "generated" | "testFixture" | "locked";
+
+export type PathClassCommitPolicy = {
+  allowMixedWith?: PathClassKind[];
+  requireTrailer?: string;
+  generatedRequiresProvenance?: boolean;
+};
+
+export type PathClassManifest = {
+  id: string;
+  kind: PathClassKind;
+  paths: string[];
+  description?: string;
+  commitPolicy?: PathClassCommitPolicy;
+};
+
+export type CheckProfileManifest = {
+  description?: string;
+  rules?: RuleSeverityMap;
+  changedOnly?: boolean;
+  reportOnly?: boolean;
+  requireEvidenceWithinCommits?: number;
+};
+
 export type PluginReference =
   | string
   | {
@@ -93,6 +117,7 @@ export type ManifestGovernance = {
   exclude?: string[];
   requiredRules?: string[];
   resourceAdapters?: ResourceAdapterMap;
+  pathClasses?: PathClassManifest[];
 };
 
 export type CellManifest = {
@@ -116,6 +141,7 @@ export type CellFenceManifest = {
   governance?: ManifestGovernance;
   rules?: RuleSeverityMap;
   overrides?: RuleOverride[];
+  profiles?: Record<string, CheckProfileManifest>;
   cells: CellManifest[];
 };
 
@@ -239,6 +265,42 @@ function validateResourceContract(value: unknown, location: string, errors: stri
   return errors.length === 0 || typeof value.id === "string";
 }
 
+function validatePathClass(value: unknown, location: string, errors: string[]): value is PathClassManifest {
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (typeof value.id !== "string" || value.id.trim().length === 0) {
+    errors.push(`${location}.id must be a non-empty string`);
+  }
+  if (!["source", "runtime", "generated", "testFixture", "locked"].includes(String(value.kind))) {
+    errors.push(`${location}.kind must be source|runtime|generated|testFixture|locked`);
+  }
+  if (!isStringArray(value.paths)) {
+    errors.push(`${location}.paths must be an array of non-empty strings`);
+  }
+  if (!optionalString(value.description)) {
+    errors.push(`${location}.description must be a string when present`);
+  }
+  if (value.commitPolicy !== undefined) {
+    if (!isRecord(value.commitPolicy)) {
+      errors.push(`${location}.commitPolicy must be an object when present`);
+    } else {
+      const policy = value.commitPolicy;
+      if (policy.allowMixedWith !== undefined && (!Array.isArray(policy.allowMixedWith) || !policy.allowMixedWith.every((entry) => ["source", "runtime", "generated", "testFixture", "locked"].includes(String(entry))))) {
+        errors.push(`${location}.commitPolicy.allowMixedWith must contain source|runtime|generated|testFixture|locked`);
+      }
+      if (!optionalString(policy.requireTrailer)) {
+        errors.push(`${location}.commitPolicy.requireTrailer must be a string when present`);
+      }
+      if (!optionalBoolean(policy.generatedRequiresProvenance)) {
+        errors.push(`${location}.commitPolicy.generatedRequiresProvenance must be a boolean when present`);
+      }
+    }
+  }
+  return true;
+}
+
 function validateResourceBaselineEntry(value: unknown, location: string, errors: string[]): value is ResourceBaselineEntry {
   if (!isRecord(value)) {
     errors.push(`${location} must be an object`);
@@ -321,8 +383,38 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
       }
     }
   }
+  if (value.pathClasses !== undefined) {
+    if (!Array.isArray(value.pathClasses)) {
+      errors.push(`${location}.pathClasses must be an array when present`);
+    } else {
+      value.pathClasses.forEach((pathClass, pathClassIndex) => {
+        validatePathClass(pathClass, `${location}.pathClasses[${pathClassIndex}]`, errors);
+      });
+    }
+  }
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
     errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);
+  }
+  return true;
+}
+
+function validateProfile(value: unknown, location: string, errors: string[]): value is CheckProfileManifest {
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  if (!optionalString(value.description)) {
+    errors.push(`${location}.description must be a string when present`);
+  }
+  validateRuleSeverityMap(value.rules, `${location}.rules`, errors);
+  if (!optionalBoolean(value.changedOnly)) {
+    errors.push(`${location}.changedOnly must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.reportOnly)) {
+    errors.push(`${location}.reportOnly must be a boolean when present`);
+  }
+  if (value.requireEvidenceWithinCommits !== undefined && (!Number.isInteger(value.requireEvidenceWithinCommits) || Number(value.requireEvidenceWithinCommits) < 0)) {
+    errors.push(`${location}.requireEvidenceWithinCommits must be a non-negative integer when present`);
   }
   return true;
 }
@@ -462,6 +554,16 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
       value.overrides.forEach((override, overrideIndex) => {
         validateRuleOverride(override, `overrides[${overrideIndex}]`, errors);
       });
+    }
+  }
+  if (value.profiles !== undefined) {
+    if (!isRecord(value.profiles)) {
+      errors.push("profiles must be an object when present");
+    } else {
+      for (const [profileName, profile] of Object.entries(value.profiles)) {
+        if (profileName.trim().length === 0) errors.push("profiles contains an empty profile name");
+        validateProfile(profile, `profiles.${profileName}`, errors);
+      }
     }
   }
   if (!Array.isArray(value.cells)) {

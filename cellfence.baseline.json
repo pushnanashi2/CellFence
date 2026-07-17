@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-15T17:14:39.592Z",
+  "generatedAt": "2026-07-17T03:29:18.752Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -22,8 +22,8 @@
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 30,
-      "publicSurfaceLines": 566,
+      "publicSymbols": 34,
+      "publicSurfaceLines": 668,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -42,8 +42,12 @@
         "CellFenceManifest",
         "CellFenceResourceEvidence",
         "CellManifest",
+        "CheckProfileManifest",
         "EnforcementStatus",
         "ManifestGovernance",
+        "PathClassCommitPolicy",
+        "PathClassKind",
+        "PathClassManifest",
         "PluginReference",
         "ResourceAccessConfidence",
         "ResourceAccessMode",
@@ -61,7 +65,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "e840766b97a15754549e08b9fc14291091bc15f18f1fd682d5618f72a04eb5b2",
+      "publicSurfaceHash": "d0493220252453a813e26b0f30906ea3ead57466cb7c7261c51ec9ea2597ccbd",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -109,8 +113,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 55,
-      "publicSurfaceLines": 3499,
+      "publicSymbols": 72,
+      "publicSurfaceLines": 3665,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -119,6 +123,7 @@
       "publicSymbolSet": [
         "AutoAllocateOptions",
         "AutoAllocation",
+        "BaselineAuditResult",
         "BaselineUpdateGuardOptions",
         "BaselineUpdateGuardResult",
         "CellFenceClaim",
@@ -128,14 +133,19 @@
         "ChangedCheckOptions",
         "checkChangedRepository",
         "checkClaims",
+        "checkCommitEvidence",
+        "checkDesignDocs",
+        "checkMutationReport",
         "CheckOptions",
         "checkRepository",
         "CheckResult",
+        "checkTaskManifest",
         "checkWriteAccess",
         "ClaimCheckOptions",
         "ClaimCheckResult",
         "ClaimCreateOptions",
         "ClaimCreateResult",
+        "CommitEvidenceResult",
         "ContextAllowedImport",
         "ContextBudgetEntry",
         "ContextOptions",
@@ -145,12 +155,15 @@
         "CouplingGraphNode",
         "createAutoAllocation",
         "createBaseline",
+        "createBaselineAudit",
         "createCellContext",
         "createClaim",
         "createCouplingGraph",
+        "createManifestFromServiceManifests",
         "createPruneReport",
         "createWaiverRequest",
         "defaultBaselinePath",
+        "DocsCheckResult",
         "Finding",
         "formatCouplingGraphMermaid",
         "formatHumanResult",
@@ -160,12 +173,20 @@
         "listClaims",
         "listWaivers",
         "loadManifestFromFile",
+        "MutationCheckResult",
+        "profileConfig",
+        "profileRuleSeverities",
         "PruneCandidate",
         "PruneCandidateKind",
         "PruneReport",
         "RuleId",
+        "ServiceManifestImportResult",
+        "ServiceManifestVerifyResult",
         "Severity",
+        "stampDesignDoc",
         "SuggestedResolution",
+        "TaskCheckResult",
+        "verifyManifestFromServiceManifests",
         "WaiverRequest",
         "WaiverRequestOptions",
         "WriteAccessOptions",
@@ -173,7 +194,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "e38a73a234d1fc0964bb8429f39e91c5b68aa9aad054cf83f26bccf0ea1cfe15",
+      "publicSurfaceHash": "4914271abbb2e30b481729f0391ffbca557b069fc4b8ba2fdd0137477903fa1f",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -198,7 +219,7 @@
     "mcp-proxy": {
       "ownedPathPatterns": 1,
       "publicSymbols": 9,
-      "publicSurfaceLines": 424,
+      "publicSurfaceLines": 426,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -240,7 +261,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 1573,
+      "publicSurfaceLines": 1785,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
