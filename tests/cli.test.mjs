@@ -1518,6 +1518,53 @@ test("CLI changed check fails on new findings introduced after the base commit",
   assert.deepEqual(parsed.changedFiles, ["src/consumer/public.ts"]);
 });
 
+test("CLI changed check rejects cross-cell ownership moves", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cross-cell-move-"));
+  fs.mkdirSync(path.join(tempDir, "src/billing"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, "src/collection"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, "src/billing/public.ts"), "export const billing = true;\n");
+  fs.writeFileSync(path.join(tempDir, "src/billing/calculate.ts"), "export const calculate = 1;\n");
+  fs.writeFileSync(path.join(tempDir, "src/collection/public.ts"), "export const collection = true;\n");
+  writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [
+      {
+        id: "billing",
+        ownedPaths: ["src/billing/**"],
+        publicEntry: "src/billing/public.ts",
+        publicSymbols: ["billing"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "collection",
+        ownedPaths: ["src/collection/**"],
+        publicEntry: "src/collection/public.ts",
+        publicSymbols: ["collection"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  runGit(["init"], tempDir);
+  runGit(["config", "user.email", "cellfence@example.invalid"], tempDir);
+  runGit(["config", "user.name", "CellFence Test"], tempDir);
+  runGit(["add", "."], tempDir);
+  runGit(["commit", "-m", "base"], tempDir);
+
+  runGit(["mv", "src/billing/calculate.ts", "src/collection/calculate.ts"], tempDir);
+
+  const result = runCli(["check", "--changed", "--base", "HEAD", "--json"], tempDir);
+  assert.equal(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  const movementFinding = parsed.findings.find((finding) => finding.ruleId === "CELLFENCE_CROSS_CELL_MOVE");
+  assert.ok(movementFinding);
+  assert.equal(movementFinding.producerCellId, "billing");
+  assert.equal(movementFinding.cellId, "collection");
+  assert.equal(movementFinding.details.fromPath, "src/billing/calculate.ts");
+  assert.equal(movementFinding.details.toPath, "src/collection/calculate.ts");
+});
+
 test("CLI changed check fails closed without git metadata", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-changed-nogit-"));
   writePrivateImportProject(tempDir);

@@ -121,6 +121,7 @@ export type RuleId =
   | "CELLFENCE_ACTIVE_CLAIM_CONFLICT"
   | "CELLFENCE_UNCLAIMED_CHANGE"
   | "CELLFENCE_UNRESOLVED_IMPORT"
+  | "CELLFENCE_CROSS_CELL_MOVE"
   | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
   | "CELLFENCE_WAIVER_INVALID"
   | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
@@ -2461,6 +2462,97 @@ function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string)
   return [...files].sort((left, right) => left.localeCompare(right));
 }
 
+type OwnershipMovement = {
+  status: "rename" | "copy";
+  similarity: number | undefined;
+  fromPath: string;
+  toPath: string;
+};
+
+function parseMovementStatus(status: string): Pick<OwnershipMovement, "status" | "similarity"> | undefined {
+  const kind = status[0];
+  if (kind !== "R" && kind !== "C") return undefined;
+  const rawSimilarity = status.slice(1);
+  return {
+    status: kind === "R" ? "rename" : "copy",
+    similarity: rawSimilarity.length > 0 ? Number(rawSimilarity) : undefined,
+  };
+}
+
+function movementEntriesFromDiff(output: string): OwnershipMovement[] {
+  const movements: OwnershipMovement[] = [];
+  for (const line of output.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parts = line.split("\t");
+    if (parts.length < 3) continue;
+    const parsedStatus = parseMovementStatus(parts[0]);
+    if (!parsedStatus) continue;
+    movements.push({
+      ...parsedStatus,
+      fromPath: normalizePath(parts[1]),
+      toPath: normalizePath(parts[2]),
+    });
+  }
+  return movements;
+}
+
+function movementEntriesForRefs(rootDir: string, baseRef: string, headRef?: string): OwnershipMovement[] {
+  const movements = new Map<string, OwnershipMovement>();
+  const addDiff = (args: string[]): void => {
+    const output = gitCommand(rootDir, args);
+    for (const movement of movementEntriesFromDiff(output)) {
+      movements.set(`${movement.status}:${movement.fromPath}:${movement.toPath}`, movement);
+    }
+  };
+  const diffArgs = ["diff", "--find-renames=50%", "--find-copies=50%", "--name-status", "--diff-filter=RC"];
+  if (headRef) {
+    addDiff([...diffArgs, `${baseRef}...${headRef}`]);
+  } else {
+    addDiff([...diffArgs, `${baseRef}...HEAD`]);
+    addDiff([...diffArgs, "--cached"]);
+    addDiff([...diffArgs]);
+  }
+  return [...movements.values()].sort((left, right) => `${left.fromPath}:${left.toPath}`.localeCompare(`${right.fromPath}:${right.toPath}`));
+}
+
+function crossCellMovementFindings(manifest: CellFenceManifest, movements: OwnershipMovement[]): Finding[] {
+  const findings: Finding[] = [];
+  for (const movement of movements) {
+    const fromCell = findOwningCell(manifest, movement.fromPath);
+    const toCell = findOwningCell(manifest, movement.toPath);
+    if (!fromCell || !toCell || fromCell.id === toCell.id) continue;
+    findings.push({
+      ruleId: "CELLFENCE_CROSS_CELL_MOVE",
+      severity: "error",
+      cellId: toCell.id,
+      producerCellId: fromCell.id,
+      filePath: movement.toPath,
+      message: `${movement.status} moves governed source across cell ownership from ${fromCell.id} to ${toCell.id}`,
+      details: {
+        status: movement.status,
+        similarity: movement.similarity,
+        fromPath: movement.fromPath,
+        toPath: movement.toPath,
+        fromCell: fromCell.id,
+        toCell: toCell.id,
+      },
+      suggestedResolutions: [
+        humanResolution("Declare and review the cross-cell ownership transfer before merging", {
+          fromCell: fromCell.id,
+          toCell: toCell.id,
+          fromPath: movement.fromPath,
+          toPath: movement.toPath,
+        }),
+        manifestResolution("Update dependency, public-surface, and resource contracts for the ownership transfer", true, {
+          fromCell: fromCell.id,
+          toCell: toCell.id,
+        }),
+      ],
+    });
+  }
+  return findings;
+}
+
 function withBaseWorktree<T>(rootDir: string, baseCommit: string, callback: (baseRootDir: string) => T): T {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-base-"));
   const baseRootDir = path.join(tempRoot, "repo");
@@ -2509,6 +2601,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
     const baseCommit = assertGitCommit(rootDir, baseRef);
     if (options.headRef) assertGitCommit(rootDir, options.headRef);
     const changedFiles = changedFilesForRefs(rootDir, baseRef, options.headRef);
+    const movements = movementEntriesForRefs(rootDir, baseRef, options.headRef);
     const currentResult = checkRepository({ ...options, changedFiles });
     if (currentResult.exitCode === 2 || currentResult.exitCode === 3) {
       return { ...currentResult, changedFiles };
@@ -2526,7 +2619,12 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
     }
     const baseFindingKeys = new Set(baseResult.findings.map(findingKey));
     const baseWarningKeys = new Set(baseResult.warnings.map(findingKey));
-    const findings = currentResult.findings.filter((finding) => !baseFindingKeys.has(findingKey(finding)));
+    const manifest = loadManifestFromFile(path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH));
+    const movementFindings = crossCellMovementFindings(manifest, movements);
+    const findings = [
+      ...currentResult.findings.filter((finding) => !baseFindingKeys.has(findingKey(finding))),
+      ...movementFindings,
+    ];
     const warnings = currentResult.warnings.filter((warning) => !baseWarningKeys.has(findingKey(warning)));
     const hasErrors = findings.some((finding) => finding.severity === "error");
     return {
