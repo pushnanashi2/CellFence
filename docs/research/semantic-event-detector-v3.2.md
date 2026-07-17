@@ -25,7 +25,7 @@ Workflow controls are compared as normalized semantic records, not raw YAML text
 - action references use structural identity from the action name without the version ref, not display name or step index;
 - `cmd || true`, `cmd || :`, and `cmd || exit 0` emit one `failure_enforcement` record per normalized suppressed command;
 - suppression replacement is represented as removed old command plus added new command, not as one large run-block replacement;
-- `set +e` is detected as `errexit-disabled` and remains advisory unless a stricter policy classifies it as blocking;
+- `set +e` is detected as `errexit-disabled` and remains nonblocking unless a stricter policy classifies it as blocking;
 - records outside the same recent-head comparison window are excluded from recall-regression denominators.
 
 ## Freeze Fixtures
