@@ -259,6 +259,61 @@ test("module resolution extracts and resolves Python imports", () => {
   }
 });
 
+test("module resolution uses Python AST for multiline imports and __all__", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-ast-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/internal.py"), "def hidden():\n    return True\n");
+    const consumerPath = path.join(rootDir, "src/consumer/public.py");
+    fs.writeFileSync(
+      consumerPath,
+      [
+        "from producer.internal import (",
+        "    hidden as _hidden,",
+        ")",
+        "__all__ = [",
+        "    'Client',",
+        "    'run',",
+        "]",
+        "class Client:",
+        "    pass",
+        "def run(value):",
+        "    return value",
+        "",
+      ].join("\n"),
+    );
+
+    const references = extractImports(context(rootDir), consumerPath, []);
+    assert.deepEqual(references.map((reference) => [reference.specifier, reference.line]), [
+      ["producer.internal", 1],
+    ]);
+    assert.deepEqual([...extractPublicSymbols(consumerPath)].sort(), ["Client", "run"]);
+    const firstHash = publicSurfaceHash(consumerPath);
+    fs.writeFileSync(
+      consumerPath,
+      [
+        "from producer.internal import (",
+        "    hidden as _hidden,",
+        ")",
+        "__all__ = [",
+        "    'Client',",
+        "    'run',",
+        "    'Mode',",
+        "]",
+        "class Client:",
+        "    pass",
+        "def run(value):",
+        "    return value",
+        "",
+      ].join("\n"),
+    );
+    assert.notEqual(publicSurfaceHash(consumerPath), firstHash);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution exposes literal and line helpers exactly", () => {
   const sourceFile = ts.createSourceFile(
     "sample.ts",
@@ -344,7 +399,7 @@ test("module resolution extracts Python public symbols and surface hashes", () =
     assert.deepEqual([...extractPublicSymbols(inferredPath)].sort(), ["Box", "VERSION", "fetch", "public_helper", "run"]);
     const expectedParts = [
       "py:class:Box(Base)",
-      "py:function:fetch(value, limit=1)",
+      "py:function:fetch(value,limit=1)",
       "py:function:run(value)",
       "py:import:public_helper",
       "py:variable:VERSION:str",

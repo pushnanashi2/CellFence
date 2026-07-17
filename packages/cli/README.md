@@ -2,7 +2,7 @@
 
 > **AI coding agents do not need more prompts. They need enforceable architectural boundaries.**
 
-CellFence turns architectural intent into deterministic CLI and CI checks for repositories edited by parallel coding agents and humans: cell ownership, declared dependencies, public entry points, resource contracts, and one-way growth ratchets. The governance core is language-agnostic; v0.x has first-class TypeScript/JavaScript analysis and initial Python import/public-surface support.
+CellFence turns architectural intent into deterministic CLI and CI checks for repositories edited by parallel coding agents and humans: cell ownership, declared dependencies, public entry points, resource contracts, and one-way growth ratchets. The governance core is language-agnostic; v0.x has first-class TypeScript/JavaScript analysis and AST-based Python import/public-surface support.
 
 ## Sixty seconds
 

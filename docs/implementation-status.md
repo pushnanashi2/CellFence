@@ -36,7 +36,7 @@
 | Expiring waivers | enforced | `@cellfence/engine` and `cellfence waivers list` | Line-local source comments only; missing expiry, approver, concrete rule, or reason fails the check | CLI tests |
 | Waiver request generation | enforced | `@cellfence/engine` and `cellfence waivers request` | Generates approval text only; it never edits source or grants an exception by itself | CLI tests |
 | TypeScript/JavaScript source analysis | enforced | `@cellfence/engine` | Static string dynamic imports only; computed imports are reported as unsupported | fixture tests |
-| Python source analysis | partially_enforced | `@cellfence/engine` | `.py` files are governed source; common `import` and `from ... import ...` forms resolve through known source roots; public surface uses `__all__` or top-level declarations; no full Python AST/dataflow in v0.x | Python import and public-surface fixtures |
+| Python source analysis | partially_enforced | `@cellfence/engine` | `.py` files are governed source; imports and public surface are extracted with Python `ast`; absolute imports resolve through manifest-derived roots plus common `pyproject.toml` / `setup.cfg` package roots; no Python framework resource adapters or dataflow in v0.x | Python import, pyproject, and public-surface fixtures |
 | CLI exit codes | enforced | `cellfence` package | Internal errors are grouped under exit code 3 | CLI tests |
 | Human-readable and JSON output | enforced | `cellfence` package | SARIF output deferred | CLI tests |
 | GitHub Actions support | partially_enforced | `.github/workflows` and action wrapper | Required-check configuration must be set externally; action wrapper invokes the published CLI with `npx` | workflow files and self-check |

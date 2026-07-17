@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "lib/python/**"
+    ],
+    "exclude": []
+  },
+  "cells": [
+    {
+      "id": "producer",
+      "ownedPaths": [
+        "lib/python/producer/**"
+      ],
+      "publicEntry": "lib/python/producer/public.py",
+      "publicSymbols": [
+        "exposed"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "consumer",
+      "ownedPaths": [
+        "lib/python/consumer/**"
+      ],
+      "publicEntry": "lib/python/consumer/public.py",
+      "publicSymbols": [
+        "used"
+      ],
+      "consumes": [
+        {
+          "cell": "producer"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

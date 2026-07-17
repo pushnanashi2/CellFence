@@ -1493,9 +1493,51 @@ function parentPrefix(relativePath: string): string {
   return parent === "." ? "" : parent;
 }
 
-function pythonSourceRoots(manifest: CellFenceManifest): string[] {
+function addPythonRoot(roots: Set<string>, root: string | undefined): void {
+  if (!root) return;
+  const normalized = normalizePath(root).replace(/\/+$/, "");
+  if (normalized === "." || normalized === "") roots.add("");
+  else roots.add(normalized);
+}
+
+function pythonSourceRootsFromPyproject(rootDir: string): string[] {
+  const pyprojectPath = path.join(rootDir, "pyproject.toml");
+  if (!fs.existsSync(pyprojectPath)) return [];
+  const text = fs.readFileSync(pyprojectPath, "utf8");
+  const roots = new Set<string>();
+  for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
+    addPythonRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bfrom\s*=\s*["']([^"']+)["']/g)) {
+    addPythonRoot(roots, match[1]);
+  }
+  return [...roots];
+}
+
+function pythonSourceRootsFromSetupCfg(rootDir: string): string[] {
+  const setupCfgPath = path.join(rootDir, "setup.cfg");
+  if (!fs.existsSync(setupCfgPath)) return [];
+  const text = fs.readFileSync(setupCfgPath, "utf8");
+  const roots = new Set<string>();
+  const lines = text.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*package_dir\s*=\s*$/.test(lines[index])) continue;
+    for (let blockIndex = index + 1; blockIndex < lines.length; blockIndex += 1) {
+      const line = lines[blockIndex];
+      if (line.trim().length === 0) continue;
+      if (/^\S/.test(line)) break;
+      const match = line.match(/^\s*=\s*([^\s#]+)\s*$/);
+      if (match) addPythonRoot(roots, match[1]);
+    }
+  }
+  return [...roots];
+}
+
+function pythonSourceRoots(context: AnalysisContext): string[] {
   const roots = new Set<string>(["", "src"]);
-  for (const cell of manifest.cells) {
+  for (const root of pythonSourceRootsFromPyproject(context.rootDir)) addPythonRoot(roots, root);
+  for (const root of pythonSourceRootsFromSetupCfg(context.rootDir)) addPythonRoot(roots, root);
+  for (const cell of context.manifest.cells) {
     if (path.extname(cell.publicEntry) === ".py") {
       const parent = parentPrefix(cell.publicEntry);
       const packageRoot = parentPrefix(parent);
@@ -1512,7 +1554,7 @@ function pythonSourceRoots(manifest: CellFenceManifest): string[] {
 
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
   if (path.extname(reference.importerPath) === ".py") {
-    const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, reference.specifier, pythonSourceRoots(context.manifest));
+    const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, reference.specifier, pythonSourceRoots(context));
     if (pythonTargetPath) {
       const targetCell = findOwningCell(context.manifest, pythonTargetPath);
       const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, pythonTargetPath) : undefined;

@@ -52,7 +52,7 @@ CellFence v0.x analyzes:
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
 - tsconfig `compilerOptions.paths` aliases, including aliases inherited through `extends`, that resolve to repository files;
-- Python `.py` source ownership, common `import` and `from ... import ...` module references, and public entries described by `__all__` or top-level declarations;
+- Python `.py` source ownership, AST-extracted `import` and `from ... import ...` module references, common package roots from `pyproject.toml` / `setup.cfg`, and public entries described by literal `__all__` or top-level declarations;
 - selected static string resource access for file, database, queue, and HTTP patterns;
 - Prisma model delegate calls when `schema.prisma` is present;
 - selected TypeORM entity, repository, and query builder calls;
