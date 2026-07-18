@@ -2732,7 +2732,7 @@ function gitMetadataFailure(message: string): CheckResult {
 }
 
 function assertGitCommit(rootDir: string, ref: string): string {
-  return gitCommand(rootDir, ["rev-parse", "--verify", `${ref}^{commit}`]);
+  return gitCommand(rootDir, ["rev-parse", "--verify", `${ref}^{commit}`]).trim();
 }
 
 function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
