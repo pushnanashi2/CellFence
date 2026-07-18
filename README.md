@@ -306,7 +306,7 @@ Threat model: [docs/threat-model.md](docs/threat-model.md).
 
 | Command | Purpose |
 |---|---|
-| `cellfence init [--preset python-service\|polyglot-monorepo] [--output <file>] [--no-scaffold]` | Write a starter manifest or a checked preset |
+| `cellfence init [--preset python-service\|polyglot-monorepo] [--output <file>] [--no-scaffold] [--production-scope]` | Write a starter manifest or a checked preset |
 | `cellfence init --from <glob>` / `manifest verify --from <glob>` | Convert and verify service descriptors before they become manifests |
 | `cellfence check [--changed --base <ref>] [--json\|--format markdown\|--format sarif]` | Validate the manifest contract and emit human, PR, or code-scanning output |
 | `cellfence context --cell <id> [--json\|--format agents-md]` | Emit a cell's contract for humans or agents |

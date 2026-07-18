@@ -37,7 +37,7 @@ CellFence check failed.
 <!-- Keep in sync with `cellfence --help`; a drift here already shipped once -->
 
 ```bash
-npx cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold]
+npx cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
 npx cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
 npx cellfence check [--changed --base origin/main] [--json|--format markdown|--format sarif]
 npx cellfence manifest verify --from systems/*/service.json [--json]
@@ -61,6 +61,12 @@ npx cellfence docs check|stamp
 npx cellfence mutation check --report reports/mutation/mutation.json [--min-score 90]
 npx cellfence waivers list|request
 ```
+
+`init --production-scope` is intended for non-destructive onboarding and corpus
+measurement. It keeps the same strict ownership rules, but seeds
+`governance.exclude` for tests, fixtures, generated output, vendored code, and
+static assets so inferred manifests do not turn obvious non-production noise
+into precision claims.
 
 Exit codes: `0` no violations · `1` governance violations · `2` configuration or manifest error · `3` internal tool error.
 

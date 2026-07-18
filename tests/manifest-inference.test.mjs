@@ -135,6 +135,131 @@ test("manifest inference normalizes ids, filters workspace noise, prioritizes pu
   }
 });
 
+test("manifest inference uses package entry metadata and workspace dependency contracts", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-package-metadata-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), { workspaces: ["packages/*"] });
+    writeJson(path.join(rootDir, "packages/core/package.json"), {
+      name: "@demo/core",
+      exports: {
+        ".": {
+          import: "./dist/index.js",
+          types: "./src/public.ts",
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "packages/dom/package.json"), {
+      name: "@demo/dom",
+      source: "./src/entry.ts",
+      dependencies: {
+        "@demo/core": "workspace:^",
+      },
+    });
+    writeText(path.join(rootDir, "packages/core/src/index.ts"), "export const internal = true;\n");
+    writeText(path.join(rootDir, "packages/core/src/public.ts"), "export const core = true;\n");
+    writeText(path.join(rootDir, "packages/dom/src/entry.ts"), "export const dom = true;\n");
+
+    const manifest = inferManifest({ rootDir });
+
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.publicEntry, cell.packageName, cell.consumes]), [
+      ["core", "packages/core/src/public.ts", "@demo/core", []],
+      ["dom", "packages/dom/src/entry.ts", "@demo/dom", [{ cell: "core" }]],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference discovers common app source roots without src fallback", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-app-roots-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), {
+      exports: {
+        ".": "./app/page.tsx",
+      },
+    });
+    writeText(path.join(rootDir, "app/page.tsx"), "import { Button } from '../components/button.js';\nexport const Page = Button;\n");
+    writeText(path.join(rootDir, "components/button.tsx"), "export const Button = 'ok';\n");
+    writeText(path.join(rootDir, "lib/client.ts"), "export const client = true;\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.governance.include, ["app/**", "components/**", "lib/**"]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.consumes]), [
+      ["app", ["app/**"], "app/page.tsx", [{ cell: "components" }]],
+      ["components", ["components/**"], "components/button.tsx", []],
+      ["lib", ["lib/**"], "lib/client.ts", []],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference narrows parent candidates around nested package source roots", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-nested-packages-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), { workspaces: ["src/*"] });
+    writeJson(path.join(rootDir, "src/cli/package.json"), {
+      name: "@demo/cli",
+      bin: {
+        demo: "./bin/demo.js",
+      },
+    });
+    writeJson(path.join(rootDir, "src/web/package.json"), { name: "@demo/web" });
+    writeJson(path.join(rootDir, "packages/@scope/tool/package.json"), { name: "@scope/tool" });
+    writeText(path.join(rootDir, "src/cli/src/index.ts"), "export const cli = true;\n");
+    writeText(path.join(rootDir, "src/cli/bin/demo.ts"), "export const demo = true;\n");
+    writeText(path.join(rootDir, "src/web/src/index.ts"), "export const web = true;\n");
+    writeText(path.join(rootDir, "packages/@scope/tool/src/index.ts"), "export const tool = true;\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry]), [
+      ["cli", ["src/cli/src/**"], "src/cli/src/index.ts"],
+      ["cli-2", ["src/cli/bin/**"], "src/cli/bin/demo.ts"],
+      ["tool", ["packages/@scope/tool/src/**"], "packages/@scope/tool/src/index.ts"],
+      ["web", ["src/web/src/**"], "src/web/src/index.ts"],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference production scope excludes test, generated, and asset import noise", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-production-scope-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), {
+      exports: "./src/index.ts",
+    });
+    writeText(path.join(rootDir, "src/index.ts"), "export const root = true;\n");
+    writeText(path.join(rootDir, "src/feature/public.ts"), "export const feature = true;\n");
+    writeText(path.join(rootDir, "src/feature/use.ts"), "import logo from '../assets/logo.svg';\nexport const use = logo;\n");
+    writeText(path.join(rootDir, "src/feature/use.test.ts"), "const name = './fixture';\nawait import(name);\n");
+    writeText(path.join(rootDir, "src/generated/client.ts"), "import { feature } from '../feature/public.js';\nexport const generated = feature;\n");
+    writeText(path.join(rootDir, "src/assets/logo.svg"), "<svg></svg>\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.ok(manifest.governance.exclude.includes("**/*.svg"));
+    assert.ok(manifest.governance.exclude.includes("**/*.test.*"));
+    assert.ok(manifest.governance.exclude.includes("**/generated/**"));
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.consumes]), [
+      ["feature", ["src/feature/**"], "src/feature/public.ts", []],
+      ["src-root", ["src/*"], "src/index.ts", []],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference falls back to the example manifest for empty or malformed repositories", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-empty-"));
   const previousCwd = process.cwd();

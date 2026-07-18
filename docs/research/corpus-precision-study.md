@@ -72,11 +72,25 @@ and discard subject checkouts after each check:
 
 ```bash
 npm run research:corpus -- \
-  --corpus reports/corpus/oss-ts-js-200-2026-07-18.corpus.json \
+  --corpus docs/research/corpora/oss-ts-js-200-2026-07-18.json \
   --out reports/corpus/oss-ts-js-200-2026-07-18.json \
   --workdir tmp/corpus-precision-study-200 \
   --clone-mode shallow \
   --discard-checkouts
+```
+
+For unreviewed `infer` onboarding studies, use production scope when the goal is
+to tune manifest inference rather than count every test, fixture, generated
+file, vendored file, or asset import:
+
+```bash
+npm run research:corpus -- \
+  --corpus docs/research/corpora/oss-ts-js-200-2026-07-18.json \
+  --out reports/corpus/oss-ts-js-200-2026-07-18.production-scope.json \
+  --workdir tmp/corpus-precision-study-200-production \
+  --clone-mode shallow \
+  --discard-checkouts \
+  --infer-scope production
 ```
 
 The script:
@@ -95,6 +109,13 @@ The script:
 
 With `--discard-checkouts`, the subject checkout directory is removed after the
 run while command logs, audit logs, and control manifests remain.
+
+`--infer-scope production` only affects `manifest.strategy: infer` subjects. It
+runs `cellfence init --production-scope`, records the effective scope in the
+report, and writes research-friendly `governance.exclude` patterns for tests,
+fixtures, examples, generated output, build output, vendored code, styles, and
+common static assets. It does not relax required rules for production source
+that remains in scope.
 
 Subject status is classified as:
 
@@ -141,7 +162,8 @@ The bundle contains:
 - `study.json`, `corpus.json`, and `report.json`;
 - `findings.raw.jsonl` copied from CellFence audit events;
 - `findings.normalized.jsonl` with stable `findingId` values derived from
-  `subjectId + commit + manifestSha256 + ruleId + fingerprint`;
+  `subjectId + commit + manifestSha256 + ruleId + fingerprint`, plus a stable
+  occurrence index when the same audit fingerprint is emitted more than once;
 - `findings.sampled.jsonl` and `sampling.json`;
 - copied manifests under `manifests/` and command/audit logs under `logs/`;
 - `labels.jsonl` and `SHA256SUMS`.
@@ -169,11 +191,14 @@ corpus directory. The effective manifest is copied into the subject control
 directory, outside the target checkout, and passed to CellFence by absolute path.
 
 `infer` runs `cellfence init --output <subject-control-dir>/cellfence.manifest.json --no-scaffold`
-against the checkout. This is useful for onboarding friction, but it is not a
-precision study until the generated manifest is reviewed or compared against
-existing boundary configuration. The generated manifest is stored outside the
-target checkout, custom manifest paths are rejected for this strategy, and the
-harness fails the subject if manifest preparation leaves the checkout dirty.
+against the checkout. A corpus may set `manifest.scope: "production"` per
+subject, or the harness may pass `--infer-scope production` globally, to add
+research-friendly production excludes. This is useful for onboarding friction,
+but it is not a precision study until the generated manifest is reviewed or
+compared against existing boundary configuration. The generated manifest is
+stored outside the target checkout, custom manifest paths are rejected for this
+strategy, and the harness fails the subject if manifest preparation leaves the
+checkout dirty.
 
 Additional `subject.check.args` cannot override fixed execution controls such as
 `--root`, `--manifest`, `--json`, `--format`, `--audit-log`, `--summary-json`,

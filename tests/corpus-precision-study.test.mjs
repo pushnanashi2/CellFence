@@ -425,6 +425,59 @@ test("corpus precision study supports infer manifests with the default path", ()
   }
 });
 
+test("corpus precision study can infer production-scope manifests", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-infer-production-"));
+  try {
+    const sourceRepo = path.join(rootDir, "source");
+    fs.mkdirSync(sourceRepo, { recursive: true });
+    git(sourceRepo, ["init"]);
+    git(sourceRepo, ["config", "user.email", "cellfence@example.invalid"]);
+    git(sourceRepo, ["config", "user.name", "CellFence Test"]);
+    writeJson(path.join(sourceRepo, "package.json"), { exports: "./src/index.ts" });
+    fs.mkdirSync(path.join(sourceRepo, "src/app"), { recursive: true });
+    fs.mkdirSync(path.join(sourceRepo, "src/assets"), { recursive: true });
+    fs.writeFileSync(path.join(sourceRepo, "src/index.ts"), "export const root = true;\n");
+    fs.writeFileSync(path.join(sourceRepo, "src/app/public.ts"), "export const app = true;\n");
+    fs.writeFileSync(path.join(sourceRepo, "src/app/use.ts"), "import logo from '../assets/logo.svg';\nexport const use = logo;\n");
+    fs.writeFileSync(path.join(sourceRepo, "src/app/use.test.ts"), "const moduleName = './fixture';\nawait import(moduleName);\n");
+    fs.writeFileSync(path.join(sourceRepo, "src/assets/logo.svg"), "<svg></svg>\n");
+    git(sourceRepo, ["add", "."]);
+    git(sourceRepo, ["commit", "--quiet", "-m", "initial"]);
+    const commit = git(sourceRepo, ["rev-parse", "HEAD"]);
+    const corpusPath = path.join(rootDir, "corpus.json");
+    const outPath = path.join(rootDir, "report.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "infer-production",
+          repository: sourceRepo,
+          commit,
+          manifest: { strategy: "infer" },
+        },
+      ],
+    });
+
+    const result = runCorpusStudy([
+      "--corpus", corpusPath,
+      "--workdir", path.join(rootDir, "work"),
+      "--out", outPath,
+      "--infer-scope", "production",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
+    assert.equal(report.inferScope, "production");
+    assert.equal(report.subjects[0].manifest.scope, "production");
+    assert.equal(report.subjects[0].status, "checked_clean");
+    const manifest = JSON.parse(fs.readFileSync(report.subjects[0].manifest.effectivePath, "utf8"));
+    assert.ok(manifest.governance.exclude.includes("**/*.svg"));
+    assert.ok(manifest.governance.exclude.includes("**/*.test.*"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision study can use shallow clones and discard checkouts after preserving evidence", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-discard-"));
   try {

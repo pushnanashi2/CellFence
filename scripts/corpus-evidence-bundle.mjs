@@ -210,17 +210,26 @@ function fallbackFingerprint(event) {
   }));
 }
 
-function normalizeFinding(studyId, rawFinding) {
+function findingIdentityParts(rawFinding) {
   const { subject, event } = rawFinding;
   const ruleId = String(event.ruleId || "CELLFENCE_UNKNOWN_RULE");
   const fingerprint = String(event.fingerprint || fallbackFingerprint(event));
   const commit = subject.commit || subject.requestedCommit || null;
   const manifestSha256 = subject.manifest?.sha256 || null;
-  const findingId = `sha256:${hashText([subject.id, commit || "", manifestSha256 || "", ruleId, fingerprint].join("\0"))}`;
+  return { ruleId, fingerprint, commit, manifestSha256 };
+}
+
+function normalizeFinding(studyId, rawFinding, occurrenceIndex = 0) {
+  const { subject, event } = rawFinding;
+  const { ruleId, fingerprint, commit, manifestSha256 } = findingIdentityParts(rawFinding);
+  const stableIdParts = [subject.id, commit || "", manifestSha256 || "", ruleId, fingerprint];
+  if (occurrenceIndex > 0) stableIdParts.push(String(occurrenceIndex));
+  const findingId = `sha256:${hashText(stableIdParts.join("\0"))}`;
   return {
     schemaVersion: "cellfence.corpus-finding.v1",
     studyId,
     findingId,
+    occurrenceIndex,
     subjectId: subject.id,
     repository: subject.repository || null,
     commit,
@@ -239,6 +248,17 @@ function normalizeFinding(studyId, rawFinding) {
     producerCellId: event.producerCellId || null,
     outcome: event.outcome || null,
   };
+}
+
+function normalizeFindings(studyId, rawFindings) {
+  const occurrenceCounts = new Map();
+  return rawFindings.map((rawFinding) => {
+    const { ruleId, fingerprint, commit, manifestSha256 } = findingIdentityParts(rawFinding);
+    const occurrenceKey = [rawFinding.subject.id, commit || "", manifestSha256 || "", ruleId, fingerprint].join("\0");
+    const occurrenceIndex = occurrenceCounts.get(occurrenceKey) || 0;
+    occurrenceCounts.set(occurrenceKey, occurrenceIndex + 1);
+    return normalizeFinding(studyId, rawFinding, occurrenceIndex);
+  });
 }
 
 function findingSortKey(finding) {
@@ -484,7 +504,7 @@ function buildBundle(options) {
     const corpus = readJson(options.corpusPath);
     const report = readJson(options.reportPath);
     const rawFindings = collectRawFindings(report, options.studyId);
-    const normalizedFindings = sortFindings(rawFindings.map((rawFinding) => normalizeFinding(options.studyId, rawFinding)));
+    const normalizedFindings = sortFindings(normalizeFindings(options.studyId, rawFindings));
     const sampling = deterministicSample(normalizedFindings, report.environment?.corpusSha256 || hashFile(options.corpusPath));
     const sampledFindingSet = new Set(sampling.sampledFindingIds);
     const sampledFindings = normalizedFindings.filter((finding) => sampledFindingSet.has(finding.findingId));

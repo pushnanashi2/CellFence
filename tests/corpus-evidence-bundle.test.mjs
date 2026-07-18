@@ -79,6 +79,21 @@ function createFixture(tempDir) {
       commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       event: "finding.detected",
       command: "check",
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      cellId: "demo",
+      filePath: "src/demo/internal.ts",
+      message: "private import",
+      fingerprint: "fingerprint-a",
+      outcome: "rejected",
+    },
+    {
+      schemaVersion: "cellfence.audit-event.v1",
+      runId: "run-1",
+      timestamp: "2026-07-18T00:00:00.000Z",
+      commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      event: "finding.detected",
+      command: "check",
       ruleId: "CELLFENCE_UNDECLARED_CONSUMER",
       severity: "error",
       cellId: "demo",
@@ -135,7 +150,7 @@ function createFixture(tempDir) {
           status: "checked_findings",
           exitCode: 1,
           ok: false,
-          findings: 2,
+          findings: 3,
           warnings: 0,
           auditLogPath,
           auditLogSha256: hashFile(auditLogPath),
@@ -146,7 +161,7 @@ function createFixture(tempDir) {
       total: 1,
       completed: 1,
       failed: 0,
-      totalFindings: 2,
+      totalFindings: 3,
     },
   });
   return { corpusPath, reportPath };
@@ -176,11 +191,19 @@ test("corpus evidence bundle generates normalized findings, sample, and checksum
       .trim()
       .split(/\r?\n/)
       .map((line) => JSON.parse(line));
-    assert.equal(findings.length, 2);
+    assert.equal(findings.length, 3);
     assert.match(findings[0].findingId, /^sha256:[a-f0-9]{64}$/);
+    assert.equal(new Set(findings.map((finding) => finding.findingId)).size, 3);
+    assert.deepEqual(
+      findings
+        .filter((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT")
+        .map((finding) => finding.occurrenceIndex)
+        .sort(),
+      [0, 1],
+    );
     assert.equal(findings.every((finding) => finding.precisionEligible), true);
     const sampling = JSON.parse(fs.readFileSync(path.join(bundleDir, "sampling.json"), "utf8"));
-    assert.equal(sampling.sampledFindingIds.length, 2);
+    assert.equal(sampling.sampledFindingIds.length, 3);
 
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
     assert.equal(validate.status, 0, validate.stderr || validate.stdout);

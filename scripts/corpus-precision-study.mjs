@@ -41,7 +41,7 @@ class SubjectFailure extends Error {
 }
 
 function usage() {
-  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts]
+  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts] [--infer-scope all|production]
 
 Runs a frozen-corpus CellFence precision/onboarding pass.
 The script clones each subject at an exact commit, prepares a manifest, runs
@@ -58,6 +58,7 @@ function parseArgs(argv) {
     allowFloatingRef: false,
     cloneMode: "full",
     discardCheckouts: false,
+    inferScope: "all",
     maxSubjects: undefined,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -93,6 +94,11 @@ function parseArgs(argv) {
       parsed.cloneMode = argument.slice("--clone-mode=".length);
     } else if (argument === "--discard-checkouts") {
       parsed.discardCheckouts = true;
+    } else if (argument === "--infer-scope") {
+      parsed.inferScope = argv[index + 1] || "";
+      index += 1;
+    } else if (argument.startsWith("--infer-scope=")) {
+      parsed.inferScope = argument.slice("--infer-scope=".length);
     } else if (argument === "--help" || argument === "-h") {
       usage();
       process.exit(0);
@@ -106,6 +112,9 @@ function parseArgs(argv) {
   }
   if (!["full", "shallow"].includes(parsed.cloneMode)) {
     throw new Error("--clone-mode must be full or shallow");
+  }
+  if (!["all", "production"].includes(parsed.inferScope)) {
+    throw new Error("--infer-scope must be all or production");
   }
   return parsed;
 }
@@ -295,6 +304,12 @@ function validateCorpus(corpus, options, corpusDir) {
     if (subject.manifest?.strategy === "copy" && !subject.manifest.source) {
       throw new Error(`${subject.id} manifest.strategy=copy requires manifest.source`);
     }
+    if (subject.manifest?.scope !== undefined) {
+      if (strategy !== "infer") throw new Error(`${subject.id} manifest.scope is only supported with manifest.strategy=infer`);
+      if (!["all", "production"].includes(subject.manifest.scope)) {
+        throw new Error(`${subject.id} manifest.scope must be all or production`);
+      }
+    }
     if (strategy === "copy") {
       const sourcePath = resolveWithin(corpusDir, subject.manifest.source, `${subject.id} manifest.source`);
       if (!fs.existsSync(sourcePath)) throw new Error(`${subject.id} manifest.source not found: ${subject.manifest.source}`);
@@ -332,9 +347,10 @@ function expectationResult(expected, checkResult) {
   return { status: failures.length === 0 ? "passed" : "failed", failures };
 }
 
-function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
+function prepareManifest(subject, checkoutDir, corpusDir, subjectDir, options) {
   const strategy = subject.manifest?.strategy || "existing";
   const manifestPath = subject.manifest?.path || defaultManifestPath;
+  const inferScope = subject.manifest?.scope || options.inferScope;
   const startedAt = performance.now();
   let effectivePath;
   if (strategy === "existing") {
@@ -357,6 +373,7 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
     const controlDir = path.join(subjectDir, "control");
     const targetPath = resolveWithin(controlDir, manifestPath, "manifest.path");
     const args = ["init", "--root", checkoutDir, "--output", targetPath, "--no-scaffold"];
+    if (inferScope === "production") args.push("--production-scope");
     if (subject.manifest?.preset) args.push("--preset", subject.manifest.preset);
     for (const fromPath of subject.manifest?.from || []) args.push("--from", fromPath);
     const result = run(process.execPath, [cellfenceCli, ...args], { cwd: checkoutDir, timeoutMs: commandTimeouts.manifest });
@@ -369,6 +386,7 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
   const manifestFilePath = path.isAbsolute(effectivePath) ? effectivePath : path.resolve(checkoutDir, effectivePath);
   return {
     strategy,
+    ...(strategy === "infer" ? { scope: inferScope } : {}),
     path: manifestPath,
     effectivePath,
     sha256: hashFile(manifestFilePath),
@@ -558,12 +576,16 @@ function runSubject(subject, corpusDir, options) {
     startedAt,
   };
   if (options.dryRun) {
+    const strategy = subject.manifest?.strategy || "existing";
     return {
       ...base,
       status: "planned",
       manifest: {
-        strategy: subject.manifest?.strategy || "existing",
+        strategy,
         path: subject.manifest?.path || defaultManifestPath,
+        ...(strategy === "infer"
+          ? { scope: subject.manifest?.scope || options.inferScope }
+          : {}),
       },
       subjectDir,
       completedAt: new Date().toISOString(),
@@ -575,7 +597,7 @@ function runSubject(subject, corpusDir, options) {
     const worktreeBeforeManifest = gitWorktreeStatus(clone.checkoutDir, subjectDir, "status-before-manifest");
     let manifest;
     try {
-      manifest = prepareManifest(subject, clone.checkoutDir, corpusDir, subjectDir);
+      manifest = prepareManifest(subject, clone.checkoutDir, corpusDir, subjectDir, options);
     } catch (error) {
       if (error instanceof SubjectFailure) throw error;
       throw new SubjectFailure("manifest", "manifest_error", error instanceof Error ? error.message : String(error));
@@ -686,6 +708,7 @@ function main() {
     allowFloatingRef: options.allowFloatingRef,
     cloneMode: options.cloneMode,
     discardCheckouts: options.discardCheckouts,
+    inferScope: options.inferScope,
     environment: environmentMetadata(options.corpusPath),
     subjects,
     summary: summarize(subjects),

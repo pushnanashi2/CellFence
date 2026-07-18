@@ -923,6 +923,36 @@ test("CLI init can write inferred manifests outside the root without scaffolding
   }
 });
 
+test("CLI init production scope writes research-friendly excludes without scaffolding", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-production-scope-"));
+  try {
+    fs.writeFileSync(path.join(tempDir, "package.json"), `${JSON.stringify({ exports: "./src/index.ts" })}\n`);
+    fs.mkdirSync(path.join(tempDir, "src/app"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/assets"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/index.ts"), "export const root = true;\n");
+    fs.writeFileSync(path.join(tempDir, "src/app/public.ts"), "export const app = true;\n");
+    fs.writeFileSync(path.join(tempDir, "src/app/use.ts"), "import logo from '../assets/logo.svg';\nexport const use = logo;\n");
+    fs.writeFileSync(path.join(tempDir, "src/app/use.test.ts"), "const moduleName = './fixture';\nawait import(moduleName);\n");
+    fs.writeFileSync(path.join(tempDir, "src/assets/logo.svg"), "<svg></svg>\n");
+    const outputPath = path.join(tempDir, "control", "cellfence.manifest.json");
+
+    const result = runCli(["init", "--output", outputPath, "--no-scaffold", "--production-scope"], tempDir);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    assert.ok(manifest.governance.exclude.includes("**/*.svg"));
+    assert.ok(manifest.governance.exclude.includes("**/*.test.*"));
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry]), [
+      ["app", ["src/app/**"], "src/app/public.ts"],
+      ["src-root", ["src/*"], "src/index.ts"],
+    ]);
+    const checkResult = runCli(["check", "--manifest", outputPath, "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI init rejects --output without a value before writing files", () => {
   const cases = [
     ["init", "--output"],

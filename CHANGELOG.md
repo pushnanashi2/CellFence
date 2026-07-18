@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Add shallow corpus clone mode and optional checkout disposal so larger onboarding studies can preserve evidence without retaining every cloned worktree.
+- Add production-scope manifest inference for corpus onboarding runs, including package metadata entrypoint inference, workspace dependency consumes, and default excludes for tests, fixtures, generated files, vendored files, build output, styles, and assets.
+- Improve inferred manifests for real TS/JS app repositories by discovering common top-level source roots, narrowing parent cells around nested package roots, and treating `packages/@scope/*` entries as packages instead of namespace cells.
+- Disambiguate duplicate corpus evidence finding IDs with stable occurrence indexes when identical audit fingerprints are emitted more than once.
 - Fix resource SQL detection so zero-argument `.query()` calls are ignored instead of raising an internal analyzer error.
 
 ## 0.1.13 - 2026-07-18
