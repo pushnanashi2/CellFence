@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 0.1.14 - 2026-07-18
+
+- Bump all workspace packages and internal `@cellfence/*` dependency pins from `0.1.13` to `0.1.14` because `0.1.13` has already been published.
+- Refine the upstream policy oracle study metrics with consumer edge micro and subject-macro precision/recall, null denominator handling, finding-to-question mapping coverage, resolved-manifest rechecks, and path-independent artifact set hashes.
+- Clarify that upstream policy oracle v1 is an entry/dependency package-policy-hint ablation and oracle-conditioned mechanism validation, not independent CellFence precision evidence.
 - Add shallow corpus clone mode and optional checkout disposal so larger onboarding studies can preserve evidence without retaining every cloned worktree.
 - Add production-scope manifest inference for corpus onboarding runs, including package metadata entrypoint inference, workspace dependency consumes, and default excludes for tests, fixtures, generated files, vendored files, build output, styles, and assets.
 - Improve inferred manifests for real TS/JS app repositories by discovering common top-level source roots, narrowing parent cells around nested package roots, and treating `packages/@scope/*` entries as packages instead of namespace cells.

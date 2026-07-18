@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/schema",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "CellFence manifest and baseline schema types.",
   "license": "Apache-2.0",
   "type": "module",

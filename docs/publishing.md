@@ -78,20 +78,20 @@ Do not put this command in a root npm script during v0.x; `release:verify` inten
 Create and push the release tag only after the release commit and CI are green:
 
 ```bash
-git tag -s v0.1.13 -m "CellFence v0.1.13"
-git push origin v0.1.13
+git tag -s v0.1.14 -m "CellFence v0.1.14"
+git push origin v0.1.14
 ```
 
 Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every package in the publish set:
 
 ```bash
-gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.13 -f dry_run=true
+gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.14 -f dry_run=true
 ```
 
 For the real publish, use the same tag ref, set `dry_run=false`, enter the exact confirmation string, and approve the `npm-publish` environment deployment:
 
 ```bash
-gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.13 -f dry_run=false -f confirm_publish="publish 0.1.13"
+gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.14 -f dry_run=false -f confirm_publish="publish 0.1.14"
 ```
 
 The workflow preflight checks that every package in the publish set is visible on npm before `dry_run=false`. `@cellfence/mcp-proxy` remains covered by `pack:smoke`, but it is held out of the registry publish set because npm Trusted Publisher configuration requires an existing package page. Resolve its first-publish path separately before adding it to `npm-publish.yml`; do not add a repository `NPM_TOKEN` as a shortcut.
@@ -110,7 +110,7 @@ Attach `reports/sbom.cdx.json` to the GitHub Release. The `reports/` directory r
 
 After the release commit is pushed and CI is green:
 
-1. Create a signed tag, for example `v0.1.13`.
+1. Create a signed tag, for example `v0.1.14`.
 2. Draft release notes from `CHANGELOG.md`.
 3. Attach the SBOM and any generated package provenance or attestation artifacts.
 4. Link the successful CI run and the exact commit SHA.

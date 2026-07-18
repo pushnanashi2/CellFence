@@ -200,6 +200,12 @@ function canonicalSha256(value) {
   return hashText(stableCanonicalJson(value));
 }
 
+function artifactDigestSet(artifacts) {
+  return Object.fromEntries(Object.entries(artifacts)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, artifact]) => [key, artifact.sha256]));
+}
+
 function normalizePath(value) {
   return String(value).replace(/\\/g, "/").replace(/\/+/g, "/").replace(/^\.\//, "").replace(/\/+$/, "") || ".";
 }
@@ -1405,7 +1411,7 @@ async function runSubject(subject, options, engine) {
       subjectWorktreeCleanAfter: worktreeAfter.clean,
       policy: reference.provenance.policy,
       artifacts,
-      artifactSetSha256: canonicalSha256(artifacts),
+      artifactSetSha256: canonicalSha256(artifactDigestSet(artifacts)),
       reference: {
         cells: reference.manifest.cells.length,
         consumerEdges: edgeSet(reference.manifest).size,
@@ -1580,7 +1586,7 @@ function summarize(subjects) {
     artifactSetSha256: canonicalSha256(completedSubjects.map((subject) => ({
       id: subject.id,
       artifactSetSha256: subject.artifactSetSha256,
-    }))),
+    })).sort((left, right) => left.id.localeCompare(right.id))),
     before: {
       ownershipAgreementSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.ownership?.agreement),
       publicEntryExactMatchRateSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.publicEntries?.exactMatchRate),

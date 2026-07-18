@@ -126,7 +126,7 @@ function createFixture(tempDir) {
     environment: {
       harnessCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       harnessDirty: false,
-      cellfenceVersion: "0.1.13",
+      cellfenceVersion: "0.1.14",
       corpusSha256: hashFile(corpusPath),
     },
     subjects: [

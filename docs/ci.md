@@ -162,7 +162,7 @@ jobs:
         with:
           node-version: 22
       - name: Install reviewed CellFence package
-        run: npm install --global cellfence@0.1.13
+        run: npm install --global cellfence@0.1.14
       - name: Sign reviewed baseline only
         env:
           CELLFENCE_BASELINE_ED25519_PRIVATE_KEY: ${{ secrets.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY }}

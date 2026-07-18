@@ -4,9 +4,9 @@
 
 ## Investigation Notes
 
-This package is implemented against the observed CellFence 0.1.13 interfaces rather than a guessed manifest shape.
+This package is implemented against the observed CellFence 0.1.14 interfaces rather than a guessed manifest shape.
 
-- `npx cellfence@0.1.13 init` generates `cellfence.manifest.json` with `schemaVersion: "cellfence.manifest.v1"`, optional `governance`, and `cells[]` containing `id`, `ownedPaths`, `publicEntry`, `publicSymbols`, `consumes`, and `producesArtifacts`.
+- `npx cellfence@0.1.14 init` generates `cellfence.manifest.json` with `schemaVersion: "cellfence.manifest.v1"`, optional `governance`, and `cells[]` containing `id`, `ownedPaths`, `publicEntry`, `publicSymbols`, `consumes`, and `producesArtifacts`.
 - `cellfence serve --mcp` currently exposes `get_cell_context`, `check_change`, `create_claim`, and `explain_finding`. Those tools are useful for agent context and repository checks, but they are not a direct "may this agent write this path now?" oracle.
 - `@cellfence/engine` exposes stable repository and claim helpers such as `createCellContext`, `checkClaims`, `checkRepository`, and `checkChangedRepository`. This package adds and uses `checkWriteAccess`, which evaluates one or more candidate write paths against active claim coverage using the engine's existing CellFence manifest and glob matching behavior.
 - The MVP therefore uses direct engine calls for policy decisions. That path is deterministic, avoids shelling out per tool call, and avoids proxying CellFence through a second MCP server.

@@ -30,7 +30,7 @@ Summary:
 | Consumer edge subject-macro recall after answers | 1.00 |
 | Ownership agreement before/after | 1.00 / 1.00 |
 | Public entry exact match before/after | 1.00 / 1.00 |
-| Artifact set hash | `5e5e3145bb859f8e62c0dc053a9db09deeb7d78978b600d6ce776327a70c09a1` |
+| Artifact set hash | `6420182cb1cef36f4bb6e3262040713fac3176607037929d0da4bee0655a27f1` |
 
 Finding-to-question mapping:
 
@@ -81,6 +81,8 @@ This is evidence for the onboarding mechanism, not evidence that every finding i
 The useful signal is that ablation gaps are representable as deterministic policy questions with manifest patches, and the reference oracle can answer those questions in a way that restores consumer edge micro and subject-macro precision/recall to 1.0 for the chosen policy surface.
 
 The raw-finding-to-policy-question count ratio is not a claim that each question resolves 4.30 findings. The observed mapping shows 1,501 unique findings attached to at least one policy question, 1,353 mapped findings absent after applying oracle patches, and 330 actionable questions after excluding zero-impact questions. The observed resolved finding / actionable question ratio is 4.10:1 for this run.
+
+Subject-macro edge rates exclude subjects where the denominator is zero; the no-reference-edge and no-inferred-edge counts above make those N/A cases explicit. The artifact set hash is computed from logical artifact keys and content SHA-256 values, not from the local output directory path.
 
 The less flattering signal is also useful: the first pilot produced 437 questions, mostly consumer visibility decisions. That is too many for a human onboarding flow on very large workspaces if surfaced one edge at a time. The next tuning step should group consumer edges by package family, workspace pattern, and dependency source before asking humans to approve them.
 

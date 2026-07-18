@@ -67,6 +67,8 @@ reports/upstream-policy-oracle-v1/
 
 `questions/*.json` is the core product evidence. Every question includes a `decisionKey`, affected finding fingerprints, evidence, choices, and a manifest patch. The patch is the bridge from observed differences to a reviewable governance change.
 
+Artifact records include human-readable paths and per-file SHA-256 values. `artifactSetSha256` is computed from logical artifact keys and content hashes, not from the output directory path.
+
 In v1, policy questions are generated from the comparison between the ablated manifest and the upstream-declared reference manifest. Therefore, the study validates deterministic question and patch construction once a reference difference is known. It does not yet evaluate whether CellFence can discover the required policy questions from blind repository observations alone.
 
 ## Metrics
@@ -86,6 +88,8 @@ The report includes:
 - oracle-resolvable question count;
 - before/after agreement after oracle answers;
 - planned mutation count.
+
+Consumer edge micro precision/recall is computed over all edges across completed subjects. Subject-macro precision/recall averages per-subject ratios and excludes subjects where the denominator is zero; the empty-edge subject counts are reported separately so those exclusions are visible.
 
 The precision wording is intentionally scoped. This run can say that CellFence moved closer to upstream-declared policy after deterministic oracle-conditioned questions were answered. It cannot say that every upstream policy is correct, that every CellFence finding is a true positive, that CellFence independently discovered every needed question without the reference manifest, or that onboarding time has been proven.
 
