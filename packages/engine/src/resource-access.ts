@@ -13,6 +13,7 @@ import {
   sourceFilesForCell,
   type FileIndexContext,
 } from "./file-index.js";
+import { inspectPythonSource } from "./python-analysis.js";
 
 export type ResourceAccessKind = "file" | "database" | "queue" | "http";
 export type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
@@ -165,6 +166,13 @@ const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"])
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
 const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
 const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|Queue|Worker|fetch|request|query|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
+const PYTHON_RESOURCE_SCAN_HINT = /\b(?:django|FastAPI|APIRouter|Celery|shared_task|sqlalchemy|models\.Model|objects|path|re_path|url|select|insert|update|delete|Table|text|query|execute|send_task|delay|apply_async)\b/;
+const PYTHON_RESOURCE_ADAPTERS = new Map<string, BuiltInResourceAdapter>([
+  ["django-adapter", "django"],
+  ["fastapi-adapter", "fastapi"],
+  ["sqlalchemy-adapter", "sqlalchemy"],
+  ["celery-adapter", "celery"],
+]);
 
 function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
   return { source, detectedBy, confidence };
@@ -431,8 +439,38 @@ function resourceAdapterEnabled(context: ResourceAccessAnalysisContext, adapter:
   return context.manifest.governance?.resourceAdapters?.[adapter] !== "off";
 }
 
+function isPythonPath(filePath: string): boolean {
+  return path.extname(filePath) === ".py";
+}
+
+function collectPythonResourceAccesses(context: ResourceAccessAnalysisContext, filePath: string): ResourceAccessReference[] {
+  const accesses: ResourceAccessReference[] = [];
+  const relativeFilePath = repoPath(context.rootDir, filePath);
+  for (const access of inspectPythonSource(filePath).resources || []) {
+    const adapter = PYTHON_RESOURCE_ADAPTERS.get(access.detectedBy);
+    if (adapter && !resourceAdapterEnabled(context, adapter)) continue;
+    addResourceAccess(accesses, {
+      kind: access.kind,
+      access: access.access,
+      selector: access.selector,
+      filePath: relativeFilePath,
+      line: access.line,
+      source: access.source,
+      detectedBy: access.detectedBy,
+      confidence: access.confidence,
+      unresolved: access.unresolved,
+      reason: access.reason,
+    });
+  }
+  return accesses;
+}
+
 export function collectResourceAccesses(context: ResourceAccessAnalysisContext, filePath: string): ResourceAccessReference[] {
   const sourceText = readSourceText(context, filePath);
+  if (isPythonPath(filePath)) {
+    if (!PYTHON_RESOURCE_SCAN_HINT.test(sourceText)) return [];
+    return collectPythonResourceAccesses(context, filePath);
+  }
   // Stryker disable next-line ConditionalExpression: the hint is a performance prefilter; scanning a no-hint file still produces no resource accesses.
   if (!RESOURCE_SCAN_HINT.test(sourceText)) return [];
   const sourceFile = parseSourceFile(context, filePath);

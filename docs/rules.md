@@ -75,9 +75,9 @@ NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are
 
 The repository CI includes a synthetic scale benchmark for 10,000 files / 20 cells, 50,000 files / 100 cells, and 100,000 files / 300 cells. It is a regression tripwire for file discovery, ownership indexing, and low-signal source scanning; it is not a universal performance guarantee for every monorepo shape.
 
-Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. It does not infer arbitrary ORM metadata, runtime broker topology, or values assembled through general dataflow.
+Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, selected NestJS/Fastify HTTP route declarations, selected FastAPI route decorators, Django URLConf routes and model manager calls, SQLAlchemy declarative/Table/query/text calls, and Celery task declarations and literal publish calls. It does not infer arbitrary ORM metadata, runtime broker topology, framework plugin behavior, or values assembled through general dataflow.
 
-ORMs, query builders, HTTP frameworks, and broker clients require explicit CellFence adapters. Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, selected string-literal query builders, selected NestJS routes, and selected Fastify routes have built-in coverage; that does not imply support for Sequelize, every Knex/Kysely expression, every Drizzle expression, every NestJS/Fastify plugin, or a project-local database wrapper. Each adapter must document:
+ORMs, query builders, HTTP frameworks, and broker clients require explicit CellFence adapters. Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, selected string-literal query builders, selected NestJS routes, selected Fastify routes, and selected Django, FastAPI, SQLAlchemy, and Celery Python patterns have built-in coverage; that does not imply support for Sequelize, every Knex/Kysely expression, every Drizzle expression, every NestJS/Fastify plugin, every Python framework extension, or a project-local database wrapper. Each adapter must document:
 
 - the API shapes it recognizes;
 - how model, entity, table, topic, or queue names are resolved;
@@ -99,6 +99,10 @@ Repositories can disable unused built-in resource adapters so CellFence does not
       "kafkajs": "off",
       "nestjs": "off",
       "fastify": "off",
+      "django": "off",
+      "fastapi": "off",
+      "sqlalchemy": "off",
+      "celery": "off",
       "queue": "off",
       "sql-literal": "off"
     }
@@ -106,4 +110,4 @@ Repositories can disable unused built-in resource adapters so CellFence does not
 }
 ```
 
-Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, and `fastify`. Omitted adapters default to `on`.
+Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, `fastify`, `django`, `fastapi`, `sqlalchemy`, and `celery`. Omitted adapters default to `on`.

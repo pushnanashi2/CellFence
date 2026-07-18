@@ -10,6 +10,7 @@ export type PythonInspection = {
   imports: PythonImportReference[];
   publicSymbols: string[];
   surfaceParts: string[];
+  resources: PythonResourceAccess[];
   errors?: PythonInspectionError[];
 };
 
@@ -18,6 +19,18 @@ export type PythonInspectionError = {
   message: string;
   line?: number;
   offset?: number;
+};
+
+export type PythonResourceAccess = {
+  kind: "file" | "database" | "queue" | "http";
+  access: "read" | "write" | "publish" | "subscribe" | "call" | "serve";
+  selector: string;
+  line: number;
+  source: string;
+  detectedBy: string;
+  confidence: "high" | "medium" | "low" | "runtime";
+  unresolved?: boolean;
+  reason?: string;
 };
 
 type CachedPythonInspection = {
@@ -31,6 +44,7 @@ const inspectionCache = new Map<string, CachedPythonInspection>();
 const PYTHON_INSPECTOR = String.raw`
 import ast
 import json
+import re
 import sys
 import tokenize
 
@@ -41,6 +55,7 @@ def emit_error(kind, message, line=None, offset=None):
         "imports": [],
         "publicSymbols": [],
         "surfaceParts": [],
+        "resources": [],
         "errors": [{
             "kind": kind,
             "message": str(message),
@@ -85,6 +100,101 @@ def literal_string_collection(node):
         else:
             return None
     return values
+
+def literal_string(node):
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+def literal_string_list(node):
+    if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+        values = []
+        for item in node.elts:
+            value = literal_string(item)
+            if value is None:
+                return []
+            values.append(value)
+        return values
+    value = literal_string(node)
+    return [value] if value is not None else []
+
+def dotted_name(node):
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        base = dotted_name(node.value)
+        return (base + "." if base else "") + node.attr
+    if isinstance(node, ast.Call):
+        return dotted_name(node.func)
+    return None
+
+def root_name(node):
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return root_name(node.value)
+    if isinstance(node, ast.Call):
+        return root_name(node.func)
+    return None
+
+def keyword_literal(call, name):
+    for keyword in getattr(call, "keywords", []):
+        if keyword.arg == name:
+            return literal_string(keyword.value)
+    return None
+
+def keyword_literal_list(call, name):
+    for keyword in getattr(call, "keywords", []):
+        if keyword.arg == name:
+            return literal_string_list(keyword.value)
+    return []
+
+def normalize_http_path(prefix, route):
+    segments = []
+    for segment in [prefix or "", route or ""]:
+        segment = segment.strip()
+        if segment:
+            segments.append(segment.strip("/"))
+    normalized = "/" + "/".join([segment for segment in segments if segment])
+    normalized = re.sub(r"/+", "/", normalized)
+    return normalized if normalized != "" else "/"
+
+def sql_table_accesses(text):
+    accesses = []
+    for match in re.finditer(r"\b(from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$\"]*)", text, re.IGNORECASE):
+        verb = match.group(1).lower()
+        selector = match.group(2).replace('"', "")
+        accesses.append({
+            "access": "write" if verb in ("into", "update") else "read",
+            "selector": selector,
+        })
+    return accesses
+
+resources = []
+resource_keys = set()
+
+def emit_resource(kind, access, selector, node, source, detected_by, confidence="high", unresolved=False, reason=None):
+    if selector is None or selector == "":
+        return
+    line = node_line(node)
+    key = (kind, access, selector, line, source, detected_by, confidence, bool(unresolved), reason or "")
+    if key in resource_keys:
+        return
+    resource_keys.add(key)
+    entry = {
+        "kind": kind,
+        "access": access,
+        "selector": selector,
+        "line": line,
+        "source": source,
+        "detectedBy": detected_by,
+        "confidence": confidence,
+    }
+    if unresolved:
+        entry["unresolved"] = True
+    if reason:
+        entry["reason"] = reason
+    resources.append(entry)
 
 def assignment_names(target):
     if isinstance(target, ast.Name):
@@ -186,10 +296,271 @@ else:
     public_symbols = sorted(top_level_public)
     surface_parts = sorted(set(surface_parts))
 
+fastapi_app_factories = set(["FastAPI"])
+fastapi_router_factories = set(["APIRouter"])
+fastapi_route_prefixes = {}
+django_url_functions = set()
+django_model_base_names = set(["Model"])
+django_model_selectors = {}
+sqlalchemy_table_factories = set(["Table"])
+sqlalchemy_read_functions = set(["select"])
+sqlalchemy_write_functions = set(["insert", "update", "delete"])
+sqlalchemy_sql_literal_functions = set(["text"])
+sqlalchemy_model_selectors = {}
+sqlalchemy_table_selectors = {}
+celery_factories = set(["Celery"])
+celery_task_decorators = set(["shared_task"])
+celery_app_names = set()
+
+def imported_local_name(alias):
+    return alias.asname or alias.name.split(".")[0]
+
+for node in tree.body:
+    if isinstance(node, ast.ImportFrom):
+        module = node.module or ""
+        for alias in node.names:
+            local_name = alias.asname or alias.name
+            if module == "django.urls" and alias.name in ("path", "re_path", "url"):
+                django_url_functions.add(local_name)
+            if module == "django.conf.urls" and alias.name == "url":
+                django_url_functions.add(local_name)
+            if module in ("django.db.models", "django.db") and alias.name == "Model":
+                django_model_base_names.add(local_name)
+            if module == "fastapi" and alias.name == "FastAPI":
+                fastapi_app_factories.add(local_name)
+            if module == "fastapi" and alias.name == "APIRouter":
+                fastapi_router_factories.add(local_name)
+            if module == "sqlalchemy" and alias.name == "Table":
+                sqlalchemy_table_factories.add(local_name)
+            if module == "sqlalchemy" and alias.name in ("select",):
+                sqlalchemy_read_functions.add(local_name)
+            if module == "sqlalchemy" and alias.name in ("insert", "update", "delete"):
+                sqlalchemy_write_functions.add(local_name)
+            if module == "sqlalchemy" and alias.name == "text":
+                sqlalchemy_sql_literal_functions.add(local_name)
+            if module == "celery" and alias.name == "Celery":
+                celery_factories.add(local_name)
+            if module == "celery" and alias.name == "shared_task":
+                celery_task_decorators.add(local_name)
+
+def class_string_assignment(class_node, assignment_name):
+    for item in class_node.body:
+        if isinstance(item, ast.Assign):
+            for target in item.targets:
+                if isinstance(target, ast.Name) and target.id == assignment_name:
+                    value = literal_string(item.value)
+                    if value is not None:
+                        return value
+        if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name) and item.target.id == assignment_name:
+            value = literal_string(item.value)
+            if value is not None:
+                return value
+    return None
+
+def django_meta_db_table(class_node):
+    for item in class_node.body:
+        if isinstance(item, ast.ClassDef) and item.name == "Meta":
+            value = class_string_assignment(item, "db_table")
+            if value is not None:
+                return value
+    return None
+
+def has_django_model_base(class_node):
+    for base in class_node.bases:
+        name = dotted_name(base) or ""
+        if name in django_model_base_names or name.endswith(".Model") or name.endswith(".models.Model"):
+            return True
+    return False
+
+def selector_entry(selector_map, name):
+    entry = selector_map.get(name)
+    if entry is None:
+        return None
+    return entry
+
+def selector_from_expression(node):
+    if isinstance(node, ast.Name):
+        entry = selector_entry(sqlalchemy_model_selectors, node.id) or selector_entry(sqlalchemy_table_selectors, node.id)
+        if entry is not None:
+            return entry
+    if isinstance(node, ast.Call):
+        return selector_from_expression(node.func)
+    return None
+
+def django_manager_model(node):
+    if isinstance(node, ast.Attribute):
+        if node.attr == "objects" and isinstance(node.value, ast.Name):
+            return node.value.id
+        return django_manager_model(node.value)
+    if isinstance(node, ast.Call):
+        return django_manager_model(node.func)
+    return None
+
+for node in ast.walk(tree):
+    if isinstance(node, (ast.Assign, ast.AnnAssign)):
+        value = node.value
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        for target in targets:
+            if not isinstance(target, ast.Name) or not isinstance(value, ast.Call):
+                continue
+            call_name = dotted_name(value.func) or ""
+            if call_name in fastapi_app_factories or call_name.endswith(".FastAPI"):
+                fastapi_route_prefixes[target.id] = ""
+            elif call_name in fastapi_router_factories or call_name.endswith(".APIRouter"):
+                fastapi_route_prefixes[target.id] = keyword_literal(value, "prefix") or ""
+            elif call_name in celery_factories or call_name.endswith(".Celery"):
+                celery_app_names.add(target.id)
+            elif call_name in sqlalchemy_table_factories or call_name.endswith(".Table"):
+                table_name = literal_string(value.args[0]) if value.args else None
+                if table_name:
+                    sqlalchemy_table_selectors[target.id] = {"selector": table_name, "confidence": "high"}
+    elif isinstance(node, ast.ClassDef):
+        if has_django_model_base(node):
+            db_table = django_meta_db_table(node)
+            django_model_selectors[node.name] = {
+                "selector": db_table or "django." + node.name,
+                "confidence": "high" if db_table else "medium",
+            }
+        tablename = class_string_assignment(node, "__tablename__")
+        if tablename is not None:
+            sqlalchemy_model_selectors[node.name] = {"selector": tablename, "confidence": "high"}
+
+FASTAPI_METHODS = {
+    "get": ["GET"],
+    "post": ["POST"],
+    "put": ["PUT"],
+    "patch": ["PATCH"],
+    "delete": ["DELETE"],
+    "options": ["OPTIONS"],
+    "head": ["HEAD"],
+    "trace": ["TRACE"],
+}
+DJANGO_READ_METHODS = set(["all", "count", "exists", "exclude", "filter", "first", "get", "last", "order_by", "select_related", "prefetch_related"])
+DJANGO_WRITE_METHODS = set(["bulk_create", "create", "delete", "get_or_create", "update", "update_or_create"])
+
+def emit_fastapi_route(function_node):
+    for decorator in function_node.decorator_list:
+        call = decorator if isinstance(decorator, ast.Call) else None
+        target = call.func if call is not None else decorator
+        if not isinstance(target, ast.Attribute):
+            continue
+        receiver = dotted_name(target.value)
+        if receiver not in fastapi_route_prefixes:
+            continue
+        route_path = literal_string(call.args[0]) if call is not None and call.args else None
+        if route_path is None:
+            continue
+        methods = FASTAPI_METHODS.get(target.attr)
+        if target.attr == "api_route" and call is not None:
+            methods = [method.upper() for method in keyword_literal_list(call, "methods")] or ["ANY"]
+        if not methods:
+            continue
+        for method in methods:
+            emit_resource(
+                "http",
+                "serve",
+                method + " " + normalize_http_path(fastapi_route_prefixes.get(receiver, ""), route_path),
+                function_node,
+                target.attr,
+                "fastapi-adapter",
+                "high",
+            )
+
+def celery_task_name(function_node, decorator_call):
+    if decorator_call is not None:
+        named = keyword_literal(decorator_call, "name")
+        if named:
+            return named
+        if decorator_call.args:
+            positional = literal_string(decorator_call.args[0])
+            if positional:
+                return positional
+    return function_node.name
+
+def emit_celery_task(function_node):
+    for decorator in function_node.decorator_list:
+        call = decorator if isinstance(decorator, ast.Call) else None
+        target = call.func if call is not None else decorator
+        name = dotted_name(target) or ""
+        root = root_name(target)
+        is_bound_app_task = isinstance(target, ast.Attribute) and target.attr == "task" and root in celery_app_names
+        is_shared_task = name in celery_task_decorators or name.endswith(".shared_task")
+        if not is_bound_app_task and not is_shared_task:
+            continue
+        task_name = celery_task_name(function_node, call)
+        emit_resource("queue", "subscribe", "celery:" + task_name, function_node, name.split(".")[-1] or "task", "celery-adapter", "high" if task_name != function_node.name else "medium")
+
+for node in ast.walk(tree):
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        emit_fastapi_route(node)
+        emit_celery_task(node)
+        continue
+    if not isinstance(node, ast.Call):
+        continue
+
+    call_name = dotted_name(node.func) or ""
+    basename = call_name.split(".")[-1]
+
+    if basename in django_url_functions and node.args:
+        route = literal_string(node.args[0])
+        if route:
+            selector = "ANY " + (("regex:" + route) if basename in ("re_path", "url") else normalize_http_path("", route))
+            emit_resource("http", "serve", selector, node, basename, "django-adapter", "medium")
+
+    if isinstance(node.func, ast.Attribute):
+        manager_model = django_manager_model(node.func.value)
+        django_entry = django_model_selectors.get(manager_model) if manager_model else None
+        if django_entry is not None:
+            if node.func.attr in DJANGO_READ_METHODS:
+                emit_resource("database", "read", django_entry["selector"], node, node.func.attr, "django-adapter", django_entry["confidence"])
+            elif node.func.attr in DJANGO_WRITE_METHODS:
+                emit_resource("database", "write", django_entry["selector"], node, node.func.attr, "django-adapter", django_entry["confidence"])
+
+        if basename in ("send_task",) and node.args:
+            task_name = literal_string(node.args[0])
+            if task_name:
+                emit_resource("queue", "publish", "celery:" + task_name, node, basename, "celery-adapter", "high")
+        elif basename in ("delay", "apply_async") and celery_app_names:
+            target = dotted_name(node.func.value)
+            if target:
+                emit_resource("queue", "publish", "celery:" + target, node, basename, "celery-adapter", "medium")
+
+    if basename in sqlalchemy_read_functions and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "read", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if basename in sqlalchemy_write_functions and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if isinstance(node.func, ast.Attribute) and basename == "query" and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "read", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if isinstance(node.func, ast.Attribute) and basename in ("add", "merge") and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if isinstance(node.func, ast.Attribute) and basename == "add_all" and node.args and isinstance(node.args[0], (ast.List, ast.Tuple)):
+        for item in node.args[0].elts:
+            entry = selector_from_expression(item)
+            if entry is not None:
+                emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+
+    sql_literal = None
+    if basename in sqlalchemy_sql_literal_functions and node.args:
+        sql_literal = literal_string(node.args[0])
+    elif isinstance(node.func, ast.Attribute) and basename == "execute" and node.args:
+        sql_literal = literal_string(node.args[0])
+    if sql_literal:
+        for sql_access in sql_table_accesses(sql_literal):
+            emit_resource("database", sql_access["access"], sql_access["selector"], node, basename, "sqlalchemy-adapter", "medium")
+
 print(json.dumps({
     "imports": imports,
     "publicSymbols": public_symbols,
     "surfaceParts": surface_parts,
+    "resources": resources,
     "errors": [],
 }, separators=(",", ":")))
 `;
@@ -214,6 +585,7 @@ export function inspectPythonSource(filePath: string): PythonInspection {
       imports: [],
       publicSymbols: [],
       surfaceParts: [],
+      resources: [],
       errors: [{ kind: "inspector_error", message }],
     };
     inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });

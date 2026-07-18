@@ -26,7 +26,11 @@ export type BuiltInResourceAdapter =
   | "bullmq"
   | "kafkajs"
   | "nestjs"
-  | "fastify";
+  | "fastify"
+  | "django"
+  | "fastapi"
+  | "sqlalchemy"
+  | "celery";
 export type ResourceAdapterStatus = "on" | "off";
 export type ResourceAdapterMap = Partial<Record<BuiltInResourceAdapter, ResourceAdapterStatus>>;
 
@@ -211,6 +215,10 @@ const BUILT_IN_RESOURCE_ADAPTERS = new Set([
   "kafkajs",
   "nestjs",
   "fastify",
+  "django",
+  "fastapi",
+  "sqlalchemy",
+  "celery",
 ]);
 
 function optionalString(value: unknown): value is string | undefined {

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Add built-in Python framework resource adapters for selected FastAPI route decorators, Django URLConf/model-manager patterns, SQLAlchemy declarative/Table/query/text calls, and Celery task/publish calls.
 
 ## 0.1.14 - 2026-07-18
 

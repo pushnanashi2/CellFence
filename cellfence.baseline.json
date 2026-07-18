@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-18T17:58:19.521Z",
+  "generatedAt": "2026-07-18T18:51:34.796Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,7 +23,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 35,
-      "publicSurfaceLines": 703,
+      "publicSurfaceLines": 711,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -66,7 +66,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "2f4aed7488ad2093f244dfe496cb244e76a71abf305ef299f7431b9c55f258e1",
+      "publicSurfaceHash": "9b64bb7e0e3eede4047ebb4e3fb17f46cfa4fc0ee57710ba70a8606e1000ac49",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []

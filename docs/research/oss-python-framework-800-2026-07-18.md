@@ -88,3 +88,50 @@ It does not prove Python precision. The findings come from inferred manifests,
 and many are likely policy/setup/scope questions rather than upstream defects.
 The next proof step is to label a deterministic sample or rerun selected
 subjects with reviewed manifests.
+
+## Framework Resource Adapter Rerun
+
+After the 800/800 robustness fix, CellFence added Python AST resource adapters
+for selected framework shapes:
+
+- FastAPI: `@app.get(...)`, `@router.post(...)`, and `api_route(...,
+  methods=[...])` decorators, including local `APIRouter(prefix=...)`;
+- Django: `django.urls.path` / `re_path` URLConf calls and model-manager calls
+  such as `Model.objects.filter(...)`, `create(...)`, `update(...)`, and
+  `delete(...)`;
+- SQLAlchemy: declarative `__tablename__`, `Table("...")`, `select(...)`,
+  `insert(...)`, `update(...)`, `delete(...)`, `session.query(...)`,
+  `session.add(...)`, and static SQL in `text(...)` / `execute(...)`;
+- Celery: `@app.task`, `@shared_task`, literal `send_task(...)`, and selected
+  task publish calls.
+
+The same frozen corpora were rerun with the same non-executing command shape,
+writing `reports/corpus/*after-framework-adapters.json`. Target dependencies
+and target package scripts were still not executed.
+
+| framework | completed | failed | clean checks | checks with findings | total findings |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Django | 200 | 0 | 44 | 156 | 4,554 |
+| FastAPI | 200 | 0 | 57 | 143 | 4,408 |
+| SQLAlchemy | 200 | 0 | 70 | 130 | 2,868 |
+| Celery | 200 | 0 | 45 | 155 | 2,098 |
+| **Total** | **800** | **0** | **216** | **584** | **13,928** |
+
+Framework-adapter findings from the rerun:
+
+| detectedBy | kind/access | findings |
+| --- | --- | ---: |
+| `fastapi-adapter` | `http/serve` | 3,379 |
+| `django-adapter` | `http/serve` | 3,339 |
+| `sqlalchemy-adapter` | `database/read` | 562 |
+| `sqlalchemy-adapter` | `database/write` | 320 |
+| `celery-adapter` | `queue/subscribe` | 184 |
+| `django-adapter` | `database/read` | 112 |
+| `django-adapter` | `database/write` | 52 |
+| `celery-adapter` | `queue/publish` | 22 |
+
+At least 227 framework-topic rows emitted one or more framework-adapter
+findings. This is evidence that Python framework resource surfaces are now
+visible to CellFence on real repositories. It remains onboarding/resource
+visibility evidence, not a precision percentage: the manifests are inferred and
+the resource contracts are unlabeled.

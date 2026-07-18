@@ -88,6 +88,10 @@ test("schema validation accepts maximal valid manifests", () => {
         kafkajs: "on",
         nestjs: "off",
         fastify: "off",
+        django: "on",
+        fastapi: "off",
+        sqlalchemy: "on",
+        celery: "off",
       },
     },
     rules: {

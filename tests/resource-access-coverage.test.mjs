@@ -68,6 +68,13 @@ function writeRuntimeSource(rootDir, lines) {
   return filePath;
 }
 
+function writePythonSource(rootDir, lines) {
+  fs.mkdirSync(path.join(rootDir, "src/runtime"), { recursive: true });
+  const filePath = path.join(rootDir, "src/runtime/public.py");
+  fs.writeFileSync(filePath, `${lines.join("\n")}\n`);
+  return filePath;
+}
+
 function lineOf(lines, needle) {
   const index = lines.findIndex((line) => line.includes(needle));
   assert.notEqual(index, -1, `missing source line containing ${needle}`);
@@ -106,6 +113,146 @@ test("addResourceAccess only suppresses exact duplicate resource observations", 
     "read:app_users:src/runtime/other.ts:10",
     "read:app_users:src/runtime/public.ts:11",
   ]);
+});
+
+test("collectResourceAccesses detects FastAPI route decorators in Python source", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-fastapi-python-"));
+  try {
+    const lines = [
+      "from fastapi import FastAPI, APIRouter",
+      "app = FastAPI()",
+      "router = APIRouter(prefix='/v1')",
+      "@app.get('/health')",
+      "def health():",
+      "    return {'ok': True}",
+      "@router.post('/items')",
+      "async def create_item():",
+      "    return {'ok': True}",
+      "@router.api_route('/search', methods=['GET', 'POST'])",
+      "def search():",
+      "    return {'ok': True}",
+    ];
+    const filePath = writePythonSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.filter((access) => access.detectedBy === "fastapi-adapter").map((access) => access.selector), [
+      "GET /health",
+      "GET /v1/search",
+      "POST /v1/items",
+      "POST /v1/search",
+    ].sort());
+    assert.ok(accesses.every((access) => access.kind === "http" && access.access === "serve"));
+    assert.ok(accesses.every((access) => access.confidence === "high"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses detects Django URLConf and model manager accesses", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-django-python-"));
+  try {
+    const lines = [
+      "from django.db import models",
+      "from django.urls import path, re_path",
+      "class Order(models.Model):",
+      "    class Meta:",
+      "        db_table = 'orders'",
+      "urlpatterns = [",
+      "    path('orders/', lambda request: None),",
+      "    re_path(r'^health/$', lambda request: None),",
+      "]",
+      "def run():",
+      "    Order.objects.filter(status='open').count()",
+      "    Order.objects.create(status='open')",
+      "    Order.objects.filter(status='stale').delete()",
+    ];
+    const filePath = writePythonSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.filter((access) => access.kind === "http").map((access) => access.selector), [
+      "ANY /orders",
+      "ANY regex:^health/$",
+    ]);
+    assert.equal(countMatching(accesses, (access) => access.detectedBy === "django-adapter" && access.kind === "database" && access.access === "read" && access.selector === "orders"), 2);
+    assert.equal(countMatching(accesses, (access) => access.detectedBy === "django-adapter" && access.kind === "database" && access.access === "write" && access.selector === "orders"), 2);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses detects SQLAlchemy model, table, query, and SQL literal accesses", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-sqlalchemy-python-"));
+  try {
+    const lines = [
+      "from sqlalchemy import Table, select, insert, text",
+      "users = Table('app_users', metadata)",
+      "class Audit(Base):",
+      "    __tablename__ = 'audit_log'",
+      "def run(session):",
+      "    session.query(Audit)",
+      "    session.execute(select(users))",
+      "    session.execute(insert(Audit))",
+      "    session.add(Audit())",
+      "    session.execute(text('select * from app_users join audit_log on 1 = 1'))",
+    ];
+    const filePath = writePythonSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.equal(countMatching(accesses, (access) => access.detectedBy === "sqlalchemy-adapter" && access.access === "read" && access.selector === "audit_log"), 2);
+    assert.equal(countMatching(accesses, (access) => access.detectedBy === "sqlalchemy-adapter" && access.access === "write" && access.selector === "audit_log"), 2);
+    assert.equal(countMatching(accesses, (access) => access.detectedBy === "sqlalchemy-adapter" && access.access === "read" && access.selector === "app_users"), 2);
+    assert.ok(accesses.every((access) => access.kind === "database"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses detects Celery task declarations and publish calls", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-celery-python-"));
+  try {
+    const lines = [
+      "from celery import Celery, shared_task",
+      "app = Celery('orders')",
+      "@app.task(name='orders.rebuild')",
+      "def rebuild():",
+      "    return None",
+      "@shared_task",
+      "def cleanup():",
+      "    return None",
+      "def run():",
+      "    app.send_task('orders.rebuild')",
+    ];
+    const filePath = writePythonSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.map((access) => `${access.access}:${access.selector}:${access.detectedBy}`), [
+      "publish:celery:orders.rebuild:celery-adapter",
+      "subscribe:celery:cleanup:celery-adapter",
+      "subscribe:celery:orders.rebuild:celery-adapter",
+    ]);
+    assert.ok(accesses.every((access) => access.kind === "queue"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses honors Python framework resource adapter switches", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-python-adapter-off-"));
+  try {
+    const lines = [
+      "from fastapi import FastAPI",
+      "app = FastAPI()",
+      "@app.get('/health')",
+      "def health():",
+      "    return {'ok': True}",
+    ];
+    const filePath = writePythonSource(rootDir, lines);
+    const accesses = collectResourceAccesses(createResourceContext(rootDir, { resourceAdapters: { fastapi: "off" } }), filePath);
+
+    assert.deepEqual(accesses, []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("collectResourceAccesses covers the full Prisma delegate method vocabulary", () => {
