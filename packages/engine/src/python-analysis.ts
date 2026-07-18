@@ -865,9 +865,19 @@ export function inspectPythonSource(filePath: string): PythonInspection {
   if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.result;
 
   let lastError: unknown;
-  for (const pythonCommand of ["python3", "python"]) {
+  const pythonCommands: Array<{ command: string; args: string[] }> = process.platform === "win32"
+    ? [
+      { command: "py", args: ["-3"] },
+      { command: "python", args: [] },
+      { command: "python3", args: [] },
+    ]
+    : [
+      { command: "python3", args: [] },
+      { command: "python", args: [] },
+    ];
+  for (const pythonCommand of pythonCommands) {
     try {
-      const output = execFileSync(pythonCommand, ["-I", "-B", "-c", PYTHON_INSPECTOR, filePath], {
+      const output = execFileSync(pythonCommand.command, [...pythonCommand.args, "-I", "-B", "-c", PYTHON_INSPECTOR, filePath], {
         encoding: "utf8",
         maxBuffer: 1024 * 1024,
         stdio: ["ignore", "pipe", "pipe"],
