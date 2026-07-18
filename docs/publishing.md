@@ -1,6 +1,6 @@
 # Publishing And Supply Chain
 
-CellFence is not published from this repository automatically. The repository intentionally has no publish workflow and no `publish` npm script. Maintainers must run the release verification gates, configure external trust settings, and then perform the registry publish from an approved workflow. Do not use these instructions to publish from an ordinary development shell.
+CellFence is not published from this repository automatically. The repository has a manual `npm-publish.yml` workflow, but it defaults to `dry_run=true`, requires a `v*` tag ref, and uses the protected `npm-publish` environment before any registry command. The root package intentionally has no `publish` npm script. Do not publish from an ordinary development shell.
 
 ## Current Status
 
@@ -9,8 +9,8 @@ CellFence is not published from this repository automatically. The repository in
 | npm package metadata | ready | Workspace packages have `publishConfig.access: public` where needed and package versions are kept in lockstep. |
 | Fresh install smoke | enforced | `npm run pack:smoke --silent` packs every workspace package, installs the tarballs into a temporary consumer, and runs the CLI. |
 | Forbidden source scan | enforced | `npm run provenance:scan --silent` checks the source tree for known private provenance terms before release. |
-| npm trusted publishing | documented | External npm package trust settings and a dedicated GitHub workflow are still required. |
-| npm provenance attestations | documented | Trusted publishing should produce provenance automatically; token-based fallback must use provenance explicitly. |
+| npm trusted publishing | workflow ready | `.github/workflows/npm-publish.yml` uses GitHub OIDC, Node 24, npm trusted publishing, and the protected `npm-publish` environment; npm package-level Trusted Publisher settings must still exist for every published package. |
+| npm provenance attestations | workflow ready | Trusted publishing should produce provenance automatically; token-based fallback must use provenance explicitly. |
 | SBOM | implemented locally | `npm run sbom:generate --silent` writes `reports/sbom.cdx.json` without contacting the registry. |
 | GitHub Release | documented | Release notes and artifacts are created manually after CI passes for the release commit. |
 
@@ -48,7 +48,13 @@ git diff --check
 
 ## Trusted Publishing Setup
 
-Before adding a publish workflow, configure npm trusted publishing for every public package name in the workspace. The trusted publisher must point at the exact GitHub repository, workflow file, and protected environment that will be allowed to publish.
+Configure npm trusted publishing for every public package name in the workspace before running `dry_run=false`. The trusted publisher must point at the exact GitHub repository, workflow file, and protected environment that will be allowed to publish:
+
+- GitHub owner: the repository owner configured in npm Trusted Publisher settings
+- GitHub repository: this repository name
+- Workflow filename: `npm-publish.yml`
+- Environment: `npm-publish`
+- Allowed action: `npm publish`
 
 The publish job should use:
 
@@ -56,7 +62,7 @@ The publish job should use:
 - Node.js `22.14.0` or newer.
 - npm `11.5.1` or newer.
 - `permissions: { contents: read, id-token: write }`.
-- A protected GitHub Environment such as `npm-publish` with required reviewers.
+- The protected GitHub Environment `npm-publish` with required reviewers.
 - Exact version install and the same pre-publish gate above before any registry command.
 
 Trusted publishing is preferred because it avoids long-lived npm tokens. With trusted publishing, npm provenance is expected to be generated automatically by npm. If a maintainer temporarily falls back to token-based publishing, the publish command must explicitly include provenance and public access for first-time scoped packages:
@@ -66,6 +72,29 @@ npm publish --provenance --access public
 ```
 
 Do not put this command in a root npm script during v0.x; `release:verify` intentionally fails if the root package defines a publish script.
+
+## Publish Workflow
+
+Create and push the release tag only after the release commit and CI are green:
+
+```bash
+git tag -s v0.1.12 -m "CellFence v0.1.12"
+git push origin v0.1.12
+```
+
+Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every workspace package:
+
+```bash
+gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.12 -f dry_run=true
+```
+
+For the real publish, use the same tag ref, set `dry_run=false`, enter the exact confirmation string, and approve the `npm-publish` environment deployment:
+
+```bash
+gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.12 -f dry_run=false -f confirm_publish="publish 0.1.12"
+```
+
+The workflow preflight checks that every package is visible on npm before `dry_run=false`. If a new workspace package is not yet visible on npm, resolve package ownership and Trusted Publisher setup first; do not add a repository `NPM_TOKEN` as a shortcut.
 
 ## SBOM
 

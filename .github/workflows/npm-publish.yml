@@ -1,0 +1,174 @@
+name: npm Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run npm publish --dry-run instead of publishing."
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      confirm_publish:
+        description: "For dry_run=false, type: publish <version>"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    env:
+      DRY_RUN: ${{ inputs.dry_run }}
+      CONFIRM_PUBLISH: ${{ inputs.confirm_publish }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Validate release dispatch
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+          expected_tag="v${version}"
+
+          if [[ "${DRY_RUN}" != "true" && "${DRY_RUN}" != "false" ]]; then
+            echo "::error::dry_run must be true or false."
+            exit 1
+          fi
+
+          if [[ "${GITHUB_REF_TYPE}" != "tag" || "${GITHUB_REF_NAME}" != "${expected_tag}" ]]; then
+            echo "::error::Run this workflow from tag ${expected_tag}; got ${GITHUB_REF}."
+            exit 1
+          fi
+
+          if [[ "${DRY_RUN}" == "false" && "${CONFIRM_PUBLISH}" != "publish ${version}" ]]; then
+            echo "::error::For dry_run=false, confirm_publish must be exactly: publish ${version}"
+            exit 1
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "expected_tag=${expected_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run release gates
+        run: |
+          npm run build --silent
+          npm run typecheck --silent
+          npm run lint --silent
+          npm test --silent
+          npm run release:verify --silent
+          npm run provenance:scan --silent
+          npm run cellfence:self-check --silent
+          npm run pack:smoke --silent
+          npm run sbom:generate --silent
+          git diff --check
+
+      - name: Preflight npm package visibility
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          package_dirs=(
+            packages/schema
+            packages/plugin-api
+            packages/adapter-call-pattern
+            packages/adapter-opentelemetry
+            packages/plugin-agent-budget
+            packages/plugin-blast-radius
+            packages/plugin-dependency-sovereignty
+            packages/plugin-geo-purity
+            packages/plugin-legacy-strangler
+            packages/plugin-quants-trend
+            packages/reporter-economy-matrix
+            packages/engine
+            packages/cli
+            packages/github-action
+            packages/trace
+            packages/mcp-proxy
+          )
+
+          missing_packages=0
+          for package_dir in "${package_dirs[@]}"; do
+            package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
+            if npm view "${package_name}" version >/dev/null 2>&1; then
+              echo "${package_name} is visible on npm."
+            else
+              echo "::warning::${package_name} is not visible on npm; configure ownership/trusted publishing before dry_run=false."
+              missing_packages=1
+            fi
+          done
+
+          if [[ "${DRY_RUN}" == "false" && "${missing_packages}" -ne 0 ]]; then
+            echo "::error::Refusing to publish because at least one workspace package is not visible on npm."
+            exit 1
+          fi
+
+      - name: Publish workspaces
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          package_dirs=(
+            packages/schema
+            packages/plugin-api
+            packages/adapter-call-pattern
+            packages/adapter-opentelemetry
+            packages/plugin-agent-budget
+            packages/plugin-blast-radius
+            packages/plugin-dependency-sovereignty
+            packages/plugin-geo-purity
+            packages/plugin-legacy-strangler
+            packages/plugin-quants-trend
+            packages/reporter-economy-matrix
+            packages/engine
+            packages/cli
+            packages/github-action
+            packages/trace
+            packages/mcp-proxy
+          )
+
+          for package_dir in "${package_dirs[@]}"; do
+            package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
+            package_version="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).version")"
+
+            if [[ "${package_version}" != "${RELEASE_VERSION}" ]]; then
+              echo "::error::${package_name} is ${package_version}, expected ${RELEASE_VERSION}."
+              exit 1
+            fi
+
+            publish_args=(publish)
+            if [[ "${package_name}" == @* ]]; then
+              publish_args+=(--access public)
+            fi
+            if [[ "${DRY_RUN}" == "true" ]]; then
+              publish_args+=(--dry-run)
+            fi
+
+            echo "::group::${package_name}@${package_version}"
+            (cd "${package_dir}" && npm "${publish_args[@]}")
+            echo "::endgroup::"
+          done

@@ -49,8 +49,8 @@
 | External immutable checker | planned | external service or pinned workflow | Not implemented in v0.x | root-of-trust document |
 | Sealed hash ledger | planned | external ledger | Not implemented in v0.x | root-of-trust document |
 | Credential separation | documented | external repository and npm settings | Not enforceable by package code | root-of-trust document |
-| npm trusted publishing | documented | npm and GitHub OIDC settings | Publishing workflow is intentionally absent until trusted publisher settings and protected environment reviewers are configured | `docs/publishing.md` |
-| npm provenance attestations | documented | npm trusted publishing or token-based `npm publish --provenance` fallback | No package has been published from this repository in this task; provenance must be verified on the registry artifact after release | `docs/publishing.md` |
+| npm trusted publishing | partially_enforced | `.github/workflows/npm-publish.yml`, npm Trusted Publisher settings, and GitHub protected environment | Manual workflow defaults to `dry_run=true`, requires a matching `v*` tag ref, explicit confirmation for real publish, and the protected `npm-publish` environment; npm package-level Trusted Publisher settings remain external | `docs/publishing.md` and release workflow |
+| npm provenance attestations | documented | npm trusted publishing or token-based `npm publish --provenance` fallback | Trusted publishing should create provenance automatically; provenance must be verified on the registry artifact after release | `docs/publishing.md` |
 | SBOM generation | enforced | `scripts/sbom-generate.mjs` | Generates a CycloneDX SBOM from the lockfile into ignored `reports/`; release attachment remains a maintainer action | `npm run sbom:generate` |
 | GitHub Release artifacts | documented | GitHub Release UI or CLI | Release creation and artifact attachment require maintainer action after CI passes | `docs/publishing.md` |
 | Provenance or forbidden-source scan | enforced | `scripts/forbidden-source-scan.mjs` | Term list is conservative and project-owned | lint and CI |

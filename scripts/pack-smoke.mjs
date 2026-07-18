@@ -19,7 +19,8 @@ const workspacePackages = [
   "packages/engine",
   "packages/cli",
   "packages/github-action",
-  "packages/trace"
+  "packages/trace",
+  "packages/mcp-proxy"
 ];
 
 function run(command, args, options = {}) {
