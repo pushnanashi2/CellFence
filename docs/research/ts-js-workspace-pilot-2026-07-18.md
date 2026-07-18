@@ -158,3 +158,18 @@ The seven `CELLFENCE_PUBLIC_ENTRY_MISSING` findings are from repositories where
 manifest inference fell back to the example cell. This is an onboarding
 limitation, not evidence about those repositories. It means the next reporting
 corpus must not treat unreviewed `infer` output as a precision denominator.
+
+Evidence bundle command:
+
+```bash
+npm run research:bundle -- \
+  --study-id ts-js-workspace-pilot-2026-07-18 \
+  --corpus docs/research/corpora/ts-js-workspace-pilot-10.json \
+  --report reports/corpus/ts-js-workspace-pilot-10.nondestructive.json \
+  --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle
+```
+
+The generated bundle contains 2,074 normalized audit findings, including
+warning-severity findings, and a deterministic sample of 220 findings. Because
+the corpus uses unreviewed `infer` manifests, the bundle is a tuning/onboarding
+artifact and not a precision denominator.

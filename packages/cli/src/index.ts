@@ -269,10 +269,10 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (argument.startsWith("--target=")) {
       parsed.installTarget = argument.slice("--target=".length);
     } else if (argument === "--output") {
-      parsed.initOutputPath = argv[index + 1];
+      parsed.initOutputPath = requireOptionValue(argv, index, "--output");
       index += 1;
     } else if (argument.startsWith("--output=")) {
-      parsed.initOutputPath = argument.slice("--output=".length);
+      parsed.initOutputPath = requireInlineOptionValue(argument, "--output=", "--output");
     } else if (argument === "--repo") {
       parsed.repo = argv[index + 1];
       index += 1;
@@ -370,6 +370,18 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
   }
   return parsed;
+}
+
+function requireOptionValue(argv: string[], index: number, optionName: string): string {
+  const value = argv[index + 1];
+  if (!value || value.startsWith("--")) throw new Error(`${optionName} requires a value`);
+  return value;
+}
+
+function requireInlineOptionValue(argument: string, prefix: string, optionName: string): string {
+  const value = argument.slice(prefix.length);
+  if (!value) throw new Error(`${optionName} requires a value`);
+  return value;
 }
 
 function writeJson(value: unknown): void {
@@ -1784,7 +1796,13 @@ function commandServe(parsed: ParsedArgs): number {
 }
 
 export function main(argv = process.argv.slice(2)): number {
-  const parsed = parseArgs(argv);
+  let parsed: ParsedArgs;
+  try {
+    parsed = parseArgs(argv);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return 2;
+  }
   try {
     if (parsed.command.length === 0 || parsed.command.includes("--help") || parsed.command.includes("-h")) {
       printUsage();

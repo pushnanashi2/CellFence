@@ -15,6 +15,33 @@ const requiredFiles = [
 ];
 const findings = [];
 
+function changelogSection(text, heading) {
+  const lines = text.split(/\r?\n/);
+  const headingLine = `## ${heading}`;
+  const startIndex = lines.findIndex((line) => line.trim() === headingLine);
+  if (startIndex === -1) return null;
+  const sectionLines = [];
+  for (const line of lines.slice(startIndex + 1)) {
+    if (/^##\s/.test(line)) break;
+    sectionLines.push(line);
+  }
+  return sectionLines.join("\n").trim();
+}
+
+function sectionBullets(section) {
+  if (!section) return [];
+  return section.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^- /.test(line));
+}
+
+function unreleasedHasOnlyPlaceholder(section) {
+  if (!section) return true;
+  const meaningfulLines = section.split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  return meaningfulLines.length === 0
+    || (meaningfulLines.length === 1 && meaningfulLines[0] === "- No unreleased changes.");
+}
+
 for (const requiredFile of requiredFiles) {
   if (!fs.existsSync(requiredFile)) findings.push(`missing required file: ${requiredFile}`);
 }
@@ -33,6 +60,22 @@ for (const line of statusDocument.split(/\r?\n/)) {
 const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 if (packageJson.scripts && /publish/.test(Object.keys(packageJson.scripts).join("\n"))) {
   findings.push("root package.json must not define an npm publishing script in v0.x");
+}
+
+const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+const releaseHeadingPattern = new RegExp(`^## ${packageJson.version} - \\d{4}-\\d{2}-\\d{2}\\s*$`, "m");
+const releaseHeading = releaseHeadingPattern.exec(changelog)?.[0].replace(/^##\s+/, "").trim();
+const releaseSection = releaseHeading ? changelogSection(changelog, releaseHeading) : null;
+if (!releaseHeading) {
+  findings.push(`CHANGELOG.md must contain a release heading for ${packageJson.version}`);
+} else if (sectionBullets(releaseSection).length === 0) {
+  findings.push(`CHANGELOG.md release ${packageJson.version} must contain at least one bullet`);
+}
+
+const strictChangelog = process.env.CELLFENCE_RELEASE_STRICT_CHANGELOG === "1" || process.env.GITHUB_REF_TYPE === "tag";
+const unreleasedSection = changelogSection(changelog, "Unreleased");
+if (strictChangelog && !unreleasedHasOnlyPlaceholder(unreleasedSection)) {
+  findings.push("CHANGELOG.md Unreleased must be empty or contain only '- No unreleased changes.' for release publishing");
 }
 
 const githubAction = fs.readFileSync("packages/github-action/action.yml", "utf8");

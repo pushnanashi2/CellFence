@@ -103,6 +103,43 @@ eligible for external claims.
 Use `--dry-run` to validate the frozen corpus manifest and produce a planned
 report without cloning repositories.
 
+## Evidence Bundles
+
+After a corpus run, freeze the evidence bundle before labeling:
+
+```bash
+npm run research:bundle -- \
+  --study-id ts-js-workspace-pilot-2026-07-18 \
+  --corpus docs/research/corpora/ts-js-workspace-pilot-10.json \
+  --report reports/corpus/ts-js-workspace-pilot-10.nondestructive.json \
+  --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle
+```
+
+Validate an existing bundle with:
+
+```bash
+npm run research:bundle -- --validate --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle
+```
+
+The bundle contains:
+
+- `study.json`, `corpus.json`, and `report.json`;
+- `findings.raw.jsonl` copied from CellFence audit events;
+- `findings.normalized.jsonl` with stable `findingId` values derived from
+  `subjectId + commit + manifestSha256 + ruleId + fingerprint`;
+- `findings.sampled.jsonl` and `sampling.json`;
+- copied manifests under `manifests/` and command/audit logs under `logs/`;
+- `labels.jsonl` and `SHA256SUMS`.
+
+The validator rejects unknown `findingId` references, duplicate
+`rater/findingId` labels, unknown label values, missing rationales, unsorted
+normalized findings, manifest hash mismatches, and SHA-256 mismatches.
+
+Sampling is deterministic. The default rule is to include every finding for
+rule families with 50 or fewer findings, otherwise sample 50 per rule using a
+seed derived from the corpus SHA-256, then ensure at least three findings per
+repository when available.
+
 ## Manifest Strategies
 
 `existing` uses a manifest already present in the target repository. This is the
@@ -143,6 +180,15 @@ Report precision only on labeled rows. Report onboarding failures separately.
 Use a predeclared sampling rule. A recommended default is to label every finding
 for rule families with 50 or fewer findings and otherwise sample 50 findings per
 rule using a seed derived from the corpus hash.
+
+Allowed bundle labels are `true_positive`, `false_positive`, `needs_policy`,
+`needs_review`, `invalid_setup`, and `out_of_scope`. Every label row must include
+`findingId`, `rater`, `label`, and `rationale`.
+
+`manifest.strategy: infer` findings may be labeled for tuning and onboarding
+friction, but they are excluded from precision denominators. Precision
+denominators are limited to findings from `existing` manifests or `copy`
+manifests whose translation has been reviewed and recorded as `reviewed`.
 
 Report at least:
 

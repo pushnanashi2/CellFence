@@ -2,13 +2,17 @@
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 0.1.13 - 2026-07-18
+
+- Reject `cellfence init --output` without a value before writing manifests or scaffold files.
+- Add release verification for the current changelog version section, with strict Unreleased checks in the npm publish workflow.
+- Add a corpus evidence bundle generator and validator with stable finding IDs, deterministic sampling, manual-label validation, copied manifests/logs, and SHA-256 checksums.
 - Add a reproducible corpus precision study harness and protocol for frozen-repository onboarding, failure-inclusive CellFence checks, and manual false-positive labeling.
 - Add the first frozen TS/JS workspace corpus pilot report and fix the root-file glob versus nested-directory ownership overlap false positive it exposed.
 - Harden the corpus study harness with contained subject and manifest paths, command timeouts, fixed check outputs, manifest hashes, audit-log capture, and explicit configuration/tool/timeout classifications before expanding to larger corpora.
 - Add non-destructive `cellfence init --output ... --no-scaffold` support, use it for corpus `infer` manifests, and add npm publish post-smoke checks that reinstall the released CLI from the registry.
-
-## 0.1.13 - 2026-07-18
-
 - Fix owned path overlap detection so sibling path prefixes such as `src/user/**` and `src/users/**` no longer trigger `CELLFENCE_OWNERSHIP_OVERLAP`, while nested ownership such as `src/shared/**` and `src/shared/narrow/**` still fails.
 - Bump all workspace packages and internal `@cellfence/*` dependency pins from `0.1.12` to `0.1.13` for the next pre-release package set.
 - Expand README and package README command coverage for shipped `doctor`, `prune`, `task`, `docs`, `mutation`, `manifest verify`, `evidence commit`, and baseline sealing commands.

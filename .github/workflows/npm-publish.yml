@@ -73,6 +73,8 @@ jobs:
         run: npm ci
 
       - name: Run release gates
+        env:
+          CELLFENCE_RELEASE_STRICT_CHANGELOG: "1"
         run: |
           npm run build --silent
           npm run typecheck --silent

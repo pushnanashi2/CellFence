@@ -923,6 +923,28 @@ test("CLI init can write inferred manifests outside the root without scaffolding
   }
 });
 
+test("CLI init rejects --output without a value before writing files", () => {
+  const cases = [
+    ["init", "--output"],
+    ["init", "--output="],
+    ["init", "--output", "--no-scaffold"],
+  ];
+
+  for (const args of cases) {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-output-missing-"));
+    try {
+      const result = runCli(args, tempDir);
+
+      assert.equal(result.status, 2, `${args.join(" ")}\n${result.stderr || result.stdout}`);
+      assert.match(result.stderr, /--output requires a value/);
+      assert.equal(fs.existsSync(path.join(tempDir, "cellfence.manifest.json")), false);
+      assert.equal(fs.existsSync(path.join(tempDir, "src/example/public.ts")), false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  }
+});
+
 test("CLI init refuses dangling manifest symlinks instead of following them", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-dangling-manifest-"));
   try {
