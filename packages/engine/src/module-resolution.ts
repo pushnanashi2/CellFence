@@ -690,9 +690,10 @@ function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
   const tsconfigPath = findNearestTsConfig(filePath);
   let options = defaultOptions;
   if (tsconfigPath) {
-    const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+    const normalizedTsconfigPath = normalizePath(tsconfigPath);
+    const configFile = ts.readConfigFile(normalizedTsconfigPath, ts.sys.readFile);
     if (!configFile.error) {
-      const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(tsconfigPath), defaultOptions, tsconfigPath);
+      const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(normalizedTsconfigPath), defaultOptions, normalizedTsconfigPath);
       options = parsedConfig.options;
     }
   }
