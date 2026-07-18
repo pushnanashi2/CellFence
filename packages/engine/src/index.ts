@@ -47,7 +47,9 @@ import {
   getLineNumber,
   literalText,
   resolvePythonImport,
-  readPathAliases,
+  resolveNearestPathAliasTarget,
+  readWorkspacePathAliases,
+  resolvePackageImportsTarget,
   resolvePathAliasTarget,
   resolveRelativeImport,
   type ImportReference,
@@ -562,6 +564,7 @@ type ResolvedImport = {
   targetPath?: string;
   targetCell?: CellManifest;
   artifactLaneId?: string;
+  matchedSpecifier?: string;
   isExternal: boolean;
   isPublicPackage: boolean;
 };
@@ -593,7 +596,70 @@ const CORE_REQUIRED_RULES = [
 ];
 
 function readJsonFile(filePath: string): unknown {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const text = fs.readFileSync(filePath, "utf8");
+  const duplicateKeys = duplicateJsonKeys(text);
+  if (duplicateKeys.length > 0) throw new Error(`duplicate JSON keys are not allowed: ${duplicateKeys.join(", ")}`);
+  return JSON.parse(text);
+}
+
+function duplicateJsonKeys(text: string): string[] {
+  type Frame = { kind: "object"; keys: Set<string>; expectingKey: boolean } | { kind: "array" };
+  const frames: Frame[] = [];
+  const duplicates = new Set<string>();
+
+  function skipWhitespace(index: number): number {
+    let cursor = index;
+    while (cursor < text.length && /\s/.test(text[cursor])) cursor += 1;
+    return cursor;
+  }
+
+  function readString(index: number): { value: string; end: number } {
+    let cursor = index + 1;
+    while (cursor < text.length) {
+      const character = text[cursor];
+      if (character === "\\") {
+        cursor += 2;
+        continue;
+      }
+      if (character === "\"") {
+        const rawString = text.slice(index, cursor + 1);
+        try {
+          return { value: JSON.parse(rawString) as string, end: cursor + 1 };
+        } catch {
+          return { value: rawString, end: cursor + 1 };
+        }
+      }
+      cursor += 1;
+    }
+    return { value: text.slice(index, cursor), end: cursor };
+  }
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === "\"") {
+      const stringValue = readString(index);
+      const current = frames[frames.length - 1];
+      const colonIndex = skipWhitespace(stringValue.end);
+      if (current?.kind === "object" && current.expectingKey && text[colonIndex] === ":") {
+        if (current.keys.has(stringValue.value)) duplicates.add(stringValue.value);
+        current.keys.add(stringValue.value);
+        current.expectingKey = false;
+      }
+      index = stringValue.end - 1;
+      continue;
+    }
+    if (character === "{") {
+      frames.push({ kind: "object", keys: new Set<string>(), expectingKey: true });
+    } else if (character === "[") {
+      frames.push({ kind: "array" });
+    } else if (character === "}" || character === "]") {
+      frames.pop();
+    } else if (character === ",") {
+      const current = frames[frames.length - 1];
+      if (current?.kind === "object") current.expectingKey = true;
+    }
+  }
+  return [...duplicates].sort((left, right) => left.localeCompare(right));
 }
 
 function normalizedFindingDetails(details: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
@@ -740,7 +806,13 @@ function applyWaiversToFindings(
       },
     }));
 
-  const isWaived = (finding: Finding) => validWaivers.some((waiver) => waiverMatchesFinding(waiver, finding));
+  const requiredRules = new Set<string>([
+    ...CORE_REQUIRED_RULES,
+    ...(context.manifest.governance?.requiredRules || []),
+  ]);
+  const isWaived = (finding: Finding) =>
+    !requiredRules.has(finding.ruleId)
+    && validWaivers.some((waiver) => waiverMatchesFinding(waiver, finding));
   return {
     findings: [...findings.filter((finding) => !isWaived(finding)), ...waiverFindings],
     warnings: warnings.filter((warning) => !isWaived(warning)),
@@ -803,7 +875,7 @@ function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisCo
     cellsById,
     packageToCell,
     packageRoots,
-    pathAliases: readPathAliases(rootDir),
+    pathAliases: readWorkspacePathAliases(rootDir),
     sourceFilesForCellCache: new Map<string, string[]>(),
     sourceTextCache: new Map<string, string>(),
     sourceFileCache: new Map<string, ts.SourceFile>(),
@@ -1107,6 +1179,16 @@ function evidencePathsForOptions(rootDir: string, evidencePaths: string[] | unde
   return (evidencePaths || []).map((evidencePath) => path.resolve(rootDir, evidencePath));
 }
 
+function gitHeadForExactRoot(rootDir: string): string | undefined {
+  try {
+    const topLevel = gitCommand(rootDir, ["rev-parse", "--show-toplevel"]);
+    if (fs.realpathSync(topLevel) !== fs.realpathSync(rootDir)) return undefined;
+    return gitCommand(rootDir, ["rev-parse", "HEAD"]);
+  } catch {
+    return undefined;
+  }
+}
+
 function resourceEvidenceAccesses(
   context: AnalysisContext,
   evidencePaths: string[],
@@ -1114,7 +1196,19 @@ function resourceEvidenceAccesses(
   baseline: CellFenceBaseline | undefined,
 ): Map<string, ResourceAccessReference[]> {
   const accessesByCell = new Map<string, ResourceAccessReference[]>();
+  const headCommit = gitHeadForExactRoot(context.rootDir);
   for (const evidencePath of evidencePaths) {
+    const evidenceRealPath = fs.existsSync(evidencePath) ? fs.realpathSync(evidencePath) : path.resolve(evidencePath);
+    if (!targetIsInsideRoot(context.rootDir, evidenceRealPath)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+        severity: "error",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: `resource evidence path is outside the repository: ${repoPath(context.rootDir, evidencePath)}`,
+      });
+      continue;
+    }
+
     let evidence: CellFenceResourceEvidence;
     try {
       const validation = validateResourceEvidence(readJsonFile(evidencePath));
@@ -1134,6 +1228,17 @@ function resourceEvidenceAccesses(
         severity: "error",
         filePath: repoPath(context.rootDir, evidencePath),
         message: `failed to read resource evidence: ${errorMessage(error)}`,
+      });
+      continue;
+    }
+
+    if (headCommit && evidence.commitSha && evidence.commitSha !== headCommit) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+        severity: "error",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: `resource evidence commitSha ${evidence.commitSha} does not match repository HEAD ${headCommit}`,
+        details: { evidenceCommitSha: evidence.commitSha, headCommit },
       });
       continue;
     }
@@ -1621,6 +1726,18 @@ function pythonSourceRootsFromPyproject(rootDir: string): string[] {
   for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
     addPythonRoot(roots, match[1]);
   }
+  let section = "";
+  for (const line of text.split(/\r?\n/)) {
+    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      continue;
+    }
+    if (section === "tool.setuptools.package-dir") {
+      const match = line.match(/^\s*["']?\s*["']?\s*=\s*["']([^"']+)["']/);
+      if (match) addPythonRoot(roots, match[1]);
+    }
+  }
   for (const match of text.matchAll(/\bwhere\s*=\s*\[([^\]]+)\]/g)) {
     for (const rootMatch of match[1].matchAll(/["']([^"']+)["']/g)) addPythonRoot(roots, rootMatch[1]);
   }
@@ -1688,11 +1805,14 @@ function pythonSourceRoots(context: AnalysisContext): string[] {
 
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
   if (path.extname(reference.importerPath) === ".py") {
-    const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, reference.specifier, pythonSourceRoots(context));
-    if (pythonTargetPath) {
-      const targetCell = findOwningCell(context.manifest, pythonTargetPath);
-      const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, pythonTargetPath) : undefined;
-      return { targetPath: pythonTargetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+    const specifiers = [...(reference.candidateSpecifiers || []), reference.specifier];
+    for (const specifier of specifiers) {
+      const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, specifier, pythonSourceRoots(context));
+      if (pythonTargetPath) {
+        const targetCell = findOwningCell(context.manifest, pythonTargetPath);
+        const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, pythonTargetPath) : undefined;
+        return { targetPath: pythonTargetPath, targetCell, artifactLaneId, matchedSpecifier: specifier, isExternal: false, isPublicPackage: false };
+      }
     }
     if (reference.specifier.startsWith(".")) return { isExternal: false, isPublicPackage: false };
   }
@@ -1705,11 +1825,24 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     return { targetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
   }
 
-  const aliasTargetPath = resolvePathAliasTarget(context, reference.specifier);
+  const aliasTargetPath = resolveNearestPathAliasTarget(context.rootDir, reference.importerPath, reference.specifier)
+    || resolvePathAliasTarget(context, reference.specifier);
   if (aliasTargetPath) {
     const targetCell = findOwningCell(context.manifest, aliasTargetPath);
     const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, aliasTargetPath) : undefined;
-    return { targetPath: aliasTargetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+    return { targetPath: aliasTargetPath, targetCell, artifactLaneId, matchedSpecifier: reference.specifier, isExternal: false, isPublicPackage: false };
+  }
+
+  const packageImportTargetPath = resolvePackageImportsTarget(
+    context.rootDir,
+    reference.importerPath,
+    reference.specifier,
+    reference.typeOnly ? "types" : reference.kind === "require" ? "require" : "import",
+  );
+  if (packageImportTargetPath) {
+    const targetCell = findOwningCell(context.manifest, packageImportTargetPath);
+    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, packageImportTargetPath) : undefined;
+    return { targetPath: packageImportTargetPath, targetCell, artifactLaneId, matchedSpecifier: reference.specifier, isExternal: false, isPublicPackage: false };
   }
 
   const exactPackageCell = context.packageToCell.get(reference.specifier);
@@ -1717,6 +1850,7 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     return {
       targetPath: exactPackageCell.publicEntry,
       targetCell: exactPackageCell,
+      matchedSpecifier: reference.specifier,
       isExternal: false,
       isPublicPackage: true,
     };
@@ -1727,16 +1861,24 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     if (!reference.specifier.startsWith(subpathPrefix)) continue;
     const packageRoot = context.packageRoots.get(packageName);
     const subpath = reference.specifier.slice(subpathPrefix.length);
-    const targetPath = packageRoot ? normalizePath(path.join(packageRoot, subpath)) : undefined;
+    const targetPath = packageRoot
+      ? resolveRelativeImport(context.rootDir, normalizePath(path.join(packageRoot, "package.json")), `./${subpath}`)
+        || normalizePath(path.join(packageRoot, subpath))
+      : undefined;
     return {
       targetPath,
       targetCell: packageCell,
+      matchedSpecifier: reference.specifier,
       isExternal: false,
       isPublicPackage: false,
     };
   }
 
   return { isExternal: true, isPublicPackage: false };
+}
+
+function resolvedSpecifier(reference: ImportReference, resolvedImport: ResolvedImport): string {
+  return resolvedImport.matchedSpecifier || reference.specifier;
 }
 
 function consumerDeclaration(cell: CellManifest, producerCellId: string): CellConsumerManifest | undefined {
@@ -1763,7 +1905,7 @@ function addPrivateImportFinding(
     producerCellId: producerCell.id,
     filePath: reference.importerPath,
     message: `${importerCell.id} imports private implementation from ${producerCell.id}`,
-    details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+    details: { specifier: resolvedSpecifier(reference, resolvedImport), targetPath: resolvedImport.targetPath, line: reference.line },
     suggestedResolutions: [
       codeResolution(`Import from ${producerCell.publicEntry} instead of ${resolvedImport.targetPath || reference.specifier}`, {
         publicEntry: producerCell.publicEntry,
@@ -1833,10 +1975,11 @@ function validateImports(
       const references = extractImports(context, sourceFilePath, warnings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
+        const specifier = resolvedSpecifier(reference, resolvedImport);
         observedImports.push({
           importerPath: reference.importerPath,
           importerCellId: importerCell.id,
-          specifier: reference.specifier,
+          specifier,
           kind: reference.kind,
           typeOnly: reference.typeOnly,
           line: reference.line,
@@ -1874,10 +2017,10 @@ function validateImports(
             cellId: importerCell.id,
             filePath: reference.importerPath,
             message: `${importerCell.id} imports governed but unowned source ${resolvedImport.targetPath}`,
-            details: { specifier: reference.specifier, targetPath: resolvedImport.targetPath, line: reference.line },
+            details: { specifier, targetPath: resolvedImport.targetPath, line: reference.line },
             suggestedResolutions: [
               codeResolution("Move the helper into an owned cell and import through that cell's public entry", {
-                specifier: reference.specifier,
+                specifier,
                 targetPath: resolvedImport.targetPath,
               }),
               manifestResolution("Assign the target path to exactly one cell if it is intentional source", true, {
@@ -1902,10 +2045,10 @@ function validateImports(
             producerCellId: producerCell.id,
             filePath: reference.importerPath,
             message: `${importerCell.id} imports ${producerCell.id} without declaring a consumer relationship`,
-            details: { specifier: reference.specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
+            details: { specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
             suggestedResolutions: [
               codeResolution(`Remove the ${producerCell.id} import or move the code behind an existing allowed cell`, {
-                specifier: reference.specifier,
+                specifier,
               }),
               manifestResolution(`Declare ${importerCell.id} as a consumer of ${producerCell.id}`, Boolean(importerCell.locked), {
                 cell: importerCell.id,
@@ -1932,10 +2075,10 @@ function validateImports(
               producerCellId: producerCell.id,
               filePath: reference.importerPath,
               message: `${importerCell.id} imports artifact lane ${resolvedImport.artifactLaneId} from ${producerCell.id} without declaring it`,
-              details: { specifier: reference.specifier, artifactLaneId: resolvedImport.artifactLaneId, line: reference.line },
+              details: { specifier, artifactLaneId: resolvedImport.artifactLaneId, line: reference.line },
               suggestedResolutions: [
                 codeResolution("Stop importing the artifact lane directly if this is not an intended artifact dependency", {
-                  specifier: reference.specifier,
+                  specifier,
                 }),
                 manifestResolution(`Declare artifact lane ${resolvedImport.artifactLaneId} on the consumer relationship`, Boolean(importerCell.locked), {
                   cell: importerCell.id,
@@ -2086,6 +2229,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   const context = createContext(rootDir, manifest);
   const plugins = options.plugins || [];
   let baseline: CellFenceBaseline | undefined;
+  let verifiedResourceBaseline: CellFenceBaseline | undefined;
 
   if (baselinePath) {
     try {
@@ -2098,9 +2242,9 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
         });
       } else {
         baseline = baselineValidation.value;
-        for (const finding of validateBaselineSealFindings(manifest, baseline, repoPath(rootDir, baselinePath))) {
-          addFinding(findings, finding);
-        }
+        const sealFindings = validateBaselineSealFindings(manifest, baseline, repoPath(rootDir, baselinePath));
+        for (const finding of sealFindings) addFinding(findings, finding);
+        if (baseline.seal && sealFindings.length === 0) verifiedResourceBaseline = baseline;
       }
     } catch (error) {
       addFinding(findings, {
@@ -2136,10 +2280,10 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   })) {
     addFinding(finding.severity === "error" ? findings : warnings, finding);
   }
-  const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
+  const accessesByCell = validateResourceAccesses(context, findings, warnings, verifiedResourceBaseline);
   mergeAccessesByCell(
     accessesByCell,
-    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
+    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, verifiedResourceBaseline),
   );
   const prePluginMetrics = computeMetrics(context, crossCellDependencies, accessesByCell);
   const pluginRepositoryModel = createRepositoryModel(
@@ -2332,7 +2476,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(
     accessesByCell,
-    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
+    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, undefined),
   );
   const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
   if (baseline) compareBaseline(context, metrics, baseline, findings, addFinding);
@@ -2484,6 +2628,7 @@ function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string)
     addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
     addDiff(["diff", "--name-only", "--diff-filter=ACMR", "--cached"]);
     addDiff(["diff", "--name-only", "--diff-filter=ACMR"]);
+    addDiff(["ls-files", "--others", "--exclude-standard"]);
   }
   return [...files].sort((left, right) => left.localeCompare(right));
 }
@@ -2827,48 +2972,113 @@ function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
   fs.renameSync(temporaryPath, filePath);
 }
 
+type GlobTransition =
+  | { kind: "epsilon"; to: number }
+  | { kind: "any"; to: number }
+  | { kind: "non-slash"; to: number }
+  | { kind: "literal"; to: number; value: string };
+
+type GlobAutomaton = {
+  accept: number;
+  transitions: GlobTransition[][];
+};
+
+function patternAutomaton(pattern: string): GlobAutomaton {
+  const normalized = normalizePath(pattern);
+  const transitions: GlobTransition[][] = [[]];
+  let state = 0;
+  const nextState = (): number => {
+    transitions.push([]);
+    return transitions.length - 1;
+  };
+  for (let index = 0; index < normalized.length; index += 1) {
+    const character = normalized[index];
+    const nextCharacter = normalized[index + 1];
+    if (character === "*" && nextCharacter === "*") {
+      const next = nextState();
+      transitions[state].push({ kind: "epsilon", to: next });
+      transitions[state].push({ kind: "any", to: state });
+      state = next;
+      index += 1;
+    } else if (character === "*") {
+      const next = nextState();
+      transitions[state].push({ kind: "epsilon", to: next });
+      transitions[state].push({ kind: "non-slash", to: state });
+      state = next;
+    } else {
+      const next = nextState();
+      transitions[state].push({ kind: "literal", value: character, to: next });
+      state = next;
+    }
+  }
+  return { accept: state, transitions };
+}
+
+function epsilonClosure(automaton: GlobAutomaton, state: number): Set<number> {
+  const closure = new Set<number>([state]);
+  const stack = [state];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current === undefined) continue;
+    for (const transition of automaton.transitions[current] || []) {
+      if (transition.kind !== "epsilon" || closure.has(transition.to)) continue;
+      closure.add(transition.to);
+      stack.push(transition.to);
+    }
+  }
+  return closure;
+}
+
+function transitionLabelsIntersect(left: GlobTransition, right: GlobTransition): boolean {
+  if (left.kind === "epsilon" || right.kind === "epsilon") return false;
+  if (left.kind === "any" || right.kind === "any") return true;
+  if (left.kind === "non-slash" && right.kind === "non-slash") return true;
+  if (left.kind === "non-slash" && right.kind === "literal") return right.value !== "/";
+  if (right.kind === "non-slash" && left.kind === "literal") return left.value !== "/";
+  return left.kind === "literal" && right.kind === "literal" && left.value === right.value;
+}
+
+function patternAutomataIntersect(leftPattern: string, rightPattern: string): boolean {
+  const left = patternAutomaton(leftPattern);
+  const right = patternAutomaton(rightPattern);
+  const queue: Array<[number, number]> = [];
+  const seen = new Set<string>();
+  const enqueueClosures = (leftState: number, rightState: number): void => {
+    for (const leftClosed of epsilonClosure(left, leftState)) {
+      for (const rightClosed of epsilonClosure(right, rightState)) {
+        const key = `${leftClosed}:${rightClosed}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        queue.push([leftClosed, rightClosed]);
+      }
+    }
+  };
+  enqueueClosures(0, 0);
+  while (queue.length > 0) {
+    const [leftState, rightState] = queue.shift() as [number, number];
+    if (leftState === left.accept && rightState === right.accept) return true;
+    for (const leftTransition of left.transitions[leftState] || []) {
+      if (leftTransition.kind === "epsilon") continue;
+      for (const rightTransition of right.transitions[rightState] || []) {
+        if (!transitionLabelsIntersect(leftTransition, rightTransition)) continue;
+        enqueueClosures(leftTransition.to, rightTransition.to);
+      }
+    }
+  }
+  return false;
+}
+
 function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
+  if (patternAutomataIntersect(leftPattern, rightPattern)) return true;
   const left = normalizePath(leftPattern);
   const right = normalizePath(rightPattern);
-  if (left === right) return true;
-  const leftPrefix = literalPrefix(left) || left;
-  const rightPrefix = literalPrefix(right) || right;
-  return matchesPattern(leftPrefix, right)
-    || matchesPattern(rightPrefix, left)
-    || (Boolean(leftPrefix) && Boolean(rightPrefix) && (
-      leftPrefix === rightPrefix
-      || leftPrefix.startsWith(`${rightPrefix}/`)
-      || rightPrefix.startsWith(`${leftPrefix}/`)
-    ));
-}
-
-function patternHasWildcard(pattern: string): boolean {
-  return /[*?]/.test(pattern);
-}
-
-function recursiveLiteralRoot(pattern: string): string | undefined {
-  const normalized = normalizePath(pattern);
-  if (!normalized.endsWith("/**")) return undefined;
-  const root = normalized.slice(0, -"/**".length);
-  return patternHasWildcard(root) ? undefined : root;
+  const leftHasWildcard = left.includes("*");
+  const rightHasWildcard = right.includes("*");
+  return !leftHasWildcard && !rightHasWildcard && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));
 }
 
 function ownedPathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  const left = normalizePath(leftPattern);
-  const right = normalizePath(rightPattern);
-  if (left === right) return true;
-  if (!patternHasWildcard(left) && matchesPattern(left, right)) return true;
-  if (!patternHasWildcard(right) && matchesPattern(right, left)) return true;
-
-  const leftRecursiveRoot = recursiveLiteralRoot(left);
-  const rightRecursiveRoot = recursiveLiteralRoot(right);
-  const leftPrefix = literalPrefix(left);
-  const rightPrefix = literalPrefix(right);
-
-  if (leftRecursiveRoot && rightPrefix && (rightPrefix === leftRecursiveRoot || rightPrefix.startsWith(`${leftRecursiveRoot}/`))) return true;
-  if (rightRecursiveRoot && leftPrefix && (leftPrefix === rightRecursiveRoot || leftPrefix.startsWith(`${rightRecursiveRoot}/`))) return true;
-
-  return Boolean(leftPrefix) && leftPrefix === rightPrefix;
+  return patternAutomataIntersect(leftPattern, rightPattern);
 }
 
 function intersectingValues(left: readonly string[], right: readonly string[]): string[] {

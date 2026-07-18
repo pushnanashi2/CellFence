@@ -2,9 +2,7 @@
   "mode": "check",
   "ok": false,
   "errorRuleIds": [
-    "CELLFENCE_DUPLICATE_CELL_ID"
+    "CELLFENCE_MANIFEST_INVALID"
   ],
-  "warningRuleIds": [
-    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
-  ]
+  "warningRuleIds": []
 }

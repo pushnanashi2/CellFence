@@ -3,7 +3,14 @@ import fs from "node:fs";
 
 export type PythonImportReference = {
   specifier: string;
+  candidateSpecifiers?: string[];
   line: number;
+};
+
+export type PythonInspectionWarning = {
+  kind: "dynamic_import";
+  message: string;
+  line?: number;
 };
 
 export type PythonInspection = {
@@ -12,6 +19,7 @@ export type PythonInspection = {
   surfaceParts: string[];
   resources: PythonResourceAccess[];
   errors?: PythonInspectionError[];
+  warnings?: PythonInspectionWarning[];
 };
 
 export type PythonInspectionError = {
@@ -106,16 +114,29 @@ def literal_string(node):
         return node.value
     return None
 
+string_constants = {}
+string_list_constants = {}
+
+def static_string(node):
+    value = literal_string(node)
+    if value is not None:
+        return value
+    if isinstance(node, ast.Name):
+        return string_constants.get(node.id)
+    return None
+
 def literal_string_list(node):
+    if isinstance(node, ast.Name) and node.id in string_list_constants:
+        return string_list_constants.get(node.id) or []
     if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
         values = []
         for item in node.elts:
-            value = literal_string(item)
+            value = static_string(item)
             if value is None:
                 return []
             values.append(value)
         return values
-    value = literal_string(node)
+    value = static_string(node)
     return [value] if value is not None else []
 
 def dotted_name(node):
@@ -140,7 +161,7 @@ def root_name(node):
 def keyword_literal(call, name):
     for keyword in getattr(call, "keywords", []):
         if keyword.arg == name:
-            return literal_string(keyword.value)
+            return static_string(keyword.value)
     return None
 
 def keyword_literal_list(call, name):
@@ -161,11 +182,11 @@ def normalize_http_path(prefix, route):
 
 def sql_table_accesses(text):
     accesses = []
-    for match in re.finditer(r"\b(from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$\"]*)", text, re.IGNORECASE):
+    for match in re.finditer(r"\b(delete\s+from|from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$\"]*)", text, re.IGNORECASE):
         verb = match.group(1).lower()
         selector = match.group(2).replace('"', "")
         accesses.append({
-            "access": "write" if verb in ("into", "update") else "read",
+            "access": "write" if verb in ("into", "update", "delete from") else "read",
             "selector": selector,
         })
     return accesses
@@ -234,14 +255,43 @@ def function_signature(args):
     return ",".join(pieces)
 
 imports = []
+import_keys = set()
+warnings = []
 explicit_all = None
 top_level_public = set()
 surface_parts = []
 
+def add_import(specifier, line, candidate_specifiers=None):
+    candidate_specifiers = [item for item in (candidate_specifiers or []) if item and item != specifier]
+    key = (specifier, tuple(candidate_specifiers), line)
+    if key in import_keys:
+        return
+    import_keys.add(key)
+    entry = {"specifier": specifier, "line": line}
+    if candidate_specifiers:
+        entry["candidateSpecifiers"] = candidate_specifiers
+    imports.append(entry)
+
+def add_dynamic_import_warning(node, source):
+    warnings.append({
+        "kind": "dynamic_import",
+        "message": f"computed Python {source} cannot be resolved statically at line {node_line(node)}",
+        "line": node_line(node),
+    })
+
+def from_import_candidate(module, alias_name):
+    if alias_name == "*":
+        return None
+    if module == "":
+        return alias_name
+    if module.endswith("."):
+        return module + alias_name
+    return module + "." + alias_name
+
 for node in tree.body:
     if isinstance(node, ast.Import):
         for alias in node.names:
-            imports.append({"specifier": alias.name, "line": node_line(node)})
+            add_import(alias.name, node_line(node))
             public_name = alias_public_name(alias)
             if is_public(public_name):
                 top_level_public.add(public_name)
@@ -252,9 +302,17 @@ for node in tree.body:
             for alias in node.names:
                 if alias.name == "*":
                     continue
-                imports.append({"specifier": module + alias.name, "line": node_line(node)})
+                add_import(module + alias.name, node_line(node))
         else:
-            imports.append({"specifier": module, "line": node_line(node)})
+            saw_star = False
+            for alias in node.names:
+                if alias.name == "*":
+                    saw_star = True
+                    continue
+                candidate = from_import_candidate(module, alias.name)
+                add_import(module, node_line(node), [candidate] if candidate else [])
+            if saw_star:
+                add_import(module, node_line(node))
         for alias in node.names:
             public_name = alias_public_name(alias)
             if is_public(public_name):
@@ -276,6 +334,14 @@ for node in tree.body:
             names.extend(assignment_names(target))
         if "__all__" in names:
             explicit_all = literal_string_collection(node.value)
+        string_value = literal_string(node.value)
+        if string_value is not None:
+            for name in names:
+                string_constants[name] = string_value
+        string_list_value = literal_string_collection(node.value)
+        if string_list_value is not None:
+            for name in names:
+                string_list_constants[name] = string_list_value
         for name in names:
             if name != "__all__" and is_public(name):
                 top_level_public.add(name)
@@ -284,6 +350,14 @@ for node in tree.body:
         names = assignment_names(node.target)
         if "__all__" in names:
             explicit_all = literal_string_collection(node.value)
+        string_value = literal_string(node.value)
+        if string_value is not None:
+            for name in names:
+                string_constants[name] = string_value
+        string_list_value = literal_string_collection(node.value)
+        if string_list_value is not None:
+            for name in names:
+                string_list_constants[name] = string_list_value
         for name in names:
             if name != "__all__" and is_public(name):
                 top_level_public.add(name)
@@ -296,30 +370,56 @@ else:
     public_symbols = sorted(top_level_public)
     surface_parts = sorted(set(surface_parts))
 
-fastapi_app_factories = set(["FastAPI"])
-fastapi_router_factories = set(["APIRouter"])
+fastapi_app_factories = set()
+fastapi_router_factories = set()
 fastapi_route_prefixes = {}
 django_url_functions = set()
-django_model_base_names = set(["Model"])
+django_model_base_names = set()
 django_model_selectors = {}
-sqlalchemy_table_factories = set(["Table"])
-sqlalchemy_read_functions = set(["select"])
-sqlalchemy_write_functions = set(["insert", "update", "delete"])
-sqlalchemy_sql_literal_functions = set(["text"])
+django_manager_aliases = {}
+django_model_instances = {}
+sqlalchemy_table_factories = set()
+sqlalchemy_read_functions = set()
+sqlalchemy_write_functions = set()
+sqlalchemy_sql_literal_functions = set()
 sqlalchemy_model_selectors = {}
 sqlalchemy_table_selectors = {}
-celery_factories = set(["Celery"])
-celery_task_decorators = set(["shared_task"])
+celery_factories = set()
+celery_task_decorators = set()
+celery_signature_functions = set()
 celery_app_names = set()
+celery_task_symbols = {}
+importlib_module_names = set()
+pkgutil_module_names = set()
+builtins_module_names = set()
+dynamic_import_functions = set(["__import__"])
+pkgutil_resolver_functions = set()
 
 def imported_local_name(alias):
     return alias.asname or alias.name.split(".")[0]
 
 for node in tree.body:
-    if isinstance(node, ast.ImportFrom):
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            local_name = imported_local_name(alias)
+            if alias.name == "django.urls":
+                django_url_functions.update([local_name + ".path", local_name + ".re_path", local_name + ".url"])
+            if alias.name == "importlib":
+                importlib_module_names.add(local_name)
+            if alias.name == "pkgutil":
+                pkgutil_module_names.add(local_name)
+            if alias.name == "builtins":
+                builtins_module_names.add(local_name)
+    elif isinstance(node, ast.ImportFrom):
         module = node.module or ""
         for alias in node.names:
             local_name = alias.asname or alias.name
+            if module == "importlib" and alias.name == "import_module":
+                dynamic_import_functions.add(local_name)
+            if module == "pkgutil" and alias.name == "resolve_name":
+                pkgutil_resolver_functions.add(local_name)
+            if module == "builtins" and alias.name == "__import__":
+                dynamic_import_functions.add(local_name)
             if module == "django.urls" and alias.name in ("path", "re_path", "url"):
                 django_url_functions.add(local_name)
             if module == "django.conf.urls" and alias.name == "url":
@@ -342,17 +442,19 @@ for node in tree.body:
                 celery_factories.add(local_name)
             if module == "celery" and alias.name == "shared_task":
                 celery_task_decorators.add(local_name)
+            if module == "celery" and alias.name in ("signature", "Signature"):
+                celery_signature_functions.add(local_name)
 
 def class_string_assignment(class_node, assignment_name):
     for item in class_node.body:
         if isinstance(item, ast.Assign):
             for target in item.targets:
                 if isinstance(target, ast.Name) and target.id == assignment_name:
-                    value = literal_string(item.value)
+                    value = static_string(item.value)
                     if value is not None:
                         return value
         if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name) and item.target.id == assignment_name:
-            value = literal_string(item.value)
+            value = static_string(item.value)
             if value is not None:
                 return value
     return None
@@ -383,13 +485,17 @@ def selector_from_expression(node):
         entry = selector_entry(sqlalchemy_model_selectors, node.id) or selector_entry(sqlalchemy_table_selectors, node.id)
         if entry is not None:
             return entry
+    if isinstance(node, ast.Attribute):
+        return selector_from_expression(node.value)
     if isinstance(node, ast.Call):
         return selector_from_expression(node.func)
     return None
 
 def django_manager_model(node):
+    if isinstance(node, ast.Name):
+        return django_manager_aliases.get(node.id) or django_model_instances.get(node.id)
     if isinstance(node, ast.Attribute):
-        if node.attr == "objects" and isinstance(node.value, ast.Name):
+        if node.attr in ("objects", "_default_manager") and isinstance(node.value, ast.Name):
             return node.value.id
         return django_manager_model(node.value)
     if isinstance(node, ast.Call):
@@ -401,7 +507,23 @@ for node in ast.walk(tree):
         value = node.value
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         for target in targets:
-            if not isinstance(target, ast.Name) or not isinstance(value, ast.Call):
+            if not isinstance(target, ast.Name):
+                continue
+            manager_model = django_manager_model(value)
+            if manager_model:
+                django_manager_aliases[target.id] = manager_model
+            if isinstance(value, ast.Call):
+                if isinstance(value.func, ast.Name) and value.func.id in django_model_selectors:
+                    django_model_instances[target.id] = value.func.id
+            if isinstance(value, ast.Attribute):
+                value_receiver = dotted_name(value.value)
+                if value.attr == "import_module" and value_receiver in importlib_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif value.attr == "__import__" and value_receiver in builtins_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif value.attr == "resolve_name" and value_receiver in pkgutil_module_names:
+                    pkgutil_resolver_functions.add(target.id)
+            if not isinstance(value, ast.Call):
                 continue
             call_name = dotted_name(value.func) or ""
             if call_name in fastapi_app_factories or call_name.endswith(".FastAPI"):
@@ -411,9 +533,38 @@ for node in ast.walk(tree):
             elif call_name in celery_factories or call_name.endswith(".Celery"):
                 celery_app_names.add(target.id)
             elif call_name in sqlalchemy_table_factories or call_name.endswith(".Table"):
-                table_name = literal_string(value.args[0]) if value.args else None
+                table_name = static_string(value.args[0]) if value.args else None
                 if table_name:
                     sqlalchemy_table_selectors[target.id] = {"selector": table_name, "confidence": "high"}
+            if isinstance(value.func, ast.Name) and value.func.id == "getattr" and len(value.args) >= 2:
+                receiver = dotted_name(value.args[0])
+                attr = static_string(value.args[1])
+                if attr == "import_module" and receiver in importlib_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif attr == "__import__" and receiver in builtins_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif attr == "resolve_name" and receiver in pkgutil_module_names:
+                    pkgutil_resolver_functions.add(target.id)
+            elif isinstance(value.func, ast.Attribute):
+                value_receiver = dotted_name(value.func.value)
+                if value.func.attr == "import_module" and value_receiver in importlib_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif value.func.attr == "__import__" and value_receiver in builtins_module_names:
+                    dynamic_import_functions.add(target.id)
+                elif value.func.attr == "resolve_name" and value_receiver in pkgutil_module_names:
+                    pkgutil_resolver_functions.add(target.id)
+    elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+        call_name = dotted_name(node.func) or ""
+        basename = call_name.split(".")[-1]
+        receiver = dotted_name(node.func.value)
+        if basename == "include_router" and receiver in fastapi_route_prefixes and node.args:
+            router_name = dotted_name(node.args[0])
+            if router_name in fastapi_route_prefixes:
+                include_prefix = keyword_literal(node, "prefix") or ""
+                fastapi_route_prefixes[router_name] = normalize_http_path(
+                    fastapi_route_prefixes.get(receiver, ""),
+                    normalize_http_path(include_prefix, fastapi_route_prefixes.get(router_name, "")),
+                )
     elif isinstance(node, ast.ClassDef):
         if has_django_model_base(node):
             db_table = django_meta_db_table(node)
@@ -434,9 +585,100 @@ FASTAPI_METHODS = {
     "options": ["OPTIONS"],
     "head": ["HEAD"],
     "trace": ["TRACE"],
+    "websocket": ["WEBSOCKET"],
 }
-DJANGO_READ_METHODS = set(["all", "count", "exists", "exclude", "filter", "first", "get", "last", "order_by", "select_related", "prefetch_related"])
-DJANGO_WRITE_METHODS = set(["bulk_create", "create", "delete", "get_or_create", "update", "update_or_create"])
+DJANGO_READ_METHODS = set(["all", "count", "exists", "exclude", "filter", "first", "get", "last", "order_by", "prefetch_related", "raw", "select_related"])
+DJANGO_WRITE_METHODS = set(["bulk_create", "bulk_update", "create", "delete", "get_or_create", "save", "update", "update_or_create"])
+
+def dynamic_import_call_source(call):
+    name = dotted_name(call.func) or ""
+    if name in dynamic_import_functions:
+        return "__import__" if name == "__import__" else name
+    if name in pkgutil_resolver_functions:
+        return "pkgutil.resolve_name"
+    if isinstance(call.func, ast.Attribute):
+        receiver = dotted_name(call.func.value)
+        if call.func.attr == "import_module" and receiver in importlib_module_names:
+            return "importlib.import_module"
+        if call.func.attr == "__import__" and receiver in builtins_module_names:
+            return "builtins.__import__"
+        if call.func.attr == "resolve_name" and receiver in pkgutil_module_names:
+            return "pkgutil.resolve_name"
+    if isinstance(call.func, ast.Call):
+        return dynamic_import_getattr_source(call.func)
+    return None
+
+def dynamic_import_getattr_source(call):
+    name = dotted_name(call.func) or ""
+    if name != "getattr" or len(call.args) < 2:
+        return None
+    receiver = dotted_name(call.args[0])
+    attr = static_string(call.args[1])
+    if attr == "import_module" and receiver in importlib_module_names:
+        return "importlib.import_module"
+    if attr == "__import__" and receiver in builtins_module_names:
+        return "builtins.__import__"
+    if attr == "resolve_name" and receiver in pkgutil_module_names:
+        return "pkgutil.resolve_name"
+    return None
+
+def dynamic_import_literal(call, source):
+    if not call.args:
+        return None
+    value = literal_string(call.args[0])
+    if value is None:
+        return None
+    if source == "pkgutil.resolve_name":
+        return value.split(":", 1)[0]
+    return value
+
+def inspect_dynamic_import_call_node(call, line_override=None):
+    dynamic_source = dynamic_import_call_source(call)
+    if not dynamic_source:
+        return
+    specifier = dynamic_import_literal(call, dynamic_source)
+    if specifier:
+        add_import(specifier, line_override or node_line(call))
+    else:
+        add_dynamic_import_warning(call, dynamic_source)
+
+def inspect_exec_literal(call):
+    name = dotted_name(call.func) or ""
+    if name not in ("exec", "eval") or not call.args:
+        return
+    value = literal_string(call.args[0])
+    if value is None:
+        add_dynamic_import_warning(call, name)
+        return
+    if "import" not in value:
+        return
+    try:
+        nested = ast.parse(value)
+    except SyntaxError:
+        add_dynamic_import_warning(call, name)
+        return
+    for nested_node in ast.walk(nested):
+        if isinstance(nested_node, ast.Import):
+            for alias in nested_node.names:
+                add_import(alias.name, node_line(call))
+        elif isinstance(nested_node, ast.ImportFrom):
+            module = "." * int(nested_node.level or 0) + (nested_node.module or "")
+            if nested_node.module is None:
+                for alias in nested_node.names:
+                    if alias.name != "*":
+                        add_import(module + alias.name, node_line(call))
+            else:
+                saw_star = False
+                for alias in nested_node.names:
+                    if alias.name == "*":
+                        saw_star = True
+                        continue
+                    candidate = from_import_candidate(module, alias.name)
+                    add_import(module, node_line(call), [candidate] if candidate else [])
+                if saw_star:
+                    add_import(module, node_line(call))
+        elif isinstance(nested_node, ast.Call):
+            inspect_dynamic_import_call_node(nested_node, node_line(call))
 
 def emit_fastapi_route(function_node):
     for decorator in function_node.decorator_list:
@@ -447,11 +689,13 @@ def emit_fastapi_route(function_node):
         receiver = dotted_name(target.value)
         if receiver not in fastapi_route_prefixes:
             continue
-        route_path = literal_string(call.args[0]) if call is not None and call.args else None
+        route_path = static_string(call.args[0]) if call is not None and call.args else None
+        if route_path is None and call is not None:
+            route_path = keyword_literal(call, "path")
         if route_path is None:
             continue
         methods = FASTAPI_METHODS.get(target.attr)
-        if target.attr == "api_route" and call is not None:
+        if target.attr in ("api_route", "route") and call is not None:
             methods = [method.upper() for method in keyword_literal_list(call, "methods")] or ["ANY"]
         if not methods:
             continue
@@ -472,10 +716,22 @@ def celery_task_name(function_node, decorator_call):
         if named:
             return named
         if decorator_call.args:
-            positional = literal_string(decorator_call.args[0])
+            positional = static_string(decorator_call.args[0])
             if positional:
                 return positional
     return function_node.name
+
+def celery_signature_task_name(node):
+    if not isinstance(node, ast.Call):
+        return None
+    name = dotted_name(node.func) or ""
+    if name not in celery_signature_functions and not name.endswith(".signature") and not name.endswith(".Signature"):
+        return None
+    if node.args:
+        positional = static_string(node.args[0])
+        if positional:
+            return positional
+    return keyword_literal(node, "task") or keyword_literal(node, "name")
 
 def emit_celery_task(function_node):
     for decorator in function_node.decorator_list:
@@ -488,6 +744,7 @@ def emit_celery_task(function_node):
         if not is_bound_app_task and not is_shared_task:
             continue
         task_name = celery_task_name(function_node, call)
+        celery_task_symbols[function_node.name] = task_name
         emit_resource("queue", "subscribe", "celery:" + task_name, function_node, name.split(".")[-1] or "task", "celery-adapter", "high" if task_name != function_node.name else "medium")
 
 for node in ast.walk(tree):
@@ -501,8 +758,12 @@ for node in ast.walk(tree):
     call_name = dotted_name(node.func) or ""
     basename = call_name.split(".")[-1]
 
-    if basename in django_url_functions and node.args:
-        route = literal_string(node.args[0])
+    inspect_dynamic_import_call_node(node)
+
+    inspect_exec_literal(node)
+
+    if basename in django_url_functions or call_name in django_url_functions:
+        route = (static_string(node.args[0]) if node.args else None) or keyword_literal(node, "route")
         if route:
             selector = "ANY " + (("regex:" + route) if basename in ("re_path", "url") else normalize_http_path("", route))
             emit_resource("http", "serve", selector, node, basename, "django-adapter", "medium")
@@ -516,14 +777,35 @@ for node in ast.walk(tree):
             elif node.func.attr in DJANGO_WRITE_METHODS:
                 emit_resource("database", "write", django_entry["selector"], node, node.func.attr, "django-adapter", django_entry["confidence"])
 
+        if basename == "save":
+            model_name = django_manager_model(node.func.value)
+            django_entry = django_model_selectors.get(model_name) if model_name else None
+            if django_entry is not None:
+                emit_resource("database", "write", django_entry["selector"], node, basename, "django-adapter", django_entry["confidence"])
+
         if basename in ("send_task",) and node.args:
-            task_name = literal_string(node.args[0])
+            task_name = static_string(node.args[0])
             if task_name:
                 emit_resource("queue", "publish", "celery:" + task_name, node, basename, "celery-adapter", "high")
-        elif basename in ("delay", "apply_async") and celery_app_names:
-            target = dotted_name(node.func.value)
-            if target:
-                emit_resource("queue", "publish", "celery:" + target, node, basename, "celery-adapter", "medium")
+        elif basename in ("delay", "apply_async"):
+            signature_task = celery_signature_task_name(node.func.value)
+            if signature_task:
+                emit_resource("queue", "publish", "celery:" + signature_task, node, basename, "celery-adapter", "high")
+            else:
+                target = dotted_name(node.func.value)
+                task_name = celery_task_symbols.get(target)
+                if task_name:
+                    emit_resource("queue", "publish", "celery:" + task_name, node, basename, "celery-adapter", "high" if task_name != target else "medium")
+
+    if isinstance(node.func, ast.Attribute) and basename in ("get",) and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "read", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+
+    if isinstance(node.func, ast.Attribute) and basename in ("insert", "update", "delete"):
+        entry = selector_from_expression(node.func.value)
+        if entry is not None:
+            emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
 
     if basename in sqlalchemy_read_functions and node.args:
         entry = selector_from_expression(node.args[0])
@@ -546,12 +828,23 @@ for node in ast.walk(tree):
             entry = selector_from_expression(item)
             if entry is not None:
                 emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if isinstance(node.func, ast.Attribute) and basename == "bulk_save_objects" and node.args and isinstance(node.args[0], (ast.List, ast.Tuple)):
+        for item in node.args[0].elts:
+            entry = selector_from_expression(item)
+            if entry is not None:
+                emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
+    if isinstance(node.func, ast.Attribute) and basename in ("bulk_insert_mappings", "bulk_update_mappings") and node.args:
+        entry = selector_from_expression(node.args[0])
+        if entry is not None:
+            emit_resource("database", "write", entry["selector"], node, basename, "sqlalchemy-adapter", entry["confidence"])
 
     sql_literal = None
     if basename in sqlalchemy_sql_literal_functions and node.args:
-        sql_literal = literal_string(node.args[0])
+        sql_literal = static_string(node.args[0])
     elif isinstance(node.func, ast.Attribute) and basename == "execute" and node.args:
-        sql_literal = literal_string(node.args[0])
+        sql_literal = static_string(node.args[0])
+    elif isinstance(node.func, ast.Attribute) and basename == "exec_driver_sql" and node.args:
+        sql_literal = static_string(node.args[0])
     if sql_literal:
         for sql_access in sql_table_accesses(sql_literal):
             emit_resource("database", sql_access["access"], sql_access["selector"], node, basename, "sqlalchemy-adapter", "medium")
@@ -562,6 +855,7 @@ print(json.dumps({
     "surfaceParts": surface_parts,
     "resources": resources,
     "errors": [],
+    "warnings": warnings,
 }, separators=(",", ":")))
 `;
 

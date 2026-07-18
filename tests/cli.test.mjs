@@ -161,7 +161,9 @@ test("CLI check returns two for manifest configuration errors", () => {
 
 test("CLI evidence check accepts baseline-approved runtime evidence", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
-  const result = runCli(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath);
+  const result = runCliWithEnv(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath, {
+    CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret",
+  });
   assert.equal(result.status, 0);
   assert.match(result.stdout, /"ok": true/);
 });
@@ -1446,7 +1448,26 @@ test("CLI baseline check does not print the next public surface hash in human ou
 
 test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-valid-"));
-  writePrivateImportProject(tempDir, { withWaiver: true });
+  fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+  fs.writeFileSync(
+    path.join(tempDir, "src/core/public.ts"),
+    [
+      "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2099-01-01 approved-by:test-owner reason:temporary public surface mismatch fixture",
+      "export const extra = true;",
+      "",
+    ].join("\n"),
+  );
+  writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    cells: [{
+      id: "core",
+      ownedPaths: ["src/core/**"],
+      publicEntry: "src/core/public.ts",
+      publicSymbols: [],
+      consumes: [],
+      producesArtifacts: [],
+    }],
+  });
 
   const checkResult = runCli(["check", "--json"], tempDir);
   assert.equal(checkResult.status, 0);
@@ -1457,12 +1478,12 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   const parsed = JSON.parse(listResult.stdout);
   assert.equal(parsed.schemaVersion, "cellfence.waivers.v1");
   assert.equal(parsed.waivers.length, 1);
-  assert.equal(parsed.waivers[0].ruleId, "CELLFENCE_PRIVATE_IMPORT");
+  assert.equal(parsed.waivers[0].ruleId, "CELLFENCE_PUBLIC_SYMBOL_MISMATCH");
   assert.equal(parsed.waivers[0].valid, true);
 
   const humanList = runCli(["waivers", "list"], tempDir);
   assert.equal(humanList.status, 0);
-  assert.match(humanList.stdout, /valid CELLFENCE_PRIVATE_IMPORT src\/consumer\/public\.ts:1/);
+  assert.match(humanList.stdout, /valid CELLFENCE_PUBLIC_SYMBOL_MISMATCH src\/core\/public\.ts:1/);
 });
 
 test("CLI waivers list reports an empty human-readable inventory", () => {
@@ -2186,7 +2207,9 @@ test("CLI human output covers check, baseline, evidence, and waiver error paths"
   assert.match(check.stdout, /CellFence check passed/);
 
   const baselineFixture = path.join(root, "fixtures/valid/resource-baseline-allows-existing");
-  const baseline = runCli(["baseline", "check", "--baseline=cellfence.baseline.json"], baselineFixture);
+  const baseline = runCliWithEnv(["baseline", "check", "--baseline=cellfence.baseline.json"], baselineFixture, {
+    CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret",
+  });
   assert.equal(baseline.status, 0);
   assert.match(baseline.stdout, /CellFence check passed/);
 

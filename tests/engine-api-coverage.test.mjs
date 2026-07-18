@@ -152,6 +152,34 @@ test("engine still rejects nested owned path overlap on a segment boundary", () 
   }
 });
 
+test("engine rejects wildcard owned path overlap with a concrete witness path", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-wildcard-owned-paths-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/a"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/a/public.ts"), "export const rootApi = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/a/feature.ts"), "export const featureApi = true;\n");
+    writeManifest(rootDir, [
+      baseCell("root", {
+        ownedPaths: ["src/*/public.ts"],
+        publicEntry: "src/a/public.ts",
+        publicSymbols: ["rootApi"],
+      }),
+      baseCell("feature", {
+        ownedPaths: ["src/a/*.ts"],
+        publicEntry: "src/a/feature.ts",
+        publicSymbols: ["featureApi"],
+      }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_OWNERSHIP_OVERLAP"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine does not treat a root file glob as owning nested directory files", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-root-file-glob-"));
   try {
@@ -185,6 +213,7 @@ test("engine does not treat a root file glob as owning nested directory files", 
 
 test("engine handles invalid runtime evidence inputs without false green results", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-outside-"));
   try {
     writeCell(rootDir, "core");
     writeManifest(rootDir, [baseCell("core")]);
@@ -198,18 +227,109 @@ test("engine handles invalid runtime evidence inputs without false green results
       cellId: "",
       accesses: [{ kind: "database", access: "read", selector: "app.users" }],
     });
+    writeJson(path.join(outsideDir, "outside-evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v1",
+      cellId: "core",
+      accesses: [{ kind: "database", access: "read", selector: "app.users" }],
+    });
 
     const result = checkRepository({
       rootDir,
       manifestPath: "cellfence.manifest.json",
-      evidencePaths: ["invalid-evidence.json", "missing-evidence.json", "unknown-cell-evidence.json", "missing-cell-evidence.json"],
+      evidencePaths: [
+        "invalid-evidence.json",
+        "missing-evidence.json",
+        "unknown-cell-evidence.json",
+        "missing-cell-evidence.json",
+        path.join(outsideDir, "outside-evidence.json"),
+      ],
     });
 
     assert.equal(result.ok, false);
-    assert.equal(result.findings.filter((finding) => finding.ruleId === "CELLFENCE_RESOURCE_EVIDENCE_INVALID").length, 4);
+    assert.equal(result.findings.filter((finding) => finding.ruleId === "CELLFENCE_RESOURCE_EVIDENCE_INVALID").length, 5);
     assert.ok(result.findings.some((finding) => /failed to read resource evidence/.test(finding.message)));
     assert.ok(result.findings.some((finding) => /references unknown cell missing/.test(finding.message)));
-    assert.ok(result.findings.some((finding) => /references unknown cell \(missing\)/.test(finding.message)));
+    assert.ok(result.findings.some((finding) => /cellId must be a non-empty string/.test(finding.message)));
+    assert.ok(result.findings.some((finding) => /resource evidence path is outside the repository/.test(finding.message)));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  }
+});
+
+test("engine does not let unsealed baselines grandfather runtime resource evidence", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-baseline-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    writeJson(path.join(rootDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          resourceAccesses: [{ kind: "database", access: "read", selector: "app.users" }],
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v1",
+      cellId: "core",
+      accesses: [{ kind: "database", access: "read", selector: "app.users" }],
+    });
+
+    const result = checkRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "cellfence.baseline.json",
+      evidencePaths: ["evidence.json"],
+    });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine rejects stale runtime evidence commit shas at the repository root", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-stale-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core", {
+      resourceContracts: [{
+        id: "orders",
+        kind: "database",
+        access: ["read"],
+        selectors: ["app.orders"],
+      }],
+    })]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "initial"]);
+    const head = git(rootDir, ["rev-parse", "HEAD"]);
+
+    writeJson(path.join(rootDir, "evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v1",
+      commitSha: "0".repeat(40),
+      cellId: "core",
+      accesses: [{ kind: "database", access: "read", selector: "app.orders" }],
+    });
+    const stale = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
+    assert.equal(stale.ok, false);
+    assert.ok(stale.findings.some((finding) => /does not match repository HEAD/.test(finding.message)));
+
+    writeJson(path.join(rootDir, "evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v1",
+      commitSha: head,
+      cellId: "core",
+      accesses: [{ kind: "database", access: "read", selector: "app.orders" }],
+    });
+    const current = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
+    assert.equal(current.ok, true, JSON.stringify(current.findings));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -251,8 +371,17 @@ test("engine resolves exact tsconfig path aliases and package-name public import
 
     writeCell(rootDir, "loose", "export const loose = true;\n");
     fs.mkdirSync(path.join(rootDir, "src/loose-consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/loose/package.json"), "{\"name\":\"@cell/loose\"}\n");
     fs.writeFileSync(path.join(rootDir, "src/loose/internal.ts"), "export const privateLoose = true;\n");
-    fs.writeFileSync(path.join(rootDir, "src/loose-consumer/public.ts"), "import { privateLoose } from '@cell/loose/internal';\nexport const looseConsumer = privateLoose;\n");
+    fs.writeFileSync(
+      path.join(rootDir, "src/loose-consumer/public.ts"),
+      [
+        "import { loose } from '@cell/loose/public';",
+        "import { privateLoose } from '@cell/loose/internal';",
+        "export const looseConsumer = loose && privateLoose;",
+        "",
+      ].join("\n"),
+    );
     writeManifest(rootDir, [
       baseCell("loose", { packageName: "@cell/loose" }),
       baseCell("loose-consumer", {
@@ -265,7 +394,7 @@ test("engine resolves exact tsconfig path aliases and package-name public import
     assert.ok(looseResult.findings.some((finding) =>
       finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
       && finding.details?.specifier === "@cell/loose/internal"
-      && finding.details?.targetPath === undefined));
+      && finding.details?.targetPath === "src/loose/internal.ts"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -509,6 +638,94 @@ test("engine reports manifest and baseline load failures through public APIs", (
     const missingBaseline = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", baselinePath: "missing-baseline.json" });
     assert.equal(missingBaseline.ok, false);
     assert.match(missingBaseline.findings[0].message, /failed to read baseline/);
+
+    fs.writeFileSync(path.join(rootDir, "escaped-duplicate-manifest.json"), [
+      "{",
+      "  \"schemaVersion\": \"cellfence.manifest.v1\",",
+      "  \"cells\": [],",
+      "  \"\\u0063ells\": [{",
+      "    \"id\": \"core\",",
+      "    \"ownedPaths\": [\"src/core/**\"],",
+      "    \"publicEntry\": \"src/core/public.ts\",",
+      "    \"publicSymbols\": [\"core\"],",
+      "    \"consumes\": [],",
+      "    \"producesArtifacts\": []",
+      "  }]",
+      "}",
+      "",
+    ].join("\n"));
+    const escapedDuplicateManifest = checkRepository({ rootDir, manifestPath: "escaped-duplicate-manifest.json" });
+    assert.equal(escapedDuplicateManifest.exitCode, 2);
+    assert.match(escapedDuplicateManifest.findings[0].message, /duplicate JSON keys are not allowed: cells/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine resolves nested tsconfig aliases and package imports maps", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-nested-resolution-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "packages/producer/src"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "packages/consumer/src"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "packages/safe/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/producer/src/public.ts"), "export const producer = true;\n");
+    fs.writeFileSync(path.join(rootDir, "packages/producer/src/internal.ts"), "export const hidden = true;\n");
+    fs.writeFileSync(path.join(rootDir, "packages/safe/src/public.ts"), "export const hidden = true;\n");
+    fs.writeFileSync(
+      path.join(rootDir, "packages/consumer/src/public.ts"),
+      [
+        "import { hidden as viaAlias } from '@producer/internal';",
+        "import { hidden as viaImports } from '#producer/internal';",
+        "export const consumer = viaAlias && viaImports;",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(rootDir, "tsconfig.json"), {
+      compilerOptions: {
+        paths: {
+          "@producer/internal": ["packages/safe/src/public.ts"],
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "package.json"), {
+      imports: {
+        "#producer/internal": {
+          types: "./packages/producer/src/public.ts",
+          default: "./packages/producer/src/internal.ts",
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "packages/consumer/tsconfig.json"), {
+      compilerOptions: {
+        baseUrl: ".",
+        paths: {
+          "@producer/*": ["../producer/src/*"],
+        },
+      },
+    });
+    writeManifest(rootDir, [
+      {
+        ...baseCell("producer", { publicSymbols: ["producer"] }),
+        ownedPaths: ["packages/producer/src/**"],
+        publicEntry: "packages/producer/src/public.ts",
+      },
+      {
+        ...baseCell("consumer", { publicSymbols: ["consumer"], consumes: [{ cell: "producer" }] }),
+        ownedPaths: ["packages/consumer/src/**"],
+        publicEntry: "packages/consumer/src/public.ts",
+      },
+      {
+        ...baseCell("safe", { publicSymbols: ["hidden"] }),
+        ownedPaths: ["packages/safe/src/**"],
+        publicEntry: "packages/safe/src/public.ts",
+      },
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.ok, false);
+    assert.equal(result.findings.filter((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && finding.details?.targetPath === "packages/producer/src/internal.ts").length, 2);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -753,6 +970,35 @@ test("engine changed checks return the current manifest error before base diffin
     assert.equal(result.exitCode, 2);
     assert.deepEqual(result.changedFiles, ["cellfence.manifest.json"]);
     assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_MANIFEST_INVALID"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks include untracked files in working tree mode", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-untracked-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")], {
+      governance: {
+        pathClasses: [{
+          id: "generated-output",
+          kind: "generated",
+          paths: ["generated/**"],
+          commitPolicy: { generatedRequiresProvenance: true },
+        }],
+      },
+    });
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.mkdirSync(path.join(rootDir, "generated"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "generated/out.ts"), "export const generated = true;\n");
+
+    const result = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    assert.deepEqual(result.changedFiles, ["generated/out.ts"]);
+    assert.ok([...result.findings, ...result.warnings].some((finding) => finding.ruleId === "CELLFENCE_GENERATED_PATH_CHANGED"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1568,7 +1814,7 @@ test("engine resolves runtime extensions, alias suffixes, and optional manifest 
         ownedPaths: ["src/app/**"],
         publicEntry: "src/app/public.ts",
         publicSymbols: ["app"],
-        consumes: [{ cell: "lib", artifactLanes: ["events"] }, { cell: "missing" }],
+        consumes: [{ cell: "lib", artifactLanes: ["events"] }],
       }, {
         id: "empty",
         ownedPaths: ["src/empty.ts"],

@@ -26,7 +26,8 @@ export type SymlinkEntry = {
 };
 
 export function normalizePath(filePath: string): string {
-  return filePath.replace(/\\/g, "/");
+  const slashPath = filePath.replace(/\\/g, "/");
+  return slashPath === "" ? "" : path.posix.normalize(slashPath);
 }
 
 export function repoPath(rootDir: string, filePath: string): string {
@@ -34,7 +35,7 @@ export function repoPath(rootDir: string, filePath: string): string {
 }
 
 export function absolutePath(rootDir: string, relativePath: string): string {
-  return path.resolve(rootDir, relativePath);
+  return path.resolve(rootDir, normalizePath(relativePath));
 }
 
 function escapeRegExp(text: string): string {

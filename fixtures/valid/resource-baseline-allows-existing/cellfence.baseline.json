@@ -20,5 +20,10 @@
         }
       ]
     }
+  },
+  "seal": {
+    "algorithm": "hmac-sha256",
+    "keyId": "test-key",
+    "digest": "432acd62784e17d4a70a9cc5374333616005d1f658a5af34b003b55c1e69a7a3"
   }
 }

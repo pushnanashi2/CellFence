@@ -114,34 +114,43 @@ test("schema validation accepts maximal valid manifests", () => {
         "resources/undeclared-access": "off",
       },
     }],
-    cells: [{
-      ...validCell,
-      packageName: "@example/core",
-      locked: true,
-      consumes: [{ cell: "platform", artifactLanes: ["events-v1"] }],
-      producesArtifacts: [{
-        id: "events-v1",
-        paths: ["src/core/artifacts/**"],
-        description: "runtime artifacts produced by core",
+    cells: [
+      {
+        ...validCell,
+        packageName: "@example/core",
         locked: true,
-      }],
-      resourceContracts: [{
-        id: "users-read",
-        kind: "database",
-        access: ["read", "write"],
-        selectors: ["app.users"],
-        description: "reads and writes user rows",
-      }],
-      budgets: {
-        ownedPathPatterns: 1,
-        publicSymbols: 2,
-        publicSurfaceLines: 30,
-        crossCellDependencies: 1,
+        consumes: [{ cell: "platform", artifactLanes: ["events-v1"] }],
+        producesArtifacts: [{
+          id: "events-v1",
+          paths: ["src/core/artifacts/**"],
+          description: "runtime artifacts produced by core",
+          locked: true,
+        }],
+        resourceContracts: [{
+          id: "users-read",
+          kind: "database",
+          access: ["read", "write"],
+          selectors: ["app.users"],
+          description: "reads and writes user rows",
+        }],
+        budgets: {
+          ownedPathPatterns: 1,
+          publicSymbols: 2,
+          publicSurfaceLines: 30,
+          crossCellDependencies: 1,
+        },
+        rules: {
+          "resources/undeclared-access": "error",
+        },
       },
-      rules: {
-        "resources/undeclared-access": "error",
+      {
+        ...validCell,
+        id: "platform",
+        ownedPaths: ["src/platform/**"],
+        publicEntry: "src/platform/public.ts",
+        publicSymbols: ["platform"],
       },
-    }],
+    ],
   });
 
   const result = validateManifest(manifest);
@@ -272,9 +281,35 @@ test("schema validation rejects duplicate names that would overwrite manifest po
     [
       "governance.pathClasses[].id contains duplicate entry generated",
       "cells[0].consumes[].cell contains duplicate entry platform",
+      "cells[0].consumes[0].cell references unknown cell platform",
+      "cells[0].consumes[1].cell references unknown cell platform",
       "cells[0].producesArtifacts[].id contains duplicate entry events-v1",
       "cells[0].resourceContracts[].id contains duplicate entry users-read",
     ],
+  );
+  assertInvalidContaining(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        ownedPaths: ["src/core/**", "src/core/**"],
+        publicSymbols: ["api", "api"],
+      }],
+    })),
+    [
+      "cells[0].ownedPaths contains duplicate entry src/core/**",
+      "cells[0].publicSymbols contains duplicate entry api",
+    ],
+  );
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        ownedPaths: ["../outside/**"],
+        publicEntry: "/tmp/outside.ts",
+        producesArtifacts: [{ id: "leak", paths: ["../dist/**"] }],
+      }],
+    })),
+    /ownedPaths\[0\] must be a repo-relative path[\s\S]*publicEntry must be a repo-relative path[\s\S]*paths\[0\] must be a repo-relative path/,
   );
 });
 
@@ -387,8 +422,11 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ generatedAt: 1 })), /generatedAt must be a non-empty string/);
   assertInvalid(validateBaseline(validBaseline({ generatedAt: "" })), /generatedAt must be a non-empty string/);
   assertInvalid(validateBaseline(validBaseline({ generatedAt: "   " })), /generatedAt must be a non-empty string/);
+  assertInvalid(validateBaseline(validBaseline({ generatedAt: "tomorrow" })), /generatedAt must be an ISO 8601 date-time string/);
   assertInvalid(validateBaseline(validBaseline({ cellIds: [1] })), /cellIds must be an array/);
+  assertInvalid(validateBaseline(validBaseline({ cellIds: ["core", "core"] })), /cellIds contains duplicate entry core/);
   assertInvalid(validateBaseline(validBaseline({ cells: [] })), /cells must be an object/);
+  assertInvalid(validateBaseline(validBaseline({ cells: { "": validBaseline().cells.core } })), /cells contains an empty cell id/);
   assertInvalid(validateBaseline(validBaseline({ cells: { core: null } })), /cells\.core must be an object/);
   assertInvalid(validateBaseline(validBaseline({ seal: "sealed" })), /seal must be an object/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "sha256", digest: "a".repeat(64) } })), /seal\.algorithm must be hmac-sha256 or ed25519/);
@@ -512,7 +550,9 @@ test("schema validation accepts and rejects resource evidence", () => {
   assertInvalid(validateResourceEvidence(validEvidence({ schemaVersion: "v0" })), /schemaVersion must be/);
   assertInvalid(validateResourceEvidence(validEvidence({ commitSha: 1 })), /commitSha must be a string/);
   assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: 1 })), /generatedAt must be a string/);
-  assertInvalid(validateResourceEvidence(validEvidence({ cellId: 1 })), /cellId must be a string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: "yesterday" })), /generatedAt must be an ISO 8601 date-time string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ cellId: 1 })), /cellId must be a non-empty string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ cellId: "" })), /cellId must be a non-empty string/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: "bad" })), /accesses must be an array/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: [123] })), /accesses\[0\] must be an object/);
   assertInvalid(
@@ -538,6 +578,17 @@ test("schema validation accepts and rejects resource evidence", () => {
         observedAt: 1,
       }],
     }),
-    /cellId must be a string[\s\S]*observedAt must be a string[\s\S]*cellId is required/,
+    /cellId must be a non-empty string[\s\S]*observedAt must be a string[\s\S]*cellId is required/,
+  );
+  assertInvalid(
+    validateResourceEvidence(validEvidence({
+      accesses: [{
+        kind: "database",
+        access: "read",
+        selector: "app.users",
+        observedAt: "not-a-date",
+      }],
+    })),
+    /observedAt must be an ISO 8601 date-time string/,
   );
 });

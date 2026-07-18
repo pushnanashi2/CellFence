@@ -1,0 +1,5232 @@
+{
+  "schemaVersion": "cellfence.adversarial-validation.v1",
+  "generatedAt": "2026-07-18T20:58:44.264Z",
+  "iterationsPerCategory": 100,
+  "categories": [
+    "language-independent",
+    "python",
+    "js-ts"
+  ],
+  "ok": true,
+  "durationMs": 13177,
+  "summary": {
+    "language-independent": {
+      "total": 100,
+      "passed": 100,
+      "failed": 0,
+      "expectedBlocks": 95,
+      "confirmedBlocks": 95,
+      "expectedGreens": 5,
+      "confirmedGreens": 5,
+      "templates": [
+        "artifact-path-outside-owner",
+        "baseline-cell-set-growth",
+        "baseline-unknown-field",
+        "duplicate-json-key-manifest",
+        "duplicate-package-name",
+        "escaped-duplicate-json-key-manifest",
+        "manifest-path-root-escape",
+        "nested-owned-path-overlap",
+        "pending-waiver-does-not-authorize",
+        "required-rule-disabled",
+        "resource-evidence-unknown-field",
+        "sealed-baseline-requires-verifier",
+        "sibling-prefix-ownership-control",
+        "source-waiver-cannot-suppress-required-private-import",
+        "stale-runtime-evidence-commit-sha",
+        "unknown-cell-policy-field",
+        "unknown-consumer-cell",
+        "unknown-manifest-root-field",
+        "unowned-governed-source",
+        "unsealed-baseline-cannot-grandfather-runtime-evidence",
+        "wildcard-owned-path-overlap"
+      ]
+    },
+    "python": {
+      "total": 100,
+      "passed": 100,
+      "failed": 0,
+      "expectedBlocks": 90,
+      "confirmedBlocks": 90,
+      "expectedGreens": 10,
+      "confirmedGreens": 10,
+      "templates": [
+        "absolute-private-from-import",
+        "absolute-private-import-module",
+        "celery-delay-near-miss-control",
+        "celery-task-without-contract",
+        "computed-python-dynamic-import-fail-closed",
+        "django-model-manager-without-contract",
+        "eval-dunder-import-private",
+        "fastapi-route-without-contract",
+        "from-package-submodule-private",
+        "importlib-alias-private",
+        "importlib-getattr-private",
+        "literal-importlib-private",
+        "pyproject-src-layout-private-import",
+        "python-public-import-control",
+        "python-syntax-recovery-fail-closed",
+        "relative-private-from-import",
+        "sqlalchemy-bulk-write-no-hint",
+        "sqlalchemy-dynamic-text-without-contract",
+        "sqlalchemy-session-get-no-hint",
+        "undeclared-python-consumer"
+      ]
+    },
+    "js-ts": {
+      "total": 100,
+      "passed": 100,
+      "failed": 0,
+      "expectedBlocks": 92,
+      "confirmedBlocks": 92,
+      "expectedGreens": 8,
+      "confirmedGreens": 8,
+      "templates": [
+        "cjs-create-require-private",
+        "computed-dynamic-import-fail-closed",
+        "computed-eval-string-require-fail-closed",
+        "computed-require-fail-closed",
+        "create-require-private",
+        "eval-string-require-private",
+        "global-require-private",
+        "global-this-require-private",
+        "import-equals-private",
+        "import-type-node-private",
+        "module-constructor-load-private",
+        "module-require-private",
+        "namespace-public-symbol-control",
+        "nested-tsconfig-alias-private",
+        "package-imports-map-private",
+        "package-imports-types-condition-runtime-private",
+        "package-subpath-private",
+        "process-main-module-require-private",
+        "require-alias-private",
+        "shadowed-require-control",
+        "top-level-this-require-private",
+        "typescript-syntax-recovery-fail-closed"
+      ]
+    }
+  },
+  "failures": [],
+  "cases": [
+    {
+      "category": "language-independent",
+      "iteration": 0,
+      "templateId": "unknown-manifest-root-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 3
+    },
+    {
+      "category": "language-independent",
+      "iteration": 1,
+      "templateId": "unknown-cell-policy-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 2,
+      "templateId": "duplicate-package-name",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 3,
+      "templateId": "sibling-prefix-ownership-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 105
+    },
+    {
+      "category": "language-independent",
+      "iteration": 4,
+      "templateId": "nested-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 32
+    },
+    {
+      "category": "language-independent",
+      "iteration": 5,
+      "templateId": "wildcard-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "language-independent",
+      "iteration": 6,
+      "templateId": "unowned-governed-source",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "language-independent",
+      "iteration": 7,
+      "templateId": "artifact-path-outside-owner",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "language-independent",
+      "iteration": 8,
+      "templateId": "baseline-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 26
+    },
+    {
+      "category": "language-independent",
+      "iteration": 9,
+      "templateId": "resource-evidence-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 24
+    },
+    {
+      "category": "language-independent",
+      "iteration": 10,
+      "templateId": "stale-runtime-evidence-commit-sha",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 57
+    },
+    {
+      "category": "language-independent",
+      "iteration": 11,
+      "templateId": "required-rule-disabled",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "language-independent",
+      "iteration": 12,
+      "templateId": "unknown-consumer-cell",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 13,
+      "templateId": "baseline-cell-set-growth",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "language-independent",
+      "iteration": 14,
+      "templateId": "manifest-path-root-escape",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 15,
+      "templateId": "duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 16,
+      "templateId": "escaped-duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 17,
+      "templateId": "sealed-baseline-requires-verifier",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 18,
+      "templateId": "pending-waiver-does-not-authorize",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_WAIVER_INVALID",
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_WAIVER_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 34
+    },
+    {
+      "category": "language-independent",
+      "iteration": 19,
+      "templateId": "source-waiver-cannot-suppress-required-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 24
+    },
+    {
+      "category": "language-independent",
+      "iteration": 20,
+      "templateId": "unsealed-baseline-cannot-grandfather-runtime-evidence",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "language-independent",
+      "iteration": 21,
+      "templateId": "unknown-manifest-root-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 22,
+      "templateId": "unknown-cell-policy-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 23,
+      "templateId": "duplicate-package-name",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 24,
+      "templateId": "sibling-prefix-ownership-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "language-independent",
+      "iteration": 25,
+      "templateId": "nested-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 25
+    },
+    {
+      "category": "language-independent",
+      "iteration": 26,
+      "templateId": "wildcard-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "language-independent",
+      "iteration": 27,
+      "templateId": "unowned-governed-source",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 28,
+      "templateId": "artifact-path-outside-owner",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 29,
+      "templateId": "baseline-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "language-independent",
+      "iteration": 30,
+      "templateId": "resource-evidence-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 31,
+      "templateId": "stale-runtime-evidence-commit-sha",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 56
+    },
+    {
+      "category": "language-independent",
+      "iteration": 32,
+      "templateId": "required-rule-disabled",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 33,
+      "templateId": "unknown-consumer-cell",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 34,
+      "templateId": "baseline-cell-set-growth",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "language-independent",
+      "iteration": 35,
+      "templateId": "manifest-path-root-escape",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 36,
+      "templateId": "duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 37,
+      "templateId": "escaped-duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 38,
+      "templateId": "sealed-baseline-requires-verifier",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 39,
+      "templateId": "pending-waiver-does-not-authorize",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_WAIVER_INVALID",
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_WAIVER_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "language-independent",
+      "iteration": 40,
+      "templateId": "source-waiver-cannot-suppress-required-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "language-independent",
+      "iteration": 41,
+      "templateId": "unsealed-baseline-cannot-grandfather-runtime-evidence",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 42,
+      "templateId": "unknown-manifest-root-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 43,
+      "templateId": "unknown-cell-policy-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 44,
+      "templateId": "duplicate-package-name",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 45,
+      "templateId": "sibling-prefix-ownership-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 30
+    },
+    {
+      "category": "language-independent",
+      "iteration": 46,
+      "templateId": "nested-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "language-independent",
+      "iteration": 47,
+      "templateId": "wildcard-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "language-independent",
+      "iteration": 48,
+      "templateId": "unowned-governed-source",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 49,
+      "templateId": "artifact-path-outside-owner",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "language-independent",
+      "iteration": 50,
+      "templateId": "baseline-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 51,
+      "templateId": "resource-evidence-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "language-independent",
+      "iteration": 52,
+      "templateId": "stale-runtime-evidence-commit-sha",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 51
+    },
+    {
+      "category": "language-independent",
+      "iteration": 53,
+      "templateId": "required-rule-disabled",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 54,
+      "templateId": "unknown-consumer-cell",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 55,
+      "templateId": "baseline-cell-set-growth",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "language-independent",
+      "iteration": 56,
+      "templateId": "manifest-path-root-escape",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 57,
+      "templateId": "duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 58,
+      "templateId": "escaped-duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 59,
+      "templateId": "sealed-baseline-requires-verifier",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 60,
+      "templateId": "pending-waiver-does-not-authorize",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_WAIVER_INVALID",
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_WAIVER_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 26
+    },
+    {
+      "category": "language-independent",
+      "iteration": 61,
+      "templateId": "source-waiver-cannot-suppress-required-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "language-independent",
+      "iteration": 62,
+      "templateId": "unsealed-baseline-cannot-grandfather-runtime-evidence",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "language-independent",
+      "iteration": 63,
+      "templateId": "unknown-manifest-root-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 64,
+      "templateId": "unknown-cell-policy-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 65,
+      "templateId": "duplicate-package-name",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 66,
+      "templateId": "sibling-prefix-ownership-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "language-independent",
+      "iteration": 67,
+      "templateId": "nested-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "language-independent",
+      "iteration": 68,
+      "templateId": "wildcard-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "language-independent",
+      "iteration": 69,
+      "templateId": "unowned-governed-source",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 11
+    },
+    {
+      "category": "language-independent",
+      "iteration": 70,
+      "templateId": "artifact-path-outside-owner",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 11
+    },
+    {
+      "category": "language-independent",
+      "iteration": 71,
+      "templateId": "baseline-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "language-independent",
+      "iteration": 72,
+      "templateId": "resource-evidence-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "language-independent",
+      "iteration": 73,
+      "templateId": "stale-runtime-evidence-commit-sha",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 60
+    },
+    {
+      "category": "language-independent",
+      "iteration": 74,
+      "templateId": "required-rule-disabled",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 11
+    },
+    {
+      "category": "language-independent",
+      "iteration": 75,
+      "templateId": "unknown-consumer-cell",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 76,
+      "templateId": "baseline-cell-set-growth",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "language-independent",
+      "iteration": 77,
+      "templateId": "manifest-path-root-escape",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 78,
+      "templateId": "duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 79,
+      "templateId": "escaped-duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 80,
+      "templateId": "sealed-baseline-requires-verifier",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_BASELINE_SEAL_INVALID",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 81,
+      "templateId": "pending-waiver-does-not-authorize",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_WAIVER_INVALID",
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_WAIVER_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "language-independent",
+      "iteration": 82,
+      "templateId": "source-waiver-cannot-suppress-required-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "language-independent",
+      "iteration": 83,
+      "templateId": "unsealed-baseline-cannot-grandfather-runtime-evidence",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 84,
+      "templateId": "unknown-manifest-root-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 85,
+      "templateId": "unknown-cell-policy-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 86,
+      "templateId": "duplicate-package-name",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 87,
+      "templateId": "sibling-prefix-ownership-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "language-independent",
+      "iteration": 88,
+      "templateId": "nested-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "language-independent",
+      "iteration": 89,
+      "templateId": "wildcard-owned-path-overlap",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_OWNERSHIP_OVERLAP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "language-independent",
+      "iteration": 90,
+      "templateId": "unowned-governed-source",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 91,
+      "templateId": "artifact-path-outside-owner",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "language-independent",
+      "iteration": 92,
+      "templateId": "baseline-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 93,
+      "templateId": "resource-evidence-unknown-field",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 11
+    },
+    {
+      "category": "language-independent",
+      "iteration": 94,
+      "templateId": "stale-runtime-evidence-commit-sha",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "language-independent",
+      "iteration": 95,
+      "templateId": "required-rule-disabled",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_REQUIRED_RULE_DISABLED"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "language-independent",
+      "iteration": 96,
+      "templateId": "unknown-consumer-cell",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 1
+    },
+    {
+      "category": "language-independent",
+      "iteration": 97,
+      "templateId": "baseline-cell-set-growth",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "language-independent",
+      "iteration": 98,
+      "templateId": "manifest-path-root-escape",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "language-independent",
+      "iteration": 99,
+      "templateId": "duplicate-json-key-manifest",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "observedOk": false,
+      "exitCode": 2,
+      "findingRuleIds": [
+        "CELLFENCE_MANIFEST_INVALID"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 0
+    },
+    {
+      "category": "python",
+      "iteration": 0,
+      "templateId": "absolute-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 1,
+      "templateId": "absolute-private-import-module",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 2,
+      "templateId": "relative-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 3,
+      "templateId": "undeclared-python-consumer",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 130
+    },
+    {
+      "category": "python",
+      "iteration": 4,
+      "templateId": "pyproject-src-layout-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 132
+    },
+    {
+      "category": "python",
+      "iteration": 5,
+      "templateId": "from-package-submodule-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 175
+    },
+    {
+      "category": "python",
+      "iteration": 6,
+      "templateId": "literal-importlib-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 7,
+      "templateId": "importlib-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 130
+    },
+    {
+      "category": "python",
+      "iteration": 8,
+      "templateId": "importlib-getattr-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 9,
+      "templateId": "eval-dunder-import-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 130
+    },
+    {
+      "category": "python",
+      "iteration": 10,
+      "templateId": "computed-python-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 133
+    },
+    {
+      "category": "python",
+      "iteration": 11,
+      "templateId": "python-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 62
+    },
+    {
+      "category": "python",
+      "iteration": 12,
+      "templateId": "fastapi-route-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 50
+    },
+    {
+      "category": "python",
+      "iteration": 13,
+      "templateId": "django-model-manager-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 50
+    },
+    {
+      "category": "python",
+      "iteration": 14,
+      "templateId": "sqlalchemy-dynamic-text-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 51
+    },
+    {
+      "category": "python",
+      "iteration": 15,
+      "templateId": "sqlalchemy-session-get-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 16,
+      "templateId": "sqlalchemy-bulk-write-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 17,
+      "templateId": "celery-task-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 18,
+      "templateId": "celery-delay-near-miss-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 48
+    },
+    {
+      "category": "python",
+      "iteration": 19,
+      "templateId": "python-public-import-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 20,
+      "templateId": "absolute-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 148
+    },
+    {
+      "category": "python",
+      "iteration": 21,
+      "templateId": "absolute-private-import-module",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 22,
+      "templateId": "relative-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 23,
+      "templateId": "undeclared-python-consumer",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 24,
+      "templateId": "pyproject-src-layout-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 25,
+      "templateId": "from-package-submodule-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 170
+    },
+    {
+      "category": "python",
+      "iteration": 26,
+      "templateId": "literal-importlib-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 27,
+      "templateId": "importlib-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 127
+    },
+    {
+      "category": "python",
+      "iteration": 28,
+      "templateId": "importlib-getattr-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 126
+    },
+    {
+      "category": "python",
+      "iteration": 29,
+      "templateId": "eval-dunder-import-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 30,
+      "templateId": "computed-python-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 31,
+      "templateId": "python-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 51
+    },
+    {
+      "category": "python",
+      "iteration": 32,
+      "templateId": "fastapi-route-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 33,
+      "templateId": "django-model-manager-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 34,
+      "templateId": "sqlalchemy-dynamic-text-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 50
+    },
+    {
+      "category": "python",
+      "iteration": 35,
+      "templateId": "sqlalchemy-session-get-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 51
+    },
+    {
+      "category": "python",
+      "iteration": 36,
+      "templateId": "sqlalchemy-bulk-write-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 48
+    },
+    {
+      "category": "python",
+      "iteration": 37,
+      "templateId": "celery-task-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 38,
+      "templateId": "celery-delay-near-miss-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 59
+    },
+    {
+      "category": "python",
+      "iteration": 39,
+      "templateId": "python-public-import-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 132
+    },
+    {
+      "category": "python",
+      "iteration": 40,
+      "templateId": "absolute-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 132
+    },
+    {
+      "category": "python",
+      "iteration": 41,
+      "templateId": "absolute-private-import-module",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 130
+    },
+    {
+      "category": "python",
+      "iteration": 42,
+      "templateId": "relative-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 130
+    },
+    {
+      "category": "python",
+      "iteration": 43,
+      "templateId": "undeclared-python-consumer",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 44,
+      "templateId": "pyproject-src-layout-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 134
+    },
+    {
+      "category": "python",
+      "iteration": 45,
+      "templateId": "from-package-submodule-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 170
+    },
+    {
+      "category": "python",
+      "iteration": 46,
+      "templateId": "literal-importlib-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 47,
+      "templateId": "importlib-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 48,
+      "templateId": "importlib-getattr-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 132
+    },
+    {
+      "category": "python",
+      "iteration": 49,
+      "templateId": "eval-dunder-import-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 133
+    },
+    {
+      "category": "python",
+      "iteration": 50,
+      "templateId": "computed-python-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 51,
+      "templateId": "python-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "python",
+      "iteration": 52,
+      "templateId": "fastapi-route-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 53,
+      "templateId": "django-model-manager-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 54,
+      "templateId": "sqlalchemy-dynamic-text-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 48
+    },
+    {
+      "category": "python",
+      "iteration": 55,
+      "templateId": "sqlalchemy-session-get-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 47
+    },
+    {
+      "category": "python",
+      "iteration": 56,
+      "templateId": "sqlalchemy-bulk-write-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 57,
+      "templateId": "celery-task-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 50
+    },
+    {
+      "category": "python",
+      "iteration": 58,
+      "templateId": "celery-delay-near-miss-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 47
+    },
+    {
+      "category": "python",
+      "iteration": 59,
+      "templateId": "python-public-import-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 128
+    },
+    {
+      "category": "python",
+      "iteration": 60,
+      "templateId": "absolute-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 131
+    },
+    {
+      "category": "python",
+      "iteration": 61,
+      "templateId": "absolute-private-import-module",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 131
+    },
+    {
+      "category": "python",
+      "iteration": 62,
+      "templateId": "relative-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 63,
+      "templateId": "undeclared-python-consumer",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 129
+    },
+    {
+      "category": "python",
+      "iteration": 64,
+      "templateId": "pyproject-src-layout-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 127
+    },
+    {
+      "category": "python",
+      "iteration": 65,
+      "templateId": "from-package-submodule-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 161
+    },
+    {
+      "category": "python",
+      "iteration": 66,
+      "templateId": "literal-importlib-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 125
+    },
+    {
+      "category": "python",
+      "iteration": 67,
+      "templateId": "importlib-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 126
+    },
+    {
+      "category": "python",
+      "iteration": 68,
+      "templateId": "importlib-getattr-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 123
+    },
+    {
+      "category": "python",
+      "iteration": 69,
+      "templateId": "eval-dunder-import-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 124
+    },
+    {
+      "category": "python",
+      "iteration": 70,
+      "templateId": "computed-python-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 139
+    },
+    {
+      "category": "python",
+      "iteration": 71,
+      "templateId": "python-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 44
+    },
+    {
+      "category": "python",
+      "iteration": 72,
+      "templateId": "fastapi-route-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "python",
+      "iteration": 73,
+      "templateId": "django-model-manager-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "python",
+      "iteration": 74,
+      "templateId": "sqlalchemy-dynamic-text-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "python",
+      "iteration": 75,
+      "templateId": "sqlalchemy-session-get-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 48
+    },
+    {
+      "category": "python",
+      "iteration": 76,
+      "templateId": "sqlalchemy-bulk-write-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 49
+    },
+    {
+      "category": "python",
+      "iteration": 77,
+      "templateId": "celery-task-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "python",
+      "iteration": 78,
+      "templateId": "celery-delay-near-miss-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 47
+    },
+    {
+      "category": "python",
+      "iteration": 79,
+      "templateId": "python-public-import-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 122
+    },
+    {
+      "category": "python",
+      "iteration": 80,
+      "templateId": "absolute-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 122
+    },
+    {
+      "category": "python",
+      "iteration": 81,
+      "templateId": "absolute-private-import-module",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 121
+    },
+    {
+      "category": "python",
+      "iteration": 82,
+      "templateId": "relative-private-from-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNOWNED_SOURCE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 123
+    },
+    {
+      "category": "python",
+      "iteration": 83,
+      "templateId": "undeclared-python-consumer",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_CONSUMER"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 121
+    },
+    {
+      "category": "python",
+      "iteration": 84,
+      "templateId": "pyproject-src-layout-private-import",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 122
+    },
+    {
+      "category": "python",
+      "iteration": 85,
+      "templateId": "from-package-submodule-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 159
+    },
+    {
+      "category": "python",
+      "iteration": 86,
+      "templateId": "literal-importlib-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 123
+    },
+    {
+      "category": "python",
+      "iteration": 87,
+      "templateId": "importlib-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 127
+    },
+    {
+      "category": "python",
+      "iteration": 88,
+      "templateId": "importlib-getattr-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 140
+    },
+    {
+      "category": "python",
+      "iteration": 89,
+      "templateId": "eval-dunder-import-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 122
+    },
+    {
+      "category": "python",
+      "iteration": 90,
+      "templateId": "computed-python-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 127
+    },
+    {
+      "category": "python",
+      "iteration": 91,
+      "templateId": "python-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "python",
+      "iteration": 92,
+      "templateId": "fastapi-route-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "python",
+      "iteration": 93,
+      "templateId": "django-model-manager-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 45
+    },
+    {
+      "category": "python",
+      "iteration": 94,
+      "templateId": "sqlalchemy-dynamic-text-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 47
+    },
+    {
+      "category": "python",
+      "iteration": 95,
+      "templateId": "sqlalchemy-session-get-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 44
+    },
+    {
+      "category": "python",
+      "iteration": 96,
+      "templateId": "sqlalchemy-bulk-write-no-hint",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "python",
+      "iteration": 97,
+      "templateId": "celery-task-without-contract",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 46
+    },
+    {
+      "category": "python",
+      "iteration": 98,
+      "templateId": "celery-delay-near-miss-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 44
+    },
+    {
+      "category": "python",
+      "iteration": 99,
+      "templateId": "python-public-import-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 120
+    },
+    {
+      "category": "js-ts",
+      "iteration": 0,
+      "templateId": "import-equals-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "js-ts",
+      "iteration": 1,
+      "templateId": "module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 2,
+      "templateId": "require-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 3,
+      "templateId": "create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 24
+    },
+    {
+      "category": "js-ts",
+      "iteration": 4,
+      "templateId": "cjs-create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "js-ts",
+      "iteration": 5,
+      "templateId": "computed-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 6,
+      "templateId": "computed-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 7,
+      "templateId": "package-subpath-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 23
+    },
+    {
+      "category": "js-ts",
+      "iteration": 8,
+      "templateId": "global-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "js-ts",
+      "iteration": 9,
+      "templateId": "global-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 10,
+      "templateId": "top-level-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 11,
+      "templateId": "process-main-module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "js-ts",
+      "iteration": 12,
+      "templateId": "module-constructor-load-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 13,
+      "templateId": "eval-string-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 14,
+      "templateId": "computed-eval-string-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "js-ts",
+      "iteration": 15,
+      "templateId": "import-type-node-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "js-ts",
+      "iteration": 16,
+      "templateId": "nested-tsconfig-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 33
+    },
+    {
+      "category": "js-ts",
+      "iteration": 17,
+      "templateId": "package-imports-map-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "js-ts",
+      "iteration": 18,
+      "templateId": "package-imports-types-condition-runtime-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 19,
+      "templateId": "typescript-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 10
+    },
+    {
+      "category": "js-ts",
+      "iteration": 20,
+      "templateId": "shadowed-require-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "js-ts",
+      "iteration": 21,
+      "templateId": "namespace-public-symbol-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "js-ts",
+      "iteration": 22,
+      "templateId": "import-equals-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "js-ts",
+      "iteration": 23,
+      "templateId": "module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 24,
+      "templateId": "require-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 25,
+      "templateId": "create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 17
+    },
+    {
+      "category": "js-ts",
+      "iteration": 26,
+      "templateId": "cjs-create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 27,
+      "templateId": "computed-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 24
+    },
+    {
+      "category": "js-ts",
+      "iteration": 28,
+      "templateId": "computed-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 29,
+      "templateId": "package-subpath-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 30,
+      "templateId": "global-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 31,
+      "templateId": "global-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "js-ts",
+      "iteration": 32,
+      "templateId": "top-level-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 33,
+      "templateId": "process-main-module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 34,
+      "templateId": "module-constructor-load-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 35,
+      "templateId": "eval-string-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 36,
+      "templateId": "computed-eval-string-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 24
+    },
+    {
+      "category": "js-ts",
+      "iteration": 37,
+      "templateId": "import-type-node-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 38,
+      "templateId": "nested-tsconfig-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 21
+    },
+    {
+      "category": "js-ts",
+      "iteration": 39,
+      "templateId": "package-imports-map-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 40,
+      "templateId": "package-imports-types-condition-runtime-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 41,
+      "templateId": "typescript-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "js-ts",
+      "iteration": 42,
+      "templateId": "shadowed-require-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 31
+    },
+    {
+      "category": "js-ts",
+      "iteration": 43,
+      "templateId": "namespace-public-symbol-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 12
+    },
+    {
+      "category": "js-ts",
+      "iteration": 44,
+      "templateId": "import-equals-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 45,
+      "templateId": "module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 46,
+      "templateId": "require-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 47,
+      "templateId": "create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "js-ts",
+      "iteration": 48,
+      "templateId": "cjs-create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 49,
+      "templateId": "computed-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 50,
+      "templateId": "computed-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "js-ts",
+      "iteration": 51,
+      "templateId": "package-subpath-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 52,
+      "templateId": "global-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 53,
+      "templateId": "global-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 23
+    },
+    {
+      "category": "js-ts",
+      "iteration": 54,
+      "templateId": "top-level-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 55,
+      "templateId": "process-main-module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 56,
+      "templateId": "module-constructor-load-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 57,
+      "templateId": "eval-string-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 58,
+      "templateId": "computed-eval-string-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 59,
+      "templateId": "import-type-node-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 60,
+      "templateId": "nested-tsconfig-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "js-ts",
+      "iteration": 61,
+      "templateId": "package-imports-map-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 62,
+      "templateId": "package-imports-types-condition-runtime-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 63,
+      "templateId": "typescript-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 10
+    },
+    {
+      "category": "js-ts",
+      "iteration": 64,
+      "templateId": "shadowed-require-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "js-ts",
+      "iteration": 65,
+      "templateId": "namespace-public-symbol-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 11
+    },
+    {
+      "category": "js-ts",
+      "iteration": 66,
+      "templateId": "import-equals-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "js-ts",
+      "iteration": 67,
+      "templateId": "module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "js-ts",
+      "iteration": 68,
+      "templateId": "require-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 69,
+      "templateId": "create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 70,
+      "templateId": "cjs-create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 71,
+      "templateId": "computed-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "js-ts",
+      "iteration": 72,
+      "templateId": "computed-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 73,
+      "templateId": "package-subpath-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 74,
+      "templateId": "global-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 75,
+      "templateId": "global-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 13
+    },
+    {
+      "category": "js-ts",
+      "iteration": 76,
+      "templateId": "top-level-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 77,
+      "templateId": "process-main-module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 78,
+      "templateId": "module-constructor-load-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 79,
+      "templateId": "eval-string-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 20
+    },
+    {
+      "category": "js-ts",
+      "iteration": 80,
+      "templateId": "computed-eval-string-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 81,
+      "templateId": "import-type-node-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 82,
+      "templateId": "nested-tsconfig-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 18
+    },
+    {
+      "category": "js-ts",
+      "iteration": 83,
+      "templateId": "package-imports-map-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 84,
+      "templateId": "package-imports-types-condition-runtime-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 26
+    },
+    {
+      "category": "js-ts",
+      "iteration": 85,
+      "templateId": "typescript-syntax-recovery-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 23
+    },
+    {
+      "category": "js-ts",
+      "iteration": 86,
+      "templateId": "shadowed-require-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 87,
+      "templateId": "namespace-public-symbol-control",
+      "ok": true,
+      "expectedOk": true,
+      "expectedRuleIds": [],
+      "observedOk": true,
+      "exitCode": 0,
+      "findingRuleIds": [],
+      "warningRuleIds": [],
+      "durationMs": 10
+    },
+    {
+      "category": "js-ts",
+      "iteration": 88,
+      "templateId": "import-equals-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 89,
+      "templateId": "module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 90,
+      "templateId": "require-alias-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 91,
+      "templateId": "create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 16
+    },
+    {
+      "category": "js-ts",
+      "iteration": 92,
+      "templateId": "cjs-create-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 93,
+      "templateId": "computed-require-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 19
+    },
+    {
+      "category": "js-ts",
+      "iteration": 94,
+      "templateId": "computed-dynamic-import-fail-closed",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 95,
+      "templateId": "package-subpath-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 96,
+      "templateId": "global-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 15
+    },
+    {
+      "category": "js-ts",
+      "iteration": 97,
+      "templateId": "global-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 22
+    },
+    {
+      "category": "js-ts",
+      "iteration": 98,
+      "templateId": "top-level-this-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    },
+    {
+      "category": "js-ts",
+      "iteration": 99,
+      "templateId": "process-main-module-require-private",
+      "ok": true,
+      "expectedOk": false,
+      "expectedRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "observedOk": false,
+      "exitCode": 1,
+      "findingRuleIds": [
+        "CELLFENCE_PRIVATE_IMPORT"
+      ],
+      "warningRuleIds": [],
+      "durationMs": 14
+    }
+  ]
+}

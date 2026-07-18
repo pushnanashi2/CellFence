@@ -61,11 +61,22 @@ function summarizeCheck(result) {
 }
 
 function checkFixture(relativePath, options = {}) {
-  return checkRepository({
-    rootDir: path.join(root, "fixtures", relativePath),
-    manifestPath: "cellfence.manifest.json",
-    ...options,
-  });
+  const previous = process.env.CELLFENCE_BASELINE_HMAC_KEY;
+  const baselinePath = options.baselinePath ? path.join(root, "fixtures", relativePath, options.baselinePath) : "";
+  const baselineHasSeal = baselinePath && JSON.parse(fs.readFileSync(baselinePath, "utf8")).seal;
+  if (baselineHasSeal) process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
+  try {
+    return checkRepository({
+      rootDir: path.join(root, "fixtures", relativePath),
+      manifestPath: "cellfence.manifest.json",
+      ...options,
+    });
+  } finally {
+    if (baselineHasSeal) {
+      if (previous === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+      else process.env.CELLFENCE_BASELINE_HMAC_KEY = previous;
+    }
+  }
 }
 
 test("governance canonicalization is stable across object order and JSON primitive shapes", () => {

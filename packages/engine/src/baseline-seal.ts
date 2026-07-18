@@ -99,7 +99,15 @@ export function validateBaselineSealFindings(
     return findings;
   }
   if (!verifier) {
-    if (requireConfiguredVerifier) {
+    if (baseline.seal) {
+      findings.push({
+        ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
+        severity: "error",
+        filePath: baselinePath,
+        message: `baseline has a seal but no verifier is configured; set ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`,
+        details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
+      });
+    } else if (requireConfiguredVerifier) {
       findings.push({
         ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
         severity: "error",

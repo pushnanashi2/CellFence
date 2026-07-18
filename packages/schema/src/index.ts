@@ -198,6 +198,25 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === "string" && entry.trim().length > 0);
 }
 
+function isRepoRelativePathLike(value: string): boolean {
+  const normalized = value.replace(/\\/g, "/");
+  if (normalized.startsWith("/") || normalized.startsWith("//")) return false;
+  if (/^[A-Za-z]:\//.test(normalized)) return false;
+  if ([...normalized].some((character) => character.charCodeAt(0) <= 0x1f)) return false;
+  return !normalized.split("/").includes("..");
+}
+
+function validateRepoRelativePathLike(value: unknown, location: string, errors: string[]): void {
+  if (typeof value === "string" && value.trim().length > 0 && !isRepoRelativePathLike(value)) {
+    errors.push(`${location} must be a repo-relative path or pattern that does not escape the repository`);
+  }
+}
+
+function validateRepoRelativePathLikeArray(value: unknown, location: string, errors: string[]): void {
+  if (!Array.isArray(value)) return;
+  value.forEach((entry, index) => validateRepoRelativePathLike(entry, `${location}[${index}]`, errors));
+}
+
 function isRuleSeverity(value: unknown): value is RuleSeverity {
   return value === "off" || value === "warning" || value === "error";
 }
@@ -244,6 +263,17 @@ function optionalBoolean(value: unknown): value is boolean | undefined {
   return value === undefined || typeof value === "boolean";
 }
 
+function isIsoDateTime(value: string): boolean {
+  const timestamp = Date.parse(value);
+  return !Number.isNaN(timestamp) && /^\d{4}-\d{2}-\d{2}T/.test(value);
+}
+
+function validateOptionalIsoDateTime(value: unknown, location: string, errors: string[]): void {
+  if (value !== undefined && typeof value === "string" && value.trim().length > 0 && !isIsoDateTime(value)) {
+    errors.push(`${location} must be an ISO 8601 date-time string when present`);
+  }
+}
+
 function validateConsumer(value: unknown, location: string, errors: string[]): value is CellConsumerManifest {
   if (!isRecord(value)) {
     errors.push(`${location} must be an object like {"cell":"producer-cell"}`);
@@ -270,6 +300,9 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
   }
   if (!isStringArray(value.paths)) {
     errors.push(`${location}.paths must be an array of non-empty strings`);
+  } else {
+    validateUniqueNonEmptyStrings(value.paths, `${location}.paths`, errors);
+    validateRepoRelativePathLikeArray(value.paths, `${location}.paths`, errors);
   }
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);
@@ -321,6 +354,9 @@ function validatePathClass(value: unknown, location: string, errors: string[]): 
   }
   if (!isStringArray(value.paths)) {
     errors.push(`${location}.paths must be an array of non-empty strings`);
+  } else {
+    validateUniqueNonEmptyStrings(value.paths, `${location}.paths`, errors);
+    validateRepoRelativePathLikeArray(value.paths, `${location}.paths`, errors);
   }
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);
@@ -372,11 +408,13 @@ function validateResourceBaselineEntry(value: unknown, location: string, errors:
 function validateResourceEvidenceAccess(value: unknown, location: string, errors: string[]): value is ResourceEvidenceAccess {
   validateResourceBaselineEntry(value, location, errors, ["cellId", "observedAt"]);
   if (!isRecord(value)) return false;
-  if (!optionalString(value.cellId)) {
-    errors.push(`${location}.cellId must be a string when present`);
+  if (value.cellId !== undefined && (typeof value.cellId !== "string" || value.cellId.trim().length === 0)) {
+    errors.push(`${location}.cellId must be a non-empty string when present`);
   }
   if (!optionalString(value.observedAt)) {
     errors.push(`${location}.observedAt must be a string when present`);
+  } else {
+    validateOptionalIsoDateTime(value.observedAt, `${location}.observedAt`, errors);
   }
   return true;
 }
@@ -409,12 +447,20 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
   }
   if (value.include !== undefined && !isStringArray(value.include)) {
     errors.push(`${location}.include must be an array of non-empty strings when present`);
+  } else if (value.include !== undefined) {
+    validateUniqueNonEmptyStrings(value.include, `${location}.include`, errors);
+    validateRepoRelativePathLikeArray(value.include, `${location}.include`, errors);
   }
   if (value.exclude !== undefined && !isStringArray(value.exclude)) {
     errors.push(`${location}.exclude must be an array of non-empty strings when present`);
+  } else if (value.exclude !== undefined) {
+    validateUniqueNonEmptyStrings(value.exclude, `${location}.exclude`, errors);
+    validateRepoRelativePathLikeArray(value.exclude, `${location}.exclude`, errors);
   }
   if (value.requiredRules !== undefined && !isStringArray(value.requiredRules)) {
     errors.push(`${location}.requiredRules must be an array of non-empty strings when present`);
+  } else if (value.requiredRules !== undefined) {
+    validateUniqueNonEmptyStrings(value.requiredRules, `${location}.requiredRules`, errors);
   }
   if (value.resourceAdapters !== undefined) {
     if (!isRecord(value.resourceAdapters)) {
@@ -542,12 +588,19 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (!isStringArray(value.ownedPaths)) {
     errors.push(`${location}.ownedPaths must be an array of non-empty strings`);
+  } else {
+    validateUniqueNonEmptyStrings(value.ownedPaths, `${location}.ownedPaths`, errors);
+    validateRepoRelativePathLikeArray(value.ownedPaths, `${location}.ownedPaths`, errors);
   }
   if (typeof value.publicEntry !== "string" || value.publicEntry.trim().length === 0) {
     errors.push(`${location}.publicEntry must be a non-empty string`);
+  } else {
+    validateRepoRelativePathLike(value.publicEntry, `${location}.publicEntry`, errors);
   }
   if (!isStringArray(value.publicSymbols)) {
     errors.push(`${location}.publicSymbols must be an array of non-empty strings`);
+  } else {
+    validateUniqueNonEmptyStrings(value.publicSymbols, `${location}.publicSymbols`, errors);
   }
   if (!optionalString(value.packageName)) {
     errors.push(`${location}.packageName must be a string when present`);
@@ -645,12 +698,25 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   if (!Array.isArray(value.cells)) {
     errors.push("cells must be an array");
   } else {
+    const cellIds: string[] = [];
     const packageNames: string[] = [];
     value.cells.forEach((cell, cellIndex) => {
       validateCell(cell, `cells[${cellIndex}]`, errors);
+      if (isRecord(cell) && typeof cell.id === "string" && cell.id.trim().length > 0) cellIds.push(cell.id);
       if (isRecord(cell) && typeof cell.packageName === "string" && cell.packageName.trim().length > 0) packageNames.push(cell.packageName);
     });
+    validateUniqueNonEmptyStrings(cellIds, "cells[].id", errors);
     validateUniqueNonEmptyStrings(packageNames, "cells[].packageName", errors);
+    const knownCellIds = new Set(cellIds);
+    value.cells.forEach((cell, cellIndex) => {
+      if (!isRecord(cell) || !Array.isArray(cell.consumes)) return;
+      cell.consumes.forEach((consumer, consumerIndex) => {
+        if (!isRecord(consumer) || typeof consumer.cell !== "string" || consumer.cell.trim().length === 0) return;
+        if (!knownCellIds.has(consumer.cell)) {
+          errors.push(`cells[${cellIndex}].consumes[${consumerIndex}].cell references unknown cell ${consumer.cell}`);
+        }
+      });
+    });
   }
   validateGovernance(value.governance, "governance", errors);
   return errors.length === 0
@@ -669,9 +735,13 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   }
   if (typeof value.generatedAt !== "string" || value.generatedAt.trim().length === 0) {
     errors.push("generatedAt must be a non-empty string");
+  } else if (!isIsoDateTime(value.generatedAt)) {
+    errors.push("generatedAt must be an ISO 8601 date-time string");
   }
   if (value.cellIds !== undefined && !isStringArray(value.cellIds)) {
     errors.push("cellIds must be an array of non-empty strings when present");
+  } else if (value.cellIds !== undefined) {
+    validateUniqueNonEmptyStrings(value.cellIds, "cellIds", errors);
   }
   if (value.seal !== undefined) {
     if (!isRecord(value.seal)) {
@@ -705,6 +775,9 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   if (!isRecord(value.cells)) {
     errors.push("cells must be an object");
   } else {
+    for (const cellId of Object.keys(value.cells)) {
+      if (cellId.trim().length === 0) errors.push("cells contains an empty cell id");
+    }
     for (const [cellId, record] of Object.entries(value.cells)) {
       if (!isRecord(record)) {
         errors.push(`cells.${cellId} must be an object`);
@@ -770,9 +843,11 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   }
   if (!optionalString(value.generatedAt)) {
     errors.push("generatedAt must be a string when present");
+  } else {
+    validateOptionalIsoDateTime(value.generatedAt, "generatedAt", errors);
   }
-  if (!optionalString(value.cellId)) {
-    errors.push("cellId must be a string when present");
+  if (value.cellId !== undefined && (typeof value.cellId !== "string" || value.cellId.trim().length === 0)) {
+    errors.push("cellId must be a non-empty string when present");
   }
   if (!Array.isArray(value.accesses)) {
     errors.push("accesses must be an array");

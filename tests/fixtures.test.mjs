@@ -23,17 +23,38 @@ function sortedRuleIds(findings) {
   return [...new Set(findings.map((finding) => finding.ruleId))].sort();
 }
 
+function baselineHasSeal(fixturePath) {
+  try {
+    const baseline = JSON.parse(fs.readFileSync(path.join(fixturePath, "cellfence.baseline.json"), "utf8"));
+    return Boolean(baseline.seal);
+  } catch {
+    return false;
+  }
+}
+
+function withBaselineVerifier(callback) {
+  const previous = process.env.CELLFENCE_BASELINE_HMAC_KEY;
+  process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
+  try {
+    return callback();
+  } finally {
+    if (previous === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+    else process.env.CELLFENCE_BASELINE_HMAC_KEY = previous;
+  }
+}
+
 for (const group of ["valid", "invalid"]) {
   for (const fixturePath of fixtureDirectories(group)) {
     const fixtureName = path.relative(path.join(root, "fixtures"), fixturePath);
     test(`fixture ${fixtureName}`, () => {
       const expected = readExpected(fixturePath);
-      const result = checkRepository({
+      const check = () => checkRepository({
         rootDir: fixturePath,
         manifestPath: "cellfence.manifest.json",
         baselinePath: expected.mode === "baseline-check" ? "cellfence.baseline.json" : undefined,
         evidencePaths: expected.evidencePaths || [],
       });
+      const result = expected.mode === "baseline-check" && baselineHasSeal(fixturePath) ? withBaselineVerifier(check) : check();
 
       assert.equal(result.ok, expected.ok);
       assert.deepEqual(sortedRuleIds(result.findings), [...expected.errorRuleIds].sort());

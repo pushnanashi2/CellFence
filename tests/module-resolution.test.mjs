@@ -252,6 +252,33 @@ test("module resolution extracts TypeScript CommonJS compatibility forms", () =>
         "moduleRequire('./module-alias.js');",
         "cjsRequire('./cjs-created.js');",
         "namespaceRequire('./namespace-created.js');",
+        "(require)('./paren-require.js');",
+        "(0, require)('./comma-require.js');",
+        "require.call(null, './call-require.js');",
+        "require.apply(null, ['./apply-require.js']);",
+        "Reflect.apply(require, null, ['./reflect-apply-require.js']);",
+        "const boundRequire = require.bind(null);",
+        "boundRequire('./bound-require.js');",
+        "module['require']('./element-module-require.js');",
+        "const moduleAlias = module;",
+        "moduleAlias.require('./module-object-alias.js');",
+        "const { require: destructuredRequire } = module;",
+        "destructuredRequire('./destructured-module-require.js');",
+        "import Module from 'node:module';",
+        "const defaultRequire = Module.createRequire(import.meta.url);",
+        "defaultRequire('./default-create-require.js');",
+        "const inlineRequire = require('node:module').createRequire(__filename);",
+        "inlineRequire('./inline-create-require.js');",
+        "const commaCreateRequire = (0, makeRequire)(import.meta.url);",
+        "commaCreateRequire('./comma-create-require.js');",
+        "globalThis.require('./global-require.js');",
+        "global.require('./node-global-require.js');",
+        "global['require']('./node-global-element-require.js');",
+        "this.require('./top-level-this-require.js');",
+        "const globalRequire = global.require;",
+        "globalRequire('./global-alias-require.js');",
+        "process.mainModule.require('./process-main-module-require.js');",
+        "module.constructor._load('./module-constructor-load.js');",
         "export const app = legacy;",
         "",
       ].join("\n"),
@@ -271,6 +298,27 @@ test("module resolution extracts TypeScript CommonJS compatibility forms", () =>
       ["require", "./module-alias.js", false],
       ["require", "./cjs-created.js", false],
       ["require", "./namespace-created.js", false],
+      ["require", "./paren-require.js", false],
+      ["require", "./comma-require.js", false],
+      ["require", "./call-require.js", false],
+      ["require", "./apply-require.js", false],
+      ["require", "./reflect-apply-require.js", false],
+      ["require", "./bound-require.js", false],
+      ["require", "./element-module-require.js", false],
+      ["require", "./module-object-alias.js", false],
+      ["require", "./destructured-module-require.js", false],
+      ["import", "node:module", false],
+      ["require", "./default-create-require.js", false],
+      ["require", "node:module", false],
+      ["require", "./inline-create-require.js", false],
+      ["require", "./comma-create-require.js", false],
+      ["require", "./global-require.js", false],
+      ["require", "./node-global-require.js", false],
+      ["require", "./node-global-element-require.js", false],
+      ["require", "./top-level-this-require.js", false],
+      ["require", "./global-alias-require.js", false],
+      ["require", "./process-main-module-require.js", false],
+      ["require", "./module-constructor-load.js", false],
     ]);
     assert.deepEqual(warnings, [{
       ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
@@ -278,6 +326,41 @@ test("module resolution extracts TypeScript CommonJS compatibility forms", () =>
       filePath: "src/app.ts",
       message: "computed req() cannot be resolved statically at line 9",
       details: { line: 9 },
+    }]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution fails closed for string execution require forms", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-string-exec-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "const code = \"require('./computed.js')\";",
+        "eval(\"require('./eval.js')\");",
+        "Function(\"return require('./function.js')\")();",
+        "eval(code);",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
+      ["require", "./eval.js", 2],
+      ["require", "./function.js", 3],
+    ]);
+    assert.deepEqual(warnings, [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed eval() source cannot be resolved statically at line 4",
+      details: { line: 4 },
     }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -322,6 +405,29 @@ test("module resolution tracks CommonJS aliases without crossing shadowed scopes
       ["require", "./node-module.js", 17],
     ]);
     assert.deepEqual(warnings, []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution extracts TypeScript import type nodes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-import-type-node-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "type Secret = import('./internal.js').Secret;",
+        "export const app: Secret = { ok: true };",
+        "",
+      ].join("\n"),
+    );
+
+    const references = extractImports(context(rootDir), filePath, []);
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.typeOnly, reference.line]), [
+      ["import", "./internal.js", true, 1],
+    ]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -375,6 +481,88 @@ test("module resolution extracts and resolves Python imports", () => {
     assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", "producer.internal", ["src"]), "src/producer/internal.py");
     assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", ".helpers", ["src"]), "src/consumer/helpers.py");
     assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", "external.package", ["src"]), undefined);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution extracts Python submodule from-imports and literal dynamic imports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-submodule-imports-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/__init__.py"), "");
+    fs.writeFileSync(path.join(rootDir, "src/producer/internal.py"), "def hidden():\n    return True\n");
+    const consumerPath = path.join(rootDir, "src/consumer/public.py");
+    fs.writeFileSync(
+      consumerPath,
+      [
+        "from producer import internal as _internal",
+        "import importlib as _importlib",
+        "import builtins",
+        "from pkgutil import resolve_name",
+        "mod = _importlib.import_module('producer.internal')",
+        "also = __import__('producer.internal', fromlist=['hidden'])",
+        "again = builtins.__import__('producer.internal')",
+        "resolved = resolve_name('producer.internal:hidden')",
+        "load = _importlib.import_module",
+        "via_getattr = getattr(_importlib, 'import_module')",
+        "loaded = load('producer.internal')",
+        "got = getattr(_importlib, 'import_module')('producer.internal')",
+        "again = via_getattr('producer.internal')",
+        "evaluated = eval(\"__import__('producer.internal')\")",
+        "exec(\"__import__('producer.internal')\")",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), consumerPath, warnings);
+    assert.deepEqual(references.map((reference) => [reference.specifier, reference.candidateSpecifiers, reference.line]), [
+      ["producer", ["producer.internal"], 1],
+      ["importlib", undefined, 2],
+      ["builtins", undefined, 3],
+      ["pkgutil", ["pkgutil.resolve_name"], 4],
+      ["producer.internal", undefined, 5],
+      ["producer.internal", undefined, 6],
+      ["producer.internal", undefined, 7],
+      ["producer.internal", undefined, 8],
+      ["producer.internal", undefined, 11],
+      ["producer.internal", undefined, 12],
+      ["producer.internal", undefined, 13],
+      ["producer.internal", undefined, 14],
+      ["producer.internal", undefined, 15],
+    ]);
+    assert.deepEqual(warnings, []);
+    assert.equal(resolvePythonImport(rootDir, "src/consumer/public.py", references[0].candidateSpecifiers[0], ["src"]), "src/producer/internal.py");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution reports computed Python dynamic imports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-dynamic-imports-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/app"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app/public.py");
+    fs.writeFileSync(
+      filePath,
+      [
+        "import importlib",
+        "target = 'producer.internal'",
+        "mod = importlib.import_module(target)",
+        "exec(target)",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+    assert.deepEqual(references.map((reference) => reference.specifier), ["importlib"]);
+    assert.deepEqual(warnings.map((warning) => warning.ruleId), [
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+    ]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -746,6 +934,42 @@ test("module resolution declaration surface hash follows API types without class
 
     writeSurface({ answer: "'42'" });
     assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution declaration surface hash follows alias and package self re-exports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-surface-project-resolve-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    writeJson(path.join(rootDir, "package.json"), { name: "@example/core" });
+    writeJson(path.join(rootDir, "tsconfig.json"), {
+      compilerOptions: {
+        baseUrl: ".",
+        paths: { "@core/*": ["src/core/*"] },
+      },
+    });
+    const publicPath = path.join(rootDir, "src/core/public.ts");
+    const toolsPath = path.join(rootDir, "src/core/tools.ts");
+    const internalPath = path.join(rootDir, "src/core/internal.ts");
+    fs.writeFileSync(publicPath, [
+      "import type { Internal } from './internal.js';",
+      "export type PublicAlias = Internal;",
+      "export { Tool } from '@core/tools';",
+      "export { SelfTool } from '@example/core/tools';",
+      "",
+    ].join("\n"));
+    fs.writeFileSync(toolsPath, "export type Tool = { value: number };\nexport type SelfTool = { value: number };\n");
+    fs.writeFileSync(internalPath, "export type Internal = { id: string };\n");
+    const firstHash = publicSurfaceHash(publicPath);
+
+    fs.writeFileSync(internalPath, "export type Internal = { id: number };\n");
+    assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+
+    const secondHash = publicSurfaceHash(publicPath);
+    fs.writeFileSync(toolsPath, "export type Tool = { value: string };\nexport type SelfTool = { value: string };\n");
+    assert.notEqual(publicSurfaceHash(publicPath), secondHash);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

@@ -18,7 +18,8 @@ import {
   candidateModulePaths,
   extractImports,
   extractPublicSymbols,
-  readPathAliases,
+  resolvePackageImportsTarget,
+  readWorkspacePathAliases,
   resolvePythonImport,
   resolvePathAliasTarget,
   resolveRelativeImport,
@@ -288,6 +289,18 @@ function pythonSourceRootsFromPyproject(rootDir: string): string[] {
   const roots = new Set<string>();
   for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
     addPythonSourceRoot(roots, match[1]);
+  }
+  let section = "";
+  for (const line of text.split(/\r?\n/)) {
+    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      continue;
+    }
+    if (section === "tool.setuptools.package-dir") {
+      const match = line.match(/^\s*["']?\s*["']?\s*=\s*["']([^"']+)["']/);
+      if (match) addPythonSourceRoot(roots, match[1]);
+    }
   }
   for (const match of text.matchAll(/\bwhere\s*=\s*\[([^\]]+)\]/g)) {
     for (const rootMatch of match[1].matchAll(/["']([^"']+)["']/g)) addPythonSourceRoot(roots, rootMatch[1]);
@@ -708,7 +721,7 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
       }
     }
   }
-  const pathAliases = readPathAliases(rootDir);
+  const pathAliases = readWorkspacePathAliases(rootDir);
   const pythonSourceRoots = [
     ...new Set([
       ...pythonPackagingSourceRoots(rootDir),
@@ -725,10 +738,17 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
   for (const relativePath of sourceFilesOwnedByCandidate(rootDir, candidate, options.scope)) {
     const warnings: never[] = [];
     for (const reference of extractImports(context, path.join(rootDir, relativePath), warnings)) {
-      const targetPath = path.extname(relativePath) === ".py"
-        ? resolvePythonImport(rootDir, relativePath, reference.specifier, pythonSourceRoots)
-        : resolveRelativeImport(rootDir, relativePath, reference.specifier)
+      let targetPath: string | undefined;
+      if (path.extname(relativePath) === ".py") {
+        for (const specifier of [...(reference.candidateSpecifiers || []), reference.specifier]) {
+          targetPath = resolvePythonImport(rootDir, relativePath, specifier, pythonSourceRoots);
+          if (targetPath) break;
+        }
+      } else {
+        targetPath = resolveRelativeImport(rootDir, relativePath, reference.specifier)
+          || resolvePackageImportsTarget(rootDir, relativePath, reference.specifier)
           || resolvePathAliasTarget({ rootDir, pathAliases }, reference.specifier);
+      }
       if (!targetPath) continue;
       const targetOwner = ownerForPath(candidates, targetPath);
       if (targetOwner && targetOwner.id !== candidate.id) consumedCells.add(targetOwner.id);

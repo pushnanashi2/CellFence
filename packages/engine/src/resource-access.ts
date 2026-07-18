@@ -166,7 +166,7 @@ const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"])
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
 const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
 const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|Queue|Worker|fetch|request|query|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
-const PYTHON_RESOURCE_SCAN_HINT = /\b(?:django|FastAPI|APIRouter|Celery|shared_task|sqlalchemy|models\.Model|objects|path|re_path|url|select|insert|update|delete|Table|text|query|execute|send_task|delay|apply_async)\b/;
+const PYTHON_RESOURCE_SCAN_HINT = /\b(?:django|FastAPI|APIRouter|Celery|shared_task|sqlalchemy|models\.Model|objects|path|re_path|url|select|insert|update|delete|Table|text|query|execute|get|send_task|delay|apply_async|bulk_save_objects|bulk_insert_mappings|bulk_update_mappings)\b|__tablename__/;
 const PYTHON_RESOURCE_ADAPTERS = new Map<string, BuiltInResourceAdapter>([
   ["django-adapter", "django"],
   ["fastapi-adapter", "fastapi"],
