@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 export type PythonImportReference = {
   specifier: string;
@@ -859,12 +861,23 @@ print(json.dumps({
 }, separators=(",", ":")))
 `;
 
+let inspectorScriptPath: string | undefined;
+
+function writeInspectorScript(): string {
+  if (inspectorScriptPath) return inspectorScriptPath;
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-inspector-"));
+  inspectorScriptPath = path.join(tempDir, "inspect.py");
+  fs.writeFileSync(inspectorScriptPath, PYTHON_INSPECTOR, { mode: 0o600 });
+  return inspectorScriptPath;
+}
+
 export function inspectPythonSource(filePath: string): PythonInspection {
   const stat = fs.statSync(filePath);
   const cached = inspectionCache.get(filePath);
   if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.result;
 
   let lastError: unknown;
+  const inspectorPath = writeInspectorScript();
   const pythonCommands: Array<{ command: string; args: string[] }> = process.platform === "win32"
     ? [
       { command: "py", args: ["-3"] },
@@ -877,7 +890,7 @@ export function inspectPythonSource(filePath: string): PythonInspection {
     ];
   for (const pythonCommand of pythonCommands) {
     try {
-      const output = execFileSync(pythonCommand.command, [...pythonCommand.args, "-I", "-B", "-c", PYTHON_INSPECTOR, filePath], {
+      const output = execFileSync(pythonCommand.command, [...pythonCommand.args, "-I", "-B", inspectorPath, filePath], {
         encoding: "utf8",
         maxBuffer: 1024 * 1024,
         stdio: ["ignore", "pipe", "pipe"],
