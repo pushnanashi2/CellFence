@@ -2784,7 +2784,8 @@ function acquireClaimStoreLock(filePath: string): () => void {
       };
     } catch (error) {
       const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
-      if (code !== "EEXIST" || Date.now() >= deadline) {
+      const lockIsBusy = code === "EEXIST" || code === "EPERM" || code === "EACCES" || code === "EBUSY";
+      if (!lockIsBusy || Date.now() >= deadline) {
         throw new Error(`failed to acquire claim store lock ${lockPath}: ${errorMessage(error)}`, { cause: error });
       }
       sleepSync(25);
