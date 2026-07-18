@@ -130,3 +130,6 @@ the fence add?"
 Use all three. Corpus precision earns detector trust; history replay earns
 counterfactual credibility; agent A/B measures the claim that the tool changes
 agent behavior.
+
+The first frozen onboarding pilot is recorded in
+`docs/research/ts-js-workspace-pilot-2026-07-18.md`.

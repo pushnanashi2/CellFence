@@ -150,6 +150,37 @@ test("engine still rejects nested owned path overlap on a segment boundary", () 
   }
 });
 
+test("engine does not treat a root file glob as owning nested directory files", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-root-file-glob-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/build"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/root.ts"), "export const root = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/build/public.ts"), "export const build = true;\n");
+    writeManifest(rootDir, [
+      {
+        id: "src-root",
+        ownedPaths: ["src/*"],
+        publicEntry: "src/root.ts",
+        publicSymbols: ["root"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      baseCell("build", {
+        ownedPaths: ["src/build/**"],
+        publicEntry: "src/build/public.ts",
+        publicSymbols: ["build"],
+      }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, true, JSON.stringify(result.findings));
+    assert.equal(result.findings.some((finding) => finding.ruleId === "CELLFENCE_OWNERSHIP_OVERLAP"), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine handles invalid runtime evidence inputs without false green results", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-"));
   try {

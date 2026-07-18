@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add a reproducible corpus precision study harness and protocol for frozen-repository onboarding, failure-inclusive CellFence checks, and manual false-positive labeling.
+- Add the first frozen TS/JS workspace corpus pilot report and fix the root-file glob versus nested-directory ownership overlap false positive it exposed.
 
 ## 0.1.13 - 2026-07-18
 

@@ -23,6 +23,7 @@ coverage
 *.lcov
 reports/
 .stryker-tmp/
+tmp/
 
 # nyc test coverage
 .nyc_output

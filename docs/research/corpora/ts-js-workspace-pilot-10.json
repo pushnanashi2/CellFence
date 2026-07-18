@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "First frozen TS/JS workspace onboarding pilot. Subjects were selected before running the study from public repositories with TypeScript/JavaScript workspace or package-boundary signals. This is an onboarding/finding-distribution pilot, not a precision claim.",
+  "selectionPolicy": {
+    "date": "2026-07-18",
+    "languageScope": "TypeScript/JavaScript workspace repositories",
+    "sizePolicy": "Avoided very large repositories for the first local pilot run.",
+    "boundaryEvidence": [
+      "workspace package layout",
+      "monorepo tooling",
+      "package-level public entry points",
+      "existing project structure suitable for manifest inference"
+    ],
+    "safety": "Static CellFence checks only; no target repository package install scripts are executed."
+  },
+  "subjects": [
+    {
+      "id": "vite",
+      "repository": "https://github.com/vitejs/vite.git",
+      "commit": "e16ff3a1199293ac9cdfa6132c08fdea162215f3",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vue-core",
+      "repository": "https://github.com/vuejs/core.git",
+      "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tanstack-query",
+      "repository": "https://github.com/TanStack/query.git",
+      "commit": "b955f60d7965cc521df6ee8b1ce91b3d0e8c046d",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tanstack-router",
+      "repository": "https://github.com/TanStack/router.git",
+      "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "trpc",
+      "repository": "https://github.com/trpc/trpc.git",
+      "commit": "340811ba5320637fbaf48fccf3dbfdd258bd34db",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "changesets",
+      "repository": "https://github.com/changesets/changesets.git",
+      "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "remix",
+      "repository": "https://github.com/remix-run/remix.git",
+      "commit": "2c0ef67220714e1005162be4acdb91fbf355c664",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "svelte-kit",
+      "repository": "https://github.com/sveltejs/kit.git",
+      "commit": "385f7ed7671f955e544004cae404bf53932dd6de",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nitro",
+      "repository": "https://github.com/nitrojs/nitro.git",
+      "commit": "bfc2f5ef445494cec0f61ef3fe43ece4956dc14d",
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nuxt",
+      "repository": "https://github.com/nuxt/nuxt.git",
+      "commit": "2a6ab991ad52bca658ad010633dea8231bbb5722",
+      "manifest": {
+        "strategy": "infer"
+      }
+    }
+  ]
+}

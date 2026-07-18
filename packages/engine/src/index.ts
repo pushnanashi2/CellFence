@@ -828,7 +828,7 @@ function validateOwnershipOverlap(manifest: CellFenceManifest, findings: Finding
       const rightCell = manifest.cells[rightIndex];
       for (const leftPattern of leftCell.ownedPaths) {
         for (const rightPattern of rightCell.ownedPaths) {
-          if (pathPatternsOverlap(leftPattern, rightPattern)) {
+          if (ownedPathPatternsOverlap(leftPattern, rightPattern)) {
             addFinding(findings, {
               ruleId: "CELLFENCE_OWNERSHIP_OVERLAP",
               severity: "error",
@@ -2815,6 +2815,35 @@ function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean
       || leftPrefix.startsWith(`${rightPrefix}/`)
       || rightPrefix.startsWith(`${leftPrefix}/`)
     ));
+}
+
+function patternHasWildcard(pattern: string): boolean {
+  return /[*?]/.test(pattern);
+}
+
+function recursiveLiteralRoot(pattern: string): string | undefined {
+  const normalized = normalizePath(pattern);
+  if (!normalized.endsWith("/**")) return undefined;
+  const root = normalized.slice(0, -"/**".length);
+  return patternHasWildcard(root) ? undefined : root;
+}
+
+function ownedPathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
+  const left = normalizePath(leftPattern);
+  const right = normalizePath(rightPattern);
+  if (left === right) return true;
+  if (!patternHasWildcard(left) && matchesPattern(left, right)) return true;
+  if (!patternHasWildcard(right) && matchesPattern(right, left)) return true;
+
+  const leftRecursiveRoot = recursiveLiteralRoot(left);
+  const rightRecursiveRoot = recursiveLiteralRoot(right);
+  const leftPrefix = literalPrefix(left);
+  const rightPrefix = literalPrefix(right);
+
+  if (leftRecursiveRoot && rightPrefix && (rightPrefix === leftRecursiveRoot || rightPrefix.startsWith(`${leftRecursiveRoot}/`))) return true;
+  if (rightRecursiveRoot && leftPrefix && (leftPrefix === rightRecursiveRoot || leftPrefix.startsWith(`${rightRecursiveRoot}/`))) return true;
+
+  return Boolean(leftPrefix) && leftPrefix === rightPrefix;
 }
 
 function intersectingValues(left: readonly string[], right: readonly string[]): string[] {
