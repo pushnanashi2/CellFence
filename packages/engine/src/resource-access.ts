@@ -122,7 +122,8 @@ function templateLiteralText(node: ts.TemplateLiteral): string | undefined {
   return undefined;
 }
 
-function expressionContainsSqlLiteral(node: ts.Node): boolean {
+function expressionContainsSqlLiteral(node: ts.Node | undefined): boolean {
+  if (!node) return false;
   let found = false;
   function visit(candidate: ts.Node): void {
     // Stryker disable next-line ConditionalExpression: once a SQL literal is found, continuing the traversal cannot change the final true result.
@@ -685,19 +686,22 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
                 ...resourceAccessSource(methodName, "sql-literal", "medium"),
               });
             }
-          } else if (expressionContainsSqlLiteral(node.arguments[0]) || (ts.isIdentifier(node.arguments[0]) && dynamicSqlVariables.has(node.arguments[0].text))) {
-            addResourceAccess(accesses, {
-              kind: "database",
-              access: "read",
-              selector: "unresolved:dynamic-sql",
-              filePath: relativeFilePath,
-              line: getLineNumber(sourceFile, node),
-              // Stryker disable next-line BooleanLiteral: dynamic SQL evidence must remain unresolved and is asserted by detail tests.
-              unresolved: true,
-              reason: "SQL query is assembled dynamically",
-              // Stryker disable next-line StringLiteral: dynamic SQL confidence is asserted by detail tests.
-              ...resourceAccessSource(methodName, "sql-literal", "low"),
-            });
+          } else {
+            const firstArgument = node.arguments[0];
+            if (firstArgument && (expressionContainsSqlLiteral(firstArgument) || (ts.isIdentifier(firstArgument) && dynamicSqlVariables.has(firstArgument.text)))) {
+              addResourceAccess(accesses, {
+                kind: "database",
+                access: "read",
+                selector: "unresolved:dynamic-sql",
+                filePath: relativeFilePath,
+                line: getLineNumber(sourceFile, node),
+                // Stryker disable next-line BooleanLiteral: dynamic SQL evidence must remain unresolved and is asserted by detail tests.
+                unresolved: true,
+                reason: "SQL query is assembled dynamically",
+                // Stryker disable next-line StringLiteral: dynamic SQL confidence is asserted by detail tests.
+                ...resourceAccessSource(methodName, "sql-literal", "low"),
+              });
+            }
           }
         }
 

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add shallow corpus clone mode and optional checkout disposal so larger onboarding studies can preserve evidence without retaining every cloned worktree.
+- Fix resource SQL detection so zero-argument `.query()` calls are ignored instead of raising an internal analyzer error.
 
 ## 0.1.13 - 2026-07-18
 

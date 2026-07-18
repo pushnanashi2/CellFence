@@ -433,6 +433,7 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "  sqlClient.query(dynamicSql);",
       "  sqlClient.query(notSql);",
       "  sqlClient.query(tableName);",
+      "  sqlClient.query();",
       "  fetch('/relative-not-http');",
       "  router.get('relative-route');",
       "  bus.publish('/not-a-queue-route');",
