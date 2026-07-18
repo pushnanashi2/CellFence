@@ -14,6 +14,7 @@
 - Improve inferred manifests for real TS/JS app repositories by discovering common top-level source roots, narrowing parent cells around nested package roots, and treating `packages/@scope/*` entries as packages instead of namespace cells.
 - Improve Python manifest inference with `pyproject.toml`, `setup.cfg`, and static `setup.py` package metadata, Python public-entry candidates, and inferred Python absolute-import consumer edges.
 - Add a frozen OSS Python 10 onboarding corpus and pilot report: 10/10 completed, 0 configuration/tool/timeout failures, and 121 unlabeled findings reserved for tuning rather than precision claims.
+- Add a history-replay research harness for exact before/after commit pairs, introduced-fingerprint comparison, optional before-baseline replay, and counterfactual evidence reports.
 - Disambiguate duplicate corpus evidence finding IDs with stable occurrence indexes when identical audit fingerprints are emitted more than once.
 - Fix resource SQL detection so zero-argument `.query()` calls are ignored instead of raising an internal analyzer error.
 

@@ -261,8 +261,9 @@ repositories. If a real upstream bug is found, report it manually and narrowly.
 The corpus precision study answers "does CellFence flag real repository states
 with tolerable false-positive pressure?"
 
-History replay asks a stronger question: "Would CellFence have stopped a real
-boundary break at the commit where it was introduced?"
+History replay asks a stronger question: "Would CellFence have produced a new
+blocking fingerprint at the commit where a boundary break was introduced?" The
+dedicated protocol is [history-replay-study.md](history-replay-study.md).
 
 Agent A/B asks the product question: "With the same repository and task, do
 agents produce fewer boundary violations under CellFence, and what friction does

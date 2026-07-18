@@ -13,7 +13,16 @@ blocks the right changes with acceptable friction.
    - Run the failure-inclusive onboarding/check harness in
      `docs/research/corpus-precision-study.md`.
 
-2. Label events.
+2. Replay labeled history windows.
+   - Use `docs/research/history-replay-study.md` for before/after commit
+     pairs.
+   - Prefer `single_commit_intro` rows where the after commit is exactly one
+     commit after the before commit.
+   - Use reviewed `copy` manifests or upstream `existing` manifests for proof
+     rows; keep `infer` rows as onboarding evidence.
+   - Enable before-baseline replay when measuring ratchet catchability.
+
+3. Label events.
    - Extract candidate events such as public surface changes, cross-cell moves,
      workflow control changes, baseline changes, and protected path changes.
    - Label each event as:
@@ -23,18 +32,18 @@ blocks the right changes with acceptable friction.
    - Prefer Git evidence for labels: reviewed PRs, reverts, follow-up bugfixes,
      reviewer discussion, or release notes.
 
-3. Score detectors.
+4. Score detectors.
    - Report precision and recall per rule family.
    - Track false-positive examples as fixtures.
    - Track false-negative examples as detector backlog.
 
-4. Score friction.
+5. Score friction.
    - For negative events, record whether CellFence would stop the change.
    - Report friction rate separately from precision/recall.
    - A detector can be precise and still operationally expensive if it blocks
      too many legitimate changes.
 
-5. Publish the table per release.
+6. Publish the table per release.
    - Every detector change must show whether precision, recall, and friction
      improved or regressed.
    - A one-off study becomes useful only when it turns into a regression
@@ -55,6 +64,8 @@ ratchet should have fired at all.
 Allowed:
 
 - "Rule family X has measured precision/recall on this frozen corpus."
+- "For labeled history event Y, CellFence would have emitted a new blocking
+  fingerprint at the introducing commit."
 - "Change Y reduced bypass rate in the ratchet friction study."
 - "This release reduced false positives for detector Z against the frozen
   fixtures."
@@ -64,3 +75,5 @@ Not allowed:
 - "CellFence is market-validated" from broad keyword mining alone.
 - "Large OSS adoption pressure is proven" from repository names or star counts.
 - "A rule is useful" before positive/negative labels exist.
+- "A raw history-replay finding is an upstream defect" before manual event
+  labeling and narrow review.

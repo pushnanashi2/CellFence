@@ -342,6 +342,7 @@ Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; r
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Implementation status | [docs/implementation-status.md](docs/implementation-status.md) |
 | Validation research protocol | [docs/research/corpus-precision-study.md](docs/research/corpus-precision-study.md) |
+| History replay protocol | [docs/research/history-replay-study.md](docs/research/history-replay-study.md) |
 | First frozen corpus pilot | [docs/research/ts-js-workspace-pilot-2026-07-18.md](docs/research/ts-js-workspace-pilot-2026-07-18.md) |
 
 ## Contributing, security, license
