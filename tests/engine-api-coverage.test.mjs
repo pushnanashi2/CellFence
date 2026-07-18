@@ -35,6 +35,7 @@ const defaultRequiredRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
   "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
@@ -265,6 +266,70 @@ test("engine resolves exact tsconfig path aliases and package-name public import
       finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
       && finding.details?.specifier === "@cell/loose/internal"
       && finding.details?.targetPath === undefined));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine rejects TypeScript import-equals private dependency bypasses", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-import-equals-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const exposed = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/internal.ts"), "export const hidden = true;\n");
+    fs.writeFileSync(
+      path.join(rootDir, "src/consumer/public.ts"),
+      [
+        "import secret = require('../producer/internal');",
+        "export const app = secret.hidden;",
+        "",
+      ].join("\n"),
+    );
+    writeManifest(rootDir, [
+      baseCell("producer", { publicSymbols: ["exposed"] }),
+      baseCell("consumer", { publicSymbols: ["app"] }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && finding.filePath === "src/consumer/public.ts"
+      && finding.producerCellId === "producer"
+      && finding.cellId === "consumer"
+      && finding.details?.specifier === "../producer/internal"
+      && finding.details?.line === 1
+      && typeof finding.fingerprint === "string"));
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_UNDECLARED_CONSUMER"
+      && finding.filePath === "src/consumer/public.ts"
+      && finding.producerCellId === "producer"
+      && finding.cellId === "consumer"
+      && finding.details?.specifier === "../producer/internal"
+      && typeof finding.fingerprint === "string"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine reports invalid TypeScript syntax as a required fail-closed finding", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-invalid-ts-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/app"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/app/public.ts"), "export const app = ;\n");
+    writeManifest(rootDir, [baseCell("app", { publicSymbols: ["app"] })]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    const syntaxFinding = result.findings.find((finding) => finding.ruleId === "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX");
+    assert.ok(syntaxFinding);
+    assert.equal(syntaxFinding.severity, "error");
+    assert.equal(syntaxFinding.filePath, "src/app/public.ts");
+    assert.equal(syntaxFinding.details?.line, 1);
+    assert.equal(typeof syntaxFinding.fingerprint, "string");
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

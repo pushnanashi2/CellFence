@@ -16,6 +16,7 @@ const defaultRequiredRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
   "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
@@ -93,8 +94,8 @@ test("manifest inference handles object workspaces, broad wildcards, duplicates,
     assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths[0], cell.publicEntry, cell.packageName]), [
       ["cell", "loose/src/**", "loose/src/index.ts", "/"],
       ["core", "libs/core/src/**", "libs/core/src/custom.ts", undefined],
-      ["dup", "packages/dup-a/src/**", "packages/dup-a/src/index.ts", "@demo/dup"],
-      ["dup-2", "packages/dup-b/src/**", "packages/dup-b/src/index.ts", "@demo/dup"],
+      ["dup", "packages/dup-a/src/**", "packages/dup-a/src/index.ts", undefined],
+      ["dup-2", "packages/dup-b/src/**", "packages/dup-b/src/index.ts", undefined],
       ["src-root", "src/*", "src/helper.ts", undefined],
     ]);
     writeManifest(rootDir, manifest);

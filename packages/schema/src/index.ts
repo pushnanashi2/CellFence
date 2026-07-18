@@ -202,6 +202,21 @@ function isRuleSeverity(value: unknown): value is RuleSeverity {
   return value === "off" || value === "warning" || value === "error";
 }
 
+function validateKnownKeys(value: Record<string, unknown>, location: string, allowedKeys: readonly string[], errors: string[]): void {
+  const allowed = new Set(allowedKeys);
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) errors.push(`${location}.${key} is not a supported field`);
+  }
+}
+
+function validateUniqueNonEmptyStrings(values: string[], location: string, errors: string[]): void {
+  const seen = new Set<string>();
+  for (const value of values) {
+    if (seen.has(value)) errors.push(`${location} contains duplicate entry ${value}`);
+    seen.add(value);
+  }
+}
+
 const BUILT_IN_RESOURCE_ADAPTERS = new Set([
   "file",
   "http",
@@ -234,6 +249,7 @@ function validateConsumer(value: unknown, location: string, errors: string[]): v
     errors.push(`${location} must be an object like {"cell":"producer-cell"}`);
     return false;
   }
+  validateKnownKeys(value, location, ["cell", "artifactLanes"], errors);
   if (typeof value.cell !== "string" || value.cell.trim().length === 0) {
     errors.push(`${location}.cell must be a non-empty string`);
   }
@@ -248,6 +264,7 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["id", "paths", "description", "locked"], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
   }
@@ -268,6 +285,7 @@ function validateResourceContract(value: unknown, location: string, errors: stri
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["id", "kind", "access", "selectors", "locked", "description"], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
   }
@@ -283,6 +301,9 @@ function validateResourceContract(value: unknown, location: string, errors: stri
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);
   }
+  if (!optionalBoolean(value.locked)) {
+    errors.push(`${location}.locked must be a boolean when present`);
+  }
   return errors.length === 0 || typeof value.id === "string";
 }
 
@@ -291,6 +312,7 @@ function validatePathClass(value: unknown, location: string, errors: string[]): 
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["id", "kind", "paths", "description", "commitPolicy"], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
   }
@@ -308,6 +330,7 @@ function validatePathClass(value: unknown, location: string, errors: string[]): 
       errors.push(`${location}.commitPolicy must be an object when present`);
     } else {
       const policy = value.commitPolicy;
+      validateKnownKeys(policy, `${location}.commitPolicy`, ["allowMixedWith", "requireTrailer", "generatedRequiresProvenance"], errors);
       if (policy.allowMixedWith !== undefined && (!Array.isArray(policy.allowMixedWith) || !policy.allowMixedWith.every((entry) => ["source", "runtime", "generated", "testFixture", "locked"].includes(String(entry))))) {
         errors.push(`${location}.commitPolicy.allowMixedWith must contain source|runtime|generated|testFixture|locked`);
       }
@@ -322,11 +345,12 @@ function validatePathClass(value: unknown, location: string, errors: string[]): 
   return true;
 }
 
-function validateResourceBaselineEntry(value: unknown, location: string, errors: string[]): value is ResourceBaselineEntry {
+function validateResourceBaselineEntry(value: unknown, location: string, errors: string[], extraAllowedKeys: string[] = []): value is ResourceBaselineEntry {
   if (!isRecord(value)) {
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["kind", "access", "selector", "detectedBy", "confidence", ...extraAllowedKeys], errors);
   if (!["file", "database", "queue", "http"].includes(String(value.kind))) {
     errors.push(`${location}.kind must be file|database|queue|http`);
   }
@@ -346,7 +370,7 @@ function validateResourceBaselineEntry(value: unknown, location: string, errors:
 }
 
 function validateResourceEvidenceAccess(value: unknown, location: string, errors: string[]): value is ResourceEvidenceAccess {
-  validateResourceBaselineEntry(value, location, errors);
+  validateResourceBaselineEntry(value, location, errors, ["cellId", "observedAt"]);
   if (!isRecord(value)) return false;
   if (!optionalString(value.cellId)) {
     errors.push(`${location}.cellId must be a string when present`);
@@ -363,6 +387,7 @@ function validateBudgets(value: unknown, location: string, errors: string[]): va
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"], errors);
   for (const key of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"]) {
     const numericValue = value[key];
     if (numericValue !== undefined && (!Number.isInteger(numericValue) || Number(numericValue) < 0)) {
@@ -378,6 +403,7 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["requireOwnership", "include", "exclude", "requiredRules", "resourceAdapters", "pathClasses"], errors);
   if (!optionalBoolean(value.requireOwnership)) {
     errors.push(`${location}.requireOwnership must be a boolean when present`);
   }
@@ -408,9 +434,12 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
     if (!Array.isArray(value.pathClasses)) {
       errors.push(`${location}.pathClasses must be an array when present`);
     } else {
+      const pathClassIds: string[] = [];
       value.pathClasses.forEach((pathClass, pathClassIndex) => {
         validatePathClass(pathClass, `${location}.pathClasses[${pathClassIndex}]`, errors);
+        if (isRecord(pathClass) && typeof pathClass.id === "string" && pathClass.id.trim().length > 0) pathClassIds.push(pathClass.id);
       });
+      validateUniqueNonEmptyStrings(pathClassIds, `${location}.pathClasses[].id`, errors);
     }
   }
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
@@ -424,6 +453,7 @@ function validateProfile(value: unknown, location: string, errors: string[]): va
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["description", "rules", "changedOnly", "reportOnly", "requireEvidenceWithinCommits"], errors);
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);
   }
@@ -463,6 +493,7 @@ function validatePluginReference(value: unknown, location: string, errors: strin
     errors.push(`${location} must be a package string or an object like {"package":"plugin-name"}`);
     return false;
   }
+  validateKnownKeys(value, location, ["package", "options"], errors);
   if (typeof value.package !== "string" || value.package.trim().length === 0) {
     errors.push(`${location}.package must be a non-empty string`);
   }
@@ -477,6 +508,7 @@ function validateRuleOverride(value: unknown, location: string, errors: string[]
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, ["files", "rules"], errors);
   if (!isStringArray(value.files)) {
     errors.push(`${location}.files must be an array of non-empty strings`);
   }
@@ -492,6 +524,19 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     errors.push(`${location} must be an object`);
     return false;
   }
+  validateKnownKeys(value, location, [
+    "id",
+    "ownedPaths",
+    "publicEntry",
+    "publicSymbols",
+    "packageName",
+    "locked",
+    "consumes",
+    "producesArtifacts",
+    "resourceContracts",
+    "budgets",
+    "rules",
+  ], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
   }
@@ -514,27 +559,36 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     if (!Array.isArray(value.consumes)) {
       errors.push(`${location}.consumes must be an array of objects like [{"cell":"producer-cell"}] when present`);
     } else {
+      const consumerCells: string[] = [];
       value.consumes.forEach((consumer, consumerIndex) => {
         validateConsumer(consumer, `${location}.consumes[${consumerIndex}]`, errors);
+        if (isRecord(consumer) && typeof consumer.cell === "string" && consumer.cell.trim().length > 0) consumerCells.push(consumer.cell);
       });
+      validateUniqueNonEmptyStrings(consumerCells, `${location}.consumes[].cell`, errors);
     }
   }
   if (value.producesArtifacts !== undefined) {
     if (!Array.isArray(value.producesArtifacts)) {
       errors.push(`${location}.producesArtifacts must be an array when present`);
     } else {
+      const artifactIds: string[] = [];
       value.producesArtifacts.forEach((lane, laneIndex) => {
         validateArtifactLane(lane, `${location}.producesArtifacts[${laneIndex}]`, errors);
+        if (isRecord(lane) && typeof lane.id === "string" && lane.id.trim().length > 0) artifactIds.push(lane.id);
       });
+      validateUniqueNonEmptyStrings(artifactIds, `${location}.producesArtifacts[].id`, errors);
     }
   }
   if (value.resourceContracts !== undefined) {
     if (!Array.isArray(value.resourceContracts)) {
       errors.push(`${location}.resourceContracts must be an array when present`);
     } else {
+      const contractIds: string[] = [];
       value.resourceContracts.forEach((contract, contractIndex) => {
         validateResourceContract(contract, `${location}.resourceContracts[${contractIndex}]`, errors);
+        if (isRecord(contract) && typeof contract.id === "string" && contract.id.trim().length > 0) contractIds.push(contract.id);
       });
+      validateUniqueNonEmptyStrings(contractIds, `${location}.resourceContracts[].id`, errors);
     }
   }
   validateBudgets(value.budgets, `${location}.budgets`, errors);
@@ -548,6 +602,7 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   if (!isRecord(value)) {
     return { ok: false, errors: ["manifest must be an object"] };
   }
+  validateKnownKeys(value, "manifest", ["schemaVersion", "extends", "plugins", "governance", "rules", "overrides", "profiles", "cells"], errors);
   if (value.schemaVersion !== CELLFENCE_MANIFEST_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_MANIFEST_SCHEMA_VERSION}`);
   }
@@ -590,9 +645,12 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   if (!Array.isArray(value.cells)) {
     errors.push("cells must be an array");
   } else {
+    const packageNames: string[] = [];
     value.cells.forEach((cell, cellIndex) => {
       validateCell(cell, `cells[${cellIndex}]`, errors);
+      if (isRecord(cell) && typeof cell.packageName === "string" && cell.packageName.trim().length > 0) packageNames.push(cell.packageName);
     });
+    validateUniqueNonEmptyStrings(packageNames, "cells[].packageName", errors);
   }
   validateGovernance(value.governance, "governance", errors);
   return errors.length === 0
@@ -605,6 +663,7 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   if (!isRecord(value)) {
     return { ok: false, errors: ["baseline must be an object"] };
   }
+  validateKnownKeys(value, "baseline", ["schemaVersion", "generatedAt", "cellIds", "seal", "cells"], errors);
   if (value.schemaVersion !== CELLFENCE_BASELINE_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_BASELINE_SCHEMA_VERSION}`);
   }
@@ -618,6 +677,13 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
     if (!isRecord(value.seal)) {
       errors.push("seal must be an object when present");
     } else {
+      if (value.seal.algorithm === "hmac-sha256") {
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "digest"], errors);
+      } else if (value.seal.algorithm === "ed25519") {
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "signature"], errors);
+      } else {
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "digest", "signature"], errors);
+      }
       if (!optionalString(value.seal.keyId)) {
         errors.push("seal.keyId must be a string when present");
       }
@@ -644,6 +710,19 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
         errors.push(`cells.${cellId} must be an object`);
         continue;
       }
+      validateKnownKeys(record, `cells.${cellId}`, [
+        "ownedPathPatterns",
+        "publicSymbols",
+        "publicSurfaceLines",
+        "crossCellDependencies",
+        "ownedPathSet",
+        "publicEntryPath",
+        "publicSymbolSet",
+        "publicSurfaceHash",
+        "dependencyEdges",
+        "artifactContracts",
+        "resourceAccesses",
+      ], errors);
       for (const key of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"]) {
         const numericValue = record[key];
         if (!Number.isInteger(numericValue) || Number(numericValue) < 0) {
@@ -682,6 +761,7 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   if (!isRecord(value)) {
     return { ok: false, errors: ["resource evidence must be an object"] };
   }
+  validateKnownKeys(value, "resource evidence", ["schemaVersion", "commitSha", "generatedAt", "cellId", "accesses"], errors);
   if (value.schemaVersion !== CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION}`);
   }

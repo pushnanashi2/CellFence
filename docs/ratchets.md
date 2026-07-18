@@ -13,7 +13,7 @@ A baseline captures both compatibility metrics and normalized architectural cont
 - owned path set;
 - public entry path;
 - public symbol set;
-- exported public surface signature hash;
+- isolated declaration-derived public surface signature hash;
 - dependency edge set;
 - artifact contract set;
 - static and runtime resource access inventory.
@@ -45,6 +45,8 @@ cellfence baseline update
 ```
 
 A baseline update is a governance change, not a routine way to silence a failing check. In a protected repository, review manifest and baseline changes separately from ordinary implementation changes.
+
+For TypeScript and JavaScript, the public surface signature hash is based on isolated normalized declaration output when available, including local re-export roots. It is meant to catch visible contract drift such as generic constraints, declaration-visible inferred changes, class member signatures, namespaces, and literal export types without reacting to ordinary method-body churn. It is still a v0.x contract fingerprint, not a replacement for a release-critical TypeScript compatibility check.
 
 Baseline signing is the real protection against hand-edited ratchet files. The preferred model is asymmetric signing:
 

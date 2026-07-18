@@ -181,7 +181,7 @@ test("module resolution extracts imports and reports computed module loading", (
         "export type { B } from './b.js';",
         "const name = './c.js';",
         "require('./d.js');",
-        "require('./ignored.js', name);",
+        "require('./extra-arg.js', name);",
         "require(name);",
         "import('./e.js');",
         "import(name);",
@@ -195,6 +195,7 @@ test("module resolution extracts imports and reports computed module loading", (
       ["import", "./side-effect.js", false],
       ["export-from", "./b.js", true],
       ["require", "./d.js", false],
+      ["require", "./extra-arg.js", false],
       ["dynamic-import", "./e.js", false],
     ]);
     assert.deepEqual(warnings.map((warning) => warning.ruleId), [
@@ -219,6 +220,126 @@ test("module resolution extracts imports and reports computed module loading", (
     ]);
     fs.writeFileSync(path.join(rootDir, "src/no-imports.ts"), "const value = 1;\n");
     assert.deepEqual(extractImports(context(rootDir), path.join(rootDir, "src/no-imports.ts"), []), []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution extracts TypeScript CommonJS compatibility forms", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-commonjs-forms-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "import { createRequire as makeRequire } from 'node:module';",
+        "import legacy = require('./legacy.js');",
+        "const req = require;",
+        "const localRequire = makeRequire(import.meta.url);",
+        "module.require('./module-require.js');",
+        "req('./alias-require.js');",
+        "localRequire('./created-require.js');",
+        "const target = './dynamic.js';",
+        "req(target);",
+        "const loader = { require }; loader.require('./not-commonjs.js');",
+        "const { createRequire: makeRequireFromCjs } = require('module');",
+        "const moduleRequire = module.require;",
+        "const nodeModule = require('node:module');",
+        "const namespaceCreateRequire = nodeModule.createRequire;",
+        "const cjsRequire = makeRequireFromCjs(__filename);",
+        "const namespaceRequire = namespaceCreateRequire(__filename);",
+        "moduleRequire('./module-alias.js');",
+        "cjsRequire('./cjs-created.js');",
+        "namespaceRequire('./namespace-created.js');",
+        "export const app = legacy;",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.typeOnly]), [
+      ["import", "node:module", false],
+      ["require", "./legacy.js", false],
+      ["require", "./module-require.js", false],
+      ["require", "./alias-require.js", false],
+      ["require", "./created-require.js", false],
+      ["require", "module", false],
+      ["require", "node:module", false],
+      ["require", "./module-alias.js", false],
+      ["require", "./cjs-created.js", false],
+      ["require", "./namespace-created.js", false],
+    ]);
+    assert.deepEqual(warnings, [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed req() cannot be resolved statically at line 9",
+      details: { line: 9 },
+    }]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution tracks CommonJS aliases without crossing shadowed scopes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-commonjs-scope-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "const req = require;",
+        "req('./top-level.js');",
+        "function usesOuter() {",
+        "  req('./outer-alias.js');",
+        "}",
+        "function shadowsParam(req: (value: string) => unknown) {",
+        "  req('./not-require-param.js');",
+        "}",
+        "function shadowsLocal() {",
+        "  const req = (value: string) => value;",
+        "  req('./not-require-local.js');",
+        "}",
+        "{",
+        "  const module = { require(value: string) { return value; } };",
+        "  module.require('./not-node-module.js');",
+        "}",
+        "module.require('./node-module.js');",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
+      ["require", "./top-level.js", 2],
+      ["require", "./outer-alias.js", 4],
+      ["require", "./node-module.js", 17],
+    ]);
+    assert.deepEqual(warnings, []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution reports invalid TypeScript syntax as fail-closed analysis input", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-invalid-ts-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/broken.ts");
+    fs.writeFileSync(filePath, "const broken = ;\n");
+
+    const warnings = [];
+    assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
+    assert.equal(warnings.length, 1);
+    assert.equal(warnings[0].ruleId, "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX");
+    assert.equal(warnings[0].filePath, "src/broken.ts");
+    assert.equal(warnings[0].details.line, 1);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -459,6 +580,7 @@ test("module resolution public symbols cover declarations, aliases, defaults, cy
         "export type Mode = 'a';",
         "export enum Rank { One = 1 }",
         "export const value = 1;",
+        "export namespace API { export const flag = true; }",
         "const local = 1;",
         "export { local as exposed };",
         "export * as tools from './tools.js';",
@@ -468,6 +590,7 @@ test("module resolution public symbols cover declarations, aliases, defaults, cy
       ].join("\n"),
     );
     assert.deepEqual([...extractPublicSymbols(publicPath)].sort(), [
+      "API",
       "Box",
       "Mode",
       "Rank",
@@ -512,7 +635,7 @@ test("module resolution ignores invalid nameless non-default exports defensively
   }
 });
 
-test("module resolution public surface hash is a precise normalized contract digest", () => {
+test("module resolution public surface hash is a declaration-emit contract digest", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-surface-hash-"));
   try {
     fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
@@ -537,19 +660,30 @@ test("module resolution public surface hash is a precise normalized contract dig
       ].join("\n"),
     );
     const expectedParts = [
-      "ClassDeclaration:Box:export class Box { value = 1; }",
-      "EnumDeclaration:Rank:export enum Rank { One = 1 }",
-      "ClassDeclaration:default:export default class DefaultBox {}",
-      "export-star:./tools.js",
-      "export:default",
-      "export:exposed",
-      "function:alpha(value:string,count:number):number",
-      "function:inferred(value:):",
-      "InterfaceDeclaration:Shape:export interface Shape { name: string; }",
-      "namespace:tools",
-      "TypeAliasDeclaration:Mode:export type Mode = \"a\" | \"b\";",
-      "variable:version:string",
-    ].sort((left, right) => left.localeCompare(right));
+      [
+        "dts:export declare function alpha(value: string, count: number): number;",
+        "export declare function inferred(value: any): any;",
+        "export default class DefaultBox {",
+        "}",
+        "export declare class Box {",
+        "value: number;",
+        "}",
+        "export interface Shape {",
+        "name: string;",
+        "}",
+        "export type Mode = \"a\" | \"b\";",
+        "export declare enum Rank {",
+        "One = 1",
+        "}",
+        "export declare const version: string;",
+        "declare const local = 1;",
+        "export { local as exposed };",
+        "export * as tools from \"./tools.js\";",
+        "export * from \"./tools.js\";",
+        "declare const _default: 1;",
+        "export default _default;",
+      ].join("\n"),
+    ];
     assert.equal(publicSurfaceHash(publicPath), sha256(expectedParts.join("\n")));
     assert.equal(publicSurfaceHash(path.join(rootDir, "src/core/missing.ts")), sha256(""));
 
@@ -573,6 +707,45 @@ test("module resolution public surface hash is a precise normalized contract dig
       ].join("\n"),
     );
     assert.notEqual(publicSurfaceHash(publicPath), sha256(expectedParts.join("\n")));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution declaration surface hash follows API types without class body churn", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-surface-types-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    const publicPath = path.join(rootDir, "src/core/public.ts");
+    const writeSurface = ({ methodBody = "return 1", inferredReturn = "return 1", genericConstraint = "string", answer = "42" } = {}) => {
+      fs.writeFileSync(
+        publicPath,
+        [
+          `export function generic<T extends ${genericConstraint}>(value: T): T { return value; }`,
+          `export function inferred() { ${inferredReturn}; }`,
+          `export const answer = ${answer};`,
+          `export class Box { method(): number { ${methodBody}; } }`,
+          "export namespace API { export const flag = true; }",
+          "",
+        ].join("\n"),
+      );
+    };
+
+    writeSurface();
+    assert.deepEqual([...extractPublicSymbols(publicPath)].sort(), ["API", "Box", "answer", "generic", "inferred"]);
+    const firstHash = publicSurfaceHash(publicPath);
+
+    writeSurface({ methodBody: "return 2" });
+    assert.equal(publicSurfaceHash(publicPath), firstHash);
+
+    writeSurface({ inferredReturn: "return 'one'" });
+    assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+
+    writeSurface({ genericConstraint: "number" });
+    assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+
+    writeSurface({ answer: "'42'" });
+    assert.notEqual(publicSurfaceHash(publicPath), firstHash);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

@@ -103,7 +103,7 @@ Declaring a consumer authorizes the dependency, not the internals. The producer'
 
 ## What it catches
 
-- Private cross-cell imports — `CELLFENCE_PRIVATE_IMPORT`
+- Private cross-cell imports, including TypeScript `import = require(...)` and common CommonJS require aliases — `CELLFENCE_PRIVATE_IMPORT`
 - Undeclared cross-cell dependencies — `CELLFENCE_UNDECLARED_CONSUMER`
 - Public API drift against the manifest — `CELLFENCE_PUBLIC_SYMBOL_MISMATCH`
 - Overlapping or missing ownership — `CELLFENCE_OWNERSHIP_OVERLAP`, `CELLFENCE_UNOWNED_SOURCE`
@@ -124,7 +124,7 @@ CellFence check failed.
 [error] CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH: parser public symbols grew from 1 to 2
 ```
 
-Editing the manifest authorizes nothing by itself. New cells, broader ownership, new public symbols, new dependency edges, and public signature changes all fail until a human runs `baseline update` and a reviewer accepts the diff. Selected contracts may shrink freely; growth is one-way gated. For high-trust CI, sign baselines with `cellfence baseline sign` using an external Ed25519 private key, and verify with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; HMAC remains available only for isolated verifier setups. Locked cells require a configured baseline verifier. The manifest names the fence, the baseline accepts it, CI enforces it.
+Editing the manifest authorizes nothing by itself. New cells, broader ownership, new public symbols, new dependency edges, and isolated declaration-derived public surface fingerprint changes all fail until a human runs `baseline update` and a reviewer accepts the diff. Selected contracts may shrink freely; growth is one-way gated. For high-trust CI, sign baselines with `cellfence baseline sign` using an external Ed25519 private key, and verify with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; HMAC remains available only for isolated verifier setups. Locked cells require a configured baseline verifier. The manifest names the fence, the baseline accepts it, CI enforces it.
 
 An operational signing flow keeps the private key out of ordinary PR jobs:
 
@@ -325,7 +325,7 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## Status and limitations
 
-Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript; AST-based Python boundary analysis for `.py` imports, public entries, and selected Django/FastAPI/SQLAlchemy/Celery resource patterns; packaging-aware Python manifest inference; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness or prevent an agent from editing a path at runtime — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
+Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript with fail-closed parser diagnostics; isolated declaration-derived public surface fingerprints; AST-based Python boundary analysis for `.py` imports, public entries, and selected Django/FastAPI/SQLAlchemy/Celery resource patterns; packaging-aware Python manifest inference; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness, full API compatibility proof, or runtime path-write prevention — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
 
 ## Documentation map
 

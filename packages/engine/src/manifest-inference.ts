@@ -121,6 +121,7 @@ const DEFAULT_REQUIRED_RULES = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
   "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
@@ -600,7 +601,8 @@ function discoverCandidates(rootDir: string, options: InferManifestOptions = {})
     });
   }
 
-  return narrowAncestorCandidates(rootDir, candidates, options.scope).sort((left, right) => left.id.localeCompare(right.id));
+  return removeAmbiguousPackageNames(narrowAncestorCandidates(rootDir, candidates, options.scope))
+    .sort((left, right) => left.id.localeCompare(right.id));
 }
 
 function narrowAncestorCandidates(rootDir: string, candidates: readonly CellCandidate[], scope?: InferManifestScope): CellCandidate[] {
@@ -624,6 +626,18 @@ function narrowAncestorCandidates(rootDir: string, candidates: readonly CellCand
     narrowed.push({ ...candidate, ownedPaths, publicEntry });
   }
   return narrowed;
+}
+
+function removeAmbiguousPackageNames(candidates: readonly CellCandidate[]): CellCandidate[] {
+  const packageCounts = new Map<string, number>();
+  for (const candidate of candidates) {
+    if (!candidate.packageName) continue;
+    packageCounts.set(candidate.packageName, (packageCounts.get(candidate.packageName) || 0) + 1);
+  }
+  return candidates.map((candidate) => {
+    if (!candidate.packageName || packageCounts.get(candidate.packageName) === 1) return candidate;
+    return { ...candidate, packageName: undefined };
+  });
 }
 
 function ownedPathsOutsideChildRoots(rootDir: string, relativeRoot: string, childRoots: readonly string[], scope?: InferManifestScope): string[] {

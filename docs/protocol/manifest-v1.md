@@ -54,6 +54,8 @@ Sealed source: files that require explicit human authorization before modificati
 
 Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `planned`.
 
+Manifest, baseline, and resource evidence v1 objects are strict. Unknown fields are rejected instead of ignored, so policy typos such as `requireOwnershp` or `consume` fail as configuration errors. Duplicate package names, duplicate consumer edges, duplicate artifact lane IDs, duplicate resource contract IDs, and duplicate path class IDs are rejected where they would otherwise overwrite or obscure policy.
+
 ## Cell Shape
 
 ```json
@@ -131,7 +133,8 @@ CellFence v0.x enforces:
 - artifact lanes outside declared ownership;
 - private cross-cell imports;
 - unresolved relative imports as errors;
-- computed dynamic imports and computed `require()` calls as fail-closed required-rule findings;
+- TypeScript `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases;
+- computed dynamic imports, computed `require()` calls, and TypeScript/JavaScript parser diagnostics as fail-closed required-rule findings;
 - undeclared consumers;
 - missing public entry files;
 - declared public symbols versus actual exported symbols;
@@ -147,7 +150,7 @@ CellFence v0.x enforces:
 - missing baseline verifier configuration when locked cells are checked;
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;
-- semantic baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and public surface signatures;
+- baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and isolated declaration-derived public surface signatures;
 - legacy ratchet growth for owned path counts, public symbol counts, public entry line counts, and cross-cell dependency counts when reading old baselines.
 
 Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.
@@ -157,6 +160,8 @@ Machine-readable findings also include a stable `fingerprint` when produced by t
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, selected TypeORM entity/repository/query-builder calls, selected Drizzle table declarations and table operations, selected string-literal query-builder table calls, selected BullMQ/KafkaJS calls, selected NestJS/Fastify HTTP route declarations, selected FastAPI route decorators, Django URLConf routes and model manager calls, SQLAlchemy declarative/Table/query/text calls, and Celery task declarations and literal publish calls. Dynamic paths, arbitrary ORM metadata outside supported adapters, framework plugin behavior, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 
 Relative import resolution supports NodeNext runtime specifiers by remapping `.js`, `.jsx`, `.mjs`, and `.cjs` specifiers to TypeScript source candidates before checking cell boundaries. It uses the TypeScript config parser, so `compilerOptions.paths` inherited through `extends` are included. Python `.py` imports are extracted with Python `ast` and resolved from known source roots such as `src/`, manifest-derived package roots, and common `pyproject.toml`, `setup.cfg`, and static `setup.py` package-root declarations. A relative import that still cannot be resolved is not silently ignored; it produces an unresolved-import error.
+
+For TypeScript and JavaScript public entries, the public surface hash is generated from isolated normalized declaration output when available, including local re-export roots, with the older syntax fingerprint used only as a fallback. It is intended to ratchet visible contract drift such as generic constraints, declaration-visible inferred output, class member signatures, namespaces, and literal export types. It is not a complete TypeScript API compatibility proof and should be paired with a typecheck for release-critical API compatibility.
 
 ORM, query builder, HTTP-framework, and broker-client support is adapter-scoped. Adding one adapter does not make adjacent libraries supported. For example, Prisma and TypeORM support does not cover Sequelize, Drizzle support does not cover every Drizzle expression, NestJS/Fastify support does not cover every plugin shape, and KafkaJS support does not cover every broker client. Each adapter must define the API forms it recognizes, how it resolves table, route, topic, or queue names, and which dynamic forms produce fail-closed unresolved findings.
 

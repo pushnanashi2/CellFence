@@ -21,6 +21,7 @@ const defaultRequiredRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
   "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
@@ -926,8 +927,8 @@ test("CLI init infers object workspaces, exact workspaces, duplicate ids, and sr
       ["dup-2", "packages/dup-b/src/**", "packages/dup-b/src/index.ts"],
       ["src-root", "src/*", "src/index.ts"],
     ]);
-    assert.equal(manifest.cells.find((cell) => cell.id === "dup").packageName, "@demo/dup");
-    assert.equal(manifest.cells.find((cell) => cell.id === "dup-2").packageName, "@demo/dup");
+    assert.equal(manifest.cells.find((cell) => cell.id === "dup").packageName, undefined);
+    assert.equal(manifest.cells.find((cell) => cell.id === "dup-2").packageName, undefined);
 
     const checkResult = runCli(["check", "--json"], tempDir);
     assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);

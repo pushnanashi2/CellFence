@@ -38,10 +38,11 @@
 | `CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE` | A new dependency edge appeared outside the accepted baseline set |
 | `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE` | A cell's public entry path changed |
 | `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE` | A new artifact producer/consumer contract appeared |
-| `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Exported public signatures changed beyond formatting/comment noise |
+| `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Declaration-derived public surface fingerprint changed beyond formatting/comment noise |
 | `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline seal is missing or does not match when Ed25519 or HMAC baseline verification is configured |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a fail-closed required-rule finding |
+| `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` | TypeScript or JavaScript source could not be parsed cleanly; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX` | Python source could not be parsed by the configured Python AST inspector; emitted as a fail-closed required-rule finding |
 
 
@@ -50,7 +51,7 @@ CellFence v0.x analyzes:
 
 - ES module imports;
 - `export ... from` declarations;
-- CommonJS `require(...)` calls;
+- CommonJS `require(...)`, TypeScript `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases;
 - type-only imports;
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
@@ -66,10 +67,12 @@ CellFence v0.x analyzes:
 - selected NestJS controller method decorators;
 - selected Fastify route object registrations;
 - runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
-- common TypeScript export declarations and named exports;
+- common TypeScript export declarations, named exports, and exported namespaces;
 - common Python public symbols from `__all__`, top-level functions/classes/assignments, and simple re-export imports.
 
-Computed dynamic imports, computed CommonJS `require()` calls, and Python files that the configured Python AST inspector cannot parse are reported as unsupported fail-closed findings rather than silently ignored.
+Computed dynamic imports, computed calls in recognized CommonJS `require()` forms, TypeScript/JavaScript parser diagnostics, and Python files that the configured Python AST inspector cannot parse are reported as unsupported fail-closed findings rather than silently ignored.
+
+For TypeScript and JavaScript public entries, public surface hashes are based on isolated normalized declaration output when TypeScript can emit it, with a lightweight syntax fingerprint as a fallback. This catches type-facing changes such as generic constraints, inferred changes that appear in declarations, const literal type changes, class member signatures, and namespaces while avoiding method-body churn. It is still a v0.x contract fingerprint, not a full TypeScript semantic-versioning oracle.
 
 NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/`, manifest-derived package roots, and common Python packaging metadata. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 

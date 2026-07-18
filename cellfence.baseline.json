@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-18T18:51:34.796Z",
+  "generatedAt": "2026-07-18T19:17:47.012Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,7 +23,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 35,
-      "publicSurfaceLines": 711,
+      "publicSurfaceLines": 791,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -66,7 +66,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "9b64bb7e0e3eede4047ebb4e3fb17f46cfa4fc0ee57710ba70a8606e1000ac49",
+      "publicSurfaceHash": "c5e1bdca486cd8716b4b4b20d0391fc92beeb2fbf81c28e94a4465240d7ce6dc",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -105,7 +105,7 @@
         "defineReporter",
         "defineRule"
       ],
-      "publicSurfaceHash": "4acb2c58335cd0bd319779bf41d86cada513c331dbfcc9c6959413dd5f74bb9c",
+      "publicSurfaceHash": "e1d0fb0a6f77d99222e9c8d21b0883560538c16984120dd4f938b3396aff06ec",
       "dependencyEdges": [
         "plugin-api->schema"
       ],
@@ -115,7 +115,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 75,
-      "publicSurfaceLines": 3902,
+      "publicSurfaceLines": 3904,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -198,7 +198,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "fe7ad041a02969f7a1c6a6c77c48af5ef82269ddec6587066b40523e66422b15",
+      "publicSurfaceHash": "60ad3fe77d2a6393adf1aeab0e7af6559deb26858c5826e28bf56ce252415ce7",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -240,7 +240,7 @@
         "runProxy",
         "WriteToolConfig"
       ],
-      "publicSurfaceHash": "5d062e564217f3559690c10e9fec83f003667970067ced8c91550c9e51fc8dfc",
+      "publicSurfaceHash": "7f0aafbda2561d172847c057238ce671a7e41907e40df93bf8a914649aeae481",
       "dependencyEdges": [
         "mcp-proxy->engine"
       ],
@@ -274,7 +274,7 @@
       "publicSymbolSet": [
         "main"
       ],
-      "publicSurfaceHash": "2498d26c682a45adc76dedb63cff78904fc730a08c44944468467d6bc928c131",
+      "publicSurfaceHash": "843c8554c8fc252cbbb1f7dfb572d547d6073ec5d34fa324f3721b0ca959d162",
       "dependencyEdges": [
         "cli->engine"
       ],
@@ -308,7 +308,7 @@
       "publicSymbolSet": [
         "main"
       ],
-      "publicSurfaceHash": "4cb4850871112ebcc78d4c1d35008513220731839ef77205d0f46b38885ccb49",
+      "publicSurfaceHash": "5b3127dc1f57423f48232228b6af7ea29cdb7949acc28ae120fa2b654287528a",
       "dependencyEdges": [
         "github-action->engine"
       ],
@@ -332,7 +332,7 @@
         "recordQueueAccess",
         "recordResourceAccess"
       ],
-      "publicSurfaceHash": "28a8fcb53db3d5276949483038ef1df8c65b087bde96c39c043c9211a6df8c5d",
+      "publicSurfaceHash": "080a30c6f4273ec664aa5c1ba748f500f6ffd7529889e770c283d113ce7197d5",
       "dependencyEdges": [
         "trace->schema"
       ],
@@ -353,7 +353,7 @@
         "callPatternAdapter",
         "CallPatternAdapterOptions"
       ],
-      "publicSurfaceHash": "95d8a86f9e6654249d7bb88a18260881edd3b008695cef6439dd2dfbd91ec5fa",
+      "publicSurfaceHash": "0ae70aafe1e46f2b316012a37766473e10f907ea820063da0e1fb3c61b1e61f7",
       "dependencyEdges": [
         "adapter-call-pattern->plugin-api",
         "adapter-call-pattern->schema"
@@ -374,7 +374,7 @@
         "OpenTelemetryEvidenceOptions",
         "openTelemetryToResourceEvidence"
       ],
-      "publicSurfaceHash": "f80e55caedb71b4f3b6001193d41349593b722ab422f5ebf52041d6166d57236",
+      "publicSurfaceHash": "4ceffaa1a72384aa778064c56716b3fe90f1f0369156412fc95ead1c2bf6f367",
       "dependencyEdges": [
         "adapter-opentelemetry->schema"
       ],
@@ -394,7 +394,7 @@
         "AgentBudgetOptions",
         "agentBudgetPlugin"
       ],
-      "publicSurfaceHash": "59212ef14d62dae1e1b73f8d29f30fa022cdb77d7e96c053734daf919dd1797c",
+      "publicSurfaceHash": "e51d57838cc3b02ec1c20fd8b771b25e75e3fafb4fe79f23f61ec0981a746ac2",
       "dependencyEdges": [
         "plugin-agent-budget->plugin-api"
       ],
@@ -414,7 +414,7 @@
         "BlastRadiusOptions",
         "blastRadiusPlugin"
       ],
-      "publicSurfaceHash": "747f6d65e5fd9b62d1ed34f4d86a5516dd107bc6f3f72e092f17ec5d1966a294",
+      "publicSurfaceHash": "3269eb6b1bb34ad4e454c8f49a6234eaa4b2dd6cdc372bf0f112ed5ec864a420",
       "dependencyEdges": [
         "plugin-blast-radius->plugin-api"
       ],
@@ -434,7 +434,7 @@
         "DependencySovereigntyOptions",
         "dependencySovereigntyPlugin"
       ],
-      "publicSurfaceHash": "2f465d06cb1e049f139a498a97896670ee8e1c07440f4cf49feff29225550f6d",
+      "publicSurfaceHash": "20abfbbf653e960e3ed1918b94ca5bd2b632c6f1a39f3a61dd7b3e21761548a4",
       "dependencyEdges": [
         "plugin-dependency-sovereignty->plugin-api"
       ],
@@ -454,7 +454,7 @@
         "GeoPurityOptions",
         "geoPurityPlugin"
       ],
-      "publicSurfaceHash": "eb181feab623bd0c4dd0df612009fe5dc570826de453fb82db989ae80d088040",
+      "publicSurfaceHash": "8f5d92dc4e4fc2c45de9ef869f9293661c9ab995a6f89d9194ecfac796be802b",
       "dependencyEdges": [
         "plugin-geo-purity->plugin-api"
       ],
@@ -474,7 +474,7 @@
         "LegacyStranglerOptions",
         "legacyStranglerPlugin"
       ],
-      "publicSurfaceHash": "3cbaf9d8fb167507d1552299456807c7fc5c2652ca184af3847a48dbd91ec44e",
+      "publicSurfaceHash": "89807bd308503a80d7e4802903d2bbfe925c93bc9893bca585d2d2c8fd7ba032",
       "dependencyEdges": [
         "plugin-legacy-strangler->plugin-api"
       ],
@@ -495,7 +495,7 @@
         "quantsTrendPlugin",
         "TrendMetric"
       ],
-      "publicSurfaceHash": "8aa91b6e262b5fcdbf1178458643a8521ee85e1e0faa7952efc9f509662a11ed",
+      "publicSurfaceHash": "3d9788f06a52e62f7db96506c89147647cffddb5ba0fc52aabec9f161405b36d",
       "dependencyEdges": [
         "plugin-quants-trend->plugin-api",
         "plugin-quants-trend->schema"
@@ -518,7 +518,7 @@
         "economyMatrixReporter",
         "EconomyMatrixRow"
       ],
-      "publicSurfaceHash": "0c28a00845d20fde70ce3314ac3158d8f3bdb8bc81353049fe035f99151d6afb",
+      "publicSurfaceHash": "7fa2659166ee31cb19c25f21ecd0fc5d03a2ba15761594db44fb5c6d065ecbba",
       "dependencyEdges": [
         "reporter-economy-matrix->plugin-api"
       ],

@@ -63,6 +63,16 @@ function assertInvalid(result, text) {
   assert.match(result.errors.join("\n"), text);
 }
 
+function assertInvalidContaining(result, expectedErrors) {
+  assert.equal(result.ok, false);
+  for (const expectedError of expectedErrors) {
+    assert.ok(
+      result.errors.includes(expectedError),
+      `expected ${JSON.stringify(expectedError)} in:\n${result.errors.join("\n")}`,
+    );
+  }
+}
+
 test("schema validation accepts maximal valid manifests", () => {
   assert.equal(CELLFENCE_MANIFEST_SCHEMA_VERSION, "cellfence.manifest.v1");
   assert.equal(CELLFENCE_BASELINE_SCHEMA_VERSION, "cellfence.baseline.v1");
@@ -156,6 +166,116 @@ test("schema validation rejects malformed manifest root and reserved loaders", (
   assertInvalid(validateManifest(validManifest({ plugins: [{ package: "plugin", options: "bad" }] })), /options must be an object/);
   assertInvalid(validateManifest(validManifest({ rules: [] })), /rules must be an object mapping rule ids/);
   assertInvalid(validateManifest(validManifest({ rules: { "": "error", rule: "fatal" } })), /empty rule id[\s\S]*rule must be off\|warning\|error/);
+});
+
+test("schema validation rejects unknown manifest fields instead of ignoring policy typos", () => {
+  assertInvalidContaining(
+    validateManifest(validManifest({
+      typoTopLevel: true,
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        requireOwnershp: false,
+        pathClasses: [{
+          id: "generated",
+          kind: "generated",
+          paths: ["generated/**"],
+          extraPolicy: true,
+          commitPolicy: {
+            generatedRequiresProvenance: true,
+            typoTrailer: "Reviewed-by",
+          },
+        }],
+      },
+      overrides: [{
+        files: ["src/**"],
+        rules: { CELLFENCE_PRIVATE_IMPORT: "error" },
+        extraOverride: true,
+      }],
+      profiles: {
+        ci: {
+          reportOnly: false,
+          extraProfile: true,
+        },
+      },
+      cells: [{
+        ...validCell,
+        consume: [{ cell: "ghost" }],
+        consumes: [{ cell: "platform", artifactLanes: ["events-v1"], extraConsumer: true }],
+        producesArtifacts: [{ id: "events-v1", paths: ["events/**"], extraLane: true }],
+        resourceContracts: [{
+          id: "users-read",
+          kind: "database",
+          access: ["read"],
+          selectors: ["app.users"],
+          extraContract: true,
+        }],
+        budgets: {
+          publicSymbols: 1,
+          typoBudget: 1,
+        },
+      }],
+    })),
+    [
+      "manifest.typoTopLevel is not a supported field",
+      "governance.requireOwnershp is not a supported field",
+      "governance.pathClasses[0].extraPolicy is not a supported field",
+      "governance.pathClasses[0].commitPolicy.typoTrailer is not a supported field",
+      "overrides[0].extraOverride is not a supported field",
+      "profiles.ci.extraProfile is not a supported field",
+      "cells[0].consume is not a supported field",
+      "cells[0].consumes[0].extraConsumer is not a supported field",
+      "cells[0].producesArtifacts[0].extraLane is not a supported field",
+      "cells[0].resourceContracts[0].extraContract is not a supported field",
+      "cells[0].budgets.typoBudget is not a supported field",
+    ],
+  );
+});
+
+test("schema validation rejects duplicate names that would overwrite manifest policy maps", () => {
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [
+        { ...validCell, id: "core", packageName: "@example/core" },
+        {
+          ...validCell,
+          id: "api",
+          ownedPaths: ["src/api/**"],
+          publicEntry: "src/api/public.ts",
+          packageName: "@example/core",
+        },
+      ],
+    })),
+    /cells\[\]\.packageName contains duplicate entry @example\/core/,
+  );
+  assertInvalidContaining(
+    validateManifest(validManifest({
+      governance: {
+        pathClasses: [
+          { id: "generated", kind: "generated", paths: ["generated/**"] },
+          { id: "generated", kind: "generated", paths: ["dist/**"] },
+        ],
+      },
+      cells: [{
+        ...validCell,
+        consumes: [{ cell: "platform" }, { cell: "platform" }],
+        producesArtifacts: [
+          { id: "events-v1", paths: ["events/**"] },
+          { id: "events-v1", paths: ["more-events/**"] },
+        ],
+        resourceContracts: [
+          { id: "users-read", kind: "database", access: ["read"], selectors: ["app.users"] },
+          { id: "users-read", kind: "database", access: ["write"], selectors: ["app.users"] },
+        ],
+      }],
+    })),
+    [
+      "governance.pathClasses[].id contains duplicate entry generated",
+      "cells[0].consumes[].cell contains duplicate entry platform",
+      "cells[0].producesArtifacts[].id contains duplicate entry events-v1",
+      "cells[0].resourceContracts[].id contains duplicate entry users-read",
+    ],
+  );
 });
 
 test("schema validation rejects malformed manifest governance and overrides", () => {
@@ -278,6 +398,32 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be a base64 string/);
   assertInvalid(
     validateBaseline(validBaseline({
+      extraBaseline: true,
+      seal: {
+        algorithm: "hmac-sha256",
+        digest: "a".repeat(64),
+        extraSeal: true,
+      },
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          extraCell: true,
+          resourceAccesses: [{
+            kind: "file",
+            access: "read",
+            selector: "data/input.json",
+            extraAccess: true,
+          }],
+        },
+      },
+    })),
+    /baseline\.extraBaseline is not a supported field[\s\S]*seal\.extraSeal is not a supported field[\s\S]*cells\.core\.extraCell is not a supported field[\s\S]*resourceAccesses\[0\]\.extraAccess is not a supported field/,
+  );
+  assertInvalid(
+    validateBaseline(validBaseline({
       cells: {
         core: {
           ownedPathPatterns: -1,
@@ -369,6 +515,18 @@ test("schema validation accepts and rejects resource evidence", () => {
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: 1 })), /cellId must be a string/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: "bad" })), /accesses must be an array/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: [123] })), /accesses\[0\] must be an object/);
+  assertInvalid(
+    validateResourceEvidence(validEvidence({
+      extraEvidence: true,
+      accesses: [{
+        kind: "database",
+        access: "read",
+        selector: "app.users",
+        extraAccess: true,
+      }],
+    })),
+    /resource evidence\.extraEvidence is not a supported field[\s\S]*accesses\[0\]\.extraAccess is not a supported field/,
+  );
   assertInvalid(
     validateResourceEvidence({
       schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
