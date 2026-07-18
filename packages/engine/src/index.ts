@@ -1186,10 +1186,27 @@ function evidencePathsForOptions(rootDir: string, evidencePaths: string[] | unde
   return (evidencePaths || []).map((evidencePath) => path.resolve(rootDir, evidencePath));
 }
 
+function comparableRealPath(inputPath: string): string {
+  const absolutePath = path.resolve(inputPath);
+  let realPath: string;
+  try {
+    realPath = fs.realpathSync.native(absolutePath);
+  } catch {
+    try {
+      realPath = fs.realpathSync(absolutePath);
+    } catch {
+      realPath = absolutePath;
+    }
+  }
+  const normalized = path.normalize(realPath);
+  if (process.platform !== "win32") return normalized;
+  return normalized.replace(/^\\\\\?\\/, "").replace(/\\/g, "/").toLowerCase();
+}
+
 function gitHeadForExactRoot(rootDir: string): string | undefined {
   try {
     const topLevel = gitCommand(rootDir, ["rev-parse", "--show-toplevel"]);
-    if (fs.realpathSync(topLevel) !== fs.realpathSync(rootDir)) return undefined;
+    if (comparableRealPath(topLevel) !== comparableRealPath(rootDir)) return undefined;
     return gitCommand(rootDir, ["rev-parse", "HEAD"]);
   } catch {
     return undefined;
