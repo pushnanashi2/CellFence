@@ -115,6 +115,22 @@ CellFence check failed.
 
 Editing the manifest authorizes nothing by itself. New cells, broader ownership, new public symbols, new dependency edges, and public signature changes all fail until a human runs `baseline update` and a reviewer accepts the diff. Selected contracts may shrink freely; growth is one-way gated. For high-trust CI, sign baselines with `cellfence baseline sign` using an external Ed25519 private key, and verify with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; HMAC remains available only for isolated verifier setups. Locked cells require a configured baseline verifier. The manifest names the fence, the baseline accepts it, CI enforces it.
 
+An operational signing flow keeps the private key out of ordinary PR jobs:
+
+```bash
+# Approval-controlled signing job or external signing service only.
+export CELLFENCE_BASELINE_ED25519_PRIVATE_KEY="$(cat baseline-ed25519-private.pem)"
+export CELLFENCE_BASELINE_ED25519_KEY_ID="baseline-2026q3"
+npx cellfence baseline sign --baseline cellfence.baseline.json
+
+# Pull request and branch protection jobs need only the public key.
+export CELLFENCE_BASELINE_ED25519_PUBLIC_KEY="$(cat baseline-ed25519-public.pem)"
+npx cellfence baseline verify --manifest cellfence.manifest.json --baseline cellfence.baseline.json
+npx cellfence baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json
+```
+
+Do not expose `CELLFENCE_BASELINE_ED25519_PRIVATE_KEY` to a workflow that runs untrusted pull-request code. See [docs/ci.md](docs/ci.md#signed-baseline-workflows) for GitHub Actions examples.
+
 Details: [docs/ratchets.md](docs/ratchets.md).
 
 ## For coding agents
@@ -252,7 +268,7 @@ Minimal GitHub Actions job:
 - run: npx cellfence baseline check
 ```
 
-Recipes, required-check setup, and the reusable action: [docs/ci.md](docs/ci.md).
+Recipes, required-check setup, signed baseline workflows, and the reusable action: [docs/ci.md](docs/ci.md).
 
 ## Use CellFence when you are asking
 

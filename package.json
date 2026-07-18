@@ -1,6 +1,6 @@
 {
   "name": "cellfence-workspace",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "description": "Manifest-driven repository governance for parallel coding agents.",
   "license": "Apache-2.0",
@@ -23,7 +23,8 @@
     "benchmark:scale": "npm run build && node scripts/scale-benchmark.mjs",
     "pack:smoke": "node scripts/pack-smoke.mjs",
     "provenance:scan": "node scripts/forbidden-source-scan.mjs",
-    "release:verify": "node scripts/release-verify.mjs"
+    "release:verify": "node scripts/release-verify.mjs",
+    "sbom:generate": "node scripts/sbom-generate.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

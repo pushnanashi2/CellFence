@@ -46,7 +46,6 @@ import {
   extractPublicSymbols,
   getLineNumber,
   literalText,
-  publicSurfaceHash,
   resolvePythonImport,
   readPathAliases,
   resolvePathAliasTarget,
@@ -69,6 +68,19 @@ import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import type { FileObservation, ObservationFamily } from "./governance/model.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
+import {
+  BASELINE_ED25519_PRIVATE_KEY_ENV,
+  BASELINE_HMAC_KEY_ENV,
+  sealBaselineIfConfigured,
+  validateBaselineSealFindings,
+} from "./baseline-seal.js";
+import {
+  compareBaseline,
+  computeMetrics,
+  resourceBaselineEntry,
+  resourceBaselineKey,
+  sortedResourceBaselineEntries,
+} from "./baseline-ratchet.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
 export {
@@ -562,11 +574,6 @@ type AnalysisContext = FileIndexContext & {
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
 const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
-const BASELINE_HMAC_KEY_ENV = "CELLFENCE_BASELINE_HMAC_KEY";
-const BASELINE_HMAC_KEY_ID_ENV = "CELLFENCE_BASELINE_HMAC_KEY_ID";
-const BASELINE_ED25519_PRIVATE_KEY_ENV = "CELLFENCE_BASELINE_ED25519_PRIVATE_KEY";
-const BASELINE_ED25519_PUBLIC_KEY_ENV = "CELLFENCE_BASELINE_ED25519_PUBLIC_KEY";
-const BASELINE_ED25519_KEY_ID_ENV = "CELLFENCE_BASELINE_ED25519_KEY_ID";
 const CORE_REQUIRED_RULES = [
   "CELLFENCE_OWNERSHIP_OVERLAP",
   "CELLFENCE_UNOWNED_SOURCE",
@@ -620,159 +627,6 @@ function addFinding(findings: Finding[], finding: Finding): void {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function baselineWithoutSeal(baseline: CellFenceBaseline): Omit<CellFenceBaseline, "seal"> {
-  const { seal: _seal, ...unsignedBaseline } = baseline;
-  return unsignedBaseline;
-}
-
-function baselineHmacDigest(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">, secret: string): string {
-  return crypto
-    .createHmac("sha256", secret)
-    .update(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline))
-    .digest("hex");
-}
-
-function baselineSealPayload(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">): Buffer {
-  return Buffer.from(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline), "utf8");
-}
-
-function baselineKeyMaterial(value: string): string {
-  return value.includes("\\n") ? value.replace(/\\n/g, "\n") : value;
-}
-
-function baselineEd25519Signature(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">, privateKeyPem: string): string {
-  const key = crypto.createPrivateKey(baselineKeyMaterial(privateKeyPem));
-  return crypto.sign(null, baselineSealPayload(baseline), key).toString("base64");
-}
-
-function baselineEd25519SignatureValid(baseline: CellFenceBaseline, publicKeyPem: string): boolean {
-  if (baseline.seal?.algorithm !== "ed25519") return false;
-  const key = crypto.createPublicKey(baselineKeyMaterial(publicKeyPem));
-  return crypto.verify(null, baselineSealPayload(baseline), key, Buffer.from(baseline.seal.signature, "base64"));
-}
-
-function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFenceBaseline {
-  const privateKey = process.env[BASELINE_ED25519_PRIVATE_KEY_ENV];
-  if (privateKey) {
-    const unsignedBaseline = baselineWithoutSeal(baseline);
-    return {
-      ...unsignedBaseline,
-      seal: {
-        algorithm: "ed25519",
-        ...(process.env[BASELINE_ED25519_KEY_ID_ENV] ? { keyId: process.env[BASELINE_ED25519_KEY_ID_ENV] } : {}),
-        signature: baselineEd25519Signature(unsignedBaseline, privateKey),
-      },
-    };
-  }
-  const secret = process.env[BASELINE_HMAC_KEY_ENV];
-  if (!secret) return baseline;
-  const unsignedBaseline = baselineWithoutSeal(baseline);
-  const sealedBaseline: CellFenceBaseline = {
-    ...unsignedBaseline,
-    seal: {
-      algorithm: "hmac-sha256",
-      ...(process.env[BASELINE_HMAC_KEY_ID_ENV] ? { keyId: process.env[BASELINE_HMAC_KEY_ID_ENV] } : {}),
-      digest: baselineHmacDigest(unsignedBaseline, secret),
-    },
-  };
-  return sealedBaseline;
-}
-
-function configuredSealVerifier(): "ed25519" | "hmac-sha256" | undefined {
-  if (process.env[BASELINE_ED25519_PUBLIC_KEY_ENV]) return "ed25519";
-  if (process.env[BASELINE_HMAC_KEY_ENV]) return "hmac-sha256";
-  return undefined;
-}
-
-function validateBaselineSeal(manifest: CellFenceManifest, baseline: CellFenceBaseline, baselinePath: string, findings: Finding[], requireConfiguredVerifier = false): void {
-  const secret = process.env[BASELINE_HMAC_KEY_ENV];
-  const publicKey = process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
-  const verifier = configuredSealVerifier();
-  const lockedCells = manifest.cells.filter((cell) => cell.locked);
-  if (!verifier && lockedCells.length > 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-      severity: "error",
-      filePath: baselinePath,
-      message: `locked cells require ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV} during baseline check`,
-      details: { lockedCells: lockedCells.map((cell) => cell.id) },
-    });
-    return;
-  }
-  if (!verifier) {
-    if (requireConfiguredVerifier) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-        severity: "error",
-        filePath: baselinePath,
-        message: `baseline verification requires ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`,
-      });
-    }
-    return;
-  }
-  if (!baseline.seal) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-      severity: "error",
-      filePath: baselinePath,
-      message: "baseline is not sealed; sign the baseline before enabling sealed baseline verification",
-    });
-    return;
-  }
-  if (verifier === "ed25519") {
-    if (baseline.seal.algorithm !== "ed25519") {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-        severity: "error",
-        filePath: baselinePath,
-        message: "baseline seal algorithm does not match the configured Ed25519 verifier",
-        details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
-      });
-      return;
-    }
-    try {
-      if (publicKey && baselineEd25519SignatureValid(baseline, publicKey)) return;
-    } catch (error) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-        severity: "error",
-        filePath: baselinePath,
-        message: `baseline Ed25519 seal could not be verified: ${errorMessage(error)}`,
-        details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
-      });
-      return;
-    }
-    addFinding(findings, {
-      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-      severity: "error",
-      filePath: baselinePath,
-      message: "baseline Ed25519 seal does not match the checked baseline content",
-      details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
-    });
-    return;
-  }
-  if (baseline.seal.algorithm !== "hmac-sha256") {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-      severity: "error",
-      filePath: baselinePath,
-      message: "baseline seal algorithm does not match the configured HMAC verifier",
-      details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
-    });
-    return;
-  }
-  const expectedDigest = baselineHmacDigest(baseline, secret as string);
-  if (baseline.seal.digest !== expectedDigest) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
-      severity: "error",
-      filePath: baselinePath,
-      message: "baseline HMAC seal does not match the checked baseline content",
-      details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
-    });
-  }
 }
 
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
@@ -1145,29 +999,6 @@ function validateSymlinkTargets(context: AnalysisContext, findings: Finding[]): 
       });
     }
   }
-}
-
-function resourceBaselineEntry(access: ResourceAccessReference): ResourceBaselineEntry {
-  return {
-    kind: access.kind,
-    access: access.access,
-    selector: access.selector,
-    detectedBy: access.detectedBy,
-    confidence: access.confidence,
-  };
-}
-
-function resourceBaselineKey(access: ResourceBaselineEntry): string {
-  return `${access.kind}:${access.access}:${access.selector}`;
-}
-
-function sortedResourceBaselineEntries(accesses: ResourceAccessReference[]): ResourceBaselineEntry[] {
-  const uniqueEntries = new Map<string, ResourceBaselineEntry>();
-  for (const access of accesses) {
-    const entry = resourceBaselineEntry(access);
-    uniqueEntries.set(resourceBaselineKey(entry), entry);
-  }
-  return [...uniqueEntries.values()].sort((left, right) => resourceBaselineKey(left).localeCompare(resourceBaselineKey(right)));
 }
 
 function resourceAccessDeclaredByManifest(cell: CellManifest, access: ResourceAccessReference): boolean {
@@ -2102,228 +1933,6 @@ function validateImports(
   return crossCellDependencies;
 }
 
-function countLines(filePath: string): number {
-  if (!fs.existsSync(filePath)) return 0;
-  const content = fs.readFileSync(filePath, "utf8");
-  if (content.length === 0) return 0;
-  return content.split(/\r?\n/).length;
-}
-
-function artifactContractsForCell(cell: CellManifest): string[] {
-  const contracts: string[] = [];
-  for (const lane of cell.producesArtifacts || []) {
-    for (const artifactPath of lane.paths) contracts.push(`produce:${lane.id}:${normalizePath(artifactPath)}`);
-  }
-  for (const consumer of cell.consumes || []) {
-    for (const lane of consumer.artifactLanes || []) contracts.push(`consume:${consumer.cell}:${lane}`);
-  }
-  return contracts.sort((left, right) => left.localeCompare(right));
-}
-
-function dependencyEdgesForCell(cellId: string, dependencies: Set<string> | undefined): string[] {
-  return [...(dependencies || new Set<string>())]
-    .map((dependency) => `${cellId}->${dependency}`)
-    .sort((left, right) => left.localeCompare(right));
-}
-
-function computeMetrics(
-  context: AnalysisContext,
-  crossCellDependencies: Map<string, Set<string>>,
-  accessesByCell: Map<string, ResourceAccessReference[]>,
-): Record<string, CellBaselineRecord> {
-  const metrics: Record<string, CellBaselineRecord> = {};
-  for (const cell of context.manifest.cells) {
-    const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
-    metrics[cell.id] = {
-      ownedPathPatterns: cell.ownedPaths.length,
-      publicSymbols: cell.publicSymbols.length,
-      publicSurfaceLines: countLines(absolutePath(context.rootDir, cell.publicEntry)),
-      crossCellDependencies: crossCellDependencies.get(cell.id)?.size || 0,
-      ownedPathSet: [...cell.ownedPaths].map(normalizePath).sort((left, right) => left.localeCompare(right)),
-      publicEntryPath: normalizePath(cell.publicEntry),
-      publicSymbolSet: [...cell.publicSymbols].sort((left, right) => left.localeCompare(right)),
-      publicSurfaceHash: publicSurfaceHash(publicEntryPath),
-      dependencyEdges: dependencyEdgesForCell(cell.id, crossCellDependencies.get(cell.id)),
-      artifactContracts: artifactContractsForCell(cell),
-      resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id) as ResourceAccessReference[]),
-    };
-  }
-  return metrics;
-}
-
-function compareBaseline(
-  context: AnalysisContext,
-  metrics: Record<string, CellBaselineRecord>,
-  baseline: CellFenceBaseline,
-  findings: Finding[],
-): void {
-  const baselineCellIds = new Set(baseline.cellIds || Object.keys(baseline.cells));
-  for (const [cellId, metric] of Object.entries(metrics)) {
-    const locked = Boolean(context.cellsById.get(cellId)?.locked);
-    const baselineRecord = baseline.cells[cellId];
-    if (!baselineRecord || !baselineCellIds.has(cellId)) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_CELL_SET_GROWTH",
-        severity: "error",
-        cellId,
-        message: `${cellId} is not present in the accepted baseline cell set`,
-        suggestedResolutions: [
-          codeResolution("Move the new source under an existing accepted cell if this is not an intentional architecture addition"),
-          baselineResolution("Accept the new cell in the baseline", locked, { cell: cellId }),
-        ],
-      });
-      continue;
-    }
-
-    if (baselineRecord.publicEntryPath && metric.publicEntryPath !== baselineRecord.publicEntryPath) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE",
-        severity: "error",
-        cellId,
-        message: `${cellId} public entry changed from ${baselineRecord.publicEntryPath} to ${metric.publicEntryPath}`,
-        suggestedResolutions: [
-          codeResolution("Keep the existing public entry path and move implementation detail behind it"),
-          baselineResolution("Accept the public entry contract change in the baseline", locked, { cell: cellId, previous: baselineRecord.publicEntryPath, current: metric.publicEntryPath }),
-        ],
-      });
-    }
-
-    if (baselineRecord.ownedPathSet) {
-      const uncovered = (metric.ownedPathSet as string[]).filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, baselineRecord.ownedPathSet as string[]));
-      if (uncovered.length > 0) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE",
-          severity: "error",
-          cellId,
-          message: `${cellId} ownership scope expanded or shifted outside the accepted baseline: ${uncovered.join(", ")}`,
-          details: { previous: baselineRecord.ownedPathSet, current: metric.ownedPathSet, uncovered },
-          suggestedResolutions: [
-            codeResolution("Keep new source inside an existing accepted ownership scope or create a reviewed cell change"),
-            baselineResolution("Accept the ownership scope change in the baseline", locked, { cell: cellId, uncovered }),
-          ],
-        });
-      }
-    }
-
-    if (baselineRecord.publicSymbolSet) {
-      const previousSymbols = new Set(baselineRecord.publicSymbolSet);
-      const addedSymbols = (metric.publicSymbolSet as string[]).filter((symbol) => !previousSymbols.has(symbol));
-      if (addedSymbols.length > 0) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
-          severity: "error",
-          cellId,
-          message: `${cellId} added public symbols outside the accepted baseline: ${addedSymbols.join(", ")}`,
-          details: { previous: baselineRecord.publicSymbolSet, current: metric.publicSymbolSet, addedSymbols },
-          suggestedResolutions: [
-            codeResolution("Keep the new API internal or route through an existing public symbol"),
-            baselineResolution("Accept the public symbol set change in the baseline", locked, { cell: cellId, addedSymbols }),
-          ],
-        });
-      }
-    }
-
-    if (baselineRecord.dependencyEdges) {
-      const previousEdges = new Set(baselineRecord.dependencyEdges);
-      const addedEdges = (metric.dependencyEdges as string[]).filter((edge) => !previousEdges.has(edge));
-      if (addedEdges.length > 0) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
-          severity: "error",
-          cellId,
-          message: `${cellId} added dependency edges outside the accepted baseline: ${addedEdges.join(", ")}`,
-          details: { previous: baselineRecord.dependencyEdges, current: metric.dependencyEdges, addedEdges },
-          suggestedResolutions: [
-            codeResolution("Remove the new dependency edge or depend on an existing accepted cell"),
-            baselineResolution("Accept the dependency edge change in the baseline", locked, { cell: cellId, addedEdges }),
-          ],
-        });
-      }
-    }
-
-    if (baselineRecord.artifactContracts) {
-      const previousArtifacts = new Set(baselineRecord.artifactContracts);
-      const addedArtifacts = (metric.artifactContracts as string[]).filter((artifact) => !previousArtifacts.has(artifact));
-      if (addedArtifacts.length > 0) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE",
-          severity: "error",
-          cellId,
-          message: `${cellId} added artifact contracts outside the accepted baseline: ${addedArtifacts.join(", ")}`,
-          details: { previous: baselineRecord.artifactContracts, current: metric.artifactContracts, addedArtifacts },
-          suggestedResolutions: [
-            codeResolution("Avoid the new artifact lane or reuse an accepted artifact contract"),
-            baselineResolution("Accept the artifact contract change in the baseline", locked, { cell: cellId, addedArtifacts }),
-          ],
-        });
-      }
-    }
-
-    if (baselineRecord.publicSurfaceHash && metric.publicSurfaceHash !== baselineRecord.publicSurfaceHash) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE",
-        severity: "error",
-        cellId,
-        message: `${cellId} public surface signature hash changed from the accepted baseline`,
-        details: { previous: baselineRecord.publicSurfaceHash },
-        suggestedResolutions: [
-          codeResolution("Keep the public type/signature contract stable or move changes behind existing exports"),
-          baselineResolution("Accept the public signature change in the baseline", locked, { cell: cellId }),
-        ],
-      });
-    }
-
-    if (metric.ownedPathPatterns > baselineRecord.ownedPathPatterns) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_OWNED_PATH_GROWTH",
-        severity: "error",
-        cellId,
-        message: `${cellId} owned path patterns grew from ${baselineRecord.ownedPathPatterns} to ${metric.ownedPathPatterns}`,
-        suggestedResolutions: [
-          codeResolution("Move new files under existing owned path patterns or reduce the owned path expansion"),
-          baselineResolution("Accept the owned path growth in the baseline", locked, { cell: cellId, metric: "ownedPathPatterns" }),
-        ],
-      });
-    }
-    if (metric.publicSymbols > baselineRecord.publicSymbols) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
-        severity: "error",
-        cellId,
-        message: `${cellId} public symbols grew from ${baselineRecord.publicSymbols} to ${metric.publicSymbols}`,
-        suggestedResolutions: [
-          codeResolution("Keep the new API internal or remove public exports that are not part of the intended contract"),
-          baselineResolution("Accept the public symbol growth in the baseline", locked, { cell: cellId, metric: "publicSymbols" }),
-        ],
-      });
-    }
-    if (!baselineRecord.publicSurfaceHash && metric.publicSurfaceLines > baselineRecord.publicSurfaceLines) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH",
-        severity: "error",
-        cellId,
-        message: `${cellId} public surface lines grew from ${baselineRecord.publicSurfaceLines} to ${metric.publicSurfaceLines}`,
-        suggestedResolutions: [
-          codeResolution("Move implementation detail out of the public entry or reduce public surface size"),
-          baselineResolution("Accept the public surface growth in the baseline", locked, { cell: cellId, metric: "publicSurfaceLines" }),
-        ],
-      });
-    }
-    if (metric.crossCellDependencies > baselineRecord.crossCellDependencies) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH",
-        severity: "error",
-        cellId,
-        message: `${cellId} cross-cell dependencies grew from ${baselineRecord.crossCellDependencies} to ${metric.crossCellDependencies}`,
-        suggestedResolutions: [
-          codeResolution("Remove the new cross-cell dependency or route it through an existing allowed dependency"),
-          baselineResolution("Accept the cross-cell dependency growth in the baseline", locked, { cell: cellId, metric: "crossCellDependencies" }),
-        ],
-      });
-    }
-  }
-}
-
 function manifestInvalidResult(message: string): CheckResult {
   const finding: Finding = {
     ruleId: "CELLFENCE_MANIFEST_INVALID",
@@ -2466,7 +2075,9 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
         });
       } else {
         baseline = baselineValidation.value;
-        validateBaselineSeal(manifest, baseline, repoPath(rootDir, baselinePath), findings);
+        for (const finding of validateBaselineSealFindings(manifest, baseline, repoPath(rootDir, baselinePath))) {
+          addFinding(findings, finding);
+        }
       }
     } catch (error) {
       addFinding(findings, {
@@ -2530,7 +2141,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   const repositoryModel = createRepositoryModel(context, baseline, observedImports, accessesByCell, metrics, options.changedFiles);
 
   if (baseline) {
-    compareBaseline(context, metrics, baseline, findings);
+    compareBaseline(context, metrics, baseline, findings, addFinding);
   }
 
   runPluginRules(context, plugins, repositoryModel, findings);
@@ -2701,7 +2312,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, baseline),
   );
   const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
-  if (baseline) compareBaseline(context, metrics, baseline, findings);
+  if (baseline) compareBaseline(context, metrics, baseline, findings, addFinding);
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const preWaiverFindings = [...severityAdjusted.findings, ...severityAdjusted.warnings];
   const candidates: PruneCandidate[] = [];
@@ -3761,7 +3372,9 @@ export function verifyBaselineSeal(options: CheckOptions = {}): CheckResult {
   const manifest = loadManifestFromFile(manifestPath);
   const baseline = loadBaselineFromFile(baselinePath);
   const findings: Finding[] = [];
-  validateBaselineSeal(manifest, baseline, baselinePath, findings, true);
+  for (const finding of validateBaselineSealFindings(manifest, baseline, baselinePath, true)) {
+    addFinding(findings, finding);
+  }
   return {
     ok: findings.length === 0,
     exitCode: findings.length === 0 ? 0 : 1,

@@ -6,9 +6,11 @@ const requiredFiles = [
   "CONTRIBUTING.md",
   "SECURITY.md",
   "LICENSE",
+  "CHANGELOG.md",
   "docs/architecture.md",
   "docs/threat-model.md",
   "docs/root-of-trust.md",
+  "docs/publishing.md",
   "docs/implementation-status.md",
 ];
 const findings = [];

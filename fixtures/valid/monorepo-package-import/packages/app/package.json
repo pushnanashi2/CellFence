@@ -1,0 +1,8 @@
+{
+  "name": "@example/app",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@example/core": "0.0.0"
+  }
+}

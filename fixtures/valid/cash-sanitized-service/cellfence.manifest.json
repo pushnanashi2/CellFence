@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "services/**"
+    ],
+    "exclude": []
+  },
+  "cells": [
+    {
+      "id": "accounts",
+      "ownedPaths": [
+        "services/accounts/**"
+      ],
+      "publicEntry": "services/accounts/public.ts",
+      "publicSymbols": [
+        "getAccountSummary"
+      ],
+      "resourceContracts": [
+        {
+          "id": "account-ledger",
+          "kind": "database",
+          "access": [
+            "read"
+          ],
+          "selectors": [
+            "ledger.accounts"
+          ],
+          "description": "Synthetic ledger table for sanitized fixture coverage."
+        }
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "payments",
+      "ownedPaths": [
+        "services/payments/**"
+      ],
+      "publicEntry": "services/payments/public.ts",
+      "publicSymbols": [
+        "createPaymentIntent"
+      ],
+      "resourceContracts": [
+        {
+          "id": "payment-api",
+          "kind": "http",
+          "access": [
+            "call"
+          ],
+          "selectors": [
+            "https://payments.example.invalid/*"
+          ]
+        },
+        {
+          "id": "payment-events",
+          "kind": "queue",
+          "access": [
+            "publish"
+          ],
+          "selectors": [
+            "payments.created"
+          ]
+        }
+      ],
+      "consumes": [
+        {
+          "cell": "accounts"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "receipts",
+      "ownedPaths": [
+        "services/receipts/**"
+      ],
+      "publicEntry": "services/receipts/public.ts",
+      "publicSymbols": [
+        "renderReceipt"
+      ],
+      "consumes": [
+        {
+          "cell": "accounts"
+        },
+        {
+          "cell": "payments"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

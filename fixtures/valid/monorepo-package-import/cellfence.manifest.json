@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/**"
+    ],
+    "exclude": []
+  },
+  "cells": [
+    {
+      "id": "core-package",
+      "packageName": "@example/core",
+      "ownedPaths": [
+        "packages/core/**"
+      ],
+      "publicEntry": "packages/core/src/public.ts",
+      "publicSymbols": [
+        "coreValue"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "app-package",
+      "packageName": "@example/app",
+      "ownedPaths": [
+        "packages/app/**"
+      ],
+      "publicEntry": "packages/app/src/public.ts",
+      "publicSymbols": [
+        "appValue"
+      ],
+      "consumes": [
+        {
+          "cell": "core-package"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

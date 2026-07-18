@@ -49,11 +49,18 @@ A baseline update is a governance change, not a routine way to silence a failing
 Baseline signing is the real protection against hand-edited ratchet files. The preferred model is asymmetric signing:
 
 ```bash
-CELLFENCE_BASELINE_ED25519_PRIVATE_KEY="$(cat private-key.pem)" cellfence baseline sign
-CELLFENCE_BASELINE_ED25519_PUBLIC_KEY="$(cat public-key.pem)" cellfence baseline verify
+CELLFENCE_BASELINE_ED25519_PRIVATE_KEY="$(cat baseline-ed25519-private.pem)" \
+CELLFENCE_BASELINE_ED25519_KEY_ID="baseline-2026q3" \
+cellfence baseline sign --baseline cellfence.baseline.json
+
+CELLFENCE_BASELINE_ED25519_PUBLIC_KEY="$(cat baseline-ed25519-public.pem)" \
+cellfence baseline verify --manifest cellfence.manifest.json --baseline cellfence.baseline.json
+
+CELLFENCE_BASELINE_ED25519_PUBLIC_KEY="$(cat baseline-ed25519-public.pem)" \
+cellfence baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json
 ```
 
-The private key belongs to an approval-controlled workflow or external signing service. Ordinary PR checks need only the public key, so untrusted code cannot self-sign a widened baseline. `CELLFENCE_BASELINE_ED25519_KEY_ID` can label the signing key. HMAC remains supported through `CELLFENCE_BASELINE_HMAC_KEY` for isolated verifier deployments, but do not pass an HMAC secret to jobs that execute untrusted PR code.
+The private key belongs to an approval-controlled workflow or external signing service. Ordinary PR checks need only the public key, so untrusted code cannot self-sign a widened baseline. `CELLFENCE_BASELINE_ED25519_KEY_ID` can label the signing key. The signing job should not run repository code from an untrusted PR checkout; use a trusted published CellFence version or an external signer to read and sign only the reviewed baseline file. HMAC remains supported through `CELLFENCE_BASELINE_HMAC_KEY` for isolated verifier deployments, but do not pass an HMAC secret to jobs that execute untrusted PR code.
 
 If a cell has `"locked": true`, `baseline check` requires either `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY` so a hand-edited baseline cannot silently redefine the accepted contract for that locked cell. `baseline update` also fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access for that cell. A human owner must either reduce the change or explicitly review and sign the contract expansion.
 

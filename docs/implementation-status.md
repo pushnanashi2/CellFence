@@ -49,6 +49,9 @@
 | External immutable checker | planned | external service or pinned workflow | Not implemented in v0.x | root-of-trust document |
 | Sealed hash ledger | planned | external ledger | Not implemented in v0.x | root-of-trust document |
 | Credential separation | documented | external repository and npm settings | Not enforceable by package code | root-of-trust document |
-| npm trusted publishing | planned | npm and GitHub OIDC settings | Publishing workflow is intentionally absent | release verification |
+| npm trusted publishing | documented | npm and GitHub OIDC settings | Publishing workflow is intentionally absent until trusted publisher settings and protected environment reviewers are configured | `docs/publishing.md` |
+| npm provenance attestations | documented | npm trusted publishing or token-based `npm publish --provenance` fallback | No package has been published from this repository in this task; provenance must be verified on the registry artifact after release | `docs/publishing.md` |
+| SBOM generation | enforced | `scripts/sbom-generate.mjs` | Generates a CycloneDX SBOM from the lockfile into ignored `reports/`; release attachment remains a maintainer action | `npm run sbom:generate` |
+| GitHub Release artifacts | documented | GitHub Release UI or CLI | Release creation and artifact attachment require maintainer action after CI passes | `docs/publishing.md` |
 | Provenance or forbidden-source scan | enforced | `scripts/forbidden-source-scan.mjs` | Term list is conservative and project-owned | lint and CI |
 | Scale benchmark | enforced | `scripts/scale-benchmark.mjs` and CI `scale-benchmark` job | Synthetic hardlinked-file benchmark for 10k/20, 50k/100, and 100k/300 scenarios; not a substitute for consumer-repo profiling | CI benchmark |

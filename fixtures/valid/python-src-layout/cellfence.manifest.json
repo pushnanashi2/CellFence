@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": []
+  },
+  "cells": [
+    {
+      "id": "python-core",
+      "ownedPaths": [
+        "src/cellfence_fixture/core/**"
+      ],
+      "publicEntry": "src/cellfence_fixture/core/public.py",
+      "publicSymbols": [
+        "normalize_order"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "python-api",
+      "ownedPaths": [
+        "src/cellfence_fixture/api/**"
+      ],
+      "publicEntry": "src/cellfence_fixture/api/public.py",
+      "publicSymbols": [
+        "submit_order"
+      ],
+      "consumes": [
+        {
+          "cell": "python-core"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

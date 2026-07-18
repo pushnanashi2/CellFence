@@ -74,3 +74,84 @@ jobs:
 The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release.
 
 For real enforcement, configure the architecture job as a required status check on a protected branch. A workflow file inside the repository is not, by itself, a root of trust.
+
+## Signed Baseline Workflows
+
+Use asymmetric baseline signing when untrusted pull requests can edit `cellfence.baseline.json`. PR checks should receive only `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; the private key belongs only to an approval-controlled signing workflow or an external signing service.
+
+Pull request verification:
+
+```yaml
+name: CellFence Baseline Verify
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify signed baseline
+        env:
+          CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: ${{ vars.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY }}
+        run: npx cellfence baseline verify --manifest cellfence.manifest.json --baseline cellfence.baseline.json
+      - name: Enforce accepted baseline
+        env:
+          CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: ${{ vars.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY }}
+        run: npx cellfence baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json
+```
+
+Approval-controlled signing:
+
+```yaml
+name: CellFence Baseline Sign
+
+on:
+  workflow_dispatch:
+    inputs:
+      approved_branch:
+        description: Reviewed repository branch to sign
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    environment: baseline-signing
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          ref: ${{ inputs.approved_branch }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+      - name: Install reviewed CellFence package
+        run: npm install --global cellfence@0.1.12
+      - name: Sign reviewed baseline only
+        env:
+          CELLFENCE_BASELINE_ED25519_PRIVATE_KEY: ${{ secrets.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY }}
+          CELLFENCE_BASELINE_ED25519_KEY_ID: baseline-2026q3
+        run: cellfence baseline sign --baseline cellfence.baseline.json
+      - name: Commit signed baseline
+        run: |
+          git config user.name "cellfence-baseline-signer"
+          git config user.email "cellfence-baseline-signer@example.invalid"
+          git add cellfence.baseline.json
+          git commit -m "Sign CellFence baseline"
+          git push origin HEAD:${{ inputs.approved_branch }}
+```
+
+The signing job checks out the reviewed branch so it can write the signature back, but it does not run `npm ci`, package scripts, tests, or any repository code from that branch while the private key is present. If the workflow needs to inspect or regenerate the baseline, do that in a separate public-key-only job and require human approval before signing.
+
+Do not use `pull_request_target` to check out and execute pull-request code. `pull_request_target` can access privileged context and secrets from the base repository; combining it with an untrusted checkout gives the PR author a path to the signing key. If you must use `pull_request_target` for labels or comments, keep it read-only and never run the PR branch's code in that workflow.

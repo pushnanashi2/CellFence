@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "cellfence.resource-evidence.v1",
+  "commitSha": "0000000000000000000000000000000000000000",
+  "generatedAt": "2026-07-18T00:00:00.000Z",
+  "accesses": [
+    {
+      "cellId": "worker",
+      "kind": "database",
+      "access": "read",
+      "selector": "app.orders",
+      "detectedBy": "fixture-runtime",
+      "confidence": "runtime"
+    },
+    {
+      "cellId": "worker",
+      "kind": "queue",
+      "access": "subscribe",
+      "selector": "orders.ready",
+      "detectedBy": "fixture-runtime",
+      "confidence": "runtime"
+    },
+    {
+      "cellId": "worker",
+      "kind": "http",
+      "access": "call",
+      "selector": "https://api.example.invalid/orders/status",
+      "detectedBy": "fixture-runtime",
+      "confidence": "runtime"
+    }
+  ]
+}

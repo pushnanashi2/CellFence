@@ -1,0 +1,8 @@
+{
+  "name": "@example/core",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/public.ts"
+  }
+}
