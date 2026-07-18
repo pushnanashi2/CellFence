@@ -314,6 +314,27 @@ test("module resolution uses Python AST for multiline imports and __all__", () =
   }
 });
 
+test("module resolution reports unsupported Python syntax without throwing", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-unsupported-syntax-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    const filePath = path.join(rootDir, "src/core/template.py");
+    fs.writeFileSync(filePath, "def get_{{ cookiecutter.name }}():\n    return True\n");
+
+    const warnings = [];
+    assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
+    assert.equal(warnings.length, 1);
+    assert.equal(warnings[0].ruleId, "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
+    assert.equal(warnings[0].severity, "warning");
+    assert.equal(warnings[0].filePath, "src/core/template.py");
+    assert.equal(warnings[0].details.kind, "syntax_error");
+    assert.equal(warnings[0].details.line, 1);
+    assert.deepEqual([...extractPublicSymbols(filePath)], []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution exposes literal and line helpers exactly", () => {
   const sourceFile = ts.createSourceFile(
     "sample.ts",

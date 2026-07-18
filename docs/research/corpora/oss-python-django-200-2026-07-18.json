@@ -1,0 +1,5857 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "studyId": "oss-python-django-200-2026-07-18",
+  "selection": {
+    "framework": "django",
+    "retrievedAt": "2026-07-18T16:47:01.897Z",
+    "source": "GitHub Search API",
+    "query": "topic:django language:Python fork:false archived:false size:<100000",
+    "sort": "stars",
+    "order": "desc",
+    "targetCount": 200,
+    "actualCount": 200,
+    "notes": [
+      "Static onboarding corpus only; not a precision denominator.",
+      "Repositories are cloned by exact HEAD commit and checked with inferred production-scope manifests.",
+      "No target dependency installation or package scripts are run."
+    ],
+    "skipped": []
+  },
+  "subjects": [
+    {
+      "id": "django-001-encode-django-rest-framework",
+      "repository": "https://github.com/encode/django-rest-framework.git",
+      "commit": "b73cae1db8b1caef92cc6547e22140a149a007b2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 1,
+        "fullName": "encode/django-rest-framework",
+        "stars": 30103,
+        "forks": 7073,
+        "sizeKb": 64018,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-12T05:49:41Z",
+        "topics": [
+          "api",
+          "django",
+          "python",
+          "rest"
+        ],
+        "htmlUrl": "https://github.com/encode/django-rest-framework"
+      }
+    },
+    {
+      "id": "django-002-cookiecutter-cookiecutter-django",
+      "repository": "https://github.com/cookiecutter/cookiecutter-django.git",
+      "commit": "64c15cc82dc6f974fdd32ced07c460fab0dc5ded",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 2,
+        "fullName": "cookiecutter/cookiecutter-django",
+        "stars": 13565,
+        "forks": 3066,
+        "sizeKb": 12225,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T03:06:45Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "cookiecutter",
+          "cookiecutter-django",
+          "django",
+          "django-cookiecutter",
+          "docker",
+          "hacktoberfest",
+          "heroku",
+          "project-template",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/cookiecutter/cookiecutter-django"
+      }
+    },
+    {
+      "id": "django-003-miserlou-zappa",
+      "repository": "https://github.com/Miserlou/Zappa.git",
+      "commit": "5a11c17f5ecf0568bdb73b4baf6fb08ff0184f39",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 3,
+        "fullName": "Miserlou/Zappa",
+        "stars": 11835,
+        "forks": 1169,
+        "sizeKb": 5645,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-23T13:59:31Z",
+        "topics": [
+          "api-gateway",
+          "aws-lambda",
+          "bottle",
+          "django",
+          "flask",
+          "lambda",
+          "pyramid",
+          "python",
+          "serverless",
+          "serverless-framework",
+          "zappa"
+        ],
+        "htmlUrl": "https://github.com/Miserlou/Zappa"
+      }
+    },
+    {
+      "id": "django-004-wsvincent-awesome-django",
+      "repository": "https://github.com/wsvincent/awesome-django.git",
+      "commit": "51d71aea89324e2c0542407ec3cd8a0682050f20",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 4,
+        "fullName": "wsvincent/awesome-django",
+        "stars": 11171,
+        "forks": 1467,
+        "sizeKb": 1266,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-25T14:47:09Z",
+        "topics": [
+          "awesome",
+          "awesome-list",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/wsvincent/awesome-django"
+      }
+    },
+    {
+      "id": "django-005-pennersr-django-allauth",
+      "repository": "https://github.com/pennersr/django-allauth.git",
+      "commit": "d7d5d39a8d4c91eb78cf23da21fbf4ea5d5fa01b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 5,
+        "fullName": "pennersr/django-allauth",
+        "stars": 10351,
+        "forks": 3107,
+        "sizeKb": 21795,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-22T02:22:34Z",
+        "topics": [
+          "accounts",
+          "authentication",
+          "django",
+          "login",
+          "oauth2",
+          "openid-connect",
+          "passkeys",
+          "python",
+          "registration",
+          "saml",
+          "signup",
+          "social-login",
+          "two-factor-authentication",
+          "webauthn"
+        ],
+        "htmlUrl": "https://github.com/pennersr/django-allauth"
+      }
+    },
+    {
+      "id": "django-006-healthchecks-healthchecks",
+      "repository": "https://github.com/healthchecks/healthchecks.git",
+      "commit": "8e8178308433e77f4543c76ebbb15606e74553f1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 6,
+        "fullName": "healthchecks/healthchecks",
+        "stars": 10169,
+        "forks": 992,
+        "sizeKb": 27340,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-14T15:09:46Z",
+        "topics": [
+          "cron",
+          "cron-jobs",
+          "devops",
+          "django",
+          "monitoring",
+          "ops"
+        ],
+        "htmlUrl": "https://github.com/healthchecks/healthchecks"
+      }
+    },
+    {
+      "id": "django-007-vitalik-django-ninja",
+      "repository": "https://github.com/vitalik/django-ninja.git",
+      "commit": "134869b74b6cba214284faa9f13d54b7247362c0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 7,
+        "fullName": "vitalik/django-ninja",
+        "stars": 9139,
+        "forks": 602,
+        "sizeKb": 8942,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-08T11:44:15Z",
+        "topics": [
+          "django",
+          "django-ninja",
+          "openapi",
+          "pydantic",
+          "python",
+          "rest-api",
+          "swagger",
+          "swagger-ui"
+        ],
+        "htmlUrl": "https://github.com/vitalik/django-ninja"
+      }
+    },
+    {
+      "id": "django-008-joerick-pyinstrument",
+      "repository": "https://github.com/joerick/pyinstrument.git",
+      "commit": "803891df61c0850a2873c77bca8bca38b7d53090",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 8,
+        "fullName": "joerick/pyinstrument",
+        "stars": 7964,
+        "forks": 290,
+        "sizeKb": 5017,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-08T10:54:14Z",
+        "topics": [
+          "async",
+          "django",
+          "performance",
+          "profile",
+          "profiler",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/joerick/pyinstrument"
+      }
+    },
+    {
+      "id": "django-009-liangliangyy-djangoblog",
+      "repository": "https://github.com/liangliangyy/DjangoBlog.git",
+      "commit": "48e0308c2fd4fc1e98213b1c3087e92d0b684694",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 9,
+        "fullName": "liangliangyy/DjangoBlog",
+        "stars": 7411,
+        "forks": 2854,
+        "sizeKb": 5999,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T05:51:56Z",
+        "topics": [
+          "blog",
+          "django",
+          "django-blog",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/liangliangyy/DjangoBlog"
+      }
+    },
+    {
+      "id": "django-010-qingdaou-onlinejudge",
+      "repository": "https://github.com/QingdaoU/OnlineJudge.git",
+      "commit": "df873278ab1b29510aa3a0979677d7aa9a53ca0e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 10,
+        "fullName": "QingdaoU/OnlineJudge",
+        "stars": 6538,
+        "forks": 1538,
+        "sizeKb": 22885,
+        "defaultBranch": "master",
+        "pushedAt": "2024-10-23T03:05:08Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "onlinejudge",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/QingdaoU/OnlineJudge"
+      }
+    },
+    {
+      "id": "django-011-wger-project-wger",
+      "repository": "https://github.com/wger-project/wger.git",
+      "commit": "870c3b360b2ba4f5b1d6e1bfc828d2e86b976627",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 11,
+        "fullName": "wger-project/wger",
+        "stars": 6454,
+        "forks": 946,
+        "sizeKb": 89929,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T13:01:34Z",
+        "topics": [
+          "django",
+          "fitness",
+          "gym",
+          "hacktoberfest",
+          "python",
+          "self-hosted",
+          "workout"
+        ],
+        "htmlUrl": "https://github.com/wger-project/wger"
+      }
+    },
+    {
+      "id": "django-012-coleifer-huey",
+      "repository": "https://github.com/coleifer/huey.git",
+      "commit": "42df37f2fdb84bd059b9fa7b355fb93578b52161",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 12,
+        "fullName": "coleifer/huey",
+        "stars": 5991,
+        "forks": 398,
+        "sizeKb": 4484,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-12T03:29:34Z",
+        "topics": [
+          "dank",
+          "django",
+          "python",
+          "queue",
+          "redis",
+          "task-queue"
+        ],
+        "htmlUrl": "https://github.com/coleifer/huey"
+      }
+    },
+    {
+      "id": "django-013-adamchainz-django-cors-headers",
+      "repository": "https://github.com/adamchainz/django-cors-headers.git",
+      "commit": "8dd0cfb22a48a84a4dfef8ae6667202f56e17789",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 13,
+        "fullName": "adamchainz/django-cors-headers",
+        "stars": 5588,
+        "forks": 552,
+        "sizeKb": 2680,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T10:53:03Z",
+        "topics": [
+          "cors",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/adamchainz/django-cors-headers"
+      }
+    },
+    {
+      "id": "django-014-authlib-authlib",
+      "repository": "https://github.com/authlib/authlib.git",
+      "commit": "956711fe93701caec3cbf8ed49b4e5fe6f7ceddd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 14,
+        "fullName": "authlib/authlib",
+        "stars": 5372,
+        "forks": 552,
+        "sizeKb": 3984,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T09:31:56Z",
+        "topics": [
+          "django",
+          "flask",
+          "jose",
+          "jwe",
+          "jwk",
+          "jws",
+          "jwt",
+          "oauth",
+          "oauth2",
+          "oauth2-provider",
+          "oauth2-server",
+          "oidc",
+          "openid-connect"
+        ],
+        "htmlUrl": "https://github.com/authlib/authlib"
+      }
+    },
+    {
+      "id": "django-015-hunvreus-devpush",
+      "repository": "https://github.com/hunvreus/devpush.git",
+      "commit": "d67a99b62b3e2b044f1e0e9b06a3296fe1939fe3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 15,
+        "fullName": "hunvreus/devpush",
+        "stars": 4726,
+        "forks": 179,
+        "sizeKb": 2255,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-03T14:22:47Z",
+        "topics": [
+          "continuous-deployment",
+          "deployment",
+          "django",
+          "fastapi",
+          "flask",
+          "github",
+          "nextjs",
+          "nodejs",
+          "php",
+          "python",
+          "vercel"
+        ],
+        "htmlUrl": "https://github.com/hunvreus/devpush"
+      }
+    },
+    {
+      "id": "django-016-strawberry-graphql-strawberry",
+      "repository": "https://github.com/strawberry-graphql/strawberry.git",
+      "commit": "72712184bd9aa6b9d91575e01b7170326eb3d53a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 16,
+        "fullName": "strawberry-graphql/strawberry",
+        "stars": 4688,
+        "forks": 653,
+        "sizeKb": 18984,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T10:36:15Z",
+        "topics": [
+          "asgi",
+          "asyncio",
+          "django",
+          "fastapi",
+          "graphql",
+          "graphql-library",
+          "graphql-schema",
+          "graphql-server",
+          "hacktoberfest",
+          "mypy",
+          "python",
+          "starlette",
+          "strawberry"
+        ],
+        "htmlUrl": "https://github.com/strawberry-graphql/strawberry"
+      }
+    },
+    {
+      "id": "django-017-graphql-python-graphene-django",
+      "repository": "https://github.com/graphql-python/graphene-django.git",
+      "commit": "0e6ef22a87dfaa3c22fce62ddcd7d91d6fe1a830",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 17,
+        "fullName": "graphql-python/graphene-django",
+        "stars": 4392,
+        "forks": 763,
+        "sizeKb": 1355,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-24T23:46:54Z",
+        "topics": [
+          "django",
+          "graphene",
+          "graphql",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/graphql-python/graphene-django"
+      }
+    },
+    {
+      "id": "django-018-dynaconf-dynaconf",
+      "repository": "https://github.com/dynaconf/dynaconf.git",
+      "commit": "1f251e404993357af0dd2ade142803adf3a7e72e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 18,
+        "fullName": "dynaconf/dynaconf",
+        "stars": 4314,
+        "forks": 333,
+        "sizeKb": 9250,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-03T20:54:31Z",
+        "topics": [
+          "12factorapp",
+          "app-config",
+          "config",
+          "configuration",
+          "configuration-management",
+          "django",
+          "django-configuration",
+          "django-extension",
+          "dynaconf",
+          "environment-configuration",
+          "environment-variables",
+          "fastapi",
+          "flask",
+          "flask-configuration",
+          "flask-extension",
+          "hacktoberfest",
+          "python",
+          "settings",
+          "vault",
+          "yaml"
+        ],
+        "htmlUrl": "https://github.com/dynaconf/dynaconf"
+      }
+    },
+    {
+      "id": "django-019-newpanjing-simpleui",
+      "repository": "https://github.com/newpanjing/simpleui.git",
+      "commit": "85b887022217b4e46c9a34d227dbf38fef1e7a92",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 19,
+        "fullName": "newpanjing/simpleui",
+        "stars": 3804,
+        "forks": 711,
+        "sizeKb": 14177,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-13T06:31:24Z",
+        "topics": [
+          "admin-template",
+          "django",
+          "django-admin",
+          "django-admin-theme",
+          "django-application",
+          "django-project",
+          "django-simpleui",
+          "django-theme",
+          "djangorestframework",
+          "djangotemplate",
+          "element-ui",
+          "simpleui",
+          "theme",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/newpanjing/simpleui"
+      }
+    },
+    {
+      "id": "django-020-factoryboy-factory-boy",
+      "repository": "https://github.com/FactoryBoy/factory_boy.git",
+      "commit": "ae9f2f4650afef0bc9b0925de97f618603233ff8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 20,
+        "fullName": "FactoryBoy/factory_boy",
+        "stars": 3803,
+        "forks": 417,
+        "sizeKb": 1867,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-01T19:04:12Z",
+        "topics": [
+          "django",
+          "fixtures",
+          "hacktoberfest",
+          "python",
+          "sqlalchemy",
+          "testing"
+        ],
+        "htmlUrl": "https://github.com/FactoryBoy/factory_boy"
+      }
+    },
+    {
+      "id": "django-021-zappa-zappa",
+      "repository": "https://github.com/zappa/Zappa.git",
+      "commit": "5e9c6b7a49cf8caa7e76f22e06cf856bde815ada",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 21,
+        "fullName": "zappa/Zappa",
+        "stars": 3692,
+        "forks": 390,
+        "sizeKb": 6054,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-15T02:29:04Z",
+        "topics": [
+          "alb",
+          "api-gateway",
+          "aws",
+          "aws-lambda",
+          "bottle",
+          "django",
+          "flask",
+          "hacktoberfest",
+          "lambda",
+          "pyramid",
+          "python",
+          "serverless",
+          "serverless-framework",
+          "zappa"
+        ],
+        "htmlUrl": "https://github.com/zappa/Zappa"
+      }
+    },
+    {
+      "id": "django-022-geex-arts-django-jet",
+      "repository": "https://github.com/geex-arts/django-jet.git",
+      "commit": "0cc1e636109f680de6759ac30c0b14ef980883bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 22,
+        "fullName": "geex-arts/django-jet",
+        "stars": 3623,
+        "forks": 769,
+        "sizeKb": 5505,
+        "defaultBranch": "dev",
+        "pushedAt": "2025-11-26T22:21:07Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "administration",
+          "backoffice",
+          "dashboard",
+          "django",
+          "interface",
+          "responsive",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/geex-arts/django-jet"
+      }
+    },
+    {
+      "id": "django-023-unfoldadmin-django-unfold",
+      "repository": "https://github.com/unfoldadmin/django-unfold.git",
+      "commit": "a7308dee9611aae5eac54928424a77eda024a5c9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 23,
+        "fullName": "unfoldadmin/django-unfold",
+        "stars": 3573,
+        "forks": 359,
+        "sizeKb": 7766,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T14:42:52Z",
+        "topics": [
+          "admin",
+          "alpinejs",
+          "darkmode",
+          "dashboard",
+          "django",
+          "filters",
+          "htmx",
+          "python",
+          "responsive",
+          "tailwindcss",
+          "theme",
+          "ui",
+          "wysiwyg"
+        ],
+        "htmlUrl": "https://github.com/unfoldadmin/django-unfold"
+      }
+    },
+    {
+      "id": "django-024-axnsan12-drf-yasg",
+      "repository": "https://github.com/axnsan12/drf-yasg.git",
+      "commit": "f3d7416a5475222099c580005991b87339519e3d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 24,
+        "fullName": "axnsan12/drf-yasg",
+        "stars": 3543,
+        "forks": 438,
+        "sizeKb": 25873,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-08T12:42:08Z",
+        "topics": [
+          "coreapi",
+          "django",
+          "django-rest-framework",
+          "django-rest-swagger",
+          "documentation-generator",
+          "openapi",
+          "openapi-specification",
+          "redoc",
+          "rest",
+          "rest-api",
+          "swagger",
+          "swagger-codegen",
+          "swagger-ui"
+        ],
+        "htmlUrl": "https://github.com/axnsan12/drf-yasg"
+      }
+    },
+    {
+      "id": "django-025-modoboa-modoboa",
+      "repository": "https://github.com/modoboa/modoboa.git",
+      "commit": "ac4b7cafdc091133f1c891c046f8eab80b6e603c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 25,
+        "fullName": "modoboa/modoboa",
+        "stars": 3526,
+        "forks": 474,
+        "sizeKb": 41111,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T08:48:57Z",
+        "topics": [
+          "django",
+          "dovecot",
+          "email",
+          "hosting",
+          "javascript",
+          "mailserver",
+          "modoboa",
+          "postfix",
+          "python3",
+          "rspamd",
+          "vuejs",
+          "vuejs3",
+          "vuetify"
+        ],
+        "htmlUrl": "https://github.com/modoboa/modoboa"
+      }
+    },
+    {
+      "id": "django-026-gerapy-gerapy",
+      "repository": "https://github.com/Gerapy/Gerapy.git",
+      "commit": "f2c2a9772a718cb7879e0b6db002b7cfda7c4156",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 26,
+        "fullName": "Gerapy/Gerapy",
+        "stars": 3504,
+        "forks": 646,
+        "sizeKb": 37954,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-04T08:45:35Z",
+        "topics": [
+          "dashboard",
+          "distributed",
+          "django",
+          "docker",
+          "gerapy",
+          "scrapy",
+          "scrapyd",
+          "spider",
+          "vue",
+          "vuejs",
+          "webspider"
+        ],
+        "htmlUrl": "https://github.com/Gerapy/Gerapy"
+      }
+    },
+    {
+      "id": "django-027-guohongze-adminset",
+      "repository": "https://github.com/guohongze/adminset.git",
+      "commit": "6c122c2824e6553b09ebd16a1fa05a593198c5ec",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 27,
+        "fullName": "guohongze/adminset",
+        "stars": 3418,
+        "forks": 1417,
+        "sizeKb": 30267,
+        "defaultBranch": "master",
+        "pushedAt": "2025-03-16T11:01:29Z",
+        "topics": [
+          "cmdb",
+          "crontab",
+          "devops",
+          "django",
+          "monitor",
+          "ops",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/guohongze/adminset"
+      }
+    },
+    {
+      "id": "django-028-pinry-pinry",
+      "repository": "https://github.com/pinry/pinry.git",
+      "commit": "05476b112401cf34a38bfbffc67c37f5f6c3b38f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 28,
+        "fullName": "pinry/pinry",
+        "stars": 3394,
+        "forks": 374,
+        "sizeKb": 9819,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-05T16:46:25Z",
+        "topics": [
+          "django",
+          "huaban",
+          "images",
+          "node",
+          "pinterest",
+          "python",
+          "self-hosted",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/pinry/pinry"
+      }
+    },
+    {
+      "id": "django-029-django-oauth-django-oauth-toolkit",
+      "repository": "https://github.com/django-oauth/django-oauth-toolkit.git",
+      "commit": "f03f17d15977fcf38035ef3d74662b129ddce310",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 29,
+        "fullName": "django-oauth/django-oauth-toolkit",
+        "stars": 3331,
+        "forks": 848,
+        "sizeKb": 4026,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-09T22:43:02Z",
+        "topics": [
+          "django",
+          "oauth2",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-oauth/django-oauth-toolkit"
+      }
+    },
+    {
+      "id": "django-030-django-import-export-django-import-export",
+      "repository": "https://github.com/django-import-export/django-import-export.git",
+      "commit": "496421a7ed239308adb1233e1f856bdc5c232c40",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 30,
+        "fullName": "django-import-export/django-import-export",
+        "stars": 3330,
+        "forks": 830,
+        "sizeKb": 6237,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:20:43Z",
+        "topics": [
+          "csv",
+          "django",
+          "import-export",
+          "json",
+          "python",
+          "xls"
+        ],
+        "htmlUrl": "https://github.com/django-import-export/django-import-export"
+      }
+    },
+    {
+      "id": "django-031-awesto-django-shop",
+      "repository": "https://github.com/awesto/django-shop.git",
+      "commit": "13d9a77aff7eede74a5f363c1d540e005d88dbcd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 31,
+        "fullName": "awesto/django-shop",
+        "stars": 3318,
+        "forks": 1043,
+        "sizeKb": 9121,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-19T01:09:56Z",
+        "topics": [
+          "django",
+          "django-shop",
+          "e-commerce"
+        ],
+        "htmlUrl": "https://github.com/awesto/django-shop"
+      }
+    },
+    {
+      "id": "django-032-joke2k-django-environ",
+      "repository": "https://github.com/joke2k/django-environ.git",
+      "commit": "9c1fc30b2b2330f297187904190c3baf80919876",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 32,
+        "fullName": "joke2k/django-environ",
+        "stars": 3163,
+        "forks": 339,
+        "sizeKb": 934,
+        "defaultBranch": "develop",
+        "pushedAt": "2026-07-08T17:42:52Z",
+        "topics": [
+          "django",
+          "hacktoberfest",
+          "python",
+          "settings",
+          "twelve-factor"
+        ],
+        "htmlUrl": "https://github.com/joke2k/django-environ"
+      }
+    },
+    {
+      "id": "django-033-milesmcc-shynet",
+      "repository": "https://github.com/milesmcc/shynet.git",
+      "commit": "ca35caba3af2b888acc990b99152c500a1c44461",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 33,
+        "fullName": "milesmcc/shynet",
+        "stars": 3141,
+        "forks": 206,
+        "sizeKb": 35629,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-15T23:00:29Z",
+        "topics": [
+          "a17t",
+          "analytics",
+          "django",
+          "docker",
+          "kubernetes",
+          "monitoring",
+          "noscript",
+          "privacy",
+          "python",
+          "security",
+          "self-hosted",
+          "web-analytics"
+        ],
+        "htmlUrl": "https://github.com/milesmcc/shynet"
+      }
+    },
+    {
+      "id": "django-034-fuzzygrim-yamtrack",
+      "repository": "https://github.com/FuzzyGrim/Yamtrack.git",
+      "commit": "4082a5f77dc93b3f383c937ae90f79219895af7f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 34,
+        "fullName": "FuzzyGrim/Yamtrack",
+        "stars": 3078,
+        "forks": 227,
+        "sizeKb": 9111,
+        "defaultBranch": "dev",
+        "pushedAt": "2026-07-18T11:23:09Z",
+        "topics": [
+          "django",
+          "docker",
+          "docker-compose",
+          "media-tracker",
+          "postgresql",
+          "self-hosted",
+          "sqlite",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/FuzzyGrim/Yamtrack"
+      }
+    },
+    {
+      "id": "django-035-reloadware-reloadium",
+      "repository": "https://github.com/reloadware/reloadium.git",
+      "commit": "de40ab2eac806fcc019e496d2a33cf19c10e0a72",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 35,
+        "fullName": "reloadware/reloadium",
+        "stars": 2994,
+        "forks": 63,
+        "sizeKb": 5432,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-24T16:13:26Z",
+        "topics": [
+          "ai",
+          "artificial-intelligence",
+          "chatgpt",
+          "django",
+          "edit-and-continue",
+          "flask",
+          "hot-reload",
+          "hot-reloading",
+          "pandas",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/reloadware/reloadium"
+      }
+    },
+    {
+      "id": "django-036-jschneier-django-storages",
+      "repository": "https://github.com/jschneier/django-storages.git",
+      "commit": "ca89a94a7462a2423df460e7bfd5f847457042ca",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 36,
+        "fullName": "jschneier/django-storages",
+        "stars": 2954,
+        "forks": 889,
+        "sizeKb": 1908,
+        "defaultBranch": "master",
+        "pushedAt": "2025-06-18T15:59:00Z",
+        "topics": [
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/jschneier/django-storages"
+      }
+    },
+    {
+      "id": "django-037-ciur-papermerge",
+      "repository": "https://github.com/ciur/papermerge.git",
+      "commit": "9b38540a8f89e26fdf64b7d44381c2bb29142435",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 37,
+        "fullName": "ciur/papermerge",
+        "stars": 2932,
+        "forks": 308,
+        "sizeKb": 26691,
+        "defaultBranch": "master",
+        "pushedAt": "2025-11-23T11:52:05Z",
+        "topics": [
+          "archives",
+          "django",
+          "dms",
+          "document-management",
+          "ocr",
+          "paperless",
+          "pdf",
+          "scan",
+          "scanned-documents"
+        ],
+        "htmlUrl": "https://github.com/ciur/papermerge"
+      }
+    },
+    {
+      "id": "django-038-viewflow-viewflow",
+      "repository": "https://github.com/viewflow/viewflow.git",
+      "commit": "aeab1afab84a52844eeead2698e82488d62ce998",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 38,
+        "fullName": "viewflow/viewflow",
+        "stars": 2866,
+        "forks": 412,
+        "sizeKb": 34471,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-06T04:32:35Z",
+        "topics": [
+          "bpmn",
+          "django",
+          "process-engine",
+          "python",
+          "workflow",
+          "workflow-engine"
+        ],
+        "htmlUrl": "https://github.com/viewflow/viewflow"
+      }
+    },
+    {
+      "id": "django-039-tfranzel-drf-spectacular",
+      "repository": "https://github.com/tfranzel/drf-spectacular.git",
+      "commit": "1a5c44a15b2d06744f49285f1f58992f938a05fa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 39,
+        "fullName": "tfranzel/drf-spectacular",
+        "stars": 2847,
+        "forks": 327,
+        "sizeKb": 1874,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-06T11:29:48Z",
+        "topics": [
+          "django",
+          "documentation-generator",
+          "drf",
+          "openapi-generator",
+          "openapi-specification",
+          "openapi3",
+          "rest-api",
+          "rest-framework",
+          "swagger"
+        ],
+        "htmlUrl": "https://github.com/tfranzel/drf-spectacular"
+      }
+    },
+    {
+      "id": "django-040-babybuddy-babybuddy",
+      "repository": "https://github.com/babybuddy/babybuddy.git",
+      "commit": "16b8848c7bc2031fc5936f8da89c8056ec5624d2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 40,
+        "fullName": "babybuddy/babybuddy",
+        "stars": 2833,
+        "forks": 376,
+        "sizeKb": 72257,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-07T17:55:14Z",
+        "topics": [
+          "baby",
+          "dashboard",
+          "django",
+          "parenting",
+          "parents",
+          "python",
+          "self-hosted",
+          "tracker"
+        ],
+        "htmlUrl": "https://github.com/babybuddy/babybuddy"
+      }
+    },
+    {
+      "id": "django-041-opencve-opencve",
+      "repository": "https://github.com/opencve/opencve.git",
+      "commit": "5aadedf181f5b3d16c74ab3f6df807c2fb909815",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 41,
+        "fullName": "opencve/opencve",
+        "stars": 2775,
+        "forks": 335,
+        "sizeKb": 15797,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T06:48:55Z",
+        "topics": [
+          "cve",
+          "cybersecurity",
+          "django",
+          "infosec",
+          "mitre",
+          "nvd",
+          "python",
+          "security-tools",
+          "vulnerabilities",
+          "vulnerability-management"
+        ],
+        "htmlUrl": "https://github.com/opencve/opencve"
+      }
+    },
+    {
+      "id": "django-042-evansd-whitenoise",
+      "repository": "https://github.com/evansd/whitenoise.git",
+      "commit": "779b66fd5afc2ec3017cf7f0e5c98c6f02bd3a1f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 42,
+        "fullName": "evansd/whitenoise",
+        "stars": 2753,
+        "forks": 153,
+        "sizeKb": 1580,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T10:55:44Z",
+        "topics": [
+          "django"
+        ],
+        "htmlUrl": "https://github.com/evansd/whitenoise"
+      }
+    },
+    {
+      "id": "django-043-django-commons-django-unicorn",
+      "repository": "https://github.com/django-commons/django-unicorn.git",
+      "commit": "63043f40424455e189bd4d094beeeb1f3f2008bd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 43,
+        "fullName": "django-commons/django-unicorn",
+        "stars": 2656,
+        "forks": 132,
+        "sizeKb": 8993,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-22T05:40:38Z",
+        "topics": [
+          "django",
+          "frontend-framework",
+          "fullstack",
+          "javascript",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-commons/django-unicorn"
+      }
+    },
+    {
+      "id": "django-044-django-webpack-django-webpack-loader",
+      "repository": "https://github.com/django-webpack/django-webpack-loader.git",
+      "commit": "8bf16adc26c4c809c8e2a774afdc8d5c7753b7e2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 44,
+        "fullName": "django-webpack/django-webpack-loader",
+        "stars": 2543,
+        "forks": 341,
+        "sizeKb": 9449,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-13T14:48:04Z",
+        "topics": [
+          "assets",
+          "django",
+          "django-webpack-loader",
+          "javascript",
+          "reactjs",
+          "static",
+          "webpack"
+        ],
+        "htmlUrl": "https://github.com/django-webpack/django-webpack-loader"
+      }
+    },
+    {
+      "id": "django-045-supabase-supabase-py",
+      "repository": "https://github.com/supabase/supabase-py.git",
+      "commit": "b16b16a175be0bfc57cf7af6acac01ef4078590a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 45,
+        "fullName": "supabase/supabase-py",
+        "stars": 2543,
+        "forks": 509,
+        "sizeKb": 4324,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T13:17:03Z",
+        "topics": [
+          "auth",
+          "authentication",
+          "authorization",
+          "community",
+          "data-science",
+          "databases",
+          "django",
+          "fastapi",
+          "flask",
+          "good-first-issue",
+          "machine-learning",
+          "postgres",
+          "postgresql",
+          "python",
+          "supabase"
+        ],
+        "htmlUrl": "https://github.com/supabase/supabase-py"
+      }
+    },
+    {
+      "id": "django-046-allegro-ralph",
+      "repository": "https://github.com/allegro/ralph.git",
+      "commit": "bcf65b994ef29fb3fc2e10b660e6288723d5209e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 46,
+        "fullName": "allegro/ralph",
+        "stars": 2509,
+        "forks": 590,
+        "sizeKb": 39578,
+        "defaultBranch": "ng",
+        "pushedAt": "2026-07-03T12:21:50Z",
+        "topics": [
+          "assets-management",
+          "backoffice",
+          "cmdb",
+          "data-center",
+          "dcim",
+          "django",
+          "hacktoberfest",
+          "inventory",
+          "inventory-management",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/allegro/ralph"
+      }
+    },
+    {
+      "id": "django-047-wsvincent-lithium",
+      "repository": "https://github.com/wsvincent/lithium.git",
+      "commit": "14c0374eaab52dc49898229ffe9a3e8f0e0e51c2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 47,
+        "fullName": "wsvincent/lithium",
+        "stars": 2467,
+        "forks": 447,
+        "sizeKb": 30667,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-09T00:47:07Z",
+        "topics": [
+          "allauth",
+          "django",
+          "docker",
+          "python",
+          "starter-template",
+          "whitenoise"
+        ],
+        "htmlUrl": "https://github.com/wsvincent/lithium"
+      }
+    },
+    {
+      "id": "django-048-tivix-django-rest-auth",
+      "repository": "https://github.com/Tivix/django-rest-auth.git",
+      "commit": "cdd04aa9be7ad3da6b417380ee14b3ff4d5459ba",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 48,
+        "fullName": "Tivix/django-rest-auth",
+        "stars": 2418,
+        "forks": 647,
+        "sizeKb": 490,
+        "defaultBranch": "master",
+        "pushedAt": "2024-03-13T16:33:25Z",
+        "topics": [
+          "authentication",
+          "django",
+          "django-rest-framework",
+          "rest",
+          "social-login"
+        ],
+        "htmlUrl": "https://github.com/Tivix/django-rest-auth"
+      }
+    },
+    {
+      "id": "django-049-shuup-shuup",
+      "repository": "https://github.com/shuup/shuup.git",
+      "commit": "25f78cfe370109b9885b903e503faac295c7b7f2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 49,
+        "fullName": "shuup/shuup",
+        "stars": 2389,
+        "forks": 1151,
+        "sizeKb": 30596,
+        "defaultBranch": "master",
+        "pushedAt": "2024-03-13T23:45:42Z",
+        "topics": [
+          "django",
+          "ecommerce",
+          "ecommerce-framework",
+          "ecommerce-platform",
+          "ecommerce-shopping-solution",
+          "ecommerce-website",
+          "multivendor",
+          "multivendor-ecommerce",
+          "python",
+          "shuup"
+        ],
+        "htmlUrl": "https://github.com/shuup/shuup"
+      }
+    },
+    {
+      "id": "django-050-jazzband-django-push-notifications",
+      "repository": "https://github.com/jazzband/django-push-notifications.git",
+      "commit": "7ed4c44bb3111be6791ebb5aba9f6c3bfe71749d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 50,
+        "fullName": "jazzband/django-push-notifications",
+        "stars": 2389,
+        "forks": 635,
+        "sizeKb": 602,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-05T17:32:43Z",
+        "topics": [
+          "apns",
+          "django",
+          "fcm",
+          "gcm",
+          "push-notifications",
+          "python",
+          "wns"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-push-notifications"
+      }
+    },
+    {
+      "id": "django-051-micropyramid-django-crm",
+      "repository": "https://github.com/MicroPyramid/Django-CRM.git",
+      "commit": "d9608333cc070a2328b2b39d8db4eae60644b3d4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 51,
+        "fullName": "MicroPyramid/Django-CRM",
+        "stars": 2356,
+        "forks": 1019,
+        "sizeKb": 29356,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T20:55:13Z",
+        "topics": [
+          "cpq",
+          "crm",
+          "django",
+          "django-crm",
+          "invoice-management",
+          "invoicing",
+          "lead-management",
+          "multitenancy",
+          "open-source",
+          "saas",
+          "svelte",
+          "sveltekit",
+          "task-manager"
+        ],
+        "htmlUrl": "https://github.com/MicroPyramid/Django-CRM"
+      }
+    },
+    {
+      "id": "django-052-mirumee-ariadne",
+      "repository": "https://github.com/mirumee/ariadne.git",
+      "commit": "38059a47f7a0d1656a57a88d51f11cb7d5faed0e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 52,
+        "fullName": "mirumee/ariadne",
+        "stars": 2347,
+        "forks": 195,
+        "sizeKb": 4256,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-15T11:20:51Z",
+        "topics": [
+          "api",
+          "apollo-graphql",
+          "apollo-python",
+          "ariadne",
+          "asgi",
+          "django",
+          "django-graphql",
+          "graphql",
+          "graphql-python",
+          "graphql-server",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/mirumee/ariadne"
+      }
+    },
+    {
+      "id": "django-053-kmmbvnr-django-fsm",
+      "repository": "https://github.com/kmmbvnr/django-fsm.git",
+      "commit": "88eeeca1a4f7b5a88c8aa9fce5fecbb5ceb2b74f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 53,
+        "fullName": "kmmbvnr/django-fsm",
+        "stars": 2346,
+        "forks": 297,
+        "sizeKb": 370,
+        "defaultBranch": "master",
+        "pushedAt": "2025-10-07T16:33:09Z",
+        "topics": [
+          "django",
+          "finite-state-machine",
+          "fsm",
+          "python",
+          "state-machine",
+          "state-machine-diagram"
+        ],
+        "htmlUrl": "https://github.com/kmmbvnr/django-fsm"
+      }
+    },
+    {
+      "id": "django-054-zostera-django-bootstrap3",
+      "repository": "https://github.com/zostera/django-bootstrap3.git",
+      "commit": "eccb5992ee9905311c4ac9748d95c37960280a07",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 54,
+        "fullName": "zostera/django-bootstrap3",
+        "stars": 2334,
+        "forks": 671,
+        "sizeKb": 1945,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:48:29Z",
+        "topics": [
+          "bootstrap3",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/zostera/django-bootstrap3"
+      }
+    },
+    {
+      "id": "django-055-suor-django-cacheops",
+      "repository": "https://github.com/Suor/django-cacheops.git",
+      "commit": "57dc991e7793345bc43e66b7331214eea90f41ed",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 55,
+        "fullName": "Suor/django-cacheops",
+        "stars": 2272,
+        "forks": 240,
+        "sizeKb": 1390,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-15T14:49:26Z",
+        "topics": [
+          "caching",
+          "django",
+          "orm",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/Suor/django-cacheops"
+      }
+    },
+    {
+      "id": "django-056-vintasoftware-django-react-boilerplate",
+      "repository": "https://github.com/vintasoftware/django-react-boilerplate.git",
+      "commit": "340e19b11249b87c4d89afad423a447f279c4a1c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 56,
+        "fullName": "vintasoftware/django-react-boilerplate",
+        "stars": 2264,
+        "forks": 551,
+        "sizeKb": 2011,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-04T15:46:01Z",
+        "topics": [
+          "celery",
+          "django",
+          "pnpm",
+          "python",
+          "react",
+          "tailwind",
+          "tailwindcss-v4",
+          "typescript",
+          "webpack"
+        ],
+        "htmlUrl": "https://github.com/vintasoftware/django-react-boilerplate"
+      }
+    },
+    {
+      "id": "django-057-wemake-services-wemake-django-template",
+      "repository": "https://github.com/wemake-services/wemake-django-template.git",
+      "commit": "807e0a3848b12348f0557a38776086e2fcd28fda",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 57,
+        "fullName": "wemake-services/wemake-django-template",
+        "stars": 2261,
+        "forks": 224,
+        "sizeKb": 8670,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T05:08:24Z",
+        "topics": [
+          "caddy",
+          "cookiecutter",
+          "cookiecutter-template",
+          "django",
+          "docker",
+          "gitlab-ci",
+          "mypy",
+          "pytest",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/wemake-services/wemake-django-template"
+      }
+    },
+    {
+      "id": "django-058-wooey-wooey",
+      "repository": "https://github.com/wooey/Wooey.git",
+      "commit": "d1db8bc506d266cf687897b9585c2614605468d6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 58,
+        "fullName": "wooey/Wooey",
+        "stars": 2235,
+        "forks": 189,
+        "sizeKb": 3557,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-19T22:52:50Z",
+        "topics": [
+          "data-science",
+          "django",
+          "python",
+          "python-scripts",
+          "web",
+          "wooey",
+          "workflows"
+        ],
+        "htmlUrl": "https://github.com/wooey/Wooey"
+      }
+    },
+    {
+      "id": "django-059-suitenumerique-meet",
+      "repository": "https://github.com/suitenumerique/meet.git",
+      "commit": "ab707d866ff1d6cd9cf3d185f79bd5c8f39b4bd0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 59,
+        "fullName": "suitenumerique/meet",
+        "stars": 2149,
+        "forks": 261,
+        "sizeKb": 30715,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T17:58:14Z",
+        "topics": [
+          "django",
+          "help-wanted",
+          "livekit",
+          "open-source-project",
+          "react",
+          "reactjs",
+          "video-conferencing",
+          "webrtc"
+        ],
+        "htmlUrl": "https://github.com/suitenumerique/meet"
+      }
+    },
+    {
+      "id": "django-060-python-social-auth-social-app-django",
+      "repository": "https://github.com/python-social-auth/social-app-django.git",
+      "commit": "91c02123b20fb0f71f5fad326d002b8fd21a3ee5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 60,
+        "fullName": "python-social-auth/social-app-django",
+        "stars": 2138,
+        "forks": 390,
+        "sizeKb": 2940,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T19:59:22Z",
+        "topics": [
+          "authentication",
+          "django",
+          "hacktoberfest",
+          "oauth2",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/python-social-auth/social-app-django"
+      }
+    },
+    {
+      "id": "django-061-fantomas42-django-blog-zinnia",
+      "repository": "https://github.com/Fantomas42/django-blog-zinnia.git",
+      "commit": "881101a9d1d455b2fc581d6f4ae0947cdd8126c6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 61,
+        "fullName": "Fantomas42/django-blog-zinnia",
+        "stars": 2129,
+        "forks": 730,
+        "sizeKb": 7990,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-05-03T19:19:17Z",
+        "topics": [
+          "blog",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/Fantomas42/django-blog-zinnia"
+      }
+    },
+    {
+      "id": "django-062-kludex-mangum",
+      "repository": "https://github.com/Kludex/mangum.git",
+      "commit": "42a07e16390ab2e57ee115f0a8c2b77e6c485a73",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 62,
+        "fullName": "Kludex/mangum",
+        "stars": 2129,
+        "forks": 134,
+        "sizeKb": 2216,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-31T15:04:46Z",
+        "topics": [
+          "api-gateway",
+          "asgi",
+          "asyncio",
+          "aws",
+          "aws-lambda",
+          "django",
+          "fastapi",
+          "lambda",
+          "python",
+          "python3",
+          "quart",
+          "sanic",
+          "serverless",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/Kludex/mangum"
+      }
+    },
+    {
+      "id": "django-063-brightbeanxyz-brightbean-studio",
+      "repository": "https://github.com/brightbeanxyz/brightbean-studio.git",
+      "commit": "e4da3a2c2b717f9140af54a7a03a34b90ae4cf59",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 63,
+        "fullName": "brightbeanxyz/brightbean-studio",
+        "stars": 2046,
+        "forks": 407,
+        "sizeKb": 4091,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-12T06:00:31Z",
+        "topics": [
+          "agpl",
+          "buffer-alternative",
+          "content-management",
+          "django",
+          "docker",
+          "htmx",
+          "multi-platform",
+          "open-source",
+          "python",
+          "scheduling",
+          "self-hosted",
+          "social-media",
+          "social-media-management",
+          "social-media-scheduler",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/brightbeanxyz/brightbean-studio"
+      }
+    },
+    {
+      "id": "django-064-fabiocaccamo-django-admin-interface",
+      "repository": "https://github.com/fabiocaccamo/django-admin-interface.git",
+      "commit": "c41ec0c2faed881269f2d442b2f585d251ee2016",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 64,
+        "fullName": "fabiocaccamo/django-admin-interface",
+        "stars": 2039,
+        "forks": 203,
+        "sizeKb": 1119,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T18:17:45Z",
+        "topics": [
+          "admin",
+          "colors",
+          "custom",
+          "customizable",
+          "django",
+          "enviroment",
+          "enviroments",
+          "flat",
+          "interface",
+          "logo",
+          "modal",
+          "modals",
+          "popup",
+          "python",
+          "responsive",
+          "settings",
+          "theme",
+          "ui",
+          "window",
+          "windows"
+        ],
+        "htmlUrl": "https://github.com/fabiocaccamo/django-admin-interface"
+      }
+    },
+    {
+      "id": "django-065-cloud-cv-evalai",
+      "repository": "https://github.com/Cloud-CV/EvalAI.git",
+      "commit": "d43da66bab66d7bb526058487fc9fb294ca5740f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 65,
+        "fullName": "Cloud-CV/EvalAI",
+        "stars": 2032,
+        "forks": 983,
+        "sizeKb": 67708,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-09T22:22:22Z",
+        "topics": [
+          "ai",
+          "ai-challenges",
+          "angularjs",
+          "artificial-intelligence",
+          "challenge",
+          "codecov",
+          "coveralls",
+          "django",
+          "docker",
+          "evalai",
+          "evaluation",
+          "evaluation-framework",
+          "github-actions",
+          "leaderboard",
+          "machine-learning",
+          "python",
+          "reproducibility",
+          "reproducible-research"
+        ],
+        "htmlUrl": "https://github.com/Cloud-CV/EvalAI"
+      }
+    },
+    {
+      "id": "django-066-ansible-community-ara",
+      "repository": "https://github.com/ansible-community/ara.git",
+      "commit": "8aa994d1e5a254e3994819b2f799c79dbc9f77e6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 66,
+        "fullName": "ansible-community/ara",
+        "stars": 2021,
+        "forks": 181,
+        "sizeKb": 40426,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T13:02:21Z",
+        "topics": [
+          "ansible",
+          "api",
+          "ara",
+          "django",
+          "django-rest-framework",
+          "interface",
+          "python",
+          "reporting"
+        ],
+        "htmlUrl": "https://github.com/ansible-community/ara"
+      }
+    },
+    {
+      "id": "django-067-brack3t-django-braces",
+      "repository": "https://github.com/brack3t/django-braces.git",
+      "commit": "cb7a553ce58ea536257b9e095355cca56066fec6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 67,
+        "fullName": "brack3t/django-braces",
+        "stars": 2017,
+        "forks": 217,
+        "sizeKb": 8814,
+        "defaultBranch": "main",
+        "pushedAt": "2025-03-18T02:03:38Z",
+        "topics": [
+          "cbv",
+          "cbvs",
+          "class-based",
+          "django",
+          "django-braces",
+          "python",
+          "views"
+        ],
+        "htmlUrl": "https://github.com/brack3t/django-braces"
+      }
+    },
+    {
+      "id": "django-068-jieter-django-tables2",
+      "repository": "https://github.com/jieter/django-tables2.git",
+      "commit": "e52d5bc1b770f36935774261c3fb475a6e63ac4e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 68,
+        "fullName": "jieter/django-tables2",
+        "stars": 2013,
+        "forks": 444,
+        "sizeKb": 3887,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-29T21:52:06Z",
+        "topics": [
+          "django",
+          "python",
+          "sorting",
+          "tables",
+          "tableview"
+        ],
+        "htmlUrl": "https://github.com/jieter/django-tables2"
+      }
+    },
+    {
+      "id": "django-069-dfunckt-django-rules",
+      "repository": "https://github.com/dfunckt/django-rules.git",
+      "commit": "4efd45d27b2572b9e6215253c915ec6eae49e032",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 69,
+        "fullName": "dfunckt/django-rules",
+        "stars": 1979,
+        "forks": 152,
+        "sizeKb": 279,
+        "defaultBranch": "master",
+        "pushedAt": "2025-10-11T06:42:08Z",
+        "topics": [
+          "authorization",
+          "django",
+          "permissions",
+          "predicates",
+          "python",
+          "rules"
+        ],
+        "htmlUrl": "https://github.com/dfunckt/django-rules"
+      }
+    },
+    {
+      "id": "django-070-typeddjango-django-stubs",
+      "repository": "https://github.com/typeddjango/django-stubs.git",
+      "commit": "a25e39673711779ccf6b0ebe20c007d475d7f526",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 70,
+        "fullName": "typeddjango/django-stubs",
+        "stars": 1961,
+        "forks": 564,
+        "sizeKb": 9582,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T09:18:06Z",
+        "topics": [
+          "django",
+          "hacktoberfest",
+          "mypy",
+          "pep484",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/typeddjango/django-stubs"
+      }
+    },
+    {
+      "id": "django-071-django-notifications-django-notifications",
+      "repository": "https://github.com/django-notifications/django-notifications.git",
+      "commit": "4c44bcea2504d9a3fcd26366b232a13732a08f2a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 71,
+        "fullName": "django-notifications/django-notifications",
+        "stars": 1955,
+        "forks": 478,
+        "sizeKb": 7352,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-17T17:54:23Z",
+        "topics": [
+          "django",
+          "notification",
+          "package",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-notifications/django-notifications"
+      }
+    },
+    {
+      "id": "django-072-photonixapp-photonix",
+      "repository": "https://github.com/photonixapp/photonix.git",
+      "commit": "d62ce15e8e1fe5e6c83b97fa3542b79f8eda3297",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 72,
+        "fullName": "photonixapp/photonix",
+        "stars": 1953,
+        "forks": 136,
+        "sizeKb": 7734,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-14T06:32:32Z",
+        "topics": [
+          "ai",
+          "django",
+          "docker",
+          "docker-image",
+          "face-recognition",
+          "gallery",
+          "google-photos",
+          "image-recognition",
+          "javascript",
+          "management",
+          "ml",
+          "object-detection",
+          "photo",
+          "photo-manager",
+          "photography",
+          "python",
+          "react",
+          "storage",
+          "tensorflow",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/photonixapp/photonix"
+      }
+    },
+    {
+      "id": "django-073-rq-django-rq",
+      "repository": "https://github.com/rq/django-rq.git",
+      "commit": "7642312391b25ab40f6bfe36297840e7e117bc19",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 73,
+        "fullName": "rq/django-rq",
+        "stars": 1947,
+        "forks": 295,
+        "sizeKb": 1334,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:47:26Z",
+        "topics": [
+          "background-jobs",
+          "django",
+          "job-queue",
+          "python",
+          "redis",
+          "rq",
+          "task-queue"
+        ],
+        "htmlUrl": "https://github.com/rq/django-rq"
+      }
+    },
+    {
+      "id": "django-074-celery-django-celery-beat",
+      "repository": "https://github.com/celery/django-celery-beat.git",
+      "commit": "f008dd80737ed9345aff675e7c8d83cda2882187",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 74,
+        "fullName": "celery/django-celery-beat",
+        "stars": 1942,
+        "forks": 487,
+        "sizeKb": 938,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:21:34Z",
+        "topics": [
+          "celery",
+          "celery-task",
+          "celerybeat",
+          "django",
+          "django-orm",
+          "python",
+          "python-libary",
+          "python-library",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery-beat"
+      }
+    },
+    {
+      "id": "django-075-django-wiki-django-wiki",
+      "repository": "https://github.com/django-wiki/django-wiki.git",
+      "commit": "ebe1bf0f4608b759caf2a21cc19a8eeb041cb4a7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 75,
+        "fullName": "django-wiki/django-wiki",
+        "stars": 1927,
+        "forks": 590,
+        "sizeKb": 12446,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-23T22:33:13Z",
+        "topics": [
+          "django",
+          "django-wiki",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-wiki/django-wiki"
+      }
+    },
+    {
+      "id": "django-076-doableware-djongo",
+      "repository": "https://github.com/doableware/djongo.git",
+      "commit": "f3164112887cf9d13a5c0937694d7961943b9c35",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 76,
+        "fullName": "doableware/djongo",
+        "stars": 1924,
+        "forks": 355,
+        "sizeKb": 22025,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-28T19:51:03Z",
+        "topics": [
+          "django",
+          "mongodb",
+          "nosql",
+          "nosql-databases",
+          "pymongo",
+          "relational-databases",
+          "sql"
+        ],
+        "htmlUrl": "https://github.com/doableware/djongo"
+      }
+    },
+    {
+      "id": "django-077-anymail-django-anymail",
+      "repository": "https://github.com/anymail/django-anymail.git",
+      "commit": "8a4cc24895c60485e7d77a77da4aeb397506d78c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 77,
+        "fullName": "anymail/django-anymail",
+        "stars": 1890,
+        "forks": 146,
+        "sizeKb": 2960,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-16T19:44:22Z",
+        "topics": [
+          "amazon-ses",
+          "brevo",
+          "django",
+          "email",
+          "mailersend",
+          "mailgun",
+          "mailjet",
+          "mailtrap",
+          "mandrill",
+          "postal",
+          "postmark",
+          "resend",
+          "resend-email",
+          "scaleway",
+          "sendgrid",
+          "sendinblue",
+          "sparkpost",
+          "unisender",
+          "unisender-go"
+        ],
+        "htmlUrl": "https://github.com/anymail/django-anymail"
+      }
+    },
+    {
+      "id": "django-078-twtrubiks-docker-tutorial",
+      "repository": "https://github.com/twtrubiks/docker-tutorial.git",
+      "commit": "bdd20d8a61c09a80e65c339ff6ccabc5ddcaca0e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 78,
+        "fullName": "twtrubiks/docker-tutorial",
+        "stars": 1882,
+        "forks": 305,
+        "sizeKb": 208,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-30T05:56:16Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "docker",
+          "postgresql",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/twtrubiks/docker-tutorial"
+      }
+    },
+    {
+      "id": "django-079-jazzband-django-two-factor-auth",
+      "repository": "https://github.com/jazzband/django-two-factor-auth.git",
+      "commit": "b31c4c097990b6570cc2c81ecfc9d6519c1498bb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 79,
+        "fullName": "jazzband/django-two-factor-auth",
+        "stars": 1873,
+        "forks": 457,
+        "sizeKb": 2197,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:55:33Z",
+        "topics": [
+          "authentication",
+          "django",
+          "two-factor-authentication"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-two-factor-auth"
+      }
+    },
+    {
+      "id": "django-080-yourlabs-django-autocomplete-light",
+      "repository": "https://github.com/yourlabs/django-autocomplete-light.git",
+      "commit": "0477c823ef5737edb3eb486317d181ef32b87871",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 80,
+        "fullName": "yourlabs/django-autocomplete-light",
+        "stars": 1871,
+        "forks": 464,
+        "sizeKb": 13759,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-29T18:11:55Z",
+        "topics": [
+          "autocomplete",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/yourlabs/django-autocomplete-light"
+      }
+    },
+    {
+      "id": "django-081-imerica-dj-rest-auth",
+      "repository": "https://github.com/iMerica/dj-rest-auth.git",
+      "commit": "90082e3a4d257c053e5eef3f30f51cc7f55492ee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 81,
+        "fullName": "iMerica/dj-rest-auth",
+        "stars": 1863,
+        "forks": 343,
+        "sizeKb": 1343,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-05T17:02:00Z",
+        "topics": [
+          "authentication",
+          "django",
+          "django-rest-framework",
+          "jwt",
+          "python",
+          "rest-api"
+        ],
+        "htmlUrl": "https://github.com/iMerica/dj-rest-auth"
+      }
+    },
+    {
+      "id": "django-082-django-cms-django-filer",
+      "repository": "https://github.com/django-cms/django-filer.git",
+      "commit": "29cd53781faccfba2c34822f162a65d06dc45dc1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 82,
+        "fullName": "django-cms/django-filer",
+        "stars": 1852,
+        "forks": 594,
+        "sizeKb": 13158,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-06T18:33:14Z",
+        "topics": [
+          "addon",
+          "cms",
+          "django",
+          "django-cms",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-cms/django-filer"
+      }
+    },
+    {
+      "id": "django-083-uselotus-lotus",
+      "repository": "https://github.com/uselotus/lotus.git",
+      "commit": "0ea71f7974659589b95c490af1e58a2782b8cb59",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 83,
+        "fullName": "uselotus/lotus",
+        "stars": 1828,
+        "forks": 134,
+        "sizeKb": 66349,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T13:12:07Z",
+        "topics": [
+          "analytics",
+          "api",
+          "billing",
+          "django",
+          "monetization",
+          "price-optimization",
+          "pricing",
+          "pricing-engine",
+          "product-led-pricing",
+          "python",
+          "self-hosted",
+          "typescript",
+          "usage-based-billing",
+          "usage-based-pricing"
+        ],
+        "htmlUrl": "https://github.com/uselotus/lotus"
+      }
+    },
+    {
+      "id": "django-084-django-commons-django-polymorphic",
+      "repository": "https://github.com/django-commons/django-polymorphic.git",
+      "commit": "69d68b53252ddbb8331a59cb48eeedf38ad7d04e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 84,
+        "fullName": "django-commons/django-polymorphic",
+        "stars": 1826,
+        "forks": 304,
+        "sizeKb": 3672,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-09T17:11:04Z",
+        "topics": [
+          "django",
+          "django-admin",
+          "django-formsets",
+          "django-orm",
+          "object-oriented",
+          "oop",
+          "polymorphism"
+        ],
+        "htmlUrl": "https://github.com/django-commons/django-polymorphic"
+      }
+    },
+    {
+      "id": "django-085-alanjds-drf-nested-routers",
+      "repository": "https://github.com/alanjds/drf-nested-routers.git",
+      "commit": "babd4a9c7cee13c13508838a35fc4db03e6b51e0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 85,
+        "fullName": "alanjds/drf-nested-routers",
+        "stars": 1796,
+        "forks": 173,
+        "sizeKb": 9325,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T17:44:29Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "hacktoberfest",
+          "nested-resources",
+          "rest"
+        ],
+        "htmlUrl": "https://github.com/alanjds/drf-nested-routers"
+      }
+    },
+    {
+      "id": "django-086-dj-stripe-dj-stripe",
+      "repository": "https://github.com/dj-stripe/dj-stripe.git",
+      "commit": "aa1dae3616cbcf8cde2181f488de9076991ba961",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 86,
+        "fullName": "dj-stripe/dj-stripe",
+        "stars": 1786,
+        "forks": 512,
+        "sizeKb": 8189,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-02T15:34:12Z",
+        "topics": [
+          "billing",
+          "django",
+          "finance",
+          "fintech",
+          "payments",
+          "python",
+          "stripe",
+          "subscriptions"
+        ],
+        "htmlUrl": "https://github.com/dj-stripe/dj-stripe"
+      }
+    },
+    {
+      "id": "django-087-etesync-server",
+      "repository": "https://github.com/etesync/server.git",
+      "commit": "6ac54121048e104437eec861f142e7dc1bebf7eb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 87,
+        "fullName": "etesync/server",
+        "stars": 1763,
+        "forks": 101,
+        "sizeKb": 518,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-12T12:44:26Z",
+        "topics": [
+          "django",
+          "encryption",
+          "end-to-end-encryption",
+          "etesync",
+          "synchronization"
+        ],
+        "htmlUrl": "https://github.com/etesync/server"
+      }
+    },
+    {
+      "id": "django-088-codingforentrepreneurs-ecommerce",
+      "repository": "https://github.com/codingforentrepreneurs/eCommerce.git",
+      "commit": "80e38cb5319c8f470db00c469bebd7a5e9cdad38",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 88,
+        "fullName": "codingforentrepreneurs/eCommerce",
+        "stars": 1755,
+        "forks": 963,
+        "sizeKb": 1169,
+        "defaultBranch": "master",
+        "pushedAt": "2024-06-14T07:05:13Z",
+        "topics": [
+          "ajax",
+          "bootstrap",
+          "bootstrap4",
+          "card",
+          "cart-model",
+          "custom-queryset",
+          "django",
+          "django1-11",
+          "ecommerce",
+          "jquery",
+          "jquery-ajax",
+          "lookup",
+          "mailchimp",
+          "python",
+          "python3-6",
+          "stripe"
+        ],
+        "htmlUrl": "https://github.com/codingforentrepreneurs/eCommerce"
+      }
+    },
+    {
+      "id": "django-089-timonweb-django-tailwind",
+      "repository": "https://github.com/timonweb/django-tailwind.git",
+      "commit": "2b7d170b26a7661202aa2e5139b37d3ca6a5f716",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 89,
+        "fullName": "timonweb/django-tailwind",
+        "stars": 1750,
+        "forks": 110,
+        "sizeKb": 6494,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-12T13:22:08Z",
+        "topics": [
+          "css",
+          "django",
+          "django-tailwind",
+          "tailwind",
+          "tailwind-css",
+          "tailwindcss",
+          "tailwindcss-v4"
+        ],
+        "htmlUrl": "https://github.com/timonweb/django-tailwind"
+      }
+    },
+    {
+      "id": "django-090-django-hijack-django-hijack",
+      "repository": "https://github.com/django-hijack/django-hijack.git",
+      "commit": "aaa9bfa4a1ab4b14ed49573871f3da460a334e05",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 90,
+        "fullName": "django-hijack/django-hijack",
+        "stars": 1730,
+        "forks": 185,
+        "sizeKb": 1711,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T21:23:16Z",
+        "topics": [
+          "django",
+          "django-hijack",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-hijack/django-hijack"
+      }
+    },
+    {
+      "id": "django-091-mdn-django-locallibrary-tutorial",
+      "repository": "https://github.com/mdn/django-locallibrary-tutorial.git",
+      "commit": "f8e4f683aae1ac3851229fad0f22893f8d284416",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 91,
+        "fullName": "mdn/django-locallibrary-tutorial",
+        "stars": 1687,
+        "forks": 962,
+        "sizeKb": 341,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-21T18:41:04Z",
+        "topics": [
+          "demo",
+          "django",
+          "example",
+          "python",
+          "web-app"
+        ],
+        "htmlUrl": "https://github.com/mdn/django-locallibrary-tutorial"
+      }
+    },
+    {
+      "id": "django-092-django-helpdesk-django-helpdesk",
+      "repository": "https://github.com/django-helpdesk/django-helpdesk.git",
+      "commit": "edfe5e2b11e2f33a2c228a1fe5693aecfdc1594b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 92,
+        "fullName": "django-helpdesk/django-helpdesk",
+        "stars": 1682,
+        "forks": 683,
+        "sizeKb": 25921,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-13T13:04:32Z",
+        "topics": [
+          "agile",
+          "bugs",
+          "cases",
+          "django",
+          "hacktoberfest",
+          "hacktoberfest2020",
+          "helpdesk",
+          "incidents",
+          "issues",
+          "kanban",
+          "python",
+          "scrum",
+          "servicedesk",
+          "support",
+          "tickets",
+          "tracker"
+        ],
+        "htmlUrl": "https://github.com/django-helpdesk/django-helpdesk"
+      }
+    },
+    {
+      "id": "django-093-pyeventsourcing-eventsourcing",
+      "repository": "https://github.com/pyeventsourcing/eventsourcing.git",
+      "commit": "099c92ddcb3515d24fb3934ea25d823279f42584",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 93,
+        "fullName": "pyeventsourcing/eventsourcing",
+        "stars": 1679,
+        "forks": 141,
+        "sizeKb": 13217,
+        "defaultBranch": "9.6",
+        "pushedAt": "2026-06-24T21:22:04Z",
+        "topics": [
+          "cqrs",
+          "ddd",
+          "distributed-systems",
+          "django",
+          "domain-driven-design",
+          "event-sourcing",
+          "eventsourcing",
+          "python",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pyeventsourcing/eventsourcing"
+      }
+    },
+    {
+      "id": "django-094-django-commons-django-prometheus",
+      "repository": "https://github.com/django-commons/django-prometheus.git",
+      "commit": "26a5ac84d1790ffd643e0a60c83ea71f00dfa92e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 94,
+        "fullName": "django-commons/django-prometheus",
+        "stars": 1656,
+        "forks": 262,
+        "sizeKb": 675,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-09T15:09:42Z",
+        "topics": [
+          "django",
+          "django-prometheus",
+          "exported-metrics",
+          "metrics",
+          "monitoring",
+          "prometheus",
+          "prometheus-client",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/django-commons/django-prometheus"
+      }
+    },
+    {
+      "id": "django-095-mozilla-pontoon",
+      "repository": "https://github.com/mozilla/pontoon.git",
+      "commit": "43d60ec085ecbd64d65a9c4503877644e6b28c9f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 95,
+        "fullName": "mozilla/pontoon",
+        "stars": 1651,
+        "forks": 603,
+        "sizeKb": 51620,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T16:11:53Z",
+        "topics": [
+          "design",
+          "django",
+          "javascript",
+          "localization",
+          "mozilla",
+          "pontoon",
+          "translation"
+        ],
+        "htmlUrl": "https://github.com/mozilla/pontoon"
+      }
+    },
+    {
+      "id": "django-096-gtalarico-django-vue-template",
+      "repository": "https://github.com/gtalarico/django-vue-template.git",
+      "commit": "1106978b4c965669dc6add0f85d39345e1272bed",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 96,
+        "fullName": "gtalarico/django-vue-template",
+        "stars": 1617,
+        "forks": 397,
+        "sizeKb": 528,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T17:16:02Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "rest-api",
+          "vue",
+          "vuecli",
+          "vuejs",
+          "whitenoise"
+        ],
+        "htmlUrl": "https://github.com/gtalarico/django-vue-template"
+      }
+    },
+    {
+      "id": "django-097-agconti-cookiecutter-django-rest",
+      "repository": "https://github.com/agconti/cookiecutter-django-rest.git",
+      "commit": "0b518b18b7af5e486b1c54cc345982ff74c060be",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 97,
+        "fullName": "agconti/cookiecutter-django-rest",
+        "stars": 1603,
+        "forks": 191,
+        "sizeKb": 6026,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-11T19:15:47Z",
+        "topics": [
+          "api",
+          "boilerplate",
+          "django",
+          "docker",
+          "python",
+          "python3",
+          "rest",
+          "rest-api"
+        ],
+        "htmlUrl": "https://github.com/agconti/cookiecutter-django-rest"
+      }
+    },
+    {
+      "id": "django-098-dj-bolt-django-bolt",
+      "repository": "https://github.com/dj-bolt/django-bolt.git",
+      "commit": "5683ab169216b507f87e8e63cfaaa5905d2733ff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 98,
+        "fullName": "dj-bolt/django-bolt",
+        "stars": 1565,
+        "forks": 80,
+        "sizeKb": 22783,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T15:57:02Z",
+        "topics": [
+          "actix-web",
+          "api",
+          "api-rest",
+          "asyncio",
+          "bolt",
+          "django",
+          "django-bolt",
+          "msgspec",
+          "pyo3",
+          "python",
+          "rust"
+        ],
+        "htmlUrl": "https://github.com/dj-bolt/django-bolt"
+      }
+    },
+    {
+      "id": "django-099-celery-django-celery",
+      "repository": "https://github.com/celery/django-celery.git",
+      "commit": "3b6335d14fd05506391119175406634668d72062",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 99,
+        "fullName": "celery/django-celery",
+        "stars": 1552,
+        "forks": 453,
+        "sizeKb": 1663,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-20T12:16:49Z",
+        "topics": [
+          "celery",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery"
+      }
+    },
+    {
+      "id": "django-100-pytest-dev-pytest-django",
+      "repository": "https://github.com/pytest-dev/pytest-django.git",
+      "commit": "587b65f25aec1e91803841f95543469d82f5d79d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 100,
+        "fullName": "pytest-dev/pytest-django",
+        "stars": 1537,
+        "forks": 359,
+        "sizeKb": 1859,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-01T00:53:01Z",
+        "topics": [
+          "django",
+          "pytest",
+          "pytest-plugin",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/pytest-dev/pytest-django"
+      }
+    },
+    {
+      "id": "django-101-smileychris-django-countries",
+      "repository": "https://github.com/SmileyChris/django-countries.git",
+      "commit": "ee82223a1b7100b35935029c162b3042751c5d4a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 101,
+        "fullName": "SmileyChris/django-countries",
+        "stars": 1531,
+        "forks": 302,
+        "sizeKb": 4770,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-10T00:39:36Z",
+        "topics": [
+          "country-codes",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/SmileyChris/django-countries"
+      }
+    },
+    {
+      "id": "django-102-nickjj-docker-django-example",
+      "repository": "https://github.com/nickjj/docker-django-example.git",
+      "commit": "ae7250c068fed7ee7eb59bf2bdb5ff82aa81f4ea",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 102,
+        "fullName": "nickjj/docker-django-example",
+        "stars": 1528,
+        "forks": 476,
+        "sizeKb": 1506,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-08T11:28:59Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "docker-compose",
+          "esbuild",
+          "postgres",
+          "redis",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/nickjj/docker-django-example"
+      }
+    },
+    {
+      "id": "django-103-deschler-django-modeltranslation",
+      "repository": "https://github.com/deschler/django-modeltranslation.git",
+      "commit": "d9bdffa6108ef38db2e203e67a1affa99a7b39b1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 103,
+        "fullName": "deschler/django-modeltranslation",
+        "stars": 1482,
+        "forks": 270,
+        "sizeKb": 2136,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-14T05:20:08Z",
+        "topics": [
+          "django",
+          "python",
+          "translation"
+        ],
+        "htmlUrl": "https://github.com/deschler/django-modeltranslation"
+      }
+    },
+    {
+      "id": "django-104-stacklens-django-blog-tutorial",
+      "repository": "https://github.com/stacklens/django_blog_tutorial.git",
+      "commit": "171b1c2bf47d6ea9f88d980ef1ba12827ce07832",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 104,
+        "fullName": "stacklens/django_blog_tutorial",
+        "stars": 1442,
+        "forks": 420,
+        "sizeKb": 2137,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-17T13:28:42Z",
+        "topics": [
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/stacklens/django_blog_tutorial"
+      }
+    },
+    {
+      "id": "django-105-andrewingram-django-extra-views",
+      "repository": "https://github.com/AndrewIngram/django-extra-views.git",
+      "commit": "d37136d3c0f6e1194170d50ccb03cae96d860d6c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 105,
+        "fullName": "AndrewIngram/django-extra-views",
+        "stars": 1437,
+        "forks": 170,
+        "sizeKb": 455,
+        "defaultBranch": "master",
+        "pushedAt": "2025-04-28T07:04:07Z",
+        "topics": [
+          "django"
+        ],
+        "htmlUrl": "https://github.com/AndrewIngram/django-extra-views"
+      }
+    },
+    {
+      "id": "django-106-noripyt-django-cachalot",
+      "repository": "https://github.com/noripyt/django-cachalot.git",
+      "commit": "f09a9cebc6d75347541107a9c1028f2deb9c94a0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 106,
+        "fullName": "noripyt/django-cachalot",
+        "stars": 1426,
+        "forks": 156,
+        "sizeKb": 1600,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-28T05:23:10Z",
+        "topics": [
+          "cache",
+          "django",
+          "performance",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/noripyt/django-cachalot"
+      }
+    },
+    {
+      "id": "django-107-mbi-django-simple-captcha",
+      "repository": "https://github.com/mbi/django-simple-captcha.git",
+      "commit": "5d56da4cddcfa4f9e2a7aaf39db360c889a4145f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 107,
+        "fullName": "mbi/django-simple-captcha",
+        "stars": 1424,
+        "forks": 325,
+        "sizeKb": 632,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-07T17:46:07Z",
+        "topics": [
+          "captcha",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/mbi/django-simple-captcha"
+      }
+    },
+    {
+      "id": "django-108-arguman-arguman-org",
+      "repository": "https://github.com/arguman/arguman.org.git",
+      "commit": "3242df5c6be8186e245af7e5b378e973ca01f6bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 108,
+        "fullName": "arguman/arguman.org",
+        "stars": 1418,
+        "forks": 152,
+        "sizeKb": 2699,
+        "defaultBranch": "master",
+        "pushedAt": "2022-03-05T21:37:31Z",
+        "topics": [
+          "arguman",
+          "computational-linguistics",
+          "critical-thinking",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/arguman/arguman.org"
+      }
+    },
+    {
+      "id": "django-109-codingjoe-django-health-check",
+      "repository": "https://github.com/codingjoe/django-health-check.git",
+      "commit": "52d1502b563ee5a73c2f2c2dff8f681d0e723e84",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 109,
+        "fullName": "codingjoe/django-health-check",
+        "stars": 1416,
+        "forks": 220,
+        "sizeKb": 543,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T15:13:49Z",
+        "topics": [
+          "container",
+          "django",
+          "docker",
+          "health-check",
+          "monitoring"
+        ],
+        "htmlUrl": "https://github.com/codingjoe/django-health-check"
+      }
+    },
+    {
+      "id": "django-110-marshmallow-code-webargs",
+      "repository": "https://github.com/marshmallow-code/webargs.git",
+      "commit": "53477b4baa3d6765a0e0caf0f5e07c8d173e2fa0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 110,
+        "fullName": "marshmallow-code/webargs",
+        "stars": 1407,
+        "forks": 164,
+        "sizeKb": 3533,
+        "defaultBranch": "dev",
+        "pushedAt": "2026-07-12T13:15:23Z",
+        "topics": [
+          "aiohttp",
+          "bottlepy",
+          "django",
+          "falcon",
+          "flask",
+          "hacktoberfest",
+          "marshmallow",
+          "pyramid",
+          "python",
+          "request-validation",
+          "validation"
+        ],
+        "htmlUrl": "https://github.com/marshmallow-code/webargs"
+      }
+    },
+    {
+      "id": "django-111-rsinger86-django-lifecycle",
+      "repository": "https://github.com/rsinger86/django-lifecycle.git",
+      "commit": "0021726a05f37e0b36f1a37d873da76e3024828a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 111,
+        "fullName": "rsinger86/django-lifecycle",
+        "stars": 1406,
+        "forks": 95,
+        "sizeKb": 2054,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-14T10:05:37Z",
+        "topics": [
+          "django",
+          "django-models",
+          "lifecycle-hooks",
+          "transition-conditions"
+        ],
+        "htmlUrl": "https://github.com/rsinger86/django-lifecycle"
+      }
+    },
+    {
+      "id": "django-112-jazzband-django-auditlog",
+      "repository": "https://github.com/jazzband/django-auditlog.git",
+      "commit": "b9d8330ee50e766ba26c29d5fe7a3439f209742a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 112,
+        "fullName": "jazzband/django-auditlog",
+        "stars": 1374,
+        "forks": 448,
+        "sizeKb": 869,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-15T00:49:48Z",
+        "topics": [
+          "auditing",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-auditlog"
+      }
+    },
+    {
+      "id": "django-113-sloria-environs",
+      "repository": "https://github.com/sloria/environs.git",
+      "commit": "fd0a8e45964cc5e909675149d1a1972dc976921b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 113,
+        "fullName": "sloria/environs",
+        "stars": 1371,
+        "forks": 112,
+        "sizeKb": 648,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-07T13:49:26Z",
+        "topics": [
+          "configuration",
+          "django",
+          "environment-variables",
+          "flask",
+          "marshmallow",
+          "python",
+          "twelve-factor"
+        ],
+        "htmlUrl": "https://github.com/sloria/environs"
+      }
+    },
+    {
+      "id": "django-114-arrobalytics-django-ledger",
+      "repository": "https://github.com/arrobalytics/django-ledger.git",
+      "commit": "13005ad89902619943267234060623d31ba3aeff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 114,
+        "fullName": "arrobalytics/django-ledger",
+        "stars": 1360,
+        "forks": 323,
+        "sizeKb": 23336,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-13T23:41:36Z",
+        "topics": [
+          "accounting",
+          "bookkeeping",
+          "cashmanagement",
+          "django",
+          "django-application",
+          "django-framework",
+          "django-ledger",
+          "django-project",
+          "entities",
+          "finance",
+          "financial",
+          "financial-analysis-engine",
+          "forecasting",
+          "ledger-journal",
+          "quickbooks"
+        ],
+        "htmlUrl": "https://github.com/arrobalytics/django-ledger"
+      }
+    },
+    {
+      "id": "django-115-bennylope-django-organizations",
+      "repository": "https://github.com/bennylope/django-organizations.git",
+      "commit": "71018835a6ccd28558513614af9e7d77ee921fe4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 115,
+        "fullName": "bennylope/django-organizations",
+        "stars": 1359,
+        "forks": 223,
+        "sizeKb": 1131,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-04T16:32:04Z",
+        "topics": [
+          "accounts",
+          "django",
+          "groups",
+          "multi-tenant",
+          "organisation",
+          "organization",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/bennylope/django-organizations"
+      }
+    },
+    {
+      "id": "django-116-slackapi-bolt-python",
+      "repository": "https://github.com/slackapi/bolt-python.git",
+      "commit": "5a0cfb80a16b8789ac03c8babe8fa79fe28ca8c7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 116,
+        "fullName": "slackapi/bolt-python",
+        "stars": 1319,
+        "forks": 289,
+        "sizeKb": 12040,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T20:27:48Z",
+        "topics": [
+          "aiohttp",
+          "aiohttp-client",
+          "asyncio",
+          "bolt",
+          "chatbot",
+          "chatops",
+          "django",
+          "docker",
+          "fastapi",
+          "flask",
+          "pypi-url",
+          "python",
+          "slack",
+          "slack-api",
+          "socket-mode",
+          "web-api",
+          "websocket",
+          "websocket-client",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/slackapi/bolt-python"
+      }
+    },
+    {
+      "id": "django-117-wemake-services-django-modern-rest",
+      "repository": "https://github.com/wemake-services/django-modern-rest.git",
+      "commit": "c0c3b603b0c1130907941ae7fa104df9e900d363",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 117,
+        "fullName": "wemake-services/django-modern-rest",
+        "stars": 1303,
+        "forks": 138,
+        "sizeKb": 10906,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T13:34:00Z",
+        "topics": [
+          "api",
+          "django",
+          "django-ninja",
+          "django-rest-api",
+          "django-rest-framework",
+          "rest",
+          "rest-api",
+          "restful-api"
+        ],
+        "htmlUrl": "https://github.com/wemake-services/django-modern-rest"
+      }
+    },
+    {
+      "id": "django-118-jazzband-django-analytical",
+      "repository": "https://github.com/jazzband/django-analytical.git",
+      "commit": "e6f12719ccf37c944dc0f75e79eb9e39111a9b9c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 118,
+        "fullName": "jazzband/django-analytical",
+        "stars": 1294,
+        "forks": 175,
+        "sizeKb": 944,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-08T16:10:32Z",
+        "topics": [
+          "analytics",
+          "django",
+          "python",
+          "templates"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-analytical"
+      }
+    },
+    {
+      "id": "django-119-wq-django-rest-pandas",
+      "repository": "https://github.com/wq/django-rest-pandas.git",
+      "commit": "7bdf912d16774133ce731100bf9a245917b0aa59",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 119,
+        "fullName": "wq/django-rest-pandas",
+        "stars": 1276,
+        "forks": 128,
+        "sizeKb": 1030,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-10T18:32:25Z",
+        "topics": [
+          "chart",
+          "csv",
+          "dataviz",
+          "django",
+          "django-rest-framework",
+          "excel",
+          "pandas",
+          "rest-api",
+          "spreadsheet"
+        ],
+        "htmlUrl": "https://github.com/wq/django-rest-pandas"
+      }
+    },
+    {
+      "id": "django-120-codingforentrepreneurs-try-django",
+      "repository": "https://github.com/codingforentrepreneurs/Try-Django.git",
+      "commit": "a46ab93027e27fa55682adbfa04514c01a5a015d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 120,
+        "fullName": "codingforentrepreneurs/Try-Django",
+        "stars": 1271,
+        "forks": 822,
+        "sizeKb": 45,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-09T05:47:55Z",
+        "topics": [
+          "django",
+          "django2",
+          "learn",
+          "python",
+          "python3",
+          "python36",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/codingforentrepreneurs/Try-Django"
+      }
+    },
+    {
+      "id": "django-121-lardbit-nefarious",
+      "repository": "https://github.com/lardbit/nefarious.git",
+      "commit": "edefe1a4e79940832955ab1fedf619c7f3ffc26a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 121,
+        "fullName": "lardbit/nefarious",
+        "stars": 1271,
+        "forks": 84,
+        "sizeKb": 42430,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-15T22:27:23Z",
+        "topics": [
+          "angular",
+          "django",
+          "docker",
+          "jackett",
+          "python",
+          "tmdb",
+          "torrent",
+          "torrent-downloader",
+          "transmission"
+        ],
+        "htmlUrl": "https://github.com/lardbit/nefarious"
+      }
+    },
+    {
+      "id": "django-122-sibtc-django-beginners-guide",
+      "repository": "https://github.com/sibtc/django-beginners-guide.git",
+      "commit": "cb376b927f764c3a2c3bac8ed72a536f379f5d55",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 122,
+        "fullName": "sibtc/django-beginners-guide",
+        "stars": 1261,
+        "forks": 409,
+        "sizeKb": 406,
+        "defaultBranch": "master",
+        "pushedAt": "2021-09-05T19:24:56Z",
+        "topics": [
+          "django",
+          "python",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/sibtc/django-beginners-guide"
+      }
+    },
+    {
+      "id": "django-123-hopetree-izone",
+      "repository": "https://github.com/Hopetree/izone.git",
+      "commit": "3c0fa4ffaccdf160206ef92ce39457ad5876d7c4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 123,
+        "fullName": "Hopetree/izone",
+        "stars": 1228,
+        "forks": 380,
+        "sizeKb": 7056,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-29T01:40:42Z",
+        "topics": [
+          "blog",
+          "bootstrap",
+          "django",
+          "docker",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/Hopetree/izone"
+      }
+    },
+    {
+      "id": "django-124-adamchainz-django-upgrade",
+      "repository": "https://github.com/adamchainz/django-upgrade.git",
+      "commit": "19d99888f6d85ddb7c2195bfea2d7f7164729e71",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 124,
+        "fullName": "adamchainz/django-upgrade",
+        "stars": 1228,
+        "forks": 81,
+        "sizeKb": 1452,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T10:56:15Z",
+        "topics": [
+          "django"
+        ],
+        "htmlUrl": "https://github.com/adamchainz/django-upgrade"
+      }
+    },
+    {
+      "id": "django-125-django-treebeard-django-treebeard",
+      "repository": "https://github.com/django-treebeard/django-treebeard.git",
+      "commit": "abd9908e01a8bbacd36cd71a98f02c19d0c14a39",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 125,
+        "fullName": "django-treebeard/django-treebeard",
+        "stars": 1212,
+        "forks": 224,
+        "sizeKb": 4145,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T05:28:32Z",
+        "topics": [
+          "django",
+          "python",
+          "tree-structure"
+        ],
+        "htmlUrl": "https://github.com/django-treebeard/django-treebeard"
+      }
+    },
+    {
+      "id": "django-126-jazzband-django-payments",
+      "repository": "https://github.com/jazzband/django-payments.git",
+      "commit": "7d85fa14d759f27aa1e65f979d20f91ed9375c4d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 126,
+        "fullName": "jazzband/django-payments",
+        "stars": 1200,
+        "forks": 294,
+        "sizeKb": 1096,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T13:55:03Z",
+        "topics": [
+          "braintree",
+          "django",
+          "google-wallet",
+          "payments",
+          "paypal",
+          "python",
+          "sagepay",
+          "sofort",
+          "stripe"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-payments"
+      }
+    },
+    {
+      "id": "django-127-wemake-services-django-split-settings",
+      "repository": "https://github.com/wemake-services/django-split-settings.git",
+      "commit": "4d8a0d3f7639a4f00a3af13db72ca5ba2e2ee340",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 127,
+        "fullName": "wemake-services/django-split-settings",
+        "stars": 1198,
+        "forks": 73,
+        "sizeKb": 1628,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T07:48:26Z",
+        "topics": [
+          "django",
+          "django-configuration",
+          "django-settings",
+          "python",
+          "python3",
+          "settings"
+        ],
+        "htmlUrl": "https://github.com/wemake-services/django-split-settings"
+      }
+    },
+    {
+      "id": "django-128-nitely-spirit",
+      "repository": "https://github.com/nitely/Spirit.git",
+      "commit": "72361fd3464fd14551a34dc1f3e98a2e2733346a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 128,
+        "fullName": "nitely/Spirit",
+        "stars": 1188,
+        "forks": 331,
+        "sizeKb": 12295,
+        "defaultBranch": "master",
+        "pushedAt": "2025-04-19T17:44:27Z",
+        "topics": [
+          "django",
+          "django-framework",
+          "forum",
+          "python",
+          "spirit"
+        ],
+        "htmlUrl": "https://github.com/nitely/Spirit"
+      }
+    },
+    {
+      "id": "django-129-testdrivenio-django-on-docker",
+      "repository": "https://github.com/testdrivenio/django-on-docker.git",
+      "commit": "26be9cd5f891734425e4fe754d6340b92180b471",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 129,
+        "fullName": "testdrivenio/django-on-docker",
+        "stars": 1187,
+        "forks": 453,
+        "sizeKb": 30,
+        "defaultBranch": "main",
+        "pushedAt": "2023-11-07T11:47:05Z",
+        "topics": [
+          "django",
+          "django-gunicorn-docker",
+          "django-nginx",
+          "docker"
+        ],
+        "htmlUrl": "https://github.com/testdrivenio/django-on-docker"
+      }
+    },
+    {
+      "id": "django-130-rpkilby-jsonfield",
+      "repository": "https://github.com/rpkilby/jsonfield.git",
+      "commit": "157aa9219c0e66469edcb8e4ff51d8ac47d092c1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 130,
+        "fullName": "rpkilby/jsonfield",
+        "stars": 1161,
+        "forks": 265,
+        "sizeKb": 236,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-04T23:04:43Z",
+        "topics": [
+          "django",
+          "json",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/rpkilby/jsonfield"
+      }
+    },
+    {
+      "id": "django-131-holgerd77-django-dynamic-scraper",
+      "repository": "https://github.com/holgerd77/django-dynamic-scraper.git",
+      "commit": "48943f6a9f911b7f410ce084f6d0ccc9af3a90cf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 131,
+        "fullName": "holgerd77/django-dynamic-scraper",
+        "stars": 1158,
+        "forks": 302,
+        "sizeKb": 4930,
+        "defaultBranch": "master",
+        "pushedAt": "2022-02-19T21:12:06Z",
+        "topics": [
+          "django",
+          "python",
+          "scraper",
+          "scraping",
+          "scrapy",
+          "spider",
+          "webscraping"
+        ],
+        "htmlUrl": "https://github.com/holgerd77/django-dynamic-scraper"
+      }
+    },
+    {
+      "id": "django-132-mbi-django-rosetta",
+      "repository": "https://github.com/mbi/django-rosetta.git",
+      "commit": "f5ac3f5040f7db9dc0797a0a0cc2f9ea7694627e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 132,
+        "fullName": "mbi/django-rosetta",
+        "stars": 1157,
+        "forks": 202,
+        "sizeKb": 1044,
+        "defaultBranch": "develop",
+        "pushedAt": "2025-12-07T18:05:10Z",
+        "topics": [
+          "django",
+          "gettext",
+          "i18n",
+          "internationalization",
+          "python",
+          "translation"
+        ],
+        "htmlUrl": "https://github.com/mbi/django-rosetta"
+      }
+    },
+    {
+      "id": "django-133-wrabit-django-cotton",
+      "repository": "https://github.com/wrabit/django-cotton.git",
+      "commit": "60bea18fe3d81d75cdff1f5d5a3645649babf68c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 133,
+        "fullName": "wrabit/django-cotton",
+        "stars": 1154,
+        "forks": 62,
+        "sizeKb": 3654,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-12T15:09:44Z",
+        "topics": [
+          "components",
+          "django",
+          "python",
+          "ui"
+        ],
+        "htmlUrl": "https://github.com/wrabit/django-cotton"
+      }
+    },
+    {
+      "id": "django-134-nsupdate-info-nsupdate-info",
+      "repository": "https://github.com/nsupdate-info/nsupdate.info.git",
+      "commit": "1c3578ba2e0d82c322bf49f11dbf891af189a4a8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 134,
+        "fullName": "nsupdate-info/nsupdate.info",
+        "stars": 1129,
+        "forks": 124,
+        "sizeKb": 4634,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:45:36Z",
+        "topics": [
+          "django",
+          "dns",
+          "dyndns",
+          "dyndns-service",
+          "ipv4",
+          "ipv6",
+          "python",
+          "python-3",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/nsupdate-info/nsupdate.info"
+      }
+    },
+    {
+      "id": "django-135-openwisp-django-rest-framework-gis",
+      "repository": "https://github.com/openwisp/django-rest-framework-gis.git",
+      "commit": "0ba561bb65ce26e170444a3d3507758a6f4940dd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 135,
+        "fullName": "openwisp/django-rest-framework-gis",
+        "stars": 1123,
+        "forks": 218,
+        "sizeKb": 631,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-01T17:11:04Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "geojson",
+          "gis",
+          "hacktoberfest",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/openwisp/django-rest-framework-gis"
+      }
+    },
+    {
+      "id": "django-136-archmonger-django-dbbackup",
+      "repository": "https://github.com/Archmonger/django-dbbackup.git",
+      "commit": "24f5dde5cef874b89296849ad6d0380f0b61d07a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 136,
+        "fullName": "Archmonger/django-dbbackup",
+        "stars": 1110,
+        "forks": 218,
+        "sizeKb": 2095,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-15T14:46:07Z",
+        "topics": [
+          "backup",
+          "django",
+          "mongodb",
+          "mysql",
+          "postgresql",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/Archmonger/django-dbbackup"
+      }
+    },
+    {
+      "id": "django-137-caoqianming-django-vue-admin",
+      "repository": "https://github.com/caoqianming/django-vue-admin.git",
+      "commit": "849f9aafa552380c64eecc6059e357f6a1f5437a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 137,
+        "fullName": "caoqianming/django-vue-admin",
+        "stars": 1095,
+        "forks": 287,
+        "sizeKb": 3579,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-08T16:59:53Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "element-ui",
+          "python",
+          "rbac",
+          "vue",
+          "workflow"
+        ],
+        "htmlUrl": "https://github.com/caoqianming/django-vue-admin"
+      }
+    },
+    {
+      "id": "django-138-lqez-django-summernote",
+      "repository": "https://github.com/lqez/django-summernote.git",
+      "commit": "f79c71b974c17a13df9549ba88bb939fe6cd5abf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 138,
+        "fullName": "lqez/django-summernote",
+        "stars": 1088,
+        "forks": 233,
+        "sizeKb": 1906,
+        "defaultBranch": "main",
+        "pushedAt": "2024-06-07T12:24:13Z",
+        "topics": [
+          "django",
+          "summernote",
+          "wysiwyg"
+        ],
+        "htmlUrl": "https://github.com/lqez/django-summernote"
+      }
+    },
+    {
+      "id": "django-139-haddyyang-django2-0-course",
+      "repository": "https://github.com/HaddyYang/django2.0-course.git",
+      "commit": "e206cc4839a0f6cd6864a7a5961601bf98313c16",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 139,
+        "fullName": "HaddyYang/django2.0-course",
+        "stars": 1085,
+        "forks": 452,
+        "sizeKb": 3655,
+        "defaultBranch": "master",
+        "pushedAt": "2023-12-19T05:35:08Z",
+        "topics": [
+          "django",
+          "django-course",
+          "django2",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/HaddyYang/django2.0-course"
+      }
+    },
+    {
+      "id": "django-140-dmpayton-django-admin-honeypot",
+      "repository": "https://github.com/dmpayton/django-admin-honeypot.git",
+      "commit": "a840496d183df89965eeb33c9a5dd9ea3919dfff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 140,
+        "fullName": "dmpayton/django-admin-honeypot",
+        "stars": 1084,
+        "forks": 207,
+        "sizeKb": 164,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-04-10T14:22:38Z",
+        "topics": [
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/dmpayton/django-admin-honeypot"
+      }
+    },
+    {
+      "id": "django-141-iommirocks-iommi",
+      "repository": "https://github.com/iommirocks/iommi.git",
+      "commit": "1620265b1b818cb600a8805f2fd8beecaad30f52",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 141,
+        "fullName": "iommirocks/iommi",
+        "stars": 1081,
+        "forks": 66,
+        "sizeKb": 13491,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T01:36:26Z",
+        "topics": [
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/iommirocks/iommi"
+      }
+    },
+    {
+      "id": "django-142-realmteam-django-rest-framework-social-oauth2",
+      "repository": "https://github.com/RealmTeam/django-rest-framework-social-oauth2.git",
+      "commit": "3f7fbf809c7f2ce0c046cd213d2345645caae752",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 142,
+        "fullName": "RealmTeam/django-rest-framework-social-oauth2",
+        "stars": 1066,
+        "forks": 189,
+        "sizeKb": 84,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-17T20:24:57Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "oauth2",
+          "python",
+          "python-social-auth"
+        ],
+        "htmlUrl": "https://github.com/RealmTeam/django-rest-framework-social-oauth2"
+      }
+    },
+    {
+      "id": "django-143-typeerror-secure",
+      "repository": "https://github.com/TypeError/secure.git",
+      "commit": "5878d0d6c2f00945ef5b81a82746eba57bd44cfc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 143,
+        "fullName": "TypeError/secure",
+        "stars": 1047,
+        "forks": 33,
+        "sizeKb": 1227,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-10T21:22:04Z",
+        "topics": [
+          "asgi",
+          "content-security-policy",
+          "django",
+          "fastapi",
+          "flask",
+          "http-headers",
+          "python",
+          "security",
+          "security-headers",
+          "shiny",
+          "strict-transport-security",
+          "web-security",
+          "wsgi"
+        ],
+        "htmlUrl": "https://github.com/TypeError/secure"
+      }
+    },
+    {
+      "id": "django-144-django-recaptcha-django-recaptcha",
+      "repository": "https://github.com/django-recaptcha/django-recaptcha.git",
+      "commit": "39a1de811724f5b487ca185b36c9aa5666bc066f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 144,
+        "fullName": "django-recaptcha/django-recaptcha",
+        "stars": 1035,
+        "forks": 266,
+        "sizeKb": 412,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T20:26:33Z",
+        "topics": [
+          "django",
+          "python",
+          "recaptcha",
+          "recaptcha-v3",
+          "recaptchav2"
+        ],
+        "htmlUrl": "https://github.com/django-recaptcha/django-recaptcha"
+      }
+    },
+    {
+      "id": "django-145-aaugustin-django-sesame",
+      "repository": "https://github.com/aaugustin/django-sesame.git",
+      "commit": "db0d811a84b97d5fe4df050f03be1c68c6982f6f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 145,
+        "fullName": "aaugustin/django-sesame",
+        "stars": 1034,
+        "forks": 58,
+        "sizeKb": 457,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-05T21:29:26Z",
+        "topics": [
+          "authentication",
+          "django",
+          "python",
+          "token-based-authentication"
+        ],
+        "htmlUrl": "https://github.com/aaugustin/django-sesame"
+      }
+    },
+    {
+      "id": "django-146-open-cmdb-cmdb",
+      "repository": "https://github.com/open-cmdb/cmdb.git",
+      "commit": "5dd433692d85001b6e09bc8ec976a133ba5df6ed",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 146,
+        "fullName": "open-cmdb/cmdb",
+        "stars": 1029,
+        "forks": 381,
+        "sizeKb": 4530,
+        "defaultBranch": "master",
+        "pushedAt": "2020-03-06T08:41:17Z",
+        "topics": [
+          "cmdb",
+          "django",
+          "django-rest-framework",
+          "element-ui",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/open-cmdb/cmdb"
+      }
+    },
+    {
+      "id": "django-147-zostera-django-bootstrap4",
+      "repository": "https://github.com/zostera/django-bootstrap4.git",
+      "commit": "c4c635d7572e2b92f3ea862aa5d8604ce427ccc3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 147,
+        "fullName": "zostera/django-bootstrap4",
+        "stars": 1027,
+        "forks": 256,
+        "sizeKb": 2020,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:48:35Z",
+        "topics": [
+          "bootstrap4",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/zostera/django-bootstrap4"
+      }
+    },
+    {
+      "id": "django-148-byashimov-django-controlcenter",
+      "repository": "https://github.com/byashimov/django-controlcenter.git",
+      "commit": "1fb904bafef300d7657e6a27c1c4090269cdd177",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 148,
+        "fullName": "byashimov/django-controlcenter",
+        "stars": 1011,
+        "forks": 81,
+        "sizeKb": 293,
+        "defaultBranch": "master",
+        "pushedAt": "2025-03-25T19:41:03Z",
+        "topics": [
+          "admin-dashboard",
+          "dashboard",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/byashimov/django-controlcenter"
+      }
+    },
+    {
+      "id": "django-149-model-bakers-model-bakery",
+      "repository": "https://github.com/model-bakers/model_bakery.git",
+      "commit": "315e0e2951abf2ad847c9ead0e28ac254fe94886",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 149,
+        "fullName": "model-bakers/model_bakery",
+        "stars": 997,
+        "forks": 106,
+        "sizeKb": 941,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T07:19:19Z",
+        "topics": [
+          "django",
+          "fixtures",
+          "object-factory",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/model-bakers/model_bakery"
+      }
+    },
+    {
+      "id": "django-150-kele59-imooc-django",
+      "repository": "https://github.com/kele59/imooc-django.git",
+      "commit": "daf1ced745d3d21989e8191b658c293a511b37fd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 150,
+        "fullName": "kele59/imooc-django",
+        "stars": 975,
+        "forks": 431,
+        "sizeKb": 8064,
+        "defaultBranch": "master",
+        "pushedAt": "2022-11-22T04:28:07Z",
+        "topics": [
+          "django",
+          "docker",
+          "pycharm",
+          "python",
+          "xadmin",
+          "xadmin-python3"
+        ],
+        "htmlUrl": "https://github.com/kele59/imooc-django"
+      }
+    },
+    {
+      "id": "django-151-macropin-django-registration",
+      "repository": "https://github.com/macropin/django-registration.git",
+      "commit": "45a6e13623bcb3b9278ad458ca9b1e7f246a1fae",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 151,
+        "fullName": "macropin/django-registration",
+        "stars": 973,
+        "forks": 339,
+        "sizeKb": 1646,
+        "defaultBranch": "main",
+        "pushedAt": "2025-10-09T09:33:20Z",
+        "topics": [
+          "django",
+          "user-registration"
+        ],
+        "htmlUrl": "https://github.com/macropin/django-registration"
+      }
+    },
+    {
+      "id": "django-152-klen-mixer",
+      "repository": "https://github.com/klen/mixer.git",
+      "commit": "431ca2756af5571efc4d08d743fa8ab2a8619183",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 152,
+        "fullName": "klen/mixer",
+        "stars": 955,
+        "forks": 93,
+        "sizeKb": 1073,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-03-08T09:29:07Z",
+        "topics": [
+          "django",
+          "flask",
+          "sqlalchemy",
+          "testing",
+          "testing-tools"
+        ],
+        "htmlUrl": "https://github.com/klen/mixer"
+      }
+    },
+    {
+      "id": "django-153-whitesmith-hawkpost",
+      "repository": "https://github.com/whitesmith/hawkpost.git",
+      "commit": "1a6d064a7def9bc6081746361ba01c50561f0feb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 153,
+        "fullName": "whitesmith/hawkpost",
+        "stars": 952,
+        "forks": 41,
+        "sizeKb": 5958,
+        "defaultBranch": "master",
+        "pushedAt": "2024-12-09T04:45:37Z",
+        "topics": [
+          "django",
+          "email",
+          "gpg-encryption",
+          "hacktoberfest",
+          "openpgp",
+          "openpgpjs",
+          "python",
+          "python3",
+          "security",
+          "webapp"
+        ],
+        "htmlUrl": "https://github.com/whitesmith/hawkpost"
+      }
+    },
+    {
+      "id": "django-154-djangopackages-djangopackages",
+      "repository": "https://github.com/djangopackages/djangopackages.git",
+      "commit": "043ac9652c6fdbe3e5e8f5a57ffc97b291cbbe73",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 154,
+        "fullName": "djangopackages/djangopackages",
+        "stars": 948,
+        "forks": 198,
+        "sizeKb": 20031,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T04:55:32Z",
+        "topics": [
+          "django",
+          "packaging",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/djangopackages/djangopackages"
+      }
+    },
+    {
+      "id": "django-155-ubernostrum-django-registration",
+      "repository": "https://github.com/ubernostrum/django-registration.git",
+      "commit": "ee9458a46403c46e7ea4440876f774a715bef047",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 155,
+        "fullName": "ubernostrum/django-registration",
+        "stars": 946,
+        "forks": 233,
+        "sizeKb": 2053,
+        "defaultBranch": "trunk",
+        "pushedAt": "2025-04-07T05:54:37Z",
+        "topics": [
+          "authentication",
+          "django",
+          "python",
+          "user-management",
+          "user-registration"
+        ],
+        "htmlUrl": "https://github.com/ubernostrum/django-registration"
+      }
+    },
+    {
+      "id": "django-156-practical-recommender-systems-moviegeek",
+      "repository": "https://github.com/practical-recommender-systems/moviegeek.git",
+      "commit": "174016ef536552eb6102a3a1e03ccceb9735efa8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 156,
+        "fullName": "practical-recommender-systems/moviegeek",
+        "stars": 942,
+        "forks": 374,
+        "sizeKb": 370,
+        "defaultBranch": "master",
+        "pushedAt": "2024-12-03T12:00:22Z",
+        "topics": [
+          "data-science",
+          "django",
+          "python",
+          "recommender-system"
+        ],
+        "htmlUrl": "https://github.com/practical-recommender-systems/moviegeek"
+      }
+    },
+    {
+      "id": "django-157-djlint-djlint",
+      "repository": "https://github.com/djlint/djLint.git",
+      "commit": "3decb9fc65f4afbedd439cc80552c9fb02d0c761",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 157,
+        "fullName": "djlint/djLint",
+        "stars": 938,
+        "forks": 117,
+        "sizeKb": 39183,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T09:31:10Z",
+        "topics": [
+          "django",
+          "django-templates",
+          "golang",
+          "golang-template",
+          "handlebars-js",
+          "handlebars-templates",
+          "html",
+          "html-linter",
+          "html-templates",
+          "jinja2",
+          "jinja2-templates",
+          "linter",
+          "mustache-js",
+          "nunjucks",
+          "nunjucks-templates",
+          "python",
+          "twig",
+          "twig-templates"
+        ],
+        "htmlUrl": "https://github.com/djlint/djLint"
+      }
+    },
+    {
+      "id": "django-158-neutronx-django-markdownx",
+      "repository": "https://github.com/neutronX/django-markdownx.git",
+      "commit": "36cd358474e1c2109a216fc11cc11f79b30f3db3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 158,
+        "fullName": "neutronX/django-markdownx",
+        "stars": 938,
+        "forks": 157,
+        "sizeKb": 14235,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-19T09:02:23Z",
+        "topics": [
+          "django",
+          "editor",
+          "markdown",
+          "markdownx",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/neutronX/django-markdownx"
+      }
+    },
+    {
+      "id": "django-159-kmmbvnr-django-jenkins",
+      "repository": "https://github.com/kmmbvnr/django-jenkins.git",
+      "commit": "f673c8ecded24eb56aeaef8d1c0caeb82208b595",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 159,
+        "fullName": "kmmbvnr/django-jenkins",
+        "stars": 937,
+        "forks": 274,
+        "sizeKb": 501,
+        "defaultBranch": "master",
+        "pushedAt": "2022-03-29T15:06:39Z",
+        "topics": [
+          "django",
+          "jenkins",
+          "jenkins-ci",
+          "test",
+          "testing",
+          "unit-testing"
+        ],
+        "htmlUrl": "https://github.com/kmmbvnr/django-jenkins"
+      }
+    },
+    {
+      "id": "django-160-mtianyan-funpyspidersearchengine",
+      "repository": "https://github.com/mtianyan/FunpySpiderSearchEngine.git",
+      "commit": "ddf88d77d871aa5ed6545b5929c19eef366cd93d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 160,
+        "fullName": "mtianyan/FunpySpiderSearchEngine",
+        "stars": 933,
+        "forks": 311,
+        "sizeKb": 47147,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-08T00:29:07Z",
+        "topics": [
+          "django",
+          "elasticsearch",
+          "elasticsearch-analysis-ik",
+          "lagou",
+          "mysql",
+          "python",
+          "redis",
+          "scrapy",
+          "search-engine",
+          "spider",
+          "zhihu"
+        ],
+        "htmlUrl": "https://github.com/mtianyan/FunpySpiderSearchEngine"
+      }
+    },
+    {
+      "id": "django-161-vas3k-vas3k-club",
+      "repository": "https://github.com/vas3k/vas3k.club.git",
+      "commit": "035cbfd0e57086c91d4624880a9ce674a072dc91",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 161,
+        "fullName": "vas3k/vas3k.club",
+        "stars": 930,
+        "forks": 266,
+        "sizeKb": 25355,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T12:44:50Z",
+        "topics": [
+          "django",
+          "python",
+          "vuejs"
+        ],
+        "htmlUrl": "https://github.com/vas3k/vas3k.club"
+      }
+    },
+    {
+      "id": "django-162-mtianyan-django-react-tyadmin",
+      "repository": "https://github.com/mtianyan/django-react-tyadmin.git",
+      "commit": "3e74d63fe9233b8d703f6d21b27a5289308bd773",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 162,
+        "fullName": "mtianyan/django-react-tyadmin",
+        "stars": 925,
+        "forks": 197,
+        "sizeKb": 43139,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-08T08:32:02Z",
+        "topics": [
+          "admin",
+          "antd-design-pro",
+          "antdesign",
+          "django",
+          "django-admin",
+          "django-rest-framework",
+          "drf",
+          "generator",
+          "nocode",
+          "python3",
+          "react",
+          "xadmin"
+        ],
+        "htmlUrl": "https://github.com/mtianyan/django-react-tyadmin"
+      }
+    },
+    {
+      "id": "django-163-jazzband-django-newsletter",
+      "repository": "https://github.com/jazzband/django-newsletter.git",
+      "commit": "fbde7a13ba686156d355b613a1d03d2595b4b89d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 163,
+        "fullName": "jazzband/django-newsletter",
+        "stars": 924,
+        "forks": 207,
+        "sizeKb": 5000,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-10T05:34:17Z",
+        "topics": [
+          "django",
+          "newsletter",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-newsletter"
+      }
+    },
+    {
+      "id": "django-164-pretalx-pretalx",
+      "repository": "https://github.com/pretalx/pretalx.git",
+      "commit": "564efd11faba4f5c1238dcb8027e775e82c7fe10",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 164,
+        "fullName": "pretalx/pretalx",
+        "stars": 924,
+        "forks": 255,
+        "sizeKb": 100035,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T14:45:36Z",
+        "topics": [
+          "call-for-paper",
+          "call-for-papers",
+          "cfp",
+          "conference",
+          "conference-management",
+          "django",
+          "events",
+          "pretalx",
+          "python",
+          "scheduling"
+        ],
+        "htmlUrl": "https://github.com/pretalx/pretalx"
+      }
+    },
+    {
+      "id": "django-165-django-admin-tools-django-admin-tools",
+      "repository": "https://github.com/django-admin-tools/django-admin-tools.git",
+      "commit": "7039c7316846400be80f2286a341527aa4035a1a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 165,
+        "fullName": "django-admin-tools/django-admin-tools",
+        "stars": 898,
+        "forks": 117,
+        "sizeKb": 2278,
+        "defaultBranch": "master",
+        "pushedAt": "2023-08-10T12:40:54Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "admin-menu",
+          "admin-panel",
+          "customizable",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/django-admin-tools/django-admin-tools"
+      }
+    },
+    {
+      "id": "django-166-getludic-ludic",
+      "repository": "https://github.com/getludic/ludic.git",
+      "commit": "73aba6a4186e01d7774b09724eb35be48745a464",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 166,
+        "fullName": "getludic/ludic",
+        "stars": 890,
+        "forks": 21,
+        "sizeKb": 1088,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-29T20:12:47Z",
+        "topics": [
+          "async",
+          "django",
+          "fastapi",
+          "html-css-js",
+          "htmx",
+          "python",
+          "template-engine"
+        ],
+        "htmlUrl": "https://github.com/getludic/ludic"
+      }
+    },
+    {
+      "id": "django-167-jrief-django-admin-sortable2",
+      "repository": "https://github.com/jrief/django-admin-sortable2.git",
+      "commit": "899402aa0aac301d27dc1c16116dc7c067bf4461",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 167,
+        "fullName": "jrief/django-admin-sortable2",
+        "stars": 886,
+        "forks": 188,
+        "sizeKb": 5299,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-06T13:04:06Z",
+        "topics": [
+          "django",
+          "django-admin",
+          "python",
+          "sorting"
+        ],
+        "htmlUrl": "https://github.com/jrief/django-admin-sortable2"
+      }
+    },
+    {
+      "id": "django-168-egorsmkv-simple-django-login-and-register",
+      "repository": "https://github.com/egorsmkv/simple-django-login-and-register.git",
+      "commit": "27e88ec4d813088b90a5e819b0a08499bd763866",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 168,
+        "fullName": "egorsmkv/simple-django-login-and-register",
+        "stars": 886,
+        "forks": 461,
+        "sizeKb": 2980,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T16:56:40Z",
+        "topics": [
+          "bootstrap",
+          "django",
+          "django-bootstrap4",
+          "django-login",
+          "django-registration",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/egorsmkv/simple-django-login-and-register"
+      }
+    },
+    {
+      "id": "django-169-xieyumc-yuyuwechat",
+      "repository": "https://github.com/xieyumc/YuYuWechat.git",
+      "commit": "29840cce28a3ec22b4d539acceacbf28d7fa391c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 169,
+        "fullName": "xieyumc/YuYuWechat",
+        "stars": 884,
+        "forks": 102,
+        "sizeKb": 20281,
+        "defaultBranch": "v3",
+        "pushedAt": "2026-07-11T02:38:43Z",
+        "topics": [
+          "chatbot",
+          "cron",
+          "django",
+          "docker",
+          "docker-compose",
+          "postgresql",
+          "python",
+          "redis",
+          "timing",
+          "webui",
+          "wechat"
+        ],
+        "htmlUrl": "https://github.com/xieyumc/YuYuWechat"
+      }
+    },
+    {
+      "id": "django-170-eitchtee-wygiwyh",
+      "repository": "https://github.com/eitchtee/WYGIWYH.git",
+      "commit": "74d3d5fcf967b84942fe19ea6df234afd8d2b0e7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 170,
+        "fullName": "eitchtee/WYGIWYH",
+        "stars": 868,
+        "forks": 40,
+        "sizeKb": 9756,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T00:30:29Z",
+        "topics": [
+          "django",
+          "dollar-cost-averaging",
+          "expense-tracker",
+          "finance",
+          "money",
+          "multi-currency",
+          "self-hosted"
+        ],
+        "htmlUrl": "https://github.com/eitchtee/WYGIWYH"
+      }
+    },
+    {
+      "id": "django-171-mtianyan-onlinemooc",
+      "repository": "https://github.com/mtianyan/OnlineMooc.git",
+      "commit": "218b3e260498c8cfc7121f9ba9e5993ee5a8f483",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 171,
+        "fullName": "mtianyan/OnlineMooc",
+        "stars": 860,
+        "forks": 362,
+        "sizeKb": 71633,
+        "defaultBranch": "v2",
+        "pushedAt": "2023-02-11T22:42:16Z",
+        "topics": [
+          "antd-design-pro",
+          "django",
+          "django-rest-framework",
+          "online-learning",
+          "python-django",
+          "vue",
+          "xadmin-python3"
+        ],
+        "htmlUrl": "https://github.com/mtianyan/OnlineMooc"
+      }
+    },
+    {
+      "id": "django-172-philipn-django-rest-framework-filters",
+      "repository": "https://github.com/philipn/django-rest-framework-filters.git",
+      "commit": "47dff32f4c1f5f84ae08ab4fcb7c14dd48ca83d8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 172,
+        "fullName": "philipn/django-rest-framework-filters",
+        "stars": 853,
+        "forks": 129,
+        "sizeKb": 439,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-25T12:00:14Z",
+        "topics": [
+          "django",
+          "django-rest-framework"
+        ],
+        "htmlUrl": "https://github.com/philipn/django-rest-framework-filters"
+      }
+    },
+    {
+      "id": "django-173-jwt1399-sec-tools",
+      "repository": "https://github.com/jwt1399/Sec-Tools.git",
+      "commit": "f81436da5d5e7037d907746ba2d5aa21f792ebb4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 173,
+        "fullName": "jwt1399/Sec-Tools",
+        "stars": 852,
+        "forks": 158,
+        "sizeKb": 13841,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-20T01:22:51Z",
+        "topics": [
+          "django",
+          "penetration-testing-tools",
+          "python3",
+          "scan-tool",
+          "security-tools",
+          "vulnerability-scanners"
+        ],
+        "htmlUrl": "https://github.com/jwt1399/Sec-Tools"
+      }
+    },
+    {
+      "id": "django-174-heroku-python-getting-started",
+      "repository": "https://github.com/heroku/python-getting-started.git",
+      "commit": "f7c8d9929a782e90bc0bb9320f2cb43a3d62958d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 174,
+        "fullName": "heroku/python-getting-started",
+        "stars": 852,
+        "forks": 1802,
+        "sizeKb": 217,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T16:48:55Z",
+        "topics": [
+          "django",
+          "heroku",
+          "heroku-languages",
+          "python",
+          "sample-app"
+        ],
+        "htmlUrl": "https://github.com/heroku/python-getting-started"
+      }
+    },
+    {
+      "id": "django-175-shacker-django-todo",
+      "repository": "https://github.com/shacker/django-todo.git",
+      "commit": "f5f326af0a80dfad88b432621dc6d81883c8e46b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 175,
+        "fullName": "shacker/django-todo",
+        "stars": 849,
+        "forks": 286,
+        "sizeKb": 416,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:36:09Z",
+        "topics": [
+          "django",
+          "python",
+          "tasks",
+          "ticketing-system",
+          "todo"
+        ],
+        "htmlUrl": "https://github.com/shacker/django-todo"
+      }
+    },
+    {
+      "id": "django-176-soynatan-django-easy-audit",
+      "repository": "https://github.com/soynatan/django-easy-audit.git",
+      "commit": "73c8d7f2cb6f10d2aa7f93277c2e1be35a40e0f7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 176,
+        "fullName": "soynatan/django-easy-audit",
+        "stars": 844,
+        "forks": 201,
+        "sizeKb": 317,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T03:06:17Z",
+        "topics": [
+          "audit",
+          "audit-logs",
+          "auditing",
+          "crud",
+          "django",
+          "django-application"
+        ],
+        "htmlUrl": "https://github.com/soynatan/django-easy-audit"
+      }
+    },
+    {
+      "id": "django-177-mrbin99-django-vite",
+      "repository": "https://github.com/MrBin99/django-vite.git",
+      "commit": "307f84d89c352403f6ca5861c98398f099b91b54",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 177,
+        "fullName": "MrBin99/django-vite",
+        "stars": 836,
+        "forks": 90,
+        "sizeKb": 211,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-09T19:36:18Z",
+        "topics": [
+          "django",
+          "python",
+          "vite",
+          "vitejs"
+        ],
+        "htmlUrl": "https://github.com/MrBin99/django-vite"
+      }
+    },
+    {
+      "id": "django-178-jazzband-django-avatar",
+      "repository": "https://github.com/jazzband/django-avatar.git",
+      "commit": "12e4745f296466b9df5201e90e43fbfbc791b9b6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 178,
+        "fullName": "jazzband/django-avatar",
+        "stars": 830,
+        "forks": 298,
+        "sizeKb": 1826,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:55:05Z",
+        "topics": [
+          "avatar",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/jazzband/django-avatar"
+      }
+    },
+    {
+      "id": "django-179-flavors-django-graphql-jwt",
+      "repository": "https://github.com/flavors/django-graphql-jwt.git",
+      "commit": "0debe4fbd5299e394ee253e6fa77e7a68b3236ba",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 179,
+        "fullName": "flavors/django-graphql-jwt",
+        "stars": 825,
+        "forks": 175,
+        "sizeKb": 1140,
+        "defaultBranch": "main",
+        "pushedAt": "2023-12-20T11:55:00Z",
+        "topics": [
+          "authentication",
+          "django",
+          "graphene",
+          "graphql",
+          "jsonwebtoken",
+          "jwt",
+          "oauth2",
+          "token"
+        ],
+        "htmlUrl": "https://github.com/flavors/django-graphql-jwt"
+      }
+    },
+    {
+      "id": "django-180-crucialfelix-django-ajax-selects",
+      "repository": "https://github.com/crucialfelix/django-ajax-selects.git",
+      "commit": "3828e7bd8788012e4d5e791ce266e0b72c195f9a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 180,
+        "fullName": "crucialfelix/django-ajax-selects",
+        "stars": 825,
+        "forks": 241,
+        "sizeKb": 1100,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-09-14T12:31:11Z",
+        "topics": [
+          "django",
+          "django-admin",
+          "jquery-ui",
+          "select",
+          "select-multiple"
+        ],
+        "htmlUrl": "https://github.com/crucialfelix/django-ajax-selects"
+      }
+    },
+    {
+      "id": "django-181-toastdriven-restless",
+      "repository": "https://github.com/toastdriven/restless.git",
+      "commit": "ce18b02886cce6d182d60661cb5c2eeeac215cf6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 181,
+        "fullName": "toastdriven/restless",
+        "stars": 823,
+        "forks": 111,
+        "sizeKb": 262,
+        "defaultBranch": "master",
+        "pushedAt": "2024-08-15T13:40:52Z",
+        "topics": [
+          "django",
+          "flask",
+          "hacktoberfest",
+          "hacktoberfest2021",
+          "python",
+          "restful-api"
+        ],
+        "htmlUrl": "https://github.com/toastdriven/restless"
+      }
+    },
+    {
+      "id": "django-182-blacklanternsecurity-badsecrets",
+      "repository": "https://github.com/blacklanternsecurity/badsecrets.git",
+      "commit": "d9e43d8f08efadca4e929a87b565cded7f416583",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 182,
+        "fullName": "blacklanternsecurity/badsecrets",
+        "stars": 813,
+        "forks": 82,
+        "sizeKb": 5207,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-07T20:24:01Z",
+        "topics": [
+          "appsec",
+          "asp-net",
+          "cryptography",
+          "django",
+          "express-js",
+          "flask",
+          "javaserver-faces",
+          "jwt",
+          "peoplesoft",
+          "python",
+          "rails",
+          "secrets",
+          "security",
+          "symfony",
+          "telerik-ui"
+        ],
+        "htmlUrl": "https://github.com/blacklanternsecurity/badsecrets"
+      }
+    },
+    {
+      "id": "django-183-crccheck-django-object-actions",
+      "repository": "https://github.com/crccheck/django-object-actions.git",
+      "commit": "a0595bf36f6bf764c91edb46eda45a4e4a682a36",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 183,
+        "fullName": "crccheck/django-object-actions",
+        "stars": 812,
+        "forks": 85,
+        "sizeKb": 411,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-29T03:01:57Z",
+        "topics": [
+          "django",
+          "django-admin",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/crccheck/django-object-actions"
+      }
+    },
+    {
+      "id": "django-184-realorangeone-django-tasks",
+      "repository": "https://github.com/RealOrangeOne/django-tasks.git",
+      "commit": "3624c21dd4b6c86b2388dee612e083e0c6efd41c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 184,
+        "fullName": "RealOrangeOne/django-tasks",
+        "stars": 808,
+        "forks": 53,
+        "sizeKb": 554,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-22T15:48:23Z",
+        "topics": [
+          "background-workers",
+          "django",
+          "django-tasks"
+        ],
+        "htmlUrl": "https://github.com/RealOrangeOne/django-tasks"
+      }
+    },
+    {
+      "id": "django-185-modlinltd-django-advanced-filters",
+      "repository": "https://github.com/modlinltd/django-advanced-filters.git",
+      "commit": "2b2432f4be42eee9653fe4a792fa9ba8f82ce2d2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 185,
+        "fullName": "modlinltd/django-advanced-filters",
+        "stars": 807,
+        "forks": 171,
+        "sizeKb": 651,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-07-30T05:57:59Z",
+        "topics": [
+          "admin",
+          "django",
+          "filter",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/modlinltd/django-advanced-filters"
+      }
+    },
+    {
+      "id": "django-186-fabiocaccamo-django-treenode",
+      "repository": "https://github.com/fabiocaccamo/django-treenode.git",
+      "commit": "38431e7b660f91d50e94013accb2da2f25727adc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 186,
+        "fullName": "fabiocaccamo/django-treenode",
+        "stars": 801,
+        "forks": 39,
+        "sizeKb": 484,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T18:17:54Z",
+        "topics": [
+          "abstract",
+          "ancestors",
+          "categories",
+          "category",
+          "children",
+          "descendants",
+          "django",
+          "model",
+          "node",
+          "nodes",
+          "parent",
+          "python",
+          "root",
+          "roots",
+          "siblings",
+          "tree",
+          "trees"
+        ],
+        "htmlUrl": "https://github.com/fabiocaccamo/django-treenode"
+      }
+    },
+    {
+      "id": "django-187-xtrinch-fcm-django",
+      "repository": "https://github.com/xtrinch/fcm-django.git",
+      "commit": "a4bdff5eff3b4dca78117c3b0aae0964bc99a2d0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 187,
+        "fullName": "xtrinch/fcm-django",
+        "stars": 793,
+        "forks": 200,
+        "sizeKb": 434,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-07T13:04:32Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "fcm",
+          "fcm-notifications",
+          "firebase-cloud-messaging",
+          "push-notifications"
+        ],
+        "htmlUrl": "https://github.com/xtrinch/fcm-django"
+      }
+    },
+    {
+      "id": "django-188-huge-dream-django-vue3-admin",
+      "repository": "https://github.com/huge-dream/django-vue3-admin.git",
+      "commit": "2800d1ee14e571b85ba953b423f90498b8a1e937",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 188,
+        "fullName": "huge-dream/django-vue3-admin",
+        "stars": 791,
+        "forks": 240,
+        "sizeKb": 33587,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-09T13:22:33Z",
+        "topics": [
+          "crud",
+          "django",
+          "django-rest-framework",
+          "dvadmin",
+          "fast-crud",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/huge-dream/django-vue3-admin"
+      }
+    },
+    {
+      "id": "django-189-celery-django-celery-results",
+      "repository": "https://github.com/celery/django-celery-results.git",
+      "commit": "067dfc9a857344c833e269f679047d48b938e60d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 189,
+        "fullName": "celery/django-celery-results",
+        "stars": 784,
+        "forks": 226,
+        "sizeKb": 385,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T16:58:04Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-celery-results",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery-results"
+      }
+    },
+    {
+      "id": "django-190-lb2281075105-python-spider",
+      "repository": "https://github.com/lb2281075105/Python-Spider.git",
+      "commit": "c53822e7b3bd96cd785361cacebe4edbb612ef4f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 190,
+        "fullName": "lb2281075105/Python-Spider",
+        "stars": 779,
+        "forks": 273,
+        "sizeKb": 1757,
+        "defaultBranch": "master",
+        "pushedAt": "2022-08-27T14:06:42Z",
+        "topics": [
+          "beautifulsoup4",
+          "crawlspider",
+          "django",
+          "itchat",
+          "mongodb",
+          "mysql",
+          "pymysql",
+          "python",
+          "redis",
+          "scrapy",
+          "selenium",
+          "spider",
+          "weichat",
+          "xpath"
+        ],
+        "htmlUrl": "https://github.com/lb2281075105/Python-Spider"
+      }
+    },
+    {
+      "id": "django-191-theatlantic-django-nested-admin",
+      "repository": "https://github.com/theatlantic/django-nested-admin.git",
+      "commit": "f50dee589b2e57e53710106cf66bd7d0bb8ff342",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 191,
+        "fullName": "theatlantic/django-nested-admin",
+        "stars": 774,
+        "forks": 114,
+        "sizeKb": 3544,
+        "defaultBranch": "master",
+        "pushedAt": "2025-10-23T17:45:45Z",
+        "topics": [
+          "django",
+          "django-admin",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/theatlantic/django-nested-admin"
+      }
+    },
+    {
+      "id": "django-192-rsinger86-drf-flex-fields",
+      "repository": "https://github.com/rsinger86/drf-flex-fields.git",
+      "commit": "9dd6a9140fd6d2ffe1baf9ab1ffc728540dea84d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 192,
+        "fullName": "rsinger86/drf-flex-fields",
+        "stars": 769,
+        "forks": 62,
+        "sizeKb": 243,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-16T05:55:10Z",
+        "topics": [
+          "django",
+          "django-rest-framework",
+          "field-expansion"
+        ],
+        "htmlUrl": "https://github.com/rsinger86/drf-flex-fields"
+      }
+    },
+    {
+      "id": "django-193-coderedcorp-coderedcms",
+      "repository": "https://github.com/coderedcorp/coderedcms.git",
+      "commit": "6de85dbfb03206d435dce7bc5aa65d278be1110d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 193,
+        "fullName": "coderedcorp/coderedcms",
+        "stars": 766,
+        "forks": 153,
+        "sizeKb": 60918,
+        "defaultBranch": "main",
+        "pushedAt": "2025-12-16T22:01:19Z",
+        "topics": [
+          "bootstrap",
+          "bootstrap5",
+          "cms",
+          "content-management-system",
+          "django",
+          "responsive",
+          "wagtail",
+          "website-builder"
+        ],
+        "htmlUrl": "https://github.com/coderedcorp/coderedcms"
+      }
+    },
+    {
+      "id": "django-194-revsys-django-friendship",
+      "repository": "https://github.com/revsys/django-friendship.git",
+      "commit": "ceced76fa8de0b8594614d46c0375bdb8276d828",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 194,
+        "fullName": "revsys/django-friendship",
+        "stars": 764,
+        "forks": 176,
+        "sizeKb": 403,
+        "defaultBranch": "main",
+        "pushedAt": "2025-06-26T21:40:52Z",
+        "topics": [
+          "django",
+          "friendship",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/revsys/django-friendship"
+      }
+    },
+    {
+      "id": "django-195-sectorlabs-django-postgres-extra",
+      "repository": "https://github.com/SectorLabs/django-postgres-extra.git",
+      "commit": "4c229062df508ee5fe8eb8c1d165e7fb06ff26d3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 195,
+        "fullName": "SectorLabs/django-postgres-extra",
+        "stars": 762,
+        "forks": 115,
+        "sizeKb": 1213,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:46:33Z",
+        "topics": [
+          "django",
+          "extra",
+          "hstore",
+          "ltree",
+          "postgresql"
+        ],
+        "htmlUrl": "https://github.com/SectorLabs/django-postgres-extra"
+      }
+    },
+    {
+      "id": "django-196-openwisp-openwisp-controller",
+      "repository": "https://github.com/openwisp/openwisp-controller.git",
+      "commit": "f21dad86a7bebca8718371fb322acb9171ccd430",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 196,
+        "fullName": "openwisp/openwisp-controller",
+        "stars": 760,
+        "forks": 300,
+        "sizeKb": 37637,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T18:31:20Z",
+        "topics": [
+          "configuration-management",
+          "django",
+          "hacktoberfest",
+          "lede",
+          "networking",
+          "openwisp",
+          "openwrt",
+          "python",
+          "wifi",
+          "wifi-controller",
+          "wireless"
+        ],
+        "htmlUrl": "https://github.com/openwisp/openwisp-controller"
+      }
+    },
+    {
+      "id": "django-197-vintasoftware-django-role-permissions",
+      "repository": "https://github.com/vintasoftware/django-role-permissions.git",
+      "commit": "e74613d78d188788ee4c5c84b99341648e06e78c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 197,
+        "fullName": "vintasoftware/django-role-permissions",
+        "stars": 757,
+        "forks": 110,
+        "sizeKb": 219,
+        "defaultBranch": "master",
+        "pushedAt": "2023-06-09T20:31:34Z",
+        "topics": [
+          "django",
+          "permissions",
+          "python",
+          "roles"
+        ],
+        "htmlUrl": "https://github.com/vintasoftware/django-role-permissions"
+      }
+    },
+    {
+      "id": "django-198-rackerlabs-scantron",
+      "repository": "https://github.com/rackerlabs/scantron.git",
+      "commit": "175f93c501780f09befb7127028a141b1e5a1b3f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 198,
+        "fullName": "rackerlabs/scantron",
+        "stars": 756,
+        "forks": 149,
+        "sizeKb": 16400,
+        "defaultBranch": "master",
+        "pushedAt": "2023-07-17T19:01:21Z",
+        "topics": [
+          "ansible",
+          "api",
+          "automation",
+          "django",
+          "masscan",
+          "nmap",
+          "penetration-testing",
+          "python",
+          "rest",
+          "scanning"
+        ],
+        "htmlUrl": "https://github.com/rackerlabs/scantron"
+      }
+    },
+    {
+      "id": "django-199-django-ordered-model-django-ordered-model",
+      "repository": "https://github.com/django-ordered-model/django-ordered-model.git",
+      "commit": "f4a338ca4b9e1c7d9edb677fddc6c2743552232e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 199,
+        "fullName": "django-ordered-model/django-ordered-model",
+        "stars": 753,
+        "forks": 153,
+        "sizeKb": 547,
+        "defaultBranch": "master",
+        "pushedAt": "2024-11-15T15:16:07Z",
+        "topics": [
+          "django",
+          "django-admin"
+        ],
+        "htmlUrl": "https://github.com/django-ordered-model/django-ordered-model"
+      }
+    },
+    {
+      "id": "django-200-raveberry-raveberry",
+      "repository": "https://github.com/raveberry/raveberry.git",
+      "commit": "76116315d526b93ab6a11e646c35b6b3ba5f1013",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "django",
+        "rank": 200,
+        "fullName": "raveberry/raveberry",
+        "stars": 750,
+        "forks": 48,
+        "sizeKb": 4421,
+        "defaultBranch": "master",
+        "pushedAt": "2025-09-05T17:48:29Z",
+        "topics": [
+          "bootstrap",
+          "django",
+          "mopidy",
+          "music",
+          "music-player",
+          "music-visualizer",
+          "python",
+          "raspberry-pi",
+          "social-jukebox",
+          "spotify",
+          "youtube"
+        ],
+        "htmlUrl": "https://github.com/raveberry/raveberry"
+      }
+    }
+  ]
+}

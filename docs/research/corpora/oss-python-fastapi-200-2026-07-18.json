@@ -1,0 +1,6683 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "studyId": "oss-python-fastapi-200-2026-07-18",
+  "selection": {
+    "framework": "fastapi",
+    "retrievedAt": "2026-07-18T16:48:26.855Z",
+    "source": "GitHub Search API",
+    "query": "topic:fastapi language:Python fork:false archived:false size:<100000",
+    "sort": "stars",
+    "order": "desc",
+    "targetCount": 200,
+    "actualCount": 200,
+    "notes": [
+      "Static onboarding corpus only; not a precision denominator.",
+      "Repositories are cloned by exact HEAD commit and checked with inferred production-scope manifests.",
+      "No target dependency installation or package scripts are run."
+    ],
+    "skipped": []
+  },
+  "subjects": [
+    {
+      "id": "fastapi-001-fastapi-fastapi",
+      "repository": "https://github.com/fastapi/fastapi.git",
+      "commit": "afe41126f624af30038cc8e17b2aaf60ebd4b838",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 1,
+        "fullName": "fastapi/fastapi",
+        "stars": 100639,
+        "forks": 9635,
+        "sizeKb": 52530,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T14:03:18Z",
+        "topics": [
+          "api",
+          "async",
+          "asyncio",
+          "fastapi",
+          "framework",
+          "json",
+          "json-schema",
+          "openapi",
+          "openapi3",
+          "pydantic",
+          "python",
+          "python-types",
+          "python3",
+          "redoc",
+          "rest",
+          "starlette",
+          "swagger",
+          "swagger-ui",
+          "uvicorn",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/fastapi/fastapi"
+      }
+    },
+    {
+      "id": "fastapi-002-headroomlabs-ai-headroom",
+      "repository": "https://github.com/headroomlabs-ai/headroom.git",
+      "commit": "56c7d4a59e67655cd24040ecf729382c81cdec23",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 2,
+        "fullName": "headroomlabs-ai/headroom",
+        "stars": 59806,
+        "forks": 4446,
+        "sizeKb": 65119,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T08:38:32Z",
+        "topics": [
+          "agent",
+          "ai",
+          "anthropic",
+          "claude-code",
+          "compression",
+          "context-engineering",
+          "context-window",
+          "cursor",
+          "fastapi",
+          "langchain",
+          "llm",
+          "mcp",
+          "openai",
+          "prompt-engineering",
+          "proxy",
+          "python",
+          "rag",
+          "token-optimization",
+          "tokens",
+          "typescript"
+        ],
+        "htmlUrl": "https://github.com/headroomlabs-ai/headroom"
+      }
+    },
+    {
+      "id": "fastapi-003-mouredev-hello-python",
+      "repository": "https://github.com/mouredev/Hello-Python.git",
+      "commit": "55e1bb457840762b6589ab50a66e605a2cea6457",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 3,
+        "fullName": "mouredev/Hello-Python",
+        "stars": 36426,
+        "forks": 2311,
+        "sizeKb": 5715,
+        "defaultBranch": "main",
+        "pushedAt": "2025-08-11T12:00:01Z",
+        "topics": [
+          "backend",
+          "chatgpt",
+          "chatgpt-api",
+          "fastapi",
+          "frontend",
+          "gpt-3",
+          "gpt-4",
+          "mongodb",
+          "openai",
+          "openai-api",
+          "python",
+          "python3",
+          "reflex",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/mouredev/Hello-Python"
+      }
+    },
+    {
+      "id": "fastapi-004-zeyi-lin-hivisionidphotos",
+      "repository": "https://github.com/Zeyi-Lin/HivisionIDPhotos.git",
+      "commit": "5c191e2577f14755a69d9df6db415fab23aca484",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 4,
+        "fullName": "Zeyi-Lin/HivisionIDPhotos",
+        "stars": 21275,
+        "forks": 2442,
+        "sizeKb": 48948,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-03T04:12:11Z",
+        "topics": [
+          "cnn",
+          "demo",
+          "docker",
+          "face-recognition",
+          "fastapi",
+          "gradio",
+          "idphoto",
+          "machine-learning",
+          "matting",
+          "mtcnn",
+          "tools",
+          "unet"
+        ],
+        "htmlUrl": "https://github.com/Zeyi-Lin/HivisionIDPhotos"
+      }
+    },
+    {
+      "id": "fastapi-005-evil0ctal-douyin-tiktok-download-api",
+      "repository": "https://github.com/Evil0ctal/Douyin_TikTok_Download_API.git",
+      "commit": "42784ffc83a72a516bfe952153ad7e2a3998d16c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 5,
+        "fullName": "Evil0ctal/Douyin_TikTok_Download_API",
+        "stars": 18839,
+        "forks": 2686,
+        "sizeKb": 8926,
+        "defaultBranch": "main",
+        "pushedAt": "2025-10-12T15:30:32Z",
+        "topics": [
+          "api",
+          "async",
+          "crawler",
+          "douyin",
+          "douyin-api",
+          "douyin-scraper",
+          "douyin-tiktok-api",
+          "douyin-tiktok-download",
+          "fastapi",
+          "no-watermark",
+          "online-parsing",
+          "python",
+          "pywebio",
+          "scraper",
+          "spider",
+          "tiktok",
+          "tiktok-api",
+          "tiktok-scraper",
+          "tiktok-signature",
+          "web-scraping"
+        ],
+        "htmlUrl": "https://github.com/Evil0ctal/Douyin_TikTok_Download_API"
+      }
+    },
+    {
+      "id": "fastapi-006-fastapi-sqlmodel",
+      "repository": "https://github.com/fastapi/sqlmodel.git",
+      "commit": "803a3d1f6d605a1da45ed166120845ed54ce9c2a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 6,
+        "fullName": "fastapi/sqlmodel",
+        "stars": 18204,
+        "forks": 869,
+        "sizeKb": 7949,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T11:34:58Z",
+        "topics": [
+          "fastapi",
+          "json",
+          "json-schema",
+          "pydantic",
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fastapi/sqlmodel"
+      }
+    },
+    {
+      "id": "fastapi-007-joeanamier-xhs-downloader",
+      "repository": "https://github.com/JoeanAmier/XHS-Downloader.git",
+      "commit": "50f9579746de2fbb5bb46c244f680327280c019e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 7,
+        "fullName": "JoeanAmier/XHS-Downloader",
+        "stars": 11988,
+        "forks": 1780,
+        "sizeKb": 16970,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T01:12:17Z",
+        "topics": [
+          "api",
+          "docker",
+          "downloader",
+          "fastapi",
+          "httpx",
+          "javascript",
+          "json",
+          "linux",
+          "macos",
+          "mcp-server",
+          "pyinstaller",
+          "python",
+          "rednote",
+          "server",
+          "sqlite",
+          "tampermonkey",
+          "textual",
+          "userscript",
+          "windows",
+          "xiaohongshu"
+        ],
+        "htmlUrl": "https://github.com/JoeanAmier/XHS-Downloader"
+      }
+    },
+    {
+      "id": "fastapi-008-coleifer-peewee",
+      "repository": "https://github.com/coleifer/peewee.git",
+      "commit": "8db77fde921919a77bd90dee4744de0ef8c71b4f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 8,
+        "fullName": "coleifer/peewee",
+        "stars": 11980,
+        "forks": 1381,
+        "sizeKb": 17991,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T16:09:54Z",
+        "topics": [
+          "asyncio",
+          "dank",
+          "fastapi",
+          "flask",
+          "gametight",
+          "peewee",
+          "python",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/coleifer/peewee"
+      }
+    },
+    {
+      "id": "fastapi-009-tadata-org-fastapi-mcp",
+      "repository": "https://github.com/tadata-org/fastapi_mcp.git",
+      "commit": "e5cad13cabfc725bbcb047e526816d887d96da62",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 9,
+        "fullName": "tadata-org/fastapi_mcp",
+        "stars": 11949,
+        "forks": 950,
+        "sizeKb": 423,
+        "defaultBranch": "main",
+        "pushedAt": "2025-11-24T14:51:54Z",
+        "topics": [
+          "ai",
+          "authentication",
+          "authorization",
+          "claude",
+          "cursor",
+          "fastapi",
+          "llm",
+          "mcp",
+          "mcp-server",
+          "mcp-servers",
+          "modelcontextprotocol",
+          "openapi",
+          "windsurf"
+        ],
+        "htmlUrl": "https://github.com/tadata-org/fastapi_mcp"
+      }
+    },
+    {
+      "id": "fastapi-010-vastsa-filecodebox",
+      "repository": "https://github.com/vastsa/FileCodeBox.git",
+      "commit": "c676458370dd704c1adb304ae12634d5d3297c75",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 10,
+        "fullName": "vastsa/FileCodeBox",
+        "stars": 8413,
+        "forks": 1048,
+        "sizeKb": 28993,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T11:26:49Z",
+        "topics": [
+          "anonymous",
+          "fastapi",
+          "filecodebox",
+          "python",
+          "tool",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/vastsa/FileCodeBox"
+      }
+    },
+    {
+      "id": "fastapi-011-nonebot-nonebot2",
+      "repository": "https://github.com/nonebot/nonebot2.git",
+      "commit": "5871b7832ec89917c6dc4e7b0aaf5adb47975b6b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 11,
+        "fullName": "nonebot/nonebot2",
+        "stars": 7623,
+        "forks": 661,
+        "sizeKb": 14371,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T08:11:47Z",
+        "topics": [
+          "bot",
+          "chatbot",
+          "cqhttp",
+          "dingtalk-robot",
+          "fastapi",
+          "lark-bot",
+          "mirai-bot",
+          "nonebot",
+          "nonebot2",
+          "onebot",
+          "python",
+          "qq",
+          "qq-guild",
+          "telegram-bot"
+        ],
+        "htmlUrl": "https://github.com/nonebot/nonebot2"
+      }
+    },
+    {
+      "id": "fastapi-012-fastapi-users-fastapi-users",
+      "repository": "https://github.com/fastapi-users/fastapi-users.git",
+      "commit": "d02c73b69582c0e69210a6d7d527b4eb4ebe1bb6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 12,
+        "fullName": "fastapi-users/fastapi-users",
+        "stars": 6195,
+        "forks": 509,
+        "sizeKb": 14508,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-22T12:37:13Z",
+        "topics": [
+          "async",
+          "asyncio",
+          "fastapi",
+          "fastapi-users",
+          "python",
+          "starlette",
+          "users"
+        ],
+        "htmlUrl": "https://github.com/fastapi-users/fastapi-users"
+      }
+    },
+    {
+      "id": "fastapi-013-xerrors-yuxi",
+      "repository": "https://github.com/xerrors/Yuxi.git",
+      "commit": "dfb3aa203ab3d6390465d99f718e5d7fce50eecb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 13,
+        "fullName": "xerrors/Yuxi",
+        "stars": 6155,
+        "forks": 904,
+        "sizeKb": 50205,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T09:22:16Z",
+        "topics": [
+          "docker",
+          "fastapi",
+          "harness",
+          "kbqa",
+          "kgqa",
+          "llms",
+          "neo4j",
+          "rag",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/xerrors/Yuxi"
+      }
+    },
+    {
+      "id": "fastapi-014-plastic-labs-honcho",
+      "repository": "https://github.com/plastic-labs/honcho.git",
+      "commit": "055d73b580fa0437e1a17cecf3a5c88247ce9209",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 14,
+        "fullName": "plastic-labs/honcho",
+        "stars": 6034,
+        "forks": 727,
+        "sizeKb": 22423,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T20:16:55Z",
+        "topics": [
+          "agent-memory",
+          "ai",
+          "ai-agents",
+          "ai-memory",
+          "anthropic",
+          "context-engineering",
+          "continual-learning",
+          "embeddings",
+          "fastapi",
+          "langchain",
+          "llm",
+          "long-term-memory",
+          "memory",
+          "openai",
+          "personalization",
+          "python",
+          "rag",
+          "state-management",
+          "typescript",
+          "vector-database"
+        ],
+        "htmlUrl": "https://github.com/plastic-labs/honcho"
+      }
+    },
+    {
+      "id": "fastapi-015-remsky-kokoro-fastapi",
+      "repository": "https://github.com/remsky/Kokoro-FastAPI.git",
+      "commit": "b291abe69e955de67be3969402162a2975b924b5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 15,
+        "fullName": "remsky/Kokoro-FastAPI",
+        "stars": 5217,
+        "forks": 852,
+        "sizeKb": 68913,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T20:40:33Z",
+        "topics": [
+          "fastapi",
+          "huggingface-spaces",
+          "kokoro",
+          "kokoro-tts",
+          "openai-compatible-api",
+          "openwebui",
+          "pytorch",
+          "sillytavern",
+          "text-to-speech",
+          "tts",
+          "tts-api",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/remsky/Kokoro-FastAPI"
+      }
+    },
+    {
+      "id": "fastapi-016-hunvreus-devpush",
+      "repository": "https://github.com/hunvreus/devpush.git",
+      "commit": "d67a99b62b3e2b044f1e0e9b06a3296fe1939fe3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 16,
+        "fullName": "hunvreus/devpush",
+        "stars": 4726,
+        "forks": 179,
+        "sizeKb": 2255,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-03T14:22:47Z",
+        "topics": [
+          "continuous-deployment",
+          "deployment",
+          "django",
+          "fastapi",
+          "flask",
+          "github",
+          "nextjs",
+          "nodejs",
+          "php",
+          "python",
+          "vercel"
+        ],
+        "htmlUrl": "https://github.com/hunvreus/devpush"
+      }
+    },
+    {
+      "id": "fastapi-017-strawberry-graphql-strawberry",
+      "repository": "https://github.com/strawberry-graphql/strawberry.git",
+      "commit": "72712184bd9aa6b9d91575e01b7170326eb3d53a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 17,
+        "fullName": "strawberry-graphql/strawberry",
+        "stars": 4688,
+        "forks": 653,
+        "sizeKb": 18984,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T10:36:15Z",
+        "topics": [
+          "asgi",
+          "asyncio",
+          "django",
+          "fastapi",
+          "graphql",
+          "graphql-library",
+          "graphql-schema",
+          "graphql-server",
+          "hacktoberfest",
+          "mypy",
+          "python",
+          "starlette",
+          "strawberry"
+        ],
+        "htmlUrl": "https://github.com/strawberry-graphql/strawberry"
+      }
+    },
+    {
+      "id": "fastapi-018-pydantic-logfire",
+      "repository": "https://github.com/pydantic/logfire.git",
+      "commit": "db9859ae70f78c73d5cded41200afdec33e13779",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 18,
+        "fullName": "pydantic/logfire",
+        "stars": 4380,
+        "forks": 264,
+        "sizeKb": 81704,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T03:11:43Z",
+        "topics": [
+          "agent-observability",
+          "ai",
+          "ai-observability",
+          "ai-tools",
+          "evals",
+          "fastapi",
+          "llm-observability",
+          "logging",
+          "metrics",
+          "observability",
+          "openai",
+          "opentelemetry",
+          "pydantic",
+          "pydantic-ai",
+          "python",
+          "trace"
+        ],
+        "htmlUrl": "https://github.com/pydantic/logfire"
+      }
+    },
+    {
+      "id": "fastapi-019-dynaconf-dynaconf",
+      "repository": "https://github.com/dynaconf/dynaconf.git",
+      "commit": "1f251e404993357af0dd2ade142803adf3a7e72e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 19,
+        "fullName": "dynaconf/dynaconf",
+        "stars": 4314,
+        "forks": 333,
+        "sizeKb": 9250,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-03T20:54:31Z",
+        "topics": [
+          "12factorapp",
+          "app-config",
+          "config",
+          "configuration",
+          "configuration-management",
+          "django",
+          "django-configuration",
+          "django-extension",
+          "dynaconf",
+          "environment-configuration",
+          "environment-variables",
+          "fastapi",
+          "flask",
+          "flask-configuration",
+          "flask-extension",
+          "hacktoberfest",
+          "python",
+          "settings",
+          "vault",
+          "yaml"
+        ],
+        "htmlUrl": "https://github.com/dynaconf/dynaconf"
+      }
+    },
+    {
+      "id": "fastapi-020-koxudaxi-datamodel-code-generator",
+      "repository": "https://github.com/koxudaxi/datamodel-code-generator.git",
+      "commit": "d4851a51ec38bda1fc788a57ebf1baad8c1ad221",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 20,
+        "fullName": "koxudaxi/datamodel-code-generator",
+        "stars": 3972,
+        "forks": 449,
+        "sizeKb": 14895,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T16:02:32Z",
+        "topics": [
+          "code-generator",
+          "csv",
+          "dataclass",
+          "datamodel",
+          "fastapi",
+          "generator",
+          "graphql",
+          "json-schema",
+          "msgspec",
+          "openapi",
+          "openapi-codegen",
+          "pydantic",
+          "python",
+          "swagger",
+          "swagger-codegen",
+          "typeddict",
+          "yaml"
+        ],
+        "htmlUrl": "https://github.com/koxudaxi/datamodel-code-generator"
+      }
+    },
+    {
+      "id": "fastapi-021-lightning-ai-litserve",
+      "repository": "https://github.com/Lightning-AI/LitServe.git",
+      "commit": "1311d5b4aeaff2943f38a22cfb911c8bae2590bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 21,
+        "fullName": "Lightning-AI/LitServe",
+        "stars": 3920,
+        "forks": 294,
+        "sizeKb": 1437,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-06T21:15:38Z",
+        "topics": [
+          "ai",
+          "api",
+          "artificial-intelligence",
+          "deep-learning",
+          "developer-tools",
+          "fastapi",
+          "rest-api",
+          "serving",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/Lightning-AI/LitServe"
+      }
+    },
+    {
+      "id": "fastapi-022-fastapi-admin-fastapi-admin",
+      "repository": "https://github.com/fastapi-admin/fastapi-admin.git",
+      "commit": "95b1c2e2f6c3263a31c82a2be622161b024be450",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 22,
+        "fullName": "fastapi-admin/fastapi-admin",
+        "stars": 3807,
+        "forks": 464,
+        "sizeKb": 7354,
+        "defaultBranch": "dev",
+        "pushedAt": "2025-04-05T06:11:16Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "dashboard",
+          "fastapi",
+          "fastapi-admin",
+          "tabler",
+          "tortoise-orm"
+        ],
+        "htmlUrl": "https://github.com/fastapi-admin/fastapi-admin"
+      }
+    },
+    {
+      "id": "fastapi-023-raullenchai-rapid-mlx",
+      "repository": "https://github.com/raullenchai/Rapid-MLX.git",
+      "commit": "75b1fe3b3a8ab12967f64150524296f179dd9979",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 23,
+        "fullName": "raullenchai/Rapid-MLX",
+        "stars": 3284,
+        "forks": 391,
+        "sizeKb": 33295,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T14:12:12Z",
+        "topics": [
+          "apple-silicon",
+          "claude-code",
+          "cursor",
+          "deepseek",
+          "fastapi",
+          "hacktoberfest",
+          "inference",
+          "llm",
+          "local-llm",
+          "m1",
+          "m2",
+          "m3",
+          "macos",
+          "mlx",
+          "ollama-alternative",
+          "openai-api",
+          "python",
+          "qwen",
+          "tool-calling"
+        ],
+        "htmlUrl": "https://github.com/raullenchai/Rapid-MLX"
+      }
+    },
+    {
+      "id": "fastapi-024-ml-tooling-opyrator",
+      "repository": "https://github.com/ml-tooling/opyrator.git",
+      "commit": "3f443f05b6b21f00685c2b9bba16cf080edf2385",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 24,
+        "fullName": "ml-tooling/opyrator",
+        "stars": 3134,
+        "forks": 167,
+        "sizeKb": 2690,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T04:23:37Z",
+        "topics": [
+          "deployment",
+          "faas",
+          "fastapi",
+          "functions",
+          "machine-learning",
+          "microservices",
+          "pydantic",
+          "python",
+          "python-functions",
+          "serverless",
+          "streamlit",
+          "type-hints"
+        ],
+        "htmlUrl": "https://github.com/ml-tooling/opyrator"
+      }
+    },
+    {
+      "id": "fastapi-025-lxf746-any-auto-register",
+      "repository": "https://github.com/lxf746/any-auto-register.git",
+      "commit": "388204810e80553616fa7b7d6a7518dc0626b05f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 25,
+        "fullName": "lxf746/any-auto-register",
+        "stars": 2963,
+        "forks": 993,
+        "sizeKb": 8812,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-07T10:23:03Z",
+        "topics": [
+          "account-management",
+          "account-registration",
+          "ai",
+          "ai-tools",
+          "auto-register",
+          "automation",
+          "captcha-solver",
+          "chatgpt",
+          "cursor",
+          "electron",
+          "fastapi",
+          "grok",
+          "kiro",
+          "multi-platform",
+          "trae",
+          "windsurf"
+        ],
+        "htmlUrl": "https://github.com/lxf746/any-auto-register"
+      }
+    },
+    {
+      "id": "fastapi-026-tiangolo-uvicorn-gunicorn-fastapi-docker",
+      "repository": "https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker.git",
+      "commit": "2e09e88f73917a5630648502ae3e22e95a296333",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 26,
+        "fullName": "tiangolo/uvicorn-gunicorn-fastapi-docker",
+        "stars": 2915,
+        "forks": 340,
+        "sizeKb": 235,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T07:53:27Z",
+        "topics": [
+          "asgi",
+          "async",
+          "docker",
+          "docker-image",
+          "fastapi",
+          "gunicorn",
+          "json",
+          "json-schema",
+          "openapi",
+          "openapi3",
+          "pydantic",
+          "python",
+          "python-types",
+          "redoc",
+          "swagger-ui",
+          "uvicorn",
+          "web",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker"
+      }
+    },
+    {
+      "id": "fastapi-027-s3rius-fastapi-template",
+      "repository": "https://github.com/s3rius/FastAPI-template.git",
+      "commit": "f7ed808be8d239b5a8511b146c46ee0ec7e31e06",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 27,
+        "fullName": "s3rius/FastAPI-template",
+        "stars": 2815,
+        "forks": 240,
+        "sizeKb": 2518,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-05T15:42:08Z",
+        "topics": [
+          "aerich",
+          "alembic",
+          "asynchronous",
+          "asyncio",
+          "cookiecutter",
+          "cookiecutter-python3",
+          "cookiecutter-template",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "graphql",
+          "opentelemetry",
+          "ormar",
+          "prometheus",
+          "python3",
+          "sentry",
+          "sqlalchemy-orm",
+          "strawberry-graphql",
+          "tortoise-orm"
+        ],
+        "htmlUrl": "https://github.com/s3rius/FastAPI-template"
+      }
+    },
+    {
+      "id": "fastapi-028-smithyhq-sqladmin",
+      "repository": "https://github.com/smithyhq/sqladmin.git",
+      "commit": "6ad070b5b280c1f57b488ea628a69a0a4e1217a7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 28,
+        "fullName": "smithyhq/sqladmin",
+        "stars": 2800,
+        "forks": 291,
+        "sizeKb": 5918,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T20:40:29Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "asgi",
+          "asyncio",
+          "fastapi",
+          "python",
+          "sqlalchemy",
+          "starlette",
+          "web",
+          "wsgi"
+        ],
+        "htmlUrl": "https://github.com/smithyhq/sqladmin"
+      }
+    },
+    {
+      "id": "fastapi-029-buuntu-fastapi-react",
+      "repository": "https://github.com/Buuntu/fastapi-react.git",
+      "commit": "af17f2d422d0ebc5f173e83f2c6931045ab055b0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 29,
+        "fullName": "Buuntu/fastapi-react",
+        "stars": 2586,
+        "forks": 370,
+        "sizeKb": 4396,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-06T23:46:17Z",
+        "topics": [
+          "boilerplate",
+          "cookiecutter",
+          "docker",
+          "fastapi",
+          "full-stack",
+          "jwt",
+          "nginx",
+          "oauth2",
+          "postgres",
+          "react",
+          "react-admin",
+          "sqlalchemy",
+          "typescript"
+        ],
+        "htmlUrl": "https://github.com/Buuntu/fastapi-react"
+      }
+    },
+    {
+      "id": "fastapi-030-supabase-supabase-py",
+      "repository": "https://github.com/supabase/supabase-py.git",
+      "commit": "b16b16a175be0bfc57cf7af6acac01ef4078590a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 30,
+        "fullName": "supabase/supabase-py",
+        "stars": 2543,
+        "forks": 509,
+        "sizeKb": 4324,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T13:17:03Z",
+        "topics": [
+          "auth",
+          "authentication",
+          "authorization",
+          "community",
+          "data-science",
+          "databases",
+          "django",
+          "fastapi",
+          "flask",
+          "good-first-issue",
+          "machine-learning",
+          "postgres",
+          "postgresql",
+          "python",
+          "supabase"
+        ],
+        "htmlUrl": "https://github.com/supabase/supabase-py"
+      }
+    },
+    {
+      "id": "fastapi-031-wassim249-fastapi-langgraph-agent-production-ready-template",
+      "repository": "https://github.com/wassim249/fastapi-langgraph-agent-production-ready-template.git",
+      "commit": "36e9c33682a597220bb73617dd376ca5ea1a70af",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 31,
+        "fullName": "wassim249/fastapi-langgraph-agent-production-ready-template",
+        "stars": 2517,
+        "forks": 586,
+        "sizeKb": 429,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-17T09:53:19Z",
+        "topics": [
+          "agent",
+          "agentic-ai",
+          "docker",
+          "fastapi",
+          "fastapi-template",
+          "langchain",
+          "langchain-python",
+          "langgraph",
+          "langgraph-python",
+          "llm",
+          "memory"
+        ],
+        "htmlUrl": "https://github.com/wassim249/fastapi-langgraph-agent-production-ready-template"
+      }
+    },
+    {
+      "id": "fastapi-032-paulpierre-rasagpt",
+      "repository": "https://github.com/paulpierre/RasaGPT.git",
+      "commit": "2f1051031a3883397879ae113ac9dd35b4c8d0cf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 32,
+        "fullName": "paulpierre/RasaGPT",
+        "stars": 2464,
+        "forks": 250,
+        "sizeKb": 3138,
+        "defaultBranch": "main",
+        "pushedAt": "2025-11-12T14:43:36Z",
+        "topics": [
+          "ai",
+          "chatbot",
+          "chatgpt",
+          "fastapi",
+          "gpt-3",
+          "gpt-4",
+          "langchain",
+          "llama-index",
+          "llm",
+          "ml",
+          "openai",
+          "rasa",
+          "rasa-chatbot",
+          "rasa-core",
+          "rasa-nlu",
+          "telegram",
+          "telegram-bot"
+        ],
+        "htmlUrl": "https://github.com/paulpierre/RasaGPT"
+      }
+    },
+    {
+      "id": "fastapi-033-fastapi-practices-fastapi-best-architecture",
+      "repository": "https://github.com/fastapi-practices/fastapi-best-architecture.git",
+      "commit": "2dffe8f6a816fde4d5cbeec0bd48dc04f823941f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 33,
+        "fullName": "fastapi-practices/fastapi-best-architecture",
+        "stars": 2463,
+        "forks": 370,
+        "sizeKb": 22470,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T10:01:57Z",
+        "topics": [
+          "celery",
+          "fastapi",
+          "fastapi-template",
+          "fba",
+          "grafana",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fastapi-practices/fastapi-best-architecture"
+      }
+    },
+    {
+      "id": "fastapi-034-cjackhwang-aistudioproxyapi",
+      "repository": "https://github.com/CJackHwang/AIstudioProxyAPI.git",
+      "commit": "044c3db48e956097d4c509c87ebf0ecadb4e79e2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 34,
+        "fullName": "CJackHwang/AIstudioProxyAPI",
+        "stars": 2451,
+        "forks": 414,
+        "sizeKb": 9299,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-22T12:20:26Z",
+        "topics": [
+          "api",
+          "camoufox",
+          "fastapi",
+          "google-ai-studio",
+          "middleware",
+          "openai",
+          "openai-api",
+          "playwright",
+          "proxy",
+          "python",
+          "reverse-proxy"
+        ],
+        "htmlUrl": "https://github.com/CJackHwang/AIstudioProxyAPI"
+      }
+    },
+    {
+      "id": "fastapi-035-soju06-codex-lb",
+      "repository": "https://github.com/Soju06/codex-lb.git",
+      "commit": "bc8d0fa335d9c8fea4c611b932c2677ce1146236",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 35,
+        "fullName": "Soju06/codex-lb",
+        "stars": 2388,
+        "forks": 372,
+        "sizeKb": 27233,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T12:36:48Z",
+        "topics": [
+          "api-proxy",
+          "chatgpt",
+          "codex",
+          "dashboard",
+          "fastapi",
+          "load-balancer",
+          "multiple-accounts",
+          "oauth",
+          "openai",
+          "openclaw",
+          "opencode",
+          "python",
+          "rate-limit",
+          "sqlalchemy",
+          "usage-tracking"
+        ],
+        "htmlUrl": "https://github.com/Soju06/codex-lb"
+      }
+    },
+    {
+      "id": "fastapi-036-dot-agent-nextpy",
+      "repository": "https://github.com/dot-agent/nextpy.git",
+      "commit": "e8cc331f724da378d4325e3c9035ff867bf9a522",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 36,
+        "fullName": "dot-agent/nextpy",
+        "stars": 2346,
+        "forks": 181,
+        "sizeKb": 59373,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-01T09:46:55Z",
+        "topics": [
+          "agent",
+          "agi",
+          "ai",
+          "ai-agents",
+          "autogpt",
+          "fastapi",
+          "fastapi-framework",
+          "fastapi-template",
+          "fullstack-development",
+          "gpt",
+          "llm",
+          "llmops",
+          "mlops",
+          "openai",
+          "pydantic",
+          "python",
+          "sqlmodel",
+          "streamlit",
+          "webdev",
+          "webdevelopment"
+        ],
+        "htmlUrl": "https://github.com/dot-agent/nextpy"
+      }
+    },
+    {
+      "id": "fastapi-037-fastapiutils-fastapi-utils",
+      "repository": "https://github.com/fastapiutils/fastapi-utils.git",
+      "commit": "e9e7e2c834d703503a3bf5d5605db6232dd853b9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 37,
+        "fullName": "fastapiutils/fastapi-utils",
+        "stars": 2310,
+        "forks": 191,
+        "sizeKb": 549,
+        "defaultBranch": "master",
+        "pushedAt": "2025-03-03T19:47:13Z",
+        "topics": [
+          "fastapi"
+        ],
+        "htmlUrl": "https://github.com/fastapiutils/fastapi-utils"
+      }
+    },
+    {
+      "id": "fastapi-038-shy3130-tickflow-stock-panel",
+      "repository": "https://github.com/shy3130/tickflow-stock-panel.git",
+      "commit": "8e4258cf20cae40002cd5449426a23753e693b1c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 38,
+        "fullName": "shy3130/tickflow-stock-panel",
+        "stars": 2263,
+        "forks": 505,
+        "sizeKb": 10267,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T15:38:12Z",
+        "topics": [
+          "a-stock",
+          "ai-agent",
+          "aigc",
+          "backtesting",
+          "daily",
+          "duckdb",
+          "fastapi",
+          "llm",
+          "polars",
+          "quant",
+          "quantitative-finance",
+          "quantitative-trading",
+          "react",
+          "screener",
+          "self-hosted",
+          "stock",
+          "stock-analysis",
+          "tdx",
+          "tickflow",
+          "tsp"
+        ],
+        "htmlUrl": "https://github.com/shy3130/tickflow-stock-panel"
+      }
+    },
+    {
+      "id": "fastapi-039-widgetti-solara",
+      "repository": "https://github.com/widgetti/solara.git",
+      "commit": "fa5d05c4fd5cfb940a46ac29f09a679ef2f18ff4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 39,
+        "fullName": "widgetti/solara",
+        "stars": 2164,
+        "forks": 191,
+        "sizeKb": 41107,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T07:34:46Z",
+        "topics": [
+          "dataapp",
+          "fastapi",
+          "flask",
+          "ipywidgets",
+          "jupyter",
+          "starlette",
+          "webapp"
+        ],
+        "htmlUrl": "https://github.com/widgetti/solara"
+      }
+    },
+    {
+      "id": "fastapi-040-the-momentum-open-wearables",
+      "repository": "https://github.com/the-momentum/open-wearables.git",
+      "commit": "a33cc5c0e4c3126c743a501bfeeea31880222ddc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 40,
+        "fullName": "the-momentum/open-wearables",
+        "stars": 2160,
+        "forks": 403,
+        "sizeKb": 53497,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T14:59:14Z",
+        "topics": [
+          "apple-health",
+          "apple-watch",
+          "fastapi",
+          "fitness",
+          "fitness-analysis",
+          "fitness-api",
+          "garmin",
+          "health",
+          "healthcare",
+          "healthcare-ai",
+          "python",
+          "quantified-self",
+          "self-hosted",
+          "suunto",
+          "wearables"
+        ],
+        "htmlUrl": "https://github.com/the-momentum/open-wearables"
+      }
+    },
+    {
+      "id": "fastapi-041-kludex-mangum",
+      "repository": "https://github.com/Kludex/mangum.git",
+      "commit": "42a07e16390ab2e57ee115f0a8c2b77e6c485a73",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 41,
+        "fullName": "Kludex/mangum",
+        "stars": 2129,
+        "forks": 134,
+        "sizeKb": 2216,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-31T15:04:46Z",
+        "topics": [
+          "api-gateway",
+          "asgi",
+          "asyncio",
+          "aws",
+          "aws-lambda",
+          "django",
+          "fastapi",
+          "lambda",
+          "python",
+          "python3",
+          "quart",
+          "sanic",
+          "serverless",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/Kludex/mangum"
+      }
+    },
+    {
+      "id": "fastapi-042-jwadow-kiro-gateway",
+      "repository": "https://github.com/jwadow/kiro-gateway.git",
+      "commit": "a5292ca04c7c6231e0b47673ac3f981f5a706e1e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 42,
+        "fullName": "jwadow/kiro-gateway",
+        "stars": 2124,
+        "forks": 506,
+        "sizeKb": 880,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-18T19:35:19Z",
+        "topics": [
+          "ai",
+          "anthropic",
+          "api-gateway",
+          "aws",
+          "claude",
+          "codewhisperer",
+          "fastapi",
+          "free",
+          "kiro",
+          "kiro-cli",
+          "llm",
+          "openai",
+          "openclaw",
+          "opencode",
+          "opus",
+          "proxy",
+          "python",
+          "sonnet",
+          "sso",
+          "streaming"
+        ],
+        "htmlUrl": "https://github.com/jwadow/kiro-gateway"
+      }
+    },
+    {
+      "id": "fastapi-043-laurents-slowapi",
+      "repository": "https://github.com/laurentS/slowapi.git",
+      "commit": "d3442b2e1425a9db535732a0a06248470c7f9fd5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 43,
+        "fullName": "laurentS/slowapi",
+        "stars": 2033,
+        "forks": 123,
+        "sizeKb": 371,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T00:07:04Z",
+        "topics": [
+          "asgi",
+          "fastapi",
+          "python",
+          "rate-limiter",
+          "starlette",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/laurentS/slowapi"
+      }
+    },
+    {
+      "id": "fastapi-044-benavlabs-fastapi-boilerplate",
+      "repository": "https://github.com/benavlabs/FastAPI-boilerplate.git",
+      "commit": "ae1b27dcf51fa06e8f9aee0d3dbaa9159afff4e3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 44,
+        "fullName": "benavlabs/FastAPI-boilerplate",
+        "stars": 2009,
+        "forks": 302,
+        "sizeKb": 2982,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-02T01:31:41Z",
+        "topics": [
+          "alembic",
+          "api",
+          "arq",
+          "async",
+          "cache",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-boilerplate",
+          "postgres",
+          "pydantic-v2",
+          "python",
+          "redis",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/FastAPI-boilerplate"
+      }
+    },
+    {
+      "id": "fastapi-045-openapi-generators-openapi-python-client",
+      "repository": "https://github.com/openapi-generators/openapi-python-client.git",
+      "commit": "a2308143b87e551fb3ce0840069032e1efffd16e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 45,
+        "fullName": "openapi-generators/openapi-python-client",
+        "stars": 1974,
+        "forks": 286,
+        "sizeKb": 4338,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T21:42:23Z",
+        "topics": [
+          "fastapi",
+          "generator",
+          "openapi",
+          "openapi-document",
+          "openapi-python-client",
+          "openapi3",
+          "openapi31",
+          "python",
+          "python3",
+          "rest-api"
+        ],
+        "htmlUrl": "https://github.com/openapi-generators/openapi-python-client"
+      }
+    },
+    {
+      "id": "fastapi-046-piccolo-orm-piccolo",
+      "repository": "https://github.com/piccolo-orm/piccolo.git",
+      "commit": "4b0ec1ace8d0a6633d7eafd40c41d6e1a38893f8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 46,
+        "fullName": "piccolo-orm/piccolo",
+        "stars": 1930,
+        "forks": 110,
+        "sizeKb": 4791,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T16:32:36Z",
+        "topics": [
+          "asgi",
+          "asyncio",
+          "database",
+          "fastapi",
+          "hacktoberfest",
+          "orm",
+          "piccolo",
+          "postgresql",
+          "python",
+          "python3",
+          "query-builder",
+          "sqlite",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/piccolo-orm/piccolo"
+      }
+    },
+    {
+      "id": "fastapi-047-ycd-manage-fastapi",
+      "repository": "https://github.com/ycd/manage-fastapi.git",
+      "commit": "b1c266fb5eb73ce09f6ccc2fcb28b76be9fade4b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 47,
+        "fullName": "ycd/manage-fastapi",
+        "stars": 1911,
+        "forks": 103,
+        "sizeKb": 4674,
+        "defaultBranch": "master",
+        "pushedAt": "2024-03-01T21:16:58Z",
+        "topics": [
+          "boilerplate",
+          "cli",
+          "databases",
+          "fastapi",
+          "mongodb",
+          "mysql",
+          "postgresql",
+          "project-generator",
+          "project-management",
+          "project-management-tool",
+          "sqlite",
+          "tortoise-orm"
+        ],
+        "htmlUrl": "https://github.com/ycd/manage-fastapi"
+      }
+    },
+    {
+      "id": "fastapi-048-long2ice-fastapi-cache",
+      "repository": "https://github.com/long2ice/fastapi-cache.git",
+      "commit": "b2143ef85e2868dace363e432a0683675577bf81",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 48,
+        "fullName": "long2ice/fastapi-cache",
+        "stars": 1871,
+        "forks": 206,
+        "sizeKb": 737,
+        "defaultBranch": "main",
+        "pushedAt": "2025-06-30T00:20:56Z",
+        "topics": [
+          "cache",
+          "fastapi",
+          "memcached",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/long2ice/fastapi-cache"
+      }
+    },
+    {
+      "id": "fastapi-049-ormar-orm-ormar",
+      "repository": "https://github.com/ormar-orm/ormar.git",
+      "commit": "0348eb73ab5560e7cc1a87e18613cdf621cca434",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 49,
+        "fullName": "ormar-orm/ormar",
+        "stars": 1806,
+        "forks": 98,
+        "sizeKb": 25958,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T02:36:50Z",
+        "topics": [
+          "alembic",
+          "async-orm",
+          "databases",
+          "fastapi",
+          "orm",
+          "pydantic",
+          "python-orm",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ormar-orm/ormar"
+      }
+    },
+    {
+      "id": "fastapi-050-rochacbruno-python-week-2022",
+      "repository": "https://github.com/rochacbruno/python-week-2022.git",
+      "commit": "54891d82809c952bf39f3a86a60efeb2cd168204",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 50,
+        "fullName": "rochacbruno/python-week-2022",
+        "stars": 1802,
+        "forks": 1119,
+        "sizeKb": 1903,
+        "defaultBranch": "main",
+        "pushedAt": "2023-01-19T02:10:13Z",
+        "topics": [
+          "fastapi",
+          "jupyter",
+          "pytest",
+          "python",
+          "pythonweek"
+        ],
+        "htmlUrl": "https://github.com/rochacbruno/python-week-2022"
+      }
+    },
+    {
+      "id": "fastapi-051-awtkns-fastapi-crudrouter",
+      "repository": "https://github.com/awtkns/fastapi-crudrouter.git",
+      "commit": "9b829865d85113a3f16f94c029502a9a584d47bb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 51,
+        "fullName": "awtkns/fastapi-crudrouter",
+        "stars": 1693,
+        "forks": 178,
+        "sizeKb": 1368,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-01T12:10:38Z",
+        "topics": [
+          "api",
+          "async",
+          "asyncio",
+          "code-generation",
+          "crud",
+          "crud-routes",
+          "fastapi",
+          "fastapi-crudrouter",
+          "framework",
+          "openapi",
+          "openapi-route",
+          "python",
+          "python3",
+          "redoc",
+          "rest",
+          "sql",
+          "swagger-ui",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/awtkns/fastapi-crudrouter"
+      }
+    },
+    {
+      "id": "fastapi-052-uriyyo-fastapi-pagination",
+      "repository": "https://github.com/uriyyo/fastapi-pagination.git",
+      "commit": "16e827fe8a5a833da3777ec013cf15e6f485d1c6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 52,
+        "fullName": "uriyyo/fastapi-pagination",
+        "stars": 1673,
+        "forks": 162,
+        "sizeKb": 10244,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T03:42:20Z",
+        "topics": [
+          "fastapi",
+          "fastapi-pagination",
+          "fastapi-sqlalchemy",
+          "gino",
+          "pagination"
+        ],
+        "htmlUrl": "https://github.com/uriyyo/fastapi-pagination"
+      }
+    },
+    {
+      "id": "fastapi-053-expdev07-coronavirus-tracker-api",
+      "repository": "https://github.com/ExpDev07/coronavirus-tracker-api.git",
+      "commit": "67d9d22f1c56f77d0d91545d74ee1d796548943c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 53,
+        "fullName": "ExpDev07/coronavirus-tracker-api",
+        "stars": 1568,
+        "forks": 309,
+        "sizeKb": 1200,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-14T21:58:47Z",
+        "topics": [
+          "api",
+          "coronavirus",
+          "coronavirus-real-time",
+          "coronavirus-tracker",
+          "covid-19",
+          "covid-api",
+          "covid19",
+          "deaths",
+          "fastapi",
+          "heroku",
+          "json-api",
+          "ncov",
+          "pip",
+          "pipenv",
+          "python",
+          "python3",
+          "recoveries",
+          "rest-api",
+          "webapp"
+        ],
+        "htmlUrl": "https://github.com/ExpDev07/coronavirus-tracker-api"
+      }
+    },
+    {
+      "id": "fastapi-054-amisadmin-fastapi-amis-admin",
+      "repository": "https://github.com/amisadmin/fastapi-amis-admin.git",
+      "commit": "028359b092f4ef6cc7aa0a44725c8fe4493e4f21",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 54,
+        "fullName": "amisadmin/fastapi-amis-admin",
+        "stars": 1565,
+        "forks": 215,
+        "sizeKb": 2358,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-15T02:03:44Z",
+        "topics": [
+          "amis",
+          "django-admin",
+          "fastapi",
+          "fastapi-admin",
+          "fastapi-amis-admin",
+          "sqlalchemy",
+          "sqlmodel",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/amisadmin/fastapi-amis-admin"
+      }
+    },
+    {
+      "id": "fastapi-055-benavlabs-fastcrud",
+      "repository": "https://github.com/benavlabs/fastcrud.git",
+      "commit": "790aacbe9bc378c11c706dffb4d5dfadc1861778",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 55,
+        "fullName": "benavlabs/fastcrud",
+        "stars": 1537,
+        "forks": 116,
+        "sizeKb": 2730,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-21T04:03:28Z",
+        "topics": [
+          "async",
+          "backend",
+          "crud",
+          "fastapi",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/fastcrud"
+      }
+    },
+    {
+      "id": "fastapi-056-skernelx-tavily-key-generator",
+      "repository": "https://github.com/skernelx/tavily-key-generator.git",
+      "commit": "83a40addae7c81130219a7e815a648d41fba4c9a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 56,
+        "fullName": "skernelx/tavily-key-generator",
+        "stars": 1534,
+        "forks": 809,
+        "sizeKb": 4403,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-22T10:42:57Z",
+        "topics": [
+          "api-key-generator",
+          "browser-automation",
+          "camoufox",
+          "cloudflare",
+          "duckmail",
+          "email-automation",
+          "fastapi",
+          "firecrawl",
+          "mcp",
+          "playwright",
+          "proxy-server",
+          "tavily"
+        ],
+        "htmlUrl": "https://github.com/skernelx/tavily-key-generator"
+      }
+    },
+    {
+      "id": "fastapi-057-teamhide-fastapi-boilerplate",
+      "repository": "https://github.com/teamhide/fastapi-boilerplate.git",
+      "commit": "df4e6d4f817ec187eeaf2d1c5a877b27c06bb77b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 57,
+        "fullName": "teamhide/fastapi-boilerplate",
+        "stars": 1492,
+        "forks": 217,
+        "sizeKb": 612,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-08T13:32:41Z",
+        "topics": [
+          "api",
+          "asyncio",
+          "boilerplate",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "python",
+          "sqlalchemy",
+          "sqlalchemy-async"
+        ],
+        "htmlUrl": "https://github.com/teamhide/fastapi-boilerplate"
+      }
+    },
+    {
+      "id": "fastapi-058-trallnag-prometheus-fastapi-instrumentator",
+      "repository": "https://github.com/trallnag/prometheus-fastapi-instrumentator.git",
+      "commit": "c1c1fb645ce3b28d538413a9ac18cc7559c0c385",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 58,
+        "fullName": "trallnag/prometheus-fastapi-instrumentator",
+        "stars": 1474,
+        "forks": 118,
+        "sizeKb": 1035,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T13:57:08Z",
+        "topics": [
+          "exporter",
+          "fastapi",
+          "instrumentation",
+          "metrics",
+          "prometheus"
+        ],
+        "htmlUrl": "https://github.com/trallnag/prometheus-fastapi-instrumentator"
+      }
+    },
+    {
+      "id": "fastapi-059-insistence-ruoyi-vue3-fastapi",
+      "repository": "https://github.com/insistence/RuoYi-Vue3-FastAPI.git",
+      "commit": "7fd21e050ea31c27fd0290b676c19ed00cee872f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 59,
+        "fullName": "insistence/RuoYi-Vue3-FastAPI",
+        "stars": 1444,
+        "forks": 380,
+        "sizeKb": 3406,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-19T01:26:51Z",
+        "topics": [
+          "admin",
+          "element-plus",
+          "fastapi",
+          "ruoyi",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/insistence/RuoYi-Vue3-FastAPI"
+      }
+    },
+    {
+      "id": "fastapi-060-akfamily-aktools",
+      "repository": "https://github.com/akfamily/aktools.git",
+      "commit": "4b8d1f3626c86f1278a236d6e9792f9f66f86ed9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 60,
+        "fullName": "akfamily/aktools",
+        "stars": 1439,
+        "forks": 238,
+        "sizeKb": 35,
+        "defaultBranch": "main",
+        "pushedAt": "2025-10-29T13:26:30Z",
+        "topics": [
+          "akshare",
+          "asyncio",
+          "data",
+          "data-science",
+          "fastapi",
+          "openapi",
+          "pydanti"
+        ],
+        "htmlUrl": "https://github.com/akfamily/aktools"
+      }
+    },
+    {
+      "id": "fastapi-061-guillevc-yubal",
+      "repository": "https://github.com/guillevc/yubal.git",
+      "commit": "068ae9e8798306b6d2b84d60fb5ef9d2dfc5d226",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 61,
+        "fullName": "guillevc/yubal",
+        "stars": 1424,
+        "forks": 43,
+        "sizeKb": 41900,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-06T09:06:51Z",
+        "topics": [
+          "docker",
+          "fastapi",
+          "homelab",
+          "metadata",
+          "music-downloader",
+          "playlist",
+          "python",
+          "self-hosted",
+          "sync",
+          "youtube-music",
+          "yt-dlp"
+        ],
+        "htmlUrl": "https://github.com/guillevc/yubal"
+      }
+    },
+    {
+      "id": "fastapi-062-koxudaxi-fastapi-code-generator",
+      "repository": "https://github.com/koxudaxi/fastapi-code-generator.git",
+      "commit": "b3b9bd66e0b0c4d8c686fda700258104615a1332",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 62,
+        "fullName": "koxudaxi/fastapi-code-generator",
+        "stars": 1398,
+        "forks": 151,
+        "sizeKb": 5421,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T18:02:09Z",
+        "topics": [
+          "fastapi",
+          "generator",
+          "openapi",
+          "pydantic",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/koxudaxi/fastapi-code-generator"
+      }
+    },
+    {
+      "id": "fastapi-063-devnen-chatterbox-tts-server",
+      "repository": "https://github.com/devnen/Chatterbox-TTS-Server.git",
+      "commit": "915ae289340e10c6047f27f47e22eae9bf350c32",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 63,
+        "fullName": "devnen/Chatterbox-TTS-Server",
+        "stars": 1357,
+        "forks": 326,
+        "sizeKb": 19785,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-26T19:49:30Z",
+        "topics": [
+          "ai",
+          "api-server",
+          "audio-generation",
+          "chatterbox",
+          "chatterbox-tts",
+          "cuda",
+          "fastapi",
+          "huggingface",
+          "openai-api",
+          "python",
+          "pytorch",
+          "rocm",
+          "speech-synthesis",
+          "speech-synthesis-api",
+          "text-to-speech",
+          "tts",
+          "tts-api",
+          "voice-cloning",
+          "web-ui"
+        ],
+        "htmlUrl": "https://github.com/devnen/Chatterbox-TTS-Server"
+      }
+    },
+    {
+      "id": "fastapi-064-fim-ai-fim-one",
+      "repository": "https://github.com/fim-ai/fim-one.git",
+      "commit": "784a55126a7eb6ba654c31ac76d7a78def7e84b1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 64,
+        "fullName": "fim-ai/fim-one",
+        "stars": 1344,
+        "forks": 151,
+        "sizeKb": 40096,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T09:33:11Z",
+        "topics": [
+          "ai",
+          "ai-agent",
+          "ai-agents",
+          "connector",
+          "dag",
+          "fastapi",
+          "function-calling",
+          "llm",
+          "mcp",
+          "nextjs",
+          "openai-compatible",
+          "python",
+          "rag",
+          "react-agent",
+          "tool-use"
+        ],
+        "htmlUrl": "https://github.com/fim-ai/fim-one"
+      }
+    },
+    {
+      "id": "fastapi-065-ebhy-budgetml",
+      "repository": "https://github.com/ebhy/budgetml.git",
+      "commit": "4667c77662125e63ef0733e81743bde6959f7339",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 65,
+        "fullName": "ebhy/budgetml",
+        "stars": 1342,
+        "forks": 65,
+        "sizeKb": 1345,
+        "defaultBranch": "main",
+        "pushedAt": "2024-02-12T17:29:24Z",
+        "topics": [
+          "api",
+          "data-science",
+          "deployment",
+          "fastapi",
+          "inference",
+          "machine-learning",
+          "mlops"
+        ],
+        "htmlUrl": "https://github.com/ebhy/budgetml"
+      }
+    },
+    {
+      "id": "fastapi-066-slackapi-bolt-python",
+      "repository": "https://github.com/slackapi/bolt-python.git",
+      "commit": "5a0cfb80a16b8789ac03c8babe8fa79fe28ca8c7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 66,
+        "fullName": "slackapi/bolt-python",
+        "stars": 1319,
+        "forks": 289,
+        "sizeKb": 12040,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T20:27:48Z",
+        "topics": [
+          "aiohttp",
+          "aiohttp-client",
+          "asyncio",
+          "bolt",
+          "chatbot",
+          "chatops",
+          "django",
+          "docker",
+          "fastapi",
+          "flask",
+          "pypi-url",
+          "python",
+          "slack",
+          "slack-api",
+          "socket-mode",
+          "web-api",
+          "websocket",
+          "websocket-client",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/slackapi/bolt-python"
+      }
+    },
+    {
+      "id": "fastapi-067-amm1rr-webai-to-api",
+      "repository": "https://github.com/Amm1rr/WebAI-to-API.git",
+      "commit": "f81aa1248e0d78e53f7171c9bdb416952d71d4b6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 67,
+        "fullName": "Amm1rr/WebAI-to-API",
+        "stars": 1310,
+        "forks": 230,
+        "sizeKb": 4733,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-09T00:28:55Z",
+        "topics": [
+          "ai",
+          "api",
+          "api-less",
+          "atlascloud",
+          "bard",
+          "chatbot",
+          "chatgpt",
+          "fastapi",
+          "free",
+          "gemini",
+          "gemini-api",
+          "google-bard-api",
+          "llm",
+          "python",
+          "uvicorn",
+          "webserver",
+          "webservice"
+        ],
+        "htmlUrl": "https://github.com/Amm1rr/WebAI-to-API"
+      }
+    },
+    {
+      "id": "fastapi-068-vargasjona-fastapi-alembic-sqlmodel-async",
+      "repository": "https://github.com/vargasjona/fastapi-alembic-sqlmodel-async.git",
+      "commit": "96f10870e7a9cd0fb7fcc678674d7b409545b942",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 68,
+        "fullName": "vargasjona/fastapi-alembic-sqlmodel-async",
+        "stars": 1271,
+        "forks": 172,
+        "sizeKb": 11219,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-09T14:50:35Z",
+        "topics": [
+          "alembic",
+          "asyncio",
+          "caddy",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-async-db",
+          "fastapi-boilerplate",
+          "fastapi-cache",
+          "fastapi-crud",
+          "fastapi-pagination",
+          "fastapi-sqlmodel",
+          "postgresql",
+          "pydantic-v2",
+          "sqlalchemy",
+          "sqlalchemy2",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/vargasjona/fastapi-alembic-sqlmodel-async"
+      }
+    },
+    {
+      "id": "fastapi-069-zhanymkanov-fastapi-production-template",
+      "repository": "https://github.com/zhanymkanov/fastapi_production_template.git",
+      "commit": "8e82353ff3430c77fb77ead7de0d680f0229a667",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 69,
+        "fullName": "zhanymkanov/fastapi_production_template",
+        "stars": 1256,
+        "forks": 169,
+        "sizeKb": 89,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-19T08:04:44Z",
+        "topics": [
+          "fastapi"
+        ],
+        "htmlUrl": "https://github.com/zhanymkanov/fastapi_production_template"
+      }
+    },
+    {
+      "id": "fastapi-070-salesforceairesearch-enterprise-deep-research",
+      "repository": "https://github.com/SalesforceAIResearch/enterprise-deep-research.git",
+      "commit": "59f8f2ad318e70b8615ddb036e3042036a924f2d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 70,
+        "fullName": "SalesforceAIResearch/enterprise-deep-research",
+        "stars": 1193,
+        "forks": 190,
+        "sizeKb": 5339,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-02T18:57:29Z",
+        "topics": [
+          "deep-research-agent",
+          "e2b",
+          "fastapi",
+          "langchain",
+          "llm-benchmarking",
+          "multi-agent-systems",
+          "react",
+          "tailwindcss",
+          "tavily"
+        ],
+        "htmlUrl": "https://github.com/SalesforceAIResearch/enterprise-deep-research"
+      }
+    },
+    {
+      "id": "fastapi-071-yezz123-authx",
+      "repository": "https://github.com/yezz123/authx.git",
+      "commit": "ef6f00dc18a21961ec5c879b1b2b624d7d7415e1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 71,
+        "fullName": "yezz123/authx",
+        "stars": 1188,
+        "forks": 62,
+        "sizeKb": 4812,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T22:48:24Z",
+        "topics": [
+          "authentification",
+          "authorization",
+          "backend",
+          "fastapi",
+          "jwt",
+          "pydantic",
+          "python",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/yezz123/authx"
+      }
+    },
+    {
+      "id": "fastapi-072-art049-odmantic",
+      "repository": "https://github.com/art049/odmantic.git",
+      "commit": "26e45046cfd780b0616abea25f0672de25a4a7dc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 72,
+        "fullName": "art049/odmantic",
+        "stars": 1174,
+        "forks": 97,
+        "sizeKb": 7283,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-19T21:43:53Z",
+        "topics": [
+          "async",
+          "asyncio",
+          "database",
+          "fastapi",
+          "mongo",
+          "mongodb",
+          "mongodb-orm",
+          "motor",
+          "nosql",
+          "object-document-mapper",
+          "odm",
+          "orm",
+          "pydantic",
+          "pymongo",
+          "python",
+          "python-types",
+          "sync",
+          "type-hints"
+        ],
+        "htmlUrl": "https://github.com/art049/odmantic"
+      }
+    },
+    {
+      "id": "fastapi-073-ricky-7-yan-intelligent-audit-system",
+      "repository": "https://github.com/Ricky-7-Yan/intelligent-audit-system.git",
+      "commit": "309ba5f3bcbae00a829c069f53e401c7bbff8acb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 73,
+        "fullName": "Ricky-7-Yan/intelligent-audit-system",
+        "stars": 1161,
+        "forks": 105,
+        "sizeKb": 133,
+        "defaultBranch": "codex/enterprise-agent-optimization",
+        "pushedAt": "2026-07-18T16:36:49Z",
+        "topics": [
+          "agent-runtime",
+          "agentic-rag",
+          "ai-agent",
+          "audit",
+          "evaluation-harness",
+          "fastapi",
+          "human-in-the-loop",
+          "knowledge-graph",
+          "llmops",
+          "mcp",
+          "python",
+          "rag"
+        ],
+        "htmlUrl": "https://github.com/Ricky-7-Yan/intelligent-audit-system"
+      }
+    },
+    {
+      "id": "fastapi-074-asdfghj1237890-webvideo2nas",
+      "repository": "https://github.com/asdfghj1237890/WebVideo2NAS.git",
+      "commit": "0aff663d7c86232db505f9a9a5dabef84064cd46",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 74,
+        "fullName": "asdfghj1237890/WebVideo2NAS",
+        "stars": 1152,
+        "forks": 67,
+        "sizeKb": 2973,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-28T10:40:46Z",
+        "topics": [
+          "chrome-extension",
+          "dash",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "ffmpeg",
+          "ghcr",
+          "hls",
+          "m3u8",
+          "mp4",
+          "mpd",
+          "nas",
+          "self-hosted",
+          "synology",
+          "video-downloader"
+        ],
+        "htmlUrl": "https://github.com/asdfghj1237890/WebVideo2NAS"
+      }
+    },
+    {
+      "id": "fastapi-075-developmentseed-titiler",
+      "repository": "https://github.com/developmentseed/titiler.git",
+      "commit": "3d39428391beefb8d3aa428634123771f1c3f7c3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 75,
+        "fullName": "developmentseed/titiler",
+        "stars": 1127,
+        "forks": 243,
+        "sizeKb": 66218,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-11T21:46:39Z",
+        "topics": [
+          "aws-cdk",
+          "aws-lambda",
+          "cog",
+          "cogeotiff",
+          "dynamic",
+          "fastapi",
+          "gdal",
+          "map-tile-server",
+          "map-tiles",
+          "mosaicjson",
+          "raster",
+          "rasterio",
+          "rest",
+          "server",
+          "stac",
+          "tile"
+        ],
+        "htmlUrl": "https://github.com/developmentseed/titiler"
+      }
+    },
+    {
+      "id": "fastapi-076-blueswen-fastapi-observability",
+      "repository": "https://github.com/blueswen/fastapi-observability.git",
+      "commit": "2764dba3e8b9f2ad692eb5377db988414201940d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 76,
+        "fullName": "blueswen/fastapi-observability",
+        "stars": 1112,
+        "forks": 141,
+        "sizeKb": 17108,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-12T05:52:53Z",
+        "topics": [
+          "fastapi",
+          "grafana",
+          "loki",
+          "observability",
+          "openmetrics",
+          "opentelemetry",
+          "prometheus",
+          "tempo"
+        ],
+        "htmlUrl": "https://github.com/blueswen/fastapi-observability"
+      }
+    },
+    {
+      "id": "fastapi-077-atpuxiner-fastapi-scaff",
+      "repository": "https://github.com/atpuxiner/fastapi-scaff.git",
+      "commit": "7ed13ea342b13bea0ddcc2c8de340b32c1d40345",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 77,
+        "fullName": "atpuxiner/fastapi-scaff",
+        "stars": 1097,
+        "forks": 45,
+        "sizeKb": 1769,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-20T10:11:37Z",
+        "topics": [
+          "fastapi",
+          "fastapi-scaff",
+          "fastapi-scaffold",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/atpuxiner/fastapi-scaff"
+      }
+    },
+    {
+      "id": "fastapi-078-aegra-aegra",
+      "repository": "https://github.com/aegra/aegra.git",
+      "commit": "d142457a95aa61e638ccfd9af8ddaee86108db7e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 78,
+        "fullName": "aegra/aegra",
+        "stars": 1063,
+        "forks": 206,
+        "sizeKb": 3955,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-10T19:41:31Z",
+        "topics": [
+          "fastapi",
+          "langchain",
+          "langggraph",
+          "langgraph-agents",
+          "langgraph-platform-alternative",
+          "opensource-langgraph-platform",
+          "postgres",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/aegra/aegra"
+      }
+    },
+    {
+      "id": "fastapi-079-typeerror-secure",
+      "repository": "https://github.com/TypeError/secure.git",
+      "commit": "5878d0d6c2f00945ef5b81a82746eba57bd44cfc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 79,
+        "fullName": "TypeError/secure",
+        "stars": 1047,
+        "forks": 33,
+        "sizeKb": 1227,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-10T21:22:04Z",
+        "topics": [
+          "asgi",
+          "content-security-policy",
+          "django",
+          "fastapi",
+          "flask",
+          "http-headers",
+          "python",
+          "security",
+          "security-headers",
+          "shiny",
+          "strict-transport-security",
+          "web-security",
+          "wsgi"
+        ],
+        "htmlUrl": "https://github.com/TypeError/secure"
+      }
+    },
+    {
+      "id": "fastapi-080-dunossauro-fastapi-do-zero",
+      "repository": "https://github.com/dunossauro/fastapi-do-zero.git",
+      "commit": "759c8d52591a99dcc2ce060dac1ab4fba279151b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 80,
+        "fullName": "dunossauro/fastapi-do-zero",
+        "stars": 1009,
+        "forks": 132,
+        "sizeKb": 69563,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T14:24:17Z",
+        "topics": [
+          "alembic",
+          "brasil",
+          "brazil",
+          "fastapi",
+          "pydantic",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dunossauro/fastapi-do-zero"
+      }
+    },
+    {
+      "id": "fastapi-081-jowilf-starlette-admin",
+      "repository": "https://github.com/jowilf/starlette-admin.git",
+      "commit": "a0a2758a775c5f79946ddf18fc438261f7e85b5e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 81,
+        "fullName": "jowilf/starlette-admin",
+        "stars": 1004,
+        "forks": 95,
+        "sizeKb": 6492,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T21:15:02Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "datatables",
+          "fastapi",
+          "mongoengine",
+          "sqlalchemy",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/jowilf/starlette-admin"
+      }
+    },
+    {
+      "id": "fastapi-082-sabuhish-fastapi-mail",
+      "repository": "https://github.com/sabuhish/fastapi-mail.git",
+      "commit": "caeae8e39094a6b6fe366f138671206371b86943",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 82,
+        "fullName": "sabuhish/fastapi-mail",
+        "stars": 996,
+        "forks": 111,
+        "sizeKb": 1008,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-18T07:14:10Z",
+        "topics": [
+          "fastapi",
+          "fastapi-mail",
+          "fastmail"
+        ],
+        "htmlUrl": "https://github.com/sabuhish/fastapi-mail"
+      }
+    },
+    {
+      "id": "fastapi-083-ajndkr-lanarky",
+      "repository": "https://github.com/ajndkr/lanarky.git",
+      "commit": "43375b45f4e17cc0bd75752f2ef6b45829864cee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 83,
+        "fullName": "ajndkr/lanarky",
+        "stars": 992,
+        "forks": 76,
+        "sizeKb": 24003,
+        "defaultBranch": "main",
+        "pushedAt": "2024-07-06T06:21:57Z",
+        "topics": [
+          "deprecated-repo",
+          "fastapi",
+          "llmops",
+          "microservices",
+          "python3",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/ajndkr/lanarky"
+      }
+    },
+    {
+      "id": "fastapi-084-iusztinpaul-energy-forecasting",
+      "repository": "https://github.com/iusztinpaul/energy-forecasting.git",
+      "commit": "78bd9f503f9fa1546802b82eb51a74f78deadf0e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 84,
+        "fullName": "iusztinpaul/energy-forecasting",
+        "stars": 980,
+        "forks": 215,
+        "sizeKb": 4296,
+        "defaultBranch": "main",
+        "pushedAt": "2024-04-03T13:42:05Z",
+        "topics": [
+          "3-pipeline-design",
+          "airflow",
+          "batch-processing",
+          "cicd",
+          "data-versioning",
+          "docker",
+          "fastapi",
+          "feature-store",
+          "gcp",
+          "github-actions",
+          "great-expectations",
+          "hopsworks",
+          "ml-monitoring",
+          "mlops",
+          "model-registry",
+          "poetry",
+          "python",
+          "sktime",
+          "streamlit",
+          "weights-and-biases"
+        ],
+        "htmlUrl": "https://github.com/iusztinpaul/energy-forecasting"
+      }
+    },
+    {
+      "id": "fastapi-085-adithya-s-k-marker-api",
+      "repository": "https://github.com/adithya-s-k/marker-api.git",
+      "commit": "ec02abcccee11a3cdbbc1108b12b86bfba259760",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 85,
+        "fullName": "adithya-s-k/marker-api",
+        "stars": 976,
+        "forks": 118,
+        "sizeKb": 36672,
+        "defaultBranch": "master",
+        "pushedAt": "2024-10-15T18:35:31Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "marker",
+          "pdf-converter",
+          "pdf-files",
+          "pdf-parser",
+          "pdf-parsing",
+          "rest-api"
+        ],
+        "htmlUrl": "https://github.com/adithya-s-k/marker-api"
+      }
+    },
+    {
+      "id": "fastapi-086-bitcart-bitcart",
+      "repository": "https://github.com/bitcart/bitcart.git",
+      "commit": "e4b4a68715ccf7e7455cb2937e7708358871a46c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 86,
+        "fullName": "bitcart/bitcart",
+        "stars": 963,
+        "forks": 168,
+        "sizeKb": 9391,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T00:56:33Z",
+        "topics": [
+          "binance-smart-chain",
+          "bitcart",
+          "bitcoin",
+          "bitcoin-payment-gateway",
+          "docker",
+          "docker-compose",
+          "electrum",
+          "ethereum",
+          "ethereum-payment-gateway",
+          "fastapi",
+          "gateway",
+          "hacktoberfest",
+          "litecoin",
+          "merchant",
+          "monero",
+          "payment-gateway",
+          "payments",
+          "python",
+          "selfhosted",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/bitcart/bitcart"
+      }
+    },
+    {
+      "id": "fastapi-087-msoedov-langcorn",
+      "repository": "https://github.com/msoedov/langcorn.git",
+      "commit": "f7fde47ee609c0623e7cc629eb01348bde3cf9c1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 87,
+        "fullName": "msoedov/langcorn",
+        "stars": 938,
+        "forks": 69,
+        "sizeKb": 870,
+        "defaultBranch": "main",
+        "pushedAt": "2024-07-15T18:05:52Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "langchain",
+          "langchain-python",
+          "large-language-models",
+          "llm",
+          "llmops",
+          "openai-api",
+          "rest-api",
+          "vercel",
+          "vercel-serverless-functions"
+        ],
+        "htmlUrl": "https://github.com/msoedov/langcorn"
+      }
+    },
+    {
+      "id": "fastapi-088-cle-b-httpdbg",
+      "repository": "https://github.com/cle-b/httpdbg.git",
+      "commit": "b23426deaa49322c5bbbdcc9ab3de33b58ee0ece",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 88,
+        "fullName": "cle-b/httpdbg",
+        "stars": 905,
+        "forks": 27,
+        "sizeKb": 845,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-11T07:09:11Z",
+        "topics": [
+          "aiohttp",
+          "debug",
+          "fastapi",
+          "flask",
+          "h2",
+          "http",
+          "http2",
+          "httpdbg",
+          "httpx",
+          "observability",
+          "pytest",
+          "python",
+          "python-requests",
+          "requests",
+          "rest",
+          "rest-api",
+          "tools",
+          "urllib3"
+        ],
+        "htmlUrl": "https://github.com/cle-b/httpdbg"
+      }
+    },
+    {
+      "id": "fastapi-089-feldroy-air",
+      "repository": "https://github.com/feldroy/air.git",
+      "commit": "0bb94b0dcf656c3bc3c8f22d5ab4c2699905c942",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 89,
+        "fullName": "feldroy/air",
+        "stars": 901,
+        "forks": 97,
+        "sizeKb": 8477,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-10T23:07:00Z",
+        "topics": [
+          "ai",
+          "fastapi",
+          "pydantic",
+          "python",
+          "starlette",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/feldroy/air"
+      }
+    },
+    {
+      "id": "fastapi-090-yigitkonur-api-llm-ocr",
+      "repository": "https://github.com/yigitkonur/api-llm-ocr.git",
+      "commit": "9b62d14ee2c53bec847a62547d153765d635fbf9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 90,
+        "fullName": "yigitkonur/api-llm-ocr",
+        "stars": 899,
+        "forks": 61,
+        "sizeKb": 82,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-21T08:33:09Z",
+        "topics": [
+          "document-ai",
+          "fastapi",
+          "ocr",
+          "pdf-to-markdown",
+          "python",
+          "table-extraction",
+          "text-extraction",
+          "vision-llm"
+        ],
+        "htmlUrl": "https://github.com/yigitkonur/api-llm-ocr"
+      }
+    },
+    {
+      "id": "fastapi-091-getludic-ludic",
+      "repository": "https://github.com/getludic/ludic.git",
+      "commit": "73aba6a4186e01d7774b09724eb35be48745a464",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 91,
+        "fullName": "getludic/ludic",
+        "stars": 890,
+        "forks": 21,
+        "sizeKb": 1088,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-29T20:12:47Z",
+        "topics": [
+          "async",
+          "django",
+          "fastapi",
+          "html-css-js",
+          "htmx",
+          "python",
+          "template-engine"
+        ],
+        "htmlUrl": "https://github.com/getludic/ludic"
+      }
+    },
+    {
+      "id": "fastapi-092-jms1717-8mb-local",
+      "repository": "https://github.com/JMS1717/8mb.local.git",
+      "commit": "1ab821fc13b2ed0890121da713016bd90da43b0f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 92,
+        "fullName": "JMS1717/8mb.local",
+        "stars": 872,
+        "forks": 44,
+        "sizeKb": 2753,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-20T19:45:58Z",
+        "topics": [
+          "celery",
+          "compression",
+          "docker",
+          "fastapi",
+          "ffmpeg",
+          "gpu-acceleration",
+          "self-hosted",
+          "svelte"
+        ],
+        "htmlUrl": "https://github.com/JMS1717/8mb.local"
+      }
+    },
+    {
+      "id": "fastapi-093-aeternalis-ingenium-fastapi-backend-template",
+      "repository": "https://github.com/Aeternalis-Ingenium/FastAPI-Backend-Template.git",
+      "commit": "d2e931b9639aa5fbca2a85c1711e47c8ee39b254",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 93,
+        "fullName": "Aeternalis-Ingenium/FastAPI-Backend-Template",
+        "stars": 871,
+        "forks": 129,
+        "sizeKb": 646,
+        "defaultBranch": "trunk",
+        "pushedAt": "2026-07-13T22:36:23Z",
+        "topics": [
+          "alembic",
+          "asynchronous",
+          "asyncpg",
+          "codecov",
+          "coverage",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "githubactions",
+          "jwt",
+          "postgresql",
+          "pre-commit",
+          "pytest",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Aeternalis-Ingenium/FastAPI-Backend-Template"
+      }
+    },
+    {
+      "id": "fastapi-094-danny-avila-rag-api",
+      "repository": "https://github.com/danny-avila/rag_api.git",
+      "commit": "12a446950f952a00ad16d5d90d2163bb69f81de1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 94,
+        "fullName": "danny-avila/rag_api",
+        "stars": 866,
+        "forks": 379,
+        "sizeKb": 29880,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-18T21:40:14Z",
+        "topics": [
+          "api",
+          "api-rest",
+          "embeddings",
+          "fastapi",
+          "langchain",
+          "pgvector",
+          "postgresql",
+          "psql",
+          "python",
+          "rag",
+          "vector",
+          "vector-database"
+        ],
+        "htmlUrl": "https://github.com/danny-avila/rag_api"
+      }
+    },
+    {
+      "id": "fastapi-095-baoliay2008-lccn-predictor",
+      "repository": "https://github.com/baoliay2008/lccn_predictor.git",
+      "commit": "459d188dbfba0ec37ab724d2c674a179754e557e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 95,
+        "fullName": "baoliay2008/lccn_predictor",
+        "stars": 835,
+        "forks": 30,
+        "sizeKb": 940,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-21T04:17:49Z",
+        "topics": [
+          "beanie",
+          "competitive-programming",
+          "contest-programming",
+          "daisyui",
+          "elo",
+          "fastapi",
+          "fft",
+          "leetcode",
+          "mongodb",
+          "prediciton",
+          "pydantic",
+          "python3",
+          "react"
+        ],
+        "htmlUrl": "https://github.com/baoliay2008/lccn_predictor"
+      }
+    },
+    {
+      "id": "fastapi-096-indominusbyte-fastapi-jwt-auth",
+      "repository": "https://github.com/IndominusByte/fastapi-jwt-auth.git",
+      "commit": "a6c06193319da0e4976c7472966f3a2891e0d50c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 96,
+        "fullName": "IndominusByte/fastapi-jwt-auth",
+        "stars": 827,
+        "forks": 179,
+        "sizeKb": 814,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-12T06:58:02Z",
+        "topics": [
+          "authorization",
+          "fastapi",
+          "fastapi-extension",
+          "fastapi-jwt",
+          "jwt",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/IndominusByte/fastapi-jwt-auth"
+      }
+    },
+    {
+      "id": "fastapi-097-maxrdu-fastapi-login",
+      "repository": "https://github.com/maxrdu/fastapi_login.git",
+      "commit": "63a212e8683ab028c4156d7abd910fdfe8771d43",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 97,
+        "fullName": "maxrdu/fastapi_login",
+        "stars": 824,
+        "forks": 68,
+        "sizeKb": 921,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-20T07:04:51Z",
+        "topics": [
+          "fastapi",
+          "plugin",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/maxrdu/fastapi_login"
+      }
+    },
+    {
+      "id": "fastapi-098-shenhao-stu-ohmycaptcha",
+      "repository": "https://github.com/shenhao-stu/ohmycaptcha.git",
+      "commit": "0b543d5436700fa3455e634583e2642a8a64159f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 98,
+        "fullName": "shenhao-stu/ohmycaptcha",
+        "stars": 812,
+        "forks": 254,
+        "sizeKb": 1367,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-09T18:15:23Z",
+        "topics": [
+          "captcha",
+          "fastapi",
+          "multimodal",
+          "openai-compatible",
+          "playwright",
+          "recaptcha",
+          "self-hosted",
+          "vision-models",
+          "yescaptcha-compatible"
+        ],
+        "htmlUrl": "https://github.com/shenhao-stu/ohmycaptcha"
+      }
+    },
+    {
+      "id": "fastapi-099-joeanamier-ks-downloader",
+      "repository": "https://github.com/JoeanAmier/KS-Downloader.git",
+      "commit": "289ea690bad40fccabbdd1205aea80fc18e3a131",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 99,
+        "fullName": "JoeanAmier/KS-Downloader",
+        "stars": 810,
+        "forks": 194,
+        "sizeKb": 3161,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-14T06:11:40Z",
+        "topics": [
+          "aiofiles",
+          "api",
+          "curl-cffi",
+          "docker",
+          "downloader",
+          "fastapi",
+          "kuaishou",
+          "linux",
+          "macos",
+          "pyinstaller",
+          "python",
+          "rich",
+          "server",
+          "sqlite",
+          "windows"
+        ],
+        "htmlUrl": "https://github.com/JoeanAmier/KS-Downloader"
+      }
+    },
+    {
+      "id": "fastapi-100-rennf93-fastapi-guard",
+      "repository": "https://github.com/rennf93/fastapi-guard.git",
+      "commit": "93cd57b0d456f739d0bde35128ca38470fc6b364",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 100,
+        "fullName": "rennf93/fastapi-guard",
+        "stars": 808,
+        "forks": 42,
+        "sizeKb": 56623,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-15T04:38:33Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "ip",
+          "middleware",
+          "python",
+          "rest",
+          "security"
+        ],
+        "htmlUrl": "https://github.com/rennf93/fastapi-guard"
+      }
+    },
+    {
+      "id": "fastapi-101-cloakhq-cloakbrowser-manager",
+      "repository": "https://github.com/CloakHQ/CloakBrowser-Manager.git",
+      "commit": "a85b213286c8a25475a6f3243c47f99375ffa772",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 101,
+        "fullName": "CloakHQ/CloakBrowser-Manager",
+        "stars": 806,
+        "forks": 181,
+        "sizeKb": 107,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-26T18:34:38Z",
+        "topics": [
+          "anti-detect",
+          "antidetect-browser",
+          "browser-automation",
+          "browser-fingerprint",
+          "browser-profiles",
+          "chromium",
+          "docker",
+          "fastapi",
+          "fingerprint",
+          "multilogin-alternative",
+          "playwright",
+          "profile-manager",
+          "react",
+          "self-hosted",
+          "stealth-browser"
+        ],
+        "htmlUrl": "https://github.com/CloakHQ/CloakBrowser-Manager"
+      }
+    },
+    {
+      "id": "fastapi-102-fastapi-mvc-fastapi-mvc",
+      "repository": "https://github.com/fastapi-mvc/fastapi-mvc.git",
+      "commit": "aa48329a19f55445eefda2fd905e5a660ebc1acd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 102,
+        "fullName": "fastapi-mvc/fastapi-mvc",
+        "stars": 804,
+        "forks": 59,
+        "sizeKb": 9527,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-11T18:30:29Z",
+        "topics": [
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "helm",
+          "kubernetes",
+          "mvc",
+          "nix",
+          "project-generator",
+          "python",
+          "redis",
+          "redis-cluster",
+          "redis-operator"
+        ],
+        "htmlUrl": "https://github.com/fastapi-mvc/fastapi-mvc"
+      }
+    },
+    {
+      "id": "fastapi-103-panaverse-learn-generative-ai",
+      "repository": "https://github.com/panaverse/learn-generative-ai.git",
+      "commit": "dbff064a550cb4e627a79dd83985a7a617a1bdc0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 103,
+        "fullName": "panaverse/learn-generative-ai",
+        "stars": 793,
+        "forks": 286,
+        "sizeKb": 46972,
+        "defaultBranch": "main",
+        "pushedAt": "2024-07-28T06:18:46Z",
+        "topics": [
+          "aws",
+          "azure",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "gemini",
+          "generative-ai",
+          "google-cloud",
+          "huggingface-transformers",
+          "langchain",
+          "neondb",
+          "openai",
+          "pinecone",
+          "postgresql",
+          "pydantic",
+          "python",
+          "sqlalchemy-orm",
+          "streamlit",
+          "terraform"
+        ],
+        "htmlUrl": "https://github.com/panaverse/learn-generative-ai"
+      }
+    },
+    {
+      "id": "fastapi-104-litestar-org-advanced-alchemy",
+      "repository": "https://github.com/litestar-org/advanced-alchemy.git",
+      "commit": "8dc8285aa293e6fed93bd36701c327047bbbc2fa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 104,
+        "fullName": "litestar-org/advanced-alchemy",
+        "stars": 790,
+        "forks": 75,
+        "sizeKb": 11259,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-24T04:42:43Z",
+        "topics": [
+          "alembic",
+          "cockroachdb",
+          "duckdb",
+          "fastapi",
+          "flask",
+          "litestar",
+          "litestar-org",
+          "mssql",
+          "mysql",
+          "oracle-db",
+          "postgresql",
+          "repository-pattern",
+          "sanic",
+          "spanner",
+          "sqlalchemy",
+          "sqlite",
+          "sqlmodel",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/litestar-org/advanced-alchemy"
+      }
+    },
+    {
+      "id": "fastapi-105-long2ice-fastapi-limiter",
+      "repository": "https://github.com/long2ice/fastapi-limiter.git",
+      "commit": "cc95615f9d68a6e82dcd2fa5abbf3f09c3f82569",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 105,
+        "fullName": "long2ice/fastapi-limiter",
+        "stars": 789,
+        "forks": 77,
+        "sizeKb": 209,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-06T08:40:24Z",
+        "topics": [
+          "asyncio",
+          "fastapi",
+          "limiter"
+        ],
+        "htmlUrl": "https://github.com/long2ice/fastapi-limiter"
+      }
+    },
+    {
+      "id": "fastapi-106-drmingler-docling-api",
+      "repository": "https://github.com/drmingler/docling-api.git",
+      "commit": "e10fd49ea6767d1d3b19f535b8d668f8a18ff953",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 106,
+        "fullName": "drmingler/docling-api",
+        "stars": 767,
+        "forks": 80,
+        "sizeKb": 3647,
+        "defaultBranch": "main",
+        "pushedAt": "2025-03-04T13:42:44Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "markdown-parser",
+          "pdf-chatbot",
+          "pdf-conversion",
+          "pdf-converter",
+          "pdf-parser",
+          "pdf-parsing",
+          "pdf-to-markdown"
+        ],
+        "htmlUrl": "https://github.com/drmingler/docling-api"
+      }
+    },
+    {
+      "id": "fastapi-107-mr-fatalyst-oxyde",
+      "repository": "https://github.com/mr-fatalyst/oxyde.git",
+      "commit": "f91408b8009f303927b226c65e4780622d2927e4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 107,
+        "fullName": "mr-fatalyst/oxyde",
+        "stars": 750,
+        "forks": 12,
+        "sizeKb": 6451,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-09T19:08:15Z",
+        "topics": [
+          "async",
+          "asyncio",
+          "database",
+          "fastapi",
+          "mysql",
+          "orm",
+          "postgresql",
+          "pydantic",
+          "sqlite",
+          "sqlx"
+        ],
+        "htmlUrl": "https://github.com/mr-fatalyst/oxyde"
+      }
+    },
+    {
+      "id": "fastapi-108-identixone-fastapi-contrib",
+      "repository": "https://github.com/identixone/fastapi_contrib.git",
+      "commit": "e61ecaa3fc114aebb89f4ced28b75bb6dfd21f05",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 108,
+        "fullName": "identixone/fastapi_contrib",
+        "stars": 740,
+        "forks": 29,
+        "sizeKb": 220,
+        "defaultBranch": "master",
+        "pushedAt": "2022-09-12T13:55:21Z",
+        "topics": [
+          "fastapi",
+          "fastapi-template",
+          "mongodb",
+          "pydantic",
+          "python",
+          "starlette",
+          "ujson"
+        ],
+        "htmlUrl": "https://github.com/identixone/fastapi_contrib"
+      }
+    },
+    {
+      "id": "fastapi-109-pcliangx-appgenesisforge",
+      "repository": "https://github.com/pcliangx/AppGenesisForge.git",
+      "commit": "03cd33f2d9ac13a56eb20530ac01c6b32fc5fa38",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 109,
+        "fullName": "pcliangx/AppGenesisForge",
+        "stars": 735,
+        "forks": 17,
+        "sizeKb": 68706,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T05:49:20Z",
+        "topics": [
+          "agentic-workflow",
+          "agile-scrum",
+          "ai-agents",
+          "ai-coding",
+          "apple",
+          "claude-code",
+          "claude-skills",
+          "deepseek",
+          "doubao",
+          "fastapi",
+          "minimax",
+          "parallel-agents",
+          "qwen",
+          "react",
+          "spec-driven-development",
+          "swift",
+          "swiftui",
+          "tdd",
+          "template",
+          "wechat-miniprogram"
+        ],
+        "htmlUrl": "https://github.com/pcliangx/AppGenesisForge"
+      }
+    },
+    {
+      "id": "fastapi-110-lvcidpsyche-auto-browser",
+      "repository": "https://github.com/LvcidPsyche/auto-browser.git",
+      "commit": "769cd1dcb353903f8b6dc2366ed4b15eb5ca5121",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 110,
+        "fullName": "LvcidPsyche/auto-browser",
+        "stars": 729,
+        "forks": 115,
+        "sizeKb": 1518,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T02:11:59Z",
+        "topics": [
+          "ai-agent",
+          "ai-agents",
+          "browser-automation",
+          "claude",
+          "docker",
+          "fastapi",
+          "llm",
+          "local-first",
+          "mcp",
+          "novnc",
+          "playwright",
+          "self-hosted"
+        ],
+        "htmlUrl": "https://github.com/LvcidPsyche/auto-browser"
+      }
+    },
+    {
+      "id": "fastapi-111-hhstore-annotated-py-projects",
+      "repository": "https://github.com/hhstore/annotated-py-projects.git",
+      "commit": "e8dadbcdc71e7589dcd1ac43d437f99a7ceb0837",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 111,
+        "fullName": "hhstore/annotated-py-projects",
+        "stars": 725,
+        "forks": 186,
+        "sizeKb": 2276,
+        "defaultBranch": "master",
+        "pushedAt": "2023-12-21T00:05:44Z",
+        "topics": [
+          "annotated",
+          "anyio",
+          "asyncio",
+          "bottle",
+          "fastapi",
+          "flask",
+          "python",
+          "sanic",
+          "starlette",
+          "webpy"
+        ],
+        "htmlUrl": "https://github.com/hhstore/annotated-py-projects"
+      }
+    },
+    {
+      "id": "fastapi-112-iktakahiro-dddpy",
+      "repository": "https://github.com/iktakahiro/dddpy.git",
+      "commit": "f9a2cfe542b7a08e8a2ca224ad38457814f0dc5b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 112,
+        "fullName": "iktakahiro/dddpy",
+        "stars": 724,
+        "forks": 76,
+        "sizeKb": 705,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-18T08:47:31Z",
+        "topics": [
+          "ddd-architecture",
+          "ddd-example",
+          "fastapi",
+          "onion-architecture",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/iktakahiro/dddpy"
+      }
+    },
+    {
+      "id": "fastapi-113-volfpeter-fasthx",
+      "repository": "https://github.com/volfpeter/fasthx.git",
+      "commit": "cf02bbccfa54c6e6c63eb9dd57740e7603a3828f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 113,
+        "fullName": "volfpeter/fasthx",
+        "stars": 723,
+        "forks": 21,
+        "sizeKb": 687,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T07:17:44Z",
+        "topics": [
+          "fastapi",
+          "html",
+          "htmx",
+          "jinja2",
+          "python",
+          "server-side-rendering",
+          "templating",
+          "website"
+        ],
+        "htmlUrl": "https://github.com/volfpeter/fasthx"
+      }
+    },
+    {
+      "id": "fastapi-114-fief-dev-fief",
+      "repository": "https://github.com/fief-dev/fief.git",
+      "commit": "a77e7fb65fc54d7994740619684a87e85d1293ed",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 114,
+        "fullName": "fief-dev/fief",
+        "stars": 719,
+        "forks": 66,
+        "sizeKb": 4352,
+        "defaultBranch": "main",
+        "pushedAt": "2025-11-24T21:23:12Z",
+        "topics": [
+          "fastapi",
+          "fief",
+          "identity",
+          "login",
+          "openid-connect",
+          "profile",
+          "registration",
+          "saas"
+        ],
+        "htmlUrl": "https://github.com/fief-dev/fief"
+      }
+    },
+    {
+      "id": "fastapi-115-arthurhenrique-cookiecutter-fastapi",
+      "repository": "https://github.com/arthurhenrique/cookiecutter-fastapi.git",
+      "commit": "6418a161e72caedf04655cdf5b22dae9386d3b8e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 115,
+        "fullName": "arthurhenrique/cookiecutter-fastapi",
+        "stars": 710,
+        "forks": 74,
+        "sizeKb": 545,
+        "defaultBranch": "main",
+        "pushedAt": "2025-08-25T15:58:56Z",
+        "topics": [
+          "ai",
+          "black",
+          "boilerplate",
+          "cli",
+          "cookiecutter",
+          "cookiecutter-fastapi",
+          "deep-learning",
+          "docker",
+          "fastapi",
+          "fastapi-boilerplate",
+          "hacktoberfest",
+          "llm",
+          "machine-learning",
+          "ml",
+          "mlops",
+          "neural-network",
+          "openai",
+          "python",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/arthurhenrique/cookiecutter-fastapi"
+      }
+    },
+    {
+      "id": "fastapi-116-tnt-likely-panwatch",
+      "repository": "https://github.com/TNT-Likely/PanWatch.git",
+      "commit": "5b5ac168ce0c97b8813099eba1a7ed65b99c5de4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 116,
+        "fullName": "TNT-Likely/PanWatch",
+        "stars": 694,
+        "forks": 167,
+        "sizeKb": 11144,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T09:49:10Z",
+        "topics": [
+          "a-share",
+          "agent",
+          "ai",
+          "ai-agent",
+          "akshare",
+          "deepseek",
+          "fastapi",
+          "fintech",
+          "llm",
+          "openai",
+          "portfolio",
+          "pwa",
+          "quant",
+          "self-hosted",
+          "stock",
+          "stock-analysis",
+          "stock-market",
+          "trading-agents",
+          "trading-bot"
+        ],
+        "htmlUrl": "https://github.com/TNT-Likely/PanWatch"
+      }
+    },
+    {
+      "id": "fastapi-117-vibber-ai-fastapi-azure-auth",
+      "repository": "https://github.com/vibber-ai/fastapi-azure-auth.git",
+      "commit": "2ddd81d5dc60b08e7656b44b5a61bd3289c46a99",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 117,
+        "fullName": "vibber-ai/fastapi-azure-auth",
+        "stars": 679,
+        "forks": 77,
+        "sizeKb": 7546,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-02T10:54:21Z",
+        "topics": [
+          "anyio",
+          "asgi",
+          "asyncio",
+          "authentication",
+          "azure",
+          "azure-active-directory",
+          "azure-ad",
+          "azuread",
+          "fastapi",
+          "oauth2",
+          "oidc",
+          "openapi",
+          "openid",
+          "openidconnect",
+          "python",
+          "security",
+          "trio"
+        ],
+        "htmlUrl": "https://github.com/vibber-ai/fastapi-azure-auth"
+      }
+    },
+    {
+      "id": "fastapi-118-nativu5-gemini-fastapi",
+      "repository": "https://github.com/Nativu5/Gemini-FastAPI.git",
+      "commit": "febafc8f3605932cd8a474065b267c7948e7bc70",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 118,
+        "fullName": "Nativu5/Gemini-FastAPI",
+        "stars": 676,
+        "forks": 112,
+        "sizeKb": 243,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-28T08:11:53Z",
+        "topics": [
+          "fastapi",
+          "gemini",
+          "openai-api"
+        ],
+        "htmlUrl": "https://github.com/Nativu5/Gemini-FastAPI"
+      }
+    },
+    {
+      "id": "fastapi-119-scrapegraphai-scrapecraft",
+      "repository": "https://github.com/ScrapeGraphAI/scrapecraft.git",
+      "commit": "24c85545d7db1c2805d65700f8dde758938d40cf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 119,
+        "fullName": "ScrapeGraphAI/scrapecraft",
+        "stars": 671,
+        "forks": 105,
+        "sizeKb": 49023,
+        "defaultBranch": "main",
+        "pushedAt": "2025-12-26T08:54:12Z",
+        "topics": [
+          "ai",
+          "automation",
+          "data-extraction",
+          "docker",
+          "fastapi",
+          "hacktoberfest",
+          "langgraph",
+          "python",
+          "react",
+          "scrapegraphai",
+          "typescript",
+          "web-scraping",
+          "webscraping"
+        ],
+        "htmlUrl": "https://github.com/ScrapeGraphAI/scrapecraft"
+      }
+    },
+    {
+      "id": "fastapi-120-gregavrbancic-fastapi-celery",
+      "repository": "https://github.com/GregaVrbancic/fastapi-celery.git",
+      "commit": "2e582ff961a5255e69fbc91820796b158282528d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 120,
+        "fullName": "GregaVrbancic/fastapi-celery",
+        "stars": 669,
+        "forks": 112,
+        "sizeKb": 41,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-07T13:39:52Z",
+        "topics": [
+          "celery",
+          "docker-compose",
+          "fastapi",
+          "flower",
+          "python",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/GregaVrbancic/fastapi-celery"
+      }
+    },
+    {
+      "id": "fastapi-121-bakrianoo-mini-rag",
+      "repository": "https://github.com/bakrianoo/mini-rag.git",
+      "commit": "77050419ad3dd749702fdbea71e6181e376afcd3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 121,
+        "fullName": "bakrianoo/mini-rag",
+        "stars": 654,
+        "forks": 288,
+        "sizeKb": 320,
+        "defaultBranch": "tut-017",
+        "pushedAt": "2025-08-15T05:41:12Z",
+        "topics": [
+          "docker",
+          "education",
+          "fastapi",
+          "genai",
+          "python",
+          "rag"
+        ],
+        "htmlUrl": "https://github.com/bakrianoo/mini-rag"
+      }
+    },
+    {
+      "id": "fastapi-122-beizhu-1209-aihelms",
+      "repository": "https://github.com/beizhu-1209/AIHelms.git",
+      "commit": "a431ab48cfc4f358fc0a06cd1f465356f7e8f537",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 122,
+        "fullName": "beizhu-1209/AIHelms",
+        "stars": 651,
+        "forks": 68,
+        "sizeKb": 3800,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T13:34:53Z",
+        "topics": [
+          "agent",
+          "ai-gateway",
+          "ai-management",
+          "ai-observability",
+          "claude",
+          "cost-control",
+          "deepseek",
+          "docker",
+          "enterprise-ai",
+          "fastapi",
+          "llm-governance",
+          "mcp",
+          "model-gateway",
+          "openai",
+          "skill-management",
+          "skillspector",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/beizhu-1209/AIHelms"
+      }
+    },
+    {
+      "id": "fastapi-123-judahpaul16-gpt-home",
+      "repository": "https://github.com/judahpaul16/gpt-home.git",
+      "commit": "1ed6027b0ad5fbcbd04e2d9f29257c32a29ae84c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 123,
+        "fullName": "judahpaul16/gpt-home",
+        "stars": 644,
+        "forks": 66,
+        "sizeKb": 51615,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T21:52:52Z",
+        "topics": [
+          "ai",
+          "automation",
+          "docker",
+          "fastapi",
+          "home-assistant",
+          "home-automation",
+          "iot",
+          "langchain",
+          "langgraph",
+          "langmem",
+          "llm",
+          "nginx",
+          "nodejs",
+          "openai",
+          "python",
+          "raspberry-pi",
+          "react",
+          "speech-recognition",
+          "spotify",
+          "typescript"
+        ],
+        "htmlUrl": "https://github.com/judahpaul16/gpt-home"
+      }
+    },
+    {
+      "id": "fastapi-124-nuglifeleoji-options-analytics-agent",
+      "repository": "https://github.com/nuglifeleoji/Options-Analytics-Agent.git",
+      "commit": "9de22c3184598440ae2209be87bcd764bd1349af",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 124,
+        "fullName": "nuglifeleoji/Options-Analytics-Agent",
+        "stars": 634,
+        "forks": 84,
+        "sizeKb": 380,
+        "defaultBranch": "main",
+        "pushedAt": "2025-12-15T14:38:00Z",
+        "topics": [
+          "chroma-db",
+          "fastapi",
+          "langgraph",
+          "options",
+          "rag-chatbot"
+        ],
+        "htmlUrl": "https://github.com/nuglifeleoji/Options-Analytics-Agent"
+      }
+    },
+    {
+      "id": "fastapi-125-fastapi-fastapi-cli",
+      "repository": "https://github.com/fastapi/fastapi-cli.git",
+      "commit": "52eb236bbd174366a36698abc6005fd3da23f3f7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 125,
+        "fullName": "fastapi/fastapi-cli",
+        "stars": 634,
+        "forks": 81,
+        "sizeKb": 1178,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T12:16:43Z",
+        "topics": [
+          "cli",
+          "fastapi",
+          "typer",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/fastapi/fastapi-cli"
+      }
+    },
+    {
+      "id": "fastapi-126-sthphoenix-insightface-rest",
+      "repository": "https://github.com/SthPhoenix/InsightFace-REST.git",
+      "commit": "fb854d8029c880dc5a244595e491c1293c218bff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 126,
+        "fullName": "SthPhoenix/InsightFace-REST",
+        "stars": 622,
+        "forks": 148,
+        "sizeKb": 4652,
+        "defaultBranch": "master",
+        "pushedAt": "2025-06-01T20:39:44Z",
+        "topics": [
+          "adaface",
+          "arcface",
+          "centerface",
+          "docker",
+          "face-detection",
+          "face-recognition",
+          "fastapi",
+          "fp16",
+          "gpu",
+          "insightface",
+          "mask-detection",
+          "onnx",
+          "retinaface",
+          "scrfd",
+          "tensorrt",
+          "tensorrt-conversion",
+          "yolov5-face"
+        ],
+        "htmlUrl": "https://github.com/SthPhoenix/InsightFace-REST"
+      }
+    },
+    {
+      "id": "fastapi-127-microsoft-cookiecutter-spacy-fastapi",
+      "repository": "https://github.com/microsoft/cookiecutter-spacy-fastapi.git",
+      "commit": "78edb2597405e6a8537c55c1f33a3e00451ce9e2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 127,
+        "fullName": "microsoft/cookiecutter-spacy-fastapi",
+        "stars": 620,
+        "forks": 62,
+        "sizeKb": 59,
+        "defaultBranch": "master",
+        "pushedAt": "2022-11-28T19:10:04Z",
+        "topics": [
+          "azure-search",
+          "cognitive-search",
+          "fastapi",
+          "natural-language-processing",
+          "spacy"
+        ],
+        "htmlUrl": "https://github.com/microsoft/cookiecutter-spacy-fastapi"
+      }
+    },
+    {
+      "id": "fastapi-128-codemation-easyauth",
+      "repository": "https://github.com/codemation/easyauth.git",
+      "commit": "6741506733f35384dc8cc2c82a24f0f2734c4faa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 128,
+        "fullName": "codemation/easyauth",
+        "stars": 620,
+        "forks": 56,
+        "sizeKb": 3786,
+        "defaultBranch": "main",
+        "pushedAt": "2024-06-11T19:11:08Z",
+        "topics": [
+          "admin-dashboard",
+          "authentication",
+          "authorization",
+          "fastapi",
+          "gui",
+          "jwt",
+          "permissions",
+          "rbac",
+          "user-management"
+        ],
+        "htmlUrl": "https://github.com/codemation/easyauth"
+      }
+    },
+    {
+      "id": "fastapi-129-tomwojcik-starlette-context",
+      "repository": "https://github.com/tomwojcik/starlette-context.git",
+      "commit": "386a4a05d22c052707608c0b96979a5d3ad26832",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 129,
+        "fullName": "tomwojcik/starlette-context",
+        "stars": 614,
+        "forks": 29,
+        "sizeKb": 963,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-24T04:02:35Z",
+        "topics": [
+          "fastapi",
+          "middleware",
+          "python",
+          "python3",
+          "starlette",
+          "starlette-context"
+        ],
+        "htmlUrl": "https://github.com/tomwojcik/starlette-context"
+      }
+    },
+    {
+      "id": "fastapi-130-madkote-fastapi-plugins",
+      "repository": "https://github.com/madkote/fastapi-plugins.git",
+      "commit": "31af20df81bd3f95c4e705b1a1c93807837ca76b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 130,
+        "fullName": "madkote/fastapi-plugins",
+        "stars": 614,
+        "forks": 28,
+        "sizeKb": 239,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-09T21:03:39Z",
+        "topics": [
+          "aiojobs",
+          "aiomcache",
+          "aioredis",
+          "async",
+          "asyncio",
+          "fastapi",
+          "fastapi-plugins",
+          "healthchecks",
+          "json",
+          "logging",
+          "memcached",
+          "openapi",
+          "openapi3",
+          "python",
+          "python3",
+          "redis",
+          "redis-sentinel"
+        ],
+        "htmlUrl": "https://github.com/madkote/fastapi-plugins"
+      }
+    },
+    {
+      "id": "fastapi-131-melvinkcx-fastapi-events",
+      "repository": "https://github.com/melvinkcx/fastapi-events.git",
+      "commit": "9c7fef69d0bea9a25d2efa67b8559afcd09a99d4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 131,
+        "fullName": "melvinkcx/fastapi-events",
+        "stars": 611,
+        "forks": 24,
+        "sizeKb": 160,
+        "defaultBranch": "dev",
+        "pushedAt": "2024-12-21T00:55:15Z",
+        "topics": [
+          "asgi",
+          "events",
+          "fastapi",
+          "python",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/melvinkcx/fastapi-events"
+      }
+    },
+    {
+      "id": "fastapi-132-eightbec-fastapi-ml-skeleton",
+      "repository": "https://github.com/eightBEC/fastapi-ml-skeleton.git",
+      "commit": "b7e21d8304b11201ea045c59c200d30ba40c96fa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 132,
+        "fullName": "eightBEC/fastapi-ml-skeleton",
+        "stars": 604,
+        "forks": 90,
+        "sizeKb": 961,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-08T02:06:03Z",
+        "topics": [
+          "fastapi",
+          "machine-learning",
+          "model-serving",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/eightBEC/fastapi-ml-skeleton"
+      }
+    },
+    {
+      "id": "fastapi-133-iam-abbas-fastapi-production-boilerplate",
+      "repository": "https://github.com/iam-abbas/FastAPI-Production-Boilerplate.git",
+      "commit": "e6aee9a927795ac6dedda4f936f9a411b6ef86b7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 133,
+        "fullName": "iam-abbas/FastAPI-Production-Boilerplate",
+        "stars": 603,
+        "forks": 96,
+        "sizeKb": 495,
+        "defaultBranch": "main",
+        "pushedAt": "2023-10-05T13:58:38Z",
+        "topics": [
+          "api",
+          "boilerplate",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "python",
+          "rest-api",
+          "restful-api",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/iam-abbas/FastAPI-Production-Boilerplate"
+      }
+    },
+    {
+      "id": "fastapi-134-permitio-fastapi-websocket-pubsub",
+      "repository": "https://github.com/permitio/fastapi_websocket_pubsub.git",
+      "commit": "b7f593ccd535e66a0011a764b8b18415068a36aa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 134,
+        "fullName": "permitio/fastapi_websocket_pubsub",
+        "stars": 592,
+        "forks": 56,
+        "sizeKb": 233,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-15T14:49:52Z",
+        "topics": [
+          "broadcast",
+          "fastapi",
+          "fastapi-websocket",
+          "publish",
+          "pubsub",
+          "pubsub-websocket",
+          "realtime",
+          "realtime-messaging",
+          "subscribe",
+          "websocket"
+        ],
+        "htmlUrl": "https://github.com/permitio/fastapi_websocket_pubsub"
+      }
+    },
+    {
+      "id": "fastapi-135-hotosm-tasking-manager",
+      "repository": "https://github.com/hotosm/tasking-manager.git",
+      "commit": "a1e8fe434fdf4a895e0a55841b666bdc2e889c2f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 135,
+        "fullName": "hotosm/tasking-manager",
+        "stars": 587,
+        "forks": 314,
+        "sizeKb": 69071,
+        "defaultBranch": "develop",
+        "pushedAt": "2026-07-17T05:24:38Z",
+        "topics": [
+          "fastapi",
+          "javascript",
+          "openstreetmap",
+          "postgis",
+          "postgresql",
+          "python",
+          "reactjs"
+        ],
+        "htmlUrl": "https://github.com/hotosm/tasking-manager"
+      }
+    },
+    {
+      "id": "fastapi-136-krukov-cashews",
+      "repository": "https://github.com/Krukov/cashews.git",
+      "commit": "f3d810af58c586e6c1bfa3a272dd9f7d3a3c8565",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 136,
+        "fullName": "Krukov/cashews",
+        "stars": 587,
+        "forks": 40,
+        "sizeKb": 935,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-02T22:28:25Z",
+        "topics": [
+          "aiohttp",
+          "asycnio",
+          "asynchronous",
+          "asyncio",
+          "cache",
+          "cache-control",
+          "cache-stampede",
+          "caching",
+          "dog-piling",
+          "fastapi",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/Krukov/cashews"
+      }
+    },
+    {
+      "id": "fastapi-137-emersonfelipesp-netbox-proxbox",
+      "repository": "https://github.com/emersonfelipesp/netbox-proxbox.git",
+      "commit": "114d822ea72f2a6bf4873579666703582ead3311",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 137,
+        "fullName": "emersonfelipesp/netbox-proxbox",
+        "stars": 576,
+        "forks": 65,
+        "sizeKb": 67650,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T13:04:59Z",
+        "topics": [
+          "api",
+          "community",
+          "community-driven",
+          "containers",
+          "fastapi",
+          "hypervisor",
+          "kvm",
+          "netbox",
+          "netbox-plugin",
+          "opensource",
+          "proxmox",
+          "proxmoxer",
+          "pynetbox",
+          "python",
+          "qemu",
+          "virtual-machine",
+          "virtualization"
+        ],
+        "htmlUrl": "https://github.com/emersonfelipesp/netbox-proxbox"
+      }
+    },
+    {
+      "id": "fastapi-138-ivan-borovets-fastapi-clean-example",
+      "repository": "https://github.com/ivan-borovets/fastapi-clean-example.git",
+      "commit": "927172311ec272ee3894619d91008a1b3403bc75",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 138,
+        "fullName": "ivan-borovets/fastapi-clean-example",
+        "stars": 573,
+        "forks": 78,
+        "sizeKb": 2988,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T20:08:24Z",
+        "topics": [
+          "alembic",
+          "api",
+          "architecture",
+          "clean-architecture",
+          "cqrs",
+          "crud",
+          "dependency-injection",
+          "fastapi",
+          "fastapi-auth",
+          "fastapi-crud",
+          "fastapi-example",
+          "fastapi-template",
+          "hexagonal-architecture",
+          "onion-architecture",
+          "python",
+          "python-clean-architecture",
+          "restful-api",
+          "sqlalchemy",
+          "unit-of-work",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/ivan-borovets/fastapi-clean-example"
+      }
+    },
+    {
+      "id": "fastapi-139-rafsaf-minimal-fastapi-postgres-template",
+      "repository": "https://github.com/rafsaf/minimal-fastapi-postgres-template.git",
+      "commit": "a9b3d855749bf7e37576a91c88fb4faa62046280",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 139,
+        "fullName": "rafsaf/minimal-fastapi-postgres-template",
+        "stars": 572,
+        "forks": 81,
+        "sizeKb": 1366,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-01T18:43:01Z",
+        "topics": [
+          "asyncio",
+          "boilerplate",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "postgres",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "template",
+          "template-repository"
+        ],
+        "htmlUrl": "https://github.com/rafsaf/minimal-fastapi-postgres-template"
+      }
+    },
+    {
+      "id": "fastapi-140-myccarl-ai-shortvideo-pipeline",
+      "repository": "https://github.com/myccarl/ai-shortVideo-pipeline.git",
+      "commit": "e9b77c3b91fb192cdc9e47b2f9407c7ae86e3278",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 140,
+        "fullName": "myccarl/ai-shortVideo-pipeline",
+        "stars": 565,
+        "forks": 40,
+        "sizeKb": 13076,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-15T14:24:59Z",
+        "topics": [
+          "ai",
+          "ai-pipeline",
+          "circuit-breaker",
+          "clip-model",
+          "deepseek",
+          "docker-compose",
+          "failover",
+          "fastapi",
+          "ffmpeg",
+          "java",
+          "kling",
+          "langfuse",
+          "llm",
+          "multi-model",
+          "prompt-engineering",
+          "python",
+          "resilience4j",
+          "short-video",
+          "spring-boot",
+          "video-generation"
+        ],
+        "htmlUrl": "https://github.com/myccarl/ai-shortVideo-pipeline"
+      }
+    },
+    {
+      "id": "fastapi-141-testdrivenio-fastapi-sqlmodel-alembic",
+      "repository": "https://github.com/testdrivenio/fastapi-sqlmodel-alembic.git",
+      "commit": "b9f78641513d78ec89954b140efc7ba16a50d1de",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 141,
+        "fullName": "testdrivenio/fastapi-sqlmodel-alembic",
+        "stars": 563,
+        "forks": 92,
+        "sizeKb": 17,
+        "defaultBranch": "main",
+        "pushedAt": "2023-08-26T16:31:31Z",
+        "topics": [
+          "fastapi",
+          "fastapi-async-db",
+          "fastapi-sqlalchemy",
+          "fastapi-sqlmodel",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/testdrivenio/fastapi-sqlmodel-alembic"
+      }
+    },
+    {
+      "id": "fastapi-142-testdrivenio-fastapi-crud-async",
+      "repository": "https://github.com/testdrivenio/fastapi-crud-async.git",
+      "commit": "4fa7ae952ece61e228135285de1b6a5ff65a1dc8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 142,
+        "fullName": "testdrivenio/fastapi-crud-async",
+        "stars": 562,
+        "forks": 91,
+        "sizeKb": 8,
+        "defaultBranch": "master",
+        "pushedAt": "2024-02-05T18:18:23Z",
+        "topics": [
+          "async-postgres",
+          "async-python",
+          "fastapi",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/testdrivenio/fastapi-crud-async"
+      }
+    },
+    {
+      "id": "fastapi-143-agentteam-taichuai-scienceclaw",
+      "repository": "https://github.com/AgentTeam-TaichuAI/ScienceClaw.git",
+      "commit": "3817e56a0ce35900a1bfa82f4b09c492f5fbfd4f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 143,
+        "fullName": "AgentTeam-TaichuAI/ScienceClaw",
+        "stars": 556,
+        "forks": 62,
+        "sizeKb": 2201,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-09T01:56:17Z",
+        "topics": [
+          "ai-agent",
+          "bioinformatics",
+          "data-analysis",
+          "docker",
+          "drug-discovery",
+          "fastapi",
+          "feishu",
+          "langchain",
+          "langgraph",
+          "llm",
+          "mcp",
+          "multi-agent",
+          "pubmed",
+          "research-assistant",
+          "sandbox",
+          "scientific-research",
+          "self-hosted",
+          "tool-use",
+          "vue",
+          "wechat"
+        ],
+        "htmlUrl": "https://github.com/AgentTeam-TaichuAI/ScienceClaw"
+      }
+    },
+    {
+      "id": "fastapi-144-leosussan-fastapi-gino-arq-uvicorn",
+      "repository": "https://github.com/leosussan/fastapi-gino-arq-uvicorn.git",
+      "commit": "dd4213f4113825ddce3d3a6a39e54ef77df6014f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 144,
+        "fullName": "leosussan/fastapi-gino-arq-uvicorn",
+        "stars": 554,
+        "forks": 47,
+        "sizeKb": 180,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T10:32:45Z",
+        "topics": [
+          "api",
+          "arq",
+          "async",
+          "asyncio",
+          "fastapi",
+          "gino",
+          "openapi3",
+          "postgresql",
+          "pydantic",
+          "python",
+          "python3",
+          "rest",
+          "swagger",
+          "uvicorn",
+          "uvloop"
+        ],
+        "htmlUrl": "https://github.com/leosussan/fastapi-gino-arq-uvicorn"
+      }
+    },
+    {
+      "id": "fastapi-145-jujumilk3-fastapi-clean-architecture",
+      "repository": "https://github.com/jujumilk3/fastapi-clean-architecture.git",
+      "commit": "a2232480d10965b2d712850252096c1ee460ffc1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 145,
+        "fullName": "jujumilk3/fastapi-clean-architecture",
+        "stars": 554,
+        "forks": 117,
+        "sizeKb": 578,
+        "defaultBranch": "main",
+        "pushedAt": "2024-11-03T12:08:42Z",
+        "topics": [
+          "boilerplate",
+          "fastapi",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/jujumilk3/fastapi-clean-architecture"
+      }
+    },
+    {
+      "id": "fastapi-146-nicholasgoh-fastapi-mcp-langgraph-template",
+      "repository": "https://github.com/NicholasGoh/fastapi-mcp-langgraph-template.git",
+      "commit": "2bd004a51e5d741e8eaf5bb01716b6a673684a53",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 146,
+        "fullName": "NicholasGoh/fastapi-mcp-langgraph-template",
+        "stars": 553,
+        "forks": 85,
+        "sizeKb": 7280,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-03T23:35:58Z",
+        "topics": [
+          "compose",
+          "fastapi",
+          "grafana",
+          "langfuse",
+          "langgraph-python",
+          "mcp",
+          "nginx",
+          "prometheus",
+          "sqlmodel",
+          "supabase"
+        ],
+        "htmlUrl": "https://github.com/NicholasGoh/fastapi-mcp-langgraph-template"
+      }
+    },
+    {
+      "id": "fastapi-147-kludex-fastapi-microservices",
+      "repository": "https://github.com/Kludex/fastapi-microservices.git",
+      "commit": "262bd1b7a97d6a6375067abac778bb8d75bb5edc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 147,
+        "fullName": "Kludex/fastapi-microservices",
+        "stars": 549,
+        "forks": 58,
+        "sizeKb": 132,
+        "defaultBranch": "main",
+        "pushedAt": "2023-05-24T10:50:10Z",
+        "topics": [
+          "arq",
+          "fastapi",
+          "fastapi-microservices"
+        ],
+        "htmlUrl": "https://github.com/Kludex/fastapi-microservices"
+      }
+    },
+    {
+      "id": "fastapi-148-grillazz-fastapi-sqlalchemy-asyncpg",
+      "repository": "https://github.com/grillazz/fastapi-sqlalchemy-asyncpg.git",
+      "commit": "51f0cebabe6b6c2f2e87732674930be4b8c1456d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 148,
+        "fullName": "grillazz/fastapi-sqlalchemy-asyncpg",
+        "stars": 524,
+        "forks": 64,
+        "sizeKb": 8600,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T12:21:28Z",
+        "topics": [
+          "asyncio",
+          "asyncpg",
+          "docker",
+          "fastapi",
+          "fastapi-sqlalchemy",
+          "granian",
+          "postgresql",
+          "pydantic",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/grillazz/fastapi-sqlalchemy-asyncpg"
+      }
+    },
+    {
+      "id": "fastapi-149-hogastack-dash-fastapi-admin",
+      "repository": "https://github.com/HogaStack/Dash-FastAPI-Admin.git",
+      "commit": "afc99280ba42f5f2a5be47e0ae9ee3310acec5c0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 149,
+        "fullName": "HogaStack/Dash-FastAPI-Admin",
+        "stars": 520,
+        "forks": 117,
+        "sizeKb": 10659,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-31T07:53:53Z",
+        "topics": [
+          "admin",
+          "ant-design",
+          "fastapi",
+          "plotly-dash",
+          "python",
+          "ruoyi"
+        ],
+        "htmlUrl": "https://github.com/HogaStack/Dash-FastAPI-Admin"
+      }
+    },
+    {
+      "id": "fastapi-150-lancetnik-fastdepends",
+      "repository": "https://github.com/Lancetnik/FastDepends.git",
+      "commit": "b00a9f4e9d5b55f6e4c4450b5385a8fd63fffe43",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 150,
+        "fullName": "Lancetnik/FastDepends",
+        "stars": 515,
+        "forks": 34,
+        "sizeKb": 1695,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T16:29:19Z",
+        "topics": [
+          "async",
+          "dependency",
+          "dependency-injection",
+          "fastapi",
+          "faststream",
+          "propan",
+          "python",
+          "sync"
+        ],
+        "htmlUrl": "https://github.com/Lancetnik/FastDepends"
+      }
+    },
+    {
+      "id": "fastapi-151-apocas-restai",
+      "repository": "https://github.com/apocas/restai.git",
+      "commit": "974086af987ac1849ee847e95d5bdc6d5436c6ef",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 151,
+        "fullName": "apocas/restai",
+        "stars": 512,
+        "forks": 105,
+        "sizeKb": 79484,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T20:17:37Z",
+        "topics": [
+          "blocky",
+          "embeddings",
+          "fastapi",
+          "langchain",
+          "llama",
+          "llamaindex",
+          "llm",
+          "ollama",
+          "openai",
+          "openaiapi",
+          "python",
+          "rag",
+          "stable-diffusion",
+          "transformers"
+        ],
+        "htmlUrl": "https://github.com/apocas/restai"
+      }
+    },
+    {
+      "id": "fastapi-152-davidefiocco-streamlit-fastapi-model-serving",
+      "repository": "https://github.com/davidefiocco/streamlit-fastapi-model-serving.git",
+      "commit": "311c838ba8a974a43cc4c4ccf1b11e254c71c41e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 152,
+        "fullName": "davidefiocco/streamlit-fastapi-model-serving",
+        "stars": 504,
+        "forks": 93,
+        "sizeKb": 49,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-27T22:14:14Z",
+        "topics": [
+          "docker-compose",
+          "fastapi",
+          "pycones",
+          "pytorch",
+          "streamlit"
+        ],
+        "htmlUrl": "https://github.com/davidefiocco/streamlit-fastapi-model-serving"
+      }
+    },
+    {
+      "id": "fastapi-153-0xtheprodev-fastapi-clean-example",
+      "repository": "https://github.com/0xTheProDev/fastapi-clean-example.git",
+      "commit": "181bb46cf7f7e7cdb58844ba65020b1a4aadbdc3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 153,
+        "fullName": "0xTheProDev/fastapi-clean-example",
+        "stars": 503,
+        "forks": 66,
+        "sizeKb": 103,
+        "defaultBranch": "main",
+        "pushedAt": "2023-05-12T09:03:57Z",
+        "topics": [
+          "clean-architecture",
+          "fastapi",
+          "graphql",
+          "hexagonal-architecture",
+          "openapi3",
+          "pydantic",
+          "python",
+          "python3",
+          "repository-pattern",
+          "rest-api",
+          "starlette",
+          "strawberry-graphql",
+          "swagger",
+          "swagger-ui"
+        ],
+        "htmlUrl": "https://github.com/0xTheProDev/fastapi-clean-example"
+      }
+    },
+    {
+      "id": "fastapi-154-gacwr-openuba",
+      "repository": "https://github.com/GACWR/OpenUBA.git",
+      "commit": "6d7b9cf85d6bff3e16eb5230791252ff2a3bd0ec",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 154,
+        "fullName": "GACWR/OpenUBA",
+        "stars": 501,
+        "forks": 280,
+        "sizeKb": 23134,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-22T18:36:42Z",
+        "topics": [
+          "analytics",
+          "anomaly-detection",
+          "cybersecurity",
+          "datascience",
+          "elasticsearch",
+          "elk",
+          "fastapi",
+          "information-security",
+          "machine-learning",
+          "nodejs",
+          "react",
+          "security",
+          "siem",
+          "sklearn",
+          "spark",
+          "tensorflow",
+          "threathunting",
+          "uba",
+          "ueba",
+          "user-behaviour"
+        ],
+        "htmlUrl": "https://github.com/GACWR/OpenUBA"
+      }
+    },
+    {
+      "id": "fastapi-155-jiayuxu0-fastapi-template",
+      "repository": "https://github.com/JiayuXu0/FastAPI-Template.git",
+      "commit": "f8f7f11bcbed38c82fe00fbaf014d55fae3f3f2f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 155,
+        "fullName": "JiayuXu0/FastAPI-Template",
+        "stars": 498,
+        "forks": 76,
+        "sizeKb": 7265,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-07T02:38:00Z",
+        "topics": [
+          "api",
+          "async",
+          "authentication",
+          "boilerplate",
+          "database",
+          "fastapi",
+          "openapi",
+          "pydantic",
+          "python",
+          "starlette",
+          "swagger",
+          "template",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/JiayuXu0/FastAPI-Template"
+      }
+    },
+    {
+      "id": "fastapi-156-azure-samples-rag-postgres-openai-python",
+      "repository": "https://github.com/Azure-Samples/rag-postgres-openai-python.git",
+      "commit": "007bb76bf9452e959487d7c175ee19c1100f787f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 156,
+        "fullName": "Azure-Samples/rag-postgres-openai-python",
+        "stars": 496,
+        "forks": 1051,
+        "sizeKb": 8331,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-08T22:26:53Z",
+        "topics": [
+          "ai-azd-templates",
+          "azd-templates",
+          "azure-container-apps",
+          "azure-openai",
+          "containers",
+          "fastapi",
+          "openai",
+          "pgvector",
+          "postgres",
+          "postgresql",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/Azure-Samples/rag-postgres-openai-python"
+      }
+    },
+    {
+      "id": "fastapi-157-asacristani-fastapi-rocket-boilerplate",
+      "repository": "https://github.com/asacristani/fastapi-rocket-boilerplate.git",
+      "commit": "f594fcd0fb2f05e79686705948d8d1506603db34",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 157,
+        "fullName": "asacristani/fastapi-rocket-boilerplate",
+        "stars": 496,
+        "forks": 67,
+        "sizeKb": 475,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-04T16:15:02Z",
+        "topics": [
+          "alembic",
+          "api",
+          "async",
+          "backend",
+          "boilerplate",
+          "boilerplate-backend",
+          "celery",
+          "docker",
+          "fastapi",
+          "poetry",
+          "postgres",
+          "pydantic",
+          "pytest",
+          "python",
+          "rabbitmq",
+          "redis",
+          "sqlmodel",
+          "trunk"
+        ],
+        "htmlUrl": "https://github.com/asacristani/fastapi-rocket-boilerplate"
+      }
+    },
+    {
+      "id": "fastapi-158-wxy2077-fastapi-mysql-generator",
+      "repository": "https://github.com/wxy2077/fastapi-mysql-generator.git",
+      "commit": "89925ab2f980043be08d8de4cdf3c7b6b1bf9789",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 158,
+        "fullName": "wxy2077/fastapi-mysql-generator",
+        "stars": 496,
+        "forks": 129,
+        "sizeKb": 819,
+        "defaultBranch": "master",
+        "pushedAt": "2022-03-23T02:38:13Z",
+        "topics": [
+          "casbin",
+          "fastapi",
+          "fastapi-jwt",
+          "fastapi-mysql",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/wxy2077/fastapi-mysql-generator"
+      }
+    },
+    {
+      "id": "fastapi-159-suislanchez-polymarket-kalshi-weather-bot",
+      "repository": "https://github.com/suislanchez/polymarket-kalshi-weather-bot.git",
+      "commit": "e406394d59c208cc035c4fdf37ebb26636e15a47",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 159,
+        "fullName": "suislanchez/polymarket-kalshi-weather-bot",
+        "stars": 493,
+        "forks": 130,
+        "sizeKb": 1058,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-02T01:19:05Z",
+        "topics": [
+          "ensemble-forecasting",
+          "fastapi",
+          "kalshi",
+          "kelly-criterion",
+          "polymarket",
+          "prediction-markets",
+          "python",
+          "react",
+          "trading-bot",
+          "typescript",
+          "weather"
+        ],
+        "htmlUrl": "https://github.com/suislanchez/polymarket-kalshi-weather-bot"
+      }
+    },
+    {
+      "id": "fastapi-160-tomasvotava-fastapi-sso",
+      "repository": "https://github.com/tomasvotava/fastapi-sso.git",
+      "commit": "cd52f19cc7898a360fc1b6d6deca6629affca267",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 160,
+        "fullName": "tomasvotava/fastapi-sso",
+        "stars": 481,
+        "forks": 63,
+        "sizeKb": 1279,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T12:41:47Z",
+        "topics": [
+          "facebook-authentication",
+          "fastapi",
+          "fastapi-oauth",
+          "google-authentication",
+          "microsoft-authentication",
+          "oauth",
+          "oauth2",
+          "python",
+          "spotify-authentication",
+          "sso",
+          "sso-authentication"
+        ],
+        "htmlUrl": "https://github.com/tomasvotava/fastapi-sso"
+      }
+    },
+    {
+      "id": "fastapi-161-kfcx-streaming-media-server-pro",
+      "repository": "https://github.com/kfcx/Streaming-Media-Server-Pro.git",
+      "commit": "e385cbaeb5f48b7080c4c508632df395f81afb8d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 161,
+        "fullName": "kfcx/Streaming-Media-Server-Pro",
+        "stars": 471,
+        "forks": 168,
+        "sizeKb": 591,
+        "defaultBranch": "main",
+        "pushedAt": "2023-04-04T11:38:58Z",
+        "topics": [
+          "collaborate",
+          "fastapi",
+          "github",
+          "github-pages",
+          "hls",
+          "hls-live-streaming",
+          "iptv",
+          "live-streaming",
+          "m3u8",
+          "proxy",
+          "python",
+          "video-buffer"
+        ],
+        "htmlUrl": "https://github.com/kfcx/Streaming-Media-Server-Pro"
+      }
+    },
+    {
+      "id": "fastapi-162-evil0ctal-fast-powerful-whisper-ai-services-api",
+      "repository": "https://github.com/Evil0ctal/Fast-Powerful-Whisper-AI-Services-API.git",
+      "commit": "e8e0315e2077ec5bff48a6ed456e41deffe2cc3f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 162,
+        "fullName": "Evil0ctal/Fast-Powerful-Whisper-AI-Services-API",
+        "stars": 470,
+        "forks": 58,
+        "sizeKb": 1276,
+        "defaultBranch": "main",
+        "pushedAt": "2025-06-17T22:48:08Z",
+        "topics": [
+          "asr",
+          "crawler",
+          "douyin-api",
+          "fastapi",
+          "faster-whisper",
+          "openai-whisper",
+          "speech-recognition",
+          "speech-to-text",
+          "speech-to-text-api",
+          "tiktok-analytics",
+          "tiktok-api",
+          "tiktok-crawler",
+          "video-analysis",
+          "whisper-ai",
+          "whisper-api",
+          "whisperbot"
+        ],
+        "htmlUrl": "https://github.com/Evil0ctal/Fast-Powerful-Whisper-AI-Services-API"
+      }
+    },
+    {
+      "id": "fastapi-163-piccolo-orm-piccolo-admin",
+      "repository": "https://github.com/piccolo-orm/piccolo_admin.git",
+      "commit": "d6053adc9f6d2db49cba9bcce97914ac3b2b989a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 163,
+        "fullName": "piccolo-orm/piccolo_admin",
+        "stars": 469,
+        "forks": 48,
+        "sizeKb": 9426,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-19T22:00:19Z",
+        "topics": [
+          "admin",
+          "asgi",
+          "asyncio",
+          "cms",
+          "content-management-system",
+          "dashboard",
+          "database",
+          "fastapi",
+          "hacktoberfest",
+          "piccolo",
+          "postgresql",
+          "python",
+          "python3",
+          "sqlite",
+          "starlette",
+          "vuejs"
+        ],
+        "htmlUrl": "https://github.com/piccolo-orm/piccolo_admin"
+      }
+    },
+    {
+      "id": "fastapi-164-violit-dev-violit",
+      "repository": "https://github.com/violit-dev/violit.git",
+      "commit": "8fae080f49f374b062172ed6ac71042539ad1f7a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 164,
+        "fullName": "violit-dev/violit",
+        "stars": 464,
+        "forks": 25,
+        "sizeKb": 16905,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-09T12:23:02Z",
+        "topics": [
+          "ai",
+          "data-application",
+          "data-science",
+          "data-visualization",
+          "deep-learning",
+          "developer-tools",
+          "fastapi",
+          "framework",
+          "frontend",
+          "fullstack",
+          "gui",
+          "machine-learning",
+          "mvp",
+          "python",
+          "python-web-development",
+          "reactive",
+          "streamlit-alternative",
+          "ui",
+          "webapp",
+          "website"
+        ],
+        "htmlUrl": "https://github.com/violit-dev/violit"
+      }
+    },
+    {
+      "id": "fastapi-165-testdrivenio-fastapi-celery",
+      "repository": "https://github.com/testdrivenio/fastapi-celery.git",
+      "commit": "191ff138701777838c363772253f73a276c16d68",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 165,
+        "fullName": "testdrivenio/fastapi-celery",
+        "stars": 459,
+        "forks": 101,
+        "sizeKb": 9,
+        "defaultBranch": "master",
+        "pushedAt": "2023-04-06T12:48:55Z",
+        "topics": [
+          "fastapi",
+          "fastapi-celery",
+          "fastapi-docker",
+          "task-queue"
+        ],
+        "htmlUrl": "https://github.com/testdrivenio/fastapi-celery"
+      }
+    },
+    {
+      "id": "fastapi-166-bigsk1-voice-chat-ai",
+      "repository": "https://github.com/bigsk1/voice-chat-ai.git",
+      "commit": "6ff84aba876b24dd9789ce9f4f6ec9f32bcc648a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 166,
+        "fullName": "bigsk1/voice-chat-ai",
+        "stars": 452,
+        "forks": 105,
+        "sizeKb": 87586,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-23T21:53:30Z",
+        "topics": [
+          "ai-speech",
+          "ai-voice",
+          "ai-voice-agent",
+          "anthropic-claude",
+          "conversational-ai",
+          "elevenlabs-api",
+          "fastapi",
+          "ollama",
+          "selfhosted",
+          "tts",
+          "typecast",
+          "voice-ai",
+          "webrtc",
+          "whisper-ai",
+          "xai",
+          "xai-tts"
+        ],
+        "htmlUrl": "https://github.com/bigsk1/voice-chat-ai"
+      }
+    },
+    {
+      "id": "fastapi-167-benavlabs-crudadmin",
+      "repository": "https://github.com/benavlabs/crudadmin.git",
+      "commit": "8b97fb47f90731c11ce24d60355d8cecfef87dac",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 167,
+        "fullName": "benavlabs/crudadmin",
+        "stars": 450,
+        "forks": 30,
+        "sizeKb": 6242,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-08T00:24:06Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "admin-panel",
+          "backend",
+          "crud",
+          "fastapi",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/crudadmin"
+      }
+    },
+    {
+      "id": "fastapi-168-klr-pattern-fastapi-voyager",
+      "repository": "https://github.com/KLR-Pattern/fastapi-voyager.git",
+      "commit": "7db1a94cfae51a5df71690a2a6cecbb1340e4189",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 168,
+        "fullName": "KLR-Pattern/fastapi-voyager",
+        "stars": 447,
+        "forks": 28,
+        "sizeKb": 1492,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-12T13:09:32Z",
+        "topics": [
+          "bff",
+          "d3",
+          "django-ninja",
+          "fastapi",
+          "graphviz",
+          "litestar",
+          "pydantic-resolve",
+          "visualization"
+        ],
+        "htmlUrl": "https://github.com/KLR-Pattern/fastapi-voyager"
+      }
+    },
+    {
+      "id": "fastapi-169-dialoguemd-fastapi-sqla",
+      "repository": "https://github.com/dialoguemd/fastapi-sqla.git",
+      "commit": "75487031296505b05e588a36fd28744cb65d251c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 169,
+        "fullName": "dialoguemd/fastapi-sqla",
+        "stars": 446,
+        "forks": 18,
+        "sizeKb": 1809,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T04:06:58Z",
+        "topics": [
+          "fastapi",
+          "fastapi-sqla",
+          "fastapi-sqlalchemy",
+          "library",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dialoguemd/fastapi-sqla"
+      }
+    },
+    {
+      "id": "fastapi-170-jod35-fastapi-beyond-crud",
+      "repository": "https://github.com/jod35/fastapi-beyond-CRUD.git",
+      "commit": "8f62866acb3b80233b2fe589c2f85c7d387d32e0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 170,
+        "fullName": "jod35/fastapi-beyond-CRUD",
+        "stars": 445,
+        "forks": 178,
+        "sizeKb": 1024,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-13T18:57:32Z",
+        "topics": [
+          "fastapi",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/jod35/fastapi-beyond-CRUD"
+      }
+    },
+    {
+      "id": "fastapi-171-tomascupr-sandstorm",
+      "repository": "https://github.com/tomascupr/sandstorm.git",
+      "commit": "4ddae977a99bbc5be46eab39d75525cc882d15fa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 171,
+        "fullName": "tomascupr/sandstorm",
+        "stars": 444,
+        "forks": 43,
+        "sizeKb": 570,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-24T23:43:56Z",
+        "topics": [
+          "agent-sdk",
+          "ai",
+          "ai-agents",
+          "anthropic",
+          "claude",
+          "e2b",
+          "fastapi",
+          "llm",
+          "python",
+          "sandbox",
+          "slack-bot"
+        ],
+        "htmlUrl": "https://github.com/tomascupr/sandstorm"
+      }
+    },
+    {
+      "id": "fastapi-172-tokusumi-fastapi-cloudauth",
+      "repository": "https://github.com/tokusumi/fastapi-cloudauth.git",
+      "commit": "594153706391258d80590a31e31666f260519a83",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 172,
+        "fullName": "tokusumi/fastapi-cloudauth",
+        "stars": 437,
+        "forks": 36,
+        "sizeKb": 158,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-17T13:14:36Z",
+        "topics": [
+          "auth0",
+          "aws-cognito",
+          "fastapi",
+          "fastapi-cloudauth",
+          "firebase-authentication",
+          "python",
+          "verification"
+        ],
+        "htmlUrl": "https://github.com/tokusumi/fastapi-cloudauth"
+      }
+    },
+    {
+      "id": "fastapi-173-oschai-visiofirm",
+      "repository": "https://github.com/OschAI/VisioFirm.git",
+      "commit": "f8ebea6c84e5bb91c615d58459b51db6dd8366cf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 173,
+        "fullName": "OschAI/VisioFirm",
+        "stars": 434,
+        "forks": 60,
+        "sizeKb": 59671,
+        "defaultBranch": "release/1.3.1",
+        "pushedAt": "2026-03-15T17:59:45Z",
+        "topics": [
+          "ai",
+          "annotation-tool",
+          "automatic-labelling",
+          "fast-annotation",
+          "fastapi",
+          "grounding-dino",
+          "labelling",
+          "labelling-images",
+          "object-detection",
+          "open-source",
+          "oriented-object-detection",
+          "sam",
+          "segmentation",
+          "ultralytics",
+          "yolo"
+        ],
+        "htmlUrl": "https://github.com/OschAI/VisioFirm"
+      }
+    },
+    {
+      "id": "fastapi-174-voxos-ai-bolna",
+      "repository": "https://github.com/voxos-ai/bolna.git",
+      "commit": "52d5dce004c2106324358d5f7308d9255b9eb6f8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 174,
+        "fullName": "voxos-ai/bolna",
+        "stars": 432,
+        "forks": 114,
+        "sizeKb": 19269,
+        "defaultBranch": "master",
+        "pushedAt": "2024-10-28T05:40:38Z",
+        "topics": [
+          "anyscale",
+          "chatgpt-api",
+          "claude-3-sonnet",
+          "deepgram",
+          "elevenlabs",
+          "fastapi",
+          "gpt-4o",
+          "llama3",
+          "llm",
+          "mistral",
+          "openai",
+          "perplexity-api",
+          "polly",
+          "telephony",
+          "twilio",
+          "voice-assistant",
+          "websocket-chat",
+          "websockets",
+          "whisper",
+          "xtts"
+        ],
+        "htmlUrl": "https://github.com/voxos-ai/bolna"
+      }
+    },
+    {
+      "id": "fastapi-175-phillipdupuis-pydantic-to-typescript",
+      "repository": "https://github.com/phillipdupuis/pydantic-to-typescript.git",
+      "commit": "e5b6cdde813ad4dc339b57c8b6e58ff2a182d17e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 175,
+        "fullName": "phillipdupuis/pydantic-to-typescript",
+        "stars": 432,
+        "forks": 60,
+        "sizeKb": 97,
+        "defaultBranch": "master",
+        "pushedAt": "2024-11-22T04:21:23Z",
+        "topics": [
+          "converting-pydantic-models",
+          "fastapi",
+          "python",
+          "type-hints",
+          "typescript",
+          "typescript-definitions",
+          "validation"
+        ],
+        "htmlUrl": "https://github.com/phillipdupuis/pydantic-to-typescript"
+      }
+    },
+    {
+      "id": "fastapi-176-michielme-fastscheduler",
+      "repository": "https://github.com/MichielMe/fastscheduler.git",
+      "commit": "03811b4c168b924f9f448c4fc573e79b4ae58bcb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 176,
+        "fullName": "MichielMe/fastscheduler",
+        "stars": 431,
+        "forks": 19,
+        "sizeKb": 9105,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-29T04:56:32Z",
+        "topics": [
+          "async",
+          "decorators",
+          "fastapi",
+          "job-scheduler",
+          "jobs",
+          "lightweight",
+          "python",
+          "scheduler",
+          "simple"
+        ],
+        "htmlUrl": "https://github.com/MichielMe/fastscheduler"
+      }
+    },
+    {
+      "id": "fastapi-177-felipeall-transfermarkt-api",
+      "repository": "https://github.com/felipeall/transfermarkt-api.git",
+      "commit": "bee4c49628b60f64d99137a675179ff2e6e843b4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 177,
+        "fullName": "felipeall/transfermarkt-api",
+        "stars": 429,
+        "forks": 145,
+        "sizeKb": 566,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-12T14:44:40Z",
+        "topics": [
+          "fastapi",
+          "football",
+          "players",
+          "scraper",
+          "soccer",
+          "transfermarkt",
+          "webscraping"
+        ],
+        "htmlUrl": "https://github.com/felipeall/transfermarkt-api"
+      }
+    },
+    {
+      "id": "fastapi-178-maldoinc-wireup",
+      "repository": "https://github.com/maldoinc/wireup.git",
+      "commit": "ee4cdbdcf0d5b7885ecb6522945d1d792fceeb4b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 178,
+        "fullName": "maldoinc/wireup",
+        "stars": 427,
+        "forks": 34,
+        "sizeKb": 24221,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-09T22:28:25Z",
+        "topics": [
+          "aiohttp",
+          "async",
+          "dependency-injection",
+          "dependency-injection-container",
+          "dependency-injection-framework",
+          "dependency-injector",
+          "design-pattern",
+          "di",
+          "django",
+          "fastapi",
+          "flask",
+          "free-threading",
+          "ioc-container",
+          "pep703",
+          "python",
+          "service-locator",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/maldoinc/wireup"
+      }
+    },
+    {
+      "id": "fastapi-179-sleepy-project-sleepy",
+      "repository": "https://github.com/sleepy-project/sleepy.git",
+      "commit": "56237f42e146f9b63cc48e785a1540fe2c38d5f8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 179,
+        "fullName": "sleepy-project/sleepy",
+        "stars": 423,
+        "forks": 179,
+        "sizeKb": 64928,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-20T18:36:31Z",
+        "topics": [
+          "fastapi",
+          "flask",
+          "online-status",
+          "python",
+          "sleepy",
+          "sleepy-project"
+        ],
+        "htmlUrl": "https://github.com/sleepy-project/sleepy"
+      }
+    },
+    {
+      "id": "fastapi-180-smagafurov-fastapi-jsonrpc",
+      "repository": "https://github.com/smagafurov/fastapi-jsonrpc.git",
+      "commit": "2b0820706f429150c44e1edc08b71a1794a1b4ac",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 180,
+        "fullName": "smagafurov/fastapi-jsonrpc",
+        "stars": 422,
+        "forks": 38,
+        "sizeKb": 854,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T19:45:56Z",
+        "topics": [
+          "asgi",
+          "fastapi",
+          "json-rpc",
+          "json-rpc-server",
+          "openapi",
+          "pydantic",
+          "starlette",
+          "swagger"
+        ],
+        "htmlUrl": "https://github.com/smagafurov/fastapi-jsonrpc"
+      }
+    },
+    {
+      "id": "fastapi-181-hynek-svcs",
+      "repository": "https://github.com/hynek/svcs.git",
+      "commit": "3e9c604f4d8660839b83366f94320ac20644367a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 181,
+        "fullName": "hynek/svcs",
+        "stars": 420,
+        "forks": 25,
+        "sizeKb": 2674,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T10:05:55Z",
+        "topics": [
+          "aiohttp",
+          "dependency-injection",
+          "fastapi",
+          "flask",
+          "inversion-of-control",
+          "ioc",
+          "pyramid",
+          "python",
+          "service-locator",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/hynek/svcs"
+      }
+    },
+    {
+      "id": "fastapi-182-stephenhillier-starlette-exporter",
+      "repository": "https://github.com/stephenhillier/starlette_exporter.git",
+      "commit": "05b9e18ccbd6f2925a229805d21b87a4000a740f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 182,
+        "fullName": "stephenhillier/starlette_exporter",
+        "stars": 415,
+        "forks": 37,
+        "sizeKb": 200,
+        "defaultBranch": "master",
+        "pushedAt": "2024-10-15T18:59:58Z",
+        "topics": [
+          "asgi",
+          "fastapi",
+          "prometheus",
+          "prometheus-exporter",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/stephenhillier/starlette_exporter"
+      }
+    },
+    {
+      "id": "fastapi-183-anil-matcha-open-ai-micro-drama-generator",
+      "repository": "https://github.com/Anil-matcha/Open-AI-Micro-Drama-Generator.git",
+      "commit": "4d513f959963361a7b133d2c5c6fc00a4ad88761",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 183,
+        "fullName": "Anil-matcha/Open-AI-Micro-Drama-Generator",
+        "stars": 414,
+        "forks": 80,
+        "sizeKb": 8096,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T08:39:17Z",
+        "topics": [
+          "agentic-ai",
+          "ai-drama",
+          "ai-filmmaking",
+          "ai-short-drama",
+          "ai-video-generation",
+          "drama-generator",
+          "fastapi",
+          "generative-ai",
+          "image-to-video",
+          "kling-ai",
+          "micro-drama",
+          "multi-agent",
+          "nextjs",
+          "seedance",
+          "seedance2",
+          "short-drama",
+          "short-film",
+          "short-form-video",
+          "text-to-video",
+          "veo3"
+        ],
+        "htmlUrl": "https://github.com/Anil-matcha/Open-AI-Micro-Drama-Generator"
+      }
+    },
+    {
+      "id": "fastapi-184-doganarif-fastapi-radar",
+      "repository": "https://github.com/doganarif/fastapi-radar.git",
+      "commit": "3b17186b9e2529a4a3bca10c3d8fbfdedc8bc3a9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 184,
+        "fullName": "doganarif/fastapi-radar",
+        "stars": 406,
+        "forks": 24,
+        "sizeKb": 8280,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-23T13:36:31Z",
+        "topics": [
+          "api-monitoring",
+          "debugging",
+          "developer-tools",
+          "devtools",
+          "fastapi",
+          "hacktoberfest",
+          "monitoring",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/doganarif/fastapi-radar"
+      }
+    },
+    {
+      "id": "fastapi-185-koldakov-futuramaapi",
+      "repository": "https://github.com/koldakov/futuramaapi.git",
+      "commit": "25c16b9cf890d56d51cef5efb9585205e281de6c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 185,
+        "fullName": "koldakov/futuramaapi",
+        "stars": 405,
+        "forks": 25,
+        "sizeKb": 12446,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-29T18:11:58Z",
+        "topics": [
+          "alembic",
+          "async",
+          "babel",
+          "fastapi",
+          "graphql",
+          "http2",
+          "hypercorn",
+          "mypy",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "ruff",
+          "sqlalchemy",
+          "sqlalchemy-python",
+          "sse",
+          "strawberry",
+          "strawberry-graphql"
+        ],
+        "htmlUrl": "https://github.com/koldakov/futuramaapi"
+      }
+    },
+    {
+      "id": "fastapi-186-volfpeter-htmy",
+      "repository": "https://github.com/volfpeter/htmy.git",
+      "commit": "3dfa11123319764475d61e83bf7086389e1f19db",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 186,
+        "fullName": "volfpeter/htmy",
+        "stars": 400,
+        "forks": 9,
+        "sizeKb": 693,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T07:01:01Z",
+        "topics": [
+          "async",
+          "asyncio",
+          "fastapi",
+          "framework",
+          "html",
+          "htmx",
+          "hypermedia",
+          "python",
+          "rendering-engine",
+          "templating-engine",
+          "web",
+          "xml"
+        ],
+        "htmlUrl": "https://github.com/volfpeter/htmy"
+      }
+    },
+    {
+      "id": "fastapi-187-beever-ai-beever-atlas",
+      "repository": "https://github.com/Beever-AI/beever-atlas.git",
+      "commit": "7d791af27ef4aa19644cb385c7ca24619bc4f848",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 187,
+        "fullName": "Beever-AI/beever-atlas",
+        "stars": 395,
+        "forks": 48,
+        "sizeKb": 93736,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T04:08:09Z",
+        "topics": [
+          "agent-memory",
+          "agents",
+          "discord-bot",
+          "fastapi",
+          "gemini",
+          "google-adk",
+          "knowledge-base",
+          "large-language-models",
+          "llm",
+          "mattermost",
+          "mcp",
+          "mcp-server",
+          "microsoft-teams",
+          "neo4j",
+          "open-source",
+          "python",
+          "rag",
+          "react",
+          "slack-bot",
+          "wiki"
+        ],
+        "htmlUrl": "https://github.com/Beever-AI/beever-atlas"
+      }
+    },
+    {
+      "id": "fastapi-188-rma-mun-ragnotebook",
+      "repository": "https://github.com/RMA-MUN/RAGNotebook.git",
+      "commit": "d0fdc9576ee295bd776252f643a3eaf4f66916d0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 188,
+        "fullName": "RMA-MUN/RAGNotebook",
+        "stars": 394,
+        "forks": 77,
+        "sizeKb": 9177,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T08:23:36Z",
+        "topics": [
+          "chromadb",
+          "fastapi",
+          "langchain",
+          "mysql",
+          "rag",
+          "react",
+          "sqlachemy",
+          "transformers"
+        ],
+        "htmlUrl": "https://github.com/RMA-MUN/RAGNotebook"
+      }
+    },
+    {
+      "id": "fastapi-189-visini-abstracting-fastapi-services",
+      "repository": "https://github.com/visini/abstracting-fastapi-services.git",
+      "commit": "adacaba43609a0f46d1baf315d0288ae1a6c3d33",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 189,
+        "fullName": "visini/abstracting-fastapi-services",
+        "stars": 393,
+        "forks": 54,
+        "sizeKb": 19,
+        "defaultBranch": "main",
+        "pushedAt": "2022-02-23T05:59:12Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/visini/abstracting-fastapi-services"
+      }
+    },
+    {
+      "id": "fastapi-190-amisadmin-fastapi-user-auth",
+      "repository": "https://github.com/amisadmin/fastapi-user-auth.git",
+      "commit": "9ad606d4b6921dff9d9752278456882b4982d2a3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 190,
+        "fullName": "amisadmin/fastapi-user-auth",
+        "stars": 390,
+        "forks": 51,
+        "sizeKb": 462,
+        "defaultBranch": "master",
+        "pushedAt": "2024-06-25T07:55:06Z",
+        "topics": [
+          "fastapi",
+          "fastapi-admin",
+          "fastapi-amis-admin",
+          "fastapi-auth",
+          "fastapi-jwt-auth",
+          "fastapi-rbac",
+          "fastapi-user",
+          "fastapi-user-auth"
+        ],
+        "htmlUrl": "https://github.com/amisadmin/fastapi-user-auth"
+      }
+    },
+    {
+      "id": "fastapi-191-sabuhish-fastapi-mqtt",
+      "repository": "https://github.com/sabuhish/fastapi-mqtt.git",
+      "commit": "b3329c0619122eab1173ca0d86614da6a57713f5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 191,
+        "fullName": "sabuhish/fastapi-mqtt",
+        "stars": 388,
+        "forks": 44,
+        "sizeKb": 853,
+        "defaultBranch": "master",
+        "pushedAt": "2024-05-22T08:58:45Z",
+        "topics": [
+          "asynchronous",
+          "fastapi",
+          "fastapimqtt",
+          "mqtt",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/sabuhish/fastapi-mqtt"
+      }
+    },
+    {
+      "id": "fastapi-192-paurakhsharma-python-microservice-fastapi",
+      "repository": "https://github.com/paurakhsharma/python-microservice-fastapi.git",
+      "commit": "3977eac365dabd0b49add36a37f769463a2d31bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 192,
+        "fullName": "paurakhsharma/python-microservice-fastapi",
+        "stars": 387,
+        "forks": 145,
+        "sizeKb": 18,
+        "defaultBranch": "master",
+        "pushedAt": "2024-08-01T15:46:17Z",
+        "topics": [
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "microservice",
+          "nginx",
+          "postgresql",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/paurakhsharma/python-microservice-fastapi"
+      }
+    },
+    {
+      "id": "fastapi-193-windson-fastapi",
+      "repository": "https://github.com/windson/fastapi.git",
+      "commit": "ebffc68792f21edd1c8a4a4efc7e2aa9231ec672",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 193,
+        "fullName": "windson/fastapi",
+        "stars": 381,
+        "forks": 177,
+        "sizeKb": 45,
+        "defaultBranch": "master",
+        "pushedAt": "2024-03-29T06:30:47Z",
+        "topics": [
+          "asgi",
+          "async",
+          "azure",
+          "fastapi",
+          "fastapi-tutorials",
+          "gcp",
+          "heroku-deployment",
+          "postgresql",
+          "python",
+          "python3",
+          "rest-api",
+          "ubuntu",
+          "uvicorn",
+          "uvicorn-gunicorn",
+          "wsgi"
+        ],
+        "htmlUrl": "https://github.com/windson/fastapi"
+      }
+    },
+    {
+      "id": "fastapi-194-baizunxian-zerorunner",
+      "repository": "https://github.com/baizunxian/zerorunner.git",
+      "commit": "fe48cb3e2a5e604db19f65effa856606b16c848c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 194,
+        "fullName": "baizunxian/zerorunner",
+        "stars": 381,
+        "forks": 106,
+        "sizeKb": 12851,
+        "defaultBranch": "master",
+        "pushedAt": "2026-02-02T06:07:41Z",
+        "topics": [
+          "api",
+          "autotest",
+          "celery",
+          "fastapi",
+          "python",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/baizunxian/zerorunner"
+      }
+    },
+    {
+      "id": "fastapi-195-rainmanjam-jobspy-api",
+      "repository": "https://github.com/rainmanjam/jobspy-api.git",
+      "commit": "26bb6f4435bce6b4128db1f7a84883c3c47a27c5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 195,
+        "fullName": "rainmanjam/jobspy-api",
+        "stars": 375,
+        "forks": 29,
+        "sizeKb": 102,
+        "defaultBranch": "main",
+        "pushedAt": "2025-05-29T00:12:42Z",
+        "topics": [
+          "docker",
+          "fastapi",
+          "glassdoor",
+          "google-jobs",
+          "job-scraper",
+          "jobspy",
+          "linkedin",
+          "pyrhon",
+          "remote-jobs"
+        ],
+        "htmlUrl": "https://github.com/rainmanjam/jobspy-api"
+      }
+    },
+    {
+      "id": "fastapi-196-bali-framework-bali",
+      "repository": "https://github.com/bali-framework/bali.git",
+      "commit": "37bd45bb8ae441c6cac8cf62b0cb76af59926429",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 196,
+        "fullName": "bali-framework/bali",
+        "stars": 371,
+        "forks": 34,
+        "sizeKb": 1641,
+        "defaultBranch": "main",
+        "pushedAt": "2025-09-10T09:05:06Z",
+        "topics": [
+          "fastapi",
+          "grpc",
+          "micorservices",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/bali-framework/bali"
+      }
+    },
+    {
+      "id": "fastapi-197-airweave-ai-error-monitoring-agent",
+      "repository": "https://github.com/airweave-ai/error-monitoring-agent.git",
+      "commit": "ec358d1148f9a4e5a46988afaff13fa078d3f726",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 197,
+        "fullName": "airweave-ai/error-monitoring-agent",
+        "stars": 367,
+        "forks": 53,
+        "sizeKb": 8375,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-29T12:38:29Z",
+        "topics": [
+          "agent",
+          "ai",
+          "airweave",
+          "alerting",
+          "context",
+          "dvops",
+          "error",
+          "error-monitoring",
+          "fastapi",
+          "linear",
+          "llm",
+          "monitoring",
+          "observability",
+          "python",
+          "react",
+          "reliability",
+          "retrieval",
+          "semantic-search",
+          "slack",
+          "typescript"
+        ],
+        "htmlUrl": "https://github.com/airweave-ai/error-monitoring-agent"
+      }
+    },
+    {
+      "id": "fastapi-198-sleep1223-fast-soy-admin",
+      "repository": "https://github.com/sleep1223/fast-soy-admin.git",
+      "commit": "f4b83bb19802dafddbcad5c2c05832aec70b0d61",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 198,
+        "fullName": "sleep1223/fast-soy-admin",
+        "stars": 366,
+        "forks": 104,
+        "sizeKb": 5768,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T06:24:12Z",
+        "topics": [
+          "admin",
+          "admin-template",
+          "fastapi",
+          "fastapi-admin",
+          "naive-ui",
+          "pinia",
+          "pydantic",
+          "python",
+          "tortoise-orm",
+          "typescript",
+          "unocss",
+          "vite7",
+          "vue",
+          "vue-admin",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/sleep1223/fast-soy-admin"
+      }
+    },
+    {
+      "id": "fastapi-199-talkpython-web-applications-with-fastapi-course",
+      "repository": "https://github.com/talkpython/web-applications-with-fastapi-course.git",
+      "commit": "c96b4ad861f931b13dc69cdb965f73e49f2accd1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 199,
+        "fullName": "talkpython/web-applications-with-fastapi-course",
+        "stars": 358,
+        "forks": 194,
+        "sizeKb": 4378,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-04T14:14:51Z",
+        "topics": [
+          "async-await",
+          "asyncio",
+          "fastapi",
+          "html",
+          "sqlalchemy",
+          "sqlalchemy-orm",
+          "static",
+          "webapp",
+          "website"
+        ],
+        "htmlUrl": "https://github.com/talkpython/web-applications-with-fastapi-course"
+      }
+    },
+    {
+      "id": "fastapi-200-leonh-redis-streams-fastapi-chat",
+      "repository": "https://github.com/leonh/redis-streams-fastapi-chat.git",
+      "commit": "804b0ec115c210634683bf8e8f19c4e273de04c7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "fastapi",
+        "rank": 200,
+        "fullName": "leonh/redis-streams-fastapi-chat",
+        "stars": 355,
+        "forks": 39,
+        "sizeKb": 39,
+        "defaultBranch": "master",
+        "pushedAt": "2025-11-15T18:20:27Z",
+        "topics": [
+          "asyncio",
+          "fastapi",
+          "redis",
+          "redis-streams",
+          "starlette",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/leonh/redis-streams-fastapi-chat"
+      }
+    }
+  ]
+}

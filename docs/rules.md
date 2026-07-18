@@ -42,6 +42,7 @@
 | `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline seal is missing or does not match when Ed25519 or HMAC baseline verification is configured |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a fail-closed required-rule finding |
+| `CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX` | Python source could not be parsed by the configured Python AST inspector; emitted as a fail-closed required-rule finding |
 
 
 
@@ -68,7 +69,7 @@ CellFence v0.x analyzes:
 - common TypeScript export declarations and named exports;
 - common Python public symbols from `__all__`, top-level functions/classes/assignments, and simple re-export imports.
 
-Computed dynamic imports and computed CommonJS `require()` calls are reported as unsupported fail-closed findings rather than silently ignored.
+Computed dynamic imports, computed CommonJS `require()` calls, and Python files that the configured Python AST inspector cannot parse are reported as unsupported fail-closed findings rather than silently ignored.
 
 NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/`, manifest-derived package roots, and common Python packaging metadata. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 

@@ -16,6 +16,7 @@ const defaultRequiredRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
 ];
@@ -375,6 +376,32 @@ test("manifest inference production scope excludes test, generated, and asset im
     ]);
     writeManifest(rootDir, manifest);
     assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference keeps unsupported Python syntax as check evidence instead of failing init", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-syntax-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/service"), { recursive: true });
+    writeText(path.join(rootDir, "src/service/__init__.py"), "def get_{{ cookiecutter.name }}():\n    return True\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.governance, {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: manifest.governance.exclude,
+      requiredRules: defaultRequiredRules,
+    });
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.publicEntry, cell.publicSymbols]), [
+      ["service", "src/service/__init__.py", []],
+    ]);
+    writeManifest(rootDir, manifest);
+    const result = checkRepository({ rootDir });
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

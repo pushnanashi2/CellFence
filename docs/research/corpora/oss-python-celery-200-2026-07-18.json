@@ -1,0 +1,6262 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "studyId": "oss-python-celery-200-2026-07-18",
+  "selection": {
+    "framework": "celery",
+    "retrievedAt": "2026-07-18T16:51:19.137Z",
+    "source": "GitHub Search API",
+    "query": "topic:celery language:Python fork:false archived:false size:<100000",
+    "sort": "stars",
+    "order": "desc",
+    "targetCount": 200,
+    "actualCount": 200,
+    "notes": [
+      "Static onboarding corpus only; not a precision denominator.",
+      "Repositories are cloned by exact HEAD commit and checked with inferred production-scope manifests.",
+      "No target dependency installation or package scripts are run."
+    ],
+    "skipped": []
+  },
+  "subjects": [
+    {
+      "id": "celery-001-cookiecutter-cookiecutter-django",
+      "repository": "https://github.com/cookiecutter/cookiecutter-django.git",
+      "commit": "64c15cc82dc6f974fdd32ced07c460fab0dc5ded",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 1,
+        "fullName": "cookiecutter/cookiecutter-django",
+        "stars": 13565,
+        "forks": 3066,
+        "sizeKb": 12225,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T03:06:45Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "cookiecutter",
+          "cookiecutter-django",
+          "django",
+          "django-cookiecutter",
+          "docker",
+          "hacktoberfest",
+          "heroku",
+          "project-template",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/cookiecutter/cookiecutter-django"
+      }
+    },
+    {
+      "id": "celery-002-mher-flower",
+      "repository": "https://github.com/mher/flower.git",
+      "commit": "c618e2648e9896a6fec61a7e212c8772d0f4a3f9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 2,
+        "fullName": "mher/flower",
+        "stars": 7221,
+        "forks": 1154,
+        "sizeKb": 5154,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-08T09:31:23Z",
+        "topics": [
+          "administration",
+          "asynchronous",
+          "celery",
+          "monitoring",
+          "python",
+          "rabbitmq",
+          "redis",
+          "task-queue",
+          "workers"
+        ],
+        "htmlUrl": "https://github.com/mher/flower"
+      }
+    },
+    {
+      "id": "celery-003-welliamcao-opsmanage",
+      "repository": "https://github.com/welliamcao/OpsManage.git",
+      "commit": "800e45ed18d0da168702b277bb45ac41a7301570",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 3,
+        "fullName": "welliamcao/OpsManage",
+        "stars": 3587,
+        "forks": 1617,
+        "sizeKb": 80356,
+        "defaultBranch": "v3",
+        "pushedAt": "2024-06-15T03:27:17Z",
+        "topics": [
+          "ansible",
+          "celery",
+          "cmdb",
+          "deploy",
+          "inception",
+          "webcrontab",
+          "wiki"
+        ],
+        "htmlUrl": "https://github.com/welliamcao/OpsManage"
+      }
+    },
+    {
+      "id": "celery-004-celery-kombu",
+      "repository": "https://github.com/celery/kombu.git",
+      "commit": "4281680ef3a275a7d87433a703790251d9805803",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 4,
+        "fullName": "celery/kombu",
+        "stars": 3130,
+        "forks": 1008,
+        "sizeKb": 9326,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T16:58:54Z",
+        "topics": [
+          "celery",
+          "kombu",
+          "message-queue",
+          "messaging",
+          "python",
+          "python-3",
+          "python-library",
+          "python3",
+          "rabbitmq",
+          "redis",
+          "sqs"
+        ],
+        "htmlUrl": "https://github.com/celery/kombu"
+      }
+    },
+    {
+      "id": "celery-005-fastapi-practices-fastapi-best-architecture",
+      "repository": "https://github.com/fastapi-practices/fastapi-best-architecture.git",
+      "commit": "2dffe8f6a816fde4d5cbeec0bd48dc04f823941f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 5,
+        "fullName": "fastapi-practices/fastapi-best-architecture",
+        "stars": 2463,
+        "forks": 370,
+        "sizeKb": 22470,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T10:01:57Z",
+        "topics": [
+          "celery",
+          "fastapi",
+          "fastapi-template",
+          "fba",
+          "grafana",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fastapi-practices/fastapi-best-architecture"
+      }
+    },
+    {
+      "id": "celery-006-vintasoftware-django-react-boilerplate",
+      "repository": "https://github.com/vintasoftware/django-react-boilerplate.git",
+      "commit": "340e19b11249b87c4d89afad423a447f279c4a1c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 6,
+        "fullName": "vintasoftware/django-react-boilerplate",
+        "stars": 2264,
+        "forks": 551,
+        "sizeKb": 2011,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-04T15:46:01Z",
+        "topics": [
+          "celery",
+          "django",
+          "pnpm",
+          "python",
+          "react",
+          "tailwind",
+          "tailwindcss-v4",
+          "typescript",
+          "webpack"
+        ],
+        "htmlUrl": "https://github.com/vintasoftware/django-react-boilerplate"
+      }
+    },
+    {
+      "id": "celery-007-celery-django-celery-beat",
+      "repository": "https://github.com/celery/django-celery-beat.git",
+      "commit": "f008dd80737ed9345aff675e7c8d83cda2882187",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 7,
+        "fullName": "celery/django-celery-beat",
+        "stars": 1942,
+        "forks": 487,
+        "sizeKb": 938,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T17:21:34Z",
+        "topics": [
+          "celery",
+          "celery-task",
+          "celerybeat",
+          "django",
+          "django-orm",
+          "python",
+          "python-libary",
+          "python-library",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery-beat"
+      }
+    },
+    {
+      "id": "celery-008-celery-django-celery",
+      "repository": "https://github.com/celery/django-celery.git",
+      "commit": "3b6335d14fd05506391119175406634668d72062",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 8,
+        "fullName": "celery/django-celery",
+        "stars": 1552,
+        "forks": 453,
+        "sizeKb": 1663,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-20T12:16:49Z",
+        "topics": [
+          "celery",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery"
+      }
+    },
+    {
+      "id": "celery-009-nickjj-docker-django-example",
+      "repository": "https://github.com/nickjj/docker-django-example.git",
+      "commit": "ae7250c068fed7ee7eb59bf2bdb5ff82aa81f4ea",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 9,
+        "fullName": "nickjj/docker-django-example",
+        "stars": 1528,
+        "forks": 476,
+        "sizeKb": 1506,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-08T11:28:59Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "docker-compose",
+          "esbuild",
+          "postgres",
+          "redis",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/nickjj/docker-django-example"
+      }
+    },
+    {
+      "id": "celery-010-dongweiming-web-develop",
+      "repository": "https://github.com/dongweiming/web_develop.git",
+      "commit": "9e7b4f3716630c176aac680d9cb50038b4373432",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 10,
+        "fullName": "dongweiming/web_develop",
+        "stars": 1238,
+        "forks": 539,
+        "sizeKb": 837,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-03T23:07:22Z",
+        "topics": [
+          "ansible",
+          "asyncio",
+          "celery",
+          "fabric",
+          "flask",
+          "ipython",
+          "jupyter-notebook",
+          "mako",
+          "mq",
+          "python",
+          "saltstack",
+          "web",
+          "webdevelopment"
+        ],
+        "htmlUrl": "https://github.com/dongweiming/web_develop"
+      }
+    },
+    {
+      "id": "celery-011-jookies-jasmin",
+      "repository": "https://github.com/jookies/jasmin.git",
+      "commit": "0aac58e466d583d0f0436df7b8afa3dc96191263",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 11,
+        "fullName": "jookies/jasmin",
+        "stars": 1189,
+        "forks": 600,
+        "sizeKb": 9045,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-26T10:28:48Z",
+        "topics": [
+          "celery",
+          "python",
+          "smpp",
+          "smpp-client",
+          "smpp-server",
+          "sms",
+          "sms-gateway",
+          "twisted"
+        ],
+        "htmlUrl": "https://github.com/jookies/jasmin"
+      }
+    },
+    {
+      "id": "celery-012-uber-common-metta",
+      "repository": "https://github.com/uber-common/metta.git",
+      "commit": "4a15b790701fe84a6493e52aec95e5788fef1a04",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 12,
+        "fullName": "uber-common/metta",
+        "stars": 1145,
+        "forks": 157,
+        "sizeKb": 536,
+        "defaultBranch": "master",
+        "pushedAt": "2019-04-01T06:34:25Z",
+        "topics": [
+          "adversarial",
+          "celery",
+          "infosec",
+          "network",
+          "networking",
+          "python",
+          "redis",
+          "security",
+          "simulation",
+          "uber",
+          "vagrant",
+          "virtualbox",
+          "yaml"
+        ],
+        "htmlUrl": "https://github.com/uber-common/metta"
+      }
+    },
+    {
+      "id": "celery-013-sibson-redbeat",
+      "repository": "https://github.com/sibson/redbeat.git",
+      "commit": "74fd84ee3b9d320d655e6005d832645502ed805a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 13,
+        "fullName": "sibson/redbeat",
+        "stars": 1045,
+        "forks": 143,
+        "sizeKb": 471,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T13:07:11Z",
+        "topics": [
+          "celery",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/sibson/redbeat"
+      }
+    },
+    {
+      "id": "celery-014-ydf0509-funboost",
+      "repository": "https://github.com/ydf0509/funboost.git",
+      "commit": "f5267d4643bea6fde1850a35e80120af37476ce4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 14,
+        "fullName": "ydf0509/funboost",
+        "stars": 889,
+        "forks": 166,
+        "sizeKb": 82329,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-31T09:58:17Z",
+        "topics": [
+          "ack",
+          "asyncio",
+          "celery",
+          "concurrent",
+          "distributed",
+          "eventlet",
+          "gevent",
+          "kafka",
+          "multiprocessing",
+          "nameko",
+          "nsq",
+          "python",
+          "qps",
+          "rabbitmq",
+          "redis",
+          "rocketmq",
+          "sqlite",
+          "tcp",
+          "threading",
+          "zeromq"
+        ],
+        "htmlUrl": "https://github.com/ydf0509/funboost"
+      }
+    },
+    {
+      "id": "celery-015-jms1717-8mb-local",
+      "repository": "https://github.com/JMS1717/8mb.local.git",
+      "commit": "1ab821fc13b2ed0890121da713016bd90da43b0f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 15,
+        "fullName": "JMS1717/8mb.local",
+        "stars": 872,
+        "forks": 44,
+        "sizeKb": 2753,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-20T19:45:58Z",
+        "topics": [
+          "celery",
+          "compression",
+          "docker",
+          "fastapi",
+          "ffmpeg",
+          "gpu-acceleration",
+          "self-hosted",
+          "svelte"
+        ],
+        "htmlUrl": "https://github.com/JMS1717/8mb.local"
+      }
+    },
+    {
+      "id": "celery-016-haohao-end-openagent",
+      "repository": "https://github.com/Haohao-end/openagent.git",
+      "commit": "4013ab216b543372c214855e6fe1ce4aeb6db5cc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 16,
+        "fullName": "Haohao-end/openagent",
+        "stars": 836,
+        "forks": 81,
+        "sizeKb": 41290,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T13:36:09Z",
+        "topics": [
+          "agent",
+          "ai",
+          "celery",
+          "deepagents",
+          "deepresearch",
+          "deepseek",
+          "docker",
+          "faiss-vector-database",
+          "flask",
+          "harness-engineering",
+          "langchain",
+          "langgraph",
+          "llmops",
+          "mcp",
+          "nginx",
+          "postgresql",
+          "skills",
+          "tailwindcss",
+          "vue",
+          "weaviate"
+        ],
+        "htmlUrl": "https://github.com/Haohao-end/openagent"
+      }
+    },
+    {
+      "id": "celery-017-celery-django-celery-results",
+      "repository": "https://github.com/celery/django-celery-results.git",
+      "commit": "067dfc9a857344c833e269f679047d48b938e60d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 17,
+        "fullName": "celery/django-celery-results",
+        "stars": 784,
+        "forks": 226,
+        "sizeKb": 385,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T16:58:04Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-celery-results",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/django-celery-results"
+      }
+    },
+    {
+      "id": "celery-018-nickjj-docker-flask-example",
+      "repository": "https://github.com/nickjj/docker-flask-example.git",
+      "commit": "16276def627d73bd36cd80a05008ad7cf933bbca",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 18,
+        "fullName": "nickjj/docker-flask-example",
+        "stars": 764,
+        "forks": 138,
+        "sizeKb": 2076,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-08T11:28:56Z",
+        "topics": [
+          "celery",
+          "docker",
+          "docker-compose",
+          "esbuild",
+          "flask",
+          "postgres",
+          "redis",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/nickjj/docker-flask-example"
+      }
+    },
+    {
+      "id": "celery-019-pythonzm-ops",
+      "repository": "https://github.com/pythonzm/Ops.git",
+      "commit": "bad6a57ae783d3e7c9786ac6e9fc4d38daa112ee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 19,
+        "fullName": "pythonzm/Ops",
+        "stars": 730,
+        "forks": 322,
+        "sizeKb": 43026,
+        "defaultBranch": "master",
+        "pushedAt": "2024-05-31T04:34:05Z",
+        "topics": [
+          "ansible",
+          "celery",
+          "cmdb",
+          "django",
+          "webssh"
+        ],
+        "htmlUrl": "https://github.com/pythonzm/Ops"
+      }
+    },
+    {
+      "id": "celery-020-ohld-django-telegram-bot",
+      "repository": "https://github.com/ohld/django-telegram-bot.git",
+      "commit": "ef13753b178b3d935fd91b60c55b85678b90ca0a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 20,
+        "fullName": "ohld/django-telegram-bot",
+        "stars": 724,
+        "forks": 169,
+        "sizeKb": 232,
+        "defaultBranch": "main",
+        "pushedAt": "2024-04-17T18:10:55Z",
+        "topics": [
+          "celery",
+          "django",
+          "dokku",
+          "github-actions",
+          "postgresql",
+          "redis",
+          "telegram",
+          "telegram-bot"
+        ],
+        "htmlUrl": "https://github.com/ohld/django-telegram-bot"
+      }
+    },
+    {
+      "id": "celery-021-akornor-playlistor",
+      "repository": "https://github.com/akornor/playlistor.git",
+      "commit": "08700471b4717a5ec4563bca2c9d174825dde659",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 21,
+        "fullName": "akornor/playlistor",
+        "stars": 670,
+        "forks": 50,
+        "sizeKb": 3742,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-15T12:56:30Z",
+        "topics": [
+          "apple-music",
+          "celery",
+          "django",
+          "javascript",
+          "python",
+          "redis",
+          "spotify",
+          "spotify-playlist-convertor"
+        ],
+        "htmlUrl": "https://github.com/akornor/playlistor"
+      }
+    },
+    {
+      "id": "celery-022-gregavrbancic-fastapi-celery",
+      "repository": "https://github.com/GregaVrbancic/fastapi-celery.git",
+      "commit": "2e582ff961a5255e69fbc91820796b158282528d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 22,
+        "fullName": "GregaVrbancic/fastapi-celery",
+        "stars": 669,
+        "forks": 112,
+        "sizeKb": 41,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-07T13:39:52Z",
+        "topics": [
+          "celery",
+          "docker-compose",
+          "fastapi",
+          "flower",
+          "python",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/GregaVrbancic/fastapi-celery"
+      }
+    },
+    {
+      "id": "celery-023-snok-asgi-correlation-id",
+      "repository": "https://github.com/snok/asgi-correlation-id.git",
+      "commit": "76b61b6325b2a0b29ee96dc1fbf00e2c7de15393",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 23,
+        "fullName": "snok/asgi-correlation-id",
+        "stars": 637,
+        "forks": 37,
+        "sizeKb": 548,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-09T15:09:21Z",
+        "topics": [
+          "celery",
+          "correlation-id",
+          "logging",
+          "python",
+          "request-id",
+          "sentry",
+          "tracing"
+        ],
+        "htmlUrl": "https://github.com/snok/asgi-correlation-id"
+      }
+    },
+    {
+      "id": "celery-024-wakatime-wakaq",
+      "repository": "https://github.com/wakatime/wakaq.git",
+      "commit": "b01220852b721efd40eda9c82fd8e26b3848e0d1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 24,
+        "fullName": "wakatime/wakaq",
+        "stars": 596,
+        "forks": 21,
+        "sizeKb": 224,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-21T13:44:33Z",
+        "topics": [
+          "async",
+          "asynchronous-tasks",
+          "background-jobs",
+          "celery",
+          "distributed",
+          "job-queue",
+          "job-scheduler",
+          "python",
+          "queue",
+          "redis",
+          "rq",
+          "task-queue",
+          "task-queues",
+          "worker"
+        ],
+        "htmlUrl": "https://github.com/wakatime/wakaq"
+      }
+    },
+    {
+      "id": "celery-025-ovh-celery-director",
+      "repository": "https://github.com/ovh/celery-director.git",
+      "commit": "94dd47fcaa7b4d7ce530d1a20713d30e9c6fb9d2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 25,
+        "fullName": "ovh/celery-director",
+        "stars": 554,
+        "forks": 61,
+        "sizeKb": 3206,
+        "defaultBranch": "master",
+        "pushedAt": "2025-04-22T13:28:15Z",
+        "topics": [
+          "celery",
+          "python",
+          "workflow"
+        ],
+        "htmlUrl": "https://github.com/ovh/celery-director"
+      }
+    },
+    {
+      "id": "celery-026-jrobichaud-django-structlog",
+      "repository": "https://github.com/jrobichaud/django-structlog.git",
+      "commit": "d82f525191a3bd202a019c6e7d3392cde6009e75",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 26,
+        "fullName": "jrobichaud/django-structlog",
+        "stars": 523,
+        "forks": 40,
+        "sizeKb": 7974,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T18:13:32Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-rest-framework",
+          "hacktoberfest",
+          "logging",
+          "structlog",
+          "structured-logging"
+        ],
+        "htmlUrl": "https://github.com/jrobichaud/django-structlog"
+      }
+    },
+    {
+      "id": "celery-027-miguelgrinberg-flack",
+      "repository": "https://github.com/miguelgrinberg/flack.git",
+      "commit": "57ad5d2f47e8de7be84738d54f521e59406feaaa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 27,
+        "fullName": "miguelgrinberg/flack",
+        "stars": 513,
+        "forks": 135,
+        "sizeKb": 77,
+        "defaultBranch": "master",
+        "pushedAt": "2022-07-06T20:04:29Z",
+        "topics": [
+          "celery",
+          "flask",
+          "flask-socketio",
+          "scale"
+        ],
+        "htmlUrl": "https://github.com/miguelgrinberg/flack"
+      }
+    },
+    {
+      "id": "celery-028-czue-celery-progress",
+      "repository": "https://github.com/czue/celery-progress.git",
+      "commit": "54f85be40d41143d2c5447de58a70a33b27c39ee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 28,
+        "fullName": "czue/celery-progress",
+        "stars": 496,
+        "forks": 89,
+        "sizeKb": 170,
+        "defaultBranch": "master",
+        "pushedAt": "2025-01-30T07:19:25Z",
+        "topics": [
+          "celery",
+          "django",
+          "hacktoberfest",
+          "javascript"
+        ],
+        "htmlUrl": "https://github.com/czue/celery-progress"
+      }
+    },
+    {
+      "id": "celery-029-asacristani-fastapi-rocket-boilerplate",
+      "repository": "https://github.com/asacristani/fastapi-rocket-boilerplate.git",
+      "commit": "f594fcd0fb2f05e79686705948d8d1506603db34",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 29,
+        "fullName": "asacristani/fastapi-rocket-boilerplate",
+        "stars": 496,
+        "forks": 67,
+        "sizeKb": 475,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-04T16:15:02Z",
+        "topics": [
+          "alembic",
+          "api",
+          "async",
+          "backend",
+          "boilerplate",
+          "boilerplate-backend",
+          "celery",
+          "docker",
+          "fastapi",
+          "poetry",
+          "postgres",
+          "pydantic",
+          "pytest",
+          "python",
+          "rabbitmq",
+          "redis",
+          "sqlmodel",
+          "trunk"
+        ],
+        "htmlUrl": "https://github.com/asacristani/fastapi-rocket-boilerplate"
+      }
+    },
+    {
+      "id": "celery-030-snok-django-guid",
+      "repository": "https://github.com/snok/django-guid.git",
+      "commit": "91ab7467d5958f032e4698f5522a029afa267791",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 30,
+        "fullName": "snok/django-guid",
+        "stars": 482,
+        "forks": 32,
+        "sizeKb": 32059,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-05T04:49:40Z",
+        "topics": [
+          "asgi",
+          "celery",
+          "correlation",
+          "correlation-id",
+          "django",
+          "django-correlation-id",
+          "django-guid",
+          "django-rest-framework",
+          "django3",
+          "guid",
+          "logging",
+          "request-id",
+          "sentry",
+          "tracing"
+        ],
+        "htmlUrl": "https://github.com/snok/django-guid"
+      }
+    },
+    {
+      "id": "celery-031-ruddra-docker-django",
+      "repository": "https://github.com/ruddra/docker-django.git",
+      "commit": "eb1eb3df16577535fee4dfe700c272d3be36cbd5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 31,
+        "fullName": "ruddra/docker-django",
+        "stars": 480,
+        "forks": 124,
+        "sizeKb": 73,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-02T19:18:22Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "container",
+          "django",
+          "docker",
+          "nginx",
+          "numpy",
+          "pandas",
+          "postgres",
+          "python",
+          "redis",
+          "scipy"
+        ],
+        "htmlUrl": "https://github.com/ruddra/docker-django"
+      }
+    },
+    {
+      "id": "celery-032-cr0hn-aiotasks",
+      "repository": "https://github.com/cr0hn/aiotasks.git",
+      "commit": "3ead06db528ddacc0584093032eb1e056e26ab42",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 32,
+        "fullName": "cr0hn/aiotasks",
+        "stars": 455,
+        "forks": 36,
+        "sizeKb": 3922,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-15T14:32:53Z",
+        "topics": [
+          "asyncio",
+          "celery",
+          "celery-task",
+          "coroutines",
+          "python",
+          "python-3"
+        ],
+        "htmlUrl": "https://github.com/cr0hn/aiotasks"
+      }
+    },
+    {
+      "id": "celery-033-celery-billiard",
+      "repository": "https://github.com/celery/billiard.git",
+      "commit": "21a2e1c2b94115d054762bb0bcee6b883d4ce324",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 33,
+        "fullName": "celery/billiard",
+        "stars": 433,
+        "forks": 258,
+        "sizeKb": 1532,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-22T00:33:34Z",
+        "topics": [
+          "celery",
+          "multiprocessing",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/celery/billiard"
+      }
+    },
+    {
+      "id": "celery-034-rsalmei-clearly",
+      "repository": "https://github.com/rsalmei/clearly.git",
+      "commit": "8bc5e87e317368f02e5986dfbcbd9ce3c1b2c75d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 34,
+        "fullName": "rsalmei/clearly",
+        "stars": 413,
+        "forks": 20,
+        "sizeKb": 8006,
+        "defaultBranch": "main",
+        "pushedAt": "2022-06-07T02:06:48Z",
+        "topics": [
+          "asynchronous",
+          "celery",
+          "distributed",
+          "flower",
+          "monitor",
+          "monitoring-tool",
+          "python",
+          "queue",
+          "real-time",
+          "realtime",
+          "task"
+        ],
+        "htmlUrl": "https://github.com/rsalmei/clearly"
+      }
+    },
+    {
+      "id": "celery-035-wlz-hit-topic-and-user-profile-analysis-system",
+      "repository": "https://github.com/Wlz-Hit/Topic_and_user_profile_analysis_system.git",
+      "commit": "a2d82c9a5a5d32d3b0241c47a9516384bbc27e8f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 35,
+        "fullName": "Wlz-Hit/Topic_and_user_profile_analysis_system",
+        "stars": 408,
+        "forks": 42,
+        "sizeKb": 33936,
+        "defaultBranch": "master",
+        "pushedAt": "2025-09-16T09:21:58Z",
+        "topics": [
+          "celery",
+          "scrapy",
+          "topic-analysis",
+          "user-profiles"
+        ],
+        "htmlUrl": "https://github.com/Wlz-Hit/Topic_and_user_profile_analysis_system"
+      }
+    },
+    {
+      "id": "celery-036-baizunxian-zerorunner",
+      "repository": "https://github.com/baizunxian/zerorunner.git",
+      "commit": "fe48cb3e2a5e604db19f65effa856606b16c848c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 36,
+        "fullName": "baizunxian/zerorunner",
+        "stars": 381,
+        "forks": 106,
+        "sizeKb": 12851,
+        "defaultBranch": "master",
+        "pushedAt": "2026-02-02T06:07:41Z",
+        "topics": [
+          "api",
+          "autotest",
+          "celery",
+          "fastapi",
+          "python",
+          "vue3"
+        ],
+        "htmlUrl": "https://github.com/baizunxian/zerorunner"
+      }
+    },
+    {
+      "id": "celery-037-justforfunnnn-webspider",
+      "repository": "https://github.com/JustForFunnnn/webspider.git",
+      "commit": "e41e94fb4f269ecab61cc19c76331c7667151cfb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 37,
+        "fullName": "JustForFunnnn/webspider",
+        "stars": 367,
+        "forks": 126,
+        "sizeKb": 1052,
+        "defaultBranch": "master",
+        "pushedAt": "2023-08-31T14:13:02Z",
+        "topics": [
+          "celery",
+          "python",
+          "requests",
+          "spider",
+          "tornado"
+        ],
+        "htmlUrl": "https://github.com/JustForFunnnn/webspider"
+      }
+    },
+    {
+      "id": "celery-038-hequan2017-autoops",
+      "repository": "https://github.com/hequan2017/autoops.git",
+      "commit": "fb1b2f66fdb26de1bf8d01c4d243825d06aa125d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 38,
+        "fullName": "hequan2017/autoops",
+        "stars": 365,
+        "forks": 196,
+        "sizeKb": 23592,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-11T23:25:03Z",
+        "topics": [
+          "celery",
+          "cmdb",
+          "demo",
+          "devops",
+          "django",
+          "django2",
+          "inception",
+          "linux",
+          "mysql",
+          "nginx",
+          "ops",
+          "python",
+          "python3",
+          "shell",
+          "supervisor",
+          "tornado",
+          "uwsgi",
+          "webconsole",
+          "webssh"
+        ],
+        "htmlUrl": "https://github.com/hequan2017/autoops"
+      }
+    },
+    {
+      "id": "celery-039-fengjinqi-website",
+      "repository": "https://github.com/fengjinqi/website.git",
+      "commit": "340eecec49ce0d66cd6a491d0ae9ad23ec9f841b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 39,
+        "fullName": "fengjinqi/website",
+        "stars": 356,
+        "forks": 95,
+        "sizeKb": 19028,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-16T08:40:13Z",
+        "topics": [
+          "celery",
+          "django",
+          "django2",
+          "djangorestframework",
+          "python3",
+          "react",
+          "redis",
+          "rest-framework",
+          "supervisord",
+          "supervisord-supervisorctl"
+        ],
+        "htmlUrl": "https://github.com/fengjinqi/website"
+      }
+    },
+    {
+      "id": "celery-040-cansarigol-pdbr",
+      "repository": "https://github.com/cansarigol/pdbr.git",
+      "commit": "ed4cd448f335a0d4afff4f90fc0c3d60dd9b57e5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 40,
+        "fullName": "cansarigol/pdbr",
+        "stars": 351,
+        "forks": 15,
+        "sizeKb": 2069,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-16T07:04:06Z",
+        "topics": [
+          "celery",
+          "debugger",
+          "debugger-color",
+          "ipython",
+          "pdb",
+          "python",
+          "rich",
+          "traceback"
+        ],
+        "htmlUrl": "https://github.com/cansarigol/pdbr"
+      }
+    },
+    {
+      "id": "celery-041-saadmk11-banking-system",
+      "repository": "https://github.com/saadmk11/banking-system.git",
+      "commit": "9c3ee3eea75030280405506c62d968d646981c05",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 41,
+        "fullName": "saadmk11/banking-system",
+        "stars": 347,
+        "forks": 207,
+        "sizeKb": 700,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-16T07:15:24Z",
+        "topics": [
+          "bank",
+          "bank-account",
+          "banking",
+          "banking-applications",
+          "bootstrap",
+          "bootstrap4",
+          "celery",
+          "celerybeat",
+          "css",
+          "django",
+          "django-application",
+          "django-framework",
+          "django3",
+          "html",
+          "python",
+          "python3",
+          "redis",
+          "tailwind",
+          "tailwind-css",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/saadmk11/banking-system"
+      }
+    },
+    {
+      "id": "celery-042-no13bus-baymax",
+      "repository": "https://github.com/no13bus/baymax.git",
+      "commit": "5fa88b5da21542bfacb3013bc1de1c6b9a9edab2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 42,
+        "fullName": "no13bus/baymax",
+        "stars": 342,
+        "forks": 48,
+        "sizeKb": 3454,
+        "defaultBranch": "master",
+        "pushedAt": "2022-06-13T08:32:23Z",
+        "topics": [
+          "celery",
+          "flask",
+          "healthcare",
+          "mysql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/no13bus/baymax"
+      }
+    },
+    {
+      "id": "celery-043-ydf0509-distributed-framework",
+      "repository": "https://github.com/ydf0509/distributed_framework.git",
+      "commit": "497f670fe77a9fa757c0b1a47e04b8c4af99339c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 43,
+        "fullName": "ydf0509/distributed_framework",
+        "stars": 327,
+        "forks": 89,
+        "sizeKb": 72338,
+        "defaultBranch": "master",
+        "pushedAt": "2024-05-28T03:51:00Z",
+        "topics": [
+          "apscheduler",
+          "celery",
+          "consume-confirm",
+          "disk",
+          "distributed-framework",
+          "function-scheduling",
+          "gevent",
+          "kafka",
+          "nsq",
+          "pulsar",
+          "python",
+          "rabbitmq",
+          "redis",
+          "rocketmq",
+          "sqlachemy",
+          "task-scheduling",
+          "timing"
+        ],
+        "htmlUrl": "https://github.com/ydf0509/distributed_framework"
+      }
+    },
+    {
+      "id": "celery-044-williano-final-senior-year-project",
+      "repository": "https://github.com/Williano/Final-Senior-Year-Project-.git",
+      "commit": "4bd988575537b37b5cf852b616d3db5666c95e7f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 44,
+        "fullName": "Williano/Final-Senior-Year-Project-",
+        "stars": 324,
+        "forks": 68,
+        "sizeKb": 29040,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-18T01:48:53Z",
+        "topics": [
+          "bootstrap",
+          "celery",
+          "css",
+          "django",
+          "ecommerce-website",
+          "html",
+          "javascript",
+          "postgresql",
+          "python",
+          "redis",
+          "virtualenv"
+        ],
+        "htmlUrl": "https://github.com/Williano/Final-Senior-Year-Project-"
+      }
+    },
+    {
+      "id": "celery-045-selinon-selinon",
+      "repository": "https://github.com/selinon/selinon.git",
+      "commit": "d3a6f3178242dee9a69608e493a9d5ccbf10ca91",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 45,
+        "fullName": "selinon/selinon",
+        "stars": 315,
+        "forks": 35,
+        "sizeKb": 8015,
+        "defaultBranch": "master",
+        "pushedAt": "2025-03-29T10:46:23Z",
+        "topics": [
+          "big-data",
+          "celery",
+          "distributed-computing",
+          "flow-management",
+          "hacktoberfest",
+          "hacktoberfest-accepted",
+          "hacktoberfest2021",
+          "kubernetes",
+          "openshift",
+          "python",
+          "schedule-tasks",
+          "selinon",
+          "task",
+          "workflow-management",
+          "workflow-management-system",
+          "workflow-scheduler"
+        ],
+        "htmlUrl": "https://github.com/selinon/selinon"
+      }
+    },
+    {
+      "id": "celery-046-mattkohl-docker-flask-celery-redis",
+      "repository": "https://github.com/mattkohl/docker-flask-celery-redis.git",
+      "commit": "ac095dc96c5e343290eddb742582648fa2a93583",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 46,
+        "fullName": "mattkohl/docker-flask-celery-redis",
+        "stars": 306,
+        "forks": 132,
+        "sizeKb": 41,
+        "defaultBranch": "master",
+        "pushedAt": "2023-07-14T15:41:19Z",
+        "topics": [
+          "celery",
+          "docker",
+          "docker-compose",
+          "flask",
+          "gunicorn",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/mattkohl/docker-flask-celery-redis"
+      }
+    },
+    {
+      "id": "celery-047-tedivm-robs-awesome-python-template",
+      "repository": "https://github.com/tedivm/robs_awesome_python_template.git",
+      "commit": "9676322e66fe2e7ceef4ef9ec379a7994f6f5a79",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 47,
+        "fullName": "tedivm/robs_awesome_python_template",
+        "stars": 303,
+        "forks": 23,
+        "sizeKb": 270,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-16T17:54:49Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "cookiecutter",
+          "docker",
+          "fastapi",
+          "github-actions",
+          "project-template",
+          "pytest",
+          "python",
+          "python-template",
+          "ruff",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/tedivm/robs_awesome_python_template"
+      }
+    },
+    {
+      "id": "celery-048-qitan-devops-backend",
+      "repository": "https://github.com/qitan/devops-backend.git",
+      "commit": "360e0428b26139bb9eda9fb16e6f8d1756df7933",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 48,
+        "fullName": "qitan/devops-backend",
+        "stars": 295,
+        "forks": 198,
+        "sizeKb": 27401,
+        "defaultBranch": "main",
+        "pushedAt": "2024-09-23T15:36:43Z",
+        "topics": [
+          "ansible",
+          "celery",
+          "cicd",
+          "django",
+          "jenkins",
+          "kubernetes"
+        ],
+        "htmlUrl": "https://github.com/qitan/devops-backend"
+      }
+    },
+    {
+      "id": "celery-049-jaspersui-fastapi-injectable",
+      "repository": "https://github.com/JasperSui/fastapi-injectable.git",
+      "commit": "28f26098eb1831a94a22f4d3bdd730eb0cde2d7a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 49,
+        "fullName": "JasperSui/fastapi-injectable",
+        "stars": 294,
+        "forks": 8,
+        "sizeKb": 1019,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-10T08:03:20Z",
+        "topics": [
+          "background-tasks",
+          "celery",
+          "clean-architecture",
+          "cli",
+          "dependency-injection",
+          "depends",
+          "di",
+          "dramatiq",
+          "fastapi",
+          "testing"
+        ],
+        "htmlUrl": "https://github.com/JasperSui/fastapi-injectable"
+      }
+    },
+    {
+      "id": "celery-050-steinitzu-celery-singleton",
+      "repository": "https://github.com/steinitzu/celery-singleton.git",
+      "commit": "4ee161853d82f71d4565be2bd7d81fc6d8bcbded",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 50,
+        "fullName": "steinitzu/celery-singleton",
+        "stars": 263,
+        "forks": 41,
+        "sizeKb": 69,
+        "defaultBranch": "master",
+        "pushedAt": "2023-06-09T15:34:01Z",
+        "topics": [
+          "celery",
+          "celery-tasks",
+          "distributed-locks",
+          "python",
+          "rate-limiting",
+          "redis",
+          "singleton-task"
+        ],
+        "htmlUrl": "https://github.com/steinitzu/celery-singleton"
+      }
+    },
+    {
+      "id": "celery-051-djangostarter-web",
+      "repository": "https://github.com/djangostarter/web.git",
+      "commit": "2cce2f972b9a794e4830e29d1320f7e470246080",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 51,
+        "fullName": "djangostarter/web",
+        "stars": 263,
+        "forks": 56,
+        "sizeKb": 4660,
+        "defaultBranch": "master",
+        "pushedAt": "2026-02-13T09:03:14Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-ninja",
+          "django-q",
+          "docker",
+          "drf",
+          "python",
+          "redis",
+          "restframework-api",
+          "rq",
+          "simpleui",
+          "swagger",
+          "template-project",
+          "yasg-drf"
+        ],
+        "htmlUrl": "https://github.com/djangostarter/web"
+      }
+    },
+    {
+      "id": "celery-052-kuzyashin-fastapi-tortoise-template",
+      "repository": "https://github.com/Kuzyashin/FastAPI_Tortoise_template.git",
+      "commit": "48e1d30cb41398109853d3ec4d9939dd0a3c42e9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 52,
+        "fullName": "Kuzyashin/FastAPI_Tortoise_template",
+        "stars": 261,
+        "forks": 41,
+        "sizeKb": 115,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-09T13:19:25Z",
+        "topics": [
+          "celery",
+          "docker",
+          "docker-compose",
+          "docker-swarm",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-docker",
+          "fastapi-template",
+          "flower",
+          "postgresql",
+          "python",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/Kuzyashin/FastAPI_Tortoise_template"
+      }
+    },
+    {
+      "id": "celery-053-tkp-archive-paperboy",
+      "repository": "https://github.com/tkp-archive/paperboy.git",
+      "commit": "b2641ac7205045404228887f87635410ce17e2d8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 53,
+        "fullName": "tkp-archive/paperboy",
+        "stars": 254,
+        "forks": 25,
+        "sizeKb": 13151,
+        "defaultBranch": "main",
+        "pushedAt": "2024-11-29T19:09:23Z",
+        "topics": [
+          "airflow",
+          "apache-airflow",
+          "celery",
+          "dask",
+          "docker",
+          "jupyter",
+          "jupyter-notebook",
+          "jupyter-notebooks",
+          "jupyterlab",
+          "kubernetes",
+          "luigi",
+          "notebook",
+          "nteract",
+          "papermill",
+          "phosphorjs",
+          "scheduling-notebooks"
+        ],
+        "htmlUrl": "https://github.com/tkp-archive/paperboy"
+      }
+    },
+    {
+      "id": "celery-054-yuanwenq-dailyfresh",
+      "repository": "https://github.com/yuanwenq/dailyfresh.git",
+      "commit": "d834f01a8ec15f880302009e8ffb1eaf0b99177b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 54,
+        "fullName": "yuanwenq/dailyfresh",
+        "stars": 249,
+        "forks": 83,
+        "sizeKb": 2672,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T01:27:46Z",
+        "topics": [
+          "celery",
+          "django",
+          "fastdfs",
+          "mysql",
+          "nginx",
+          "python-django",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/yuanwenq/dailyfresh"
+      }
+    },
+    {
+      "id": "celery-055-manimozaffar-aioclock",
+      "repository": "https://github.com/ManiMozaffar/aioclock.git",
+      "commit": "c943c853ac9f2b14184d3693c7baf9eb44bd4cf1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 55,
+        "fullName": "ManiMozaffar/aioclock",
+        "stars": 241,
+        "forks": 11,
+        "sizeKb": 2217,
+        "defaultBranch": "main",
+        "pushedAt": "2025-11-17T15:27:03Z",
+        "topics": [
+          "apscheduler",
+          "async",
+          "asynchronous",
+          "asyncio",
+          "celery",
+          "cron",
+          "cronjob",
+          "crontab",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "rocketry",
+          "scheduler",
+          "scheduling"
+        ],
+        "htmlUrl": "https://github.com/ManiMozaffar/aioclock"
+      }
+    },
+    {
+      "id": "celery-056-ylisen-dailyfresh-b2c",
+      "repository": "https://github.com/Ylisen/dailyfresh-B2C.git",
+      "commit": "276e26abe865773c29fd6d47afb8ad2f43b55967",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 56,
+        "fullName": "Ylisen/dailyfresh-B2C",
+        "stars": 236,
+        "forks": 158,
+        "sizeKb": 16580,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T04:56:40Z",
+        "topics": [
+          "celery",
+          "django",
+          "fastdfs",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/Ylisen/dailyfresh-B2C"
+      }
+    },
+    {
+      "id": "celery-057-hequan2017-chain",
+      "repository": "https://github.com/hequan2017/chain.git",
+      "commit": "0f19c369d4868fff16d06d7ffe8b7f74d94d5049",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 57,
+        "fullName": "hequan2017/chain",
+        "stars": 234,
+        "forks": 152,
+        "sizeKb": 18905,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-19T16:11:38Z",
+        "topics": [
+          "celery",
+          "chain",
+          "cmdb",
+          "demo",
+          "devops",
+          "django",
+          "django-project",
+          "django2",
+          "docker",
+          "dockerfile",
+          "hequan",
+          "ops",
+          "python",
+          "python3",
+          "redis",
+          "webssh"
+        ],
+        "htmlUrl": "https://github.com/hequan2017/chain"
+      }
+    },
+    {
+      "id": "celery-058-airscholar-redditdataengineering",
+      "repository": "https://github.com/airscholar/RedditDataEngineering.git",
+      "commit": "ac36b26e9d7da7fe6df0f9c5abad00a79cafa227",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 58,
+        "fullName": "airscholar/RedditDataEngineering",
+        "stars": 220,
+        "forks": 96,
+        "sizeKb": 121,
+        "defaultBranch": "main",
+        "pushedAt": "2023-10-23T12:13:02Z",
+        "topics": [
+          "apache-airflow",
+          "aws",
+          "celery",
+          "data-pipeline",
+          "end-to-end-data-engineering",
+          "reddit"
+        ],
+        "htmlUrl": "https://github.com/airscholar/RedditDataEngineering"
+      }
+    },
+    {
+      "id": "celery-059-getkanchi-kanchi",
+      "repository": "https://github.com/getkanchi/kanchi.git",
+      "commit": "ecc07bba728b0a344eece436af70ef36bd0ac989",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 59,
+        "fullName": "getkanchi/kanchi",
+        "stars": 215,
+        "forks": 20,
+        "sizeKb": 3478,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-02T06:22:09Z",
+        "topics": [
+          "celery",
+          "monitoring",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/getkanchi/kanchi"
+      }
+    },
+    {
+      "id": "celery-060-earthcomfy-django-ecommerce-api",
+      "repository": "https://github.com/earthcomfy/django-ecommerce-api.git",
+      "commit": "bd9168afca504866d366a8245ce2944158d82515",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 60,
+        "fullName": "earthcomfy/django-ecommerce-api",
+        "stars": 195,
+        "forks": 73,
+        "sizeKb": 80,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T21:40:37Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-cache",
+          "django-docker",
+          "django-ecommerce-api",
+          "django-phone-verification",
+          "django-stripe",
+          "docker",
+          "drf",
+          "drf-spectacular",
+          "ecommerce-api",
+          "nginx",
+          "postgresql",
+          "redis",
+          "stripe",
+          "stripe-checkout",
+          "twilio"
+        ],
+        "htmlUrl": "https://github.com/earthcomfy/django-ecommerce-api"
+      }
+    },
+    {
+      "id": "celery-061-briancaffey-django-step-by-step",
+      "repository": "https://github.com/briancaffey/django-step-by-step.git",
+      "commit": "85bc5121c0df47b80c83a96813cb9be7fc9843ba",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 61,
+        "fullName": "briancaffey/django-step-by-step",
+        "stars": 191,
+        "forks": 42,
+        "sizeKb": 24260,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-30T01:03:20Z",
+        "topics": [
+          "12-factor-app",
+          "aws",
+          "celery",
+          "cicd",
+          "django",
+          "docker",
+          "ecs",
+          "github-actions",
+          "gunicorn",
+          "nginx",
+          "python",
+          "quasar-framework",
+          "terraform",
+          "typescript",
+          "vue"
+        ],
+        "htmlUrl": "https://github.com/briancaffey/django-step-by-step"
+      }
+    },
+    {
+      "id": "celery-062-pomo-mondreganto-forcad",
+      "repository": "https://github.com/pomo-mondreganto/ForcAD.git",
+      "commit": "6ce3407be569b7f69f879501c5e2ca79231c1ff9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 62,
+        "fullName": "pomo-mondreganto/ForcAD",
+        "stars": 184,
+        "forks": 23,
+        "sizeKb": 5212,
+        "defaultBranch": "master",
+        "pushedAt": "2023-12-06T13:33:54Z",
+        "topics": [
+          "attack-defense",
+          "attack-defense-ctf",
+          "capture-the-flag",
+          "celery",
+          "ctf",
+          "ctf-platform",
+          "ctf-scoreboard",
+          "docker",
+          "python",
+          "scoreboard"
+        ],
+        "htmlUrl": "https://github.com/pomo-mondreganto/ForcAD"
+      }
+    },
+    {
+      "id": "celery-063-nickatnight-cookiecutter-fastapi-backend",
+      "repository": "https://github.com/nickatnight/cookiecutter-fastapi-backend.git",
+      "commit": "1ffdec7aee4ce22e70c715aa5e045afcd498b5ff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 63,
+        "fullName": "nickatnight/cookiecutter-fastapi-backend",
+        "stars": 169,
+        "forks": 13,
+        "sizeKb": 287,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-21T23:18:06Z",
+        "topics": [
+          "alembic",
+          "asyncpg",
+          "celery",
+          "celerybeat",
+          "cookiecutter",
+          "digitalocean",
+          "fastapi",
+          "layered-architecture",
+          "nginx",
+          "openapi",
+          "postgres",
+          "postgresql",
+          "pre-commit",
+          "python",
+          "readthedoc",
+          "readthedocs",
+          "render",
+          "sentry",
+          "sqlmodel",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/nickatnight/cookiecutter-fastapi-backend"
+      }
+    },
+    {
+      "id": "celery-064-tobi-de-cookiecutter-fastapi",
+      "repository": "https://github.com/Tobi-De/cookiecutter-fastapi.git",
+      "commit": "bb5fd5c0d47829431a610f883c51ddb2db72eb5c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 64,
+        "fullName": "Tobi-De/cookiecutter-fastapi",
+        "stars": 161,
+        "forks": 10,
+        "sizeKb": 549,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T05:22:47Z",
+        "topics": [
+          "asgi",
+          "celery",
+          "cookiecutter",
+          "django",
+          "fastapi",
+          "fastapi-template",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/Tobi-De/cookiecutter-fastapi"
+      }
+    },
+    {
+      "id": "celery-065-sbdchd-celery-types",
+      "repository": "https://github.com/sbdchd/celery-types.git",
+      "commit": "707e25a5096463d6d997c586755aeaf8635412ed",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 65,
+        "fullName": "sbdchd/celery-types",
+        "stars": 153,
+        "forks": 57,
+        "sizeKb": 369,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-23T03:14:44Z",
+        "topics": [
+          "amqp",
+          "billiard",
+          "celery",
+          "django-celery-results",
+          "kombu",
+          "mypy",
+          "stubs",
+          "types"
+        ],
+        "htmlUrl": "https://github.com/sbdchd/celery-types"
+      }
+    },
+    {
+      "id": "celery-066-gofynd-flask-full",
+      "repository": "https://github.com/gofynd/flask-full.git",
+      "commit": "00c0b2559d4e5f4b5196a73784d890b76a4f6eb3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 66,
+        "fullName": "gofynd/flask-full",
+        "stars": 151,
+        "forks": 32,
+        "sizeKb": 45,
+        "defaultBranch": "master",
+        "pushedAt": "2018-09-26T13:30:12Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "celerybeat",
+          "eventlet",
+          "flask",
+          "mongoengine",
+          "python-3",
+          "socket-io",
+          "starter"
+        ],
+        "htmlUrl": "https://github.com/gofynd/flask-full"
+      }
+    },
+    {
+      "id": "celery-067-ammirsm-llamaindex-omakase-rag",
+      "repository": "https://github.com/ammirsm/llamaindex-omakase-rag.git",
+      "commit": "10a34b5d92660ceb5f5b544113588780176e5ca9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 67,
+        "fullName": "ammirsm/llamaindex-omakase-rag",
+        "stars": 146,
+        "forks": 16,
+        "sizeKb": 546,
+        "defaultBranch": "main",
+        "pushedAt": "2024-04-10T17:17:04Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "django",
+          "google-drive",
+          "google-drive-api",
+          "llamaindex",
+          "rag"
+        ],
+        "htmlUrl": "https://github.com/ammirsm/llamaindex-omakase-rag"
+      }
+    },
+    {
+      "id": "celery-068-karsasdev-fastapi-celery-redis-rabbitmq",
+      "repository": "https://github.com/karsasdev/fastapi-celery-redis-rabbitmq.git",
+      "commit": "a4660c87225155d8f4c13af3c36ce48cc5136da2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 68,
+        "fullName": "karsasdev/fastapi-celery-redis-rabbitmq",
+        "stars": 136,
+        "forks": 28,
+        "sizeKb": 22,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-31T14:56:37Z",
+        "topics": [
+          "celery",
+          "docker-compose",
+          "fastapi",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/karsasdev/fastapi-celery-redis-rabbitmq"
+      }
+    },
+    {
+      "id": "celery-069-sdediego-django-clean-architecture",
+      "repository": "https://github.com/sdediego/django-clean-architecture.git",
+      "commit": "915a8d844a8db5a40c726fe4cf9f6d50f7c95275",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 69,
+        "fullName": "sdediego/django-clean-architecture",
+        "stars": 128,
+        "forks": 19,
+        "sizeKb": 178,
+        "defaultBranch": "main",
+        "pushedAt": "2021-11-06T16:42:36Z",
+        "topics": [
+          "api-restful",
+          "celery",
+          "clean-architechture",
+          "django",
+          "django-rest-framework",
+          "docker",
+          "poetry",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/sdediego/django-clean-architecture"
+      }
+    },
+    {
+      "id": "celery-070-codingjoe-django-crontask",
+      "repository": "https://github.com/codingjoe/django-crontask.git",
+      "commit": "109d0580163c441f04cb96b31fb61e3cdd8242e3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 70,
+        "fullName": "codingjoe/django-crontask",
+        "stars": 123,
+        "forks": 4,
+        "sizeKb": 746,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T15:13:58Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "cron",
+          "cronjob",
+          "crontab",
+          "django",
+          "dramatiq",
+          "tasks"
+        ],
+        "htmlUrl": "https://github.com/codingjoe/django-crontask"
+      }
+    },
+    {
+      "id": "celery-071-workable-flask-log-request-id",
+      "repository": "https://github.com/Workable/flask-log-request-id.git",
+      "commit": "b21fe7bcff371b082a257ccf1d077d8b8279f169",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 71,
+        "fullName": "Workable/flask-log-request-id",
+        "stars": 115,
+        "forks": 24,
+        "sizeKb": 77,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-07-02T18:47:24Z",
+        "topics": [
+          "celery",
+          "flask",
+          "python",
+          "request-id",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/Workable/flask-log-request-id"
+      }
+    },
+    {
+      "id": "celery-072-mukulmantosh-fastapi-eks-kubernetes",
+      "repository": "https://github.com/mukulmantosh/FastAPI_EKS_Kubernetes.git",
+      "commit": "9d1927bdb516fb145e48689a819300685eb4711a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 72,
+        "fullName": "mukulmantosh/FastAPI_EKS_Kubernetes",
+        "stars": 111,
+        "forks": 49,
+        "sizeKb": 20838,
+        "defaultBranch": "main",
+        "pushedAt": "2022-12-30T04:17:13Z",
+        "topics": [
+          "aws",
+          "celery",
+          "eksctl",
+          "elasticache",
+          "fastapi",
+          "helm",
+          "helm-charts",
+          "kubernetes",
+          "postgres",
+          "pycharm",
+          "python",
+          "rds",
+          "redis",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/mukulmantosh/FastAPI_EKS_Kubernetes"
+      }
+    },
+    {
+      "id": "celery-073-slyapustin-django-chatbot",
+      "repository": "https://github.com/slyapustin/django-chatbot.git",
+      "commit": "693aa0fb862648a74867ab3ab72a677a7552ca7a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 73,
+        "fullName": "slyapustin/django-chatbot",
+        "stars": 110,
+        "forks": 42,
+        "sizeKb": 87,
+        "defaultBranch": "master",
+        "pushedAt": "2025-11-05T20:03:05Z",
+        "topics": [
+          "celery",
+          "chatbot",
+          "django",
+          "django-celery",
+          "django-channels",
+          "dokku",
+          "gpt",
+          "heroku",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/slyapustin/django-chatbot"
+      }
+    },
+    {
+      "id": "celery-074-mdapena-pyventus",
+      "repository": "https://github.com/mdapena/pyventus.git",
+      "commit": "73ff7a7e5f0d01b2d544ef3ded4a18847e4d8f90",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 74,
+        "fullName": "mdapena/pyventus",
+        "stars": 108,
+        "forks": 5,
+        "sizeKb": 14800,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-16T14:04:38Z",
+        "topics": [
+          "asynchronous-programming",
+          "asyncio",
+          "celery",
+          "event-driven-programming",
+          "event-emitters",
+          "events",
+          "fastapi",
+          "observables",
+          "reactive-programming",
+          "redis-queue"
+        ],
+        "htmlUrl": "https://github.com/mdapena/pyventus"
+      }
+    },
+    {
+      "id": "celery-075-petrgazarov-fastapi-app",
+      "repository": "https://github.com/petrgazarov/FastAPI-app.git",
+      "commit": "664feaaca5fc2eee5966a1f2e4a6a9be32b3b6e6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 75,
+        "fullName": "petrgazarov/FastAPI-app",
+        "stars": 108,
+        "forks": 9,
+        "sizeKb": 689,
+        "defaultBranch": "main",
+        "pushedAt": "2024-07-29T02:19:35Z",
+        "topics": [
+          "alembic",
+          "asyncio",
+          "celery",
+          "fastapi",
+          "pydantic",
+          "python3",
+          "sqlmodel",
+          "supertokens"
+        ],
+        "htmlUrl": "https://github.com/petrgazarov/FastAPI-app"
+      }
+    },
+    {
+      "id": "celery-076-orsinium-labs-walnats",
+      "repository": "https://github.com/orsinium-labs/walnats.git",
+      "commit": "7f77cb0bb7c4c23f4b2caccdde75c2473eea0a55",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 76,
+        "fullName": "orsinium-labs/walnats",
+        "stars": 103,
+        "forks": 4,
+        "sizeKb": 623,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-12T14:47:44Z",
+        "topics": [
+          "asyncio",
+          "celery",
+          "distributed",
+          "distributed-systems",
+          "dramatiq",
+          "event-driven",
+          "framework",
+          "jetstream",
+          "microservices",
+          "mypy",
+          "nats",
+          "python",
+          "pythonic",
+          "scheduler"
+        ],
+        "htmlUrl": "https://github.com/orsinium-labs/walnats"
+      }
+    },
+    {
+      "id": "celery-077-ovh-celery-dyrygent",
+      "repository": "https://github.com/ovh/celery-dyrygent.git",
+      "commit": "d144559bebf4d03c135ebaace5a403407909e374",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 77,
+        "fullName": "ovh/celery-dyrygent",
+        "stars": 103,
+        "forks": 16,
+        "sizeKb": 85,
+        "defaultBranch": "master",
+        "pushedAt": "2023-09-13T09:22:03Z",
+        "topics": [
+          "automation",
+          "celery",
+          "workflow"
+        ],
+        "htmlUrl": "https://github.com/ovh/celery-dyrygent"
+      }
+    },
+    {
+      "id": "celery-078-vintasoftware-django-celerybeat-status",
+      "repository": "https://github.com/vintasoftware/django-celerybeat-status.git",
+      "commit": "c75c219ea85656030c266d665a36c4e1ff2251b3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 78,
+        "fullName": "vintasoftware/django-celerybeat-status",
+        "stars": 102,
+        "forks": 11,
+        "sizeKb": 190,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-20T17:35:35Z",
+        "topics": [
+          "celery",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/vintasoftware/django-celerybeat-status"
+      }
+    },
+    {
+      "id": "celery-079-simovilab-databus",
+      "repository": "https://github.com/simovilab/databus.git",
+      "commit": "2b062c03b2ff9b36e7e2614e74f03903305dacde",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 79,
+        "fullName": "simovilab/databus",
+        "stars": 101,
+        "forks": 1,
+        "sizeKb": 6291,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-09T15:21:37Z",
+        "topics": [
+          "api",
+          "celery",
+          "django",
+          "gtfs"
+        ],
+        "htmlUrl": "https://github.com/simovilab/databus"
+      }
+    },
+    {
+      "id": "celery-080-clokep-celery-batches",
+      "repository": "https://github.com/clokep/celery-batches.git",
+      "commit": "68b0e64fc329119f032258000c1c1d9d3dab0aab",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 80,
+        "fullName": "clokep/celery-batches",
+        "stars": 101,
+        "forks": 33,
+        "sizeKb": 177,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-13T20:59:25Z",
+        "topics": [
+          "batch-task",
+          "celery",
+          "celery-task",
+          "celery-tasks",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/clokep/celery-batches"
+      }
+    },
+    {
+      "id": "celery-081-praekeltfoundation-docker-django-bootstrap",
+      "repository": "https://github.com/praekeltfoundation/docker-django-bootstrap.git",
+      "commit": "9cac8d7dfb259e7ac74b6d560ca82f9db15e4491",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 81,
+        "fullName": "praekeltfoundation/docker-django-bootstrap",
+        "stars": 98,
+        "forks": 25,
+        "sizeKb": 738,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-08-07T09:01:13Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "gunicorn",
+          "nginx"
+        ],
+        "htmlUrl": "https://github.com/praekeltfoundation/docker-django-bootstrap"
+      }
+    },
+    {
+      "id": "celery-082-tonywangcn-scaleable-crawler-with-docker-cluster",
+      "repository": "https://github.com/tonywangcn/scaleable-crawler-with-docker-cluster.git",
+      "commit": "f3b772a3d29fb0f3b3e6e7ab288b429733aed5dc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 82,
+        "fullName": "tonywangcn/scaleable-crawler-with-docker-cluster",
+        "stars": 97,
+        "forks": 26,
+        "sizeKb": 9,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-08T16:07:20Z",
+        "topics": [
+          "celery",
+          "cluster",
+          "crawler",
+          "distributed",
+          "docker",
+          "python",
+          "rabbitmq",
+          "scaleable"
+        ],
+        "htmlUrl": "https://github.com/tonywangcn/scaleable-crawler-with-docker-cluster"
+      }
+    },
+    {
+      "id": "celery-083-simovilab-infobus",
+      "repository": "https://github.com/simovilab/infobus.git",
+      "commit": "f9e096353585c8dee04ce9b7809857ac6b510654",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 83,
+        "fullName": "simovilab/infobus",
+        "stars": 96,
+        "forks": 2,
+        "sizeKb": 3309,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-09T18:12:02Z",
+        "topics": [
+          "api",
+          "celery",
+          "django",
+          "gtfs"
+        ],
+        "htmlUrl": "https://github.com/simovilab/infobus"
+      }
+    },
+    {
+      "id": "celery-084-wxq0309-fastapi",
+      "repository": "https://github.com/wxq0309/fastapi.git",
+      "commit": "4acf1a1da4a1eedd81a3bdf6256661c2464928b9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 84,
+        "fullName": "wxq0309/fastapi",
+        "stars": 96,
+        "forks": 24,
+        "sizeKb": 202,
+        "defaultBranch": "master",
+        "pushedAt": "2022-03-10T15:42:40Z",
+        "topics": [
+          "celery",
+          "elasticsearch",
+          "fastapi",
+          "gunicorn",
+          "jwt",
+          "orm",
+          "python3",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/wxq0309/fastapi"
+      }
+    },
+    {
+      "id": "celery-085-ys0meone-corvus",
+      "repository": "https://github.com/YS0meone/Corvus.git",
+      "commit": "7abcf9b96234e468b8ffdd0c3242a29d1c5715bd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 85,
+        "fullName": "YS0meone/Corvus",
+        "stars": 95,
+        "forks": 12,
+        "sizeKb": 1009,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-28T22:37:55Z",
+        "topics": [
+          "academic-research",
+          "agentic-rag",
+          "ai-agent",
+          "celery",
+          "fastapi",
+          "grobid",
+          "langchain",
+          "langgraph",
+          "multi-agent",
+          "python",
+          "qdrant",
+          "rag",
+          "react",
+          "typescript",
+          "vector-search"
+        ],
+        "htmlUrl": "https://github.com/YS0meone/Corvus"
+      }
+    },
+    {
+      "id": "celery-086-jimmy201602-celery-monitor",
+      "repository": "https://github.com/jimmy201602/celery-monitor.git",
+      "commit": "cea8a924106a490642804eb254fe10236b4edf4a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 86,
+        "fullName": "jimmy201602/celery-monitor",
+        "stars": 92,
+        "forks": 43,
+        "sizeKb": 17113,
+        "defaultBranch": "master",
+        "pushedAt": "2022-11-04T19:39:24Z",
+        "topics": [
+          "celery",
+          "celery-monitor",
+          "distributed",
+          "django",
+          "monitor"
+        ],
+        "htmlUrl": "https://github.com/jimmy201602/celery-monitor"
+      }
+    },
+    {
+      "id": "celery-087-vjanz-python-asynchronous-tasks",
+      "repository": "https://github.com/vjanz/python-asynchronous-tasks.git",
+      "commit": "d2b3802401dd7a76979067614b9388a24cdb94be",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 87,
+        "fullName": "vjanz/python-asynchronous-tasks",
+        "stars": 88,
+        "forks": 19,
+        "sizeKb": 9,
+        "defaultBranch": "main",
+        "pushedAt": "2022-01-13T11:07:42Z",
+        "topics": [
+          "asynchronous",
+          "celery",
+          "python",
+          "queue",
+          "rabbitmq",
+          "redis",
+          "tasks"
+        ],
+        "htmlUrl": "https://github.com/vjanz/python-asynchronous-tasks"
+      }
+    },
+    {
+      "id": "celery-088-bugsnag-bugsnag-python",
+      "repository": "https://github.com/bugsnag/bugsnag-python.git",
+      "commit": "569df7abdd9ed1a2d5ebb1cda7e193a40f84c47e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 88,
+        "fullName": "bugsnag/bugsnag-python",
+        "stars": 88,
+        "forks": 41,
+        "sizeKb": 1158,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-18T09:20:54Z",
+        "topics": [
+          "bug",
+          "bugs",
+          "bugsnag",
+          "celery",
+          "crash",
+          "crash-reporting",
+          "debug",
+          "debugging-tool",
+          "django",
+          "error-monitoring",
+          "error-reporting",
+          "errors",
+          "exceptions",
+          "flask",
+          "notifier",
+          "platforms",
+          "python",
+          "tornado"
+        ],
+        "htmlUrl": "https://github.com/bugsnag/bugsnag-python"
+      }
+    },
+    {
+      "id": "celery-089-linto-ai-linto-stt",
+      "repository": "https://github.com/linto-ai/linto-stt.git",
+      "commit": "9e2ab9f8db889d86705a81591ecbe7b4999798b8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 89,
+        "fullName": "linto-ai/linto-stt",
+        "stars": 84,
+        "forks": 21,
+        "sizeKb": 1572,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-26T16:03:02Z",
+        "topics": [
+          "asr",
+          "celery",
+          "kaldi-asr",
+          "linto",
+          "microservices",
+          "offline",
+          "online",
+          "speech-recognition",
+          "speech-to-text",
+          "stt",
+          "websockets",
+          "whisper"
+        ],
+        "htmlUrl": "https://github.com/linto-ai/linto-stt"
+      }
+    },
+    {
+      "id": "celery-090-jeyrce-ishare",
+      "repository": "https://github.com/jeyrce/ishare.git",
+      "commit": "ab1d0882a5035bae97b136e4e0ad7c753a000828",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 90,
+        "fullName": "jeyrce/ishare",
+        "stars": 83,
+        "forks": 29,
+        "sizeKb": 19890,
+        "defaultBranch": "main",
+        "pushedAt": "2024-04-22T09:15:24Z",
+        "topics": [
+          "blog",
+          "celery",
+          "django",
+          "layer",
+          "mysql",
+          "nginx",
+          "redis",
+          "simpleui"
+        ],
+        "htmlUrl": "https://github.com/jeyrce/ishare"
+      }
+    },
+    {
+      "id": "celery-091-celery-pytest-celery",
+      "repository": "https://github.com/celery/pytest-celery.git",
+      "commit": "f667a17fa265e82bb5fef5ea3504ccebae1a6d5a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 91,
+        "fullName": "celery/pytest-celery",
+        "stars": 82,
+        "forks": 18,
+        "sizeKb": 2314,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T14:26:40Z",
+        "topics": [
+          "celery",
+          "docker",
+          "pytest",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/pytest-celery"
+      }
+    },
+    {
+      "id": "celery-092-strongbugman-oxalis",
+      "repository": "https://github.com/strongbugman/oxalis.git",
+      "commit": "b5ca4d3082eee1285a6fd881bfb1c05c91eecf64",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 92,
+        "fullName": "strongbugman/oxalis",
+        "stars": 81,
+        "forks": 2,
+        "sizeKb": 130,
+        "defaultBranch": "main",
+        "pushedAt": "2023-07-13T09:52:19Z",
+        "topics": [
+          "asyncio",
+          "celery",
+          "python",
+          "queue",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/strongbugman/oxalis"
+      }
+    },
+    {
+      "id": "celery-093-farahats9-sqlalchemy-celery-beat",
+      "repository": "https://github.com/farahats9/sqlalchemy-celery-beat.git",
+      "commit": "d949bbcc5b9bad9a4f57ad78ead36ae2feedef37",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 93,
+        "fullName": "farahats9/sqlalchemy-celery-beat",
+        "stars": 81,
+        "forks": 14,
+        "sizeKb": 261,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-20T17:55:06Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "fastapi",
+          "flask",
+          "periodic-tasks",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/farahats9/sqlalchemy-celery-beat"
+      }
+    },
+    {
+      "id": "celery-094-johan-sports-wscelery",
+      "repository": "https://github.com/johan-sports/wscelery.git",
+      "commit": "c16a65f2469464b28e8adf527f02de899a589bc9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 94,
+        "fullName": "johan-sports/wscelery",
+        "stars": 78,
+        "forks": 5,
+        "sizeKb": 38,
+        "defaultBranch": "master",
+        "pushedAt": "2017-07-04T13:37:04Z",
+        "topics": [
+          "celery",
+          "monitoring",
+          "python",
+          "websocket"
+        ],
+        "htmlUrl": "https://github.com/johan-sports/wscelery"
+      }
+    },
+    {
+      "id": "celery-095-auvipy-cell",
+      "repository": "https://github.com/auvipy/cell.git",
+      "commit": "ccaea8fcfb5cc1b03cca2e4f2cd9485f33b4023f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 95,
+        "fullName": "auvipy/cell",
+        "stars": 77,
+        "forks": 17,
+        "sizeKb": 660,
+        "defaultBranch": "master",
+        "pushedAt": "2025-10-30T09:59:06Z",
+        "topics": [
+          "actor",
+          "celery",
+          "kombu",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/auvipy/cell"
+      }
+    },
+    {
+      "id": "celery-096-jearistiz-guane-intern-fastapi",
+      "repository": "https://github.com/jearistiz/guane-intern-fastapi.git",
+      "commit": "269adc3ee6a78a262b4e19e7df291fd920fae2e1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 96,
+        "fullName": "jearistiz/guane-intern-fastapi",
+        "stars": 76,
+        "forks": 11,
+        "sizeKb": 629,
+        "defaultBranch": "master",
+        "pushedAt": "2023-06-11T15:29:20Z",
+        "topics": [
+          "celery",
+          "docker",
+          "fastapi",
+          "postgresql",
+          "python",
+          "rabbitmq",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/jearistiz/guane-intern-fastapi"
+      }
+    },
+    {
+      "id": "celery-097-tonywangcn-docker-cluster-with-celery-and-rabbitmq",
+      "repository": "https://github.com/tonywangcn/docker-cluster-with-celery-and-rabbitmq.git",
+      "commit": "03783d5515eae29ae8d9caf46f4643405aad2a76",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 97,
+        "fullName": "tonywangcn/docker-cluster-with-celery-and-rabbitmq",
+        "stars": 76,
+        "forks": 28,
+        "sizeKb": 6,
+        "defaultBranch": "master",
+        "pushedAt": "2018-12-19T12:03:15Z",
+        "topics": [
+          "celery",
+          "cluster",
+          "docker",
+          "rabbitmq"
+        ],
+        "htmlUrl": "https://github.com/tonywangcn/docker-cluster-with-celery-and-rabbitmq"
+      }
+    },
+    {
+      "id": "celery-098-saritasa-nest-django-import-export-extensions",
+      "repository": "https://github.com/saritasa-nest/django-import-export-extensions.git",
+      "commit": "f28a6490eebfbb9b59946da1960e952b6aff7480",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 98,
+        "fullName": "saritasa-nest/django-import-export-extensions",
+        "stars": 75,
+        "forks": 6,
+        "sizeKb": 3748,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-12T22:14:39Z",
+        "topics": [
+          "celery",
+          "csv",
+          "django",
+          "django-import-export",
+          "import-export",
+          "json",
+          "python",
+          "xlsx"
+        ],
+        "htmlUrl": "https://github.com/saritasa-nest/django-import-export-extensions"
+      }
+    },
+    {
+      "id": "celery-099-in03-proxima",
+      "repository": "https://github.com/in03/proxima.git",
+      "commit": "595bb006b6b6a0a5e0b6bbcff1b6d193a173a37d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 99,
+        "fullName": "in03/proxima",
+        "stars": 73,
+        "forks": 3,
+        "sizeKb": 32380,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T20:26:42Z",
+        "topics": [
+          "celery",
+          "cli-app",
+          "davinci-resolve",
+          "distributed-computing",
+          "parallel-computing",
+          "python",
+          "redis",
+          "video-processing"
+        ],
+        "htmlUrl": "https://github.com/in03/proxima"
+      }
+    },
+    {
+      "id": "celery-100-nineaiyu-flyapps",
+      "repository": "https://github.com/nineaiyu/flyapps.git",
+      "commit": "d49ecbdfb6214b4de0301ff70b3adda03b1fbbf0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 100,
+        "fullName": "nineaiyu/flyapps",
+        "stars": 72,
+        "forks": 35,
+        "sizeKb": 11747,
+        "defaultBranch": "master",
+        "pushedAt": "2025-09-09T02:22:14Z",
+        "topics": [
+          "app",
+          "celery",
+          "django-rest-framework",
+          "oss",
+          "sign",
+          "supersign",
+          "zsign"
+        ],
+        "htmlUrl": "https://github.com/nineaiyu/flyapps"
+      }
+    },
+    {
+      "id": "celery-101-nebularazer-flask-celery-example",
+      "repository": "https://github.com/nebularazer/flask-celery-example.git",
+      "commit": "4dd29b4dab726e6e14d66f0f3a36aa0574690804",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 101,
+        "fullName": "nebularazer/flask-celery-example",
+        "stars": 71,
+        "forks": 28,
+        "sizeKb": 106,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-13T17:49:37Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "flask"
+        ],
+        "htmlUrl": "https://github.com/nebularazer/flask-celery-example"
+      }
+    },
+    {
+      "id": "celery-102-saasitive-docker-compose-django-celery-redis-postgres",
+      "repository": "https://github.com/saasitive/docker-compose-django-celery-redis-postgres.git",
+      "commit": "210d664b4b31f676955bc6a67b8047e9aa953367",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 102,
+        "fullName": "saasitive/docker-compose-django-celery-redis-postgres",
+        "stars": 71,
+        "forks": 16,
+        "sizeKb": 68,
+        "defaultBranch": "main",
+        "pushedAt": "2022-11-18T16:09:46Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-rest-framework",
+          "docker",
+          "docker-compose",
+          "postgresql",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/saasitive/docker-compose-django-celery-redis-postgres"
+      }
+    },
+    {
+      "id": "celery-103-woltapp-magic-di",
+      "repository": "https://github.com/woltapp/magic-di.git",
+      "commit": "c1a8fe0fb4c57f2bfba266c6bf3528350388e3f6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 103,
+        "fullName": "woltapp/magic-di",
+        "stars": 70,
+        "forks": 2,
+        "sizeKb": 1201,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-18T10:15:29Z",
+        "topics": [
+          "asyncio",
+          "celery",
+          "dependecy-container",
+          "dependency-injection",
+          "fastapi",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/woltapp/magic-di"
+      }
+    },
+    {
+      "id": "celery-104-jay-johnson-train-ai-with-django-swagger-jwt",
+      "repository": "https://github.com/jay-johnson/train-ai-with-django-swagger-jwt.git",
+      "commit": "3cdd798709b02047eadebccbe2fc9b855cfcac4f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 104,
+        "fullName": "jay-johnson/train-ai-with-django-swagger-jwt",
+        "stars": 69,
+        "forks": 23,
+        "sizeKb": 2826,
+        "defaultBranch": "master",
+        "pushedAt": "2018-11-02T05:45:20Z",
+        "topics": [
+          "ai",
+          "ai-security",
+          "anti-nex",
+          "celery",
+          "celery-tasks",
+          "deep-neural-networks",
+          "django-rest-framework",
+          "drf",
+          "jwt",
+          "keras",
+          "machine-learning",
+          "machine-learning-security",
+          "network-analysis",
+          "network-security",
+          "openshift",
+          "rest-api",
+          "swagger",
+          "tensorflow"
+        ],
+        "htmlUrl": "https://github.com/jay-johnson/train-ai-with-django-swagger-jwt"
+      }
+    },
+    {
+      "id": "celery-105-codingforentrepreneurs-recommender",
+      "repository": "https://github.com/codingforentrepreneurs/recommender.git",
+      "commit": "c342e4ed1aaccb8981eeb1f318b656bb00f7b017",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 105,
+        "fullName": "codingforentrepreneurs/recommender",
+        "stars": 68,
+        "forks": 15,
+        "sizeKb": 148,
+        "defaultBranch": "main",
+        "pushedAt": "2023-02-02T21:04:21Z",
+        "topics": [
+          "celery",
+          "django",
+          "keras",
+          "machine-learning",
+          "machine-learning-orchestration",
+          "mlops",
+          "python",
+          "recommender-system",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/codingforentrepreneurs/recommender"
+      }
+    },
+    {
+      "id": "celery-106-mbrown1508-microsoftbotframework",
+      "repository": "https://github.com/mbrown1508/microsoftbotframework.git",
+      "commit": "427a2cab862a9d8de8faee190f36d0480d28b35f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 106,
+        "fullName": "mbrown1508/microsoftbotframework",
+        "stars": 68,
+        "forks": 17,
+        "sizeKb": 221,
+        "defaultBranch": "master",
+        "pushedAt": "2018-07-03T02:10:43Z",
+        "topics": [
+          "celery",
+          "chatbot",
+          "flask",
+          "microsoft-bot-framework",
+          "python-3"
+        ],
+        "htmlUrl": "https://github.com/mbrown1508/microsoftbotframework"
+      }
+    },
+    {
+      "id": "celery-107-twtrubiks-django-celery-tutorial",
+      "repository": "https://github.com/twtrubiks/django-celery-tutorial.git",
+      "commit": "3069cc01c5516b9974c119cf81917ad61515fcd2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 107,
+        "fullName": "twtrubiks/django-celery-tutorial",
+        "stars": 67,
+        "forks": 19,
+        "sizeKb": 21,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-08T11:14:59Z",
+        "topics": [
+          "celery",
+          "django",
+          "flower",
+          "python",
+          "rabbitmq",
+          "sendmail",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/twtrubiks/django-celery-tutorial"
+      }
+    },
+    {
+      "id": "celery-108-deenuu1-property-aggregator",
+      "repository": "https://github.com/DEENUU1/property-aggregator.git",
+      "commit": "87f67c9ed9572bad3a58fb6153fa890b25856416",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 108,
+        "fullName": "DEENUU1/property-aggregator",
+        "stars": 61,
+        "forks": 12,
+        "sizeKb": 1281,
+        "defaultBranch": "main",
+        "pushedAt": "2024-06-19T14:31:14Z",
+        "topics": [
+          "alembic",
+          "celery",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "flower",
+          "postgresql",
+          "redis",
+          "sqlite",
+          "webscraping"
+        ],
+        "htmlUrl": "https://github.com/DEENUU1/property-aggregator"
+      }
+    },
+    {
+      "id": "celery-109-addu390-django-kafka",
+      "repository": "https://github.com/addu390/django-kafka.git",
+      "commit": "4b039d374f89ced84cec1836c7f535b0a769a9b8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 109,
+        "fullName": "addu390/django-kafka",
+        "stars": 60,
+        "forks": 22,
+        "sizeKb": 30,
+        "defaultBranch": "master",
+        "pushedAt": "2020-10-01T16:30:46Z",
+        "topics": [
+          "celery",
+          "confluent-kafka",
+          "confluent-platform",
+          "django",
+          "django-celery-beat",
+          "django-kafka",
+          "django-rest-framework",
+          "kafka",
+          "publish-subscribe",
+          "zookeeper"
+        ],
+        "htmlUrl": "https://github.com/addu390/django-kafka"
+      }
+    },
+    {
+      "id": "celery-110-sibtc-django-celery-example",
+      "repository": "https://github.com/sibtc/django-celery-example.git",
+      "commit": "16af34c1d736ddbf27e8035044442558afdb2cd5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 110,
+        "fullName": "sibtc/django-celery-example",
+        "stars": 57,
+        "forks": 35,
+        "sizeKb": 8,
+        "defaultBranch": "master",
+        "pushedAt": "2017-08-21T07:32:45Z",
+        "topics": [
+          "celery",
+          "django",
+          "rabbitmq"
+        ],
+        "htmlUrl": "https://github.com/sibtc/django-celery-example"
+      }
+    },
+    {
+      "id": "celery-111-yashpatel7025-pricetracker",
+      "repository": "https://github.com/yashpatel7025/PriceTracker.git",
+      "commit": "c7544184e1f73b555833d03f32ed34be533badd0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 111,
+        "fullName": "yashpatel7025/PriceTracker",
+        "stars": 56,
+        "forks": 18,
+        "sizeKb": 5173,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T05:12:19Z",
+        "topics": [
+          "amazon",
+          "amazon-price-tracker",
+          "celery",
+          "django",
+          "django-background-tasks",
+          "django-framework",
+          "price-tracker",
+          "price-tracking-system",
+          "pricetrack",
+          "python",
+          "python3",
+          "scrapy",
+          "scrapy-framework",
+          "tracker"
+        ],
+        "htmlUrl": "https://github.com/yashpatel7025/PriceTracker"
+      }
+    },
+    {
+      "id": "celery-112-celery-cyme",
+      "repository": "https://github.com/celery/cyme.git",
+      "commit": "c49047318c56f6674bd6d6ea6673b48be4eb7886",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 112,
+        "fullName": "celery/cyme",
+        "stars": 54,
+        "forks": 5,
+        "sizeKb": 447,
+        "defaultBranch": "master",
+        "pushedAt": "2018-01-21T11:55:46Z",
+        "topics": [
+          "actor-model",
+          "celery",
+          "cell",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/celery/cyme"
+      }
+    },
+    {
+      "id": "celery-113-boylegu-celery-task-tigger",
+      "repository": "https://github.com/boylegu/celery-task-tigger.git",
+      "commit": "8951da61e6bebc17c7a3c4611695822a733608d2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 113,
+        "fullName": "boylegu/celery-task-tigger",
+        "stars": 54,
+        "forks": 14,
+        "sizeKb": 38,
+        "defaultBranch": "master",
+        "pushedAt": "2017-06-21T05:40:30Z",
+        "topics": [
+          "celery",
+          "crontab",
+          "periodic",
+          "python",
+          "python3",
+          "task"
+        ],
+        "htmlUrl": "https://github.com/boylegu/celery-task-tigger"
+      }
+    },
+    {
+      "id": "celery-114-shankar-105-social-media-api",
+      "repository": "https://github.com/Shankar-105/Social-Media-Api.git",
+      "commit": "a104b91f5d5f6cf3ca2ef9baed6fa05fea4d8bd1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 114,
+        "fullName": "Shankar-105/Social-Media-Api",
+        "stars": 53,
+        "forks": 20,
+        "sizeKb": 2688,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T12:00:22Z",
+        "topics": [
+          "alembic-migration",
+          "azure-blob-storage",
+          "azure-vm",
+          "backend-api",
+          "celery",
+          "chat-rooms",
+          "docker",
+          "fastapi",
+          "grafana-dashboard",
+          "k6-load-testing",
+          "postgresql",
+          "production-backend",
+          "prometheus-metrics",
+          "pytest",
+          "python3",
+          "rabbitmq",
+          "redis-cache",
+          "social-media",
+          "sqlalchemy",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/Shankar-105/Social-Media-Api"
+      }
+    },
+    {
+      "id": "celery-115-pycn-blog",
+      "repository": "https://github.com/PyCN/Blog.git",
+      "commit": "81296b80e12ab5b724533e6940c89df6a641fa6c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 115,
+        "fullName": "PyCN/Blog",
+        "stars": 52,
+        "forks": 23,
+        "sizeKb": 20888,
+        "defaultBranch": "master",
+        "pushedAt": "2018-05-28T06:52:17Z",
+        "topics": [
+          "bootstrap",
+          "celery",
+          "database",
+          "django",
+          "django-rest-framework",
+          "markdown",
+          "mysql",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/PyCN/Blog"
+      }
+    },
+    {
+      "id": "celery-116-wilfredinni-django-starter-template",
+      "repository": "https://github.com/wilfredinni/django-starter-template.git",
+      "commit": "9fc5e5db56baf96fe06b02d1711d55ca212ab3e9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 116,
+        "fullName": "wilfredinni/django-starter-template",
+        "stars": 52,
+        "forks": 6,
+        "sizeKb": 3348,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T16:24:34Z",
+        "topics": [
+          "api",
+          "api-rest",
+          "boilerplate",
+          "celery",
+          "django",
+          "django-rest-framework",
+          "djangorestframework",
+          "postgresql",
+          "python",
+          "redis",
+          "rest",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/wilfredinni/django-starter-template"
+      }
+    },
+    {
+      "id": "celery-117-kwiersma-flask-celery-sqlalchemy",
+      "repository": "https://github.com/kwiersma/flask-celery-sqlalchemy.git",
+      "commit": "1b2e38f3f09ffd8439e35c1d84b8368d30290a5e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 117,
+        "fullName": "kwiersma/flask-celery-sqlalchemy",
+        "stars": 52,
+        "forks": 11,
+        "sizeKb": 543,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-20T15:56:27Z",
+        "topics": [
+          "celery",
+          "flask",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/kwiersma/flask-celery-sqlalchemy"
+      }
+    },
+    {
+      "id": "celery-118-twtrubiks-docker-django-celery-tutorial",
+      "repository": "https://github.com/twtrubiks/docker-django-celery-tutorial.git",
+      "commit": "50624ff07c71b6453ee02af582f8d3cf22211bee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 118,
+        "fullName": "twtrubiks/docker-django-celery-tutorial",
+        "stars": 52,
+        "forks": 10,
+        "sizeKb": 53,
+        "defaultBranch": "master",
+        "pushedAt": "2022-06-27T12:08:59Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "rabbitmq",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/twtrubiks/docker-django-celery-tutorial"
+      }
+    },
+    {
+      "id": "celery-119-mehdigmira-celery-dashboard",
+      "repository": "https://github.com/mehdigmira/celery-dashboard.git",
+      "commit": "c592889e5e44ea408ab738f8539e37418854957a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 119,
+        "fullName": "mehdigmira/celery-dashboard",
+        "stars": 51,
+        "forks": 6,
+        "sizeKb": 4604,
+        "defaultBranch": "master",
+        "pushedAt": "2018-04-10T10:55:33Z",
+        "topics": [
+          "celery",
+          "dashboard",
+          "dataviz",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/mehdigmira/celery-dashboard"
+      }
+    },
+    {
+      "id": "celery-120-senseta-os-senseta-base-project",
+      "repository": "https://github.com/senseta-os/senseta-base-project.git",
+      "commit": "2cc977b828ac2204cb9fd014abd7c6ff0ff148d6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 120,
+        "fullName": "senseta-os/senseta-base-project",
+        "stars": 51,
+        "forks": 7,
+        "sizeKb": 216,
+        "defaultBranch": "master",
+        "pushedAt": "2018-02-28T16:50:13Z",
+        "topics": [
+          "angular",
+          "api",
+          "apispec",
+          "celery",
+          "cookiecutter",
+          "docker",
+          "flask",
+          "framework",
+          "generator",
+          "letsencrypt",
+          "marshmallow",
+          "pgadmin",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "swagger",
+          "swarm-mode",
+          "token-authetication",
+          "traefik",
+          "webargs"
+        ],
+        "htmlUrl": "https://github.com/senseta-os/senseta-base-project"
+      }
+    },
+    {
+      "id": "celery-121-adhorn-logtoes",
+      "repository": "https://github.com/adhorn/logtoes.git",
+      "commit": "41f6029e928cb5cdd2753e9c42e67fd1e56f5259",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 121,
+        "fullName": "adhorn/logtoes",
+        "stars": 49,
+        "forks": 4,
+        "sizeKb": 12600,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-15T21:34:32Z",
+        "topics": [
+          "asynchronous",
+          "aws",
+          "celery",
+          "elasticsearch",
+          "flask",
+          "flask-api",
+          "gunicorn",
+          "python",
+          "redis",
+          "worker",
+          "worker-service"
+        ],
+        "htmlUrl": "https://github.com/adhorn/logtoes"
+      }
+    },
+    {
+      "id": "celery-122-bizordec-vk-to-tgm",
+      "repository": "https://github.com/Bizordec/vk-to-tgm.git",
+      "commit": "9c0e75aca948b96bc344ef892d4dd3cde9edf273",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 122,
+        "fullName": "Bizordec/vk-to-tgm",
+        "stars": 49,
+        "forks": 4,
+        "sizeKb": 2774,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T15:55:53Z",
+        "topics": [
+          "bot",
+          "celery",
+          "python",
+          "telegram",
+          "telegram-bot",
+          "telegram-channel",
+          "telethon",
+          "vk",
+          "vk-api",
+          "vk-callback-api",
+          "vkbottle",
+          "vkontakte"
+        ],
+        "htmlUrl": "https://github.com/Bizordec/vk-to-tgm"
+      }
+    },
+    {
+      "id": "celery-123-mixkorshun-celery-beatx",
+      "repository": "https://github.com/mixkorshun/celery-beatx.git",
+      "commit": "c87e6986a583433df9cd67a10f25c8c526bd819e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 123,
+        "fullName": "mixkorshun/celery-beatx",
+        "stars": 49,
+        "forks": 12,
+        "sizeKb": 115,
+        "defaultBranch": "master",
+        "pushedAt": "2019-06-11T20:10:42Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "scheduler"
+        ],
+        "htmlUrl": "https://github.com/mixkorshun/celery-beatx"
+      }
+    },
+    {
+      "id": "celery-124-apsl-django-yubin",
+      "repository": "https://github.com/APSL/django-yubin.git",
+      "commit": "57f154237fece7750c462d458d2ae1fdda7c377f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 124,
+        "fullName": "APSL/django-yubin",
+        "stars": 49,
+        "forks": 30,
+        "sizeKb": 542,
+        "defaultBranch": "master",
+        "pushedAt": "2025-07-11T10:44:41Z",
+        "topics": [
+          "celery",
+          "django",
+          "mail",
+          "mailer",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/APSL/django-yubin"
+      }
+    },
+    {
+      "id": "celery-125-abraham-ai-eden",
+      "repository": "https://github.com/abraham-ai/eden.git",
+      "commit": "04b6b3de056f79afbdbdf1d8fa129ffb97f190f8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 125,
+        "fullName": "abraham-ai/eden",
+        "stars": 48,
+        "forks": 5,
+        "sizeKb": 821,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-12T20:46:02Z",
+        "topics": [
+          "celery",
+          "cuda",
+          "fastapi",
+          "python",
+          "redis-client",
+          "task-queue"
+        ],
+        "htmlUrl": "https://github.com/abraham-ai/eden"
+      }
+    },
+    {
+      "id": "celery-126-gabrielvgs-fastapi-base",
+      "repository": "https://github.com/GabrielVGS/fastapi-base.git",
+      "commit": "ea6204d21d135635984ab07fc348b895d4091cbc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 126,
+        "fullName": "GabrielVGS/fastapi-base",
+        "stars": 47,
+        "forks": 5,
+        "sizeKb": 892,
+        "defaultBranch": "main",
+        "pushedAt": "2025-12-16T01:49:42Z",
+        "topics": [
+          "api",
+          "asyncpg",
+          "celery",
+          "fastapi",
+          "fastapi-template",
+          "postgresql",
+          "python",
+          "python3",
+          "rest-api",
+          "sqlalchemy",
+          "sqlmodel",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/GabrielVGS/fastapi-base"
+      }
+    },
+    {
+      "id": "celery-127-rodolfolottin-django-sqs-celery-template",
+      "repository": "https://github.com/rodolfolottin/django-sqs-celery-template.git",
+      "commit": "811f58ffdda0ed12abcd81ad105871de0ff8ea3a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 127,
+        "fullName": "rodolfolottin/django-sqs-celery-template",
+        "stars": 47,
+        "forks": 10,
+        "sizeKb": 29,
+        "defaultBranch": "main",
+        "pushedAt": "2023-07-23T21:13:04Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "sqs"
+        ],
+        "htmlUrl": "https://github.com/rodolfolottin/django-sqs-celery-template"
+      }
+    },
+    {
+      "id": "celery-128-ascoderu-lokole",
+      "repository": "https://github.com/ascoderu/lokole.git",
+      "commit": "b453459596e87f5441463b88781e2791e29b20df",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 128,
+        "fullName": "ascoderu/lokole",
+        "stars": 46,
+        "forks": 12,
+        "sizeKb": 5979,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-01T23:38:38Z",
+        "topics": [
+          "antd",
+          "azure",
+          "celery",
+          "connexion",
+          "dnsmasq",
+          "docker",
+          "hacktoberfest",
+          "helm",
+          "hostapd",
+          "kubernetes",
+          "libcloud",
+          "python3",
+          "raspberry-pi",
+          "reactjs",
+          "sendgrid",
+          "usb-modeswitch",
+          "wvdial"
+        ],
+        "htmlUrl": "https://github.com/ascoderu/lokole"
+      }
+    },
+    {
+      "id": "celery-129-yakneens-flickr-to-google-photos-migration",
+      "repository": "https://github.com/yakneens/flickr_to_google_photos_migration.git",
+      "commit": "2ab22c13056324e3ad63ed75df02a1d10e579b91",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 129,
+        "fullName": "yakneens/flickr_to_google_photos_migration",
+        "stars": 46,
+        "forks": 11,
+        "sizeKb": 661,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-03T11:21:31Z",
+        "topics": [
+          "celery",
+          "flickr",
+          "google-photos",
+          "migration",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/yakneens/flickr_to_google_photos_migration"
+      }
+    },
+    {
+      "id": "celery-130-dotja-django-example",
+      "repository": "https://github.com/dotja/django-example.git",
+      "commit": "bebcec10aad5a7fde85b095f0b57d53f82701155",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 130,
+        "fullName": "dotja/django-example",
+        "stars": 45,
+        "forks": 13,
+        "sizeKb": 22,
+        "defaultBranch": "main",
+        "pushedAt": "2023-03-28T11:12:06Z",
+        "topics": [
+          "celery",
+          "custom-user-model",
+          "django",
+          "photo-editing",
+          "stripe-payments"
+        ],
+        "htmlUrl": "https://github.com/dotja/django-example"
+      }
+    },
+    {
+      "id": "celery-131-prefecthq-prefect-background-task-examples",
+      "repository": "https://github.com/PrefectHQ/prefect-background-task-examples.git",
+      "commit": "07af1903d77bd24ee228db76bc17d5651beb0853",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 131,
+        "fullName": "PrefectHQ/prefect-background-task-examples",
+        "stars": 45,
+        "forks": 2,
+        "sizeKb": 2134,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-11T01:10:37Z",
+        "topics": [
+          "background-jobs",
+          "celery",
+          "prefect",
+          "tasks"
+        ],
+        "htmlUrl": "https://github.com/PrefectHQ/prefect-background-task-examples"
+      }
+    },
+    {
+      "id": "celery-132-alperencubuk-fastapi-celery-redis-postgres-docker-rest-api",
+      "repository": "https://github.com/alperencubuk/fastapi-celery-redis-postgres-docker-rest-api.git",
+      "commit": "3326587862bd4ff310edf4a50eddb4c2d9b6154f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 132,
+        "fullName": "alperencubuk/fastapi-celery-redis-postgres-docker-rest-api",
+        "stars": 44,
+        "forks": 8,
+        "sizeKb": 118,
+        "defaultBranch": "main",
+        "pushedAt": "2022-11-19T19:42:04Z",
+        "topics": [
+          "celery",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "postgresql",
+          "redis",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/alperencubuk/fastapi-celery-redis-postgres-docker-rest-api"
+      }
+    },
+    {
+      "id": "celery-133-duo0301-crawlermonitor",
+      "repository": "https://github.com/duo0301/CrawlerMonitor.git",
+      "commit": "acef65486fa55912118e9bf0edc861c6621bb571",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 133,
+        "fullName": "duo0301/CrawlerMonitor",
+        "stars": 44,
+        "forks": 9,
+        "sizeKb": 28,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-13T11:47:24Z",
+        "topics": [
+          "celery",
+          "grafana",
+          "mongodb",
+          "prometheus",
+          "rabbitmq",
+          "requests"
+        ],
+        "htmlUrl": "https://github.com/duo0301/CrawlerMonitor"
+      }
+    },
+    {
+      "id": "celery-134-mpanaryin-job-scope",
+      "repository": "https://github.com/mpanaryin/job_scope.git",
+      "commit": "dfcc24357b41f4ec602415c9e4dba8664a1a69ee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 134,
+        "fullName": "mpanaryin/job_scope",
+        "stars": 44,
+        "forks": 5,
+        "sizeKb": 1612,
+        "defaultBranch": "main",
+        "pushedAt": "2025-05-12T20:25:23Z",
+        "topics": [
+          "alembic",
+          "celery",
+          "celerybeat",
+          "clean-architecture",
+          "elasticsearch",
+          "fastapi",
+          "filebeat",
+          "flower",
+          "grafana",
+          "kibana",
+          "logstash",
+          "postgresql",
+          "prometheus",
+          "python3",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/mpanaryin/job_scope"
+      }
+    },
+    {
+      "id": "celery-135-propsai-agentserve",
+      "repository": "https://github.com/PropsAI/agentserve.git",
+      "commit": "7ac517b2a6839c45d1df063395edbf4c33f04b65",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 135,
+        "fullName": "PropsAI/agentserve",
+        "stars": 43,
+        "forks": 5,
+        "sizeKb": 67,
+        "defaultBranch": "main",
+        "pushedAt": "2024-11-25T15:40:37Z",
+        "topics": [
+          "agentic",
+          "agents",
+          "agentserve",
+          "ai",
+          "aiagent",
+          "aiagents",
+          "api",
+          "celery",
+          "deploy",
+          "deployment",
+          "framework",
+          "hosting",
+          "langchain",
+          "llamaindex",
+          "openai",
+          "python",
+          "rag",
+          "redis",
+          "rest",
+          "scaling"
+        ],
+        "htmlUrl": "https://github.com/PropsAI/agentserve"
+      }
+    },
+    {
+      "id": "celery-136-coolfool-ravager",
+      "repository": "https://github.com/CoolFool/Ravager.git",
+      "commit": "3d0bfef40a21a9cf2cd7c2fac8381cd5e390607d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 136,
+        "fullName": "CoolFool/Ravager",
+        "stars": 42,
+        "forks": 50,
+        "sizeKb": 14928,
+        "defaultBranch": "main",
+        "pushedAt": "2023-02-21T21:49:39Z",
+        "topics": [
+          "aria2",
+          "bot",
+          "celery",
+          "docker",
+          "docker-compose",
+          "downloader",
+          "google-drive-uploader",
+          "heroku",
+          "mirror-bot",
+          "self-hosted",
+          "telegram",
+          "torrent-downloader"
+        ],
+        "htmlUrl": "https://github.com/CoolFool/Ravager"
+      }
+    },
+    {
+      "id": "celery-137-novacode-nl-odoo-celery",
+      "repository": "https://github.com/novacode-nl/odoo-celery.git",
+      "commit": "ec02f2e37c724665b26b5023ef8f4ac0463ae1b9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 137,
+        "fullName": "novacode-nl/odoo-celery",
+        "stars": 42,
+        "forks": 45,
+        "sizeKb": 11251,
+        "defaultBranch": "14.0",
+        "pushedAt": "2024-05-02T21:09:38Z",
+        "topics": [
+          "celery",
+          "odoo"
+        ],
+        "htmlUrl": "https://github.com/novacode-nl/odoo-celery"
+      }
+    },
+    {
+      "id": "celery-138-rishank-shah-income-expense-tracker",
+      "repository": "https://github.com/rishank-shah/Income-Expense-Tracker.git",
+      "commit": "e11962db8be6fe248c4ebe2f1dfdca1422a3bb69",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 138,
+        "fullName": "rishank-shah/Income-Expense-Tracker",
+        "stars": 42,
+        "forks": 15,
+        "sizeKb": 359,
+        "defaultBranch": "main",
+        "pushedAt": "2022-02-06T06:22:35Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "cloudinary-api",
+          "django",
+          "expense-manager",
+          "expense-report",
+          "expense-tracker",
+          "expenses",
+          "graph",
+          "heroku-deployment",
+          "income-and-expenses",
+          "income-expense-manager",
+          "income-expense-tracker",
+          "personalfinance",
+          "postgresql",
+          "python3",
+          "reminder",
+          "sentry",
+          "visualization"
+        ],
+        "htmlUrl": "https://github.com/rishank-shah/Income-Expense-Tracker"
+      }
+    },
+    {
+      "id": "celery-139-psychok7-django-celery-inspect",
+      "repository": "https://github.com/psychok7/django-celery-inspect.git",
+      "commit": "26302cd71a0bb6bed8caf922b8cf15ea95aef699",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 139,
+        "fullName": "psychok7/django-celery-inspect",
+        "stars": 41,
+        "forks": 5,
+        "sizeKb": 10,
+        "defaultBranch": "master",
+        "pushedAt": "2017-02-21T17:37:24Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-rest-framework",
+          "inspection",
+          "monitoring",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/psychok7/django-celery-inspect"
+      }
+    },
+    {
+      "id": "celery-140-davidawad-spaceshare",
+      "repository": "https://github.com/davidawad/SpaceShare.git",
+      "commit": "d43a5239b2acddb971997ec394ec3afc726563b2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 140,
+        "fullName": "davidawad/SpaceShare",
+        "stars": 41,
+        "forks": 14,
+        "sizeKb": 14459,
+        "defaultBranch": "master",
+        "pushedAt": "2017-10-10T15:56:29Z",
+        "topics": [
+          "celery",
+          "flask",
+          "python",
+          "react",
+          "redis",
+          "resize"
+        ],
+        "htmlUrl": "https://github.com/davidawad/SpaceShare"
+      }
+    },
+    {
+      "id": "celery-141-shamspias-google-reviews-chatbot",
+      "repository": "https://github.com/shamspias/google-reviews-chatbot.git",
+      "commit": "a164831c8e590b73715ee6bb9e427925f8d03ea7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 141,
+        "fullName": "shamspias/google-reviews-chatbot",
+        "stars": 41,
+        "forks": 6,
+        "sizeKb": 13,
+        "defaultBranch": "main",
+        "pushedAt": "2023-03-25T18:35:27Z",
+        "topics": [
+          "ai",
+          "artificial-intelligence",
+          "automation",
+          "celery",
+          "chatbot",
+          "flask",
+          "google",
+          "google-my-business",
+          "google-reviews",
+          "google-reviews-api",
+          "gpt3",
+          "gpt4",
+          "natural-language-processing",
+          "nlp",
+          "nlp-machine-learning",
+          "python",
+          "python3",
+          "task-scheduler"
+        ],
+        "htmlUrl": "https://github.com/shamspias/google-reviews-chatbot"
+      }
+    },
+    {
+      "id": "celery-142-wmramadan-fastapi-boilerplate",
+      "repository": "https://github.com/WMRamadan/fastapi-boilerplate.git",
+      "commit": "92591cb8eabbf56b3d50af44eea6b0f64290a59c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 142,
+        "fullName": "WMRamadan/fastapi-boilerplate",
+        "stars": 41,
+        "forks": 4,
+        "sizeKb": 144,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-23T18:25:58Z",
+        "topics": [
+          "asynchronous",
+          "asyncio",
+          "boilerplate",
+          "celery",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "loguru",
+          "pydantic",
+          "pylint",
+          "pymongo",
+          "pytest",
+          "python",
+          "python3",
+          "redis",
+          "rest-api",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/WMRamadan/fastapi-boilerplate"
+      }
+    },
+    {
+      "id": "celery-143-dj-ms-dj-ms-core",
+      "repository": "https://github.com/dj-ms/dj-ms-core.git",
+      "commit": "82a7982eb77f8547f035b050e5cdc096b325175d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 143,
+        "fullName": "dj-ms/dj-ms-core",
+        "stars": 40,
+        "forks": 9,
+        "sizeKb": 1029,
+        "defaultBranch": "main",
+        "pushedAt": "2023-03-01T05:49:22Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "docker-compose",
+          "kubernetes",
+          "microservices",
+          "nginx",
+          "postgres",
+          "python",
+          "rabbitmq"
+        ],
+        "htmlUrl": "https://github.com/dj-ms/dj-ms-core"
+      }
+    },
+    {
+      "id": "celery-144-jay-johnson-celery-connectors",
+      "repository": "https://github.com/jay-johnson/celery-connectors.git",
+      "commit": "f6d48bf3e48513228a86a1ff6014b6e6cf465742",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 144,
+        "fullName": "jay-johnson/celery-connectors",
+        "stars": 40,
+        "forks": 7,
+        "sizeKb": 3450,
+        "defaultBranch": "master",
+        "pushedAt": "2018-11-02T19:58:22Z",
+        "topics": [
+          "ansible",
+          "celery",
+          "celery-bootsteps",
+          "docker",
+          "docker-compose",
+          "docker-compose-files",
+          "kombu",
+          "publisher-subscriber",
+          "pubsub",
+          "python",
+          "python3",
+          "rabbitmq",
+          "rabbitmq-cluster",
+          "redis",
+          "redis-cluster",
+          "sqs",
+          "sqs-consumer",
+          "ssl",
+          "subscriber",
+          "workers"
+        ],
+        "htmlUrl": "https://github.com/jay-johnson/celery-connectors"
+      }
+    },
+    {
+      "id": "celery-145-jonepatr-genea-visualizer",
+      "repository": "https://github.com/jonepatr/genea_visualizer.git",
+      "commit": "e9284427ec32bc3c97c5db0f91e895c2a19b24ab",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 145,
+        "fullName": "jonepatr/genea_visualizer",
+        "stars": 40,
+        "forks": 18,
+        "sizeKb": 2296,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-23T13:24:41Z",
+        "topics": [
+          "bvh",
+          "celery",
+          "visualization-server"
+        ],
+        "htmlUrl": "https://github.com/jonepatr/genea_visualizer"
+      }
+    },
+    {
+      "id": "celery-146-ryuchen-deadpool",
+      "repository": "https://github.com/Ryuchen/DeadPool.git",
+      "commit": "689395451035409140b80cef205255188c2749b4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 146,
+        "fullName": "Ryuchen/DeadPool",
+        "stars": 40,
+        "forks": 16,
+        "sizeKb": 39707,
+        "defaultBranch": "master",
+        "pushedAt": "2022-09-23T22:27:19Z",
+        "topics": [
+          "celery",
+          "crawler",
+          "deadpool",
+          "python3",
+          "spider",
+          "taobao",
+          "taobao-spider",
+          "tmall",
+          "tmall-spider"
+        ],
+        "htmlUrl": "https://github.com/Ryuchen/DeadPool"
+      }
+    },
+    {
+      "id": "celery-147-mohamad-liyaghi-foodanywhere",
+      "repository": "https://github.com/mohamad-liyaghi/FoodAnywhere.git",
+      "commit": "86b51dce24256a11e4e844254051f4ea27381d5a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 147,
+        "fullName": "mohamad-liyaghi/FoodAnywhere",
+        "stars": 40,
+        "forks": 3,
+        "sizeKb": 893,
+        "defaultBranch": "main",
+        "pushedAt": "2024-09-20T09:41:36Z",
+        "topics": [
+          "caching",
+          "celery",
+          "django",
+          "grafana",
+          "jaeger",
+          "kubernetes",
+          "loki",
+          "nodeexporter",
+          "opentelemetry",
+          "postgis",
+          "prometheus",
+          "promtail",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/mohamad-liyaghi/FoodAnywhere"
+      }
+    },
+    {
+      "id": "celery-148-crimeisdown-trunk-transcribe",
+      "repository": "https://github.com/CrimeIsDown/trunk-transcribe.git",
+      "commit": "ba669ae636921328d6c6aeb23cf806669b07e834",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 148,
+        "fullName": "CrimeIsDown/trunk-transcribe",
+        "stars": 40,
+        "forks": 3,
+        "sizeKb": 3296,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-18T05:11:48Z",
+        "topics": [
+          "celery",
+          "meilisearch",
+          "openai-whisper",
+          "telegram-bot",
+          "trunk-recorder",
+          "whisper"
+        ],
+        "htmlUrl": "https://github.com/CrimeIsDown/trunk-transcribe"
+      }
+    },
+    {
+      "id": "celery-149-bahus-celery-chunkify-task",
+      "repository": "https://github.com/Bahus/celery-chunkify-task.git",
+      "commit": "70577519050c4b306a7e3d56bcfe40505960117e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 149,
+        "fullName": "Bahus/celery-chunkify-task",
+        "stars": 40,
+        "forks": 7,
+        "sizeKb": 6,
+        "defaultBranch": "master",
+        "pushedAt": "2018-10-22T18:47:39Z",
+        "topics": [
+          "celery",
+          "chunks"
+        ],
+        "htmlUrl": "https://github.com/Bahus/celery-chunkify-task"
+      }
+    },
+    {
+      "id": "celery-150-sergio11-lyric-wave-architecture",
+      "repository": "https://github.com/sergio11/lyric_wave_architecture.git",
+      "commit": "9853454d29aa7be6f5e20eb85a6b31a4e3f5beba",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 150,
+        "fullName": "sergio11/lyric_wave_architecture",
+        "stars": 39,
+        "forks": 9,
+        "sizeKb": 30464,
+        "defaultBranch": "main",
+        "pushedAt": "2025-09-20T11:07:42Z",
+        "topics": [
+          "airflow",
+          "airflow-dags",
+          "airflow-docker",
+          "airflow-operators",
+          "apache-airflow",
+          "audiocraft",
+          "celery",
+          "docker",
+          "docker-compose",
+          "flask",
+          "flask-api",
+          "huggingface",
+          "huggingface-transformers",
+          "mongodb",
+          "music-generation",
+          "music-processing",
+          "musicgen",
+          "pytorch",
+          "stable-diffusion",
+          "suno-ai"
+        ],
+        "htmlUrl": "https://github.com/sergio11/lyric_wave_architecture"
+      }
+    },
+    {
+      "id": "celery-151-ssfdust-full-stack-flask-smorest",
+      "repository": "https://github.com/ssfdust/full-stack-flask-smorest.git",
+      "commit": "f2088d1fb71142abb0ae5b14b4ae45547c335a2a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 151,
+        "fullName": "ssfdust/full-stack-flask-smorest",
+        "stars": 38,
+        "forks": 9,
+        "sizeKb": 6629,
+        "defaultBranch": "master",
+        "pushedAt": "2024-05-06T20:44:14Z",
+        "topics": [
+          "adminlte",
+          "celery",
+          "flask",
+          "flask-smorest",
+          "jwt",
+          "mongodb",
+          "openapi",
+          "rabbitmq",
+          "swagger"
+        ],
+        "htmlUrl": "https://github.com/ssfdust/full-stack-flask-smorest"
+      }
+    },
+    {
+      "id": "celery-152-powergo-django-celery-fulldbresult",
+      "repository": "https://github.com/powergo/django-celery-fulldbresult.git",
+      "commit": "665679c846e80b1e22aad430910d519ef593ef22",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 152,
+        "fullName": "powergo/django-celery-fulldbresult",
+        "stars": 38,
+        "forks": 4,
+        "sizeKb": 1343,
+        "defaultBranch": "master",
+        "pushedAt": "2018-01-26T15:29:48Z",
+        "topics": [
+          "celery",
+          "distributed-systems",
+          "django",
+          "scheduled-tasks"
+        ],
+        "htmlUrl": "https://github.com/powergo/django-celery-fulldbresult"
+      }
+    },
+    {
+      "id": "celery-153-alanjds-celery-serverless",
+      "repository": "https://github.com/alanjds/celery-serverless.git",
+      "commit": "ee6cc0ffbeea79999cedeffb31830e2f011bd5bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 153,
+        "fullName": "alanjds/celery-serverless",
+        "stars": 38,
+        "forks": 8,
+        "sizeKb": 279,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-26T20:46:30Z",
+        "topics": [
+          "aws-lambda",
+          "celery",
+          "hacktoberfest"
+        ],
+        "htmlUrl": "https://github.com/alanjds/celery-serverless"
+      }
+    },
+    {
+      "id": "celery-154-fctl3314-healthnutrition-backend",
+      "repository": "https://github.com/FCTL3314/HealthNutrition-Backend.git",
+      "commit": "c7546a56d1858a808c3aebdc8e1c2a11ed2daae7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 154,
+        "fullName": "FCTL3314/HealthNutrition-Backend",
+        "stars": 37,
+        "forks": 2,
+        "sizeKb": 819,
+        "defaultBranch": "master",
+        "pushedAt": "2024-09-23T21:58:12Z",
+        "topics": [
+          "celery",
+          "crud-api",
+          "ddd",
+          "django",
+          "django-rest-framework",
+          "docker",
+          "documentation",
+          "jwt",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/FCTL3314/HealthNutrition-Backend"
+      }
+    },
+    {
+      "id": "celery-155-dhruv-goyal-10-linkedin-clone-backend",
+      "repository": "https://github.com/dhruv-goyal-10/Linkedin-Clone-backend.git",
+      "commit": "913b5ba6cf634b2eebea3cb128fe079e99e24a5d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 155,
+        "fullName": "dhruv-goyal-10/Linkedin-Clone-backend",
+        "stars": 37,
+        "forks": 12,
+        "sizeKb": 2868,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-25T16:39:23Z",
+        "topics": [
+          "azure",
+          "celery",
+          "cloudinary",
+          "django",
+          "django-rest-framework",
+          "jwt-authentication",
+          "linkedin-clone",
+          "nginx-proxy",
+          "postgresql",
+          "python",
+          "twilio",
+          "websockets"
+        ],
+        "htmlUrl": "https://github.com/dhruv-goyal-10/Linkedin-Clone-backend"
+      }
+    },
+    {
+      "id": "celery-156-developers-cosmos-mimasa",
+      "repository": "https://github.com/developers-cosmos/Mimasa.git",
+      "commit": "16c6beea5f28e8314042b57d48eed73e486cc3e8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 156,
+        "fullName": "developers-cosmos/Mimasa",
+        "stars": 37,
+        "forks": 13,
+        "sizeKb": 1018,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-01T04:48:05Z",
+        "topics": [
+          "audio-separation",
+          "celery",
+          "face-detection",
+          "github-actions",
+          "mimasa",
+          "python",
+          "real-time-multilingual-face-translator",
+          "redis",
+          "rest-api",
+          "speech-recognition",
+          "speech-to-text",
+          "video-translation"
+        ],
+        "htmlUrl": "https://github.com/developers-cosmos/Mimasa"
+      }
+    },
+    {
+      "id": "celery-157-poonesh-flask-socketio-celery-example",
+      "repository": "https://github.com/poonesh/Flask-SocketIO-Celery-example.git",
+      "commit": "82717e1ec7bc3881f1c7c911e5423e8ed0fff4b3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 157,
+        "fullName": "poonesh/Flask-SocketIO-Celery-example",
+        "stars": 36,
+        "forks": 8,
+        "sizeKb": 5,
+        "defaultBranch": "master",
+        "pushedAt": "2022-01-06T22:23:08Z",
+        "topics": [
+          "celery",
+          "flask",
+          "flask-socketio",
+          "python",
+          "socket-io"
+        ],
+        "htmlUrl": "https://github.com/poonesh/Flask-SocketIO-Celery-example"
+      }
+    },
+    {
+      "id": "celery-158-zenyui-celery-flask-factory",
+      "repository": "https://github.com/zenyui/celery-flask-factory.git",
+      "commit": "4462e9fd5ee82aa8908a6cb4ada66dfbf39c9c1f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 158,
+        "fullName": "zenyui/celery-flask-factory",
+        "stars": 36,
+        "forks": 6,
+        "sizeKb": 20,
+        "defaultBranch": "master",
+        "pushedAt": "2022-01-06T22:24:35Z",
+        "topics": [
+          "celery",
+          "flask",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/zenyui/celery-flask-factory"
+      }
+    },
+    {
+      "id": "celery-159-erdem-flask-restful-example",
+      "repository": "https://github.com/erdem/flask-restful-example.git",
+      "commit": "26a8b1de142229fc6e0bcd672f0434e858c2f410",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 159,
+        "fullName": "erdem/flask-restful-example",
+        "stars": 35,
+        "forks": 12,
+        "sizeKb": 26,
+        "defaultBranch": "master",
+        "pushedAt": "2022-01-06T22:36:07Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "flask",
+          "flask-sqlalchemy",
+          "marshmallow",
+          "pytest",
+          "restful-api",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/erdem/flask-restful-example"
+      }
+    },
+    {
+      "id": "celery-160-harmeet10000-agentnexus-langchain-fastapi",
+      "repository": "https://github.com/Harmeet10000/AgentNexus-LangChain-FastAPI.git",
+      "commit": "2beddca6185b3656ae35dbb3889b210566a2ee49",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 160,
+        "fullName": "Harmeet10000/AgentNexus-LangChain-FastAPI",
+        "stars": 35,
+        "forks": 5,
+        "sizeKb": 17048,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T20:32:22Z",
+        "topics": [
+          "celery",
+          "cognee",
+          "crawl4ai",
+          "docker",
+          "docling",
+          "fastapi",
+          "gemini",
+          "langchain",
+          "langgraph",
+          "langsmith",
+          "mcp",
+          "memory",
+          "pydantic",
+          "rag",
+          "tenacity",
+          "workflows"
+        ],
+        "htmlUrl": "https://github.com/Harmeet10000/AgentNexus-LangChain-FastAPI"
+      }
+    },
+    {
+      "id": "celery-161-huchenw-django-docker",
+      "repository": "https://github.com/huchenw/django-docker.git",
+      "commit": "0d3d979045c77e1247dffba017c8e7ba77764264",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 161,
+        "fullName": "huchenw/django-docker",
+        "stars": 35,
+        "forks": 20,
+        "sizeKb": 12,
+        "defaultBranch": "master",
+        "pushedAt": "2018-04-26T04:13:55Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "mysql",
+          "nginx",
+          "redis",
+          "uwsgi"
+        ],
+        "htmlUrl": "https://github.com/huchenw/django-docker"
+      }
+    },
+    {
+      "id": "celery-162-dimplesy-fastapi-ai-starter",
+      "repository": "https://github.com/DimplesY/fastapi-ai-starter.git",
+      "commit": "031055a5f8d60321336a858d5ad5d32d3971ba67",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 162,
+        "fullName": "DimplesY/fastapi-ai-starter",
+        "stars": 34,
+        "forks": 1,
+        "sizeKb": 788,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-18T08:38:59Z",
+        "topics": [
+          "ai",
+          "celery",
+          "fastapi",
+          "postgresql",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/DimplesY/fastapi-ai-starter"
+      }
+    },
+    {
+      "id": "celery-163-ehsanmqn-url-shortener",
+      "repository": "https://github.com/ehsanmqn/url-shortener.git",
+      "commit": "43c6a23993674eec30a33930a618bc5d4ddea367",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 163,
+        "fullName": "ehsanmqn/url-shortener",
+        "stars": 34,
+        "forks": 3,
+        "sizeKb": 68,
+        "defaultBranch": "master",
+        "pushedAt": "2024-06-26T18:11:53Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-authentication",
+          "django-rest-api",
+          "django-rest-framewok",
+          "django-rest-framework",
+          "drf",
+          "python",
+          "redis",
+          "url-shortener"
+        ],
+        "htmlUrl": "https://github.com/ehsanmqn/url-shortener"
+      }
+    },
+    {
+      "id": "celery-164-testdrivenio-falcon-celery",
+      "repository": "https://github.com/testdrivenio/falcon-celery.git",
+      "commit": "a1f93e5760a3202a6b80746be013d5da877b15a7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 164,
+        "fullName": "testdrivenio/falcon-celery",
+        "stars": 33,
+        "forks": 12,
+        "sizeKb": 17,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-31T15:29:22Z",
+        "topics": [
+          "celery",
+          "docker",
+          "falcon",
+          "falcon-framework",
+          "task-queue"
+        ],
+        "htmlUrl": "https://github.com/testdrivenio/falcon-celery"
+      }
+    },
+    {
+      "id": "celery-165-kaitohh-xiaohongshu-spider-visualizer",
+      "repository": "https://github.com/KaitoHH/xiaohongshu-spider-visualizer.git",
+      "commit": "7f9a576e91b8c51746ea12a58c40982c40d2f5a2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 165,
+        "fullName": "KaitoHH/xiaohongshu-spider-visualizer",
+        "stars": 33,
+        "forks": 10,
+        "sizeKb": 15448,
+        "defaultBranch": "master",
+        "pushedAt": "2018-08-01T14:50:28Z",
+        "topics": [
+          "celery",
+          "crawler",
+          "docker",
+          "redis",
+          "spider",
+          "visulization",
+          "wordcloud"
+        ],
+        "htmlUrl": "https://github.com/KaitoHH/xiaohongshu-spider-visualizer"
+      }
+    },
+    {
+      "id": "celery-166-ahmetkotan-celeryman",
+      "repository": "https://github.com/ahmetkotan/celeryman.git",
+      "commit": "2222ce9f9bcbd3899ff08c5ff236b5281068080b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 166,
+        "fullName": "ahmetkotan/celeryman",
+        "stars": 33,
+        "forks": 4,
+        "sizeKb": 11,
+        "defaultBranch": "master",
+        "pushedAt": "2022-01-06T22:27:46Z",
+        "topics": [
+          "async",
+          "celery",
+          "django",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/ahmetkotan/celeryman"
+      }
+    },
+    {
+      "id": "celery-167-zimmerman-team-iati-cloud",
+      "repository": "https://github.com/zimmerman-team/IATI.cloud.git",
+      "commit": "f51e41d22619083502f51066ac7dde8c8c9d22f3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 167,
+        "fullName": "zimmerman-team/IATI.cloud",
+        "stars": 33,
+        "forks": 29,
+        "sizeKb": 56441,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-25T13:52:37Z",
+        "topics": [
+          "apache",
+          "apache-solr",
+          "celery",
+          "data-science",
+          "data-validation",
+          "data-visualisation",
+          "dataviz",
+          "django",
+          "iati",
+          "iati-data",
+          "iati-registry",
+          "iati-standard",
+          "ict4d",
+          "open-data",
+          "python",
+          "solr",
+          "solr-search",
+          "solrcloud",
+          "vagrant",
+          "zimmerman"
+        ],
+        "htmlUrl": "https://github.com/zimmerman-team/IATI.cloud"
+      }
+    },
+    {
+      "id": "celery-168-betaflag-django-dx",
+      "repository": "https://github.com/betaflag/django_dx.git",
+      "commit": "603ebc1557ba83ea6105355ed54b0122ea0f8e29",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 168,
+        "fullName": "betaflag/django_dx",
+        "stars": 32,
+        "forks": 1,
+        "sizeKb": 140,
+        "defaultBranch": "main",
+        "pushedAt": "2023-05-08T12:06:12Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "docker-compose",
+          "github-actions",
+          "postgresql",
+          "pylint",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/betaflag/django_dx"
+      }
+    },
+    {
+      "id": "celery-169-mobolic-django-session-cleanup",
+      "repository": "https://github.com/mobolic/django-session-cleanup.git",
+      "commit": "06040e5c708a74c872209133de1128f0ce6899f6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 169,
+        "fullName": "mobolic/django-session-cleanup",
+        "stars": 32,
+        "forks": 11,
+        "sizeKb": 29,
+        "defaultBranch": "master",
+        "pushedAt": "2025-06-05T22:48:05Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "django"
+        ],
+        "htmlUrl": "https://github.com/mobolic/django-session-cleanup"
+      }
+    },
+    {
+      "id": "celery-170-abhioncbr-docker-airflow",
+      "repository": "https://github.com/abhioncbr/docker-airflow.git",
+      "commit": "406e4b10b830b91f296a97618f48f826b9c770b6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 170,
+        "fullName": "abhioncbr/docker-airflow",
+        "stars": 32,
+        "forks": 4,
+        "sizeKb": 1094,
+        "defaultBranch": "master",
+        "pushedAt": "2019-06-02T23:17:25Z",
+        "topics": [
+          "airflow",
+          "airflow-docker",
+          "aws-s3",
+          "celery",
+          "distributed-systems",
+          "docker",
+          "docker-airflow",
+          "gcp-container-builder",
+          "redis",
+          "scheduler",
+          "work-manager"
+        ],
+        "htmlUrl": "https://github.com/abhioncbr/docker-airflow"
+      }
+    },
+    {
+      "id": "celery-171-cibiaananth-fullstack-next-fastapi",
+      "repository": "https://github.com/CibiAananth/fullstack-next-fastapi.git",
+      "commit": "8de7453c6eb98f68f328fc9fbeed4c5ccfb464af",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 171,
+        "fullName": "CibiAananth/fullstack-next-fastapi",
+        "stars": 32,
+        "forks": 12,
+        "sizeKb": 175,
+        "defaultBranch": "main",
+        "pushedAt": "2023-07-26T17:50:52Z",
+        "topics": [
+          "alembic",
+          "celery",
+          "fastapi",
+          "fastapi-template",
+          "fullstack",
+          "nextjs",
+          "postgresql",
+          "pydantic",
+          "python",
+          "rabbitmq",
+          "redis",
+          "sqlalchemy",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/CibiAananth/fullstack-next-fastapi"
+      }
+    },
+    {
+      "id": "celery-172-payamt007-fastapi-toolkit",
+      "repository": "https://github.com/payamt007/FastAPI-Toolkit.git",
+      "commit": "540a520edde8d6c2b1d4cd1cb81bd5457f335d3f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 172,
+        "fullName": "payamt007/FastAPI-Toolkit",
+        "stars": 32,
+        "forks": 2,
+        "sizeKb": 498,
+        "defaultBranch": "main",
+        "pushedAt": "2025-06-12T13:49:10Z",
+        "topics": [
+          "alembic",
+          "asynchronous",
+          "celery",
+          "fastapi",
+          "jwt-authentication",
+          "nginx",
+          "postgresql",
+          "redis",
+          "sqlalchemy2"
+        ],
+        "htmlUrl": "https://github.com/payamt007/FastAPI-Toolkit"
+      }
+    },
+    {
+      "id": "celery-173-superdesk-superdesk-core",
+      "repository": "https://github.com/superdesk/superdesk-core.git",
+      "commit": "a3a31e1081d6ee22241e14240d1d85e973cbe605",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 173,
+        "fullName": "superdesk/superdesk-core",
+        "stars": 32,
+        "forks": 87,
+        "sizeKb": 24062,
+        "defaultBranch": "develop",
+        "pushedAt": "2026-07-17T13:55:46Z",
+        "topics": [
+          "celery",
+          "elasticsearch",
+          "flask",
+          "mongodb",
+          "python3",
+          "superdesk"
+        ],
+        "htmlUrl": "https://github.com/superdesk/superdesk-core"
+      }
+    },
+    {
+      "id": "celery-174-vijeth-aradhya-celery-priority-tasking",
+      "repository": "https://github.com/vijeth-aradhya/celery-priority-tasking.git",
+      "commit": "1a32f85a1d04e1871111e2e2a3ded3e49e17cfc2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 174,
+        "fullName": "vijeth-aradhya/celery-priority-tasking",
+        "stars": 32,
+        "forks": 8,
+        "sizeKb": 13,
+        "defaultBranch": "master",
+        "pushedAt": "2017-06-23T19:17:32Z",
+        "topics": [
+          "backend",
+          "celery",
+          "rabbitmq"
+        ],
+        "htmlUrl": "https://github.com/vijeth-aradhya/celery-priority-tasking"
+      }
+    },
+    {
+      "id": "celery-175-joaoflaviosantos-fastapi-async-sqlmodel-boilerplate",
+      "repository": "https://github.com/joaoflaviosantos/fastapi-async-sqlmodel-boilerplate.git",
+      "commit": "be5b639adb8921708c58e348dccdddb16b51f7d4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 175,
+        "fullName": "joaoflaviosantos/fastapi-async-sqlmodel-boilerplate",
+        "stars": 31,
+        "forks": 2,
+        "sizeKb": 670,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T09:30:39Z",
+        "topics": [
+          "alembic",
+          "api-rest",
+          "asynchronous",
+          "backend",
+          "celery",
+          "celerybeat",
+          "fastapi",
+          "locust",
+          "postgresql",
+          "pydantic",
+          "pydantic-v2",
+          "pytest",
+          "python",
+          "redis",
+          "sqlalchemy",
+          "sqlalchemy2",
+          "sqlmodel",
+          "tasks",
+          "uvicorn",
+          "worker"
+        ],
+        "htmlUrl": "https://github.com/joaoflaviosantos/fastapi-async-sqlmodel-boilerplate"
+      }
+    },
+    {
+      "id": "celery-176-earthcomfy-django-finance",
+      "repository": "https://github.com/earthcomfy/django_finance.git",
+      "commit": "ac4f82e00a70ea2b0e1760d08bbfd67628921f05",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 176,
+        "fullName": "earthcomfy/django_finance",
+        "stars": 31,
+        "forks": 9,
+        "sizeKb": 419,
+        "defaultBranch": "main",
+        "pushedAt": "2024-10-09T13:45:13Z",
+        "topics": [
+          "alpine",
+          "alpine-django",
+          "celery",
+          "django",
+          "django-allauth",
+          "django-cotton",
+          "factory-boy",
+          "finance-app",
+          "htmx",
+          "htmx-django",
+          "plaid",
+          "plaid-example",
+          "poetry",
+          "pytest",
+          "ruff",
+          "tailwind-django"
+        ],
+        "htmlUrl": "https://github.com/earthcomfy/django_finance"
+      }
+    },
+    {
+      "id": "celery-177-popckovs-python-lessons",
+      "repository": "https://github.com/PopckovS/Python-Lessons.git",
+      "commit": "c0989d7cecb9c45a56a5882582459d750470f095",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 177,
+        "fullName": "PopckovS/Python-Lessons",
+        "stars": 30,
+        "forks": 3,
+        "sizeKb": 24256,
+        "defaultBranch": "main",
+        "pushedAt": "2023-08-17T13:01:16Z",
+        "topics": [
+          "algorithms",
+          "celery",
+          "django",
+          "docker",
+          "docker-compose",
+          "python-3",
+          "structure"
+        ],
+        "htmlUrl": "https://github.com/PopckovS/Python-Lessons"
+      }
+    },
+    {
+      "id": "celery-178-bahus-celery-prometheus-exporter",
+      "repository": "https://github.com/Bahus/celery-prometheus-exporter.git",
+      "commit": "3d7eec01aa3fcad47aa0a62bcba364b06eae3ad5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 178,
+        "fullName": "Bahus/celery-prometheus-exporter",
+        "stars": 30,
+        "forks": 13,
+        "sizeKb": 7,
+        "defaultBranch": "master",
+        "pushedAt": "2018-10-22T18:52:47Z",
+        "topics": [
+          "celery",
+          "metrics",
+          "prometheus"
+        ],
+        "htmlUrl": "https://github.com/Bahus/celery-prometheus-exporter"
+      }
+    },
+    {
+      "id": "celery-179-zimagi-core",
+      "repository": "https://github.com/zimagi/core.git",
+      "commit": "65614cfdc49a0e5df0e0a3dc08216b867bc0cdc5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 179,
+        "fullName": "zimagi/core",
+        "stars": 30,
+        "forks": 7,
+        "sizeKb": 18817,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-28T12:23:13Z",
+        "topics": [
+          "celery",
+          "django",
+          "docker",
+          "kubernetes",
+          "postgresql",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/zimagi/core"
+      }
+    },
+    {
+      "id": "celery-180-dnguyenngoc-ml-models-in-production",
+      "repository": "https://github.com/dnguyenngoc/ml-models-in-production.git",
+      "commit": "15ca1f767ab4920eebaf9d567ae797f987b4475e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 180,
+        "fullName": "dnguyenngoc/ml-models-in-production",
+        "stars": 30,
+        "forks": 13,
+        "sizeKb": 34577,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-21T04:35:18Z",
+        "topics": [
+          "celery",
+          "fastapi",
+          "machine-learning",
+          "python",
+          "rabbit-mq",
+          "react",
+          "redis",
+          "tensorflow"
+        ],
+        "htmlUrl": "https://github.com/dnguyenngoc/ml-models-in-production"
+      }
+    },
+    {
+      "id": "celery-181-smileboywtu-fastapi-boilerplate",
+      "repository": "https://github.com/smileboywtu/fastapi-boilerplate.git",
+      "commit": "2223366b3ee3980bc018998fde7e2a52a77b240d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 181,
+        "fullName": "smileboywtu/fastapi-boilerplate",
+        "stars": 29,
+        "forks": 8,
+        "sizeKb": 406,
+        "defaultBranch": "master",
+        "pushedAt": "2024-04-17T01:59:28Z",
+        "topics": [
+          "aiosql",
+          "api",
+          "async-support",
+          "asyncio",
+          "asyncpg",
+          "celery",
+          "docker",
+          "fastapi-boilerplate",
+          "fastapi-framework",
+          "gunicorn",
+          "httptools",
+          "log",
+          "multiprocessing",
+          "python37",
+          "request-id",
+          "test",
+          "uvloop",
+          "webapp",
+          "wrk",
+          "zmq"
+        ],
+        "htmlUrl": "https://github.com/smileboywtu/fastapi-boilerplate"
+      }
+    },
+    {
+      "id": "celery-182-vadlapatikarthik-autoclipper",
+      "repository": "https://github.com/VadlapatiKarthik/autoclipper.git",
+      "commit": "6d02eb956a2041f4e6db99ad8089fa1679795d57",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 182,
+        "fullName": "VadlapatiKarthik/autoclipper",
+        "stars": 29,
+        "forks": 2,
+        "sizeKb": 9,
+        "defaultBranch": "main",
+        "pushedAt": "2025-05-07T03:22:52Z",
+        "topics": [
+          "ai-automation",
+          "celery",
+          "docker",
+          "fastapi",
+          "ffmpeg",
+          "google-cloud-run",
+          "highlight-detection",
+          "kick",
+          "microservices",
+          "openai-whisper",
+          "react",
+          "subtitling",
+          "tailwindcss",
+          "twitch",
+          "video-clipping",
+          "youtube-automation",
+          "yt-dlp"
+        ],
+        "htmlUrl": "https://github.com/VadlapatiKarthik/autoclipper"
+      }
+    },
+    {
+      "id": "celery-183-selamet-letsraffle-api",
+      "repository": "https://github.com/selamet/letsraffle-api.git",
+      "commit": "46217ef20c1cd4e65d14e06499804f391d9abd31",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 183,
+        "fullName": "selamet/letsraffle-api",
+        "stars": 29,
+        "forks": 5,
+        "sizeKb": 10618,
+        "defaultBranch": "main",
+        "pushedAt": "2025-12-02T19:44:32Z",
+        "topics": [
+          "api",
+          "backend",
+          "celery",
+          "docker",
+          "drawing-system",
+          "fastapi",
+          "flower",
+          "python",
+          "raffle-system",
+          "redis",
+          "rest-api",
+          "task-queue-worker"
+        ],
+        "htmlUrl": "https://github.com/selamet/letsraffle-api"
+      }
+    },
+    {
+      "id": "celery-184-mattdood-web-scraping-example",
+      "repository": "https://github.com/mattdood/web_scraping_example.git",
+      "commit": "735437133e23519c5d0f3fedece8af625c6c5617",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 184,
+        "fullName": "mattdood/web_scraping_example",
+        "stars": 29,
+        "forks": 12,
+        "sizeKb": 42,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-08T07:45:25Z",
+        "topics": [
+          "celery",
+          "data",
+          "rss-feed-scraper",
+          "scraping-python"
+        ],
+        "htmlUrl": "https://github.com/mattdood/web_scraping_example"
+      }
+    },
+    {
+      "id": "celery-185-earthcomfy-chat-bot",
+      "repository": "https://github.com/earthcomfy/chat-bot.git",
+      "commit": "46da63846c3e0b06f17a409ddc7be088ee74aa7a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 185,
+        "fullName": "earthcomfy/chat-bot",
+        "stars": 29,
+        "forks": 17,
+        "sizeKb": 33,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-29T15:58:23Z",
+        "topics": [
+          "celery",
+          "chatterbot",
+          "django",
+          "django-channels",
+          "django-chatbot",
+          "python",
+          "tailwindcss"
+        ],
+        "htmlUrl": "https://github.com/earthcomfy/chat-bot"
+      }
+    },
+    {
+      "id": "celery-186-socaity-apipod",
+      "repository": "https://github.com/SocAIty/APIPod.git",
+      "commit": "3512d698489d48fb1a0e250bc3976b38409d90da",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 186,
+        "fullName": "SocAIty/APIPod",
+        "stars": 28,
+        "forks": 2,
+        "sizeKb": 4671,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-14T08:48:30Z",
+        "topics": [
+          "azure-blob-storage",
+          "celery",
+          "deployment",
+          "fastapi",
+          "job-queue",
+          "json",
+          "machine-learning",
+          "openapi",
+          "rest",
+          "runpod",
+          "s3-storage",
+          "starlette",
+          "threading",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/SocAIty/APIPod"
+      }
+    },
+    {
+      "id": "celery-187-openvstorage-framework",
+      "repository": "https://github.com/openvstorage/framework.git",
+      "commit": "6e985c343aa03e9abd3f9d946ce48136aad4ce2c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 187,
+        "fullName": "openvstorage/framework",
+        "stars": 28,
+        "forks": 23,
+        "sizeKb": 17448,
+        "defaultBranch": "develop",
+        "pushedAt": "2019-08-08T14:28:48Z",
+        "topics": [
+          "celery",
+          "django",
+          "gui",
+          "python",
+          "storage"
+        ],
+        "htmlUrl": "https://github.com/openvstorage/framework"
+      }
+    },
+    {
+      "id": "celery-188-shamspias-whatsapp-voice-gpt",
+      "repository": "https://github.com/shamspias/whatsapp-voice-gpt.git",
+      "commit": "94dc9a7c676e0e0a07378bfe0fe88c66db6b3faa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 188,
+        "fullName": "shamspias/whatsapp-voice-gpt",
+        "stars": 28,
+        "forks": 3,
+        "sizeKb": 53,
+        "defaultBranch": "main",
+        "pushedAt": "2023-04-19T18:28:07Z",
+        "topics": [
+          "celery",
+          "chatbot",
+          "chatgpt-whatsapp-bot",
+          "flask",
+          "gpt-3",
+          "gpt-3-5-turbo",
+          "gpt-35-turbo",
+          "gpt-4",
+          "llm",
+          "openai",
+          "openai-api",
+          "python",
+          "python3",
+          "task-scheduler",
+          "voice-chat",
+          "voice-chat-bot",
+          "voice-recognition",
+          "whatsapp",
+          "whatsapp-bot",
+          "whatsapp-chat"
+        ],
+        "htmlUrl": "https://github.com/shamspias/whatsapp-voice-gpt"
+      }
+    },
+    {
+      "id": "celery-189-vubon-django-celery-redis",
+      "repository": "https://github.com/vubon/django-celery-redis.git",
+      "commit": "d66e2f33c1c60f556caef1fdb28895334b61f4df",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 189,
+        "fullName": "vubon/django-celery-redis",
+        "stars": 27,
+        "forks": 11,
+        "sizeKb": 14,
+        "defaultBranch": "master",
+        "pushedAt": "2022-01-27T11:13:19Z",
+        "topics": [
+          "celery",
+          "django",
+          "python",
+          "redis",
+          "redis-server"
+        ],
+        "htmlUrl": "https://github.com/vubon/django-celery-redis"
+      }
+    },
+    {
+      "id": "celery-190-golubev-fastapi-advanced-rest-template",
+      "repository": "https://github.com/golubev/fastapi-advanced-rest-template.git",
+      "commit": "6b67fb67f76a257ac22219398c22e43cfcb0e113",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 190,
+        "fullName": "golubev/fastapi-advanced-rest-template",
+        "stars": 27,
+        "forks": 0,
+        "sizeKb": 2223,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-17T09:49:57Z",
+        "topics": [
+          "boilerplate",
+          "celery",
+          "docker",
+          "fastapi",
+          "mailhog",
+          "postgresql",
+          "pytest",
+          "python",
+          "rabbitmq",
+          "rest-api",
+          "template",
+          "todo",
+          "todo-app",
+          "todo-application",
+          "vscode-devcontainer"
+        ],
+        "htmlUrl": "https://github.com/golubev/fastapi-advanced-rest-template"
+      }
+    },
+    {
+      "id": "celery-191-anjaneyulubatta505-kubernetes-django",
+      "repository": "https://github.com/AnjaneyuluBatta505/kubernetes_django.git",
+      "commit": "7bfa6e6482b2a02899434290aa00e5d9286a3bc0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 191,
+        "fullName": "AnjaneyuluBatta505/kubernetes_django",
+        "stars": 27,
+        "forks": 13,
+        "sizeKb": 27,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-31T14:36:24Z",
+        "topics": [
+          "celery",
+          "django",
+          "dockerfile",
+          "kubernetes",
+          "kubernetes-deployment",
+          "kubernetes-service",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/AnjaneyuluBatta505/kubernetes_django"
+      }
+    },
+    {
+      "id": "celery-192-fctl3314-specialrecipe",
+      "repository": "https://github.com/FCTL3314/SpecialRecipe.git",
+      "commit": "f4b4652e1cbb96189f66846e4b831ebf13f017b1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 192,
+        "fullName": "FCTL3314/SpecialRecipe",
+        "stars": 27,
+        "forks": 2,
+        "sizeKb": 2591,
+        "defaultBranch": "master",
+        "pushedAt": "2023-08-19T22:48:05Z",
+        "topics": [
+          "celery",
+          "crud-api",
+          "django",
+          "django-rest-framework",
+          "docker",
+          "gunicorn",
+          "javascript",
+          "nginx",
+          "python",
+          "recipes-website",
+          "redis",
+          "rest-api"
+        ],
+        "htmlUrl": "https://github.com/FCTL3314/SpecialRecipe"
+      }
+    },
+    {
+      "id": "celery-193-xojoc-discussions",
+      "repository": "https://github.com/xojoc/discussions.git",
+      "commit": "138f4085957f868de14f1d4bd5b31cddba224959",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 193,
+        "fullName": "xojoc/discussions",
+        "stars": 26,
+        "forks": 1,
+        "sizeKb": 6479,
+        "defaultBranch": "main",
+        "pushedAt": "2025-01-08T22:20:18Z",
+        "topics": [
+          "caprover",
+          "celery",
+          "django",
+          "docker",
+          "python",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/xojoc/discussions"
+      }
+    },
+    {
+      "id": "celery-194-lang1427-py-fresh-everyday",
+      "repository": "https://github.com/lang1427/py_fresh-everyday.git",
+      "commit": "c95658e31910630b4624181b672cb167d672f689",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 194,
+        "fullName": "lang1427/py_fresh-everyday",
+        "stars": 26,
+        "forks": 8,
+        "sizeKb": 10544,
+        "defaultBranch": "main",
+        "pushedAt": "2022-10-17T03:15:15Z",
+        "topics": [
+          "celery",
+          "django",
+          "django-redis",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/lang1427/py_fresh-everyday"
+      }
+    },
+    {
+      "id": "celery-195-abdullahbakir97-django-store",
+      "repository": "https://github.com/AbdullahBakir97/Django-Store.git",
+      "commit": "e066cfd9a3dd7f28ff09b63245019e7df406cb73",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 195,
+        "fullName": "AbdullahBakir97/Django-Store",
+        "stars": 26,
+        "forks": 5,
+        "sizeKb": 2578,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-22T18:54:43Z",
+        "topics": [
+          "ajax",
+          "bootstrap",
+          "cashing",
+          "celery",
+          "charts",
+          "deployment",
+          "django",
+          "django-queries",
+          "django-rest-framework",
+          "docker",
+          "javascript",
+          "jquery",
+          "postman",
+          "pyton3",
+          "redis",
+          "translation"
+        ],
+        "htmlUrl": "https://github.com/AbdullahBakir97/Django-Store"
+      }
+    },
+    {
+      "id": "celery-196-abdulrahim-ramadan-django-amazon-clone",
+      "repository": "https://github.com/abdulrahim-ramadan/Django-Amazon-Clone.git",
+      "commit": "9a81103e41ce568cf47808472611127515a2fef2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 196,
+        "fullName": "abdulrahim-ramadan/Django-Amazon-Clone",
+        "stars": 26,
+        "forks": 2,
+        "sizeKb": 15857,
+        "defaultBranch": "main",
+        "pushedAt": "2025-11-06T15:58:50Z",
+        "topics": [
+          "adobe-photoshop",
+          "ajax",
+          "bootstrap",
+          "cashing",
+          "celery",
+          "charts",
+          "deployment",
+          "django",
+          "django-queries",
+          "django-rest-framework",
+          "docker",
+          "javascript",
+          "jquery",
+          "nosql",
+          "postman",
+          "python",
+          "restframework",
+          "translation"
+        ],
+        "htmlUrl": "https://github.com/abdulrahim-ramadan/Django-Amazon-Clone"
+      }
+    },
+    {
+      "id": "celery-197-peopledoc-pylogctx",
+      "repository": "https://github.com/peopledoc/pylogctx.git",
+      "commit": "1ae9e2dfd27104f3c39e72161a8ee638130ac99a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 197,
+        "fullName": "peopledoc/pylogctx",
+        "stars": 25,
+        "forks": 8,
+        "sizeKb": 94,
+        "defaultBranch": "master",
+        "pushedAt": "2024-01-18T13:42:39Z",
+        "topics": [
+          "approved-public",
+          "celery",
+          "cloud",
+          "devops",
+          "django",
+          "ghec-mig-migrated",
+          "json",
+          "logging",
+          "python",
+          "python3"
+        ],
+        "htmlUrl": "https://github.com/peopledoc/pylogctx"
+      }
+    },
+    {
+      "id": "celery-198-rjalexa-fastapi-async",
+      "repository": "https://github.com/rjalexa/fastapi-async.git",
+      "commit": "f9d5601fe236c68775b5ea541712b9e101645c5a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 198,
+        "fullName": "rjalexa/fastapi-async",
+        "stars": 25,
+        "forks": 5,
+        "sizeKb": 4603,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-21T16:08:29Z",
+        "topics": [
+          "celery",
+          "fastapi",
+          "llm",
+          "openrouter-api",
+          "react",
+          "redis"
+        ],
+        "htmlUrl": "https://github.com/rjalexa/fastapi-async"
+      }
+    },
+    {
+      "id": "celery-199-shamspias-chat-gpt-celery-flask",
+      "repository": "https://github.com/shamspias/chat-gpt-celery-flask.git",
+      "commit": "05f45131cc25460baa0f7d24f27696b34635d863",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 199,
+        "fullName": "shamspias/chat-gpt-celery-flask",
+        "stars": 25,
+        "forks": 2,
+        "sizeKb": 44,
+        "defaultBranch": "main",
+        "pushedAt": "2023-02-15T20:16:01Z",
+        "topics": [
+          "artificial-intelligence",
+          "celery",
+          "chatgpt",
+          "flask",
+          "gpt-3",
+          "machine-learning",
+          "nlp",
+          "python"
+        ],
+        "htmlUrl": "https://github.com/shamspias/chat-gpt-celery-flask"
+      }
+    },
+    {
+      "id": "celery-200-leopard627-django-tdd-restful-api",
+      "repository": "https://github.com/leopard627/django-tdd-restful-api.git",
+      "commit": "db4b28b3024bb253123efe965542212f9aba047b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "celery",
+        "rank": 200,
+        "fullName": "leopard627/django-tdd-restful-api",
+        "stars": 25,
+        "forks": 2,
+        "sizeKb": 1882,
+        "defaultBranch": "master",
+        "pushedAt": "2026-02-13T18:25:30Z",
+        "topics": [
+          "celery",
+          "django-2",
+          "django-rest-framework",
+          "email",
+          "i-need-a-life",
+          "life",
+          "mixin",
+          "oauth2",
+          "python3",
+          "tdd",
+          "test"
+        ],
+        "htmlUrl": "https://github.com/leopard627/django-tdd-restful-api"
+      }
+    }
+  ]
+}

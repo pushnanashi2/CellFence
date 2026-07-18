@@ -31,11 +31,11 @@ export type ImportReference = {
 };
 
 export type ImportWarning = {
-  ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE" | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT";
+  ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE" | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT" | "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX";
   severity: "warning";
   filePath: string;
   message: string;
-  details: { line: number };
+  details: { line?: number; offset?: number; kind?: string };
 };
 
 type ImportScanContext = FileIndexContext & {
@@ -197,9 +197,23 @@ export function resolvePathAliasTarget(context: PathAliasContext, specifier: str
   return undefined;
 }
 
-function extractPythonImports(context: ImportScanContext, filePath: string): ImportReference[] {
+function extractPythonImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
   const importerPath = repoPath(context.rootDir, filePath);
-  return inspectPythonSource(filePath).imports.map((reference) => ({
+  const inspection = inspectPythonSource(filePath);
+  for (const error of inspection.errors || []) {
+    warnings.push({
+      ruleId: "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      severity: "warning",
+      filePath: importerPath,
+      message: `Python source cannot be parsed statically${error.line ? ` at line ${error.line}` : ""}: ${error.message}`,
+      details: {
+        kind: error.kind,
+        ...(error.line ? { line: error.line } : {}),
+        ...(error.offset ? { offset: error.offset } : {}),
+      },
+    });
+  }
+  return inspection.imports.map((reference) => ({
     importerPath,
     specifier: reference.specifier,
     kind: "import",
@@ -210,9 +224,9 @@ function extractPythonImports(context: ImportScanContext, filePath: string): Imp
 
 export function extractImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
   const sourceText = readSourceText(context, filePath);
+  if (isPythonPath(filePath)) return extractPythonImports(context, filePath, warnings);
   // Stryker disable next-line ConditionalExpression,ArrayDeclaration: the hint is a performance prefilter; parsing no-import files still returns no references.
   if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
-  if (isPythonPath(filePath)) return extractPythonImports(context, filePath);
   const sourceFile = parseSourceFile(context, filePath);
   const references: ImportReference[] = [];
   const importerPath = repoPath(context.rootDir, filePath);

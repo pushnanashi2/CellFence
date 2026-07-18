@@ -107,6 +107,9 @@ npm run research:corpus -- \
   --infer-scope production
 ```
 
+The larger Django, FastAPI, SQLAlchemy, and Celery topic run is documented in
+[oss-python-framework-800-2026-07-18.md](oss-python-framework-800-2026-07-18.md).
+
 The script:
 
 - clones each repository into a hash-suffixed subject directory under

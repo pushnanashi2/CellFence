@@ -10,6 +10,14 @@ export type PythonInspection = {
   imports: PythonImportReference[];
   publicSymbols: string[];
   surfaceParts: string[];
+  errors?: PythonInspectionError[];
+};
+
+export type PythonInspectionError = {
+  kind: "syntax_error" | "read_error" | "inspector_error";
+  message: string;
+  line?: number;
+  offset?: number;
 };
 
 type CachedPythonInspection = {
@@ -28,10 +36,30 @@ import tokenize
 
 file_path = sys.argv[1]
 
-with tokenize.open(file_path) as handle:
-    source = handle.read()
+def emit_error(kind, message, line=None, offset=None):
+    print(json.dumps({
+        "imports": [],
+        "publicSymbols": [],
+        "surfaceParts": [],
+        "errors": [{
+            "kind": kind,
+            "message": str(message),
+            "line": line,
+            "offset": offset,
+        }],
+    }, separators=(",", ":")))
+    sys.exit(0)
 
-tree = ast.parse(source, filename=file_path)
+try:
+    with tokenize.open(file_path) as handle:
+        source = handle.read()
+except Exception as exc:
+    emit_error("read_error", f"{type(exc).__name__}: {exc}")
+
+try:
+    tree = ast.parse(source, filename=file_path)
+except SyntaxError as exc:
+    emit_error("syntax_error", exc.msg or str(exc), exc.lineno, exc.offset)
 
 def node_line(node):
     return int(getattr(node, "lineno", 1) or 1)
@@ -162,6 +190,7 @@ print(json.dumps({
     "imports": imports,
     "publicSymbols": public_symbols,
     "surfaceParts": surface_parts,
+    "errors": [],
 }, separators=(",", ":")))
 `;
 
@@ -181,6 +210,13 @@ export function inspectPythonSource(filePath: string): PythonInspection {
     return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Python source analysis failed for ${filePath}: ${message}`, { cause: error });
+    const result: PythonInspection = {
+      imports: [],
+      publicSymbols: [],
+      surfaceParts: [],
+      errors: [{ kind: "inspector_error", message }],
+    };
+    inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
+    return result;
   }
 }

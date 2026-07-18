@@ -1,0 +1,6141 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "studyId": "oss-python-sqlalchemy-200-2026-07-18",
+  "selection": {
+    "framework": "sqlalchemy",
+    "retrievedAt": "2026-07-18T16:49:52.257Z",
+    "source": "GitHub Search API",
+    "query": "topic:sqlalchemy language:Python fork:false archived:false size:<100000",
+    "sort": "stars",
+    "order": "desc",
+    "targetCount": 200,
+    "actualCount": 200,
+    "notes": [
+      "Static onboarding corpus only; not a precision denominator.",
+      "Repositories are cloned by exact HEAD commit and checked with inferred production-scope manifests.",
+      "No target dependency installation or package scripts are run."
+    ],
+    "skipped": []
+  },
+  "subjects": [
+    {
+      "id": "sqlalchemy-001-fastapi-sqlmodel",
+      "repository": "https://github.com/fastapi/sqlmodel.git",
+      "commit": "803a3d1f6d605a1da45ed166120845ed54ce9c2a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 1,
+        "fullName": "fastapi/sqlmodel",
+        "stars": 18204,
+        "forks": 869,
+        "sizeKb": 7949,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T11:34:58Z",
+        "topics": [
+          "fastapi",
+          "json",
+          "json-schema",
+          "pydantic",
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fastapi/sqlmodel"
+      }
+    },
+    {
+      "id": "sqlalchemy-002-kennethreitz-records",
+      "repository": "https://github.com/kennethreitz/records.git",
+      "commit": "ea4273695cee6da42edf1cb294d1f2a4505470fc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 2,
+        "fullName": "kennethreitz/records",
+        "stars": 7219,
+        "forks": 568,
+        "sizeKb": 201,
+        "defaultBranch": "master",
+        "pushedAt": "2026-02-09T03:57:09Z",
+        "topics": [
+          "forhumans",
+          "kennethreitz",
+          "orm",
+          "postgres",
+          "python",
+          "schemas",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/kennethreitz/records"
+      }
+    },
+    {
+      "id": "sqlalchemy-003-pallets-eco-flask-sqlalchemy",
+      "repository": "https://github.com/pallets-eco/flask-sqlalchemy.git",
+      "commit": "80ac6ef26bd12a6b5472a494d541a7d2442a38a4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 3,
+        "fullName": "pallets-eco/flask-sqlalchemy",
+        "stars": 4314,
+        "forks": 905,
+        "sizeKb": 1895,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-18T23:27:00Z",
+        "topics": [
+          "flask",
+          "flask-sqlalchemy",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pallets-eco/flask-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-004-sqlalchemy-alembic",
+      "repository": "https://github.com/sqlalchemy/alembic.git",
+      "commit": "7b2af57eba318a712b7b4f79c7bc6b3669055636",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 4,
+        "fullName": "sqlalchemy/alembic",
+        "stars": 4263,
+        "forks": 351,
+        "sizeKb": 4826,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T17:14:03Z",
+        "topics": [
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/sqlalchemy/alembic"
+      }
+    },
+    {
+      "id": "sqlalchemy-005-factoryboy-factory-boy",
+      "repository": "https://github.com/FactoryBoy/factory_boy.git",
+      "commit": "ae9f2f4650afef0bc9b0925de97f618603233ff8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 5,
+        "fullName": "FactoryBoy/factory_boy",
+        "stars": 3803,
+        "forks": 417,
+        "sizeKb": 1867,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-01T19:04:12Z",
+        "topics": [
+          "django",
+          "fixtures",
+          "hacktoberfest",
+          "python",
+          "sqlalchemy",
+          "testing"
+        ],
+        "htmlUrl": "https://github.com/FactoryBoy/factory_boy"
+      }
+    },
+    {
+      "id": "sqlalchemy-006-dahlia-awesome-sqlalchemy",
+      "repository": "https://github.com/dahlia/awesome-sqlalchemy.git",
+      "commit": "f30ee07119594c771a5767b5dd07f461b859cec6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 6,
+        "fullName": "dahlia/awesome-sqlalchemy",
+        "stars": 3050,
+        "forks": 166,
+        "sizeKb": 114,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-08T08:36:57Z",
+        "topics": [
+          "awesome",
+          "awesome-list",
+          "databases",
+          "list",
+          "orm",
+          "python",
+          "rdbms",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dahlia/awesome-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-007-smithyhq-sqladmin",
+      "repository": "https://github.com/smithyhq/sqladmin.git",
+      "commit": "6ad070b5b280c1f57b488ea628a69a0a4e1217a7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 7,
+        "fullName": "smithyhq/sqladmin",
+        "stars": 2800,
+        "forks": 291,
+        "sizeKb": 5918,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T20:40:29Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "asgi",
+          "asyncio",
+          "fastapi",
+          "python",
+          "sqlalchemy",
+          "starlette",
+          "web",
+          "wsgi"
+        ],
+        "htmlUrl": "https://github.com/smithyhq/sqladmin"
+      }
+    },
+    {
+      "id": "sqlalchemy-008-python-gino-gino",
+      "repository": "https://github.com/python-gino/gino.git",
+      "commit": "6218b902cc8a31198f1a0b42d67e689140b68c8b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 8,
+        "fullName": "python-gino/gino",
+        "stars": 2799,
+        "forks": 151,
+        "sizeKb": 2744,
+        "defaultBranch": "master",
+        "pushedAt": "2022-02-12T20:35:18Z",
+        "topics": [
+          "asyncio",
+          "asyncpg",
+          "gino",
+          "hacktoberfest",
+          "orm",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/python-gino/gino"
+      }
+    },
+    {
+      "id": "sqlalchemy-009-buuntu-fastapi-react",
+      "repository": "https://github.com/Buuntu/fastapi-react.git",
+      "commit": "af17f2d422d0ebc5f173e83f2c6931045ab055b0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 9,
+        "fullName": "Buuntu/fastapi-react",
+        "stars": 2586,
+        "forks": 370,
+        "sizeKb": 4396,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-06T23:46:17Z",
+        "topics": [
+          "boilerplate",
+          "cookiecutter",
+          "docker",
+          "fastapi",
+          "full-stack",
+          "jwt",
+          "nginx",
+          "oauth2",
+          "postgres",
+          "react",
+          "react-admin",
+          "sqlalchemy",
+          "typescript"
+        ],
+        "htmlUrl": "https://github.com/Buuntu/fastapi-react"
+      }
+    },
+    {
+      "id": "sqlalchemy-010-fastapi-practices-fastapi-best-architecture",
+      "repository": "https://github.com/fastapi-practices/fastapi-best-architecture.git",
+      "commit": "2dffe8f6a816fde4d5cbeec0bd48dc04f823941f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 10,
+        "fullName": "fastapi-practices/fastapi-best-architecture",
+        "stars": 2463,
+        "forks": 370,
+        "sizeKb": 22470,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-10T10:01:57Z",
+        "topics": [
+          "celery",
+          "fastapi",
+          "fastapi-template",
+          "fba",
+          "grafana",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fastapi-practices/fastapi-best-architecture"
+      }
+    },
+    {
+      "id": "sqlalchemy-011-soju06-codex-lb",
+      "repository": "https://github.com/Soju06/codex-lb.git",
+      "commit": "bc8d0fa335d9c8fea4c611b932c2677ce1146236",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 11,
+        "fullName": "Soju06/codex-lb",
+        "stars": 2388,
+        "forks": 372,
+        "sizeKb": 27233,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T12:36:48Z",
+        "topics": [
+          "api-proxy",
+          "chatgpt",
+          "codex",
+          "dashboard",
+          "fastapi",
+          "load-balancer",
+          "multiple-accounts",
+          "oauth",
+          "openai",
+          "openclaw",
+          "opencode",
+          "python",
+          "rate-limit",
+          "sqlalchemy",
+          "usage-tracking"
+        ],
+        "htmlUrl": "https://github.com/Soju06/codex-lb"
+      }
+    },
+    {
+      "id": "sqlalchemy-012-jeffknupp-sandman2",
+      "repository": "https://github.com/jeffknupp/sandman2.git",
+      "commit": "715500f0d6806ad055766ecba0bd0e022f13a6f7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 12,
+        "fullName": "jeffknupp/sandman2",
+        "stars": 2041,
+        "forks": 216,
+        "sizeKb": 876,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-13T17:02:42Z",
+        "topics": [
+          "automatic-api",
+          "database",
+          "orm",
+          "python",
+          "rest",
+          "rest-api",
+          "restful-api",
+          "sqlalchemy",
+          "sqlite-database"
+        ],
+        "htmlUrl": "https://github.com/jeffknupp/sandman2"
+      }
+    },
+    {
+      "id": "sqlalchemy-013-benavlabs-fastapi-boilerplate",
+      "repository": "https://github.com/benavlabs/FastAPI-boilerplate.git",
+      "commit": "ae1b27dcf51fa06e8f9aee0d3dbaa9159afff4e3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 13,
+        "fullName": "benavlabs/FastAPI-boilerplate",
+        "stars": 2009,
+        "forks": 302,
+        "sizeKb": 2982,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-02T01:31:41Z",
+        "topics": [
+          "alembic",
+          "api",
+          "arq",
+          "async",
+          "cache",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-boilerplate",
+          "postgres",
+          "pydantic-v2",
+          "python",
+          "redis",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/FastAPI-boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-014-aio-libs-aiomysql",
+      "repository": "https://github.com/aio-libs/aiomysql.git",
+      "commit": "1aa9cfcbad60f14f5a8bdccaa660f10f69123015",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 14,
+        "fullName": "aio-libs/aiomysql",
+        "stars": 1890,
+        "forks": 268,
+        "sizeKb": 1530,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-27T01:52:43Z",
+        "topics": [
+          "aiomysql",
+          "async",
+          "asyncio",
+          "mariadb",
+          "mysql",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/aio-libs/aiomysql"
+      }
+    },
+    {
+      "id": "sqlalchemy-015-ormar-orm-ormar",
+      "repository": "https://github.com/ormar-orm/ormar.git",
+      "commit": "0348eb73ab5560e7cc1a87e18613cdf621cca434",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 15,
+        "fullName": "ormar-orm/ormar",
+        "stars": 1806,
+        "forks": 98,
+        "sizeKb": 25958,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T02:36:50Z",
+        "topics": [
+          "alembic",
+          "async-orm",
+          "databases",
+          "fastapi",
+          "orm",
+          "pydantic",
+          "python-orm",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ormar-orm/ormar"
+      }
+    },
+    {
+      "id": "sqlalchemy-016-dropbox-pyhive",
+      "repository": "https://github.com/dropbox/PyHive.git",
+      "commit": "ac09074a652fd50e10b57a7f0bbc4f6410961301",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 16,
+        "fullName": "dropbox/PyHive",
+        "stars": 1696,
+        "forks": 547,
+        "sizeKb": 405,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-13T16:48:16Z",
+        "topics": [
+          "dbapi",
+          "hive",
+          "hiveserver2",
+          "presto",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dropbox/PyHive"
+      }
+    },
+    {
+      "id": "sqlalchemy-017-pyeventsourcing-eventsourcing",
+      "repository": "https://github.com/pyeventsourcing/eventsourcing.git",
+      "commit": "099c92ddcb3515d24fb3934ea25d823279f42584",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 17,
+        "fullName": "pyeventsourcing/eventsourcing",
+        "stars": 1679,
+        "forks": 141,
+        "sizeKb": 13217,
+        "defaultBranch": "9.6",
+        "pushedAt": "2026-06-24T21:22:04Z",
+        "topics": [
+          "cqrs",
+          "ddd",
+          "distributed-systems",
+          "django",
+          "domain-driven-design",
+          "event-sourcing",
+          "eventsourcing",
+          "python",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pyeventsourcing/eventsourcing"
+      }
+    },
+    {
+      "id": "sqlalchemy-018-amisadmin-fastapi-amis-admin",
+      "repository": "https://github.com/amisadmin/fastapi-amis-admin.git",
+      "commit": "028359b092f4ef6cc7aa0a44725c8fe4493e4f21",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 18,
+        "fullName": "amisadmin/fastapi-amis-admin",
+        "stars": 1565,
+        "forks": 215,
+        "sizeKb": 2358,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-15T02:03:44Z",
+        "topics": [
+          "amis",
+          "django-admin",
+          "fastapi",
+          "fastapi-admin",
+          "fastapi-amis-admin",
+          "sqlalchemy",
+          "sqlmodel",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/amisadmin/fastapi-amis-admin"
+      }
+    },
+    {
+      "id": "sqlalchemy-019-benavlabs-fastcrud",
+      "repository": "https://github.com/benavlabs/fastcrud.git",
+      "commit": "790aacbe9bc378c11c706dffb4d5dfadc1861778",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 19,
+        "fullName": "benavlabs/fastcrud",
+        "stars": 1537,
+        "forks": 116,
+        "sizeKb": 2730,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-21T04:03:28Z",
+        "topics": [
+          "async",
+          "backend",
+          "crud",
+          "fastapi",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/fastcrud"
+      }
+    },
+    {
+      "id": "sqlalchemy-020-teamhide-fastapi-boilerplate",
+      "repository": "https://github.com/teamhide/fastapi-boilerplate.git",
+      "commit": "df4e6d4f817ec187eeaf2d1c5a877b27c06bb77b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 20,
+        "fullName": "teamhide/fastapi-boilerplate",
+        "stars": 1492,
+        "forks": 217,
+        "sizeKb": 612,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-08T13:32:41Z",
+        "topics": [
+          "api",
+          "asyncio",
+          "boilerplate",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "python",
+          "sqlalchemy",
+          "sqlalchemy-async"
+        ],
+        "htmlUrl": "https://github.com/teamhide/fastapi-boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-021-aio-libs-aiopg",
+      "repository": "https://github.com/aio-libs/aiopg.git",
+      "commit": "eabd5216c0adf7a131f79d028af9810c99e9b8ae",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 21,
+        "fullName": "aio-libs/aiopg",
+        "stars": 1431,
+        "forks": 164,
+        "sizeKb": 1203,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-03T21:01:33Z",
+        "topics": [
+          "asyncio",
+          "postgresql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/aio-libs/aiopg"
+      }
+    },
+    {
+      "id": "sqlalchemy-022-eralchemy-eralchemy",
+      "repository": "https://github.com/eralchemy/eralchemy.git",
+      "commit": "95741830cf004c0c31daa2834bf673bd48866d93",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 22,
+        "fullName": "eralchemy/eralchemy",
+        "stars": 1424,
+        "forks": 131,
+        "sizeKb": 1735,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-05T14:20:10Z",
+        "topics": [
+          "database",
+          "documentation-tool",
+          "mysql",
+          "postgresql",
+          "schema",
+          "sql",
+          "sqlalchemy",
+          "visualization"
+        ],
+        "htmlUrl": "https://github.com/eralchemy/eralchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-023-vargasjona-fastapi-alembic-sqlmodel-async",
+      "repository": "https://github.com/vargasjona/fastapi-alembic-sqlmodel-async.git",
+      "commit": "96f10870e7a9cd0fb7fcc678674d7b409545b942",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 23,
+        "fullName": "vargasjona/fastapi-alembic-sqlmodel-async",
+        "stars": 1271,
+        "forks": 172,
+        "sizeKb": 11219,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-09T14:50:35Z",
+        "topics": [
+          "alembic",
+          "asyncio",
+          "caddy",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-async-db",
+          "fastapi-boilerplate",
+          "fastapi-cache",
+          "fastapi-crud",
+          "fastapi-pagination",
+          "fastapi-sqlmodel",
+          "postgresql",
+          "pydantic-v2",
+          "sqlalchemy",
+          "sqlalchemy2",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/vargasjona/fastapi-alembic-sqlmodel-async"
+      }
+    },
+    {
+      "id": "sqlalchemy-024-dunossauro-fastapi-do-zero",
+      "repository": "https://github.com/dunossauro/fastapi-do-zero.git",
+      "commit": "759c8d52591a99dcc2ce060dac1ab4fba279151b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 24,
+        "fullName": "dunossauro/fastapi-do-zero",
+        "stars": 1009,
+        "forks": 132,
+        "sizeKb": 69563,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T14:24:17Z",
+        "topics": [
+          "alembic",
+          "brasil",
+          "brazil",
+          "fastapi",
+          "pydantic",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dunossauro/fastapi-do-zero"
+      }
+    },
+    {
+      "id": "sqlalchemy-025-jowilf-starlette-admin",
+      "repository": "https://github.com/jowilf/starlette-admin.git",
+      "commit": "a0a2758a775c5f79946ddf18fc438261f7e85b5e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 25,
+        "fullName": "jowilf/starlette-admin",
+        "stars": 1004,
+        "forks": 95,
+        "sizeKb": 6492,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T21:15:02Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "datatables",
+          "fastapi",
+          "mongoengine",
+          "sqlalchemy",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/jowilf/starlette-admin"
+      }
+    },
+    {
+      "id": "sqlalchemy-026-cburmeister-flask-bones",
+      "repository": "https://github.com/cburmeister/flask-bones.git",
+      "commit": "bc61f5c12b50e366df605462ba227f5efc03bc1b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 26,
+        "fullName": "cburmeister/flask-bones",
+        "stars": 990,
+        "forks": 122,
+        "sizeKb": 405,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-01T21:13:02Z",
+        "topics": [
+          "alembic",
+          "babel",
+          "docker",
+          "flask",
+          "rq",
+          "sqlalchemy",
+          "travis-ci",
+          "yarn"
+        ],
+        "htmlUrl": "https://github.com/cburmeister/flask-bones"
+      }
+    },
+    {
+      "id": "sqlalchemy-027-graphql-python-graphene-sqlalchemy",
+      "repository": "https://github.com/graphql-python/graphene-sqlalchemy.git",
+      "commit": "4ea6ee819600d65ad784c783a68321105a643d76",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 27,
+        "fullName": "graphql-python/graphene-sqlalchemy",
+        "stars": 985,
+        "forks": 223,
+        "sizeKb": 521,
+        "defaultBranch": "master",
+        "pushedAt": "2025-09-04T15:42:56Z",
+        "topics": [
+          "graphene",
+          "graphql",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/graphql-python/graphene-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-028-klen-mixer",
+      "repository": "https://github.com/klen/mixer.git",
+      "commit": "431ca2756af5571efc4d08d743fa8ab2a8619183",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 28,
+        "fullName": "klen/mixer",
+        "stars": 955,
+        "forks": 93,
+        "sizeKb": 1073,
+        "defaultBranch": "develop",
+        "pushedAt": "2024-03-08T09:29:07Z",
+        "topics": [
+          "django",
+          "flask",
+          "sqlalchemy",
+          "testing",
+          "testing-tools"
+        ],
+        "htmlUrl": "https://github.com/klen/mixer"
+      }
+    },
+    {
+      "id": "sqlalchemy-029-marshmallow-code-flask-marshmallow",
+      "repository": "https://github.com/marshmallow-code/flask-marshmallow.git",
+      "commit": "6769f9c3f8c33fae1372ac88c4f8310491d1a1cd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 29,
+        "fullName": "marshmallow-code/flask-marshmallow",
+        "stars": 888,
+        "forks": 63,
+        "sizeKb": 900,
+        "defaultBranch": "dev",
+        "pushedAt": "2026-07-06T20:43:26Z",
+        "topics": [
+          "flask",
+          "marshmallow",
+          "python",
+          "python-3",
+          "rest-api",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/marshmallow-code/flask-marshmallow"
+      }
+    },
+    {
+      "id": "sqlalchemy-030-aeternalis-ingenium-fastapi-backend-template",
+      "repository": "https://github.com/Aeternalis-Ingenium/FastAPI-Backend-Template.git",
+      "commit": "d2e931b9639aa5fbca2a85c1711e47c8ee39b254",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 30,
+        "fullName": "Aeternalis-Ingenium/FastAPI-Backend-Template",
+        "stars": 871,
+        "forks": 129,
+        "sizeKb": 646,
+        "defaultBranch": "trunk",
+        "pushedAt": "2026-07-13T22:36:23Z",
+        "topics": [
+          "alembic",
+          "asynchronous",
+          "asyncpg",
+          "codecov",
+          "coverage",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "githubactions",
+          "jwt",
+          "postgresql",
+          "pre-commit",
+          "pytest",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Aeternalis-Ingenium/FastAPI-Backend-Template"
+      }
+    },
+    {
+      "id": "sqlalchemy-031-allen7d-mini-shop-server",
+      "repository": "https://github.com/Allen7D/mini-shop-server.git",
+      "commit": "1e23cdfe49180b61c17104ccc5df0cdc9baa4926",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 31,
+        "fullName": "Allen7D/mini-shop-server",
+        "stars": 831,
+        "forks": 216,
+        "sizeKb": 9019,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-09T10:48:54Z",
+        "topics": [
+          "flask",
+          "mini-shop",
+          "mysql",
+          "python",
+          "rbac",
+          "restful-api",
+          "sqlalchemy",
+          "swagger"
+        ],
+        "htmlUrl": "https://github.com/Allen7D/mini-shop-server"
+      }
+    },
+    {
+      "id": "sqlalchemy-032-litestar-org-advanced-alchemy",
+      "repository": "https://github.com/litestar-org/advanced-alchemy.git",
+      "commit": "8dc8285aa293e6fed93bd36701c327047bbbc2fa",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 32,
+        "fullName": "litestar-org/advanced-alchemy",
+        "stars": 790,
+        "forks": 75,
+        "sizeKb": 11259,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-24T04:42:43Z",
+        "topics": [
+          "alembic",
+          "cockroachdb",
+          "duckdb",
+          "fastapi",
+          "flask",
+          "litestar",
+          "litestar-org",
+          "mssql",
+          "mysql",
+          "oracle-db",
+          "postgresql",
+          "repository-pattern",
+          "sanic",
+          "spanner",
+          "sqlalchemy",
+          "sqlite",
+          "sqlmodel",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/litestar-org/advanced-alchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-033-absent1706-sqlalchemy-mixins",
+      "repository": "https://github.com/absent1706/sqlalchemy-mixins.git",
+      "commit": "9877efd7d4c934d91d25f0e7a3075852dabf3a53",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 33,
+        "fullName": "absent1706/sqlalchemy-mixins",
+        "stars": 788,
+        "forks": 69,
+        "sizeKb": 297,
+        "defaultBranch": "master",
+        "pushedAt": "2024-09-08T01:52:33Z",
+        "topics": [
+          "activerecord",
+          "django-like",
+          "eager-load",
+          "eager-loading",
+          "orm",
+          "orm-extension",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/absent1706/sqlalchemy-mixins"
+      }
+    },
+    {
+      "id": "sqlalchemy-034-cosmic-byte-flask-restplus-boilerplate",
+      "repository": "https://github.com/cosmic-byte/flask-restplus-boilerplate.git",
+      "commit": "3bd1d508a3c457b6a19c709baef47496467e5f2b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 34,
+        "fullName": "cosmic-byte/flask-restplus-boilerplate",
+        "stars": 660,
+        "forks": 229,
+        "sizeKb": 32,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-15T21:59:33Z",
+        "topics": [
+          "blueprint",
+          "flask",
+          "flask-api",
+          "flask-restplus",
+          "jwt-authentication",
+          "makefile",
+          "migration",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/cosmic-byte/flask-restplus-boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-035-sqlalchemy-continuum-sqlalchemy-continuum",
+      "repository": "https://github.com/sqlalchemy-continuum/sqlalchemy-continuum.git",
+      "commit": "560369ae380f31faffba35807c0ca00e77d2ce55",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 35,
+        "fullName": "sqlalchemy-continuum/sqlalchemy-continuum",
+        "stars": 644,
+        "forks": 137,
+        "sizeKb": 1270,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T17:45:40Z",
+        "topics": [
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/sqlalchemy-continuum/sqlalchemy-continuum"
+      }
+    },
+    {
+      "id": "sqlalchemy-036-wey-gu-py-pglite",
+      "repository": "https://github.com/wey-gu/py-pglite.git",
+      "commit": "1ab59cb57aece9bbbfddad64f2eab50d64b032a1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 36,
+        "fullName": "wey-gu/py-pglite",
+        "stars": 624,
+        "forks": 22,
+        "sizeKb": 573,
+        "defaultBranch": "main",
+        "pushedAt": "2025-09-17T04:03:24Z",
+        "topics": [
+          "pglite",
+          "postgres",
+          "pytest",
+          "python",
+          "sqlalchemy",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/wey-gu/py-pglite"
+      }
+    },
+    {
+      "id": "sqlalchemy-037-litestar-org-litestar-fullstack",
+      "repository": "https://github.com/litestar-org/litestar-fullstack.git",
+      "commit": "4fab0fbc3f233167c257690c933866a79e324cf9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 37,
+        "fullName": "litestar-org/litestar-fullstack",
+        "stars": 601,
+        "forks": 86,
+        "sizeKb": 17409,
+        "defaultBranch": "main",
+        "pushedAt": "2026-02-27T18:03:36Z",
+        "topics": [
+          "hacktoberfest",
+          "litestar",
+          "litestar-api",
+          "litestar-framework",
+          "litestar-template",
+          "reactjs",
+          "saq",
+          "sqlalchemy",
+          "starlite",
+          "starlite-api",
+          "starlite-framework",
+          "starlite-template",
+          "vite"
+        ],
+        "htmlUrl": "https://github.com/litestar-org/litestar-fullstack"
+      }
+    },
+    {
+      "id": "sqlalchemy-038-dropbox-sqlalchemy-stubs",
+      "repository": "https://github.com/dropbox/sqlalchemy-stubs.git",
+      "commit": "ed9611114925f4b2aea42401217c0eacb1a564e1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 38,
+        "fullName": "dropbox/sqlalchemy-stubs",
+        "stars": 585,
+        "forks": 97,
+        "sizeKb": 286,
+        "defaultBranch": "master",
+        "pushedAt": "2024-06-10T23:08:27Z",
+        "topics": [
+          "mypy",
+          "python",
+          "sql",
+          "sqlalchemy",
+          "stubs",
+          "types",
+          "typing"
+        ],
+        "htmlUrl": "https://github.com/dropbox/sqlalchemy-stubs"
+      }
+    },
+    {
+      "id": "sqlalchemy-039-marshmallow-code-marshmallow-sqlalchemy",
+      "repository": "https://github.com/marshmallow-code/marshmallow-sqlalchemy.git",
+      "commit": "5ea6ef2304851b0a625ca2e3c6976dea72b02ef4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 39,
+        "fullName": "marshmallow-code/marshmallow-sqlalchemy",
+        "stars": 581,
+        "forks": 99,
+        "sizeKb": 1045,
+        "defaultBranch": "dev",
+        "pushedAt": "2026-07-06T20:43:16Z",
+        "topics": [
+          "marshmallow",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/marshmallow-code/marshmallow-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-040-ivan-borovets-fastapi-clean-example",
+      "repository": "https://github.com/ivan-borovets/fastapi-clean-example.git",
+      "commit": "927172311ec272ee3894619d91008a1b3403bc75",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 40,
+        "fullName": "ivan-borovets/fastapi-clean-example",
+        "stars": 573,
+        "forks": 78,
+        "sizeKb": 2988,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T20:08:24Z",
+        "topics": [
+          "alembic",
+          "api",
+          "architecture",
+          "clean-architecture",
+          "cqrs",
+          "crud",
+          "dependency-injection",
+          "fastapi",
+          "fastapi-auth",
+          "fastapi-crud",
+          "fastapi-example",
+          "fastapi-template",
+          "hexagonal-architecture",
+          "onion-architecture",
+          "python",
+          "python-clean-architecture",
+          "restful-api",
+          "sqlalchemy",
+          "unit-of-work",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/ivan-borovets/fastapi-clean-example"
+      }
+    },
+    {
+      "id": "sqlalchemy-041-rafsaf-minimal-fastapi-postgres-template",
+      "repository": "https://github.com/rafsaf/minimal-fastapi-postgres-template.git",
+      "commit": "a9b3d855749bf7e37576a91c88fb4faa62046280",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 41,
+        "fullName": "rafsaf/minimal-fastapi-postgres-template",
+        "stars": 572,
+        "forks": 81,
+        "sizeKb": 1366,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-01T18:43:01Z",
+        "topics": [
+          "asyncio",
+          "boilerplate",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "postgres",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "template",
+          "template-repository"
+        ],
+        "htmlUrl": "https://github.com/rafsaf/minimal-fastapi-postgres-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-042-seanharr11-etlalchemy",
+      "repository": "https://github.com/seanharr11/etlalchemy.git",
+      "commit": "9285c0fa0a6ef2ec07de25501fe25eb7f7de20a1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 42,
+        "fullName": "seanharr11/etlalchemy",
+        "stars": 557,
+        "forks": 83,
+        "sizeKb": 21822,
+        "defaultBranch": "master",
+        "pushedAt": "2019-05-23T20:22:14Z",
+        "topics": [
+          "database",
+          "etl",
+          "etl-framework",
+          "migrations",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/seanharr11/etlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-043-talkpython-data-driven-web-apps-with-flask",
+      "repository": "https://github.com/talkpython/data-driven-web-apps-with-flask.git",
+      "commit": "16013e369c68a214da841cba3db8feb040804533",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 43,
+        "fullName": "talkpython/data-driven-web-apps-with-flask",
+        "stars": 542,
+        "forks": 498,
+        "sizeKb": 3231,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-01T20:00:44Z",
+        "topics": [
+          "course",
+          "course-demo",
+          "flask",
+          "flask-course",
+          "fullstack",
+          "mongodb",
+          "online-learning",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "unit-testing"
+        ],
+        "htmlUrl": "https://github.com/talkpython/data-driven-web-apps-with-flask"
+      }
+    },
+    {
+      "id": "sqlalchemy-044-grillazz-fastapi-sqlalchemy-asyncpg",
+      "repository": "https://github.com/grillazz/fastapi-sqlalchemy-asyncpg.git",
+      "commit": "51f0cebabe6b6c2f2e87732674930be4b8c1456d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 44,
+        "fullName": "grillazz/fastapi-sqlalchemy-asyncpg",
+        "stars": 524,
+        "forks": 64,
+        "sizeKb": 8600,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-18T12:21:28Z",
+        "topics": [
+          "asyncio",
+          "asyncpg",
+          "docker",
+          "fastapi",
+          "fastapi-sqlalchemy",
+          "granian",
+          "postgresql",
+          "pydantic",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/grillazz/fastapi-sqlalchemy-asyncpg"
+      }
+    },
+    {
+      "id": "sqlalchemy-045-svzdev-doudizhu",
+      "repository": "https://github.com/svzdev/doudizhu.git",
+      "commit": "11e4e338fc23d20382604cf1be57d8d4984a2ad2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 45,
+        "fullName": "svzdev/doudizhu",
+        "stars": 521,
+        "forks": 218,
+        "sizeKb": 21884,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-17T00:55:15Z",
+        "topics": [
+          "aiomysql",
+          "asyncio",
+          "game-server",
+          "mysql",
+          "phaser",
+          "sqlalchemy",
+          "tornado"
+        ],
+        "htmlUrl": "https://github.com/svzdev/doudizhu"
+      }
+    },
+    {
+      "id": "sqlalchemy-046-canopytax-asyncpgsa",
+      "repository": "https://github.com/CanopyTax/asyncpgsa.git",
+      "commit": "b2445202a2484494d88fc5c484d5296991973d78",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 46,
+        "fullName": "CanopyTax/asyncpgsa",
+        "stars": 509,
+        "forks": 46,
+        "sizeKb": 135,
+        "defaultBranch": "master",
+        "pushedAt": "2024-02-17T13:41:22Z",
+        "topics": [
+          "asyncio",
+          "postgres",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/CanopyTax/asyncpgsa"
+      }
+    },
+    {
+      "id": "sqlalchemy-047-simonw-db-to-sqlite",
+      "repository": "https://github.com/simonw/db-to-sqlite.git",
+      "commit": "b7c95fcfe853ca5fc2236bfbf7e4a80ca9239969",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 47,
+        "fullName": "simonw/db-to-sqlite",
+        "stars": 494,
+        "forks": 35,
+        "sizeKb": 72,
+        "defaultBranch": "main",
+        "pushedAt": "2023-02-28T07:16:21Z",
+        "topics": [
+          "datasette",
+          "datasette-io",
+          "datasette-tool",
+          "sqlalchemy",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/simonw/db-to-sqlite"
+      }
+    },
+    {
+      "id": "sqlalchemy-048-mause-duckdb-engine",
+      "repository": "https://github.com/Mause/duckdb_engine.git",
+      "commit": "414afdf19c06c3bfa4c23e9892440f9294fbc35b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 48,
+        "fullName": "Mause/duckdb_engine",
+        "stars": 493,
+        "forks": 68,
+        "sizeKb": 2594,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T22:21:57Z",
+        "topics": [
+          "duckdb",
+          "duckdb-engine",
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Mause/duckdb_engine"
+      }
+    },
+    {
+      "id": "sqlalchemy-049-pyathena-dev-pyathena",
+      "repository": "https://github.com/pyathena-dev/PyAthena.git",
+      "commit": "446a6c8beae2d325cd4ecbde4d854b86b5614534",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 49,
+        "fullName": "pyathena-dev/PyAthena",
+        "stars": 492,
+        "forks": 108,
+        "sizeKb": 20388,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-14T15:35:52Z",
+        "topics": [
+          "athena",
+          "aws",
+          "dbapi",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pyathena-dev/PyAthena"
+      }
+    },
+    {
+      "id": "sqlalchemy-050-xzkostyan-clickhouse-sqlalchemy",
+      "repository": "https://github.com/xzkostyan/clickhouse-sqlalchemy.git",
+      "commit": "25721c3cd6e094ae1853327ab1de3a5d7144acbd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 50,
+        "fullName": "xzkostyan/clickhouse-sqlalchemy",
+        "stars": 483,
+        "forks": 160,
+        "sizeKb": 536,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-08T19:38:56Z",
+        "topics": [
+          "clickhouse",
+          "database",
+          "dialect",
+          "sqlalchemy",
+          "yandex"
+        ],
+        "htmlUrl": "https://github.com/xzkostyan/clickhouse-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-051-donbarbos-telegram-bot-template",
+      "repository": "https://github.com/donbarbos/telegram-bot-template.git",
+      "commit": "6dbfe7a4b766b0b35e8cabf801b758023f60b577",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 51,
+        "fullName": "donbarbos/telegram-bot-template",
+        "stars": 473,
+        "forks": 78,
+        "sizeKb": 6738,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T02:04:47Z",
+        "topics": [
+          "aiogram",
+          "aiogram-bot-template",
+          "analytics",
+          "docker",
+          "docker-compose",
+          "metrics",
+          "poetry",
+          "postgresql",
+          "pydantic",
+          "python",
+          "redis",
+          "ruff",
+          "sqlalchemy",
+          "telegram",
+          "telegram-bot",
+          "telegram-bot-example",
+          "telegram-bot-template",
+          "telegrambot",
+          "template",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/donbarbos/telegram-bot-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-052-betodealmeida-shillelagh",
+      "repository": "https://github.com/betodealmeida/shillelagh.git",
+      "commit": "20e7697c5b4fcd9f5011256ef6d9d9c3e598c654",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 52,
+        "fullName": "betodealmeida/shillelagh",
+        "stars": 459,
+        "forks": 60,
+        "sizeKb": 3802,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-19T20:33:06Z",
+        "topics": [
+          "api",
+          "dbapi",
+          "google-spreadsheets",
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/betodealmeida/shillelagh"
+      }
+    },
+    {
+      "id": "sqlalchemy-053-benavlabs-crudadmin",
+      "repository": "https://github.com/benavlabs/crudadmin.git",
+      "commit": "8b97fb47f90731c11ce24d60355d8cecfef87dac",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 53,
+        "fullName": "benavlabs/crudadmin",
+        "stars": 450,
+        "forks": 30,
+        "sizeKb": 6242,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-08T00:24:06Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "admin-panel",
+          "backend",
+          "crud",
+          "fastapi",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/benavlabs/crudadmin"
+      }
+    },
+    {
+      "id": "sqlalchemy-054-dialoguemd-fastapi-sqla",
+      "repository": "https://github.com/dialoguemd/fastapi-sqla.git",
+      "commit": "75487031296505b05e588a36fd28744cb65d251c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 54,
+        "fullName": "dialoguemd/fastapi-sqla",
+        "stars": 446,
+        "forks": 18,
+        "sizeKb": 1809,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T04:06:58Z",
+        "topics": [
+          "fastapi",
+          "fastapi-sqla",
+          "fastapi-sqlalchemy",
+          "library",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dialoguemd/fastapi-sqla"
+      }
+    },
+    {
+      "id": "sqlalchemy-055-thomaxxl-safrs",
+      "repository": "https://github.com/thomaxxl/safrs.git",
+      "commit": "e46ab06335ebb28e7e42d95751cec19b9a3223eb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 55,
+        "fullName": "thomaxxl/safrs",
+        "stars": 413,
+        "forks": 71,
+        "sizeKb": 40783,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-18T03:24:37Z",
+        "topics": [
+          "flask",
+          "flask-restful",
+          "flask-sqlalchemy",
+          "json",
+          "json-api",
+          "openapi",
+          "openapi3",
+          "python3",
+          "rest-api",
+          "sqlalchemy",
+          "swagger"
+        ],
+        "htmlUrl": "https://github.com/thomaxxl/safrs"
+      }
+    },
+    {
+      "id": "sqlalchemy-056-koldakov-futuramaapi",
+      "repository": "https://github.com/koldakov/futuramaapi.git",
+      "commit": "25c16b9cf890d56d51cef5efb9585205e281de6c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 56,
+        "fullName": "koldakov/futuramaapi",
+        "stars": 405,
+        "forks": 25,
+        "sizeKb": 12446,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-29T18:11:58Z",
+        "topics": [
+          "alembic",
+          "async",
+          "babel",
+          "fastapi",
+          "graphql",
+          "http2",
+          "hypercorn",
+          "mypy",
+          "pydantic",
+          "pydantic-v2",
+          "python",
+          "ruff",
+          "sqlalchemy",
+          "sqlalchemy-python",
+          "sse",
+          "strawberry",
+          "strawberry-graphql"
+        ],
+        "htmlUrl": "https://github.com/koldakov/futuramaapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-057-hackersandslackers-flask-sqlalchemy-tutorial",
+      "repository": "https://github.com/hackersandslackers/flask-sqlalchemy-tutorial.git",
+      "commit": "d663ae301550411248c07f2a9fbf5ee7a5d26967",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 57,
+        "fullName": "hackersandslackers/flask-sqlalchemy-tutorial",
+        "stars": 403,
+        "forks": 68,
+        "sizeKb": 1622,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-28T06:43:47Z",
+        "topics": [
+          "flask",
+          "flask-application-factory",
+          "flask-sqlalchemy",
+          "orm-framework",
+          "orms",
+          "python",
+          "sqlalchemy",
+          "sqlalchemy-orm",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/hackersandslackers/flask-sqlalchemy-tutorial"
+      }
+    },
+    {
+      "id": "sqlalchemy-058-maxtepkeev-architect",
+      "repository": "https://github.com/maxtepkeev/architect.git",
+      "commit": "75c18ac0945582fc24ffd363e1e886d25fa100a1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 58,
+        "fullName": "maxtepkeev/architect",
+        "stars": 395,
+        "forks": 53,
+        "sizeKb": 588,
+        "defaultBranch": "master",
+        "pushedAt": "2022-09-16T13:18:20Z",
+        "topics": [
+          "architect",
+          "database",
+          "django",
+          "mysql",
+          "orm",
+          "partitioning",
+          "peewee",
+          "pony",
+          "postgres",
+          "python",
+          "sqlalchemy",
+          "sqlobject"
+        ],
+        "htmlUrl": "https://github.com/maxtepkeev/architect"
+      }
+    },
+    {
+      "id": "sqlalchemy-059-talkpython-web-applications-with-fastapi-course",
+      "repository": "https://github.com/talkpython/web-applications-with-fastapi-course.git",
+      "commit": "c96b4ad861f931b13dc69cdb965f73e49f2accd1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 59,
+        "fullName": "talkpython/web-applications-with-fastapi-course",
+        "stars": 358,
+        "forks": 194,
+        "sizeKb": 4378,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-04T14:14:51Z",
+        "topics": [
+          "async-await",
+          "asyncio",
+          "fastapi",
+          "html",
+          "sqlalchemy",
+          "sqlalchemy-orm",
+          "static",
+          "webapp",
+          "website"
+        ],
+        "htmlUrl": "https://github.com/talkpython/web-applications-with-fastapi-course"
+      }
+    },
+    {
+      "id": "sqlalchemy-060-no13bus-baymax",
+      "repository": "https://github.com/no13bus/baymax.git",
+      "commit": "5fa88b5da21542bfacb3013bc1de1c6b9a9edab2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 60,
+        "fullName": "no13bus/baymax",
+        "stars": 342,
+        "forks": 48,
+        "sizeKb": 3454,
+        "defaultBranch": "master",
+        "pushedAt": "2022-06-13T08:32:23Z",
+        "topics": [
+          "celery",
+          "flask",
+          "healthcare",
+          "mysql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/no13bus/baymax"
+      }
+    },
+    {
+      "id": "sqlalchemy-061-ksindi-flask-sqlacodegen",
+      "repository": "https://github.com/ksindi/flask-sqlacodegen.git",
+      "commit": "60797250801fc81fce17fe3e8d159973b71a25cc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 61,
+        "fullName": "ksindi/flask-sqlacodegen",
+        "stars": 337,
+        "forks": 58,
+        "sizeKb": 119,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-09T17:47:39Z",
+        "topics": [
+          "flask",
+          "flask-sqlacodegen",
+          "python",
+          "sqlacodegen",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ksindi/flask-sqlacodegen"
+      }
+    },
+    {
+      "id": "sqlalchemy-062-neonkid-fastapi-ddd-example",
+      "repository": "https://github.com/NEONKID/fastapi-ddd-example.git",
+      "commit": "b6652bf5d0a61f693ce0ffb947e1e8cb331bd35c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 62,
+        "fullName": "NEONKID/fastapi-ddd-example",
+        "stars": 331,
+        "forks": 47,
+        "sizeKb": 374,
+        "defaultBranch": "main",
+        "pushedAt": "2022-03-01T12:14:31Z",
+        "topics": [
+          "ddd-example",
+          "fastapi",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/NEONKID/fastapi-ddd-example"
+      }
+    },
+    {
+      "id": "sqlalchemy-063-faststream-community-fastapi-dishka-faststream",
+      "repository": "https://github.com/faststream-community/fastapi-dishka-faststream.git",
+      "commit": "3498ac00d66822af451a10825e47610678135223",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 63,
+        "fullName": "faststream-community/fastapi-dishka-faststream",
+        "stars": 322,
+        "forks": 14,
+        "sizeKb": 27,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-22T18:22:50Z",
+        "topics": [
+          "dishka",
+          "fastapi",
+          "faststream",
+          "pydantic",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/faststream-community/fastapi-dishka-faststream"
+      }
+    },
+    {
+      "id": "sqlalchemy-064-introlab-openimu",
+      "repository": "https://github.com/introlab/OpenIMU.git",
+      "commit": "614690ea31413fdfab79f8e4cad75c6854d92053",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 64,
+        "fullName": "introlab/OpenIMU",
+        "stars": 316,
+        "forks": 75,
+        "sizeKb": 72096,
+        "defaultBranch": "main",
+        "pushedAt": "2025-10-22T17:30:18Z",
+        "topics": [
+          "accelerometers",
+          "analysis",
+          "applewatch",
+          "database",
+          "energy",
+          "expenditure",
+          "imu",
+          "imu-data",
+          "inertial",
+          "measurement",
+          "scripting",
+          "sqlalchemy",
+          "sqlite3",
+          "units"
+        ],
+        "htmlUrl": "https://github.com/introlab/OpenIMU"
+      }
+    },
+    {
+      "id": "sqlalchemy-065-vsdudakov-fastadmin",
+      "repository": "https://github.com/vsdudakov/fastadmin.git",
+      "commit": "59babcb2d8f992a3c61d5ad21a35999a89991ee1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 65,
+        "fullName": "vsdudakov/fastadmin",
+        "stars": 314,
+        "forks": 37,
+        "sizeKb": 40307,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T09:53:35Z",
+        "topics": [
+          "admin",
+          "admin-dashboard",
+          "admin-panel",
+          "crud",
+          "dashboard",
+          "django",
+          "django-admin",
+          "fastadmin",
+          "fastapi",
+          "fastapi-admin",
+          "flask",
+          "flask-admin",
+          "ponyorm",
+          "python",
+          "sqlalchemy",
+          "tortoise-orm",
+          "yara-orm"
+        ],
+        "htmlUrl": "https://github.com/vsdudakov/fastadmin"
+      }
+    },
+    {
+      "id": "sqlalchemy-066-tko22-flask-boilerplate",
+      "repository": "https://github.com/tko22/flask-boilerplate.git",
+      "commit": "8be897648118ba3caf5c1a7cc967bbf801438b11",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 66,
+        "fullName": "tko22/flask-boilerplate",
+        "stars": 303,
+        "forks": 97,
+        "sizeKb": 6970,
+        "defaultBranch": "master",
+        "pushedAt": "2021-01-11T18:53:23Z",
+        "topics": [
+          "boilerplate",
+          "database",
+          "docker",
+          "flask",
+          "heroku",
+          "now",
+          "postgres",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/tko22/flask-boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-067-olirice-alembic-utils",
+      "repository": "https://github.com/olirice/alembic_utils.git",
+      "commit": "ccf9be7b8097bd6df13886a40a8e22c847c10bc8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 67,
+        "fullName": "olirice/alembic_utils",
+        "stars": 300,
+        "forks": 62,
+        "sizeKb": 5841,
+        "defaultBranch": "master",
+        "pushedAt": "2025-04-10T18:57:51Z",
+        "topics": [
+          "alembic",
+          "migration",
+          "postgres",
+          "postgresql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/olirice/alembic_utils"
+      }
+    },
+    {
+      "id": "sqlalchemy-068-razerm-sqlalchemy-aio",
+      "repository": "https://github.com/RazerM/sqlalchemy_aio.git",
+      "commit": "bebd89cddfd46cb46dadcadf5d899bc00555fef9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 68,
+        "fullName": "RazerM/sqlalchemy_aio",
+        "stars": 298,
+        "forks": 17,
+        "sizeKb": 154,
+        "defaultBranch": "master",
+        "pushedAt": "2022-02-14T21:54:49Z",
+        "topics": [
+          "async",
+          "async-await",
+          "asyncio",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/RazerM/sqlalchemy_aio"
+      }
+    },
+    {
+      "id": "sqlalchemy-069-tropicoo-yt-dlp-bot",
+      "repository": "https://github.com/tropicoo/yt-dlp-bot.git",
+      "commit": "ded26973a35b4acd7f1842e0b93c5e9a0057bf22",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 69,
+        "fullName": "tropicoo/yt-dlp-bot",
+        "stars": 295,
+        "forks": 88,
+        "sizeKb": 2399,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-13T16:59:54Z",
+        "topics": [
+          "async",
+          "asyncio",
+          "fastapi",
+          "made-by-ukrainians",
+          "made-in-ukraine",
+          "postgresql",
+          "pyrogram",
+          "python",
+          "python3",
+          "rabbitmq",
+          "sqlalchemy",
+          "telegram",
+          "telegram-bot",
+          "telegram-youtube-downloader",
+          "youtube",
+          "youtube-downloader",
+          "yt-dlp"
+        ],
+        "htmlUrl": "https://github.com/tropicoo/yt-dlp-bot"
+      }
+    },
+    {
+      "id": "sqlalchemy-070-dicklesworthstone-sqlalchemy-data-model-visualizer",
+      "repository": "https://github.com/Dicklesworthstone/sqlalchemy_data_model_visualizer.git",
+      "commit": "f176a92537abf426164cad9bac01b77f1f3594a5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 70,
+        "fullName": "Dicklesworthstone/sqlalchemy_data_model_visualizer",
+        "stars": 293,
+        "forks": 12,
+        "sizeKb": 39,
+        "defaultBranch": "main",
+        "pushedAt": "2025-02-27T11:26:30Z",
+        "topics": [
+          "datamodel",
+          "orm",
+          "orm-model",
+          "schema",
+          "sqlalchemy",
+          "visualization"
+        ],
+        "htmlUrl": "https://github.com/Dicklesworthstone/sqlalchemy_data_model_visualizer"
+      }
+    },
+    {
+      "id": "sqlalchemy-071-samwarden-user-service",
+      "repository": "https://github.com/SamWarden/user_service.git",
+      "commit": "220542f176dd92ddad183bc7b979369e006193a1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 71,
+        "fullName": "SamWarden/user_service",
+        "stars": 293,
+        "forks": 20,
+        "sizeKb": 589,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-28T09:48:12Z",
+        "topics": [
+          "api",
+          "clean-architecture",
+          "cqrs",
+          "crud",
+          "ddd",
+          "fastapi",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/SamWarden/user_service"
+      }
+    },
+    {
+      "id": "sqlalchemy-072-c0sogi-llmchat",
+      "repository": "https://github.com/c0sogi/LLMChat.git",
+      "commit": "01f53de6630e7302fc58f103b3fad382d8d270bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 72,
+        "fullName": "c0sogi/LLMChat",
+        "stars": 291,
+        "forks": 50,
+        "sizeKb": 61154,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-25T11:33:19Z",
+        "topics": [
+          "chatbot",
+          "chatgpt",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "flutter",
+          "fullstack",
+          "langchain",
+          "llm",
+          "mysql",
+          "openai",
+          "python",
+          "redis",
+          "restapi",
+          "sqlalchemy",
+          "websocket",
+          "webui"
+        ],
+        "htmlUrl": "https://github.com/c0sogi/LLMChat"
+      }
+    },
+    {
+      "id": "sqlalchemy-073-mikeckennedy-python-for-entrepreneurs-course-demos",
+      "repository": "https://github.com/mikeckennedy/python-for-entrepreneurs-course-demos.git",
+      "commit": "01de69da51f601f136316d86d715e1fe60fd794b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 73,
+        "fullName": "mikeckennedy/python-for-entrepreneurs-course-demos",
+        "stars": 289,
+        "forks": 141,
+        "sizeKb": 10245,
+        "defaultBranch": "master",
+        "pushedAt": "2020-05-27T18:06:10Z",
+        "topics": [
+          "bootstrap",
+          "database",
+          "entrepreneurs",
+          "entrepreneurs-course",
+          "orm",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "stripe"
+        ],
+        "htmlUrl": "https://github.com/mikeckennedy/python-for-entrepreneurs-course-demos"
+      }
+    },
+    {
+      "id": "sqlalchemy-074-anthonycorletti-cloudrun-fastapi",
+      "repository": "https://github.com/anthonycorletti/cloudrun-fastapi.git",
+      "commit": "e611d9e9cee7a2d63af8a0074a3b5898e7a78093",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 74,
+        "fullName": "anthonycorletti/cloudrun-fastapi",
+        "stars": 287,
+        "forks": 28,
+        "sizeKb": 164,
+        "defaultBranch": "main",
+        "pushedAt": "2024-10-07T23:42:50Z",
+        "topics": [
+          "alembic",
+          "docker",
+          "fastapi",
+          "google-cloud",
+          "google-cloud-run",
+          "postgresql",
+          "pytest",
+          "python3",
+          "sqlalchemy",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/anthonycorletti/cloudrun-fastapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-075-gnuboard-g6",
+      "repository": "https://github.com/gnuboard/g6.git",
+      "commit": "a4b991a70762f22279c7fffd2d2c5146c3063c07",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 75,
+        "fullName": "gnuboard/g6",
+        "stars": 275,
+        "forks": 106,
+        "sizeKb": 14393,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-12T06:31:08Z",
+        "topics": [
+          "cms",
+          "fastapi",
+          "gnuboard",
+          "jinja2",
+          "korea",
+          "orm",
+          "pydantic",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/gnuboard/g6"
+      }
+    },
+    {
+      "id": "sqlalchemy-076-manimozaffar-linkedin-scraper",
+      "repository": "https://github.com/ManiMozaffar/linkedIn-scraper.git",
+      "commit": "5fd2633044675d715130fee1b567c0984e97a897",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 76,
+        "fullName": "ManiMozaffar/linkedIn-scraper",
+        "stars": 272,
+        "forks": 27,
+        "sizeKb": 137,
+        "defaultBranch": "main",
+        "pushedAt": "2024-04-05T07:00:42Z",
+        "topics": [
+          "bot",
+          "browser-fingerprint",
+          "browser-fingerprinting",
+          "chatgpt",
+          "chatgpt-api",
+          "cralwer",
+          "fastapi",
+          "linkedin",
+          "linkedin-bot",
+          "playwright",
+          "python",
+          "scraper",
+          "scraping",
+          "spider",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ManiMozaffar/linkedIn-scraper"
+      }
+    },
+    {
+      "id": "sqlalchemy-077-luisluii-fastapiquickcrud",
+      "repository": "https://github.com/LuisLuii/FastAPIQuickCRUD.git",
+      "commit": "2f959d815ad662c7687f11f9b0ea6bb2ba05cd07",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 77,
+        "fullName": "LuisLuii/FastAPIQuickCRUD",
+        "stars": 272,
+        "forks": 36,
+        "sizeKb": 33461,
+        "defaultBranch": "main",
+        "pushedAt": "2024-01-07T13:36:22Z",
+        "topics": [
+          "api-generator",
+          "fastapi",
+          "fastapi-crud",
+          "fastapi-framework",
+          "fastapi-sqlalchemy",
+          "orm",
+          "postgres",
+          "postgresql",
+          "postgresql-database",
+          "python",
+          "python-library",
+          "python37",
+          "restful",
+          "restful-api",
+          "restful-routes",
+          "sqlalchemy",
+          "sqlalchemy-models",
+          "sqlalchemy-orm",
+          "sqlalchemy-orm-queries",
+          "sqlalchemy-python"
+        ],
+        "htmlUrl": "https://github.com/LuisLuii/FastAPIQuickCRUD"
+      }
+    },
+    {
+      "id": "sqlalchemy-078-alvassin-backendschool2019",
+      "repository": "https://github.com/alvassin/backendschool2019.git",
+      "commit": "4698cb3c1691f7e818659d874f2a237f87fe88bf",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 78,
+        "fullName": "alvassin/backendschool2019",
+        "stars": 271,
+        "forks": 58,
+        "sizeKb": 121,
+        "defaultBranch": "master",
+        "pushedAt": "2022-08-02T21:33:12Z",
+        "topics": [
+          "aiohttp",
+          "alembic",
+          "asyncio",
+          "asyncpg",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "yandex"
+        ],
+        "htmlUrl": "https://github.com/alvassin/backendschool2019"
+      }
+    },
+    {
+      "id": "sqlalchemy-079-websauna-websauna",
+      "repository": "https://github.com/websauna/websauna.git",
+      "commit": "a57de54fb8a3fae859f24f373f0292e1e4b3c344",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 79,
+        "fullName": "websauna/websauna",
+        "stars": 263,
+        "forks": 53,
+        "sizeKb": 10953,
+        "defaultBranch": "master",
+        "pushedAt": "2020-12-30T01:48:27Z",
+        "topics": [
+          "pyramid-framework",
+          "pytest",
+          "python3",
+          "sqlalchemy",
+          "webframework"
+        ],
+        "htmlUrl": "https://github.com/websauna/websauna"
+      }
+    },
+    {
+      "id": "sqlalchemy-080-yezz123-ai-template",
+      "repository": "https://github.com/yezz123/ai-template.git",
+      "commit": "86f6e33fb235678e0599d3cebd318997d65bd04d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 80,
+        "fullName": "yezz123/ai-template",
+        "stars": 255,
+        "forks": 41,
+        "sizeKb": 2637,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-12T12:14:47Z",
+        "topics": [
+          "ai",
+          "asyncio",
+          "authx",
+          "fastapi",
+          "nextjs",
+          "python",
+          "rest-api",
+          "sqlalchemy",
+          "swagger-ui",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/yezz123/ai-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-081-jeancochrane-pytest-flask-sqlalchemy",
+      "repository": "https://github.com/jeancochrane/pytest-flask-sqlalchemy.git",
+      "commit": "12ad2fbd7da1005f5fd579a6c260aff527c6ee36",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 81,
+        "fullName": "jeancochrane/pytest-flask-sqlalchemy",
+        "stars": 253,
+        "forks": 45,
+        "sizeKb": 107,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-25T20:59:27Z",
+        "topics": [
+          "flask",
+          "isolation",
+          "pytest",
+          "python",
+          "sqlalchemy",
+          "testing",
+          "transactions"
+        ],
+        "htmlUrl": "https://github.com/jeancochrane/pytest-flask-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-082-alvassin-alembic-quickstart",
+      "repository": "https://github.com/alvassin/alembic-quickstart.git",
+      "commit": "da25b4964b481891cd6765797f7c08b75f5cea87",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 82,
+        "fullName": "alvassin/alembic-quickstart",
+        "stars": 251,
+        "forks": 35,
+        "sizeKb": 129,
+        "defaultBranch": "master",
+        "pushedAt": "2022-08-02T12:48:22Z",
+        "topics": [
+          "aiohttp",
+          "alembic",
+          "example",
+          "migrations",
+          "pytest",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "testing"
+        ],
+        "htmlUrl": "https://github.com/alvassin/alembic-quickstart"
+      }
+    },
+    {
+      "id": "sqlalchemy-083-schireson-pytest-alembic",
+      "repository": "https://github.com/schireson/pytest-alembic.git",
+      "commit": "9e9098ceedb7f2cfb7fdd68dc30150273d7373d4",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 83,
+        "fullName": "schireson/pytest-alembic",
+        "stars": 247,
+        "forks": 15,
+        "sizeKb": 700,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-29T03:32:51Z",
+        "topics": [
+          "alembic",
+          "hacktoberfest",
+          "migrations",
+          "pytest",
+          "schiresonip",
+          "sqlalchemy",
+          "tidepod"
+        ],
+        "htmlUrl": "https://github.com/schireson/pytest-alembic"
+      }
+    },
+    {
+      "id": "sqlalchemy-084-seapagan-fastapi-template",
+      "repository": "https://github.com/seapagan/fastapi-template.git",
+      "commit": "2fdf9786aa99922031ea7003d2edf857c7b21a1c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 84,
+        "fullName": "seapagan/fastapi-template",
+        "stars": 246,
+        "forks": 17,
+        "sizeKb": 18864,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-15T10:01:56Z",
+        "topics": [
+          "alembic",
+          "api-keys",
+          "async",
+          "async-test",
+          "asynchronous",
+          "caching",
+          "fastapi",
+          "jwt",
+          "jwt-authentication",
+          "postgresql",
+          "pytest",
+          "python",
+          "rate-limiting",
+          "sqladmin",
+          "sqlalchemy",
+          "sqlalchemy2",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/seapagan/fastapi-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-085-codemation-pydbantic",
+      "repository": "https://github.com/codemation/pydbantic.git",
+      "commit": "1f042ec31446cad4f78a4adbfce3005347f3a7c6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 85,
+        "fullName": "codemation/pydbantic",
+        "stars": 240,
+        "forks": 14,
+        "sizeKb": 351,
+        "defaultBranch": "main",
+        "pushedAt": "2023-10-03T08:00:16Z",
+        "topics": [
+          "async",
+          "database",
+          "databases",
+          "models",
+          "orm",
+          "pydantic",
+          "python",
+          "redis",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/codemation/pydbantic"
+      }
+    },
+    {
+      "id": "sqlalchemy-086-pyeve-eve-sqlalchemy",
+      "repository": "https://github.com/pyeve/eve-sqlalchemy.git",
+      "commit": "0d5fda3d4739115be84a9bcecdb141f09265a397",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 86,
+        "fullName": "pyeve/eve-sqlalchemy",
+        "stars": 235,
+        "forks": 68,
+        "sizeKb": 425,
+        "defaultBranch": "master",
+        "pushedAt": "2024-09-11T10:20:44Z",
+        "topics": [
+          "flask",
+          "python",
+          "rest",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pyeve/eve-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-087-fy0-fpage",
+      "repository": "https://github.com/fy0/fpage.git",
+      "commit": "b45e7962166372bcb795cedc69180ce0c6b63126",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 87,
+        "fullName": "fy0/fpage",
+        "stars": 234,
+        "forks": 41,
+        "sizeKb": 73,
+        "defaultBranch": "master",
+        "pushedAt": "2018-07-12T16:03:31Z",
+        "topics": [
+          "fpage",
+          "mako",
+          "peewee",
+          "python",
+          "sqlalchemy",
+          "tornado",
+          "xsrf"
+        ],
+        "htmlUrl": "https://github.com/fy0/fpage"
+      }
+    },
+    {
+      "id": "sqlalchemy-088-rawheel-fastapi-boilerplate",
+      "repository": "https://github.com/rawheel/fastapi-boilerplate.git",
+      "commit": "a7ba03dc8c8b9e923a4c9bffca13c43bb2ccdb73",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 88,
+        "fullName": "rawheel/fastapi-boilerplate",
+        "stars": 234,
+        "forks": 42,
+        "sizeKb": 1895,
+        "defaultBranch": "main",
+        "pushedAt": "2025-01-21T10:18:28Z",
+        "topics": [
+          "alembic",
+          "boilerplate",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-sqlalchemy",
+          "orm",
+          "poetry-python",
+          "postgresql",
+          "pydantic",
+          "python3",
+          "sqlalchemy",
+          "sqlalchemy-orm"
+        ],
+        "htmlUrl": "https://github.com/rawheel/fastapi-boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-089-billvsme-videospider",
+      "repository": "https://github.com/billvsme/videoSpider.git",
+      "commit": "e19111cc48d0a2a44c5245b0ddc9fad0c7a1824d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 89,
+        "fullName": "billvsme/videoSpider",
+        "stars": 231,
+        "forks": 85,
+        "sizeKb": 122,
+        "defaultBranch": "master",
+        "pushedAt": "2022-07-06T19:19:13Z",
+        "topics": [
+          "bilibili",
+          "douban",
+          "python",
+          "spider",
+          "sqlalchemy",
+          "video"
+        ],
+        "htmlUrl": "https://github.com/billvsme/videoSpider"
+      }
+    },
+    {
+      "id": "sqlalchemy-090-honmaple-flask-msearch",
+      "repository": "https://github.com/honmaple/flask-msearch.git",
+      "commit": "aad60988fe1ee921ff8ce31966c842bf871c436b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 90,
+        "fullName": "honmaple/flask-msearch",
+        "stars": 225,
+        "forks": 30,
+        "sizeKb": 109,
+        "defaultBranch": "master",
+        "pushedAt": "2024-01-16T05:07:23Z",
+        "topics": [
+          "flask",
+          "search",
+          "sqlalchemy",
+          "whoosh"
+        ],
+        "htmlUrl": "https://github.com/honmaple/flask-msearch"
+      }
+    },
+    {
+      "id": "sqlalchemy-091-microndgt-the-flask-mega-tutorial",
+      "repository": "https://github.com/Microndgt/The-Flask-Mega-Tutorial.git",
+      "commit": "216ad53cb8b52beebb9df48a57d9dc6db3806ae2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 91,
+        "fullName": "Microndgt/The-Flask-Mega-Tutorial",
+        "stars": 225,
+        "forks": 49,
+        "sizeKb": 186,
+        "defaultBranch": "master",
+        "pushedAt": "2018-06-01T10:08:26Z",
+        "topics": [
+          "flask",
+          "python",
+          "sqlalchemy",
+          "translation",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/Microndgt/The-Flask-Mega-Tutorial"
+      }
+    },
+    {
+      "id": "sqlalchemy-092-artemonsh-sqlalchemy-course",
+      "repository": "https://github.com/artemonsh/sqlalchemy_course.git",
+      "commit": "eb69414ef2295fe7de1ae651f868f28338a2be02",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 92,
+        "fullName": "artemonsh/sqlalchemy_course",
+        "stars": 222,
+        "forks": 50,
+        "sizeKb": 440,
+        "defaultBranch": "main",
+        "pushedAt": "2023-11-06T13:02:34Z",
+        "topics": [
+          "fastapi",
+          "orm",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/artemonsh/sqlalchemy_course"
+      }
+    },
+    {
+      "id": "sqlalchemy-093-dimmg-flusk",
+      "repository": "https://github.com/dimmg/flusk.git",
+      "commit": "f64bc46a13a8371f0ded3c49c5531abdea18425b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 93,
+        "fullName": "dimmg/flusk",
+        "stars": 221,
+        "forks": 24,
+        "sizeKb": 24,
+        "defaultBranch": "master",
+        "pushedAt": "2019-04-17T16:38:43Z",
+        "topics": [
+          "blueprints",
+          "cors",
+          "docker",
+          "flask",
+          "json-exceptions",
+          "middleware",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dimmg/flusk"
+      }
+    },
+    {
+      "id": "sqlalchemy-094-scionoftech-fastapi-full-stack-samples",
+      "repository": "https://github.com/scionoftech/FastAPI-Full-Stack-Samples.git",
+      "commit": "5b430e1881da24f5175494e7dd27bc47b85e1f02",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 94,
+        "fullName": "scionoftech/FastAPI-Full-Stack-Samples",
+        "stars": 217,
+        "forks": 44,
+        "sizeKb": 171,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-07T09:44:51Z",
+        "topics": [
+          "api",
+          "fastapi",
+          "graphql",
+          "gunicorn",
+          "mongoengine",
+          "python-fastapi",
+          "rq",
+          "socket-io",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/scionoftech/FastAPI-Full-Stack-Samples"
+      }
+    },
+    {
+      "id": "sqlalchemy-095-modern-python-fastapi-sqlalchemy-template",
+      "repository": "https://github.com/modern-python/fastapi-sqlalchemy-template.git",
+      "commit": "79fe1767a84f21269c44dfd48df559f35940e8eb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 95,
+        "fullName": "modern-python/fastapi-sqlalchemy-template",
+        "stars": 210,
+        "forks": 31,
+        "sizeKb": 1067,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T08:45:25Z",
+        "topics": [
+          "advanced-alchemy",
+          "alembic",
+          "asyncio",
+          "boilerplate",
+          "di",
+          "docker",
+          "fastapi",
+          "ioc-container",
+          "justfile",
+          "modern-di",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "template"
+        ],
+        "htmlUrl": "https://github.com/modern-python/fastapi-sqlalchemy-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-096-ilyarolf-aiogramshopbot",
+      "repository": "https://github.com/ilyarolf/AiogramShopBot.git",
+      "commit": "c322b09c9628385961f5435b2cd9765844e0e85f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 96,
+        "fullName": "ilyarolf/AiogramShopBot",
+        "stars": 208,
+        "forks": 88,
+        "sizeKb": 1212,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-23T17:18:25Z",
+        "topics": [
+          "aiogram3",
+          "binance-coin",
+          "bitcoin",
+          "cryptocurrency",
+          "ethereum",
+          "litecoin",
+          "postsgresql",
+          "shop",
+          "solana",
+          "sqladmin",
+          "sqlalchemy",
+          "store",
+          "telegram",
+          "telegram-ecommerce",
+          "telegram-shop",
+          "telegram-store",
+          "tether",
+          "usd-coin",
+          "usdc",
+          "usdt"
+        ],
+        "htmlUrl": "https://github.com/ilyarolf/AiogramShopBot"
+      }
+    },
+    {
+      "id": "sqlalchemy-097-uralbash-sqlalchemy-mptt",
+      "repository": "https://github.com/uralbash/sqlalchemy_mptt.git",
+      "commit": "6bb11a2292b2b7a36a2ca8265b55d74cb721a917",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 97,
+        "fullName": "uralbash/sqlalchemy_mptt",
+        "stars": 200,
+        "forks": 33,
+        "sizeKb": 473,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-22T15:24:11Z",
+        "topics": [
+          "mptt",
+          "nested-set",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/uralbash/sqlalchemy_mptt"
+      }
+    },
+    {
+      "id": "sqlalchemy-098-xnuinside-omymodels",
+      "repository": "https://github.com/xnuinside/omymodels.git",
+      "commit": "01a839112e51f6d1212ae673d9d59644a1ed889d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 98,
+        "fullName": "xnuinside/omymodels",
+        "stars": 199,
+        "forks": 26,
+        "sizeKb": 482,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-18T14:00:50Z",
+        "topics": [
+          "async",
+          "code-generation",
+          "converter",
+          "dataclasses",
+          "ddl",
+          "ddl-parser",
+          "generator",
+          "gino",
+          "gino-orm",
+          "ginoorm-models",
+          "hacktoberfest",
+          "models",
+          "models-generation",
+          "orm",
+          "orm-model",
+          "pydantic",
+          "pydantic-models",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/xnuinside/omymodels"
+      }
+    },
+    {
+      "id": "sqlalchemy-099-jakubpluta-gymhero",
+      "repository": "https://github.com/JakubPluta/gymhero.git",
+      "commit": "1e57ec1c325199133d81ffb2dd840aa600903ef0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 99,
+        "fullName": "JakubPluta/gymhero",
+        "stars": 192,
+        "forks": 37,
+        "sizeKb": 431,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-08T17:42:18Z",
+        "topics": [
+          "crud",
+          "fastapi",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/JakubPluta/gymhero"
+      }
+    },
+    {
+      "id": "sqlalchemy-100-kenmwaura1-fast-api-example",
+      "repository": "https://github.com/KenMwaura1/Fast-Api-example.git",
+      "commit": "983a3f12e71691a809a8dcc40b9edf0ca013164e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 100,
+        "fullName": "KenMwaura1/Fast-Api-example",
+        "stars": 187,
+        "forks": 55,
+        "sizeKb": 1966,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T07:17:10Z",
+        "topics": [
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "github-actions",
+          "postgres",
+          "postgresql",
+          "pytest",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/KenMwaura1/Fast-Api-example"
+      }
+    },
+    {
+      "id": "sqlalchemy-101-nofoobar-jobboard-fastapi",
+      "repository": "https://github.com/nofoobar/JobBoard-Fastapi.git",
+      "commit": "3b8ac12ff7777e9f4aea6baba92f976e3ab17c08",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 101,
+        "fullName": "nofoobar/JobBoard-Fastapi",
+        "stars": 180,
+        "forks": 57,
+        "sizeKb": 73612,
+        "defaultBranch": "main",
+        "pushedAt": "2021-04-26T06:10:45Z",
+        "topics": [
+          "fastapi",
+          "jinja2",
+          "postgresql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/nofoobar/JobBoard-Fastapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-102-dtiesling-flask-muck",
+      "repository": "https://github.com/dtiesling/flask-muck.git",
+      "commit": "860f2960f494c4e5d02af82c646c92410e75ae8a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 102,
+        "fullName": "dtiesling/flask-muck",
+        "stars": 177,
+        "forks": 9,
+        "sizeKb": 1571,
+        "defaultBranch": "main",
+        "pushedAt": "2025-07-30T15:53:05Z",
+        "topics": [
+          "crud",
+          "flask",
+          "flask-extension",
+          "framework",
+          "marshmallow",
+          "openapi",
+          "pydantic",
+          "rest",
+          "restful-api",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dtiesling/flask-muck"
+      }
+    },
+    {
+      "id": "sqlalchemy-103-dgilland-sqlservice",
+      "repository": "https://github.com/dgilland/sqlservice.git",
+      "commit": "fe057a9094d53c9c2e3b788bf4ed23ba515a3f3d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 103,
+        "fullName": "dgilland/sqlservice",
+        "stars": 177,
+        "forks": 10,
+        "sizeKb": 444,
+        "defaultBranch": "master",
+        "pushedAt": "2025-11-20T13:53:45Z",
+        "topics": [
+          "database",
+          "orm",
+          "python",
+          "python3",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dgilland/sqlservice"
+      }
+    },
+    {
+      "id": "sqlalchemy-104-tedivm-paracelsus",
+      "repository": "https://github.com/tedivm/paracelsus.git",
+      "commit": "89b843b346c6baf2b209dacfe1c9a83f244ee222",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 104,
+        "fullName": "tedivm/paracelsus",
+        "stars": 176,
+        "forks": 18,
+        "sizeKb": 168,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-22T14:03:27Z",
+        "topics": [
+          "documentation-tool",
+          "graphviz",
+          "mermaid",
+          "mermaid-diagrams",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/tedivm/paracelsus"
+      }
+    },
+    {
+      "id": "sqlalchemy-105-mslaursen-fastapi-forge",
+      "repository": "https://github.com/mslaursen/fastapi-forge.git",
+      "commit": "2052c6e1f6de18444fc6e97e9ca46f3431444732",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 105,
+        "fullName": "mslaursen/fastapi-forge",
+        "stars": 171,
+        "forks": 7,
+        "sizeKb": 8870,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-24T22:16:43Z",
+        "topics": [
+          "asynchronous",
+          "boilerplate",
+          "cookiecutter",
+          "fastapi",
+          "fastapi-template",
+          "jwt-authentication",
+          "nicegui",
+          "postgres",
+          "pydantic",
+          "python3",
+          "rabbitmq",
+          "redis",
+          "s3",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/mslaursen/fastapi-forge"
+      }
+    },
+    {
+      "id": "sqlalchemy-106-mongkok-fastapi-debug-toolbar",
+      "repository": "https://github.com/mongkok/fastapi-debug-toolbar.git",
+      "commit": "f6a2ee2699143ed1a30fcc11c21b7aa591ac9968",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 106,
+        "fullName": "mongkok/fastapi-debug-toolbar",
+        "stars": 169,
+        "forks": 20,
+        "sizeKb": 7421,
+        "defaultBranch": "main",
+        "pushedAt": "2024-11-18T02:53:48Z",
+        "topics": [
+          "ariadne",
+          "debug",
+          "fastapi",
+          "graphene",
+          "graphql",
+          "profiling",
+          "pyinstrument",
+          "sqlalchemy",
+          "swagger",
+          "tortoise-orm"
+        ],
+        "htmlUrl": "https://github.com/mongkok/fastapi-debug-toolbar"
+      }
+    },
+    {
+      "id": "sqlalchemy-107-brucedone-scrapy-demo",
+      "repository": "https://github.com/BruceDone/scrapy_demo.git",
+      "commit": "561e677712e3fdd04ae702e06b1a885d46a3b221",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 107,
+        "fullName": "BruceDone/scrapy_demo",
+        "stars": 161,
+        "forks": 55,
+        "sizeKb": 69,
+        "defaultBranch": "master",
+        "pushedAt": "2023-01-31T11:24:21Z",
+        "topics": [
+          "cnbeta",
+          "demo",
+          "douban-image",
+          "example",
+          "imagespipeline",
+          "kafak",
+          "kafka",
+          "mongodb",
+          "oss",
+          "pipeline",
+          "scrapy",
+          "scrapy-demo",
+          "spider",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/BruceDone/scrapy_demo"
+      }
+    },
+    {
+      "id": "sqlalchemy-108-pegase745-sqlalchemy-datatables",
+      "repository": "https://github.com/Pegase745/sqlalchemy-datatables.git",
+      "commit": "e0af01f347e35eb063ed826e7e6f7ec699d9c5ef",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 108,
+        "fullName": "Pegase745/sqlalchemy-datatables",
+        "stars": 160,
+        "forks": 61,
+        "sizeKb": 208,
+        "defaultBranch": "master",
+        "pushedAt": "2021-01-19T20:54:11Z",
+        "topics": [
+          "datatables",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Pegase745/sqlalchemy-datatables"
+      }
+    },
+    {
+      "id": "sqlalchemy-109-ycd-universities",
+      "repository": "https://github.com/ycd/universities.git",
+      "commit": "8d77973ea5e5d6e077329b29ffdb798ab6c1f9ff",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 109,
+        "fullName": "ycd/universities",
+        "stars": 157,
+        "forks": 13,
+        "sizeKb": 145,
+        "defaultBranch": "master",
+        "pushedAt": "2021-06-10T15:48:56Z",
+        "topics": [
+          "api",
+          "api-rest",
+          "asyncpg",
+          "fastapi",
+          "fastapi-sqlalchemy",
+          "postgresql",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/ycd/universities"
+      }
+    },
+    {
+      "id": "sqlalchemy-110-graup-flask-restless-security",
+      "repository": "https://github.com/graup/flask-restless-security.git",
+      "commit": "084b7c8b1944260a021b4c6bf0344290432efb48",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 110,
+        "fullName": "graup/flask-restless-security",
+        "stars": 157,
+        "forks": 27,
+        "sizeKb": 35,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-30T06:10:04Z",
+        "topics": [
+          "flask",
+          "flask-security",
+          "jwt",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/graup/flask-restless-security"
+      }
+    },
+    {
+      "id": "sqlalchemy-111-joegasewicz-flask-file-upload",
+      "repository": "https://github.com/joegasewicz/flask-file-upload.git",
+      "commit": "d914b3ab22d9466d7fdffff7941becf9fbb181ee",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 111,
+        "fullName": "joegasewicz/flask-file-upload",
+        "stars": 154,
+        "forks": 15,
+        "sizeKb": 14330,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-16T04:15:10Z",
+        "topics": [
+          "flask",
+          "flask-sqlalchemy",
+          "sqlalchemy",
+          "upload-images",
+          "upload-videos"
+        ],
+        "htmlUrl": "https://github.com/joegasewicz/flask-file-upload"
+      }
+    },
+    {
+      "id": "sqlalchemy-112-anthonycepeda-fastapi-sqlmodel",
+      "repository": "https://github.com/anthonycepeda/fastapi-sqlmodel.git",
+      "commit": "4b4b039e5d5ba33e8b5d3078b2b77736b516e646",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 112,
+        "fullName": "anthonycepeda/fastapi-sqlmodel",
+        "stars": 153,
+        "forks": 26,
+        "sizeKb": 187,
+        "defaultBranch": "main",
+        "pushedAt": "2024-07-22T08:10:10Z",
+        "topics": [
+          "fastapi",
+          "postgresql",
+          "python",
+          "restapi",
+          "sqlalchemy",
+          "sqlalchemy-python",
+          "sqlmodel",
+          "uvicor"
+        ],
+        "htmlUrl": "https://github.com/anthonycepeda/fastapi-sqlmodel"
+      }
+    },
+    {
+      "id": "sqlalchemy-113-tomasemilio-fastapi-boilerplate",
+      "repository": "https://github.com/tomasemilio/FastAPI-Boilerplate.git",
+      "commit": "e4e64cc99a416163e12be481e339e2711043e565",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 113,
+        "fullName": "tomasemilio/FastAPI-Boilerplate",
+        "stars": 152,
+        "forks": 21,
+        "sizeKb": 55,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-30T16:25:41Z",
+        "topics": [
+          "async",
+          "backend",
+          "fastapi",
+          "pydantic",
+          "python",
+          "sqlalchemy",
+          "template",
+          "webapi"
+        ],
+        "htmlUrl": "https://github.com/tomasemilio/FastAPI-Boilerplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-114-syedfaisalsaleeem-fastapi-strawberry-graphql-sqlalchemy-boilerplate",
+      "repository": "https://github.com/syedfaisalsaleeem/FastApi-Strawberry-GraphQL-SqlAlchemy-BoilerPlate.git",
+      "commit": "b724a6f14607e4a5858ff70174d0e993725d27cd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 114,
+        "fullName": "syedfaisalsaleeem/FastApi-Strawberry-GraphQL-SqlAlchemy-BoilerPlate",
+        "stars": 149,
+        "forks": 25,
+        "sizeKb": 45,
+        "defaultBranch": "main",
+        "pushedAt": "2022-07-11T21:31:45Z",
+        "topics": [
+          "async",
+          "fastapi",
+          "graphql-server",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "strawberry-graphql"
+        ],
+        "htmlUrl": "https://github.com/syedfaisalsaleeem/FastApi-Strawberry-GraphQL-SqlAlchemy-BoilerPlate"
+      }
+    },
+    {
+      "id": "sqlalchemy-115-sap-sqlalchemy-hana",
+      "repository": "https://github.com/SAP/sqlalchemy-hana.git",
+      "commit": "5106ec4c191f516db92cb8c34b75053e8b2ff563",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 115,
+        "fullName": "SAP/sqlalchemy-hana",
+        "stars": 147,
+        "forks": 62,
+        "sizeKb": 2620,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T10:49:55Z",
+        "topics": [
+          "hana",
+          "orm",
+          "python",
+          "sap-hana",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/SAP/sqlalchemy-hana"
+      }
+    },
+    {
+      "id": "sqlalchemy-116-miguelgrinberg-alchemical",
+      "repository": "https://github.com/miguelgrinberg/alchemical.git",
+      "commit": "8c61b93f1b6b4c812e714fb875ac264c7ad32532",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 116,
+        "fullName": "miguelgrinberg/alchemical",
+        "stars": 147,
+        "forks": 4,
+        "sizeKb": 181,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-14T19:48:18Z",
+        "topics": [
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/miguelgrinberg/alchemical"
+      }
+    },
+    {
+      "id": "sqlalchemy-117-bomzheg-shvatka",
+      "repository": "https://github.com/bomzheg/Shvatka.git",
+      "commit": "573d47fa0804aad29770406aad32a47db1446c48",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 117,
+        "fullName": "bomzheg/Shvatka",
+        "stars": 144,
+        "forks": 13,
+        "sizeKb": 15225,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T11:28:31Z",
+        "topics": [
+          "adaptix",
+          "aiogram",
+          "aiogram3",
+          "alembic",
+          "dishka",
+          "fastapi",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/bomzheg/Shvatka"
+      }
+    },
+    {
+      "id": "sqlalchemy-118-adamhavlicek-fastapi-todo-ddd",
+      "repository": "https://github.com/AdamHavlicek/fastapi-todo-ddd.git",
+      "commit": "69715124764dd489732c8a8e998395494b178c4e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 118,
+        "fullName": "AdamHavlicek/fastapi-todo-ddd",
+        "stars": 142,
+        "forks": 21,
+        "sizeKb": 190,
+        "defaultBranch": "master",
+        "pushedAt": "2022-05-30T11:48:41Z",
+        "topics": [
+          "clean-architecture",
+          "ddd-architecture",
+          "fastapi",
+          "fastapi-sqlalchemy",
+          "python3",
+          "python310",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/AdamHavlicek/fastapi-todo-ddd"
+      }
+    },
+    {
+      "id": "sqlalchemy-119-latand-medsyncwebapp",
+      "repository": "https://github.com/Latand/MedSyncWebApp.git",
+      "commit": "065f6aed76e201518b3d8cc7711bfb8601a50263",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 119,
+        "fullName": "Latand/MedSyncWebApp",
+        "stars": 142,
+        "forks": 39,
+        "sizeKb": 11547,
+        "defaultBranch": "main",
+        "pushedAt": "2023-11-28T10:14:18Z",
+        "topics": [
+          "aiogram",
+          "aiogram-dialog",
+          "fastapi",
+          "python",
+          "react",
+          "sqlalchemy",
+          "telegram",
+          "telegram-bot",
+          "telegram-miniapp-contest-2023",
+          "telegram-web-app"
+        ],
+        "htmlUrl": "https://github.com/Latand/MedSyncWebApp"
+      }
+    },
+    {
+      "id": "sqlalchemy-120-lseffer-stock-screener",
+      "repository": "https://github.com/lseffer/stock_screener.git",
+      "commit": "f9f7f47ff3d57b8de4d894a43fd6d46bf2c570ef",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 120,
+        "fullName": "lseffer/stock_screener",
+        "stars": 142,
+        "forks": 33,
+        "sizeKb": 733,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-28T18:46:22Z",
+        "topics": [
+          "alembic",
+          "docker",
+          "docker-compose",
+          "finance",
+          "google-spreadsheet",
+          "python",
+          "sqlalchemy",
+          "stock-data",
+          "stock-market",
+          "stock-screener",
+          "value-investing",
+          "web-application",
+          "web-scraping"
+        ],
+        "htmlUrl": "https://github.com/lseffer/stock_screener"
+      }
+    },
+    {
+      "id": "sqlalchemy-121-mts-ai-fastapi-jsonapi",
+      "repository": "https://github.com/mts-ai/FastAPI-JSONAPI.git",
+      "commit": "a1a4fc5a868ab6bb563919c462ea248250e83b26",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 121,
+        "fullName": "mts-ai/FastAPI-JSONAPI",
+        "stars": 140,
+        "forks": 15,
+        "sizeKb": 6662,
+        "defaultBranch": "main",
+        "pushedAt": "2025-04-07T09:16:37Z",
+        "topics": [
+          "asyncio",
+          "fastapi",
+          "python",
+          "sqlalchemy",
+          "tortoise-orm"
+        ],
+        "htmlUrl": "https://github.com/mts-ai/FastAPI-JSONAPI"
+      }
+    },
+    {
+      "id": "sqlalchemy-122-hylarucoder-tifa",
+      "repository": "https://github.com/hylarucoder/tifa.git",
+      "commit": "8696ef487a89c07006f1973fe980d7674708331d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 122,
+        "fullName": "hylarucoder/tifa",
+        "stars": 137,
+        "forks": 20,
+        "sizeKb": 654,
+        "defaultBranch": "master",
+        "pushedAt": "2024-03-23T19:26:18Z",
+        "topics": [
+          "fastapi",
+          "fastapi-template",
+          "postgresql",
+          "redis",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/hylarucoder/tifa"
+      }
+    },
+    {
+      "id": "sqlalchemy-123-jorzel-postgres-full-text-search",
+      "repository": "https://github.com/jorzel/postgres-full-text-search.git",
+      "commit": "9aeed6a05c74c7c01d2f8678d00b7f136fb2355d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 123,
+        "fullName": "jorzel/postgres-full-text-search",
+        "stars": 135,
+        "forks": 8,
+        "sizeKb": 5288,
+        "defaultBranch": "main",
+        "pushedAt": "2022-01-27T08:24:30Z",
+        "topics": [
+          "full-text-search",
+          "learning-materials",
+          "postgres",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "trigrams",
+          "tsearch"
+        ],
+        "htmlUrl": "https://github.com/jorzel/postgres-full-text-search"
+      }
+    },
+    {
+      "id": "sqlalchemy-124-nanotaboada-python-samples-fastapi-restful",
+      "repository": "https://github.com/nanotaboada/python-samples-fastapi-restful.git",
+      "commit": "700194d11d6de9e519cfaef64ddb489a96848248",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 124,
+        "fullName": "nanotaboada/python-samples-fastapi-restful",
+        "stars": 134,
+        "forks": 25,
+        "sizeKb": 1861,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-14T07:22:54Z",
+        "topics": [
+          "api-development",
+          "backend",
+          "claude-code",
+          "continuous-delivery",
+          "continuous-integration",
+          "conventional-commits",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "github-actions",
+          "integration-testing",
+          "learning-resource",
+          "proof-of-concept",
+          "pydantic",
+          "python",
+          "python-examples",
+          "rest-api",
+          "sqlalchemy",
+          "sqlite",
+          "swagger-ui"
+        ],
+        "htmlUrl": "https://github.com/nanotaboada/python-samples-fastapi-restful"
+      }
+    },
+    {
+      "id": "sqlalchemy-125-shnela-python-course",
+      "repository": "https://github.com/shnela/python_course.git",
+      "commit": "842f94c2b0f8d73428919a3c9f397720554c30a7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 125,
+        "fullName": "shnela/python_course",
+        "stars": 133,
+        "forks": 37,
+        "sizeKb": 81,
+        "defaultBranch": "main",
+        "pushedAt": "2022-07-13T10:14:01Z",
+        "topics": [
+          "course",
+          "python",
+          "python3",
+          "requests",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/shnela/python_course"
+      }
+    },
+    {
+      "id": "sqlalchemy-126-bryaneaton-flask-restful",
+      "repository": "https://github.com/bryaneaton/flask-restful.git",
+      "commit": "68c0f1f976a8cbb9b8514193623165dc9e78d21b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 126,
+        "fullName": "bryaneaton/flask-restful",
+        "stars": 132,
+        "forks": 30,
+        "sizeKb": 82,
+        "defaultBranch": "master",
+        "pushedAt": "2026-01-09T00:47:55Z",
+        "topics": [
+          "demo",
+          "example",
+          "flask",
+          "flask-jwt-extended",
+          "flask-restful",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/bryaneaton/flask-restful"
+      }
+    },
+    {
+      "id": "sqlalchemy-127-trainingbypackt-python-api-development-fundamentals",
+      "repository": "https://github.com/TrainingByPackt/Python-API-Development-Fundamentals.git",
+      "commit": "4882ea65638ea86a233e0934d6897ee2d6ddbc35",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 127,
+        "fullName": "TrainingByPackt/Python-API-Development-Fundamentals",
+        "stars": 129,
+        "forks": 97,
+        "sizeKb": 1619,
+        "defaultBranch": "master",
+        "pushedAt": "2022-11-22T04:50:04Z",
+        "topics": [
+          "api",
+          "flask",
+          "jwt",
+          "marshmallow",
+          "pagination",
+          "postman",
+          "pycharm",
+          "python",
+          "restful",
+          "serialization",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/TrainingByPackt/Python-API-Development-Fundamentals"
+      }
+    },
+    {
+      "id": "sqlalchemy-128-arturboyun-aiogrambottemplate",
+      "repository": "https://github.com/arturboyun/AiogramBotTemplate.git",
+      "commit": "0be720fb4a820d71b759106c16c8a0cb5151de14",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 128,
+        "fullName": "arturboyun/AiogramBotTemplate",
+        "stars": 128,
+        "forks": 11,
+        "sizeKb": 161,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-17T15:02:37Z",
+        "topics": [
+          "aiogram",
+          "aiogram-bot",
+          "aiogram-bot-template",
+          "aiogram-dialog",
+          "aiogram-template",
+          "aiogrambot",
+          "bot",
+          "dishka",
+          "docker",
+          "fastapi",
+          "python",
+          "ruff",
+          "sqlalchemy",
+          "telegram",
+          "telegram-bot",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/arturboyun/AiogramBotTemplate"
+      }
+    },
+    {
+      "id": "sqlalchemy-129-miguelgrinberg-retrofun",
+      "repository": "https://github.com/miguelgrinberg/retrofun.git",
+      "commit": "b06aed5b4199e0b42c19461026314a2d8e803c97",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 129,
+        "fullName": "miguelgrinberg/retrofun",
+        "stars": 128,
+        "forks": 27,
+        "sizeKb": 3413,
+        "defaultBranch": "main",
+        "pushedAt": "2026-03-01T20:09:56Z",
+        "topics": [
+          "database",
+          "fastapi",
+          "flask",
+          "mysql",
+          "postgresql",
+          "sqlalchemy",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/miguelgrinberg/retrofun"
+      }
+    },
+    {
+      "id": "sqlalchemy-130-viktorviskov-fastapi-mvc",
+      "repository": "https://github.com/ViktorViskov/fastapi-mvc.git",
+      "commit": "b55292d163dc67d447bb9d9a277745814710fe36",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 130,
+        "fullName": "ViktorViskov/fastapi-mvc",
+        "stars": 127,
+        "forks": 31,
+        "sizeKb": 84,
+        "defaultBranch": "main",
+        "pushedAt": "2025-05-28T22:01:09Z",
+        "topics": [
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "mvc",
+          "pattern",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ViktorViskov/fastapi-mvc"
+      }
+    },
+    {
+      "id": "sqlalchemy-131-iurisilvio-bottle-sqlalchemy",
+      "repository": "https://github.com/iurisilvio/bottle-sqlalchemy.git",
+      "commit": "e14779472028c26ccde5f765fe4942df8e7314bb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 131,
+        "fullName": "iurisilvio/bottle-sqlalchemy",
+        "stars": 126,
+        "forks": 20,
+        "sizeKb": 42,
+        "defaultBranch": "master",
+        "pushedAt": "2018-05-18T14:29:43Z",
+        "topics": [
+          "bottlepy",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/iurisilvio/bottle-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-132-toaco-carry",
+      "repository": "https://github.com/toaco/carry.git",
+      "commit": "3384ae369f082cd5db0a85f605d81b94d6822d34",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 132,
+        "fullName": "toaco/carry",
+        "stars": 126,
+        "forks": 25,
+        "sizeKb": 133,
+        "defaultBranch": "master",
+        "pushedAt": "2018-07-23T14:17:55Z",
+        "topics": [
+          "database",
+          "database-migrations",
+          "datatransformer",
+          "etl",
+          "migration",
+          "pandas",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/toaco/carry"
+      }
+    },
+    {
+      "id": "sqlalchemy-133-touero-opsariichthys-bidens",
+      "repository": "https://github.com/touero/opsariichthys-bidens.git",
+      "commit": "ded974c70ea53fc6d8b1dd54a8a51ff09ecabbf3",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 133,
+        "fullName": "touero/opsariichthys-bidens",
+        "stars": 124,
+        "forks": 2,
+        "sizeKb": 15861,
+        "defaultBranch": "master",
+        "pushedAt": "2025-02-21T03:05:18Z",
+        "topics": [
+          "docker",
+          "fastapi",
+          "orm",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/touero/opsariichthys-bidens"
+      }
+    },
+    {
+      "id": "sqlalchemy-134-peopl3s-clean-architecture-fastapi-project-template",
+      "repository": "https://github.com/Peopl3s/clean-architecture-fastapi-project-template.git",
+      "commit": "66c6eea5ce7c17ffef7b6df5bfe46e9fe966b579",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 134,
+        "fullName": "Peopl3s/clean-architecture-fastapi-project-template",
+        "stars": 123,
+        "forks": 14,
+        "sizeKb": 417,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T19:09:13Z",
+        "topics": [
+          "alembic",
+          "clean-architecture",
+          "clean-architecture-boilerplate",
+          "clean-architecture-example",
+          "clean-architecture-template",
+          "ddd",
+          "ddd-example",
+          "dishka",
+          "docker",
+          "fastapi",
+          "fastapi-boilerplate",
+          "fastapi-template",
+          "faststream",
+          "onion-architecture",
+          "pytest",
+          "sphinx",
+          "sqlalchemy",
+          "stamina"
+        ],
+        "htmlUrl": "https://github.com/Peopl3s/clean-architecture-fastapi-project-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-135-siddhantgoel-tornado-sqlalchemy",
+      "repository": "https://github.com/siddhantgoel/tornado-sqlalchemy.git",
+      "commit": "39ffadbf7060fd4b8380760884f4bc30ff0fb563",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 135,
+        "fullName": "siddhantgoel/tornado-sqlalchemy",
+        "stars": 122,
+        "forks": 19,
+        "sizeKb": 284,
+        "defaultBranch": "main",
+        "pushedAt": "2024-06-06T23:29:19Z",
+        "topics": [
+          "asynchronous",
+          "asyncio",
+          "database",
+          "orm",
+          "python",
+          "sqlalchemy",
+          "tornado",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/siddhantgoel/tornado-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-136-getmrahul-flask-graphene-sqlalchemy",
+      "repository": "https://github.com/Getmrahul/Flask-Graphene-SQLAlchemy.git",
+      "commit": "772762edd8dd784a3038d046aebe823fb543d06e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 136,
+        "fullName": "Getmrahul/Flask-Graphene-SQLAlchemy",
+        "stars": 121,
+        "forks": 34,
+        "sizeKb": 8,
+        "defaultBranch": "master",
+        "pushedAt": "2017-12-12T03:47:18Z",
+        "topics": [
+          "flask",
+          "graphene",
+          "graphql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Getmrahul/Flask-Graphene-SQLAlchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-137-auvipy-django-sqlalchemy",
+      "repository": "https://github.com/auvipy/django-sqlalchemy.git",
+      "commit": "3272baa5d22fe3e3951c02c0fb45fc491efef97b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 137,
+        "fullName": "auvipy/django-sqlalchemy",
+        "stars": 121,
+        "forks": 4,
+        "sizeKb": 1264,
+        "defaultBranch": "master",
+        "pushedAt": "2023-10-04T11:09:03Z",
+        "topics": [
+          "database",
+          "datamapper",
+          "django",
+          "django-admin",
+          "django-field",
+          "django-meta-api",
+          "django-models",
+          "django-orm",
+          "django-sqlalchemy",
+          "python",
+          "signal",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/auvipy/django-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-138-preset-io-elasticsearch-dbapi",
+      "repository": "https://github.com/preset-io/elasticsearch-dbapi.git",
+      "commit": "9d40aa9471a2fa4ac0f1b4dfe56aac0d8751702e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 138,
+        "fullName": "preset-io/elasticsearch-dbapi",
+        "stars": 120,
+        "forks": 55,
+        "sizeKb": 240,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-07T17:09:29Z",
+        "topics": [
+          "elasticsearch",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/preset-io/elasticsearch-dbapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-139-art1415926535-graphene-sqlalchemy-filter",
+      "repository": "https://github.com/art1415926535/graphene-sqlalchemy-filter.git",
+      "commit": "09b3343bf1a6d03645fd03a565711991b0d6e350",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 139,
+        "fullName": "art1415926535/graphene-sqlalchemy-filter",
+        "stars": 119,
+        "forks": 33,
+        "sizeKb": 332,
+        "defaultBranch": "master",
+        "pushedAt": "2025-09-19T20:46:07Z",
+        "topics": [
+          "filters",
+          "graphene",
+          "graphene-sqlalchemy",
+          "graphql",
+          "graphql-server",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/art1415926535/graphene-sqlalchemy-filter"
+      }
+    },
+    {
+      "id": "sqlalchemy-140-interlumpen-telegram-shop",
+      "repository": "https://github.com/interlumpen/Telegram-shop.git",
+      "commit": "ff7483ee04bbac90676b510cf23f6491047b1d6c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 140,
+        "fullName": "interlumpen/Telegram-shop",
+        "stars": 118,
+        "forks": 45,
+        "sizeKb": 13246,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-16T11:45:24Z",
+        "topics": [
+          "aiogram-bot",
+          "aiogram3",
+          "asyncpg",
+          "bot",
+          "crypto-bot",
+          "docker",
+          "postgresql",
+          "python",
+          "redis",
+          "shop",
+          "shop-bot",
+          "sqlalchemy",
+          "store",
+          "telegram",
+          "telegram-bot"
+        ],
+        "htmlUrl": "https://github.com/interlumpen/Telegram-shop"
+      }
+    },
+    {
+      "id": "sqlalchemy-141-dahlia-sqlalchemy-imageattach",
+      "repository": "https://github.com/dahlia/sqlalchemy-imageattach.git",
+      "commit": "b4bafa73f3bb576ecf67ed7b40b702704a0fbdc8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 141,
+        "fullName": "dahlia/sqlalchemy-imageattach",
+        "stars": 117,
+        "forks": 23,
+        "sizeKb": 3211,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-11T01:25:45Z",
+        "topics": [
+          "databases",
+          "orm",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/dahlia/sqlalchemy-imageattach"
+      }
+    },
+    {
+      "id": "sqlalchemy-142-alexisrolland-flask-graphene-sqlalchemy",
+      "repository": "https://github.com/alexisrolland/flask-graphene-sqlalchemy.git",
+      "commit": "0478ce5f83f729bbaf2c2dea4e8bdf9c2d86d159",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 142,
+        "fullName": "alexisrolland/flask-graphene-sqlalchemy",
+        "stars": 116,
+        "forks": 30,
+        "sizeKb": 556,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-22T21:33:57Z",
+        "topics": [
+          "api",
+          "flask",
+          "graphene",
+          "graphql",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/alexisrolland/flask-graphene-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-143-jowilf-sqlalchemy-file",
+      "repository": "https://github.com/jowilf/sqlalchemy-file.git",
+      "commit": "d8b59ad1db61b41492a65c3a1c88a1962c6f3b78",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 143,
+        "fullName": "jowilf/sqlalchemy-file",
+        "stars": 115,
+        "forks": 14,
+        "sizeKb": 562,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-13T16:39:07Z",
+        "topics": [
+          "attachments",
+          "azure-storage",
+          "file-upload",
+          "libcloud",
+          "minio-storage",
+          "python3",
+          "s3-storage",
+          "sqlalchemy",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/jowilf/sqlalchemy-file"
+      }
+    },
+    {
+      "id": "sqlalchemy-144-flaiers-fastapi-clean-architecture",
+      "repository": "https://github.com/Flaiers/fastapi-clean-architecture.git",
+      "commit": "1e5a2ccc080c52563d360e6d8c4bc7573351e358",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 144,
+        "fullName": "Flaiers/fastapi-clean-architecture",
+        "stars": 115,
+        "forks": 14,
+        "sizeKb": 415,
+        "defaultBranch": "main",
+        "pushedAt": "2022-11-06T19:03:46Z",
+        "topics": [
+          "alembic",
+          "clean-architecture",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "flask",
+          "flask-admin",
+          "github-actions",
+          "gunicorn",
+          "poetry",
+          "pydantic",
+          "python",
+          "pytorm",
+          "rabbitmq",
+          "sqlalchemy",
+          "uvicorn",
+          "wemake-python-styleguide"
+        ],
+        "htmlUrl": "https://github.com/Flaiers/fastapi-clean-architecture"
+      }
+    },
+    {
+      "id": "sqlalchemy-145-thomasnield-oreilly-reactive-python-for-data",
+      "repository": "https://github.com/thomasnield/oreilly_reactive_python_for_data.git",
+      "commit": "dd223b28bad8ea8f00242e827bd020a9c94e2692",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 145,
+        "fullName": "thomasnield/oreilly_reactive_python_for_data",
+        "stars": 111,
+        "forks": 47,
+        "sizeKb": 3345,
+        "defaultBranch": "master",
+        "pushedAt": "2018-02-13T19:00:09Z",
+        "topics": [
+          "data-science",
+          "database",
+          "python",
+          "reactivex",
+          "rxpy",
+          "sqlalchemy",
+          "tweepy",
+          "twitter"
+        ],
+        "htmlUrl": "https://github.com/thomasnield/oreilly_reactive_python_for_data"
+      }
+    },
+    {
+      "id": "sqlalchemy-146-claudiosw-python-clean-architecture-example",
+      "repository": "https://github.com/claudiosw/python-clean-architecture-example.git",
+      "commit": "2050a235efe2d62a282fb6a11e8400ce1b65629f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 146,
+        "fullName": "claudiosw/python-clean-architecture-example",
+        "stars": 111,
+        "forks": 15,
+        "sizeKb": 3016,
+        "defaultBranch": "main",
+        "pushedAt": "2023-06-25T01:06:44Z",
+        "topics": [
+          "clean-architecture",
+          "flask",
+          "postgresql",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/claudiosw/python-clean-architecture-example"
+      }
+    },
+    {
+      "id": "sqlalchemy-147-insightindustry-sqlathanor",
+      "repository": "https://github.com/insightindustry/sqlathanor.git",
+      "commit": "a5cfd349d092b25a3ffb3950b996b13878e1db17",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 147,
+        "fullName": "insightindustry/sqlathanor",
+        "stars": 111,
+        "forks": 6,
+        "sizeKb": 1218,
+        "defaultBranch": "master",
+        "pushedAt": "2022-04-28T19:34:34Z",
+        "topics": [
+          "csv",
+          "deserialization",
+          "json",
+          "python-library",
+          "serialization",
+          "sqlalchemy",
+          "yaml"
+        ],
+        "htmlUrl": "https://github.com/insightindustry/sqlathanor"
+      }
+    },
+    {
+      "id": "sqlalchemy-148-smithyhq-fastapi-storages",
+      "repository": "https://github.com/smithyhq/fastapi-storages.git",
+      "commit": "a3521e9ab81d21f261a995783dea67cd0e1d06f9",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 148,
+        "fullName": "smithyhq/fastapi-storages",
+        "stars": 111,
+        "forks": 10,
+        "sizeKb": 906,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-28T10:03:37Z",
+        "topics": [
+          "fastapi",
+          "orm",
+          "python",
+          "sqlalchemy",
+          "starlette"
+        ],
+        "htmlUrl": "https://github.com/smithyhq/fastapi-storages"
+      }
+    },
+    {
+      "id": "sqlalchemy-149-bomzheg-aiogram-template",
+      "repository": "https://github.com/bomzheg/aiogram_template.git",
+      "commit": "ec254c432314c67d49f9a313e85f05e27f861f6d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 149,
+        "fullName": "bomzheg/aiogram_template",
+        "stars": 108,
+        "forks": 11,
+        "sizeKb": 295,
+        "defaultBranch": "master",
+        "pushedAt": "2025-12-28T20:34:50Z",
+        "topics": [
+          "aiogram",
+          "aiogram3",
+          "alembic",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/bomzheg/aiogram_template"
+      }
+    },
+    {
+      "id": "sqlalchemy-150-jantman-biweeklybudget",
+      "repository": "https://github.com/jantman/biweeklybudget.git",
+      "commit": "a7f2292c26c3330a766ab86ef9231cb47137c56a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 150,
+        "fullName": "jantman/biweeklybudget",
+        "stars": 107,
+        "forks": 17,
+        "sizeKb": 60426,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-19T22:18:50Z",
+        "topics": [
+          "alembic",
+          "budget",
+          "budgeting",
+          "finance",
+          "flask",
+          "ofx",
+          "personal-finance",
+          "responsive",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/jantman/biweeklybudget"
+      }
+    },
+    {
+      "id": "sqlalchemy-151-hackersandslackers-sqlalchemy-tutorial",
+      "repository": "https://github.com/hackersandslackers/sqlalchemy-tutorial.git",
+      "commit": "48cdeea1a4475fd32583442f009b8aad99b8ecf7",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 151,
+        "fullName": "hackersandslackers/sqlalchemy-tutorial",
+        "stars": 105,
+        "forks": 29,
+        "sizeKb": 199,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-17T20:09:16Z",
+        "topics": [
+          "database",
+          "database-management",
+          "orm-framework",
+          "orms",
+          "python",
+          "sqlalchemy",
+          "sqlalchemy-orm",
+          "sqlalchemy-python",
+          "tutorial"
+        ],
+        "htmlUrl": "https://github.com/hackersandslackers/sqlalchemy-tutorial"
+      }
+    },
+    {
+      "id": "sqlalchemy-152-pallets-eco-wtforms-sqlalchemy",
+      "repository": "https://github.com/pallets-eco/wtforms-sqlalchemy.git",
+      "commit": "29dee4d59b906c3493402e30019be54895dd35a6",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 152,
+        "fullName": "pallets-eco/wtforms-sqlalchemy",
+        "stars": 104,
+        "forks": 44,
+        "sizeKb": 154,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-23T09:37:22Z",
+        "topics": [
+          "python",
+          "sqlalchemy",
+          "wtforms"
+        ],
+        "htmlUrl": "https://github.com/pallets-eco/wtforms-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-153-spoqa-sqlalchemy-utc",
+      "repository": "https://github.com/spoqa/sqlalchemy-utc.git",
+      "commit": "c97363951b37f879db4c4a1a70b11bfa416f91b2",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 153,
+        "fullName": "spoqa/sqlalchemy-utc",
+        "stars": 103,
+        "forks": 22,
+        "sizeKb": 40,
+        "defaultBranch": "master",
+        "pushedAt": "2022-08-17T07:28:12Z",
+        "topics": [
+          "databases",
+          "datetime",
+          "orm",
+          "python",
+          "sqlalchemy",
+          "timezone",
+          "utc"
+        ],
+        "htmlUrl": "https://github.com/spoqa/sqlalchemy-utc"
+      }
+    },
+    {
+      "id": "sqlalchemy-154-darkenergyprocessor-npps4",
+      "repository": "https://github.com/DarkEnergyProcessor/NPPS4.git",
+      "commit": "40f99b9a2f583021fdcf8e2884f7ab8b2c4e8954",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 154,
+        "fullName": "DarkEnergyProcessor/NPPS4",
+        "stars": 103,
+        "forks": 15,
+        "sizeKb": 4943,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-18T08:04:17Z",
+        "topics": [
+          "fastapi",
+          "llsif",
+          "lovelive",
+          "school-idol-festival",
+          "server-emulator",
+          "sif1",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/DarkEnergyProcessor/NPPS4"
+      }
+    },
+    {
+      "id": "sqlalchemy-155-sharkbound-pythontwitchbotframework",
+      "repository": "https://github.com/sharkbound/PythonTwitchBotFramework.git",
+      "commit": "e81c40511864b8885da5b163f9bc1aad4ab47963",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 155,
+        "fullName": "sharkbound/PythonTwitchBotFramework",
+        "stars": 102,
+        "forks": 28,
+        "sizeKb": 964,
+        "defaultBranch": "master",
+        "pushedAt": "2025-08-30T00:05:11Z",
+        "topics": [
+          "async",
+          "bot",
+          "framework",
+          "python3",
+          "sqlalchemy",
+          "twitch",
+          "twitch-api",
+          "twitch-bot"
+        ],
+        "htmlUrl": "https://github.com/sharkbound/PythonTwitchBotFramework"
+      }
+    },
+    {
+      "id": "sqlalchemy-156-fike-fastapi-blog",
+      "repository": "https://github.com/fike/fastapi-blog.git",
+      "commit": "16e301ea984cc5cab0b5c5c23450272775b40663",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 156,
+        "fullName": "fike/fastapi-blog",
+        "stars": 101,
+        "forks": 20,
+        "sizeKb": 1392,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-24T00:32:18Z",
+        "topics": [
+          "docker",
+          "fastapi",
+          "instrumentation",
+          "jaeger",
+          "nextjs",
+          "opentelemetry",
+          "psotgresql",
+          "pytest",
+          "react",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/fike/fastapi-blog"
+      }
+    },
+    {
+      "id": "sqlalchemy-157-besnik-tutorials",
+      "repository": "https://github.com/besnik/tutorials.git",
+      "commit": "600494b7296854f873aac7b9ff3c4cc23be7d989",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 157,
+        "fullName": "besnik/tutorials",
+        "stars": 101,
+        "forks": 26,
+        "sizeKb": 89,
+        "defaultBranch": "master",
+        "pushedAt": "2020-03-28T07:25:25Z",
+        "topics": [
+          "docker",
+          "docker-compose",
+          "gunicorn",
+          "linux",
+          "mediawiki",
+          "mkdocs",
+          "mkdocs-material",
+          "mongo",
+          "mongo-express",
+          "mongodb",
+          "mysql",
+          "nginx",
+          "python",
+          "sqlalchemy",
+          "supervisor",
+          "tutorial",
+          "tutorials",
+          "ufw",
+          "virtualenv"
+        ],
+        "htmlUrl": "https://github.com/besnik/tutorials"
+      }
+    },
+    {
+      "id": "sqlalchemy-158-pylons-pyramid-cookiecutter-starter",
+      "repository": "https://github.com/Pylons/pyramid-cookiecutter-starter.git",
+      "commit": "9cac50cc77a913ff949d968557c9bd1b3e27320f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 158,
+        "fullName": "Pylons/pyramid-cookiecutter-starter",
+        "stars": 99,
+        "forks": 51,
+        "sizeKb": 227,
+        "defaultBranch": "latest",
+        "pushedAt": "2026-06-19T08:02:57Z",
+        "topics": [
+          "chameleon",
+          "cookiecutter-template",
+          "jinja2",
+          "mako",
+          "pyramid",
+          "sqlalchemy",
+          "sqlite",
+          "traversal",
+          "url-dispatch",
+          "zodb"
+        ],
+        "htmlUrl": "https://github.com/Pylons/pyramid-cookiecutter-starter"
+      }
+    },
+    {
+      "id": "sqlalchemy-159-soldatov-ss-flibusta-telegram-bot",
+      "repository": "https://github.com/soldatov-ss/flibusta-telegram-bot.git",
+      "commit": "75e8e31fb86ba28bb8b9219d0bbbd3fef0fafee0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 159,
+        "fullName": "soldatov-ss/flibusta-telegram-bot",
+        "stars": 98,
+        "forks": 21,
+        "sizeKb": 700,
+        "defaultBranch": "main",
+        "pushedAt": "2024-08-11T14:57:05Z",
+        "topics": [
+          "aiogram",
+          "aiogram3",
+          "python",
+          "sqlalchemy",
+          "telegram",
+          "telegram-bot"
+        ],
+        "htmlUrl": "https://github.com/soldatov-ss/flibusta-telegram-bot"
+      }
+    },
+    {
+      "id": "sqlalchemy-160-bluesquare23-web-lgsm",
+      "repository": "https://github.com/BlueSquare23/web-lgsm.git",
+      "commit": "27075c9a2380660a31e09c69da51dd346a611217",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 160,
+        "fullName": "BlueSquare23/web-lgsm",
+        "stars": 98,
+        "forks": 14,
+        "sizeKb": 45709,
+        "defaultBranch": "master",
+        "pushedAt": "2026-06-23T22:43:51Z",
+        "topics": [
+          "flask",
+          "lgsm",
+          "linuxgsm",
+          "python",
+          "sqlalchemy",
+          "webpanel"
+        ],
+        "htmlUrl": "https://github.com/BlueSquare23/web-lgsm"
+      }
+    },
+    {
+      "id": "sqlalchemy-161-talkpython-data-driven-web-apps-with-pyramid-and-sqlalchemy",
+      "repository": "https://github.com/talkpython/data-driven-web-apps-with-pyramid-and-sqlalchemy.git",
+      "commit": "6387a69e705cbb06617233476742968da9973f8a",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 161,
+        "fullName": "talkpython/data-driven-web-apps-with-pyramid-and-sqlalchemy",
+        "stars": 97,
+        "forks": 71,
+        "sizeKb": 4402,
+        "defaultBranch": "master",
+        "pushedAt": "2025-10-28T14:47:27Z",
+        "topics": [
+          "course",
+          "database",
+          "full-stack",
+          "pyramid",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "tutorial",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/talkpython/data-driven-web-apps-with-pyramid-and-sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-162-codeglitchz-attendance-system",
+      "repository": "https://github.com/codeglitchz/attendance-system.git",
+      "commit": "0577131edddcc2ccb137a3daa947c2ade72e121c",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 162,
+        "fullName": "codeglitchz/attendance-system",
+        "stars": 94,
+        "forks": 31,
+        "sizeKb": 20110,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-02T21:50:19Z",
+        "topics": [
+          "angular",
+          "attendance",
+          "attendance-system",
+          "command-line",
+          "deep-learning",
+          "deep-metric-learning",
+          "dlib",
+          "face-detection",
+          "face-encodings",
+          "face-recognition",
+          "face-recognition-python",
+          "facial-embeddings",
+          "flask",
+          "knn-classification",
+          "modern",
+          "opencv",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/codeglitchz/attendance-system"
+      }
+    },
+    {
+      "id": "sqlalchemy-163-p141592-simple-fastapi",
+      "repository": "https://github.com/p141592/simple_fastapi.git",
+      "commit": "ed258a852318c97a0f989c00488b4b72c2eca6c8",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 163,
+        "fullName": "p141592/simple_fastapi",
+        "stars": 93,
+        "forks": 11,
+        "sizeKb": 655,
+        "defaultBranch": "master",
+        "pushedAt": "2026-05-16T21:54:10Z",
+        "topics": [
+          "alembic",
+          "asyncio",
+          "docker",
+          "fastapi",
+          "gcloud",
+          "poetry",
+          "python",
+          "rest",
+          "russian",
+          "simple",
+          "sqlalchemy",
+          "swagger",
+          "template",
+          "web"
+        ],
+        "htmlUrl": "https://github.com/p141592/simple_fastapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-164-marcus67-little-brother",
+      "repository": "https://github.com/marcus67/little_brother.git",
+      "commit": "c18b5de6a69eadd5534c0ee9eb6da89086b5a7a5",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 164,
+        "fullName": "marcus67/little_brother",
+        "stars": 93,
+        "forks": 8,
+        "sizeKb": 12554,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-27T19:36:29Z",
+        "topics": [
+          "access-control",
+          "angular",
+          "bootstrap5",
+          "client-server",
+          "debian",
+          "debian-package",
+          "flask",
+          "kindersicherung",
+          "linux",
+          "linux-application",
+          "monitoring",
+          "mysql",
+          "package",
+          "parental-control",
+          "postgres",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "sqlite"
+        ],
+        "htmlUrl": "https://github.com/marcus67/little_brother"
+      }
+    },
+    {
+      "id": "sqlalchemy-165-olirice-nebulo",
+      "repository": "https://github.com/olirice/nebulo.git",
+      "commit": "e802bf8cc0c410d60933e0d6a3eb5dd1d87687bb",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 165,
+        "fullName": "olirice/nebulo",
+        "stars": 92,
+        "forks": 5,
+        "sizeKb": 7136,
+        "defaultBranch": "master",
+        "pushedAt": "2023-01-31T16:25:08Z",
+        "topics": [
+          "database",
+          "graphql",
+          "graphql-apis",
+          "postgres",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/olirice/nebulo"
+      }
+    },
+    {
+      "id": "sqlalchemy-166-eastossifrage-sql-to-sqlalchemy",
+      "repository": "https://github.com/eastossifrage/sql_to_sqlalchemy.git",
+      "commit": "b0d2f0cd63d915747e48d4e30ad2333abd42b842",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 166,
+        "fullName": "eastossifrage/sql_to_sqlalchemy",
+        "stars": 92,
+        "forks": 16,
+        "sizeKb": 27,
+        "defaultBranch": "master",
+        "pushedAt": "2018-06-13T02:59:34Z",
+        "topics": [
+          "mysql",
+          "python",
+          "sql",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/eastossifrage/sql_to_sqlalchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-167-pylover-sqlalchemy-media",
+      "repository": "https://github.com/pylover/sqlalchemy-media.git",
+      "commit": "fae441e0236a1f16b07e77737a607d809ada0314",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 167,
+        "fullName": "pylover/sqlalchemy-media",
+        "stars": 92,
+        "forks": 26,
+        "sizeKb": 9011,
+        "defaultBranch": "master",
+        "pushedAt": "2023-05-25T07:09:53Z",
+        "topics": [
+          "assets-management",
+          "orm",
+          "python-3-5",
+          "python-3-6",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pylover/sqlalchemy-media"
+      }
+    },
+    {
+      "id": "sqlalchemy-168-chaijunit-markbj",
+      "repository": "https://github.com/chaijunit/markbj.git",
+      "commit": "e1fddddecefc71fb9d2591104e80123ad1a8ab50",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 168,
+        "fullName": "chaijunit/markbj",
+        "stars": 92,
+        "forks": 35,
+        "sizeKb": 1048,
+        "defaultBranch": "master",
+        "pushedAt": "2017-12-29T01:50:19Z",
+        "topics": [
+          "flask",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/chaijunit/markbj"
+      }
+    },
+    {
+      "id": "sqlalchemy-169-lucasayres-python-tools",
+      "repository": "https://github.com/lucasayres/python-tools.git",
+      "commit": "686b84986aae1b1714fa5645b1f2a3fd6ef8355d",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 169,
+        "fullName": "lucasayres/python-tools",
+        "stars": 92,
+        "forks": 19,
+        "sizeKb": 143,
+        "defaultBranch": "master",
+        "pushedAt": "2018-08-31T23:01:09Z",
+        "topics": [
+          "automation",
+          "codes",
+          "collection",
+          "crawler",
+          "functions",
+          "geolocation",
+          "helper",
+          "libs",
+          "pdf",
+          "python",
+          "qrcode",
+          "recipes",
+          "scripts",
+          "speech",
+          "sqlalchemy",
+          "tips",
+          "tools",
+          "tricks",
+          "unzip",
+          "utilities"
+        ],
+        "htmlUrl": "https://github.com/lucasayres/python-tools"
+      }
+    },
+    {
+      "id": "sqlalchemy-170-andrew000-aiogram-template",
+      "repository": "https://github.com/andrew000/aiogram-template.git",
+      "commit": "61ea14767365f9ce67b745efec6950fc37f9ce86",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 170,
+        "fullName": "andrew000/aiogram-template",
+        "stars": 90,
+        "forks": 8,
+        "sizeKb": 554,
+        "defaultBranch": "master",
+        "pushedAt": "2026-07-01T12:53:54Z",
+        "topics": [
+          "aiogram",
+          "aiogram-bot-template",
+          "aiogram-template",
+          "aiogram3",
+          "alembic",
+          "caddy",
+          "caddyserver",
+          "docker",
+          "docker-compose",
+          "fluent",
+          "i18n",
+          "postgresql",
+          "python",
+          "python3",
+          "redis",
+          "sqlalchemy",
+          "uv"
+        ],
+        "htmlUrl": "https://github.com/andrew000/aiogram-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-171-m7mdhka-pydantic-ai-production-ready-template",
+      "repository": "https://github.com/m7mdhka/pydantic-ai-production-ready-template.git",
+      "commit": "70594cf56b5aa367e74531b7d1b5d7edb077be31",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 171,
+        "fullName": "m7mdhka/pydantic-ai-production-ready-template",
+        "stars": 87,
+        "forks": 9,
+        "sizeKb": 2212,
+        "defaultBranch": "main",
+        "pushedAt": "2026-01-20T05:40:49Z",
+        "topics": [
+          "alembic",
+          "asynchronous",
+          "ci-cd",
+          "commitizen",
+          "fastapi",
+          "grafana",
+          "litellm",
+          "llm-evaluation",
+          "postgresql",
+          "precommit",
+          "prometheus",
+          "prompt-versioning",
+          "pydantic-ai",
+          "redis",
+          "sqlalchemy",
+          "starlette-admin"
+        ],
+        "htmlUrl": "https://github.com/m7mdhka/pydantic-ai-production-ready-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-172-miki725-alchemy-mock",
+      "repository": "https://github.com/miki725/alchemy-mock.git",
+      "commit": "f8af8881b214e154131efe68bd2fd4083c84e066",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 172,
+        "fullName": "miki725/alchemy-mock",
+        "stars": 83,
+        "forks": 15,
+        "sizeKb": 64,
+        "defaultBranch": "master",
+        "pushedAt": "2021-01-07T23:56:50Z",
+        "topics": [
+          "mock",
+          "sqlalchemy",
+          "testing"
+        ],
+        "htmlUrl": "https://github.com/miki725/alchemy-mock"
+      }
+    },
+    {
+      "id": "sqlalchemy-173-pycasbin-sqlalchemy-adapter",
+      "repository": "https://github.com/pycasbin/sqlalchemy-adapter.git",
+      "commit": "297c753a4292c34ad6243079a8110a07e24b08cd",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 173,
+        "fullName": "pycasbin/sqlalchemy-adapter",
+        "stars": 82,
+        "forks": 38,
+        "sizeKb": 67,
+        "defaultBranch": "master",
+        "pushedAt": "2024-07-08T14:04:12Z",
+        "topics": [
+          "abac",
+          "access-control",
+          "acl",
+          "auth",
+          "casbin",
+          "casbin-adapter",
+          "orm",
+          "permission",
+          "pycasbin",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/pycasbin/sqlalchemy-adapter"
+      }
+    },
+    {
+      "id": "sqlalchemy-174-hadrien-fastsqla",
+      "repository": "https://github.com/hadrien/FastSQLA.git",
+      "commit": "584e385108d5f2eb60534a97ddbf9345b5029f2e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 174,
+        "fullName": "hadrien/FastSQLA",
+        "stars": 82,
+        "forks": 1,
+        "sizeKb": 1114,
+        "defaultBranch": "main",
+        "pushedAt": "2026-07-17T18:34:55Z",
+        "topics": [
+          "asyncio",
+          "fastapi",
+          "fastapi-sqla",
+          "fastapi-sqlalchemy",
+          "pagination",
+          "sqlalchemy",
+          "sqlmodel"
+        ],
+        "htmlUrl": "https://github.com/hadrien/FastSQLA"
+      }
+    },
+    {
+      "id": "sqlalchemy-175-farahats9-sqlalchemy-celery-beat",
+      "repository": "https://github.com/farahats9/sqlalchemy-celery-beat.git",
+      "commit": "d949bbcc5b9bad9a4f57ad78ead36ae2feedef37",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 175,
+        "fullName": "farahats9/sqlalchemy-celery-beat",
+        "stars": 81,
+        "forks": 14,
+        "sizeKb": 261,
+        "defaultBranch": "master",
+        "pushedAt": "2025-05-20T17:55:06Z",
+        "topics": [
+          "celery",
+          "celerybeat",
+          "fastapi",
+          "flask",
+          "periodic-tasks",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/farahats9/sqlalchemy-celery-beat"
+      }
+    },
+    {
+      "id": "sqlalchemy-176-viktorsapozhok-fastapi-services-oauth2",
+      "repository": "https://github.com/viktorsapozhok/fastapi-services-oauth2.git",
+      "commit": "496818a2eb7a84ce78d27e69fab827add5f1f212",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 176,
+        "fullName": "viktorsapozhok/fastapi-services-oauth2",
+        "stars": 81,
+        "forks": 21,
+        "sizeKb": 551,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-09T10:01:09Z",
+        "topics": [
+          "3-tier-architecture",
+          "fastapi",
+          "jwt",
+          "oauth2",
+          "postgres",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/viktorsapozhok/fastapi-services-oauth2"
+      }
+    },
+    {
+      "id": "sqlalchemy-177-baggerfast-advancedusertelegrambot",
+      "repository": "https://github.com/BaggerFast/AdvancedUserTelegramBot.git",
+      "commit": "d18d688194d315fdf1f1379aa08523bc6c631f94",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 177,
+        "fullName": "BaggerFast/AdvancedUserTelegramBot",
+        "stars": 81,
+        "forks": 23,
+        "sizeKb": 1667,
+        "defaultBranch": "main",
+        "pushedAt": "2024-03-30T17:17:39Z",
+        "topics": [
+          "aiogram",
+          "animations",
+          "pyrogram",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "sqlalchemy-python",
+          "telegram",
+          "userbot",
+          "userbot-for-telegram",
+          "userbot-telegram"
+        ],
+        "htmlUrl": "https://github.com/BaggerFast/AdvancedUserTelegramBot"
+      }
+    },
+    {
+      "id": "sqlalchemy-178-rajivsarvepalli-mock-alchemy",
+      "repository": "https://github.com/rajivsarvepalli/mock-alchemy.git",
+      "commit": "ebd22ba38ab3d0a93c5f0c759fe58f7750f11b31",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 178,
+        "fullName": "rajivsarvepalli/mock-alchemy",
+        "stars": 80,
+        "forks": 11,
+        "sizeKb": 662,
+        "defaultBranch": "master",
+        "pushedAt": "2023-11-01T09:57:06Z",
+        "topics": [
+          "mocking",
+          "sqlalchemy",
+          "sqlalchemy-python"
+        ],
+        "htmlUrl": "https://github.com/rajivsarvepalli/mock-alchemy"
+      }
+    },
+    {
+      "id": "sqlalchemy-179-fedora-copr-flask-whooshee",
+      "repository": "https://github.com/fedora-copr/flask-whooshee.git",
+      "commit": "1f421a886c7fe565328a359be70f30d0692e8b39",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 179,
+        "fullName": "fedora-copr/flask-whooshee",
+        "stars": 80,
+        "forks": 31,
+        "sizeKb": 142,
+        "defaultBranch": "main",
+        "pushedAt": "2026-04-23T06:30:04Z",
+        "topics": [
+          "flask",
+          "sqlalchemy",
+          "whoosh"
+        ],
+        "htmlUrl": "https://github.com/fedora-copr/flask-whooshee"
+      }
+    },
+    {
+      "id": "sqlalchemy-180-nickjj-flask-db",
+      "repository": "https://github.com/nickjj/flask-db.git",
+      "commit": "f964ca1a45b4db0a13f3e1ba678048b91544d57f",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 180,
+        "fullName": "nickjj/flask-db",
+        "stars": 77,
+        "forks": 5,
+        "sizeKb": 184,
+        "defaultBranch": "master",
+        "pushedAt": "2024-12-07T18:38:28Z",
+        "topics": [
+          "alembic",
+          "database",
+          "flask",
+          "migrations",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/nickjj/flask-db"
+      }
+    },
+    {
+      "id": "sqlalchemy-181-rajansahu713-fastapi-projects",
+      "repository": "https://github.com/rajansahu713/FastAPI-Projects.git",
+      "commit": "8afc2faeabb416b447af8e77b0775be4f74965fc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 181,
+        "fullName": "rajansahu713/FastAPI-Projects",
+        "stars": 76,
+        "forks": 23,
+        "sizeKb": 314,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-30T17:19:41Z",
+        "topics": [
+          "apscheduler",
+          "fastapi",
+          "graphql",
+          "jinja2",
+          "logging",
+          "metadata",
+          "middleware",
+          "pagination",
+          "projects",
+          "pubsub-subscriber",
+          "pytest",
+          "python3",
+          "redis",
+          "redis-cache",
+          "sqlalchemy",
+          "sqlite",
+          "template",
+          "webdevelopment"
+        ],
+        "htmlUrl": "https://github.com/rajansahu713/FastAPI-Projects"
+      }
+    },
+    {
+      "id": "sqlalchemy-182-kmbhm1-supabase-pydantic",
+      "repository": "https://github.com/kmbhm1/supabase-pydantic.git",
+      "commit": "ebc273650a3a558f9ecc07c459a6c21f99dc15bc",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 182,
+        "fullName": "kmbhm1/supabase-pydantic",
+        "stars": 74,
+        "forks": 7,
+        "sizeKb": 1610,
+        "defaultBranch": "main",
+        "pushedAt": "2026-05-20T00:31:00Z",
+        "topics": [
+          "fastapi",
+          "mysql",
+          "postgres",
+          "pydantic-models",
+          "pydantic-v2",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "supabase"
+        ],
+        "htmlUrl": "https://github.com/kmbhm1/supabase-pydantic"
+      }
+    },
+    {
+      "id": "sqlalchemy-183-wpcodevo-python-fastapi",
+      "repository": "https://github.com/wpcodevo/python_fastapi.git",
+      "commit": "6fd0c0b5ed25fd83e4a97d84afb6f4f95d8a3390",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 183,
+        "fullName": "wpcodevo/python_fastapi",
+        "stars": 73,
+        "forks": 25,
+        "sizeKb": 37,
+        "defaultBranch": "master",
+        "pushedAt": "2022-12-22T17:15:05Z",
+        "topics": [
+          "fastapi",
+          "fastapi-crud",
+          "fastapi-sqlalchemy",
+          "postgresql",
+          "pydantic",
+          "pydantic-models",
+          "python",
+          "rest-api",
+          "restful",
+          "restful-api",
+          "sqlalchemy",
+          "sqlalchemy-orm",
+          "sqlalchemy-python",
+          "uvicorn"
+        ],
+        "htmlUrl": "https://github.com/wpcodevo/python_fastapi"
+      }
+    },
+    {
+      "id": "sqlalchemy-184-flipbit03-sqlalchemy-easy-softdelete",
+      "repository": "https://github.com/flipbit03/sqlalchemy-easy-softdelete.git",
+      "commit": "d9cac7dee549cec363cc1a191ced758a186c5755",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 184,
+        "fullName": "flipbit03/sqlalchemy-easy-softdelete",
+        "stars": 73,
+        "forks": 14,
+        "sizeKb": 325,
+        "defaultBranch": "main",
+        "pushedAt": "2026-06-17T14:00:55Z",
+        "topics": [
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/flipbit03/sqlalchemy-easy-softdelete"
+      }
+    },
+    {
+      "id": "sqlalchemy-185-timhughes-example-fastapi-sqlachemy-pytest",
+      "repository": "https://github.com/timhughes/example-fastapi-sqlachemy-pytest.git",
+      "commit": "0e95544c2fa8418bf17653089a7667d61a8b8b5b",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 185,
+        "fullName": "timhughes/example-fastapi-sqlachemy-pytest",
+        "stars": 72,
+        "forks": 7,
+        "sizeKb": 91,
+        "defaultBranch": "master",
+        "pushedAt": "2022-05-25T12:22:10Z",
+        "topics": [
+          "example",
+          "fastapi",
+          "pytest",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/timhughes/example-fastapi-sqlachemy-pytest"
+      }
+    },
+    {
+      "id": "sqlalchemy-186-maurerle-eralchemy2",
+      "repository": "https://github.com/maurerle/eralchemy2.git",
+      "commit": "610754c2a4ee000e19c4b84d3a21f2ed8e234c29",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 186,
+        "fullName": "maurerle/eralchemy2",
+        "stars": 71,
+        "forks": 16,
+        "sizeKb": 1636,
+        "defaultBranch": "main",
+        "pushedAt": "2025-09-17T09:02:13Z",
+        "topics": [
+          "dot",
+          "er-diagramm",
+          "erd",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/maurerle/eralchemy2"
+      }
+    },
+    {
+      "id": "sqlalchemy-187-ttwshell-hobbit-core",
+      "repository": "https://github.com/TTWShell/hobbit-core.git",
+      "commit": "cacd6b5f8457e90e48d9b821e7f77dabc55322d1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 187,
+        "fullName": "TTWShell/hobbit-core",
+        "stars": 71,
+        "forks": 12,
+        "sizeKb": 999,
+        "defaultBranch": "master",
+        "pushedAt": "2026-03-28T20:15:33Z",
+        "topics": [
+          "flask",
+          "hobbit",
+          "marshmallow",
+          "python",
+          "restful",
+          "restful-webservices",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/TTWShell/hobbit-core"
+      }
+    },
+    {
+      "id": "sqlalchemy-188-ryanb58-fastapi-saas-base",
+      "repository": "https://github.com/Ryanb58/fastapi-saas-base.git",
+      "commit": "c985834dd3c5d84abd208bd7dae42a73b8fc8f1e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 188,
+        "fullName": "Ryanb58/fastapi-saas-base",
+        "stars": 71,
+        "forks": 15,
+        "sizeKb": 159,
+        "defaultBranch": "master",
+        "pushedAt": "2021-04-19T20:57:16Z",
+        "topics": [
+          "fastapi",
+          "python3",
+          "saas-boilerplate",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Ryanb58/fastapi-saas-base"
+      }
+    },
+    {
+      "id": "sqlalchemy-189-ergo-ziggurat-foundations",
+      "repository": "https://github.com/ergo/ziggurat_foundations.git",
+      "commit": "dd6bcca8b1d2b633d13567bb9b8b89f96f111a29",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 189,
+        "fullName": "ergo/ziggurat_foundations",
+        "stars": 71,
+        "forks": 23,
+        "sizeKb": 732,
+        "defaultBranch": "master",
+        "pushedAt": "2023-03-08T11:08:09Z",
+        "topics": [
+          "authentication",
+          "authorization",
+          "flask",
+          "mixins",
+          "permission",
+          "permissions",
+          "pyramid",
+          "python",
+          "security",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/ergo/ziggurat_foundations"
+      }
+    },
+    {
+      "id": "sqlalchemy-190-frankkkkk-pykorm",
+      "repository": "https://github.com/Frankkkkk/pykorm.git",
+      "commit": "7594a37889bd9a896044139f1f545fe8d516878e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 190,
+        "fullName": "Frankkkkk/pykorm",
+        "stars": 71,
+        "forks": 4,
+        "sizeKb": 220,
+        "defaultBranch": "master",
+        "pushedAt": "2023-02-08T03:08:42Z",
+        "topics": [
+          "crd",
+          "customresourcedefinition",
+          "kopf",
+          "kubernetes",
+          "object",
+          "orm",
+          "pykube",
+          "python",
+          "python-kubernetes",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/Frankkkkk/pykorm"
+      }
+    },
+    {
+      "id": "sqlalchemy-191-shosca-django-sorcery",
+      "repository": "https://github.com/shosca/django-sorcery.git",
+      "commit": "0ed1d0018bebabacf925215779d0c500cdce7282",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 191,
+        "fullName": "shosca/django-sorcery",
+        "stars": 69,
+        "forks": 7,
+        "sizeKb": 680,
+        "defaultBranch": "master",
+        "pushedAt": "2023-04-11T11:19:06Z",
+        "topics": [
+          "django",
+          "django-sqlalchemy",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/shosca/django-sorcery"
+      }
+    },
+    {
+      "id": "sqlalchemy-192-tenacity-dev-fastapi-sqlalchemy2-alembic-postgresql",
+      "repository": "https://github.com/Tenacity-Dev/fastapi-sqlalchemy2-alembic-postgresql.git",
+      "commit": "f42d61c2ffca8994374d0be7686adc5c091d088e",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 192,
+        "fullName": "Tenacity-Dev/fastapi-sqlalchemy2-alembic-postgresql",
+        "stars": 69,
+        "forks": 17,
+        "sizeKb": 27,
+        "defaultBranch": "main",
+        "pushedAt": "2025-05-11T16:34:51Z",
+        "topics": [
+          "alembic",
+          "api",
+          "django",
+          "fastapi",
+          "migrations",
+          "postgresql",
+          "python",
+          "python3",
+          "sqlalchemy",
+          "sqlalchemy2"
+        ],
+        "htmlUrl": "https://github.com/Tenacity-Dev/fastapi-sqlalchemy2-alembic-postgresql"
+      }
+    },
+    {
+      "id": "sqlalchemy-193-eslam5464-fastapi-template",
+      "repository": "https://github.com/eslam5464/Fastapi-Template.git",
+      "commit": "9a204bbf81b9f693eabf82383aae0c99452d2410",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 193,
+        "fullName": "eslam5464/Fastapi-Template",
+        "stars": 68,
+        "forks": 6,
+        "sizeKb": 906,
+        "defaultBranch": "master",
+        "pushedAt": "2026-04-26T16:28:31Z",
+        "topics": [
+          "api-template",
+          "fastapi",
+          "jwt",
+          "postgresql",
+          "python",
+          "sqlalchemy",
+          "starter-template"
+        ],
+        "htmlUrl": "https://github.com/eslam5464/Fastapi-Template"
+      }
+    },
+    {
+      "id": "sqlalchemy-194-alisezer-flask-template",
+      "repository": "https://github.com/alisezer/flask-template.git",
+      "commit": "3d609aefe72d94f9ed0c1e14ae3aab55a80d9893",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 194,
+        "fullName": "alisezer/flask-template",
+        "stars": 68,
+        "forks": 13,
+        "sizeKb": 52,
+        "defaultBranch": "master",
+        "pushedAt": "2022-09-16T17:46:54Z",
+        "topics": [
+          "docker-compose",
+          "docker-setup",
+          "flask-application",
+          "flasky",
+          "nginx",
+          "postgres-database",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/alisezer/flask-template"
+      }
+    },
+    {
+      "id": "sqlalchemy-195-djwoms-blog-fastapi",
+      "repository": "https://github.com/DJWOMS/blog_FastAPI.git",
+      "commit": "f584634a2cd410904df6a7d9478044d269737a91",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 195,
+        "fullName": "DJWOMS/blog_FastAPI",
+        "stars": 66,
+        "forks": 18,
+        "sizeKb": 21,
+        "defaultBranch": "master",
+        "pushedAt": "2020-03-11T18:05:07Z",
+        "topics": [
+          "fastapi",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/DJWOMS/blog_FastAPI"
+      }
+    },
+    {
+      "id": "sqlalchemy-196-mikeckennedy-cookiecutter-pyramid-talk-python-starter",
+      "repository": "https://github.com/mikeckennedy/cookiecutter-pyramid-talk-python-starter.git",
+      "commit": "9d6664695d73717e30e0410e3635ef22d14fb217",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 196,
+        "fullName": "mikeckennedy/cookiecutter-pyramid-talk-python-starter",
+        "stars": 65,
+        "forks": 10,
+        "sizeKb": 2948,
+        "defaultBranch": "master",
+        "pushedAt": "2018-05-02T00:06:53Z",
+        "topics": [
+          "bootstrap",
+          "bower",
+          "design",
+          "logging",
+          "mailchimp",
+          "pyramid",
+          "pyramid-framework",
+          "python",
+          "rollbar",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/mikeckennedy/cookiecutter-pyramid-talk-python-starter"
+      }
+    },
+    {
+      "id": "sqlalchemy-197-abstractkitchen-flask-backbone",
+      "repository": "https://github.com/abstractkitchen/flask-backbone.git",
+      "commit": "436624d15baf55161f191b0a17468e731b6617e1",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 197,
+        "fullName": "abstractkitchen/flask-backbone",
+        "stars": 65,
+        "forks": 7,
+        "sizeKb": 37,
+        "defaultBranch": "main",
+        "pushedAt": "2023-03-20T13:50:56Z",
+        "topics": [
+          "boilerplate",
+          "flask",
+          "flask-sqlalchemy",
+          "jinja2",
+          "python",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/abstractkitchen/flask-backbone"
+      }
+    },
+    {
+      "id": "sqlalchemy-198-flatcoke-flask-structure",
+      "repository": "https://github.com/flatcoke/flask-structure.git",
+      "commit": "e2ca1c19acd51bb00f591d3dbf7c1f7443fb66c0",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 198,
+        "fullName": "flatcoke/flask-structure",
+        "stars": 64,
+        "forks": 25,
+        "sizeKb": 1156,
+        "defaultBranch": "master",
+        "pushedAt": "2019-04-04T07:02:12Z",
+        "topics": [
+          "base",
+          "boilerplate",
+          "flask",
+          "hot-boilerplate",
+          "ptyhon",
+          "skeleton",
+          "sqlalchemy",
+          "structure",
+          "template",
+          "test"
+        ],
+        "htmlUrl": "https://github.com/flatcoke/flask-structure"
+      }
+    },
+    {
+      "id": "sqlalchemy-199-yezz123-frdp",
+      "repository": "https://github.com/yezz123/FRDP.git",
+      "commit": "9f7317fc352e48bd8512f3a988c2115a17eaac06",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 199,
+        "fullName": "yezz123/FRDP",
+        "stars": 63,
+        "forks": 8,
+        "sizeKb": 108,
+        "defaultBranch": "main",
+        "pushedAt": "2024-05-27T22:47:15Z",
+        "topics": [
+          "asyncio",
+          "authentication",
+          "boilerplate",
+          "docker",
+          "docker-compose",
+          "fastapi",
+          "fastapi-boilerplate",
+          "jwt",
+          "jwt-authentication",
+          "pgadmin",
+          "postgres",
+          "postgresql",
+          "python",
+          "rest-api",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/yezz123/FRDP"
+      }
+    },
+    {
+      "id": "sqlalchemy-200-djwoms-useful",
+      "repository": "https://github.com/DJWOMS/useful.git",
+      "commit": "051e1c0b676e241d143d1b17ab119b916ca00384",
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      },
+      "metadata": {
+        "framework": "sqlalchemy",
+        "rank": 200,
+        "fullName": "DJWOMS/useful",
+        "stars": 63,
+        "forks": 16,
+        "sizeKb": 271,
+        "defaultBranch": "master",
+        "pushedAt": "2020-12-22T19:21:36Z",
+        "topics": [
+          "fastapi",
+          "pydantic",
+          "python3",
+          "sqlalchemy"
+        ],
+        "htmlUrl": "https://github.com/DJWOMS/useful"
+      }
+    }
+  ]
+}

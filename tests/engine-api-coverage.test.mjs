@@ -35,6 +35,7 @@ const defaultRequiredRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
   "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
   "CELLFENCE_REQUIRED_RULE_DISABLED",
   "CELLFENCE_WAIVER_INVALID",
 ];
@@ -1799,6 +1800,35 @@ test("engine inferManifest handles malformed workspaces and src root fallback th
     ]);
   } finally {
     process.chdir(previousCwd);
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine reports unsupported Python syntax as a finding instead of a tool error", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-python-syntax-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.py"), "def run():\n    return True\n");
+    fs.writeFileSync(path.join(rootDir, "src/core/template.py"), "def get_{{ cookiecutter.name }}():\n    return True\n");
+    writeManifest(rootDir, [
+      baseCell("core", {
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.py",
+        publicSymbols: ["run"],
+      }),
+    ], {
+      governance: {
+        requiredRules: ["CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"],
+      },
+    });
+
+    const result = checkRepository({ rootDir });
+    assert.equal(result.exitCode, 1);
+    const syntaxFinding = result.findings.find((finding) => finding.ruleId === "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
+    assert.ok(syntaxFinding);
+    assert.equal(syntaxFinding.filePath, "src/core/template.py");
+    assert.equal(syntaxFinding.details.kind, "syntax_error");
+  } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
