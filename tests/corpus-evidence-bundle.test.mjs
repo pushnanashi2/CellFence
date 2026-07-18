@@ -204,6 +204,13 @@ test("corpus evidence bundle generates normalized findings, sample, and checksum
     assert.equal(findings.every((finding) => finding.precisionEligible), true);
     const sampling = JSON.parse(fs.readFileSync(path.join(bundleDir, "sampling.json"), "utf8"));
     assert.equal(sampling.sampledFindingIds.length, 3);
+    assert.equal(sampling.perRuleCap, 299);
+    assert.deepEqual(sampling.powerAnalysis, {
+      metric: "one-sided exact binomial lower bound",
+      zeroFalsePositiveMinimumPrecision: 0.99,
+      confidence: 0.95,
+      zeroFalsePositiveSampleSize: 299,
+    });
 
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
     assert.equal(validate.status, 0, validate.stderr || validate.stdout);

@@ -14,7 +14,8 @@ const allowedLabels = new Set([
   "invalid_setup",
   "out_of_scope",
 ]);
-const defaultPerRuleCap = 50;
+const defaultMinimumPrecision = 0.99;
+const defaultConfidence = 0.95;
 const defaultMinPerRepository = 3;
 
 function usage() {
@@ -24,7 +25,12 @@ function usage() {
 
 Creates and validates a reproducible evidence bundle for corpus findings. The
 bundle stores raw audit findings, normalized stable finding IDs, deterministic
-sampling metadata, optional manual labels, copied manifests/logs, and SHA256SUMS.`);
+sampling metadata, optional manual labels, copied manifests/logs, and SHA256SUMS.
+
+Sampling defaults to the zero-false-positive sample size needed for a one-sided
+95% lower bound of 99% precision, capped per rule. Override with
+--minimum-precision, --confidence, or --per-rule-cap only when the study
+protocol pre-registers a different claim.`);
 }
 
 function parseArgs(argv) {
@@ -35,6 +41,10 @@ function parseArgs(argv) {
     outDir: "",
     labelsPath: "",
     bundleDir: "",
+    minimumPrecision: defaultMinimumPrecision,
+    confidence: defaultConfidence,
+    perRuleCap: null,
+    minPerRepository: defaultMinPerRepository,
     force: false,
     validate: false,
   };
@@ -70,6 +80,26 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--bundle=")) {
       parsed.bundleDir = path.resolve(requireInlineValue(argument, "--bundle=", "--bundle"));
+    } else if (argument === "--minimum-precision") {
+      parsed.minimumPrecision = parseUnitInterval(requireValue(argv, index, "--minimum-precision"), "--minimum-precision");
+      index += 1;
+    } else if (argument.startsWith("--minimum-precision=")) {
+      parsed.minimumPrecision = parseUnitInterval(requireInlineValue(argument, "--minimum-precision=", "--minimum-precision"), "--minimum-precision");
+    } else if (argument === "--confidence") {
+      parsed.confidence = parseUnitInterval(requireValue(argv, index, "--confidence"), "--confidence");
+      index += 1;
+    } else if (argument.startsWith("--confidence=")) {
+      parsed.confidence = parseUnitInterval(requireInlineValue(argument, "--confidence=", "--confidence"), "--confidence");
+    } else if (argument === "--per-rule-cap") {
+      parsed.perRuleCap = parsePositiveInteger(requireValue(argv, index, "--per-rule-cap"), "--per-rule-cap");
+      index += 1;
+    } else if (argument.startsWith("--per-rule-cap=")) {
+      parsed.perRuleCap = parsePositiveInteger(requireInlineValue(argument, "--per-rule-cap=", "--per-rule-cap"), "--per-rule-cap");
+    } else if (argument === "--min-per-repository") {
+      parsed.minPerRepository = parsePositiveInteger(requireValue(argv, index, "--min-per-repository"), "--min-per-repository");
+      index += 1;
+    } else if (argument.startsWith("--min-per-repository=")) {
+      parsed.minPerRepository = parsePositiveInteger(requireInlineValue(argument, "--min-per-repository=", "--min-per-repository"), "--min-per-repository");
     } else if (argument === "--force") {
       parsed.force = true;
     } else if (argument === "--validate") {
@@ -91,6 +121,22 @@ function parseArgs(argv) {
   if (!parsed.corpusPath) throw new Error("--corpus is required");
   if (!parsed.reportPath) throw new Error("--report is required");
   if (!parsed.outDir) throw new Error("--out-dir is required");
+  return parsed;
+}
+
+function parseUnitInterval(value, optionName) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed >= 1) {
+    throw new Error(`${optionName} must be greater than 0 and less than 1`);
+  }
+  return parsed;
+}
+
+function parsePositiveInteger(value, optionName) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`${optionName} must be a positive integer`);
+  }
   return parsed;
 }
 
@@ -308,6 +354,10 @@ function deterministicRank(seed, findingId) {
   return hashText(`${seed}\0${findingId}`);
 }
 
+function requiredZeroFalsePositiveSampleSize(minimumPrecision, confidence) {
+  return Math.ceil(Math.log(1 - confidence) / Math.log(minimumPrecision));
+}
+
 function groupedBy(values, keyFn) {
   const groups = new Map();
   for (const value of values) {
@@ -320,7 +370,10 @@ function groupedBy(values, keyFn) {
 }
 
 function deterministicSample(findings, corpusSha256, options = {}) {
-  const perRuleCap = options.perRuleCap || defaultPerRuleCap;
+  const minimumPrecision = options.minimumPrecision || defaultMinimumPrecision;
+  const confidence = options.confidence || defaultConfidence;
+  const powerBasedPerRuleCap = requiredZeroFalsePositiveSampleSize(minimumPrecision, confidence);
+  const perRuleCap = options.perRuleCap || powerBasedPerRuleCap;
   const minPerRepository = options.minPerRepository || defaultMinPerRepository;
   const seed = `sha256:${corpusSha256}`;
   const selectedIds = new Set();
@@ -354,7 +407,13 @@ function deterministicSample(findings, corpusSha256, options = {}) {
   return {
     schemaVersion: "cellfence.corpus-sampling.v1",
     seed,
-    method: "all findings when a rule has <=50 findings; otherwise deterministic 50-per-rule sample, then ensure at least 3 findings per repository when available",
+    method: "all findings when a rule has no more findings than the pre-registered per-rule cap; otherwise deterministic per-rule sampling, then ensure a minimum number of findings per repository when available",
+    powerAnalysis: {
+      metric: "one-sided exact binomial lower bound",
+      zeroFalsePositiveMinimumPrecision: minimumPrecision,
+      confidence,
+      zeroFalsePositiveSampleSize: powerBasedPerRuleCap,
+    },
     perRuleCap,
     minPerRepository,
     population: {
@@ -505,7 +564,12 @@ function buildBundle(options) {
     const report = readJson(options.reportPath);
     const rawFindings = collectRawFindings(report, options.studyId);
     const normalizedFindings = sortFindings(normalizeFindings(options.studyId, rawFindings));
-    const sampling = deterministicSample(normalizedFindings, report.environment?.corpusSha256 || hashFile(options.corpusPath));
+    const sampling = deterministicSample(normalizedFindings, report.environment?.corpusSha256 || hashFile(options.corpusPath), {
+      minimumPrecision: options.minimumPrecision,
+      confidence: options.confidence,
+      perRuleCap: options.perRuleCap,
+      minPerRepository: options.minPerRepository,
+    });
     const sampledFindingSet = new Set(sampling.sampledFindingIds);
     const sampledFindings = normalizedFindings.filter((finding) => sampledFindingSet.has(finding.findingId));
 

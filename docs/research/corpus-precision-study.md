@@ -24,6 +24,26 @@ does not estimate recall, false-negative rate, causal effectiveness, or
 long-term operational value. Recall requires history replay, mutation
 injection, or an independent ground-truth boundary set.
 
+Do not collapse every result into a single "CellFence precision" percentage.
+The public claim must name the layer being measured:
+
+| Layer | What it can prove | Appropriate evidence |
+| --- | --- | --- |
+| Policy conformance | A finding violates the reviewed manifest semantics. | Formal rule spec, proof witnesses, independent verifier. |
+| Frontend correctness | Imports, ownership, resolution, and public surface extraction are correct. | Conformance, property, and differential tests. |
+| Blocking precision | A blocking finding should have failed CI in a real repository. | Sealed holdout corpus, independent labels, statistical lower bound. |
+
+The first external claim should stay narrow:
+
+> For reviewed TS/JS manifests and the `CELLFENCE_PRIVATE_IMPORT` and
+> `CELLFENCE_UNDECLARED_CONSUMER` blocking rules, CellFence `<commit>` reached
+> the pre-registered one-sided 95% lower confidence bound for blocking
+> precision.
+
+Resource rules, Python framework adapters, inferred manifests, and public
+surface drift should be reported as separate studies until they have their own
+reviewed manifests, labels, and recall evidence.
+
 ## Frozen Corpus Manifest
 
 Store the corpus manifest before running the study:
@@ -189,10 +209,24 @@ The validator rejects unknown `findingId` references, duplicate
 `rater/findingId` labels, unknown label values, missing rationales, unsorted
 normalized findings, manifest hash mismatches, and SHA-256 mismatches.
 
-Sampling is deterministic. The default rule is to include every finding for
-rule families with 50 or fewer findings, otherwise sample 50 per rule using a
-seed derived from the corpus SHA-256, then ensure at least three findings per
-repository when available.
+Sampling is deterministic. The default per-rule cap is power-based rather than
+a fixed "50 findings per rule" shortcut: it uses the zero-false-positive sample
+size required for a one-sided 95% lower bound of 99% precision. That is 299
+labeled findings per rule when enough findings exist. If a different threshold
+is desired, pre-register it and pass matching `--minimum-precision`,
+`--confidence`, or `--per-rule-cap` values when building the bundle.
+
+For example, the default bundle sampling plan is equivalent to:
+
+```bash
+npm run research:bundle -- \
+  --study-id ts-js-confirmation-v1 \
+  --corpus docs/research/corpora/ts-js-confirmation-v1.json \
+  --report reports/corpus/ts-js-confirmation-v1.json \
+  --out-dir reports/corpus/ts-js-confirmation-v1-bundle \
+  --minimum-precision 0.99 \
+  --confidence 0.95
+```
 
 ## Manifest Strategies
 
@@ -234,13 +268,19 @@ Raw findings are not truth. For each rule family, sample findings and label:
 - invalid setup: the manifest translation, not the detector, caused the finding.
 
 Report precision only on labeled rows. Report onboarding failures separately.
-Use a predeclared sampling rule. A recommended default is to label every finding
-for rule families with 50 or fewer findings and otherwise sample 50 findings per
-rule using a seed derived from the corpus hash.
+Use a predeclared sampling rule derived from the precision lower bound you want
+to claim. If a rule has fewer sampled findings than the required sample size,
+the correct result is `insufficient_evidence`, not "precision failed".
 
 Allowed bundle labels are `true_positive`, `false_positive`, `needs_policy`,
 `needs_review`, `invalid_setup`, and `out_of_scope`. Every label row must include
 `findingId`, `rater`, `label`, and `rationale`.
+
+Confirmation studies require at least two independent labels per included
+finding. If the independent raters disagree, add an adjudication row with
+`"role": "adjudicator"`. The adjudicator must be distinct from the independent
+raters. Do not drop `needs_review` from the denominator; count it as a
+blocking failure until adjudication resolves it.
 
 `manifest.strategy: infer` findings may be labeled for tuning and onboarding
 friction, but they are excluded from precision denominators. Precision
@@ -249,9 +289,66 @@ manifests whose translation has been reviewed and recorded as `reviewed`.
 
 Report at least:
 
-- semantic correctness: `(true positive + needs policy) / (true positive + needs policy + false positive)`;
-- blocking precision: `true positive / (true positive + needs policy + false positive)`;
+- semantic correctness: `(true positive + needs policy) / (true positive + false positive + needs policy + needs review)`;
+- blocking precision: `true positive / (true positive + false positive + needs policy + needs review)`;
 - translation error rate: `invalid setup / all labeled findings`.
+
+## Precision Claim Reports
+
+Before looking at confirmation results, write a protocol file:
+
+```json
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-confirmation-v1",
+  "claim": {
+    "toolCommit": "0123456789abcdef0123456789abcdef01234567",
+    "targetPopulation": "reviewed TS/JS workspace repositories",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95
+  },
+  "samplingPlan": {
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true
+  },
+  "exclusionRules": []
+}
+```
+
+Then evaluate the labeled bundle:
+
+```bash
+npm run research:claim -- \
+  --bundle reports/corpus/ts-js-confirmation-v1-bundle \
+  --protocol docs/research/protocols/ts-js-confirmation-v1.json \
+  --out reports/corpus/ts-js-confirmation-v1-claim.json
+```
+
+The claim verifier reports occurrence precision, unique-fingerprint precision,
+rule-level precision, repository macro precision, repository contribution, and
+leave-one-repository-out sensitivity. Exit code `0` means the pre-registered
+claim passes. Exit code `1` means the labels are usable but the evidence is
+underpowered or biased by repository concentration. Exit code `2` means the
+protocol, bundle, or labeling procedure is invalid.
+
+For an exact binomial lower bound, 50 perfect labels only support a one-sided
+95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299
+independent labeled trials with zero blocking failures, and more if there are
+any false positives, `needs_policy`, or `needs_review` labels.
+
+The verifier is intentionally conservative. It does not treat unreviewed
+`infer` manifests as detector precision evidence, does not let one repository
+dominate the denominator by default, and does not treat `needs_policy` as a
+blocking success even though it counts toward semantic correctness.
 
 ## Ethical Boundaries
 
