@@ -378,6 +378,21 @@ function stableJson(value: unknown): string {
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`;
 }
 
+function resolveCommand(commandName: string): string {
+  if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
+  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
+  const extensions = process.platform === "win32" && !path.extname(commandName)
+    ? ["", ...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean)]
+    : [""];
+  for (const directory of pathEntries) {
+    for (const extension of extensions) {
+      const candidate = path.join(directory, `${commandName}${extension}`);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+  return commandName;
+}
+
 function findingFingerprint(finding: Finding): string {
   /* c8 ignore next -- CLI cannot currently load plugins that emit precomputed finding fingerprints. */
   if (finding.fingerprint) return finding.fingerprint;
@@ -394,7 +409,7 @@ function findingFingerprint(finding: Finding): string {
 function currentCommit(rootDir: string): string | null {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
   try {
-    return execFileSync("git", ["rev-parse", "HEAD"], {
+    return execFileSync(resolveCommand("git"), ["rev-parse", "HEAD"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1234,7 +1249,7 @@ type DoctorResult = {
 function githubRepoFromRemote(rootDir: string): string | undefined {
   let remote: string;
   try {
-    remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
+    remote = execFileSync(resolveCommand("git"), ["config", "--get", "remote.origin.url"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1250,7 +1265,7 @@ function githubRepoFromRemote(rootDir: string): string | undefined {
 
 function ghCliAvailable(rootDir: string): boolean {
   try {
-    execFileSync("gh", ["--version"], {
+    execFileSync(resolveCommand("gh"), ["--version"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1329,7 +1344,7 @@ function commandDoctor(parsed: ParsedArgs): number {
     });
   } else {
     try {
-      const protection = JSON.parse(execFileSync("gh", ["api", `repos/${repo}/branches/${branch}/protection`], {
+      const protection = JSON.parse(execFileSync(resolveCommand("gh"), ["api", `repos/${repo}/branches/${branch}/protection`], {
         cwd: parsed.rootDir,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],

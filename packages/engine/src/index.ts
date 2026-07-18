@@ -2549,6 +2549,21 @@ function countPruneCandidates(candidates: PruneCandidate[], kind: PruneCandidate
   return candidates.filter((candidate) => candidate.kind === kind).length;
 }
 
+function resolveCommand(commandName: string): string {
+  if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
+  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
+  const extensions = process.platform === "win32" && !path.extname(commandName)
+    ? ["", ...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean)]
+    : [""];
+  for (const directory of pathEntries) {
+    for (const extension of extensions) {
+      const candidate = path.join(directory, `${commandName}${extension}`);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+  return commandName;
+}
+
 /* c8 ignore next 3 -- Optional fields only make prune output ordering deterministic; rule behavior is asserted through candidate contents. */
 function pruneCandidateSortKey(candidate: PruneCandidate): string {
   return `${candidate.kind}:${candidate.cellId || ""}:${candidate.producerCellId || ""}:${candidate.filePath || ""}:${candidate.symbol || ""}:${candidate.artifactLaneId || ""}:${candidate.ruleId || ""}`;
@@ -2676,7 +2691,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
 
 function gitCommand(rootDir: string, args: string[]): string {
   try {
-    return execFileSync("git", args, {
+    return execFileSync(resolveCommand("git"), args, {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
