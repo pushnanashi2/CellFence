@@ -9,7 +9,7 @@ CellFence is not published from this repository automatically. The repository ha
 | npm package metadata | ready | Workspace packages have `publishConfig.access: public` where needed and package versions are kept in lockstep. |
 | Fresh install smoke | enforced | `npm run pack:smoke --silent` packs every workspace package, installs the tarballs into a temporary consumer, and runs the CLI. |
 | Forbidden source scan | enforced | `npm run provenance:scan --silent` checks the source tree for known private provenance terms before release. |
-| npm trusted publishing | workflow ready | `.github/workflows/npm-publish.yml` uses GitHub OIDC, Node 24, npm trusted publishing, and the protected `npm-publish` environment; npm package-level Trusted Publisher settings must still exist for every published package. |
+| npm trusted publishing | workflow ready | `.github/workflows/npm-publish.yml` uses GitHub OIDC, Node 24, npm trusted publishing, and the protected `npm-publish` environment; npm package-level Trusted Publisher settings must still exist for every package in the publish set. |
 | npm provenance attestations | workflow ready | Trusted publishing should produce provenance automatically; token-based fallback must use provenance explicitly. |
 | SBOM | implemented locally | `npm run sbom:generate --silent` writes `reports/sbom.cdx.json` without contacting the registry. |
 | GitHub Release | documented | Release notes and artifacts are created manually after CI passes for the release commit. |
@@ -48,7 +48,7 @@ git diff --check
 
 ## Trusted Publishing Setup
 
-Configure npm trusted publishing for every public package name in the workspace before running `dry_run=false`. The trusted publisher must point at the exact GitHub repository, workflow file, and protected environment that will be allowed to publish:
+Configure npm trusted publishing for every package in the publish set before running `dry_run=false`. The trusted publisher must point at the exact GitHub repository, workflow file, and protected environment that will be allowed to publish:
 
 - GitHub owner: the repository owner configured in npm Trusted Publisher settings
 - GitHub repository: this repository name
@@ -82,7 +82,7 @@ git tag -s v0.1.12 -m "CellFence v0.1.12"
 git push origin v0.1.12
 ```
 
-Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every workspace package:
+Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every package in the publish set:
 
 ```bash
 gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.12 -f dry_run=true
@@ -94,7 +94,7 @@ For the real publish, use the same tag ref, set `dry_run=false`, enter the exact
 gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.1.12 -f dry_run=false -f confirm_publish="publish 0.1.12"
 ```
 
-The workflow preflight checks that every package is visible on npm before `dry_run=false`. If a new workspace package is not yet visible on npm, resolve package ownership and Trusted Publisher setup first; do not add a repository `NPM_TOKEN` as a shortcut.
+The workflow preflight checks that every package in the publish set is visible on npm before `dry_run=false`. `@cellfence/mcp-proxy` remains covered by `pack:smoke`, but it is held out of the v0.1.12 registry publish set because npm Trusted Publisher configuration requires an existing package page. Resolve its first-publish path separately before adding it to `npm-publish.yml`; do not add a repository `NPM_TOKEN` as a shortcut.
 
 ## SBOM
 

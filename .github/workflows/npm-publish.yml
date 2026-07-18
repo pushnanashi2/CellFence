@@ -90,6 +90,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Include only packages that already exist on npm and can have Trusted Publisher configured.
           package_dirs=(
             packages/schema
             packages/plugin-api
@@ -106,7 +107,6 @@ jobs:
             packages/cli
             packages/github-action
             packages/trace
-            packages/mcp-proxy
           )
 
           missing_packages=0
@@ -132,6 +132,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Keep this in sync with the preflight list above.
           package_dirs=(
             packages/schema
             packages/plugin-api
@@ -148,7 +149,6 @@ jobs:
             packages/cli
             packages/github-action
             packages/trace
-            packages/mcp-proxy
           )
 
           for package_dir in "${package_dirs[@]}"; do
