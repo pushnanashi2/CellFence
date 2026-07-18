@@ -864,25 +864,30 @@ export function inspectPythonSource(filePath: string): PythonInspection {
   const cached = inspectionCache.get(filePath);
   if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.result;
 
-  try {
-    const output = execFileSync("python3", ["-I", "-B", "-c", PYTHON_INSPECTOR, filePath], {
-      encoding: "utf8",
-      maxBuffer: 1024 * 1024,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    const result = JSON.parse(output) as PythonInspection;
-    inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
-    return result;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const result: PythonInspection = {
-      imports: [],
-      publicSymbols: [],
-      surfaceParts: [],
-      resources: [],
-      errors: [{ kind: "inspector_error", message }],
-    };
-    inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
-    return result;
+  let lastError: unknown;
+  for (const pythonCommand of ["python3", "python"]) {
+    try {
+      const output = execFileSync(pythonCommand, ["-I", "-B", "-c", PYTHON_INSPECTOR, filePath], {
+        encoding: "utf8",
+        maxBuffer: 1024 * 1024,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      const result = JSON.parse(output) as PythonInspection;
+      inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
+      return result;
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  const result: PythonInspection = {
+    imports: [],
+    publicSymbols: [],
+    surfaceParts: [],
+    resources: [],
+    errors: [{ kind: "inspector_error", message }],
+  };
+  inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
+  return result;
 }

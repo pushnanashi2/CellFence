@@ -1011,10 +1011,17 @@ function symlinkIsRelevant(context: AnalysisContext, symlink: SymlinkEntry): boo
     || owningCells(context.manifest, relativePath).length > 0;
 }
 
+function pathIsInsideDirectory(directoryPath: string, targetPath: string): boolean {
+  const relativePath = path.relative(directoryPath, targetPath);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
+}
+
 function targetIsInsideRoot(rootDir: string, targetPath: string): boolean {
-  const rootRealPath = fs.realpathSync(rootDir);
-  const normalizedRoot = rootRealPath.endsWith(path.sep) ? rootRealPath : `${rootRealPath}${path.sep}`;
-  return targetPath === rootRealPath || targetPath.startsWith(normalizedRoot);
+  const targetAbsolutePath = path.resolve(targetPath);
+  if (!fs.existsSync(targetAbsolutePath)) {
+    return pathIsInsideDirectory(path.resolve(rootDir), targetAbsolutePath);
+  }
+  return pathIsInsideDirectory(fs.realpathSync(rootDir), fs.realpathSync(targetAbsolutePath));
 }
 
 function validateSymlinkTargets(context: AnalysisContext, findings: Finding[]): void {
