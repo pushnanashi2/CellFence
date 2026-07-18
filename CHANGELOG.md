@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Align the reusable GitHub Action wrapper with the published CLI version and add release verification for future Action/MCP version drift.
+- Add `cellfence check --format markdown` for PR-ready summaries and `--format sarif` for GitHub Code Scanning ingestion.
+- Add `cellfence init --preset python-service` and `--preset polyglot-monorepo` with checked starter source files.
+- Add Python service and polyglot monorepo examples to present CellFence as repository change governance beyond TypeScript-only boundary checks.
+
 ## 0.1.12 - 2026-07-18
 
 - Bump all workspace packages and internal `@cellfence/*` dependency pins from `0.1.11` to `0.1.12` for the next pre-release package set.

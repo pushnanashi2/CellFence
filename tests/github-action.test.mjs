@@ -7,6 +7,7 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const actionYaml = fs.readFileSync(path.join(root, "packages/github-action/action.yml"), "utf8");
 const actionEntrypoint = path.join(root, "packages/github-action/dist/index.js");
 
@@ -39,8 +40,8 @@ function writeValidProject(tempDir, { writeDefaultManifest = false } = {}) {
 test("GitHub Action wrapper does not assume CellFence source checkout in consumer repositories", () => {
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.9 baseline check/);
-  assert.match(actionYaml, /npx --yes cellfence@0\.1\.9 check/);
+  assert.match(actionYaml, new RegExp(`npx --yes cellfence@${packageJson.version.replaceAll(".", "\\.")} baseline check`));
+  assert.match(actionYaml, new RegExp(`npx --yes cellfence@${packageJson.version.replaceAll(".", "\\.")} check`));
   assert.match(actionYaml, /check --manifest "\$\{\{ inputs\.manifest \}\}" "\$\{evidence_args\[@\]\}"/);
 });
 

@@ -43,6 +43,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   architecture:
@@ -57,21 +58,45 @@ jobs:
       - name: Verify agent-facing CellFence instructions
         run: npx cellfence install --check --file AGENTS.md
       - name: Enforce CellFence architecture
+        id: cellfence
+        continue-on-error: true
         run: |
           mkdir -p tmp/cellfence
           npx cellfence baseline check \
             --manifest cellfence.manifest.json \
             --baseline cellfence.baseline.json \
+            --format markdown \
             --audit-log tmp/cellfence/audit.jsonl \
-            --summary-json tmp/cellfence/summary.json
+            --summary-json tmp/cellfence/summary.json \
+            > tmp/cellfence/comment.md
+      - name: Emit SARIF for code scanning
+        if: always()
+        continue-on-error: true
+        run: |
+          npx cellfence baseline check \
+            --manifest cellfence.manifest.json \
+            --baseline cellfence.baseline.json \
+            --format sarif \
+            > tmp/cellfence/cellfence.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: tmp/cellfence/cellfence.sarif
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cellfence-audit-${{ github.sha }}
           path: tmp/cellfence/
+      - name: Fail when CellFence found violations
+        if: steps.cellfence.outcome == 'failure'
+        run: exit 1
 ```
 
 The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release.
+
+For PR discussion, post or summarize `tmp/cellfence/comment.md`; it is generated from the same findings as JSON and SARIF.
+
+The reusable Action wrapper invokes the published CLI with an exact `cellfence@<version>` pin. `npm run release:verify` fails if that pin drifts from the package version, so Action users do not silently run an older CLI than the tag they selected.
 
 For real enforcement, configure the architecture job as a required status check on a protected branch. A workflow file inside the repository is not, by itself, a root of trust.
 

@@ -2,7 +2,7 @@
 
 > **AI coding agents do not need more prompts. They need enforceable architectural boundaries.**
 
-CellFence turns architectural intent into deterministic CLI and CI checks for repositories edited by parallel coding agents and humans: cell ownership, declared dependencies, public entry points, resource contracts, and one-way growth ratchets. The governance core is language-agnostic; v0.x has first-class TypeScript/JavaScript analysis and AST-based Python import/public-surface support.
+CellFence turns repository change-governance intent into deterministic CLI and CI checks for codebases edited by parallel coding agents and humans: cell ownership, declared dependencies, public entry points, resource contracts, and one-way growth ratchets. The governance core is language-agnostic; v0.x has first-class TypeScript/JavaScript analysis and AST-based Python import/public-surface support.
 
 ## Sixty seconds
 
@@ -11,7 +11,14 @@ npm install --save-dev cellfence
 npx cellfence init                              # writes cellfence.manifest.json
 mkdir -p src/example
 echo 'export const example = 1;' > src/example/public.ts
-npx cellfence check
+npx cellfence check --format markdown
+```
+
+For a checked starter outside the default TypeScript-shaped example, use one preset instead:
+
+```bash
+npx cellfence init --preset python-service
+# or: npx cellfence init --preset polyglot-monorepo
 ```
 
 ```text
@@ -30,8 +37,8 @@ CellFence check failed.
 <!-- Keep in sync with `cellfence --help`; a drift here already shipped once -->
 
 ```bash
-npx cellfence init
-npx cellfence check [--changed --base origin/main] [--json]
+npx cellfence init [--preset python-service|polyglot-monorepo]
+npx cellfence check [--changed --base origin/main] [--json|--format markdown|--format sarif]
 npx cellfence context --cell <id> [--json|--format agents-md]
 npx cellfence context --auto-allocate --task "task text" [--json]
 npx cellfence install --target agents-md --file AGENTS.md [--check|--uninstall]

@@ -43,9 +43,16 @@ import {
   verifyManifestFromServiceManifests,
   verifyBaselineSeal,
   type CheckResult,
-  type Finding,
   writeBaselineFile,
 } from "@cellfence/engine";
+import {
+  checkOutputFormat,
+  checkSummary,
+  findingFingerprint,
+  printCheckResult,
+  type CheckRunMetadata,
+} from "./check-output.js";
+import { manifestFromPreset } from "./init-presets.js";
 
 type ParsedArgs = {
   command: string[];
@@ -66,6 +73,7 @@ type ParsedArgs = {
   resources: string[];
   artifactLanes: string[];
   format?: string;
+  preset?: string;
   json: boolean;
   rootDir: string;
   changed: boolean;
@@ -97,10 +105,10 @@ function printUsage(): void {
   console.log(`CellFence
 
 Usage:
-  cellfence init
+  cellfence init [--preset python-service|polyglot-monorepo]
   cellfence init --from systems/*/service.json
-  cellfence check [--manifest cellfence.manifest.json] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
-  cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence manifest verify --from systems/*/service.json [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
@@ -115,7 +123,7 @@ Usage:
   cellfence claim list [--claims .cellfence/claims.json] [--json]
   cellfence task check --task .cellfence/tasks/task.json [--base origin/main] [--head HEAD] [--json]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
-  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
@@ -337,6 +345,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--format=")) {
       parsed.format = argument.slice("--format=".length);
+    } else if (argument === "--preset") {
+      parsed.preset = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--preset=")) {
+      parsed.preset = argument.slice("--preset=".length);
     } else if (argument === "--root") {
       parsed.rootDir = path.resolve(argv[index + 1]);
       index += 1;
@@ -357,15 +370,6 @@ function errorMessage(error: unknown): string {
   return String(error).replace(/^[A-Za-z]*Error: /, "");
 }
 
-type CheckRunMetadata = {
-  command: string;
-  runId: string;
-  startedAt: string;
-  completedAt: string;
-  durationMs: number;
-  commit: string | null;
-};
-
 type AuditEvent = {
   schemaVersion: "cellfence.audit-event.v1";
   runId: string;
@@ -375,13 +379,6 @@ type AuditEvent = {
   command: string;
   [key: string]: unknown;
 };
-
-function stableJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`;
-}
 
 function resolveCommand(commandName: string): string {
   if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
@@ -413,19 +410,6 @@ function execCommandSync(commandName: string, args: string[], options: ExecComma
   return execFileSync(commandPath, args, options) as string;
 }
 
-function findingFingerprint(finding: Finding): string {
-  /* c8 ignore next -- CLI cannot currently load plugins that emit precomputed finding fingerprints. */
-  if (finding.fingerprint) return finding.fingerprint;
-  return crypto.createHash("sha256").update(stableJson({
-    ruleId: finding.ruleId,
-    severity: finding.severity,
-    filePath: finding.filePath,
-    cellId: finding.cellId,
-    producerCellId: finding.producerCellId,
-    details: finding.details,
-  })).digest("hex");
-}
-
 function currentCommit(rootDir: string): string | null {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
   try {
@@ -448,6 +432,8 @@ function writeFileEnsuringDirectory(filePath: string, contents: string): void {
   fs.writeFileSync(filePath, contents);
 }
 
+type InferredManifest = ReturnType<typeof inferManifest>;
+
 function createRunMetadata(command: string, rootDir: string, startedAtMs: number, startedAt: string): CheckRunMetadata {
   const completedAtMs = Date.now();
   return {
@@ -457,42 +443,6 @@ function createRunMetadata(command: string, rootDir: string, startedAtMs: number
     completedAt: new Date(completedAtMs).toISOString(),
     durationMs: completedAtMs - startedAtMs,
     commit: currentCommit(rootDir),
-  };
-}
-
-function countBy<T extends string>(values: T[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const value of values) counts[value] = (counts[value] || 0) + 1;
-  return counts;
-}
-
-function checkSummary(result: CheckResult, metadata: CheckRunMetadata): Record<string, unknown> {
-  const allFindings = [...result.findings, ...result.warnings];
-  const cells = allFindings.map((finding) => finding.cellId).filter((cellId): cellId is string => Boolean(cellId));
-  return {
-    schemaVersion: "cellfence.summary.v1",
-    runId: metadata.runId,
-    command: metadata.command,
-    commit: metadata.commit,
-    startedAt: metadata.startedAt,
-    completedAt: metadata.completedAt,
-    durationMs: metadata.durationMs,
-    ok: result.ok,
-    exitCode: result.exitCode,
-    counts: {
-      findings: result.findings.length,
-      warnings: result.warnings.length,
-      changedFiles: result.changedFiles?.length || 0,
-      baseFindings: result.baseFindingCount,
-      impactedCells: new Set(cells).size,
-    },
-    failedRules: [...new Set(result.findings.map((finding) => finding.ruleId))].sort(),
-    warningRules: [...new Set(result.warnings.map((finding) => finding.ruleId))].sort(),
-    findingsByRule: countBy(result.findings.map((finding) => finding.ruleId)),
-    warningsByRule: countBy(result.warnings.map((finding) => finding.ruleId)),
-    findingsByCell: countBy(cells),
-    findingFingerprints: result.findings.map((finding) => findingFingerprint(finding)),
-    warningFingerprints: result.warnings.map((finding) => findingFingerprint(finding)),
   };
 }
 
@@ -587,10 +537,20 @@ function commandInit(parsed: ParsedArgs): number {
     console.error("cellfence.manifest.json already exists");
     return 2;
   }
+  if (parsed.preset && parsed.fromPaths.length > 0) {
+    console.error("cellfence init cannot combine --preset and --from");
+    return 2;
+  }
   const imported = parsed.fromPaths.length > 0
     ? createManifestFromServiceManifests({ rootDir, serviceManifestPaths: parsed.fromPaths })
     : undefined;
-  const manifest = imported?.manifest || inferManifest({ rootDir });
+  let manifest: InferredManifest;
+  try {
+    manifest = imported?.manifest || manifestFromPreset(rootDir, parsed.preset) || inferManifest({ rootDir });
+  } catch (error) {
+    console.error(errorMessage(error));
+    return 2;
+  }
   if (manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
     fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
@@ -604,6 +564,11 @@ function commandInit(parsed: ParsedArgs): number {
 }
 
 function commandCheck(parsed: ParsedArgs): number {
+  const outputFormat = checkOutputFormat(parsed);
+  if (!outputFormat) {
+    console.error("cellfence check supports either --json or --format markdown|sarif");
+    return 2;
+  }
   const manifest = parsed.profile ? loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json")) : undefined;
   const profile = manifest ? profileConfig(manifest, parsed.profile) : undefined;
   if (parsed.profile && !profile) {
@@ -642,9 +607,9 @@ function commandCheck(parsed: ParsedArgs): number {
       ],
     }
     : result;
-  writeCheckArtifacts(parsed, effectiveResult, createRunMetadata(shouldRunChanged ? "check --changed" : "check", parsed.rootDir, startedAtMs, startedAt));
-  if (parsed.json) writeJson(effectiveResult);
-  else console.log(formatHumanResult(effectiveResult));
+  const metadata = createRunMetadata(shouldRunChanged ? "check --changed" : "check", parsed.rootDir, startedAtMs, startedAt);
+  writeCheckArtifacts(parsed, effectiveResult, metadata);
+  printCheckResult(outputFormat, effectiveResult, metadata);
   return effectiveResult.exitCode;
 }
 
@@ -1024,6 +989,11 @@ function commandBaselineCreate(parsed: ParsedArgs): number {
 }
 
 function commandBaselineCheck(parsed: ParsedArgs, commandName = "baseline check"): number {
+  const outputFormat = checkOutputFormat(parsed);
+  if (!outputFormat) {
+    console.error(`cellfence ${commandName} supports either --json or --format markdown|sarif`);
+    return 2;
+  }
   const startedAtMs = Date.now();
   const startedAt = new Date(startedAtMs).toISOString();
   const effectiveParsed = {
@@ -1036,9 +1006,9 @@ function commandBaselineCheck(parsed: ParsedArgs, commandName = "baseline check"
     baselinePath: effectiveParsed.baselinePath,
     evidencePaths: parsed.evidencePaths,
   });
-  writeCheckArtifacts(effectiveParsed, result, createRunMetadata(commandName, parsed.rootDir, startedAtMs, startedAt));
-  if (parsed.json) writeJson(result);
-  else console.log(formatHumanResult(result));
+  const metadata = createRunMetadata(commandName, parsed.rootDir, startedAtMs, startedAt);
+  writeCheckArtifacts(effectiveParsed, result, metadata);
+  printCheckResult(outputFormat, result, metadata);
   return result.exitCode;
 }
 
@@ -1742,7 +1712,7 @@ function handleMcpRequest(request: JsonRpcRequest, defaultRootDir: string): stri
     return mcpResponse(request.id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "cellfence", version: "0.1.10" },
+      serverInfo: { name: "cellfence", version: "0.1.12" },
     });
   }
   if (request.method === "tools/list") {

@@ -35,6 +35,33 @@ if (packageJson.scripts && /publish/.test(Object.keys(packageJson.scripts).join(
   findings.push("root package.json must not define an npm publishing script in v0.x");
 }
 
+const githubAction = fs.readFileSync("packages/github-action/action.yml", "utf8");
+const actionCliVersions = [...githubAction.matchAll(/\bcellfence@(\d+\.\d+\.\d+)\b/g)].map((match) => match[1]);
+if (actionCliVersions.length === 0) {
+  findings.push("packages/github-action/action.yml must pin the published cellfence CLI version");
+}
+for (const actionCliVersion of new Set(actionCliVersions)) {
+  if (actionCliVersion !== packageJson.version) {
+    findings.push(`packages/github-action/action.yml pins cellfence@${actionCliVersion}, expected ${packageJson.version}`);
+  }
+}
+
+const cliSource = fs.readFileSync("packages/cli/src/index.ts", "utf8");
+const mcpServerInfoMatch = /serverInfo:\s*\{\s*name:\s*"cellfence",\s*version:\s*"([^"]+)"/.exec(cliSource);
+if (!mcpServerInfoMatch) {
+  findings.push("packages/cli/src/index.ts must expose a CellFence MCP serverInfo version");
+} else if (mcpServerInfoMatch[1] !== packageJson.version) {
+  findings.push(`packages/cli/src/index.ts exposes MCP serverInfo ${mcpServerInfoMatch[1]}, expected ${packageJson.version}`);
+}
+
+const mcpProxySource = fs.readFileSync("packages/mcp-proxy/src/index.ts", "utf8");
+const mcpProxyVersionMatch = /const VERSION = "([^"]+)"/.exec(mcpProxySource);
+if (!mcpProxyVersionMatch) {
+  findings.push("packages/mcp-proxy/src/index.ts must expose a package VERSION");
+} else if (mcpProxyVersionMatch[1] !== packageJson.version) {
+  findings.push(`packages/mcp-proxy/src/index.ts exposes VERSION ${mcpProxyVersionMatch[1]}, expected ${packageJson.version}`);
+}
+
 for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {
   const text = fs.readFileSync(workflowPath, "utf8");
   for (const [index, line] of text.split(/\r?\n/).entries()) {

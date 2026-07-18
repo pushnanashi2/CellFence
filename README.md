@@ -11,7 +11,7 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 <!-- TODO: add npm provenance badge after enabling trusted publishing -->
 
-CellFence is a manifest-driven architecture governance tool for repositories edited in parallel by coding agents and humans. Its governance core is language-agnostic, with first-class TypeScript/JavaScript analysis and AST-based Python import/public-surface support. A manifest declares which cell owns which paths, which public entry other cells may import, and which resources each cell may touch. `cellfence check` turns those declarations into deterministic pass/fail results in CLI and CI, and an accepted baseline turns architectural growth into a review-gated event.
+CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, resource, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import and public-surface support. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
 
 Prompt files are context, not enforcement. An agent can import another module's internals, add an undeclared dependency, or widen a public API — and still merge green. CellFence moves these decisions out of prose and into machine-checkable repository contracts.
 
@@ -34,6 +34,17 @@ CellFence check passed.
 ```
 
 `init` generates a starter manifest with one `example` cell owning `src/example/**`. Rename it, add your real cells, and re-run `check` until the fence matches your architecture.
+
+For a non-TypeScript starter, choose a preset:
+
+```bash
+npx cellfence init --preset python-service
+# or: npx cellfence init --preset polyglot-monorepo
+npx cellfence check --format markdown
+npx cellfence check --format sarif > cellfence.sarif
+```
+
+See [examples/python-service](examples/python-service) and [examples/polyglot-monorepo](examples/polyglot-monorepo).
 
 ## Catch a violation in thirty seconds
 
@@ -273,7 +284,7 @@ Recipes, required-check setup, signed baseline workflows, and the reusable actio
 ## Use CellFence when you are asking
 
 - How do I stop AI coding agents from importing private modules?
-- How do I enforce module boundaries in an AI-assisted monorepo?
+- How do I enforce repository boundaries in an AI-assisted or polyglot codebase?
 - How do I prevent public API, dependency, or ownership growth without review?
 - How do I show an agent its allowed paths, imports, and resources before it edits?
 - How do I install and drift-check CellFence instructions in AGENTS.md or CLAUDE.md?
@@ -295,8 +306,8 @@ Threat model: [docs/threat-model.md](docs/threat-model.md).
 
 | Command | Purpose |
 |---|---|
-| `cellfence init` | Write a starter manifest |
-| `cellfence check [--changed --base <ref>] [--json]` | Validate the manifest contract |
+| `cellfence init [--preset python-service\|polyglot-monorepo]` | Write a starter manifest or a checked preset |
+| `cellfence check [--changed --base <ref>] [--json\|--format markdown\|--format sarif]` | Validate the manifest contract and emit human, PR, or code-scanning output |
 | `cellfence context --cell <id> [--json\|--format agents-md]` | Emit a cell's contract for humans or agents |
 | `cellfence install [--target agents-md\|claude-md] [--check\|--uninstall]` | Manage checksumed agent instruction blocks |
 | `cellfence serve --mcp` | Expose CellFence context, checks, claims, and explanations over MCP stdio |
@@ -310,7 +321,7 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## Status and limitations
 
-Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript; AST-based Python boundary analysis for `.py` imports and public entries; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not prevent an agent from editing a path at runtime — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
+Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript; AST-based Python boundary analysis for `.py` imports and public entries; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness or prevent an agent from editing a path at runtime — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
 
 ## Documentation map
 

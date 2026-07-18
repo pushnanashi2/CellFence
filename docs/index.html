@@ -2054,13 +2054,13 @@
             <span>Prompts suggest.</span>
             <span>CellFence enforces.</span>
           </p>
-          <button class="core-install" type="button" data-command="npm i -D cellfence&#10;npx cellfence init&#10;npx cellfence check" aria-label="Copy CellFence 60 second quickstart commands">
+          <button class="core-install" type="button" data-command="npm i -D cellfence&#10;npx cellfence init --preset polyglot-monorepo&#10;npx cellfence check --format markdown" aria-label="Copy CellFence 60 second quickstart commands">
             <span class="core-install-title">Try it in 60 seconds</span>
             <span class="core-install-command">
               <span class="core-install-prompt" aria-hidden="true">$</span>
               <code>npm i -D cellfence
-npx cellfence init
-npx cellfence check</code>
+npx cellfence init --preset polyglot-monorepo
+npx cellfence check --format markdown</code>
             </span>
             <span class="core-install-action">Copy</span>
           </button>
@@ -2072,8 +2072,8 @@ npx cellfence check</code>
           <p class="eyebrow">Machine-checkable boundaries</p>
           <h2 class="section-title">A manifest-driven repository firewall your agents can see before they edit.</h2>
           <p class="lead">
-            Machine-checkable boundaries for monorepos in the age of Cursor and Claude Code.
-            Prompts explain the architecture. CellFence enforces it in local CLI and required CI checks.
+            Machine-checkable boundaries for polyglot repositories in the age of Cursor and Claude Code.
+            Prompts explain the architecture. CellFence enforces repository evidence in local CLI and required CI checks.
           </p>
           <div class="checks">
             <article class="check">
@@ -2101,7 +2101,7 @@ npx cellfence check</code>
             <p class="eyebrow">How it works</p>
             <h2 class="section-title">Deterministic checks, not another prompt.</h2>
             <p class="lead">
-              CellFence evaluates paths, declared public entries, dependency edges, and ratchet
+              CellFence evaluates paths, declared public entries, dependency edges, resource evidence, and ratchet
               baselines from repository state. The decision path is repeatable in local CLI and CI.
             </p>
             <div class="steps">
@@ -2134,10 +2134,11 @@ npx cellfence check</code>
               <span><b>CLI</b></span>
               <span>required check</span>
             </div>
-            <pre><code>$ npx cellfence check --manifest cellfence.manifest.json
+            <pre><code>$ npx cellfence check --manifest cellfence.manifest.json --format sarif
 
 <span class="token-good">accept</span> ownership map
 <span class="token-good">accept</span> public entry dependencies
+<span class="token-good">accept</span> Python public-surface evidence
 <span class="token-warn">reject</span> private import across cells
 <span class="token-warn">reject</span> undeclared artifact lane</code></pre>
           </div>
@@ -2171,7 +2172,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npx cellfence check</code></pre>
+      - run: npx cellfence check --format markdown</code></pre>
           </div>
         </div>
       </section>
@@ -2193,8 +2194,8 @@ jobs:
             </div>
             <div class="compare-row" role="row">
               <strong role="cell">good-fences</strong>
-              <span role="cell">A TypeScript dependency boundary tool organized around conceptual areas.</span>
-              <span role="cell">CellFence adds manifest ownership, public-surface contracts, and ratchet baselines.</span>
+              <span role="cell">A focused dependency boundary tool organized around conceptual areas.</span>
+              <span role="cell">CellFence adds manifest ownership, public-surface contracts, Python repository evidence, and ratchet baselines.</span>
               <span role="cell">Use it when repository governance needs one reviewable contract across agents and humans.</span>
             </div>
             <div class="compare-row" role="row">

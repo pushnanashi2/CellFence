@@ -737,6 +737,62 @@ test("CLI init enables strict ownership coverage by default", () => {
   }
 });
 
+test("CLI init writes a checked Python service preset", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-python-"));
+  try {
+    const result = runCli(["init", "--preset", "python-service"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(fs.existsSync(path.join(tempDir, "src/api/routes.py")), true);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.governance.include, ["src/**"]);
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["api", "domain", "infra"]);
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "api").consumes, [{ cell: "domain" }, { cell: "infra" }]);
+
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+    assert.equal(JSON.parse(checkResult.stdout).ok, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init writes a checked polyglot monorepo preset", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-polyglot-"));
+  try {
+    const result = runCli(["init", "--preset=polyglot-monorepo"], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(fs.existsSync(path.join(tempDir, "packages/web/src/public.ts")), true);
+    assert.equal(fs.existsSync(path.join(tempDir, "services/api/src/public.py")), true);
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    assert.deepEqual(manifest.governance.include, ["packages/**", "services/**"]);
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["api", "shared", "web"]);
+    assert.deepEqual(manifest.cells.find((cell) => cell.id === "web").consumes, [{ cell: "shared" }]);
+
+    const checkResult = runCli(["check", "--json"], tempDir);
+    assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
+    assert.equal(JSON.parse(checkResult.stdout).ok, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init rejects unknown presets and preset service-manifest imports together", () => {
+  const unknownDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-unknown-preset-"));
+  const combinedDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-combined-preset-"));
+  try {
+    const unknown = runCli(["init", "--preset", "rails-app"], unknownDir);
+    assert.equal(unknown.status, 2);
+    assert.match(unknown.stderr, /unknown CellFence init preset: rails-app/);
+
+    const combined = runCli(["init", "--preset", "python-service", "--from", "systems/*/service.json"], combinedDir);
+    assert.equal(combined.status, 2);
+    assert.match(combined.stderr, /cannot combine --preset and --from/);
+  } finally {
+    fs.rmSync(unknownDir, { recursive: true, force: true });
+    fs.rmSync(combinedDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI init infers src cells, workspace cells, public entries, and consumers", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-infer-"));
   try {
@@ -972,6 +1028,33 @@ test("CLI check emits suggested resolutions for private imports", () => {
   assert.equal(privateImportFinding.suggestedResolutions[0].approvalRequired, false);
   assert.equal(privateImportFinding.suggestedResolutions[1].approvalRequired, true);
   assert.equal(privateImportFinding.suggestedResolutions[0].details.publicEntry, "src/producer/public.ts");
+});
+
+test("CLI check emits PR-ready markdown output", () => {
+  const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
+  const result = runCli(["check", "--format", "markdown"], fixturePath);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /^# CellFence Check/m);
+  assert.match(result.stdout, /\*\*Result:\*\* failed/);
+  assert.match(result.stdout, /`CELLFENCE_PRIVATE_IMPORT`/);
+  assert.match(result.stdout, /src\/consumer\/public\.ts/);
+});
+
+test("CLI check emits SARIF output for code scanning", () => {
+  const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
+  const result = runCli(["check", "--format=sarif"], fixturePath);
+  assert.equal(result.status, 1);
+  const sarif = JSON.parse(result.stdout);
+  assert.equal(sarif.version, "2.1.0");
+  assert.equal(sarif.runs[0].tool.driver.name, "CellFence");
+  assert.ok(sarif.runs[0].results.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+});
+
+test("CLI check rejects ambiguous JSON and formatted output options", () => {
+  const fixturePath = path.join(root, "fixtures/valid/single-cell");
+  const result = runCli(["check", "--json", "--format", "markdown"], fixturePath);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /supports either --json or --format markdown\|sarif/);
 });
 
 test("CLI baseline update refuses to expand locked cell baselines", () => {

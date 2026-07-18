@@ -16,8 +16,8 @@ Version 0.x is deliberately narrow:
 - public symbol analysis supports common TypeScript forms and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern;
 - computed dynamic imports cannot be resolved statically;
 - `check --changed` still performs full head/base repository analysis in v0.x, then compares stable finding fingerprints to report only newly introduced findings;
-- SARIF output is not implemented;
-- a reusable externally pinned GitHub Action is not yet released;
+- Markdown and SARIF output are report formats over the same deterministic findings, not separate analyzers;
+- the reusable GitHub Action is pre-release and invokes the published CLI pinned to the package version verified by `npm run release:verify`;
 - CellFence does not identify which particular agent wrote a changed file;
 - CellFence does not prevent an agent from editing a path at runtime.
 
