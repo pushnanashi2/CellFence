@@ -341,6 +341,7 @@ Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; r
 | Root of trust | [docs/root-of-trust.md](docs/root-of-trust.md) |
 | Architecture | [docs/architecture.md](docs/architecture.md) |
 | Implementation status | [docs/implementation-status.md](docs/implementation-status.md) |
+| Validation research protocol | [docs/research/corpus-precision-study.md](docs/research/corpus-precision-study.md) |
 
 ## Contributing, security, license
 

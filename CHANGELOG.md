@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add a reproducible corpus precision study harness and protocol for frozen-repository onboarding, failure-inclusive CellFence checks, and manual false-positive labeling.
+
 ## 0.1.13 - 2026-07-18
 
 - Fix owned path overlap detection so sibling path prefixes such as `src/user/**` and `src/users/**` no longer trigger `CELLFENCE_OWNERSHIP_OVERLAP`, while nested ownership such as `src/shared/**` and `src/shared/narrow/**` still fails.

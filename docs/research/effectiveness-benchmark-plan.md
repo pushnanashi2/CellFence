@@ -10,6 +10,8 @@ blocks the right changes with acceptable friction.
    - Use 20 to 40 repositories.
    - Pin every repository by exact commit SHA or release tag.
    - Store the corpus manifest as the reproducibility root.
+   - Run the failure-inclusive onboarding/check harness in
+     `docs/research/corpus-precision-study.md`.
 
 2. Label events.
    - Extract candidate events such as public surface changes, cross-cell moves,
