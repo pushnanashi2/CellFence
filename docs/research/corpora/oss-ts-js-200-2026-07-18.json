@@ -1,0 +1,3633 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Frozen public OSS TypeScript/JavaScript onboarding corpus generated on 2026-07-18. This is an infer-manifest onboarding study, not a precision corpus.",
+  "selectionPolicy": {
+    "date": "2026-07-18",
+    "source": "GitHub GraphQL repository search",
+    "queries": [
+      {
+        "label": "typescript",
+        "query": "language:TypeScript stars:>=500 archived:false fork:false size:<50000 sort:stars-desc",
+        "target": 100,
+        "selected": 100
+      },
+      {
+        "label": "javascript",
+        "query": "language:JavaScript stars:>=1000 archived:false fork:false size:<50000 sort:stars-desc",
+        "target": 100,
+        "selected": 100
+      }
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "size:<50000",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no target dependency installation, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer results measure onboarding and detector pressure only; they are excluded from precision denominators until reviewed manifests exist."
+  },
+  "subjects": [
+    {
+      "id": "vuejs-vue",
+      "repository": "https://github.com/vuejs/vue.git",
+      "commit": "9e88707940088cb1f4cd7dd210c9168a50dc347c",
+      "metadata": {
+        "nameWithOwner": "vuejs/vue",
+        "url": "https://github.com/vuejs/vue",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 210094,
+        "forks": 33830,
+        "diskUsageKb": 32152,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "yangshun-tech-interview-handbook",
+      "repository": "https://github.com/yangshun/tech-interview-handbook.git",
+      "commit": "8ee2acb54a05c4add123a824d15e7dfc4e703b2f",
+      "metadata": {
+        "nameWithOwner": "yangshun/tech-interview-handbook",
+        "url": "https://github.com/yangshun/tech-interview-handbook",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 141057,
+        "forks": 16691,
+        "diskUsageKb": 33749,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "modelcontextprotocol-servers",
+      "repository": "https://github.com/modelcontextprotocol/servers.git",
+      "commit": "d31124c982401739917fd817c2a59db344529c16",
+      "metadata": {
+        "nameWithOwner": "modelcontextprotocol/servers",
+        "url": "https://github.com/modelcontextprotocol/servers",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 88598,
+        "forks": 11239,
+        "diskUsageKb": 29271,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "chatgptnextweb-nextchat",
+      "repository": "https://github.com/ChatGPTNextWeb/NextChat.git",
+      "commit": "706a18b95b714ab29b2a4842d3b9ff4f887935d5",
+      "metadata": {
+        "nameWithOwner": "ChatGPTNextWeb/NextChat",
+        "url": "https://github.com/ChatGPTNextWeb/NextChat",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 88506,
+        "forks": 59402,
+        "diskUsageKb": 21027,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "realworld-apps-realworld",
+      "repository": "https://github.com/realworld-apps/realworld.git",
+      "commit": "98f29fb3f8bcb1dd614b91f2851371bf22c34775",
+      "metadata": {
+        "nameWithOwner": "realworld-apps/realworld",
+        "url": "https://github.com/realworld-apps/realworld",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 83860,
+        "forks": 7647,
+        "diskUsageKb": 35591,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "opencut-app-opencut",
+      "repository": "https://github.com/OpenCut-app/OpenCut.git",
+      "commit": "5e0696bc9b921dcbaf2f42bdf3e96891a30c1e9e",
+      "metadata": {
+        "nameWithOwner": "OpenCut-app/OpenCut",
+        "url": "https://github.com/OpenCut-app/OpenCut",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 75187,
+        "forks": 7570,
+        "diskUsageKb": 28137,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "egonex-ai-understand-anything",
+      "repository": "https://github.com/Egonex-AI/Understand-Anything.git",
+      "commit": "b9ac6be178b2fbc68ae45456cd9a902bdcac6dac",
+      "metadata": {
+        "nameWithOwner": "Egonex-AI/Understand-Anything",
+        "url": "https://github.com/Egonex-AI/Understand-Anything",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 74981,
+        "forks": 6232,
+        "diskUsageKb": 35001,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "socketio-socket-io",
+      "repository": "https://github.com/socketio/socket.io.git",
+      "commit": "ef026605a44e299ef6f94b6d6a07375057011060",
+      "metadata": {
+        "nameWithOwner": "socketio/socket.io",
+        "url": "https://github.com/socketio/socket.io",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 63156,
+        "forks": 10192,
+        "diskUsageKb": 33578,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "reduxjs-redux",
+      "repository": "https://github.com/reduxjs/redux.git",
+      "commit": "5d65348e26635b6ec627b1030732ed38797e88e9",
+      "metadata": {
+        "nameWithOwner": "reduxjs/redux",
+        "url": "https://github.com/reduxjs/redux",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 61502,
+        "forks": 15098,
+        "diskUsageKb": 34265,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "fission-ai-openspec",
+      "repository": "https://github.com/Fission-AI/OpenSpec.git",
+      "commit": "46a4d782229ebb104268130a16e85cb7662a2281",
+      "metadata": {
+        "nameWithOwner": "Fission-AI/OpenSpec",
+        "url": "https://github.com/Fission-AI/OpenSpec",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 61431,
+        "forks": 4255,
+        "diskUsageKb": 5359,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "colbymchenry-codegraph",
+      "repository": "https://github.com/colbymchenry/codegraph.git",
+      "commit": "5955d04c97de3311476b0ca9d8d84cfff4fcb0d3",
+      "metadata": {
+        "nameWithOwner": "colbymchenry/codegraph",
+        "url": "https://github.com/colbymchenry/codegraph",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 60714,
+        "forks": 3803,
+        "diskUsageKb": 11389,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "upstash-context7",
+      "repository": "https://github.com/upstash/context7.git",
+      "commit": "23843e9ce62908896cf2dcd32cc5c03c05047416",
+      "metadata": {
+        "nameWithOwner": "upstash/context7",
+        "url": "https://github.com/upstash/context7",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 59314,
+        "forks": 2822,
+        "diskUsageKb": 32432,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "pmndrs-zustand",
+      "repository": "https://github.com/pmndrs/zustand.git",
+      "commit": "beca84e600e4e250f6b244d22878e72948f331c7",
+      "metadata": {
+        "nameWithOwner": "pmndrs/zustand",
+        "url": "https://github.com/pmndrs/zustand",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 58437,
+        "forks": 2151,
+        "diskUsageKb": 7935,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vuejs-core",
+      "repository": "https://github.com/vuejs/core.git",
+      "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+      "metadata": {
+        "nameWithOwner": "vuejs/core",
+        "url": "https://github.com/vuejs/core",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 53970,
+        "forks": 9164,
+        "diskUsageKb": 43172,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "justjavac-wechat-miniapp-radar",
+      "repository": "https://github.com/justjavac/wechat-miniapp-radar.git",
+      "commit": "597c3e1763e5506b09037bd82d9897ca28dd6e4d",
+      "metadata": {
+        "nameWithOwner": "justjavac/wechat-miniapp-radar",
+        "url": "https://github.com/justjavac/wechat-miniapp-radar",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 51218,
+        "forks": 9021,
+        "diskUsageKb": 1470,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "chenglou-pretext",
+      "repository": "https://github.com/chenglou/pretext.git",
+      "commit": "ac49b09b7d83ede19581fa94a8b892b07d309baf",
+      "metadata": {
+        "nameWithOwner": "chenglou/pretext",
+        "url": "https://github.com/chenglou/pretext",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 49197,
+        "forks": 2716,
+        "diskUsageKb": 1667,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "type-challenges-type-challenges",
+      "repository": "https://github.com/type-challenges/type-challenges.git",
+      "commit": "0b0b0b18bcb7ac42dc22ce26ffb438231d4754b1",
+      "metadata": {
+        "nameWithOwner": "type-challenges/type-challenges",
+        "url": "https://github.com/type-challenges/type-challenges",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 48338,
+        "forks": 5275,
+        "diskUsageKb": 3344,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "slab-quill",
+      "repository": "https://github.com/slab/quill.git",
+      "commit": "539cbffd0a13b18e9c65eb84dd35e6596e403158",
+      "metadata": {
+        "nameWithOwner": "slab/quill",
+        "url": "https://github.com/slab/quill",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 47229,
+        "forks": 3655,
+        "diskUsageKb": 18429,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "chromedevtools-chrome-devtools-mcp",
+      "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp.git",
+      "commit": "76fd2424984827802867672fcc8d0e0036f4a3af",
+      "metadata": {
+        "nameWithOwner": "ChromeDevTools/chrome-devtools-mcp",
+        "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 47125,
+        "forks": 3140,
+        "diskUsageKb": 10477,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "typescript-cheatsheets-react",
+      "repository": "https://github.com/typescript-cheatsheets/react.git",
+      "commit": "1cd0635d4256deed1a22489b7f916bdfc0a464a4",
+      "metadata": {
+        "nameWithOwner": "typescript-cheatsheets/react",
+        "url": "https://github.com/typescript-cheatsheets/react",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 47090,
+        "forks": 4284,
+        "diskUsageKb": 3105,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "react-hook-form-react-hook-form",
+      "repository": "https://github.com/react-hook-form/react-hook-form.git",
+      "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633",
+      "metadata": {
+        "nameWithOwner": "react-hook-form/react-hook-form",
+        "url": "https://github.com/react-hook-form/react-hook-form",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 44797,
+        "forks": 2448,
+        "diskUsageKb": 32228,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vercel-hyper",
+      "repository": "https://github.com/vercel/hyper.git",
+      "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287",
+      "metadata": {
+        "nameWithOwner": "vercel/hyper",
+        "url": "https://github.com/vercel/hyper",
+        "defaultBranch": "canary",
+        "primaryLanguage": "TypeScript",
+        "stars": 44654,
+        "forks": 3569,
+        "diskUsageKb": 23510,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "abhigyanpatwari-gitnexus",
+      "repository": "https://github.com/abhigyanpatwari/GitNexus.git",
+      "commit": "4d7a0a69edcc87ee2b2046aba7fbe8040c0de3b7",
+      "metadata": {
+        "nameWithOwner": "abhigyanpatwari/GitNexus",
+        "url": "https://github.com/abhigyanpatwari/GitNexus",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 44320,
+        "forks": 4926,
+        "diskUsageKb": 47433,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "fastapi-full-stack-fastapi-template",
+      "repository": "https://github.com/fastapi/full-stack-fastapi-template.git",
+      "commit": "4d3d5e92c1ea6b3fa0fab02c41124844ec45bca8",
+      "metadata": {
+        "nameWithOwner": "fastapi/full-stack-fastapi-template",
+        "url": "https://github.com/fastapi/full-stack-fastapi-template",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 44300,
+        "forks": 8801,
+        "diskUsageKb": 6274,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "aykutsarac-jsoncrack-com",
+      "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+      "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059",
+      "metadata": {
+        "nameWithOwner": "AykutSarac/jsoncrack.com",
+        "url": "https://github.com/AykutSarac/jsoncrack.com",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 44251,
+        "forks": 3564,
+        "diskUsageKb": 42109,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "colinhacks-zod",
+      "repository": "https://github.com/colinhacks/zod.git",
+      "commit": "912f0f51b0ced654d0069741e7160834dca742ee",
+      "metadata": {
+        "nameWithOwner": "colinhacks/zod",
+        "url": "https://github.com/colinhacks/zod",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 43286,
+        "forks": 2082,
+        "diskUsageKb": 24006,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "heyputer-puter",
+      "repository": "https://github.com/HeyPuter/puter.git",
+      "commit": "70f343d6fe621f27525020e2da68e1389265f5fb",
+      "metadata": {
+        "nameWithOwner": "HeyPuter/puter",
+        "url": "https://github.com/HeyPuter/puter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 42775,
+        "forks": 3955,
+        "diskUsageKb": 43210,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "mifi-lossless-cut",
+      "repository": "https://github.com/mifi/lossless-cut.git",
+      "commit": "2deed8806ab8c65bf09908350d4cd929f07a7171",
+      "metadata": {
+        "nameWithOwner": "mifi/lossless-cut",
+        "url": "https://github.com/mifi/lossless-cut",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 42158,
+        "forks": 2076,
+        "diskUsageKb": 26550,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "hexojs-hexo",
+      "repository": "https://github.com/hexojs/hexo.git",
+      "commit": "a16a7e609f8d3786d21d65e98ffcf602eecbc0f6",
+      "metadata": {
+        "nameWithOwner": "hexojs/hexo",
+        "url": "https://github.com/hexojs/hexo",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 41771,
+        "forks": 27,
+        "diskUsageKb": 7621,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "styled-components-styled-components",
+      "repository": "https://github.com/styled-components/styled-components.git",
+      "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca",
+      "metadata": {
+        "nameWithOwner": "styled-components/styled-components",
+        "url": "https://github.com/styled-components/styled-components",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 41105,
+        "forks": 2565,
+        "diskUsageKb": 40441,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "chatboxai-chatbox",
+      "repository": "https://github.com/chatboxai/chatbox.git",
+      "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647",
+      "metadata": {
+        "nameWithOwner": "chatboxai/chatbox",
+        "url": "https://github.com/chatboxai/chatbox",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 41043,
+        "forks": 4149,
+        "diskUsageKb": 41188,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vadimdemedes-ink",
+      "repository": "https://github.com/vadimdemedes/ink.git",
+      "commit": "70af033dbd2b126a16f144164685612b2c1fd554",
+      "metadata": {
+        "nameWithOwner": "vadimdemedes/ink",
+        "url": "https://github.com/vadimdemedes/ink",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 39354,
+        "forks": 1023,
+        "diskUsageKb": 2146,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ant-design-ant-design-pro",
+      "repository": "https://github.com/ant-design/ant-design-pro.git",
+      "commit": "bb40867ae3ef943e06e48da6911ccc5900e638a1",
+      "metadata": {
+        "nameWithOwner": "ant-design/ant-design-pro",
+        "url": "https://github.com/ant-design/ant-design-pro",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 38561,
+        "forks": 8252,
+        "diskUsageKb": 41351,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "umami-software-umami",
+      "repository": "https://github.com/umami-software/umami.git",
+      "commit": "af1b6c6efcadd65136a9ec3db6b8ec20962a8a69",
+      "metadata": {
+        "nameWithOwner": "umami-software/umami",
+        "url": "https://github.com/umami-software/umami",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 37720,
+        "forks": 7557,
+        "diskUsageKb": 29239,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "xyflow-xyflow",
+      "repository": "https://github.com/xyflow/xyflow.git",
+      "commit": "dd308ab401d49518f73d1e91c43faf254ff5a4c9",
+      "metadata": {
+        "nameWithOwner": "xyflow/xyflow",
+        "url": "https://github.com/xyflow/xyflow",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 37688,
+        "forks": 2471,
+        "diskUsageKb": 45532,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "date-fns-date-fns",
+      "repository": "https://github.com/date-fns/date-fns.git",
+      "commit": "4098115cf705e3af7f663d8e5b0686e39a9f478a",
+      "metadata": {
+        "nameWithOwner": "date-fns/date-fns",
+        "url": "https://github.com/date-fns/date-fns",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 36600,
+        "forks": 1976,
+        "diskUsageKb": 25290,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "typeorm-typeorm",
+      "repository": "https://github.com/typeorm/typeorm.git",
+      "commit": "5543c7c462a85b79746ae61205ddd43c1d8de157",
+      "metadata": {
+        "nameWithOwner": "typeorm/typeorm",
+        "url": "https://github.com/typeorm/typeorm",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 36597,
+        "forks": 6640,
+        "diskUsageKb": 41969,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "lerna-lerna",
+      "repository": "https://github.com/lerna/lerna.git",
+      "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+      "metadata": {
+        "nameWithOwner": "lerna/lerna",
+        "url": "https://github.com/lerna/lerna",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 36048,
+        "forks": 2271,
+        "diskUsageKb": 41240,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "musistudio-claude-code-router",
+      "repository": "https://github.com/musistudio/claude-code-router.git",
+      "commit": "19973394d26fb1afec697f5d091d62d300bcdf50",
+      "metadata": {
+        "nameWithOwner": "musistudio/claude-code-router",
+        "url": "https://github.com/musistudio/claude-code-router",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 35878,
+        "forks": 2968,
+        "diskUsageKb": 26726,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "solidjs-solid",
+      "repository": "https://github.com/solidjs/solid.git",
+      "commit": "d2f81d546d5dff37aa25e4fa224e2192efec8c1a",
+      "metadata": {
+        "nameWithOwner": "solidjs/solid",
+        "url": "https://github.com/solidjs/solid",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 35742,
+        "forks": 1079,
+        "diskUsageKb": 18759,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "dokploy-dokploy",
+      "repository": "https://github.com/Dokploy/dokploy.git",
+      "commit": "df3965a5816700d61c39fd1a13241b5766d7b24e",
+      "metadata": {
+        "nameWithOwner": "Dokploy/dokploy",
+        "url": "https://github.com/Dokploy/dokploy",
+        "defaultBranch": "canary",
+        "primaryLanguage": "TypeScript",
+        "stars": 35722,
+        "forks": 2753,
+        "diskUsageKb": 30779,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "lfnovo-open-notebook",
+      "repository": "https://github.com/lfnovo/open-notebook.git",
+      "commit": "df106fabe6d722618bafd0d08209a2bb5648792d",
+      "metadata": {
+        "nameWithOwner": "lfnovo/open-notebook",
+        "url": "https://github.com/lfnovo/open-notebook",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 35688,
+        "forks": 4046,
+        "diskUsageKb": 12988,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "alan2207-bulletproof-react",
+      "repository": "https://github.com/alan2207/bulletproof-react.git",
+      "commit": "9506629ed003a561c6627735480cce4994244bb4",
+      "metadata": {
+        "nameWithOwner": "alan2207/bulletproof-react",
+        "url": "https://github.com/alan2207/bulletproof-react",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 35561,
+        "forks": 3239,
+        "diskUsageKb": 2249,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "adguardteam-adguardhome",
+      "repository": "https://github.com/AdguardTeam/AdGuardHome.git",
+      "commit": "2961664cbec08529d6e37e7ac4548eca8340e56c",
+      "metadata": {
+        "nameWithOwner": "AdguardTeam/AdGuardHome",
+        "url": "https://github.com/AdguardTeam/AdGuardHome",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 35526,
+        "forks": 2432,
+        "diskUsageKb": 30631,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "microsoft-playwright-mcp",
+      "repository": "https://github.com/microsoft/playwright-mcp.git",
+      "commit": "55679f5f3d4b4f3e2534ec0ce2fc5683ba2eaf3f",
+      "metadata": {
+        "nameWithOwner": "microsoft/playwright-mcp",
+        "url": "https://github.com/microsoft/playwright-mcp",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 35224,
+        "forks": 2927,
+        "diskUsageKb": 2056,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "crosstalk-solutions-project-nomad",
+      "repository": "https://github.com/Crosstalk-Solutions/project-nomad.git",
+      "commit": "6a4f02dd4626c64f38ac07e4740bc250ba13fea1",
+      "metadata": {
+        "nameWithOwner": "Crosstalk-Solutions/project-nomad",
+        "url": "https://github.com/Crosstalk-Solutions/project-nomad",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 34346,
+        "forks": 3441,
+        "diskUsageKb": 14474,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jaredpalmer-formik",
+      "repository": "https://github.com/jaredpalmer/formik.git",
+      "commit": "91475adbf33579561e580eceea0c031f4ec2e992",
+      "metadata": {
+        "nameWithOwner": "jaredpalmer/formik",
+        "url": "https://github.com/jaredpalmer/formik",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 34328,
+        "forks": 2781,
+        "diskUsageKb": 17152,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "lissy93-web-check",
+      "repository": "https://github.com/lissy93/web-check.git",
+      "commit": "9154bd43e8276c0310c29c86ac70648e1ed4eda5",
+      "metadata": {
+        "nameWithOwner": "lissy93/web-check",
+        "url": "https://github.com/lissy93/web-check",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 34182,
+        "forks": 2817,
+        "diskUsageKb": 28233,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "dayuanjiang-next-ai-draw-io",
+      "repository": "https://github.com/DayuanJiang/next-ai-draw-io.git",
+      "commit": "4b072283202d3fe4869acd847ee897ad1165d73d",
+      "metadata": {
+        "nameWithOwner": "DayuanJiang/next-ai-draw-io",
+        "url": "https://github.com/DayuanJiang/next-ai-draw-io",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 33627,
+        "forks": 3531,
+        "diskUsageKb": 6502,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nginxproxymanager-nginx-proxy-manager",
+      "repository": "https://github.com/NginxProxyManager/nginx-proxy-manager.git",
+      "commit": "a62c2a6dc3ab51e6fedc34d3ea3506bc9373953f",
+      "metadata": {
+        "nameWithOwner": "NginxProxyManager/nginx-proxy-manager",
+        "url": "https://github.com/NginxProxyManager/nginx-proxy-manager",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 33621,
+        "forks": 3826,
+        "diskUsageKb": 22676,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "gitroomhq-postiz-app",
+      "repository": "https://github.com/gitroomhq/postiz-app.git",
+      "commit": "ab3b1edb866486732cfa559cd47f8649bb1abd2f",
+      "metadata": {
+        "nameWithOwner": "gitroomhq/postiz-app",
+        "url": "https://github.com/gitroomhq/postiz-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 33456,
+        "forks": 6235,
+        "diskUsageKb": 47647,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "mckaywrigley-chatbot-ui",
+      "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+      "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8",
+      "metadata": {
+        "nameWithOwner": "mckaywrigley/chatbot-ui",
+        "url": "https://github.com/mckaywrigley/chatbot-ui",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 33297,
+        "forks": 9436,
+        "diskUsageKb": 3644,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "pear-devs-pear-desktop",
+      "repository": "https://github.com/pear-devs/pear-desktop.git",
+      "commit": "ec4cb23c825c50269ff9513bada7dfe805083bae",
+      "metadata": {
+        "nameWithOwner": "pear-devs/pear-desktop",
+        "url": "https://github.com/pear-devs/pear-desktop",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 32747,
+        "forks": 1913,
+        "diskUsageKb": 23730,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "floating-ui-floating-ui",
+      "repository": "https://github.com/floating-ui/floating-ui.git",
+      "commit": "12d94738472e922e1b3fa31b02b2b61b9ed77e6a",
+      "metadata": {
+        "nameWithOwner": "floating-ui/floating-ui",
+        "url": "https://github.com/floating-ui/floating-ui",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 32667,
+        "forks": 1685,
+        "diskUsageKb": 42026,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vercel-swr",
+      "repository": "https://github.com/vercel/swr.git",
+      "commit": "fc7ac116b2a2bfdfa43ec8b08753a77d6c3de93e",
+      "metadata": {
+        "nameWithOwner": "vercel/swr",
+        "url": "https://github.com/vercel/swr",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 32431,
+        "forks": 1365,
+        "diskUsageKb": 8372,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "linshenkx-prompt-optimizer",
+      "repository": "https://github.com/linshenkx/prompt-optimizer.git",
+      "commit": "0c3679511d5c61dcdbb92777e62f315f16d7d378",
+      "metadata": {
+        "nameWithOwner": "linshenkx/prompt-optimizer",
+        "url": "https://github.com/linshenkx/prompt-optimizer",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 32287,
+        "forks": 3774,
+        "diskUsageKb": 45057,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "yeachan-heo-oh-my-codex",
+      "repository": "https://github.com/Yeachan-Heo/oh-my-codex.git",
+      "commit": "5319c3d0388b09ad7036e6e3858afd959cfe0eea",
+      "metadata": {
+        "nameWithOwner": "Yeachan-Heo/oh-my-codex",
+        "url": "https://github.com/Yeachan-Heo/oh-my-codex",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 32089,
+        "forks": 2485,
+        "diskUsageKb": 24336,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "codex-team-editor-js",
+      "repository": "https://github.com/codex-team/editor.js.git",
+      "commit": "4ea9eb389847181ceb757735f8bd45cc8c2f1673",
+      "metadata": {
+        "nameWithOwner": "codex-team/editor.js",
+        "url": "https://github.com/codex-team/editor.js",
+        "defaultBranch": "next",
+        "primaryLanguage": "TypeScript",
+        "stars": 31849,
+        "forks": 2239,
+        "diskUsageKb": 20676,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "refined-github-refined-github",
+      "repository": "https://github.com/refined-github/refined-github.git",
+      "commit": "c3e947ce4b844c49f156c45aae71386a2e756fde",
+      "metadata": {
+        "nameWithOwner": "refined-github/refined-github",
+        "url": "https://github.com/refined-github/refined-github",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 31724,
+        "forks": 1820,
+        "diskUsageKb": 28521,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ianstormtaylor-slate",
+      "repository": "https://github.com/ianstormtaylor/slate.git",
+      "commit": "2b7d9b0bd0118e7ce9b9adeac748de8a3bbe390c",
+      "metadata": {
+        "nameWithOwner": "ianstormtaylor/slate",
+        "url": "https://github.com/ianstormtaylor/slate",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 31722,
+        "forks": 3316,
+        "diskUsageKb": 26291,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "reactivex-rxjs",
+      "repository": "https://github.com/ReactiveX/rxjs.git",
+      "commit": "c15b37f81ba5f5abea8c872b0189a70b150df4cb",
+      "metadata": {
+        "nameWithOwner": "ReactiveX/rxjs",
+        "url": "https://github.com/ReactiveX/rxjs",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 31692,
+        "forks": 2992,
+        "diskUsageKb": 49357,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "pmndrs-react-three-fiber",
+      "repository": "https://github.com/pmndrs/react-three-fiber.git",
+      "commit": "7dfaeaaab270ebef2b176e8bcaa5819702c34794",
+      "metadata": {
+        "nameWithOwner": "pmndrs/react-three-fiber",
+        "url": "https://github.com/pmndrs/react-three-fiber",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 31460,
+        "forks": 1893,
+        "diskUsageKb": 28241,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "honojs-hono",
+      "repository": "https://github.com/honojs/hono.git",
+      "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d",
+      "metadata": {
+        "nameWithOwner": "honojs/hono",
+        "url": "https://github.com/honojs/hono",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 31388,
+        "forks": 1171,
+        "diskUsageKb": 9068,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "shardeum-shardeum",
+      "repository": "https://github.com/shardeum/shardeum.git",
+      "commit": "0c454caf067f7b896569eabdd5f47cb8b61738b3",
+      "metadata": {
+        "nameWithOwner": "shardeum/shardeum",
+        "url": "https://github.com/shardeum/shardeum",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 31343,
+        "forks": 703,
+        "diskUsageKb": 29293,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "cheeriojs-cheerio",
+      "repository": "https://github.com/cheeriojs/cheerio.git",
+      "commit": "d3cf80ca323f2923fba572e12425da0a4f233281",
+      "metadata": {
+        "nameWithOwner": "cheeriojs/cheerio",
+        "url": "https://github.com/cheeriojs/cheerio",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 30424,
+        "forks": 1702,
+        "diskUsageKb": 21329,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nanocoai-nanoclaw",
+      "repository": "https://github.com/nanocoai/nanoclaw.git",
+      "commit": "082f5c7ea99342fcb324ab78baacb0c4e6894029",
+      "metadata": {
+        "nameWithOwner": "nanocoai/nanoclaw",
+        "url": "https://github.com/nanocoai/nanoclaw",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 30271,
+        "forks": 12878,
+        "diskUsageKb": 20180,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "gitlawb-openclaude",
+      "repository": "https://github.com/Gitlawb/openclaude.git",
+      "commit": "0effa0f42b6dbc6a4800e19f4b2d8d588269906b",
+      "metadata": {
+        "nameWithOwner": "Gitlawb/openclaude",
+        "url": "https://github.com/Gitlawb/openclaude",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 30114,
+        "forks": 8866,
+        "diskUsageKb": 30783,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "t3-oss-create-t3-app",
+      "repository": "https://github.com/t3-oss/create-t3-app.git",
+      "commit": "4709861f7e67a15564c0460c13e7b4b6cfcae40d",
+      "metadata": {
+        "nameWithOwner": "t3-oss/create-t3-app",
+        "url": "https://github.com/t3-oss/create-t3-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 29044,
+        "forks": 1526,
+        "diskUsageKb": 8482,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "postcss-postcss",
+      "repository": "https://github.com/postcss/postcss.git",
+      "commit": "5bfc3b9e7463936fdd4898f92dd43c358bfdef62",
+      "metadata": {
+        "nameWithOwner": "postcss/postcss",
+        "url": "https://github.com/postcss/postcss",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 28974,
+        "forks": 1598,
+        "diskUsageKb": 11249,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tailwindlabs-headlessui",
+      "repository": "https://github.com/tailwindlabs/headlessui.git",
+      "commit": "eea57cf46fd6767ed1059012f7073b88eb159fba",
+      "metadata": {
+        "nameWithOwner": "tailwindlabs/headlessui",
+        "url": "https://github.com/tailwindlabs/headlessui",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 28672,
+        "forks": 1199,
+        "diskUsageKb": 7103,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jcodesmore-ai-website-cloner-template",
+      "repository": "https://github.com/JCodesMore/ai-website-cloner-template.git",
+      "commit": "58e00d5369181dc0b84b45a2a55e6f64a017f59b",
+      "metadata": {
+        "nameWithOwner": "JCodesMore/ai-website-cloner-template",
+        "url": "https://github.com/JCodesMore/ai-website-cloner-template",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 28609,
+        "forks": 4112,
+        "diskUsageKb": 836,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "mobxjs-mobx",
+      "repository": "https://github.com/mobxjs/mobx.git",
+      "commit": "825244a92e0005174ec103f88aa6682248b1298e",
+      "metadata": {
+        "nameWithOwner": "mobxjs/mobx",
+        "url": "https://github.com/mobxjs/mobx",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 28203,
+        "forks": 1799,
+        "diskUsageKb": 22948,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tanstack-table",
+      "repository": "https://github.com/TanStack/table.git",
+      "commit": "209699ff77b581d2b544d10c3d0d8b46c2398c0a",
+      "metadata": {
+        "nameWithOwner": "TanStack/table",
+        "url": "https://github.com/TanStack/table",
+        "defaultBranch": "beta",
+        "primaryLanguage": "TypeScript",
+        "stars": 28193,
+        "forks": 3543,
+        "diskUsageKb": 45438,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jedwatson-react-select",
+      "repository": "https://github.com/JedWatson/react-select.git",
+      "commit": "4b6948078684bee394e09dd8e7cdc2d7f89e0fad",
+      "metadata": {
+        "nameWithOwner": "JedWatson/react-select",
+        "url": "https://github.com/JedWatson/react-select",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 28034,
+        "forks": 4116,
+        "diskUsageKb": 19377,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tobi-qmd",
+      "repository": "https://github.com/tobi/qmd.git",
+      "commit": "e428df76bc0274d9e93eb7ca3e95673315c42e90",
+      "metadata": {
+        "nameWithOwner": "tobi/qmd",
+        "url": "https://github.com/tobi/qmd",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 27998,
+        "forks": 1739,
+        "diskUsageKb": 8201,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "firecrawl-open-lovable",
+      "repository": "https://github.com/firecrawl/open-lovable.git",
+      "commit": "69bd93bae7a9c97ef989eb70aabe6797fb3dac89",
+      "metadata": {
+        "nameWithOwner": "firecrawl/open-lovable",
+        "url": "https://github.com/firecrawl/open-lovable",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 27933,
+        "forks": 5315,
+        "diskUsageKb": 1233,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "fingerprintjs-fingerprintjs",
+      "repository": "https://github.com/fingerprintjs/fingerprintjs.git",
+      "commit": "feab7913fbb536466bab72b1795d27ec68423003",
+      "metadata": {
+        "nameWithOwner": "fingerprintjs/fingerprintjs",
+        "url": "https://github.com/fingerprintjs/fingerprintjs",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 27886,
+        "forks": 2581,
+        "diskUsageKb": 4104,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "virattt-dexter",
+      "repository": "https://github.com/virattt/dexter.git",
+      "commit": "823052ed687a6f3ef0e48b5e7025c73e86d95775",
+      "metadata": {
+        "nameWithOwner": "virattt/dexter",
+        "url": "https://github.com/virattt/dexter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 27404,
+        "forks": 3404,
+        "diskUsageKb": 1240,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "yamadashy-repomix",
+      "repository": "https://github.com/yamadashy/repomix.git",
+      "commit": "71ba866e272054e74ed7b26f5db897d2489fb3c2",
+      "metadata": {
+        "nameWithOwner": "yamadashy/repomix",
+        "url": "https://github.com/yamadashy/repomix",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 27201,
+        "forks": 1436,
+        "diskUsageKb": 27278,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "alibaba-page-agent",
+      "repository": "https://github.com/alibaba/page-agent.git",
+      "commit": "da1db959558dcd49a6c489e76a23accfbda7b156",
+      "metadata": {
+        "nameWithOwner": "alibaba/page-agent",
+        "url": "https://github.com/alibaba/page-agent",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 26970,
+        "forks": 2359,
+        "diskUsageKb": 3279,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "molunerfinn-picgo",
+      "repository": "https://github.com/Molunerfinn/PicGo.git",
+      "commit": "e410afa9bdf87223b035c69e721548eab97112cb",
+      "metadata": {
+        "nameWithOwner": "Molunerfinn/PicGo",
+        "url": "https://github.com/Molunerfinn/PicGo",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 26918,
+        "forks": 2329,
+        "diskUsageKb": 7233,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vercel-labs-skills",
+      "repository": "https://github.com/vercel-labs/skills.git",
+      "commit": "777599e1159e401b11ce4c8a57c20f09a8f1596e",
+      "metadata": {
+        "nameWithOwner": "vercel-labs/skills",
+        "url": "https://github.com/vercel-labs/skills",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 26491,
+        "forks": 2226,
+        "diskUsageKb": 984,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "wg-easy-wg-easy",
+      "repository": "https://github.com/wg-easy/wg-easy.git",
+      "commit": "78b283849895b35ad45c6f83fa01228c0f1a6774",
+      "metadata": {
+        "nameWithOwner": "wg-easy/wg-easy",
+        "url": "https://github.com/wg-easy/wg-easy",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 26449,
+        "forks": 2521,
+        "diskUsageKb": 9522,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nilbuild-driver-js",
+      "repository": "https://github.com/nilbuild/driver.js.git",
+      "commit": "ccc94cb25a6602d4922d935c366e67e510cc0f27",
+      "metadata": {
+        "nameWithOwner": "nilbuild/driver.js",
+        "url": "https://github.com/nilbuild/driver.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 26301,
+        "forks": 1184,
+        "diskUsageKb": 8103,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "google-labs-code-design-md",
+      "repository": "https://github.com/google-labs-code/design.md.git",
+      "commit": "bde692f2bc92ef7fdd0cf277b2704ab074b70efd",
+      "metadata": {
+        "nameWithOwner": "google-labs-code/design.md",
+        "url": "https://github.com/google-labs-code/design.md",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 26031,
+        "forks": 2079,
+        "diskUsageKb": 226,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "maotoumao-musicfree",
+      "repository": "https://github.com/maotoumao/MusicFree.git",
+      "commit": "d118b18b3d0c904400f7eea7bf99c0ceec6c1aee",
+      "metadata": {
+        "nameWithOwner": "maotoumao/MusicFree",
+        "url": "https://github.com/maotoumao/MusicFree",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 25616,
+        "forks": 1813,
+        "diskUsageKb": 22955,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "mihomo-party-org-clash-party",
+      "repository": "https://github.com/mihomo-party-org/clash-party.git",
+      "commit": "b06667c6d7f5a178c9236bac6eebf8d217231c74",
+      "metadata": {
+        "nameWithOwner": "mihomo-party-org/clash-party",
+        "url": "https://github.com/mihomo-party-org/clash-party",
+        "defaultBranch": "smart_core",
+        "primaryLanguage": "TypeScript",
+        "stars": 25500,
+        "forks": 2008,
+        "diskUsageKb": 18140,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "homebridge-homebridge",
+      "repository": "https://github.com/homebridge/homebridge.git",
+      "commit": "e40e64bab4decb4cee7d3bc3c0c9a6538f3714dc",
+      "metadata": {
+        "nameWithOwner": "homebridge/homebridge",
+        "url": "https://github.com/homebridge/homebridge",
+        "defaultBranch": "latest",
+        "primaryLanguage": "TypeScript",
+        "stars": 25433,
+        "forks": 2006,
+        "diskUsageKb": 4908,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "rohitg00-agentmemory",
+      "repository": "https://github.com/rohitg00/agentmemory.git",
+      "commit": "93ae9bc04f3ab5042f982aaadf11f1e3f5137531",
+      "metadata": {
+        "nameWithOwner": "rohitg00/agentmemory",
+        "url": "https://github.com/rohitg00/agentmemory",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 25311,
+        "forks": 2098,
+        "diskUsageKb": 24712,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "withfig-autocomplete",
+      "repository": "https://github.com/withfig/autocomplete.git",
+      "commit": "aef52acff84c45edde61ae610cc2c964802b9a38",
+      "metadata": {
+        "nameWithOwner": "withfig/autocomplete",
+        "url": "https://github.com/withfig/autocomplete",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 25192,
+        "forks": 5447,
+        "diskUsageKb": 38860,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "nextai-translator-nextai-translator",
+      "repository": "https://github.com/nextai-translator/nextai-translator.git",
+      "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0",
+      "metadata": {
+        "nameWithOwner": "nextai-translator/nextai-translator",
+        "url": "https://github.com/nextai-translator/nextai-translator",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24942,
+        "forks": 1847,
+        "diskUsageKb": 24080,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "toon-format-toon",
+      "repository": "https://github.com/toon-format/toon.git",
+      "commit": "352a5b017d190cb01d6fc70e18fcaf06f9bbc6e5",
+      "metadata": {
+        "nameWithOwner": "toon-format/toon",
+        "url": "https://github.com/toon-format/toon",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24900,
+        "forks": 1107,
+        "diskUsageKb": 2252,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vuejs-devtools-v6",
+      "repository": "https://github.com/vuejs/devtools-v6.git",
+      "commit": "dd2ab5d4275187cbd81952a2a3d53c335643c1f4",
+      "metadata": {
+        "nameWithOwner": "vuejs/devtools-v6",
+        "url": "https://github.com/vuejs/devtools-v6",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24711,
+        "forks": 4131,
+        "diskUsageKb": 14716,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "humanlayer-12-factor-agents",
+      "repository": "https://github.com/humanlayer/12-factor-agents.git",
+      "commit": "d20c728368bf9c189d6d7aab704744decb6ec0cc",
+      "metadata": {
+        "nameWithOwner": "humanlayer/12-factor-agents",
+        "url": "https://github.com/humanlayer/12-factor-agents",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24382,
+        "forks": 1849,
+        "diskUsageKb": 45481,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "rahuldkjain-github-profile-readme-generator",
+      "repository": "https://github.com/rahuldkjain/github-profile-readme-generator.git",
+      "commit": "5ae90bfcbd7ab2f69809b094601f7975c32ae077",
+      "metadata": {
+        "nameWithOwner": "rahuldkjain/github-profile-readme-generator",
+        "url": "https://github.com/rahuldkjain/github-profile-readme-generator",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24352,
+        "forks": 8371,
+        "diskUsageKb": 18580,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "electron-react-boilerplate-electron-react-boilerplate",
+      "repository": "https://github.com/electron-react-boilerplate/electron-react-boilerplate.git",
+      "commit": "484a66bda78ea3ead4b693ab9dca3e96baf4fdcc",
+      "metadata": {
+        "nameWithOwner": "electron-react-boilerplate/electron-react-boilerplate",
+        "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24253,
+        "forks": 3980,
+        "diskUsageKb": 17503,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "felixrieseberg-windows95",
+      "repository": "https://github.com/felixrieseberg/windows95.git",
+      "commit": "051065e5ae815203a0a9038e01eefdf3c10519f1",
+      "metadata": {
+        "nameWithOwner": "felixrieseberg/windows95",
+        "url": "https://github.com/felixrieseberg/windows95",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 24188,
+        "forks": 1354,
+        "diskUsageKb": 6187,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "louislam-dockge",
+      "repository": "https://github.com/louislam/dockge.git",
+      "commit": "f809ae192b571944ad773e9866d3e67064ae8043",
+      "metadata": {
+        "nameWithOwner": "louislam/dockge",
+        "url": "https://github.com/louislam/dockge",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 23824,
+        "forks": 788,
+        "diskUsageKb": 1270,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jimliu-baoyu-skills",
+      "repository": "https://github.com/JimLiu/baoyu-skills.git",
+      "commit": "6b7a2e417500561a5ecdd0b168332f4142584617",
+      "metadata": {
+        "nameWithOwner": "JimLiu/baoyu-skills",
+        "url": "https://github.com/JimLiu/baoyu-skills",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 23804,
+        "forks": 2672,
+        "diskUsageKb": 35616,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jquense-yup",
+      "repository": "https://github.com/jquense/yup.git",
+      "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01",
+      "metadata": {
+        "nameWithOwner": "jquense/yup",
+        "url": "https://github.com/jquense/yup",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 23674,
+        "forks": 943,
+        "diskUsageKb": 4523,
+        "selectionQuery": "typescript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "affaan-m-ecc",
+      "repository": "https://github.com/affaan-m/ECC.git",
+      "commit": "754b8dd76ca885b764ec22f476664377aa46b6cd",
+      "metadata": {
+        "nameWithOwner": "affaan-m/ECC",
+        "url": "https://github.com/affaan-m/ECC",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 230775,
+        "forks": 35212,
+        "diskUsageKb": 39743,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "trekhleb-javascript-algorithms",
+      "repository": "https://github.com/trekhleb/javascript-algorithms.git",
+      "commit": "0f52fbaced5d33041a5a834f72f880a9262bcb82",
+      "metadata": {
+        "nameWithOwner": "trekhleb/javascript-algorithms",
+        "url": "https://github.com/trekhleb/javascript-algorithms",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 196267,
+        "forks": 31045,
+        "diskUsageKb": 14956,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "airbnb-javascript",
+      "repository": "https://github.com/airbnb/javascript.git",
+      "commit": "8ed19247bef145e3cc41b24a02dd1fe6d9b5e681",
+      "metadata": {
+        "nameWithOwner": "airbnb/javascript",
+        "url": "https://github.com/airbnb/javascript",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 148078,
+        "forks": 26623,
+        "diskUsageKb": 3738,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "axios-axios",
+      "repository": "https://github.com/axios/axios.git",
+      "commit": "a092bae50d1884782151b2fcea12974d6da6e376",
+      "metadata": {
+        "nameWithOwner": "axios/axios",
+        "url": "https://github.com/axios/axios",
+        "defaultBranch": "v1.x",
+        "primaryLanguage": "JavaScript",
+        "stars": 109118,
+        "forks": 11755,
+        "diskUsageKb": 27683,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "react-create-react-app",
+      "repository": "https://github.com/react/create-react-app.git",
+      "commit": "6254386531d263688ccfa542d0e628fbc0de0b28",
+      "metadata": {
+        "nameWithOwner": "react/create-react-app",
+        "url": "https://github.com/react/create-react-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 103307,
+        "forks": 26952,
+        "diskUsageKb": 25186,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ryanmcdermott-clean-code-javascript",
+      "repository": "https://github.com/ryanmcdermott/clean-code-javascript.git",
+      "commit": "5311f64b03fc0c2450ab17a45ee9818669c8b9b5",
+      "metadata": {
+        "nameWithOwner": "ryanmcdermott/clean-code-javascript",
+        "url": "https://github.com/ryanmcdermott/clean-code-javascript",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 94711,
+        "forks": 12506,
+        "diskUsageKb": 520,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "juliusbrussee-caveman",
+      "repository": "https://github.com/JuliusBrussee/caveman.git",
+      "commit": "0d95a81d35a9f2d123a5e9430d1cfc43d55f1bb0",
+      "metadata": {
+        "nameWithOwner": "JuliusBrussee/caveman",
+        "url": "https://github.com/JuliusBrussee/caveman",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 90438,
+        "forks": 5116,
+        "diskUsageKb": 2809,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "louislam-uptime-kuma",
+      "repository": "https://github.com/louislam/uptime-kuma.git",
+      "commit": "d3463870af879906f26466bad171fcbeba56c9e8",
+      "metadata": {
+        "nameWithOwner": "louislam/uptime-kuma",
+        "url": "https://github.com/louislam/uptime-kuma",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 89237,
+        "forks": 8134,
+        "diskUsageKb": 38003,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "dietrichgebert-ponytail",
+      "repository": "https://github.com/DietrichGebert/ponytail.git",
+      "commit": "16f29800fd2681bdf24f3eb4ccffe38be3baec6b",
+      "metadata": {
+        "nameWithOwner": "DietrichGebert/ponytail",
+        "url": "https://github.com/DietrichGebert/ponytail",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 85372,
+        "forks": 4643,
+        "diskUsageKb": 2253,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "anuraghazra-github-readme-stats",
+      "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+      "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2",
+      "metadata": {
+        "nameWithOwner": "anuraghazra/github-readme-stats",
+        "url": "https://github.com/anuraghazra/github-readme-stats",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 79794,
+        "forks": 35306,
+        "diskUsageKb": 7741,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "addyosmani-agent-skills",
+      "repository": "https://github.com/addyosmani/agent-skills.git",
+      "commit": "06300e258ef62cdbfbc9b1615ac5b4f58bee05ac",
+      "metadata": {
+        "nameWithOwner": "addyosmani/agent-skills",
+        "url": "https://github.com/addyosmani/agent-skills",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 79058,
+        "forks": 8502,
+        "diskUsageKb": 673,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "typicode-json-server",
+      "repository": "https://github.com/typicode/json-server.git",
+      "commit": "89a34a44b7a6a5311dc84f3b8a1b8b45c0905aea",
+      "metadata": {
+        "nameWithOwner": "typicode/json-server",
+        "url": "https://github.com/typicode/json-server",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 75653,
+        "forks": 7267,
+        "diskUsageKb": 4258,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "hakimel-reveal-js",
+      "repository": "https://github.com/hakimel/reveal.js.git",
+      "commit": "a3b940695648aa1c5b0680bc9a5b905cf43020e5",
+      "metadata": {
+        "nameWithOwner": "hakimel/reveal.js",
+        "url": "https://github.com/hakimel/reveal.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 71963,
+        "forks": 16890,
+        "diskUsageKb": 34577,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "expressjs-express",
+      "repository": "https://github.com/expressjs/express.git",
+      "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4",
+      "metadata": {
+        "nameWithOwner": "expressjs/express",
+        "url": "https://github.com/expressjs/express",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 69223,
+        "forks": 24237,
+        "diskUsageKb": 9827,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "chartjs-chart-js",
+      "repository": "https://github.com/chartjs/Chart.js.git",
+      "commit": "cb02e1d207bd4c4c40b20c259017f85f26f1e30a",
+      "metadata": {
+        "nameWithOwner": "chartjs/Chart.js",
+        "url": "https://github.com/chartjs/Chart.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 67589,
+        "forks": 11942,
+        "diskUsageKb": 43590,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "leonardomso-33-js-concepts",
+      "repository": "https://github.com/leonardomso/33-js-concepts.git",
+      "commit": "16d0d95c02b19df6a8c841f1a0012d7b7367a340",
+      "metadata": {
+        "nameWithOwner": "leonardomso/33-js-concepts",
+        "url": "https://github.com/leonardomso/33-js-concepts",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 66494,
+        "forks": 9155,
+        "diskUsageKb": 2906,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "leonxlnx-taste-skill",
+      "repository": "https://github.com/Leonxlnx/taste-skill.git",
+      "commit": "7c397f22d3af6f2b3f1925eb147d8e8801086151",
+      "metadata": {
+        "nameWithOwner": "Leonxlnx/taste-skill",
+        "url": "https://github.com/Leonxlnx/taste-skill",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 64751,
+        "forks": 4460,
+        "diskUsageKb": 4863,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "resume-resume-github-com",
+      "repository": "https://github.com/resume/resume.github.com.git",
+      "commit": "f5990756495bfd6d86495733bfb238c96771cbbf",
+      "metadata": {
+        "nameWithOwner": "resume/resume.github.com",
+        "url": "https://github.com/resume/resume.github.com",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 62884,
+        "forks": 1369,
+        "diskUsageKb": 411,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jgraph-drawio-desktop",
+      "repository": "https://github.com/jgraph/drawio-desktop.git",
+      "commit": "ca766542c939023d53b781cd05b3e41066416b38",
+      "metadata": {
+        "nameWithOwner": "jgraph/drawio-desktop",
+        "url": "https://github.com/jgraph/drawio-desktop",
+        "defaultBranch": "dev",
+        "primaryLanguage": "JavaScript",
+        "stars": 62157,
+        "forks": 5727,
+        "diskUsageKb": 3336,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "lodash-lodash",
+      "repository": "https://github.com/lodash/lodash.git",
+      "commit": "a666ba591064c8011988275790ad7d625279f09c",
+      "metadata": {
+        "nameWithOwner": "lodash/lodash",
+        "url": "https://github.com/lodash/lodash",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 61241,
+        "forks": 7182,
+        "diskUsageKb": 49920,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "santifer-career-ops",
+      "repository": "https://github.com/santifer/career-ops.git",
+      "commit": "1957e04a86f67b99396711995c81425d0f50d1f7",
+      "metadata": {
+        "nameWithOwner": "santifer/career-ops",
+        "url": "https://github.com/santifer/career-ops",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 60454,
+        "forks": 11897,
+        "diskUsageKb": 38721,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "adam-p-markdown-here",
+      "repository": "https://github.com/adam-p/markdown-here.git",
+      "commit": "e00d005299922198aef968e0cd42b275525c20a6",
+      "metadata": {
+        "nameWithOwner": "adam-p/markdown-here",
+        "url": "https://github.com/adam-p/markdown-here",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 60233,
+        "forks": 11037,
+        "diskUsageKb": 17985,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jquery-jquery",
+      "repository": "https://github.com/jquery/jquery.git",
+      "commit": "7e1efd77598a527c67d2a674a1259787f7e441fd",
+      "metadata": {
+        "nameWithOwner": "jquery/jquery",
+        "url": "https://github.com/jquery/jquery",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 59805,
+        "forks": 20392,
+        "diskUsageKb": 35951,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "asgeirtj-system-prompts-leaks",
+      "repository": "https://github.com/asgeirtj/system_prompts_leaks.git",
+      "commit": "78823866a27593dfd13e4082b157e1db9762f406",
+      "metadata": {
+        "nameWithOwner": "asgeirtj/system_prompts_leaks",
+        "url": "https://github.com/asgeirtj/system_prompts_leaks",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 58747,
+        "forks": 9594,
+        "diskUsageKb": 8371,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "h5bp-html5-boilerplate",
+      "repository": "https://github.com/h5bp/html5-boilerplate.git",
+      "commit": "b7e31d67f4cf83e23d51f4decc73618bf8bd77ba",
+      "metadata": {
+        "nameWithOwner": "h5bp/html5-boilerplate",
+        "url": "https://github.com/h5bp/html5-boilerplate",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 57558,
+        "forks": 12279,
+        "diskUsageKb": 22851,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "poteto-hiring-without-whiteboards",
+      "repository": "https://github.com/poteto/hiring-without-whiteboards.git",
+      "commit": "b3a55b08dafbd3ab414548f0796a809b0b2bc96d",
+      "metadata": {
+        "nameWithOwner": "poteto/hiring-without-whiteboards",
+        "url": "https://github.com/poteto/hiring-without-whiteboards",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 51138,
+        "forks": 3905,
+        "diskUsageKb": 3648,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "bmad-code-org-bmad-method",
+      "repository": "https://github.com/bmad-code-org/BMAD-METHOD.git",
+      "commit": "717479bc3f50f38119fd958b9e577a8bde2e0184",
+      "metadata": {
+        "nameWithOwner": "bmad-code-org/BMAD-METHOD",
+        "url": "https://github.com/bmad-code-org/BMAD-METHOD",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 50746,
+        "forks": 5837,
+        "diskUsageKb": 47001,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "narkoz-hacker-scripts",
+      "repository": "https://github.com/NARKOZ/hacker-scripts.git",
+      "commit": "b14a0a89bdf743c63ca4cc9cbcd866e050d7b3b0",
+      "metadata": {
+        "nameWithOwner": "NARKOZ/hacker-scripts",
+        "url": "https://github.com/NARKOZ/hacker-scripts",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 49771,
+        "forks": 6661,
+        "diskUsageKb": 105,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "iamkun-dayjs",
+      "repository": "https://github.com/iamkun/dayjs.git",
+      "commit": "98364bcebc047529345cc8c2bbcc44a6a8c18e79",
+      "metadata": {
+        "nameWithOwner": "iamkun/dayjs",
+        "url": "https://github.com/iamkun/dayjs",
+        "defaultBranch": "dev",
+        "primaryLanguage": "JavaScript",
+        "stars": 48663,
+        "forks": 2452,
+        "diskUsageKb": 6152,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "algorithm-visualizer-algorithm-visualizer",
+      "repository": "https://github.com/algorithm-visualizer/algorithm-visualizer.git",
+      "commit": "18de2edf6b629e843ee4bcedfa2208d22b253f0f",
+      "metadata": {
+        "nameWithOwner": "algorithm-visualizer/algorithm-visualizer",
+        "url": "https://github.com/algorithm-visualizer/algorithm-visualizer",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 48648,
+        "forks": 7587,
+        "diskUsageKb": 21182,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "moment-moment",
+      "repository": "https://github.com/moment/moment.git",
+      "commit": "18aba135ab927ffe7f868ee09276979bed6993a6",
+      "metadata": {
+        "nameWithOwner": "moment/moment",
+        "url": "https://github.com/moment/moment",
+        "defaultBranch": "develop",
+        "primaryLanguage": "JavaScript",
+        "stars": 47940,
+        "forks": 6990,
+        "diskUsageKb": 22191,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "lecoupa-awesome-cheatsheets",
+      "repository": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+      "commit": "38f406dc19f556d4633e36d3ae144895fcab138f",
+      "metadata": {
+        "nameWithOwner": "LeCoupa/awesome-cheatsheets",
+        "url": "https://github.com/LeCoupa/awesome-cheatsheets",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 46207,
+        "forks": 6705,
+        "diskUsageKb": 8889,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "google-zx",
+      "repository": "https://github.com/google/zx.git",
+      "commit": "00a2c484e219c2e84bfc3a199febf7fbce2cfbf4",
+      "metadata": {
+        "nameWithOwner": "google/zx",
+        "url": "https://github.com/google/zx",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 45606,
+        "forks": 1274,
+        "diskUsageKb": 3960,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "sudheerj-reactjs-interview-questions",
+      "repository": "https://github.com/sudheerj/reactjs-interview-questions.git",
+      "commit": "5f67417fb84b26014e5047cfab5ba1abc2abd174",
+      "metadata": {
+        "nameWithOwner": "sudheerj/reactjs-interview-questions",
+        "url": "https://github.com/sudheerj/reactjs-interview-questions",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 44697,
+        "forks": 10362,
+        "diskUsageKb": 6522,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "unitech-pm2",
+      "repository": "https://github.com/Unitech/pm2.git",
+      "commit": "31adee8048dbbc1ee36a7df7cdbcaca2559708df",
+      "metadata": {
+        "nameWithOwner": "Unitech/pm2",
+        "url": "https://github.com/Unitech/pm2",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 43236,
+        "forks": 2710,
+        "diskUsageKb": 14097,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "goabstract-awesome-design-tools",
+      "repository": "https://github.com/goabstract/Awesome-Design-Tools.git",
+      "commit": "dc60e63c248c44acb42f09fb0c985b77b5fe4bf5",
+      "metadata": {
+        "nameWithOwner": "goabstract/Awesome-Design-Tools",
+        "url": "https://github.com/goabstract/Awesome-Design-Tools",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 40593,
+        "forks": 2298,
+        "diskUsageKb": 19220,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "remoteintech-remote-jobs",
+      "repository": "https://github.com/remoteintech/remote-jobs.git",
+      "commit": "917c6a705a971a24fb875be68f3020fbab330ab6",
+      "metadata": {
+        "nameWithOwner": "remoteintech/remote-jobs",
+        "url": "https://github.com/remoteintech/remote-jobs",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 40549,
+        "forks": 3941,
+        "diskUsageKb": 13804,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "coreyhaines31-marketingskills",
+      "repository": "https://github.com/coreyhaines31/marketingskills.git",
+      "commit": "67264763cb107d61749f418d081c56e5bcbc0209",
+      "metadata": {
+        "nameWithOwner": "coreyhaines31/marketingskills",
+        "url": "https://github.com/coreyhaines31/marketingskills",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 40490,
+        "forks": 6390,
+        "diskUsageKb": 2594,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "patrickjs-awesome-cursorrules",
+      "repository": "https://github.com/PatrickJS/awesome-cursorrules.git",
+      "commit": "b044f956f021b6e8877f16781bcfc466a6a120e9",
+      "metadata": {
+        "nameWithOwner": "PatrickJS/awesome-cursorrules",
+        "url": "https://github.com/PatrickJS/awesome-cursorrules",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 40354,
+        "forks": 3446,
+        "diskUsageKb": 2938,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "preactjs-preact",
+      "repository": "https://github.com/preactjs/preact.git",
+      "commit": "7051a371282f728da7533eab27ebbd949274374d",
+      "metadata": {
+        "nameWithOwner": "preactjs/preact",
+        "url": "https://github.com/preactjs/preact",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 38771,
+        "forks": 2043,
+        "diskUsageKb": 19781,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "impress-impress-js",
+      "repository": "https://github.com/impress/impress.js.git",
+      "commit": "c9f6c67457ceee5a011e554f67c447113640777d",
+      "metadata": {
+        "nameWithOwner": "impress/impress.js",
+        "url": "https://github.com/impress/impress.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 38194,
+        "forks": 6582,
+        "diskUsageKb": 4390,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "drawdb-io-drawdb",
+      "repository": "https://github.com/drawdb-io/drawdb.git",
+      "commit": "a85458c6392a160b4aedaa5f5152b9ebcda26bde",
+      "metadata": {
+        "nameWithOwner": "drawdb-io/drawdb",
+        "url": "https://github.com/drawdb-io/drawdb",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 38119,
+        "forks": 3092,
+        "diskUsageKb": 7025,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "denysdovhan-wtfjs",
+      "repository": "https://github.com/denysdovhan/wtfjs.git",
+      "commit": "2c00c4a5759c3d8a37b1237619ea664c16ce90ee",
+      "metadata": {
+        "nameWithOwner": "denysdovhan/wtfjs",
+        "url": "https://github.com/denysdovhan/wtfjs",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 37676,
+        "forks": 2690,
+        "diskUsageKb": 1521,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "markedjs-marked",
+      "repository": "https://github.com/markedjs/marked.git",
+      "commit": "9154f8f3cb2fa136d85b61e1eacc4ef381a3b629",
+      "metadata": {
+        "nameWithOwner": "markedjs/marked",
+        "url": "https://github.com/markedjs/marked",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 36985,
+        "forks": 3555,
+        "diskUsageKb": 10635,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "fastify-fastify",
+      "repository": "https://github.com/fastify/fastify.git",
+      "commit": "6e680c3e8150071be96cba6b30e1d74487559b54",
+      "metadata": {
+        "nameWithOwner": "fastify/fastify",
+        "url": "https://github.com/fastify/fastify",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 36756,
+        "forks": 2836,
+        "diskUsageKb": 10306,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "carbon-app-carbon",
+      "repository": "https://github.com/carbon-app/carbon.git",
+      "commit": "1334429ae63f9a3d052d59ec8c6b158fa5db0943",
+      "metadata": {
+        "nameWithOwner": "carbon-app/carbon",
+        "url": "https://github.com/carbon-app/carbon",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 36062,
+        "forks": 1977,
+        "diskUsageKb": 21055,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "songquanpeng-one-api",
+      "repository": "https://github.com/songquanpeng/one-api.git",
+      "commit": "8df4a2670b98266bd287c698243fff327d9748cf",
+      "metadata": {
+        "nameWithOwner": "songquanpeng/one-api",
+        "url": "https://github.com/songquanpeng/one-api",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 35794,
+        "forks": 6744,
+        "diskUsageKb": 15963,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "koajs-koa",
+      "repository": "https://github.com/koajs/koa.git",
+      "commit": "52d5e8ff5ac79f2479463b53df2999900ae95115",
+      "metadata": {
+        "nameWithOwner": "koajs/koa",
+        "url": "https://github.com/koajs/koa",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 35708,
+        "forks": 3230,
+        "diskUsageKb": 4046,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jondot-awesome-react-native",
+      "repository": "https://github.com/jondot/awesome-react-native.git",
+      "commit": "23100d54f6ef1cbdf56d4983dde8fe97cbe26c76",
+      "metadata": {
+        "nameWithOwner": "jondot/awesome-react-native",
+        "url": "https://github.com/jondot/awesome-react-native",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 35694,
+        "forks": 4021,
+        "diskUsageKb": 5250,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "alvarotrigo-fullpage-js",
+      "repository": "https://github.com/alvarotrigo/fullPage.js.git",
+      "commit": "49f15effa7b195def295a36f872c28153cf9fb00",
+      "metadata": {
+        "nameWithOwner": "alvarotrigo/fullPage.js",
+        "url": "https://github.com/alvarotrigo/fullPage.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 35423,
+        "forks": 7118,
+        "diskUsageKb": 17123,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ryanhanwu-how-to-ask-questions-the-smart-way",
+      "repository": "https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way.git",
+      "commit": "fc6c538e5d833fc16f4ff99a36267c171fb84550",
+      "metadata": {
+        "nameWithOwner": "ryanhanwu/How-To-Ask-Questions-The-Smart-Way",
+        "url": "https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 35394,
+        "forks": 5833,
+        "diskUsageKb": 380,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "sahat-hackathon-starter",
+      "repository": "https://github.com/sahat/hackathon-starter.git",
+      "commit": "0a4453d2fff80f21f083bc842fbeb18f7bedd107",
+      "metadata": {
+        "nameWithOwner": "sahat/hackathon-starter",
+        "url": "https://github.com/sahat/hackathon-starter",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 35232,
+        "forks": 8143,
+        "diskUsageKb": 16961,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "typicode-husky",
+      "repository": "https://github.com/typicode/husky.git",
+      "commit": "3f0023dc10d7003d70f2e31aa56300eab80e76d6",
+      "metadata": {
+        "nameWithOwner": "typicode/husky",
+        "url": "https://github.com/typicode/husky",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 35214,
+        "forks": 1089,
+        "diskUsageKb": 4846,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "qishibo-anotherredisdesktopmanager",
+      "repository": "https://github.com/qishibo/AnotherRedisDesktopManager.git",
+      "commit": "4c2b7a5f1074b619eb11ca19796d896c3a8e7098",
+      "metadata": {
+        "nameWithOwner": "qishibo/AnotherRedisDesktopManager",
+        "url": "https://github.com/qishibo/AnotherRedisDesktopManager",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 34548,
+        "forks": 2714,
+        "diskUsageKb": 5533,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "thealgorithms-javascript",
+      "repository": "https://github.com/TheAlgorithms/JavaScript.git",
+      "commit": "5c39e87a9a31f279c60f830ad74a845e4788a517",
+      "metadata": {
+        "nameWithOwner": "TheAlgorithms/JavaScript",
+        "url": "https://github.com/TheAlgorithms/JavaScript",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 34200,
+        "forks": 5849,
+        "diskUsageKb": 3007,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "zenorocha-clipboard-js",
+      "repository": "https://github.com/zenorocha/clipboard.js.git",
+      "commit": "899378dee9681dcf4cb3d702c23a3f3cd9f473d8",
+      "metadata": {
+        "nameWithOwner": "zenorocha/clipboard.js",
+        "url": "https://github.com/zenorocha/clipboard.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 34131,
+        "forks": 3910,
+        "diskUsageKb": 3631,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "gulpjs-gulp",
+      "repository": "https://github.com/gulpjs/gulp.git",
+      "commit": "61f22dc11bb14234b555253095fa1d224ce0eab1",
+      "metadata": {
+        "nameWithOwner": "gulpjs/gulp",
+        "url": "https://github.com/gulpjs/gulp",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 32957,
+        "forks": 4139,
+        "diskUsageKb": 1117,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "docsifyjs-docsify",
+      "repository": "https://github.com/docsifyjs/docsify.git",
+      "commit": "e6ab47cff0f3d201bb7f2504a5fa46419f4824eb",
+      "metadata": {
+        "nameWithOwner": "docsifyjs/docsify",
+        "url": "https://github.com/docsifyjs/docsify",
+        "defaultBranch": "develop",
+        "primaryLanguage": "JavaScript",
+        "stars": 31389,
+        "forks": 5801,
+        "diskUsageKb": 30892,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "sortablejs-sortable",
+      "repository": "https://github.com/SortableJS/Sortable.git",
+      "commit": "48b626bbc61afbb0f179730c1dd3cca3dcc8b788",
+      "metadata": {
+        "nameWithOwner": "SortableJS/Sortable",
+        "url": "https://github.com/SortableJS/Sortable",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 31159,
+        "forks": 3728,
+        "diskUsageKb": 2775,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "amai-gmbh-ai-expert-roadmap",
+      "repository": "https://github.com/AMAI-GmbH/AI-Expert-Roadmap.git",
+      "commit": "a4c66c2670d9004385ed0faa4fb2a729aa6b18d4",
+      "metadata": {
+        "nameWithOwner": "AMAI-GmbH/AI-Expert-Roadmap",
+        "url": "https://github.com/AMAI-GmbH/AI-Expert-Roadmap",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 31140,
+        "forks": 2579,
+        "diskUsageKb": 414,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ascoders-weekly",
+      "repository": "https://github.com/ascoders/weekly.git",
+      "commit": "9357b24e8b5dc367e67da0bafcd5cb040821bb10",
+      "metadata": {
+        "nameWithOwner": "ascoders/weekly",
+        "url": "https://github.com/ascoders/weekly",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 31035,
+        "forks": 3261,
+        "diskUsageKb": 8812,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "layui-layui",
+      "repository": "https://github.com/layui/layui.git",
+      "commit": "2cfbc45b70ab66cb96f7f51dc4f03dae0b409b2c",
+      "metadata": {
+        "nameWithOwner": "layui/layui",
+        "url": "https://github.com/layui/layui",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 30569,
+        "forks": 7373,
+        "diskUsageKb": 33491,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vincentgarreau-particles-js",
+      "repository": "https://github.com/VincentGarreau/particles.js.git",
+      "commit": "d01286d6dcd61f497d07cc62bd48e692f6508ad5",
+      "metadata": {
+        "nameWithOwner": "VincentGarreau/particles.js",
+        "url": "https://github.com/VincentGarreau/particles.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 30227,
+        "forks": 4825,
+        "diskUsageKb": 158,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vuejs-vue-cli",
+      "repository": "https://github.com/vuejs/vue-cli.git",
+      "commit": "7eb93c169c7520935252e2473387f923ef80d856",
+      "metadata": {
+        "nameWithOwner": "vuejs/vue-cli",
+        "url": "https://github.com/vuejs/vue-cli",
+        "defaultBranch": "dev",
+        "primaryLanguage": "JavaScript",
+        "stars": 29566,
+        "forks": 6253,
+        "diskUsageKb": 31134,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "react-boilerplate-react-boilerplate",
+      "repository": "https://github.com/react-boilerplate/react-boilerplate.git",
+      "commit": "d19099afeff64ecfb09133c06c1cb18c0d40887e",
+      "metadata": {
+        "nameWithOwner": "react-boilerplate/react-boilerplate",
+        "url": "https://github.com/react-boilerplate/react-boilerplate",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 29488,
+        "forks": 6023,
+        "diskUsageKb": 8943,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "elsewhencode-project-guidelines",
+      "repository": "https://github.com/elsewhencode/project-guidelines.git",
+      "commit": "87c9014ec4f96f8469984538ec5c6601e6f09e7e",
+      "metadata": {
+        "nameWithOwner": "elsewhencode/project-guidelines",
+        "url": "https://github.com/elsewhencode/project-guidelines",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 29458,
+        "forks": 3157,
+        "diskUsageKb": 507,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "standard-standard",
+      "repository": "https://github.com/standard/standard.git",
+      "commit": "753309b21bfd7c98e208e3fb45910ffd1bb95409",
+      "metadata": {
+        "nameWithOwner": "standard/standard",
+        "url": "https://github.com/standard/standard",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 29431,
+        "forks": 2304,
+        "diskUsageKb": 3752,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vercel-labs-agent-skills",
+      "repository": "https://github.com/vercel-labs/agent-skills.git",
+      "commit": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "metadata": {
+        "nameWithOwner": "vercel-labs/agent-skills",
+        "url": "https://github.com/vercel-labs/agent-skills",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 29183,
+        "forks": 2621,
+        "diskUsageKb": 11330,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "openai-codex-plugin-cc",
+      "repository": "https://github.com/openai/codex-plugin-cc.git",
+      "commit": "db52e28f4d9ded852ab3942cea316258ae4ef346",
+      "metadata": {
+        "nameWithOwner": "openai/codex-plugin-cc",
+        "url": "https://github.com/openai/codex-plugin-cc",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 29176,
+        "forks": 1846,
+        "diskUsageKb": 158,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "immerjs-immer",
+      "repository": "https://github.com/immerjs/immer.git",
+      "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468",
+      "metadata": {
+        "nameWithOwner": "immerjs/immer",
+        "url": "https://github.com/immerjs/immer",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 28968,
+        "forks": 879,
+        "diskUsageKb": 6954,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "viatsko-awesome-vscode",
+      "repository": "https://github.com/viatsko/awesome-vscode.git",
+      "commit": "9c3bf848287d3967a744e7c057ea49ec9e89b396",
+      "metadata": {
+        "nameWithOwner": "viatsko/awesome-vscode",
+        "url": "https://github.com/viatsko/awesome-vscode",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28870,
+        "forks": 1403,
+        "diskUsageKb": 10962,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "kenwheeler-slick",
+      "repository": "https://github.com/kenwheeler/slick.git",
+      "commit": "49fed670b8917ab260ea5a74da28daaa5da4da9d",
+      "metadata": {
+        "nameWithOwner": "kenwheeler/slick",
+        "url": "https://github.com/kenwheeler/slick",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28567,
+        "forks": 5753,
+        "diskUsageKb": 3767,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jamiebuilds-the-super-tiny-compiler",
+      "repository": "https://github.com/jamiebuilds/the-super-tiny-compiler.git",
+      "commit": "d8d40130459d1537f6117a927947cd46c83182b0",
+      "metadata": {
+        "nameWithOwner": "jamiebuilds/the-super-tiny-compiler",
+        "url": "https://github.com/jamiebuilds/the-super-tiny-compiler",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28554,
+        "forks": 2864,
+        "diskUsageKb": 41,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "vuejs-vuex",
+      "repository": "https://github.com/vuejs/vuex.git",
+      "commit": "bd907467b8392d6671bb115738285ff7f63d0cf6",
+      "metadata": {
+        "nameWithOwner": "vuejs/vuex",
+        "url": "https://github.com/vuejs/vuex",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 28336,
+        "forks": 9446,
+        "diskUsageKb": 16581,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "tj-commander-js",
+      "repository": "https://github.com/tj/commander.js.git",
+      "commit": "ba6d13ddb4243e5913367734f8c159089ffe7834",
+      "metadata": {
+        "nameWithOwner": "tj/commander.js",
+        "url": "https://github.com/tj/commander.js",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28326,
+        "forks": 1761,
+        "diskUsageKb": 3910,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "digitalocean-nginxconfig-io",
+      "repository": "https://github.com/digitalocean/nginxconfig.io.git",
+      "commit": "dd290c0b706b8a8c2f86cfbffaae9c17715b431d",
+      "metadata": {
+        "nameWithOwner": "digitalocean/nginxconfig.io",
+        "url": "https://github.com/digitalocean/nginxconfig.io",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28287,
+        "forks": 2046,
+        "diskUsageKb": 9520,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "caolan-async",
+      "repository": "https://github.com/caolan/async.git",
+      "commit": "03fbed25c728e78b503df4f21e946948d9459cc9",
+      "metadata": {
+        "nameWithOwner": "caolan/async",
+        "url": "https://github.com/caolan/async",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28150,
+        "forks": 2374,
+        "diskUsageKb": 8235,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jashkenas-backbone",
+      "repository": "https://github.com/jashkenas/backbone.git",
+      "commit": "cbeb7e31d95f64dbe92f2202c1131858f905280e",
+      "metadata": {
+        "nameWithOwner": "jashkenas/backbone",
+        "url": "https://github.com/jashkenas/backbone",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 28109,
+        "forks": 5287,
+        "diskUsageKb": 27213,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "michalsnik-aos",
+      "repository": "https://github.com/michalsnik/aos.git",
+      "commit": "329fb34f777034345f4d3f4def4dc3bcc300cc2e",
+      "metadata": {
+        "nameWithOwner": "michalsnik/aos",
+        "url": "https://github.com/michalsnik/aos",
+        "defaultBranch": "next",
+        "primaryLanguage": "JavaScript",
+        "stars": 28070,
+        "forks": 2628,
+        "diskUsageKb": 1465,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "eyaltoledano-claude-task-master",
+      "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+      "commit": "c0c98d367c55296bfe69e65680625b6db437af02",
+      "metadata": {
+        "nameWithOwner": "eyaltoledano/claude-task-master",
+        "url": "https://github.com/eyaltoledano/claude-task-master",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 27866,
+        "forks": 2624,
+        "diskUsageKb": 29288,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "sudheerj-javascript-interview-questions",
+      "repository": "https://github.com/sudheerj/javascript-interview-questions.git",
+      "commit": "997037d44b45d5320626ade1d765eb4341b4ad3f",
+      "metadata": {
+        "nameWithOwner": "sudheerj/javascript-interview-questions",
+        "url": "https://github.com/sudheerj/javascript-interview-questions",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27535,
+        "forks": 7658,
+        "diskUsageKb": 6236,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "asabeneh-30-days-of-react",
+      "repository": "https://github.com/Asabeneh/30-Days-Of-React.git",
+      "commit": "2bdabdf89672241ec22b8e952fd4cd3b5573bb27",
+      "metadata": {
+        "nameWithOwner": "Asabeneh/30-Days-Of-React",
+        "url": "https://github.com/Asabeneh/30-Days-Of-React",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27458,
+        "forks": 7690,
+        "diskUsageKb": 18762,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "advanced-frontend-daily-interview-question",
+      "repository": "https://github.com/Advanced-Frontend/Daily-Interview-Question.git",
+      "commit": "46a268536dc0918c2dd466d1b8421f78f4d99c0d",
+      "metadata": {
+        "nameWithOwner": "Advanced-Frontend/Daily-Interview-Question",
+        "url": "https://github.com/Advanced-Frontend/Daily-Interview-Question",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27412,
+        "forks": 3243,
+        "diskUsageKb": 199,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jashkenas-underscore",
+      "repository": "https://github.com/jashkenas/underscore.git",
+      "commit": "d8f846769ff80dcb437f5b582e640edee8770722",
+      "metadata": {
+        "nameWithOwner": "jashkenas/underscore",
+        "url": "https://github.com/jashkenas/underscore",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27338,
+        "forks": 5439,
+        "diskUsageKb": 7282,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ajaxorg-ace",
+      "repository": "https://github.com/ajaxorg/ace.git",
+      "commit": "de5ca297d4383b2bda12a307ee764336ccf985f8",
+      "metadata": {
+        "nameWithOwner": "ajaxorg/ace",
+        "url": "https://github.com/ajaxorg/ace",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27143,
+        "forks": 5266,
+        "diskUsageKb": 44790,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "bvaughn-react-virtualized",
+      "repository": "https://github.com/bvaughn/react-virtualized.git",
+      "commit": "c737715486f724586aee8870ebea1e9efb7b0bfe",
+      "metadata": {
+        "nameWithOwner": "bvaughn/react-virtualized",
+        "url": "https://github.com/bvaughn/react-virtualized",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 27074,
+        "forks": 3023,
+        "diskUsageKb": 48767,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "ai-nanoid",
+      "repository": "https://github.com/ai/nanoid.git",
+      "commit": "c6246e036ca5e7a1d362c1a80726bab63b767754",
+      "metadata": {
+        "nameWithOwner": "ai/nanoid",
+        "url": "https://github.com/ai/nanoid",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 26884,
+        "forks": 862,
+        "diskUsageKb": 5845,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jackwener-opencli",
+      "repository": "https://github.com/jackwener/OpenCLI.git",
+      "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74",
+      "metadata": {
+        "nameWithOwner": "jackwener/OpenCLI",
+        "url": "https://github.com/jackwener/OpenCLI",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 26873,
+        "forks": 2646,
+        "diskUsageKb": 14336,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "greensock-gsap",
+      "repository": "https://github.com/greensock/GSAP.git",
+      "commit": "13e2b790546426a1a2e0e9b409f3f8dc6d6611f2",
+      "metadata": {
+        "nameWithOwner": "greensock/GSAP",
+        "url": "https://github.com/greensock/GSAP",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 26713,
+        "forks": 2091,
+        "diskUsageKb": 14456,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "philc-vimium",
+      "repository": "https://github.com/philc/vimium.git",
+      "commit": "7067bc768fc1c7ef9310e295c5782149fab73980",
+      "metadata": {
+        "nameWithOwner": "philc/vimium",
+        "url": "https://github.com/philc/vimium",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 26688,
+        "forks": 2596,
+        "diskUsageKb": 6820,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "remy-nodemon",
+      "repository": "https://github.com/remy/nodemon.git",
+      "commit": "f3c24537e68c3e88f5b6afd911b476aef6239560",
+      "metadata": {
+        "nameWithOwner": "remy/nodemon",
+        "url": "https://github.com/remy/nodemon",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 26685,
+        "forks": 1740,
+        "diskUsageKb": 3032,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jarrodwatts-claude-hud",
+      "repository": "https://github.com/jarrodwatts/claude-hud.git",
+      "commit": "10979d16dce075b112b7564bead95c5f236d8a87",
+      "metadata": {
+        "nameWithOwner": "jarrodwatts/claude-hud",
+        "url": "https://github.com/jarrodwatts/claude-hud",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 26551,
+        "forks": 1226,
+        "diskUsageKb": 2281,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "rstacruz-nprogress",
+      "repository": "https://github.com/rstacruz/nprogress.git",
+      "commit": "e1a8b7fb6e059085df5f83c45d3c2308a147ca18",
+      "metadata": {
+        "nameWithOwner": "rstacruz/nprogress",
+        "url": "https://github.com/rstacruz/nprogress",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 26398,
+        "forks": 1773,
+        "diskUsageKb": 722,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "rollup-rollup",
+      "repository": "https://github.com/rollup/rollup.git",
+      "commit": "95c2f026abcf64b125b8107696b369c2692270f5",
+      "metadata": {
+        "nameWithOwner": "rollup/rollup",
+        "url": "https://github.com/rollup/rollup",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 26303,
+        "forks": 1761,
+        "diskUsageKb": 35030,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "haizlin-fe-interview",
+      "repository": "https://github.com/haizlin/fe-interview.git",
+      "commit": "79bab2c2a203705e1201051ae8c80b752a3d439e",
+      "metadata": {
+        "nameWithOwner": "haizlin/fe-interview",
+        "url": "https://github.com/haizlin/fe-interview",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 26254,
+        "forks": 3244,
+        "diskUsageKb": 8068,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "feathericons-feather",
+      "repository": "https://github.com/feathericons/feather.git",
+      "commit": "3dc050d97405062eba78aa57115c0a15c63abdaa",
+      "metadata": {
+        "nameWithOwner": "feathericons/feather",
+        "url": "https://github.com/feathericons/feather",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 25972,
+        "forks": 1279,
+        "diskUsageKb": 16149,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "select2-select2",
+      "repository": "https://github.com/select2/select2.git",
+      "commit": "cc7ba1ebb79d9e816186a4d2defe6a6acdac433c",
+      "metadata": {
+        "nameWithOwner": "select2/select2",
+        "url": "https://github.com/select2/select2",
+        "defaultBranch": "develop",
+        "primaryLanguage": "JavaScript",
+        "stars": 25910,
+        "forks": 6150,
+        "diskUsageKb": 14622,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "jakechampion-fetch",
+      "repository": "https://github.com/JakeChampion/fetch.git",
+      "commit": "ba5cf1ed2e02ebb96fa1e60b4fd2eb04071b60e4",
+      "metadata": {
+        "nameWithOwner": "JakeChampion/fetch",
+        "url": "https://github.com/JakeChampion/fetch",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 25881,
+        "forks": 2819,
+        "diskUsageKb": 581,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "zarazhangrui-frontend-slides",
+      "repository": "https://github.com/zarazhangrui/frontend-slides.git",
+      "commit": "9906a34d640d2111f724544cbc50f7f130569ae1",
+      "metadata": {
+        "nameWithOwner": "zarazhangrui/frontend-slides",
+        "url": "https://github.com/zarazhangrui/frontend-slides",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 25850,
+        "forks": 2102,
+        "diskUsageKb": 582,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    },
+    {
+      "id": "localforage-localforage",
+      "repository": "https://github.com/localForage/localForage.git",
+      "commit": "fb78c77ee583fb727a558c439b5174aca38c5924",
+      "metadata": {
+        "nameWithOwner": "localForage/localForage",
+        "url": "https://github.com/localForage/localForage",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 25789,
+        "forks": 1293,
+        "diskUsageKb": 4858,
+        "selectionQuery": "javascript"
+      },
+      "manifest": {
+        "strategy": "infer"
+      }
+    }
+  ]
+}
