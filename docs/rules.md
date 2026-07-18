@@ -39,7 +39,7 @@
 | `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE` | A cell's public entry path changed |
 | `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE` | A new artifact producer/consumer contract appeared |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Exported public signatures changed beyond formatting/comment noise |
-| `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline HMAC seal is missing or does not match when `CELLFENCE_BASELINE_HMAC_KEY` is configured |
+| `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline seal is missing or does not match when Ed25519 or HMAC baseline verification is configured |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a fail-closed required-rule finding |
 

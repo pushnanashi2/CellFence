@@ -113,7 +113,7 @@ CellFence check failed.
 [error] CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH: parser public symbols grew from 1 to 2
 ```
 
-Editing the manifest authorizes nothing by itself. New cells, broader ownership, new public symbols, new dependency edges, and public signature changes all fail until a human runs `baseline update` and a reviewer accepts the diff. Selected contracts may shrink freely; growth is one-way gated. For high-trust CI, set `CELLFENCE_BASELINE_HMAC_KEY` so `baseline check` can reject hand-edited ratchet files; locked cells require that key. The manifest names the fence, the baseline accepts it, CI enforces it.
+Editing the manifest authorizes nothing by itself. New cells, broader ownership, new public symbols, new dependency edges, and public signature changes all fail until a human runs `baseline update` and a reviewer accepts the diff. Selected contracts may shrink freely; growth is one-way gated. For high-trust CI, sign baselines with `cellfence baseline sign` using an external Ed25519 private key, and verify with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; HMAC remains available only for isolated verifier setups. Locked cells require a configured baseline verifier. The manifest names the fence, the baseline accepts it, CI enforces it.
 
 Details: [docs/ratchets.md](docs/ratchets.md).
 

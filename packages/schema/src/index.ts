@@ -159,11 +159,17 @@ export type CellBaselineRecord = {
   resourceAccesses?: ResourceBaselineEntry[];
 };
 
-export type BaselineSeal = {
-  algorithm: "hmac-sha256";
-  keyId?: string;
-  digest: string;
-};
+export type BaselineSeal =
+  | {
+      algorithm: "hmac-sha256";
+      keyId?: string;
+      digest: string;
+    }
+  | {
+      algorithm: "ed25519";
+      keyId?: string;
+      signature: string;
+    };
 
 export type CellFenceBaseline = {
   schemaVersion: typeof CELLFENCE_BASELINE_SCHEMA_VERSION;
@@ -604,14 +610,21 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
     if (!isRecord(value.seal)) {
       errors.push("seal must be an object when present");
     } else {
-      if (value.seal.algorithm !== "hmac-sha256") {
-        errors.push("seal.algorithm must be hmac-sha256");
-      }
       if (!optionalString(value.seal.keyId)) {
         errors.push("seal.keyId must be a string when present");
       }
-      if (typeof value.seal.digest !== "string" || !/^[a-f0-9]{64}$/.test(value.seal.digest)) {
-        errors.push("seal.digest must be a 64-character lowercase hex string");
+      if (value.seal.algorithm === "hmac-sha256") {
+        if (typeof value.seal.digest !== "string" || !/^[a-f0-9]{64}$/.test(value.seal.digest)) {
+          errors.push("seal.digest must be a 64-character lowercase hex string");
+        }
+      } else if (value.seal.algorithm === "ed25519") {
+        if (typeof value.seal.signature !== "string" || value.seal.signature.trim().length === 0) {
+          errors.push("seal.signature must be a non-empty base64 string");
+        } else if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value.seal.signature) || value.seal.signature.length % 4 !== 0) {
+          errors.push("seal.signature must be a base64 string");
+        }
+      } else {
+        errors.push("seal.algorithm must be hmac-sha256 or ed25519");
       }
     }
   }

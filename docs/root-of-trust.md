@@ -10,7 +10,7 @@ The repository contains:
 - import graph checks;
 - artifact lane checks;
 - baseline ratchets;
-- optional baseline HMAC seals when CI supplies `CELLFENCE_BASELINE_HMAC_KEY`;
+- optional baseline seals, preferably Ed25519 verification with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`, or HMAC verification only in isolated verifier setups;
 - forbidden source scanning;
 - CI workflow definitions.
 
@@ -31,7 +31,7 @@ The following mechanisms require human configuration outside the repository:
 
 ## Sealed Ledger
 
-Baseline HMAC seals protect ratchet files when the key is outside the repository. They do not pin the checker, manifest, workflow, or policy itself.
+Baseline seals protect ratchet files only when signing authority is outside ordinary agent-controlled changes. Ed25519 verification lets PR checks use a public key only; HMAC requires an isolated verifier or secret-bearing trusted workflow. Neither model pins the checker, manifest, workflow, or policy itself.
 
 A broader sealed hash ledger is planned. It would record trusted manifest and checker hashes outside the repository so that a proposed change cannot silently weaken the checker and then approve itself. This is not enforced in v0.x.
 

@@ -34,11 +34,14 @@ import {
   inferManifest,
   listClaims,
   listWaivers,
+  loadBaselineFromFile,
   loadManifestFromFile,
   profileConfig,
   profileRuleSeverities,
+  sealBaselineWithConfiguredKey,
   stampDesignDoc,
   verifyManifestFromServiceManifests,
+  verifyBaselineSeal,
   type CheckResult,
   type Finding,
   writeBaselineFile,
@@ -114,6 +117,8 @@ Usage:
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
+  cellfence baseline sign [--baseline cellfence.baseline.json]
+  cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
@@ -1066,6 +1071,26 @@ function commandBaselineUpdate(parsed: ParsedArgs): number {
   return 0;
 }
 
+function commandBaselineSign(parsed: ParsedArgs): number {
+  const baselinePath = path.resolve(parsed.rootDir, parsed.baselinePath || defaultBaselinePath(parsed.rootDir));
+  const baseline = loadBaselineFromFile(baselinePath);
+  const sealedBaseline = sealBaselineWithConfiguredKey(baseline);
+  fs.writeFileSync(baselinePath, `${JSON.stringify(sealedBaseline, null, 2)}\n`);
+  console.log(`signed ${baselinePath} with ${sealedBaseline.seal?.algorithm}`);
+  return 0;
+}
+
+function commandBaselineVerify(parsed: ParsedArgs): number {
+  const result = verifyBaselineSeal({
+    rootDir: parsed.rootDir,
+    manifestPath: parsed.manifestPath,
+    baselinePath: parsed.baselinePath || defaultBaselinePath(parsed.rootDir),
+  });
+  if (parsed.json) writeJson(result);
+  else console.log(formatHumanResult(result));
+  return result.exitCode;
+}
+
 function commandEvidenceCheck(parsed: ParsedArgs): number {
   if (parsed.evidencePaths.length === 0) {
     console.error("cellfence evidence check requires at least one --evidence path");
@@ -1783,6 +1808,8 @@ export function main(argv = process.argv.slice(2)): number {
     if (primaryCommand === "baseline" && secondaryCommand === "create") return commandBaselineCreate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "check") return commandBaselineCheck(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
+    if (primaryCommand === "baseline" && secondaryCommand === "sign") return commandBaselineSign(parsed);
+    if (primaryCommand === "baseline" && secondaryCommand === "verify") return commandBaselineVerify(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "audit") return commandBaselineAudit(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "commit") return commandEvidenceCommit(parsed);

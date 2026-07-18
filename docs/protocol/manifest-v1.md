@@ -98,7 +98,7 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 
 `publicEntry` must be covered by the declaring cell's `ownedPaths`. Each produced artifact lane path must also be covered by the producer's `ownedPaths`.
 
-`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires `CELLFENCE_BASELINE_HMAC_KEY` when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
+`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires a configured baseline verifier (`CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY`) when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
 
@@ -143,8 +143,8 @@ CellFence v0.x enforces:
 - programmatic plugin rule findings as ordinary findings subject to severity policy and waivers;
 - active claim lease conflicts and unclaimed agent changes through `cellfence claim create/check`;
 - unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
-- missing or mismatched baseline HMAC seals when `CELLFENCE_BASELINE_HMAC_KEY` is configured;
-- missing baseline HMAC configuration when locked cells are checked;
+- missing or mismatched baseline seals when `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY` is configured;
+- missing baseline verifier configuration when locked cells are checked;
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;
 - semantic baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and public surface signatures;

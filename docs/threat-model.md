@@ -11,7 +11,7 @@ CellFence is designed to catch architectural drift introduced by humans or codin
 - undeclared artifact lane consumption;
 - architectural surface growth beyond a baseline;
 - accidental inclusion of forbidden source provenance terms.
-- hand-edited baseline drift when CI provides `CELLFENCE_BASELINE_HMAC_KEY` outside the repository.
+- hand-edited baseline drift when CI verifies an externally signed baseline with `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`, or when an isolated verifier holds `CELLFENCE_BASELINE_HMAC_KEY` outside the repository.
 
 ## Out of Scope
 
@@ -28,4 +28,4 @@ Repository-local checks are not a sufficient root of trust because they are them
 
 ## Expected Controls Around CellFence
 
-A strong deployment uses CellFence with protected branches, required checks, CODEOWNERS review, credential separation, `CELLFENCE_BASELINE_HMAC_KEY` stored as a required-check secret, and an externally pinned checker or sealed ledger. The HMAC seal protects baseline files only when the key is outside the repository. In v0.x, branch protection, credential separation, and external ledgers remain documented integration points rather than complete built-in enforcement.
+A strong deployment uses CellFence with protected branches, required checks, CODEOWNERS review, credential separation, an externally held Ed25519 signing key, `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` in PR checks, and an externally pinned checker or sealed ledger. HMAC protects baseline files only when the secret is kept away from jobs that execute untrusted code. In v0.x, branch protection, credential separation, and external ledgers remain documented integration points rather than complete built-in enforcement.

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -1102,6 +1103,68 @@ test("CLI baseline HMAC seal rejects hand-edited baseline expansion", () => {
     writeJson(baselinePath, baseline);
 
     const tampered = runCliWithEnv(["baseline", "check", "--json"], tempDir, env);
+    assert.equal(tampered.status, 1);
+    const parsed = JSON.parse(tampered.stdout);
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI baseline Ed25519 sign and verify separate baseline authorization from candidate generation", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-ed25519-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+
+    const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
+    const privatePem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    const publicPem = publicKey.export({ type: "spki", format: "pem" }).toString();
+
+    const create = runCli(["baseline", "create"], tempDir);
+    assert.equal(create.status, 0, create.stderr || create.stdout);
+    const unsignedVerify = runCliWithEnv(["baseline", "verify", "--json"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: publicPem,
+    });
+    assert.equal(unsignedVerify.status, 1);
+
+    const sign = runCliWithEnv(["baseline", "sign"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PRIVATE_KEY: privatePem,
+      CELLFENCE_BASELINE_ED25519_KEY_ID: "baseline-ed25519-test",
+    });
+    assert.equal(sign.status, 0, sign.stderr || sign.stdout);
+    const baselinePath = path.join(tempDir, "cellfence.baseline.json");
+    const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+    assert.equal(baseline.seal.algorithm, "ed25519");
+    assert.equal(baseline.seal.keyId, "baseline-ed25519-test");
+    assert.equal(typeof baseline.seal.signature, "string");
+
+    const verify = runCliWithEnv(["baseline", "verify", "--json"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: publicPem,
+    });
+    assert.equal(verify.status, 0, verify.stderr || verify.stdout);
+    const check = runCliWithEnv(["baseline", "check", "--json"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: publicPem,
+    });
+    assert.equal(check.status, 0, check.stderr || check.stdout);
+
+    baseline.cells.core.publicSymbolSet.push("backdoor");
+    baseline.cells.core.publicSymbols += 1;
+    writeJson(baselinePath, baseline);
+    const tampered = runCliWithEnv(["baseline", "verify", "--json"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: publicPem,
+    });
     assert.equal(tampered.status, 1);
     const parsed = JSON.parse(tampered.stdout);
     assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));

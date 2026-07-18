@@ -248,6 +248,15 @@ test("schema validation accepts and rejects baseline records", () => {
   }));
   assert.equal(richBaseline.ok, true);
   assert.deepEqual(richBaseline.errors, []);
+  const ed25519Baseline = validateBaseline(validBaseline({
+    seal: {
+      algorithm: "ed25519",
+      keyId: "baseline-signing-key",
+      signature: Buffer.from("signature").toString("base64"),
+    },
+  }));
+  assert.equal(ed25519Baseline.ok, true);
+  assert.deepEqual(ed25519Baseline.errors, []);
 
   assertInvalid(validateBaseline(false), /baseline must be an object/);
   assertInvalid(validateBaseline(validBaseline({ schemaVersion: "v0" })), /schemaVersion must be/);
@@ -258,9 +267,11 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ cells: [] })), /cells must be an object/);
   assertInvalid(validateBaseline(validBaseline({ cells: { core: null } })), /cells\.core must be an object/);
   assertInvalid(validateBaseline(validBaseline({ seal: "sealed" })), /seal must be an object/);
-  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "sha256", digest: "a".repeat(64) } })), /seal\.algorithm must be hmac-sha256/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "sha256", digest: "a".repeat(64) } })), /seal\.algorithm must be hmac-sha256 or ed25519/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", keyId: 1, digest: "a".repeat(64) } })), /seal\.keyId must be a string/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", digest: "not-hex" } })), /seal\.digest must be a 64-character lowercase hex string/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "" } })), /seal\.signature must be a non-empty base64 string/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be a base64 string/);
   assertInvalid(
     validateBaseline(validBaseline({
       cells: {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-17T16:53:45.244Z",
+  "generatedAt": "2026-07-18T04:32:17.445Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,7 +23,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 35,
-      "publicSurfaceLines": 690,
+      "publicSurfaceLines": 707,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -66,7 +66,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "3633bd401822e886238bb0a6999e72f8600be86507fba23486aa264277901138",
+      "publicSurfaceHash": "2f4aed7488ad2093f244dfe496cb244e76a71abf305ef299f7431b9c55f258e1",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -114,8 +114,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 72,
-      "publicSurfaceLines": 4057,
+      "publicSymbols": 75,
+      "publicSurfaceLines": 4238,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -173,6 +173,7 @@
         "InferManifestOptions",
         "listClaims",
         "listWaivers",
+        "loadBaselineFromFile",
         "loadManifestFromFile",
         "MutationCheckResult",
         "profileConfig",
@@ -181,12 +182,14 @@
         "PruneCandidateKind",
         "PruneReport",
         "RuleId",
+        "sealBaselineWithConfiguredKey",
         "ServiceManifestImportResult",
         "ServiceManifestVerifyResult",
         "Severity",
         "stampDesignDoc",
         "SuggestedResolution",
         "TaskCheckResult",
+        "verifyBaselineSeal",
         "verifyManifestFromServiceManifests",
         "WaiverRequest",
         "WaiverRequestOptions",
@@ -195,7 +198,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "c5dd63f710398f663a6facb215025e92286404a1ebe7c897ee56d4a95c9c63ae",
+      "publicSurfaceHash": "ec4db2bba31a383c9c862a430e0ce1efdd30b65ddb37e3d9a9f0383adfebc76c",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -262,7 +265,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 1785,
+      "publicSurfaceLines": 1841,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
