@@ -858,8 +858,9 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     } else if (ts.isCallExpression(node)) {
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         const [specifierNode] = node.arguments;
-        if (specifierNode && ts.isStringLiteral(specifierNode)) {
-          addReference(specifierNode.text, "dynamic-import", node, false);
+        const specifier = literalText(specifierNode);
+        if (specifier !== undefined) {
+          addReference(specifier, "dynamic-import", node, false);
         } else {
           warnings.push({
             ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",

@@ -16,6 +16,7 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "coverage": "npm run build && c8 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",
     "coverage:100": "npm run build && c8 --check-coverage --lines 100 --statements 100 --branches 100 --functions 100 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",
+    "conformance:imports": "npm run build && node --test tests/conformance-imports.test.mjs",
     "mutation": "npm run build && stryker run stryker.conf.mjs",
     "mutation:dry": "npm run build && stryker run stryker.conf.mjs --dryRunOnly",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",
