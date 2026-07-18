@@ -172,6 +172,44 @@ test("manifest inference uses package entry metadata and workspace dependency co
   }
 });
 
+test("manifest inference can ignore package policy hints for blind oracle studies", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-blind-policy-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), { workspaces: ["packages/*"] });
+    writeJson(path.join(rootDir, "packages/core/package.json"), {
+      name: "@demo/core",
+      exports: {
+        ".": {
+          types: "./src/entry.ts",
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "packages/web/package.json"), {
+      name: "@demo/web",
+      dependencies: {
+        "@demo/core": "workspace:*",
+      },
+    });
+    writeText(path.join(rootDir, "packages/core/src/index.ts"), "export const internal = true;\n");
+    writeText(path.join(rootDir, "packages/core/src/entry.ts"), "export const core = true;\n");
+    writeText(path.join(rootDir, "packages/web/src/index.ts"), "export const web = true;\n");
+
+    const hinted = inferManifest({ rootDir });
+    const blind = inferManifest({ rootDir, policyHints: "ignore" });
+
+    assert.deepEqual(hinted.cells.map((cell) => [cell.id, cell.publicEntry, cell.consumes]), [
+      ["core", "packages/core/src/entry.ts", []],
+      ["web", "packages/web/src/index.ts", [{ cell: "core" }]],
+    ]);
+    assert.deepEqual(blind.cells.map((cell) => [cell.id, cell.publicEntry, cell.consumes]), [
+      ["core", "packages/core/src/index.ts", []],
+      ["web", "packages/web/src/index.ts", []],
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference discovers common app source roots without src fallback", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-app-roots-"));
   try {

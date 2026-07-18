@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "cellfence.upstream-policy-oracle.corpus.v1",
+  "description": "Five-repository pilot for upstream-declared package/workspace policy oracle validation. Commits are exact and subjects are cloned read-only by the harness.",
+  "subjects": [
+    {
+      "id": "changesets-changesets-2026-07-18",
+      "repository": "https://github.com/changesets/changesets.git",
+      "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+      "policy": {
+        "strategy": "package-workspaces",
+        "packageRoot": ".",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "reduxjs-redux-toolkit-2026-07-18",
+      "repository": "https://github.com/reduxjs/redux-toolkit.git",
+      "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3",
+      "policy": {
+        "strategy": "package-workspaces",
+        "packageRoot": ".",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "typescript-eslint-typescript-eslint-2026-07-18",
+      "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+      "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13",
+      "policy": {
+        "strategy": "package-workspaces",
+        "packageRoot": ".",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "jestjs-jest-2026-07-18",
+      "repository": "https://github.com/jestjs/jest.git",
+      "commit": "f49721c78e195558b40913977c9230f5b7f559d8",
+      "policy": {
+        "strategy": "package-workspaces",
+        "packageRoot": ".",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lerna-lerna-2026-07-18",
+      "repository": "https://github.com/lerna/lerna.git",
+      "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+      "policy": {
+        "strategy": "package-workspaces",
+        "packageRoot": ".",
+        "scope": "production"
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@
     "ci:count": "npm run build && node scripts/ci-counts.mjs",
     "benchmark:scale": "npm run build && node scripts/scale-benchmark.mjs",
     "research:corpus": "npm run build && node scripts/corpus-precision-study.mjs",
+    "research:oracle": "npm run build && node scripts/upstream-policy-oracle.mjs",
     "research:bundle": "node scripts/corpus-evidence-bundle.mjs",
     "pack:smoke": "node scripts/pack-smoke.mjs",
     "provenance:scan": "node scripts/forbidden-source-scan.mjs",

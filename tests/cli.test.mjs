@@ -843,6 +843,54 @@ test("CLI init infers src cells, workspace cells, public entries, and consumers"
   }
 });
 
+test("CLI init can ignore upstream package policy hints for blind inference", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-ignore-policy-hints-"));
+  try {
+    writeJson(path.join(tempDir, "package.json"), {
+      workspaces: ["packages/*"],
+    });
+    fs.mkdirSync(path.join(tempDir, "packages/core/src"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "packages/web/src"), { recursive: true });
+    writeJson(path.join(tempDir, "packages/core/package.json"), {
+      name: "@demo/core",
+      exports: {
+        ".": {
+          types: "./src/entry.ts",
+        },
+      },
+    });
+    writeJson(path.join(tempDir, "packages/web/package.json"), {
+      name: "@demo/web",
+      dependencies: {
+        "@demo/core": "workspace:*",
+      },
+    });
+    fs.writeFileSync(path.join(tempDir, "packages/core/src/index.ts"), "export const internal = true;\n");
+    fs.writeFileSync(path.join(tempDir, "packages/core/src/entry.ts"), "export const core = true;\n");
+    fs.writeFileSync(path.join(tempDir, "packages/web/src/index.ts"), "export const web = true;\n");
+
+    const hintedPath = path.join(tempDir, "control", "hinted.manifest.json");
+    const blindPath = path.join(tempDir, "control", "blind.manifest.json");
+    const hinted = runCli(["init", "--output", hintedPath, "--no-scaffold"], tempDir);
+    assert.equal(hinted.status, 0, hinted.stderr || hinted.stdout);
+    const blind = runCli(["init", "--output", blindPath, "--no-scaffold", "--ignore-policy-hints"], tempDir);
+    assert.equal(blind.status, 0, blind.stderr || blind.stdout);
+
+    const hintedManifest = JSON.parse(fs.readFileSync(hintedPath, "utf8"));
+    const blindManifest = JSON.parse(fs.readFileSync(blindPath, "utf8"));
+    assert.deepEqual(hintedManifest.cells.map((cell) => [cell.id, cell.publicEntry, cell.consumes]), [
+      ["core", "packages/core/src/entry.ts", []],
+      ["web", "packages/web/src/index.ts", [{ cell: "core" }]],
+    ]);
+    assert.deepEqual(blindManifest.cells.map((cell) => [cell.id, cell.publicEntry, cell.consumes]), [
+      ["core", "packages/core/src/index.ts", []],
+      ["web", "packages/web/src/index.ts", []],
+    ]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI init infers object workspaces, exact workspaces, duplicate ids, and src root files", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-workspaces-"));
   try {
