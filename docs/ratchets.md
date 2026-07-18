@@ -46,7 +46,9 @@ cellfence baseline update
 
 A baseline update is a governance change, not a routine way to silence a failing check. In a protected repository, review manifest and baseline changes separately from ordinary implementation changes.
 
-If a cell has `"locked": true`, `baseline update` fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access for that cell. A human owner must either reduce the change or explicitly review the contract expansion.
+If `CELLFENCE_BASELINE_HMAC_KEY` is set, `baseline create` and `baseline update` write a `seal` field using HMAC-SHA256 over the canonical baseline content. `baseline check` verifies that seal and fails with `CELLFENCE_BASELINE_SEAL_INVALID` when the baseline was hand-edited. `CELLFENCE_BASELINE_HMAC_KEY_ID` can be set to label the key used by CI. The key must live outside the repository, for example as a required-check secret; a repository-stored key does not protect against an agent editing both the baseline and the key.
+
+If a cell has `"locked": true`, `baseline check` requires `CELLFENCE_BASELINE_HMAC_KEY` so a hand-edited baseline cannot silently redefine the accepted contract for that locked cell. `baseline update` also fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access for that cell. A human owner must either reduce the change or explicitly review the contract expansion.
 
 For large repositories, prefer this baseline-first workflow over hand-writing every resource contract:
 

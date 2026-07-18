@@ -177,14 +177,14 @@ test("file index listFiles sorts results, ignores generated directories, and cac
     };
 
     const first = listFiles(rootDir, context).map((filePath) => normalizePath(path.relative(rootDir, filePath)));
-    assert.deepEqual(first, ["src/core/a.ts", "src/core/z.ts"]);
+    assert.deepEqual(first, ["src/core/a.ts", "src/core/link.ts", "src/core/z.ts"]);
 
     fs.writeFileSync(path.join(rootDir, "src/core/new.ts"), "export const fresh = true;\n");
     const cached = listFiles(rootDir, context).map((filePath) => normalizePath(path.relative(rootDir, filePath)));
     assert.deepEqual(cached, first);
 
     const uncached = listFiles(rootDir).map((filePath) => normalizePath(path.relative(rootDir, filePath)));
-    assert.deepEqual(uncached, ["src/core/a.ts", "src/core/new.ts", "src/core/z.ts"]);
+    assert.deepEqual(uncached, ["src/core/a.ts", "src/core/link.ts", "src/core/new.ts", "src/core/z.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

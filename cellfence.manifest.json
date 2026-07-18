@@ -31,6 +31,7 @@
       "publicSymbols": [
         "ArchitecturalBudgets",
         "ArtifactLaneManifest",
+        "BaselineSeal",
         "BuiltInResourceAdapter",
         "CELLFENCE_BASELINE_SCHEMA_VERSION",
         "CELLFENCE_MANIFEST_SCHEMA_VERSION",

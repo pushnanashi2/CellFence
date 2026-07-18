@@ -219,6 +219,11 @@ test("schema validation accepts and rejects baseline records", () => {
   assert.deepEqual(minimalBaseline.errors, []);
   const richBaseline = validateBaseline(validBaseline({
     cellIds: ["core"],
+    seal: {
+      algorithm: "hmac-sha256",
+      keyId: "ci-key",
+      digest: "a".repeat(64),
+    },
     cells: {
       core: {
         ownedPathPatterns: 1,
@@ -252,6 +257,10 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ cellIds: [1] })), /cellIds must be an array/);
   assertInvalid(validateBaseline(validBaseline({ cells: [] })), /cells must be an object/);
   assertInvalid(validateBaseline(validBaseline({ cells: { core: null } })), /cells\.core must be an object/);
+  assertInvalid(validateBaseline(validBaseline({ seal: "sealed" })), /seal must be an object/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "sha256", digest: "a".repeat(64) } })), /seal\.algorithm must be hmac-sha256/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", keyId: 1, digest: "a".repeat(64) } })), /seal\.keyId must be a string/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", digest: "not-hex" } })), /seal\.digest must be a 64-character lowercase hex string/);
   assertInvalid(
     validateBaseline(validBaseline({
       cells: {

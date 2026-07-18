@@ -15,6 +15,7 @@ Version 0.x is deliberately narrow:
 - ownership overlap detection is conservative and does not solve arbitrary glob intersection;
 - public symbol analysis supports common TypeScript forms and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern;
 - computed dynamic imports cannot be resolved statically;
+- `check --changed` still performs full head/base repository analysis in v0.x, then compares stable finding fingerprints to report only newly introduced findings;
 - SARIF output is not implemented;
 - a reusable externally pinned GitHub Action is not yet released;
 - CellFence does not identify which particular agent wrote a changed file;

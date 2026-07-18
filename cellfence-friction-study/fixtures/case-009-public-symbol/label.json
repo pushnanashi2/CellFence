@@ -1,0 +1,12 @@
+{
+  "id": "case-009-public-symbol",
+  "template": "public-symbol",
+  "expectedRule": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+  "positiveLabel": true,
+  "expectedMarkers": [
+    {
+      "path": "src/parser/public.ts",
+      "text": "parseCsvLine9"
+    }
+  ]
+}

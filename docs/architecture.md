@@ -1,38 +1,68 @@
 # Architecture
 
-CellFence is split into four cells:
+CellFence dogfoods its own manifest. The current repository is a package-level cell graph rather than the original four-cell prototype.
 
-```text
-schema <- engine <- cli
-          ^
-          |
-    github-action
-```
+The enforced source of truth is `cellfence.manifest.json`; this document is a human-readable map of that manifest.
 
-## Schema
+## Core Cells
 
-The schema package defines TypeScript types, manifest constants, baseline constants, and runtime validators for JSON manifests. It has no internal dependency on the engine, CLI, or action cell.
+- `schema`: versioned manifest, baseline, evidence, and validation types. It has no CellFence-internal dependencies.
+- `plugin-api`: stable Plugin API v1 types and `define*` helpers. It depends only on `schema`.
+- `engine`: repository indexing, source analysis, resource adapters, rule evaluation, baselines, claims, changed checks, docs checks, and manifest inference. It depends on `schema`.
+- `cli`: process argument parsing, human/JSON output, audit/summary artifacts, and command dispatch. It depends on `engine`.
+- `github-action`: thin GitHub Action wrapper around the engine/CLI policy. It depends on `engine`.
 
-## Engine
+## Agent And Runtime Cells
 
-The engine loads manifests, parses source files with the TypeScript compiler API, extracts import and export declarations, resolves repository-local dependencies, and emits structured findings.
+- `mcp-proxy`: stdio MCP write guard and proxy helpers. It depends on `engine`.
+- `trace`: runtime evidence producer for selected Node.js file/fetch/manual resource observations. It depends on `schema`.
 
-The engine owns rule evaluation. It is the only cell that knows about:
+## Official Extension Cells
 
-- ownership overlap;
-- public entry validation;
-- private import rejection;
-- artifact lane consumption;
-- baseline ratchets.
+Adapters:
 
-## CLI
+- `adapter-call-pattern`: declarative static call-pattern resource adapter. It depends on `plugin-api` and `schema`.
+- `adapter-opentelemetry`: OpenTelemetry span to resource-evidence converter. It depends on `schema`.
 
-The CLI is the public command surface. It translates process arguments into engine calls and maps results to documented exit codes.
+Rule plugins:
 
-## GitHub Action
+- `plugin-agent-budget`
+- `plugin-blast-radius`
+- `plugin-dependency-sovereignty`
+- `plugin-geo-purity`
+- `plugin-legacy-strangler`
+- `plugin-quants-trend`
 
-The action wrapper calls the engine from GitHub Actions. It does not implement separate policy logic.
+These rule plugins depend on `plugin-api`; `plugin-quants-trend` also depends on `schema` for baseline-shaped metrics.
+
+Reporter:
+
+- `reporter-economy-matrix`: architecture flow reporter. It depends on `plugin-api`.
 
 ## Dependency Direction
 
-`schema` must not import other CellFence cells. `engine` may import `schema`. `cli` may import `engine`. `github-action` may import `engine`. Reverse private dependencies are rejected by CellFence self-check.
+The intended direction is:
+
+```text
+schema
+  <- plugin-api
+  <- official adapters / official plugins / reporter
+
+schema <- engine <- cli
+                 <- github-action
+                 <- mcp-proxy
+
+schema <- trace
+```
+
+Reverse private dependencies are rejected by CellFence self-check. Public imports must go through each cell's declared `publicEntry`.
+
+## Generated Views
+
+For an up-to-date graph, run:
+
+```bash
+npx cellfence graph --format mermaid
+```
+
+The README self-governance diagram is generated from this command and should be refreshed whenever `cellfence.manifest.json` changes.

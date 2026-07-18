@@ -13,6 +13,7 @@
 | `CELLFENCE_UNOWNED_IMPORT_TARGET` | A cell imports governed source that no cell owns |
 | `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry is outside the declaring cell's owned paths |
 | `CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP` | A produced artifact lane is outside the producer's owned paths |
+| `CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP` | A governed symlink points outside its owning cell, outside the repository, or cannot be resolved |
 | `CELLFENCE_PRIVATE_IMPORT` | Cross-cell import of private implementation |
 | `CELLFENCE_UNDECLARED_CONSUMER` | Cross-cell dependency missing from the consumer manifest |
 | `CELLFENCE_PUBLIC_ENTRY_MISSING` | Declared public entry does not exist |
@@ -38,8 +39,9 @@
 | `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE` | A cell's public entry path changed |
 | `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE` | A new artifact producer/consumer contract appeared |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Exported public signatures changed beyond formatting/comment noise |
-| `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a warning |
-| `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a warning |
+| `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline HMAC seal is missing or does not match when `CELLFENCE_BASELINE_HMAC_KEY` is configured |
+| `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |
+| `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a fail-closed required-rule finding |
 
 
 
@@ -66,7 +68,7 @@ CellFence v0.x analyzes:
 - common TypeScript export declarations and named exports;
 - common Python public symbols from `__all__`, top-level functions/classes/assignments, and simple re-export imports.
 
-Computed dynamic imports and computed CommonJS `require()` calls are reported as unsupported warnings rather than silently ignored.
+Computed dynamic imports and computed CommonJS `require()` calls are reported as unsupported fail-closed findings rather than silently ignored.
 
 NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/` and manifest-derived package roots. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 

@@ -1,0 +1,20 @@
+{
+  "conditions": [
+    {
+      "id": "A_hash_visible",
+      "cellfenceCommand": [
+        "node",
+        "{studyRoot}/harness/hash-visible-cellfence.mjs"
+      ],
+      "env": {}
+    },
+    {
+      "id": "B_no_hash",
+      "cellfenceCommand": [
+        "node",
+        "{repoRoot}/packages/cli/dist/index.js"
+      ],
+      "env": {}
+    }
+  ]
+}

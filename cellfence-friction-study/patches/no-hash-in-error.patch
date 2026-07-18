@@ -1,0 +1,12 @@
+diff --git a/packages/engine/src/index.ts b/packages/engine/src/index.ts
+--- a/packages/engine/src/index.ts
++++ b/packages/engine/src/index.ts
+@@
+-        message: `${cellId} public surface signature hash changed from ${baselineRecord.publicSurfaceHash} to ${metric.publicSurfaceHash}`,
+-        details: { previous: baselineRecord.publicSurfaceHash, current: metric.publicSurfaceHash },
++        message: `${cellId} public surface signature hash changed from the accepted baseline`,
++        details: { previous: baselineRecord.publicSurfaceHash },
+
+This repository already carries the redacted behavior shown above. The patch is
+kept as the historical treatment diff for reproducing the A/B study against an
+older hash-visible CellFence build.

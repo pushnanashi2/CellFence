@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-17T06:39:09.850Z",
+  "generatedAt": "2026-07-17T16:53:45.244Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -22,8 +22,8 @@
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 34,
-      "publicSurfaceLines": 668,
+      "publicSymbols": 35,
+      "publicSurfaceLines": 690,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -32,6 +32,7 @@
       "publicSymbolSet": [
         "ArchitecturalBudgets",
         "ArtifactLaneManifest",
+        "BaselineSeal",
         "BuiltInResourceAdapter",
         "CellBaselineRecord",
         "CellConsumerManifest",
@@ -65,7 +66,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "d0493220252453a813e26b0f30906ea3ead57466cb7c7261c51ec9ea2597ccbd",
+      "publicSurfaceHash": "3633bd401822e886238bb0a6999e72f8600be86507fba23486aa264277901138",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -114,7 +115,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 72,
-      "publicSurfaceLines": 3763,
+      "publicSurfaceLines": 4057,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -194,7 +195,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "b101516deed38c3633cad9cafee3d9148c115b896d49204a4bc610476ab98ccb",
+      "publicSurfaceHash": "c5dd63f710398f663a6facb215025e92286404a1ebe7c897ee56d4a95c9c63ae",
       "dependencyEdges": [
         "engine->schema"
       ],

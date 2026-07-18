@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [],
+    "requiredRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+      "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
+      "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"
+    ]
+  },
+  "cells": [
+    {
+      "id": "parser",
+      "ownedPaths": [
+        "src/parser/**"
+      ],
+      "publicEntry": "src/parser/public.ts",
+      "publicSymbols": [
+        "ParseResult",
+        "parseInput"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reporting",
+      "ownedPaths": [
+        "src/reporting/**"
+      ],
+      "publicEntry": "src/reporting/public.ts",
+      "publicSymbols": [
+        "formatReport"
+      ],
+      "consumes": [
+        {
+          "cell": "parser"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

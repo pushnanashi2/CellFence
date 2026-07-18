@@ -19,6 +19,12 @@ export type FileIndexContext = {
   sourceFileCache: Map<string, ts.SourceFile>;
 };
 
+export type SymlinkEntry = {
+  path: string;
+  targetPath?: string;
+  error?: string;
+};
+
 export function normalizePath(filePath: string): string {
   return filePath.split(path.sep).join("/");
 }
@@ -81,6 +87,12 @@ export function listFiles(rootDir: string, context?: FileIndexContext): string[]
         visit(entryPath);
       } else if (entry.isFile()) {
         files.push(entryPath);
+      } else if (entry.isSymbolicLink()) {
+        try {
+          if (fs.statSync(entryPath).isFile()) files.push(entryPath);
+        } catch {
+          // Broken symlinks are handled by listSymlinks; listFiles stays a source-file inventory.
+        }
       }
     }
   }
@@ -88,6 +100,27 @@ export function listFiles(rootDir: string, context?: FileIndexContext): string[]
   const sortedFiles = files.sort((left, right) => left.localeCompare(right));
   if (context) context.listFilesCache = sortedFiles;
   return sortedFiles;
+}
+
+export function listSymlinks(rootDir: string): SymlinkEntry[] {
+  const symlinks: SymlinkEntry[] = [];
+  function visit(directoryPath: string): void {
+    for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
+      if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
+      const entryPath = path.join(directoryPath, entry.name);
+      if (entry.isDirectory()) {
+        visit(entryPath);
+      } else if (entry.isSymbolicLink()) {
+        try {
+          symlinks.push({ path: entryPath, targetPath: fs.realpathSync(entryPath) });
+        } catch (error) {
+          symlinks.push({ path: entryPath, error: error instanceof Error ? error.message : String(error) });
+        }
+      }
+    }
+  }
+  visit(rootDir);
+  return symlinks.sort((left, right) => left.path.localeCompare(right.path));
 }
 
 function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifest, context: FileIndexContext): Map<string, string[]> {

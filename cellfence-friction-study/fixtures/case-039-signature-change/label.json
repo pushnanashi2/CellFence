@@ -1,0 +1,12 @@
+{
+  "id": "case-039-signature-change",
+  "template": "signature-change",
+  "expectedRule": "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE",
+  "positiveLabel": true,
+  "expectedMarkers": [
+    {
+      "path": "src/parser/public.ts",
+      "text": "options: { trim?: boolean }"
+    }
+  ]
+}

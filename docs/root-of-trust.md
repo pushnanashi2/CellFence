@@ -10,6 +10,7 @@ The repository contains:
 - import graph checks;
 - artifact lane checks;
 - baseline ratchets;
+- optional baseline HMAC seals when CI supplies `CELLFENCE_BASELINE_HMAC_KEY`;
 - forbidden source scanning;
 - CI workflow definitions.
 
@@ -30,7 +31,9 @@ The following mechanisms require human configuration outside the repository:
 
 ## Sealed Ledger
 
-A sealed hash ledger is planned. It would record trusted manifest and checker hashes outside the repository so that a proposed change cannot silently weaken the checker and then approve itself. This is not enforced in v0.x.
+Baseline HMAC seals protect ratchet files when the key is outside the repository. They do not pin the checker, manifest, workflow, or policy itself.
+
+A broader sealed hash ledger is planned. It would record trusted manifest and checker hashes outside the repository so that a proposed change cannot silently weaken the checker and then approve itself. This is not enforced in v0.x.
 
 ## Break-Glass
 

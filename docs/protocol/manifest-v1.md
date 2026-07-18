@@ -46,7 +46,7 @@ Locked cell: a cell whose accepted baseline cannot be expanded by `baseline upda
 
 Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
 
-Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. `governance.requiredRules` prevents selected rules from being weakened below `error`.
+Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. CellFence also has a built-in core required-rule set for boundary integrity. `governance.requiredRules` extends that set. Required rules are normalized to `error`, and attempts to weaken them produce `CELLFENCE_REQUIRED_RULE_DISABLED`.
 
 Plugin reference: a reserved manifest entry for future npm or local plugin loading. In v0.x, the programmatic plugin API is implemented, but manifest-driven arbitrary-code loading is not enabled.
 
@@ -98,7 +98,7 @@ Enforcement status: one of `enforced`, `partially_enforced`, `documented`, or `p
 
 `publicEntry` must be covered by the declaring cell's `ownedPaths`. Each produced artifact lane path must also be covered by the producer's `ownedPaths`.
 
-`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
+`locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires `CELLFENCE_BASELINE_HMAC_KEY` when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
 
@@ -116,7 +116,7 @@ repository rules
 rule default
 ```
 
-Path overrides use CellFence's glob-like path matching. A rule listed in `governance.requiredRules` must remain `error`; attempts to set it to `warning` or `off` produce `CELLFENCE_REQUIRED_RULE_DISABLED`.
+Path overrides use CellFence's glob-like path matching. A built-in core rule or a rule listed in `governance.requiredRules` must remain `error`; attempts to set it to `warning` or `off` produce `CELLFENCE_REQUIRED_RULE_DISABLED`.
 
 ## Active Enforcement
 
@@ -126,11 +126,12 @@ CellFence v0.x enforces:
 - duplicate cell IDs;
 - overlapping owned path prefixes;
 - strict governed-source ownership when enabled;
+- governed symlinks that point outside the owning cell, outside the repository, or to broken targets;
 - public entries outside declared ownership;
 - artifact lanes outside declared ownership;
 - private cross-cell imports;
 - unresolved relative imports as errors;
-- computed dynamic imports and computed `require()` calls as warnings;
+- computed dynamic imports and computed `require()` calls as fail-closed required-rule findings;
 - undeclared consumers;
 - missing public entry files;
 - declared public symbols versus actual exported symbols;
@@ -142,12 +143,16 @@ CellFence v0.x enforces:
 - programmatic plugin rule findings as ordinary findings subject to severity policy and waivers;
 - active claim lease conflicts and unclaimed agent changes through `cellfence claim create/check`;
 - unresolved unsafe raw SQL, dynamic SQL, dynamic query-builder table, and dynamic Drizzle table access;
+- missing or mismatched baseline HMAC seals when `CELLFENCE_BASELINE_HMAC_KEY` is configured;
+- missing baseline HMAC configuration when locked cells are checked;
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;
 - semantic baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and public surface signatures;
 - legacy ratchet growth for owned path counts, public symbol counts, public entry line counts, and cross-cell dependency counts when reading old baselines.
 
 Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.
+
+Machine-readable findings also include a stable `fingerprint` when produced by the engine. The fingerprint is derived from the rule ID, severity, normalized target path, cell IDs, and rule details, not from the human-readable message. `check --changed` compares fingerprints so wording changes do not turn an existing violation into a new one.
 
 Static resource access is deliberately partial. The engine recognizes selected string-literal patterns, selected Prisma delegate calls, selected TypeORM entity/repository/query-builder calls, selected Drizzle table declarations and table operations, selected string-literal query-builder table calls, selected BullMQ/KafkaJS calls, and selected NestJS/Fastify HTTP route declarations. Dynamic paths, arbitrary ORM metadata outside supported adapters, and runtime infrastructure state are outside v0.x static inference unless supplied as runtime evidence.
 

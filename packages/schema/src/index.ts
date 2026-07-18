@@ -159,10 +159,17 @@ export type CellBaselineRecord = {
   resourceAccesses?: ResourceBaselineEntry[];
 };
 
+export type BaselineSeal = {
+  algorithm: "hmac-sha256";
+  keyId?: string;
+  digest: string;
+};
+
 export type CellFenceBaseline = {
   schemaVersion: typeof CELLFENCE_BASELINE_SCHEMA_VERSION;
   generatedAt: string;
   cellIds?: string[];
+  seal?: BaselineSeal;
   cells: Record<string, CellBaselineRecord>;
 };
 
@@ -592,6 +599,21 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   }
   if (value.cellIds !== undefined && !isStringArray(value.cellIds)) {
     errors.push("cellIds must be an array of non-empty strings when present");
+  }
+  if (value.seal !== undefined) {
+    if (!isRecord(value.seal)) {
+      errors.push("seal must be an object when present");
+    } else {
+      if (value.seal.algorithm !== "hmac-sha256") {
+        errors.push("seal.algorithm must be hmac-sha256");
+      }
+      if (!optionalString(value.seal.keyId)) {
+        errors.push("seal.keyId must be a string when present");
+      }
+      if (typeof value.seal.digest !== "string" || !/^[a-f0-9]{64}$/.test(value.seal.digest)) {
+        errors.push("seal.digest must be a 64-character lowercase hex string");
+      }
+    }
   }
   if (!isRecord(value.cells)) {
     errors.push("cells must be an object");

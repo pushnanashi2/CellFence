@@ -35,6 +35,19 @@ export type InferManifestOptions = {
 };
 
 const PUBLIC_ENTRY_BASENAMES = ["public", "index"];
+const DEFAULT_REQUIRED_RULES = [
+  "CELLFENCE_OWNERSHIP_OVERLAP",
+  "CELLFENCE_UNOWNED_SOURCE",
+  "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_REQUIRED_RULE_DISABLED",
+  "CELLFENCE_WAIVER_INVALID",
+];
 
 function readJsonFile(filePath: string): unknown {
   try {
@@ -242,6 +255,7 @@ function manifestFromCandidates(rootDir: string, candidates: readonly CellCandid
       requireOwnership: true,
       include,
       exclude: [],
+      requiredRules: DEFAULT_REQUIRED_RULES,
     },
     cells: candidates.map((candidate): CellManifest => ({
       id: candidate.id,
@@ -265,6 +279,7 @@ export function inferManifest(options: InferManifestOptions = {}): CellFenceMani
       requireOwnership: true,
       include: ["src/**"],
       exclude: [],
+      requiredRules: DEFAULT_REQUIRED_RULES,
     },
     cells: [
       {

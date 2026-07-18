@@ -25,6 +25,20 @@ import {
   loadManifestFromFile,
 } from "../packages/engine/dist/index.js";
 
+const defaultRequiredRules = [
+  "CELLFENCE_OWNERSHIP_OVERLAP",
+  "CELLFENCE_UNOWNED_SOURCE",
+  "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_REQUIRED_RULE_DISABLED",
+  "CELLFENCE_WAIVER_INVALID",
+];
+
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
@@ -262,7 +276,7 @@ test("engine applies path overrides and rejects required-rule weakening in overr
 
     const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
     assert.equal(result.ok, false);
-    assert.ok(result.warnings.some((finding) => finding.ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"));
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"));
     assert.ok(result.findings.some((finding) =>
       finding.ruleId === "CELLFENCE_REQUIRED_RULE_DISABLED"
       && /override 0/.test(finding.message)));
@@ -578,6 +592,61 @@ test("engine changed checks return the current manifest error before base diffin
     assert.equal(result.exitCode, 2);
     assert.deepEqual(result.changedFiles, ["cellfence.manifest.json"]);
     assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_MANIFEST_INVALID"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed check finding identity is stable across message wording changes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-fingerprint-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core", "export const core = \"base\";\n");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const core = \"head\";\n");
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "head"]);
+
+    const noisyMessagePlugin = {
+      apiVersion: 1,
+      name: "@cellfence/test-message-noise",
+      version: "1.0.0",
+      rules: {
+        "test/message-noise": {
+          meta: {
+            description: "Emits the same finding with message text derived from current file content.",
+            defaultSeverity: "error",
+            category: "test",
+          },
+          run(context) {
+            const publicFile = path.join(context.repository.rootDir, "src/core/public.ts");
+            const content = fs.readFileSync(publicFile, "utf8").trim();
+            return [{
+              ruleId: "test/message-noise",
+              severity: "error",
+              cellId: "core",
+              filePath: "src/core/public.ts",
+              message: `same violation, wording ${content}`,
+              details: { contract: "stable" },
+            }];
+          },
+        },
+      },
+    };
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+      plugins: [noisyMessagePlugin],
+    });
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.deepEqual(result.findings, []);
+    assert.deepEqual(result.changedFiles, ["src/core/public.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1625,6 +1694,7 @@ test("engine inferManifest handles malformed workspaces and src root fallback th
       requireOwnership: true,
       include: ["src/**"],
       exclude: [],
+      requiredRules: defaultRequiredRules,
     });
     assert.deepEqual(manifest.cells, [
       {

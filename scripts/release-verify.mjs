@@ -33,6 +33,16 @@ if (packageJson.scripts && /publish/.test(Object.keys(packageJson.scripts).join(
   findings.push("root package.json must not define an npm publishing script in v0.x");
 }
 
+for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {
+  const text = fs.readFileSync(workflowPath, "utf8");
+  for (const [index, line] of text.split(/\r?\n/).entries()) {
+    const match = line.match(/uses:\s*actions\/[^@\s]+@([^\s#]+)/);
+    if (match && !/^[a-f0-9]{40}$/.test(match[1])) {
+      findings.push(`${workflowPath}:${index + 1} action is not pinned to a commit SHA: ${line.trim()}`);
+    }
+  }
+}
+
 if (findings.length > 0) {
   console.error(findings.join("\n"));
   process.exitCode = 1;

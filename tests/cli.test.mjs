@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -10,6 +10,19 @@ import { main } from "../packages/cli/dist/index.js";
 
 const root = process.cwd();
 const cliPath = path.join(root, "packages/cli/dist/index.js");
+const defaultRequiredRules = [
+  "CELLFENCE_OWNERSHIP_OVERLAP",
+  "CELLFENCE_UNOWNED_SOURCE",
+  "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_REQUIRED_RULE_DISABLED",
+  "CELLFENCE_WAIVER_INVALID",
+];
 
 function runCli(args, cwd = root) {
   return spawnSync(process.execPath, [cliPath, ...args], {
@@ -518,6 +531,60 @@ test("CLI claim create rejects an active same-cell conflict", () => {
   assert.equal(JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/claims.json"), "utf8")).claims.length, 1);
 });
 
+test("CLI claim create serializes concurrent writes without losing claims", async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-concurrent-"));
+  try {
+    const cells = [];
+    for (const cellId of ["a", "b", "c", "d", "e", "f"]) {
+      fs.mkdirSync(path.join(tempDir, "src", cellId), { recursive: true });
+      fs.writeFileSync(path.join(tempDir, "src", cellId, "public.ts"), `export const ${cellId} = true;\n`);
+      cells.push({
+        id: cellId,
+        ownedPaths: [`src/${cellId}/**`],
+        publicEntry: `src/${cellId}/public.ts`,
+        publicSymbols: [cellId],
+        consumes: [],
+        producesArtifacts: [],
+      });
+    }
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells,
+    });
+
+    const children = await Promise.all(cells.map((cell) => new Promise((resolve) => {
+      const child = spawn(process.execPath, [
+        cliPath,
+        "claim",
+        "create",
+        "--agent",
+        `agent-${cell.id}`,
+        "--cell",
+        cell.id,
+        "--ttl",
+        "2h",
+        "--json",
+      ], {
+        cwd: tempDir,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.setEncoding("utf8");
+      child.stderr.setEncoding("utf8");
+      child.stdout.on("data", (chunk) => { stdout += chunk; });
+      child.stderr.on("data", (chunk) => { stderr += chunk; });
+      child.on("close", (status) => resolve({ status, stdout, stderr }));
+    })));
+    for (const child of children) assert.equal(child.status, 0, child.stderr || child.stdout);
+    const store = JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/claims.json"), "utf8"));
+    assert.deepEqual(store.claims.map((claim) => claim.agent).sort(), cells.map((cell) => `agent-${cell.id}`).sort());
+    assert.equal(fs.existsSync(path.join(tempDir, ".cellfence/claims.json.lock")), false);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI claim commands render human output and reject missing agent ids", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-human-"));
   writeClaimProject(tempDir);
@@ -657,6 +724,7 @@ test("CLI init enables strict ownership coverage by default", () => {
       requireOwnership: true,
       include: ["src/**"],
       exclude: [],
+      requiredRules: defaultRequiredRules,
     });
     const checkResult = runCli(["check", "--json"], tempDir);
     assert.equal(checkResult.status, 0, checkResult.stderr || checkResult.stdout);
@@ -697,6 +765,7 @@ test("CLI init infers src cells, workspace cells, public entries, and consumers"
       requireOwnership: true,
       include: ["packages/worker/src/**", "src/**"],
       exclude: [],
+      requiredRules: defaultRequiredRules,
     });
     assert.deepEqual(manifest.cells.map((cell) => cell.id), ["parser", "reporting", "worker"]);
     assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.publicEntry]), [
@@ -820,6 +889,74 @@ test("CLI rejects manifest plugins and extends instead of silently ignoring them
   }
 });
 
+test("CLI rejects attempts to disable core boundary rules even without manifest requiredRules", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-core-rule-off-"));
+  try {
+    writePrivateImportProject(tempDir);
+    const manifestPath = path.join(tempDir, "cellfence.manifest.json");
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    manifest.rules = { CELLFENCE_PRIVATE_IMPORT: "off" };
+    writeJson(manifestPath, manifest);
+
+    const result = runCli(["check", "--json"], tempDir);
+    assert.equal(result.status, 1);
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_REQUIRED_RULE_DISABLED"));
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI rejects governed symlinks that target another cell private source", { skip: process.platform === "win32" }, () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-symlink-private-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/parser/internal"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/parser"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/reporting"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/parser/public.ts"), "export const parse = true;\n");
+    fs.writeFileSync(path.join(tempDir, "src/parser/internal/tokenizer.ts"), "export const token = true;\n");
+    fs.symlinkSync(path.join(tempDir, "src/parser/internal/tokenizer.ts"), path.join(tempDir, "src/reporting/sneaky.ts"));
+    fs.writeFileSync(path.join(tempDir, "src/reporting/public.ts"), "export { token } from './sneaky';\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        exclude: [],
+      },
+      cells: [
+        {
+          id: "parser",
+          ownedPaths: ["src/parser/**"],
+          publicEntry: "src/parser/public.ts",
+          publicSymbols: ["parse"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+        {
+          id: "reporting",
+          ownedPaths: ["src/reporting/**"],
+          publicEntry: "src/reporting/public.ts",
+          publicSymbols: ["token"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+      ],
+    });
+
+    const result = runCli(["check", "--json"], tempDir);
+    assert.equal(result.status, 1);
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(parsed.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP"
+      && finding.filePath === "src/reporting/sneaky.ts"
+    ));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI check emits suggested resolutions for private imports", () => {
   const fixturePath = path.join(root, "fixtures/invalid/private-cross-cell-import");
   const result = runCli(["check", "--json"], fixturePath);
@@ -930,6 +1067,79 @@ test("CLI baseline update refuses to add a locked cell missing from the accepted
   assert.match(result.stdout, /newcell is locked and is absent from the existing baseline/);
   const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
   assert.equal(baseline.cells.newcell, undefined);
+});
+
+test("CLI baseline HMAC seal rejects hand-edited baseline expansion", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-seal-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+
+    const env = { CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret", CELLFENCE_BASELINE_HMAC_KEY_ID: "test-key" };
+    const create = runCliWithEnv(["baseline", "create"], tempDir, env);
+    assert.equal(create.status, 0, create.stderr || create.stdout);
+    const baselinePath = path.join(tempDir, "cellfence.baseline.json");
+    const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+    assert.equal(baseline.seal.algorithm, "hmac-sha256");
+    assert.equal(baseline.seal.keyId, "test-key");
+
+    const cleanCheck = runCliWithEnv(["baseline", "check", "--json"], tempDir, env);
+    assert.equal(cleanCheck.status, 0, cleanCheck.stderr || cleanCheck.stdout);
+
+    baseline.cells.core.publicSymbolSet.push("backdoor");
+    baseline.cells.core.publicSymbols += 1;
+    writeJson(baselinePath, baseline);
+
+    const tampered = runCliWithEnv(["baseline", "check", "--json"], tempDir, env);
+    assert.equal(tampered.status, 1);
+    const parsed = JSON.parse(tampered.stdout);
+    assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI baseline check does not print the next public surface hash in human output", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-hash-redaction-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    assert.equal(runCli(["baseline", "create"], tempDir).status, 0);
+
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\nexport const extra = true;\n");
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    manifest.cells[0].publicSymbols.push("extra");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), manifest);
+
+    const result = runCli(["baseline", "check"], tempDir);
+    assert.equal(result.status, 1);
+    assert.doesNotMatch(result.stdout, / to [a-f0-9]{64}/);
+    assert.match(result.stdout, /public surface signature hash changed from the accepted baseline/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI accepts a valid line-local CellFence waiver and lists it", () => {

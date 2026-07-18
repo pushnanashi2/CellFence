@@ -6,6 +6,20 @@ import test from "node:test";
 
 import { checkRepository, inferManifest } from "../packages/engine/dist/index.js";
 
+const defaultRequiredRules = [
+  "CELLFENCE_OWNERSHIP_OVERLAP",
+  "CELLFENCE_UNOWNED_SOURCE",
+  "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_REQUIRED_RULE_DISABLED",
+  "CELLFENCE_WAIVER_INVALID",
+];
+
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
@@ -42,6 +56,7 @@ test("manifest inference discovers src cells, workspace cells, public entries, a
       requireOwnership: true,
       include: ["packages/worker/src/**", "src/**"],
       exclude: [],
+      requiredRules: defaultRequiredRules,
     });
     assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.publicEntry, cell.publicSymbols, cell.consumes]), [
       ["parser", "src/parser/public.ts", ["parse"], []],
@@ -133,6 +148,7 @@ test("manifest inference falls back to the example manifest for empty or malform
         requireOwnership: true,
         include: ["src/**"],
         exclude: [],
+        requiredRules: defaultRequiredRules,
       },
       cells: [
         {

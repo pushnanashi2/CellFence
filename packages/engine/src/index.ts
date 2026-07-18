@@ -25,6 +25,7 @@ import {
 import {
   absolutePath,
   listFiles,
+  listSymlinks,
   literalPrefix,
   matchesPattern,
   normalizePath,
@@ -35,6 +36,7 @@ import {
   repoPath,
   SOURCE_EXTENSIONS,
   type FileIndexContext,
+  type SymlinkEntry,
   sourceFilesForCell,
   sourceFilesUnderGovernance,
   sourceKindForPath,
@@ -66,6 +68,7 @@ import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import type { FileObservation, ObservationFamily } from "./governance/model.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
+import { stableCanonicalJson } from "./governance/canonicalization.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
 export {
@@ -97,6 +100,7 @@ export type RuleId =
   | "CELLFENCE_UNOWNED_IMPORT_TARGET"
   | "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP"
   | "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
+  | "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP"
   | "CELLFENCE_PRIVATE_IMPORT"
   | "CELLFENCE_UNDECLARED_CONSUMER"
   | "CELLFENCE_PUBLIC_ENTRY_MISSING"
@@ -113,6 +117,7 @@ export type RuleId =
   | "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE"
   | "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE"
   | "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"
+  | "CELLFENCE_BASELINE_SEAL_INVALID"
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
   | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
@@ -557,17 +562,123 @@ type AnalysisContext = FileIndexContext & {
 const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
 const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
 const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
+const BASELINE_HMAC_KEY_ENV = "CELLFENCE_BASELINE_HMAC_KEY";
+const BASELINE_HMAC_KEY_ID_ENV = "CELLFENCE_BASELINE_HMAC_KEY_ID";
+const CORE_REQUIRED_RULES = [
+  "CELLFENCE_OWNERSHIP_OVERLAP",
+  "CELLFENCE_UNOWNED_SOURCE",
+  "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+  "CELLFENCE_REQUIRED_RULE_DISABLED",
+  "CELLFENCE_WAIVER_INVALID",
+];
 
 function readJsonFile(filePath: string): unknown {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function normalizedFindingDetails(details: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!details) return undefined;
+  const normalizedEntries = Object.entries(details)
+    .filter(([key]) => !["message", "currentHash", "nextHash"].includes(key))
+    .map(([key, value]) => [key, value] as const);
+  return normalizedEntries.length > 0 ? Object.fromEntries(normalizedEntries) : undefined;
+}
+
+function findingFingerprint(finding: Finding): string {
+  return crypto
+    .createHash("sha256")
+    .update(stableCanonicalJson({
+      ruleId: finding.ruleId,
+      severity: finding.severity,
+      filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
+      cellId: finding.cellId,
+      producerCellId: finding.producerCellId,
+      details: normalizedFindingDetails(finding.details),
+    }))
+    .digest("hex");
+}
+
+function withFindingFingerprint(finding: Finding): Finding {
+  return {
+    ...finding,
+    fingerprint: finding.fingerprint || findingFingerprint(finding),
+  };
+}
+
 function addFinding(findings: Finding[], finding: Finding): void {
-  findings.push(finding);
+  findings.push(withFindingFingerprint(finding));
 }
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function baselineWithoutSeal(baseline: CellFenceBaseline): Omit<CellFenceBaseline, "seal"> {
+  const { seal: _seal, ...unsignedBaseline } = baseline;
+  return unsignedBaseline;
+}
+
+function baselineHmacDigest(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">, secret: string): string {
+  return crypto
+    .createHmac("sha256", secret)
+    .update(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline))
+    .digest("hex");
+}
+
+function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFenceBaseline {
+  const secret = process.env[BASELINE_HMAC_KEY_ENV];
+  if (!secret) return baseline;
+  const unsignedBaseline = baselineWithoutSeal(baseline);
+  const sealedBaseline: CellFenceBaseline = {
+    ...unsignedBaseline,
+    seal: {
+      algorithm: "hmac-sha256",
+      ...(process.env[BASELINE_HMAC_KEY_ID_ENV] ? { keyId: process.env[BASELINE_HMAC_KEY_ID_ENV] } : {}),
+      digest: baselineHmacDigest(unsignedBaseline, secret),
+    },
+  };
+  return sealedBaseline;
+}
+
+function validateBaselineSeal(manifest: CellFenceManifest, baseline: CellFenceBaseline, baselinePath: string, findings: Finding[]): void {
+  const secret = process.env[BASELINE_HMAC_KEY_ENV];
+  const lockedCells = manifest.cells.filter((cell) => cell.locked);
+  if (!secret && lockedCells.length > 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
+      severity: "error",
+      filePath: baselinePath,
+      message: `locked cells require ${BASELINE_HMAC_KEY_ENV} during baseline check`,
+      details: { lockedCells: lockedCells.map((cell) => cell.id) },
+    });
+    return;
+  }
+  if (!secret) return;
+  if (!baseline.seal) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
+      severity: "error",
+      filePath: baselinePath,
+      message: `baseline is not sealed; set ${BASELINE_HMAC_KEY_ENV} only after creating or updating the baseline with the same key`,
+    });
+    return;
+  }
+  const expectedDigest = baselineHmacDigest(baseline, secret);
+  if (baseline.seal.digest !== expectedDigest) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
+      severity: "error",
+      filePath: baselinePath,
+      message: "baseline seal does not match the checked baseline content",
+      details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
+    });
+  }
 }
 
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
@@ -702,6 +813,10 @@ function humanResolution(title: string, details?: Record<string, unknown>): Sugg
 
 function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
   return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
+}
+
+function owningCells(manifest: CellFenceManifest, relativePath: string): CellManifest[] {
+  return manifest.cells.filter((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
 }
 
 function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {
@@ -864,6 +979,77 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
         }),
       ],
     });
+  }
+}
+
+function symlinkIsRelevant(context: AnalysisContext, symlink: SymlinkEntry): boolean {
+  const relativePath = repoPath(context.rootDir, symlink.path);
+  return SOURCE_EXTENSIONS.includes(path.extname(relativePath))
+    || pathIsGoverned(context.manifest, relativePath)
+    || owningCells(context.manifest, relativePath).length > 0;
+}
+
+function targetIsInsideRoot(rootDir: string, targetPath: string): boolean {
+  const rootRealPath = fs.realpathSync(rootDir);
+  const normalizedRoot = rootRealPath.endsWith(path.sep) ? rootRealPath : `${rootRealPath}${path.sep}`;
+  return targetPath === rootRealPath || targetPath.startsWith(normalizedRoot);
+}
+
+function validateSymlinkTargets(context: AnalysisContext, findings: Finding[]): void {
+  for (const symlink of listSymlinks(context.rootDir)) {
+    if (!symlinkIsRelevant(context, symlink)) continue;
+    const relativePath = repoPath(context.rootDir, symlink.path);
+    if (!symlink.targetPath) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+        severity: "error",
+        filePath: relativePath,
+        message: `governed symlink cannot be resolved: ${relativePath}`,
+        details: { path: relativePath, error: symlink.error },
+        suggestedResolutions: [
+          codeResolution("Replace the symlink with a regular file inside the owning cell or remove the broken link"),
+        ],
+      });
+      continue;
+    }
+    if (!targetIsInsideRoot(context.rootDir, symlink.targetPath)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+        severity: "error",
+        filePath: relativePath,
+        message: `governed symlink points outside the repository: ${relativePath}`,
+        details: { path: relativePath },
+        suggestedResolutions: [
+          codeResolution("Replace the symlink with a checked-in source file or point it inside the owning cell"),
+        ],
+      });
+      continue;
+    }
+
+    const targetRelativePath = repoPath(context.rootDir, symlink.targetPath);
+    const linkOwners = owningCells(context.manifest, relativePath);
+    const targetOwners = owningCells(context.manifest, targetRelativePath);
+    const sharesOwner = linkOwners.some((linkOwner) => targetOwners.some((targetOwner) => targetOwner.id === linkOwner.id));
+    if (linkOwners.length > 0 && !sharesOwner) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+        severity: "error",
+        cellId: linkOwners[0].id,
+        producerCellId: targetOwners[0]?.id,
+        filePath: relativePath,
+        message: `governed symlink ${relativePath} targets ${targetRelativePath} outside its owning cell`,
+        details: {
+          path: relativePath,
+          targetPath: targetRelativePath,
+          linkOwners: linkOwners.map((cell) => cell.id),
+          targetOwners: targetOwners.map((cell) => cell.id),
+        },
+        suggestedResolutions: [
+          codeResolution("Import the producer public entry instead of re-exporting another cell through a symlink"),
+          humanResolution("Ask a human owner to review whether this path should move to the target cell"),
+        ],
+      });
+    }
   }
 }
 
@@ -1984,8 +2170,8 @@ function compareBaseline(
         ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE",
         severity: "error",
         cellId,
-        message: `${cellId} public surface signature hash changed from ${baselineRecord.publicSurfaceHash} to ${metric.publicSurfaceHash}`,
-        details: { previous: baselineRecord.publicSurfaceHash, current: metric.publicSurfaceHash },
+        message: `${cellId} public surface signature hash changed from the accepted baseline`,
+        details: { previous: baselineRecord.publicSurfaceHash },
         suggestedResolutions: [
           codeResolution("Keep the public type/signature contract stable or move changes behind existing exports"),
           baselineResolution("Accept the public signature change in the baseline", locked, { cell: cellId }),
@@ -2076,7 +2262,11 @@ function configuredRuleSeverity(
 }
 
 function ruleIsRequired(context: AnalysisContext, ruleId: string): boolean {
-  return new Set(context.manifest.governance?.requiredRules || []).has(ruleId);
+  return requiredRuleSet(context).has(ruleId);
+}
+
+function requiredRuleSet(context: AnalysisContext): Set<string> {
+  return new Set([...CORE_REQUIRED_RULES, ...(context.manifest.governance?.requiredRules || [])]);
 }
 
 function validateRequiredRuleConfiguration(
@@ -2084,7 +2274,7 @@ function validateRequiredRuleConfiguration(
   cliRuleSeverities: Record<string, ConfiguredRuleSeverity> | undefined,
   findings: Finding[],
 ): void {
-  const requiredRules = new Set(context.manifest.governance?.requiredRules || []);
+  const requiredRules = requiredRuleSet(context);
   if (requiredRules.size === 0) return;
   const checkMap = (source: string, rules: Record<string, ConfiguredRuleSeverity> | undefined, filePath?: string, cellId?: string): void => {
     for (const [ruleId, severity] of Object.entries(rules || {})) {
@@ -2131,8 +2321,8 @@ function applyRuleSeverityPolicy(
       }
       continue;
     }
-    const severity = configuredSeverity || finding.severity;
-    const normalizedFinding: Finding = { ...finding, severity };
+    const severity = ruleIsRequired(context, finding.ruleId) ? "error" : configuredSeverity || finding.severity;
+    const normalizedFinding: Finding = withFindingFingerprint({ ...finding, severity, fingerprint: undefined });
     if (severity === "warning") nextWarnings.push(normalizedFinding);
     else nextFindings.push(normalizedFinding);
   }
@@ -2182,6 +2372,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
         });
       } else {
         baseline = baselineValidation.value;
+        validateBaselineSeal(manifest, baseline, repoPath(rootDir, baselinePath), findings);
       }
     } catch (error) {
       addFinding(findings, {
@@ -2196,6 +2387,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipOverlap(manifest, findings);
   warnWhenOwnershipCoverageDisabled(context, warnings);
   validateOwnershipCoverage(context, findings);
+  validateSymlinkTargets(context, findings);
   validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
   const observedImports: PluginImportReference[] = [];
@@ -2264,7 +2456,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     findings: active.findings,
     warnings: active.warnings,
     metrics,
-    requiredRules: context.manifest.governance?.requiredRules || [],
+    requiredRules: [...requiredRuleSet(context)].sort((left, right) => left.localeCompare(right)),
   });
   const decision = legacyDecisionFromEvaluation(evaluation);
   return {
@@ -2653,20 +2845,15 @@ function checkOptionsForBase(baseRootDir: string, options: ChangedCheckOptions):
   if (options.baselinePath && fs.existsSync(path.resolve(baseRootDir, options.baselinePath))) {
     baseOptions.baselinePath = options.baselinePath;
   }
+  if (options.plugins) baseOptions.plugins = options.plugins;
+  if (options.ruleSeverities) baseOptions.ruleSeverities = options.ruleSeverities;
   const evidencePaths = (options.evidencePaths || []).filter((evidencePath) => fs.existsSync(path.resolve(baseRootDir, evidencePath)));
   if (evidencePaths.length > 0) baseOptions.evidencePaths = evidencePaths;
   return baseOptions;
 }
 
 function findingKey(finding: Finding): string {
-  return JSON.stringify({
-    ruleId: finding.ruleId,
-    severity: finding.severity,
-    filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
-    cellId: finding.cellId,
-    producerCellId: finding.producerCellId,
-    message: finding.message,
-  });
+  return finding.fingerprint || findingFingerprint(finding);
 }
 
 export function checkChangedRepository(options: ChangedCheckOptions = {}): CheckResult {
@@ -2838,13 +3025,47 @@ function readClaimStore(rootDir: string, claimsPathOption: string | undefined, f
   return { path: resolvedPath, claims };
 }
 
+function sleepSync(ms: number): void {
+  const buffer = new SharedArrayBuffer(4);
+  const view = new Int32Array(buffer);
+  Atomics.wait(view, 0, 0, ms);
+}
+
+function acquireClaimStoreLock(filePath: string): () => void {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const lockPath = `${filePath}.lock`;
+  const deadline = Date.now() + 5_000;
+  while (true) {
+    try {
+      const fd = fs.openSync(lockPath, "wx");
+      fs.writeFileSync(fd, `${process.pid}\n${new Date().toISOString()}\n`);
+      return () => {
+        fs.closeSync(fd);
+        try {
+          fs.unlinkSync(lockPath);
+        } catch {
+          // The lock is already gone; release stays idempotent for process cleanup races.
+        }
+      };
+    } catch (error) {
+      const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+      if (code !== "EEXIST" || Date.now() >= deadline) {
+        throw new Error(`failed to acquire claim store lock ${lockPath}: ${errorMessage(error)}`, { cause: error });
+      }
+      sleepSync(25);
+    }
+  }
+}
+
 function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const store: CellFenceClaimStore = {
     schemaVersion: "cellfence.claims.v1",
     claims: [...claims].sort((left, right) => left.id.localeCompare(right.id)),
   };
-  fs.writeFileSync(filePath, `${JSON.stringify(store, null, 2)}\n`);
+  const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(temporaryPath, `${JSON.stringify(store, null, 2)}\n`, { flag: "wx" });
+  fs.renameSync(temporaryPath, filePath);
 }
 
 function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
@@ -3282,73 +3503,94 @@ export function createClaim(options: ClaimCreateOptions): ClaimCreateResult {
   const context = createContext(rootDir, manifest);
   const findings: Finding[] = [];
   const warnings: Finding[] = [];
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
-  const claimsPath = repoPath(rootDir, store.path);
-  const now = options.now || new Date();
-  const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
-  if (!expiresAt) {
+  const claimsStorePath = claimStorePath(rootDir, options.claimsPath);
+  let releaseClaimLock: (() => void) | undefined;
+  try {
+    releaseClaimLock = acquireClaimStoreLock(claimsStorePath);
+  } catch (error) {
     addFinding(findings, {
       ruleId: "CELLFENCE_CLAIM_INVALID",
       severity: "error",
-      filePath: claimsPath,
-      message: "claim requires --ttl like 30m, 2h, 1d or --expires as an ISO timestamp",
+      filePath: repoPath(rootDir, claimsStorePath),
+      message: errorMessage(error),
     });
-  }
-  if (!options.agent || options.agent.trim().length === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: claimsPath,
-      message: "claim requires a non-empty agent",
-    });
-  }
-  const draft: Omit<CellFenceClaim, "id"> = {
-    agent: options.agent.trim(),
-    task: options.task?.trim() || undefined,
-    cells: sortedUnique(options.cells),
-    paths: sortedUnique(options.paths),
-    symbols: sortedUnique(options.symbols),
-    resources: sortedUnique(options.resources),
-    artifactLanes: sortedUnique(options.artifactLanes),
-    createdAt: now.toISOString(),
-    expiresAt: expiresAt || now.toISOString(),
-  };
-  const claimedSurfaceCount = draft.cells.length + draft.paths.length + draft.symbols.length + draft.resources.length + draft.artifactLanes.length;
-  if (claimedSurfaceCount === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: claimsPath,
-      message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
-    });
-  }
-  const claim: CellFenceClaim = {
-    ...draft,
-    id: options.claimId?.trim() || claimIdFor(draft),
-  };
-  validateClaimCells(context, claim, findings, claimsPath);
-  const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
-  for (const existingClaim of activeClaims) {
-    const surfaces = claimConflictSurfaces(existingClaim, claim);
-    if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
-  }
-  if (findings.some((finding) => finding.severity === "error")) {
     return {
-      ...claimResult(findings, warnings, store.claims, activeClaims),
-      claimsPath: store.path,
+      ...claimResult(findings, warnings, [], []),
+      claimsPath: claimsStorePath,
     };
   }
-  const nextClaims = [
-    ...store.claims.filter((candidate) => candidate.id !== claim.id),
-    claim,
-  ];
-  writeClaimStore(store.path, nextClaims);
-  const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
-  return {
-    ...claimResult(findings, warnings, nextClaims, nextActiveClaims),
-    createdClaim: claim,
-    claimsPath: store.path,
-  };
+  try {
+    const store = readClaimStore(rootDir, options.claimsPath, findings);
+    const claimsPath = repoPath(rootDir, store.path);
+    const now = options.now || new Date();
+    const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
+    if (!expiresAt) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: "claim requires --ttl like 30m, 2h, 1d or --expires as an ISO timestamp",
+      });
+    }
+    const agent = options.agent?.trim() || "";
+    if (agent.length === 0) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: "claim requires a non-empty agent",
+      });
+    }
+    const draft: Omit<CellFenceClaim, "id"> = {
+      agent,
+      task: options.task?.trim() || undefined,
+      cells: sortedUnique(options.cells),
+      paths: sortedUnique(options.paths),
+      symbols: sortedUnique(options.symbols),
+      resources: sortedUnique(options.resources),
+      artifactLanes: sortedUnique(options.artifactLanes),
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt || now.toISOString(),
+    };
+    const claimedSurfaceCount = draft.cells.length + draft.paths.length + draft.symbols.length + draft.resources.length + draft.artifactLanes.length;
+    if (claimedSurfaceCount === 0) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
+      });
+    }
+    const claim: CellFenceClaim = {
+      ...draft,
+      id: options.claimId?.trim() || claimIdFor(draft),
+    };
+    validateClaimCells(context, claim, findings, claimsPath);
+    const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
+    for (const existingClaim of activeClaims) {
+      const surfaces = claimConflictSurfaces(existingClaim, claim);
+      if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
+    }
+    if (findings.some((finding) => finding.severity === "error")) {
+      return {
+        ...claimResult(findings, warnings, store.claims, activeClaims),
+        claimsPath: store.path,
+      };
+    }
+    const nextClaims = [
+      ...store.claims.filter((candidate) => candidate.id !== claim.id),
+      claim,
+    ];
+    writeClaimStore(store.path, nextClaims);
+    const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
+    return {
+      ...claimResult(findings, warnings, nextClaims, nextActiveClaims),
+      createdClaim: claim,
+      claimsPath: store.path,
+    };
+  } finally {
+    releaseClaimLock?.();
+  }
 }
 
 export function listClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
@@ -3820,7 +4062,7 @@ export function createWaiverRequest(options: WaiverRequestOptions): WaiverReques
 }
 
 export function writeBaselineFile(filePath: string, baseline: CellFenceBaseline): void {
-  fs.writeFileSync(filePath, `${JSON.stringify(baseline, null, 2)}\n`);
+  fs.writeFileSync(filePath, `${JSON.stringify(sealBaselineIfConfigured(baseline), null, 2)}\n`);
 }
 
 export function defaultBaselinePath(rootDir = process.cwd()): string {

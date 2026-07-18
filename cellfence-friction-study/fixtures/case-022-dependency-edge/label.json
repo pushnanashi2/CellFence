@@ -1,0 +1,12 @@
+{
+  "id": "case-022-dependency-edge",
+  "template": "dependency-edge",
+  "expectedRule": "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
+  "positiveLabel": true,
+  "expectedMarkers": [
+    {
+      "path": "src/logger/public.ts",
+      "text": "logReport7"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "check",
+  "ok": false,
+  "errorRuleIds": [
+    "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+  ],
+  "warningRuleIds": [
+    "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
+  ]
+}

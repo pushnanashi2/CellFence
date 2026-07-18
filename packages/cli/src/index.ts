@@ -387,7 +387,6 @@ function findingFingerprint(finding: Finding): string {
     filePath: finding.filePath,
     cellId: finding.cellId,
     producerCellId: finding.producerCellId,
-    message: finding.message,
     details: finding.details,
   })).digest("hex");
 }
