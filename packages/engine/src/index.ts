@@ -2738,7 +2738,7 @@ function gitMetadataFailure(message: string): CheckResult {
 }
 
 function assertGitCommit(rootDir: string, ref: string): string {
-  return gitCommand(rootDir, ["rev-parse", "--verify", `${ref}^{commit}`]).trim();
+  return gitCommand(rootDir, ["rev-list", "-1", ref]);
 }
 
 function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
