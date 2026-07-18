@@ -382,7 +382,7 @@ function resolveCommand(commandName: string): string {
   if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
   const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
   const extensions = process.platform === "win32" && !path.extname(commandName)
-    ? ["", ...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean)]
+    ? [...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean), ""]
     : [""];
   for (const directory of pathEntries) {
     for (const extension of extensions) {
@@ -391,6 +391,15 @@ function resolveCommand(commandName: string): string {
     }
   }
   return commandName;
+}
+
+type ExecCommandOptions = NonNullable<Parameters<typeof execFileSync>[2]>;
+
+function execCommandSync(commandName: string, args: string[], options: ExecCommandOptions): string {
+  const commandPath = resolveCommand(commandName);
+  const extension = path.extname(commandPath).toLowerCase();
+  const shell = process.platform === "win32" && (extension === ".cmd" || extension === ".bat");
+  return execFileSync(commandPath, args, { ...options, shell }) as string;
 }
 
 function findingFingerprint(finding: Finding): string {
@@ -409,7 +418,7 @@ function findingFingerprint(finding: Finding): string {
 function currentCommit(rootDir: string): string | null {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
   try {
-    return execFileSync(resolveCommand("git"), ["rev-parse", "HEAD"], {
+    return execCommandSync("git", ["rev-parse", "HEAD"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1249,7 +1258,7 @@ type DoctorResult = {
 function githubRepoFromRemote(rootDir: string): string | undefined {
   let remote: string;
   try {
-    remote = execFileSync(resolveCommand("git"), ["config", "--get", "remote.origin.url"], {
+    remote = execCommandSync("git", ["config", "--get", "remote.origin.url"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1265,7 +1274,7 @@ function githubRepoFromRemote(rootDir: string): string | undefined {
 
 function ghCliAvailable(rootDir: string): boolean {
   try {
-    execFileSync(resolveCommand("gh"), ["--version"], {
+    execCommandSync("gh", ["--version"], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -1344,7 +1353,7 @@ function commandDoctor(parsed: ParsedArgs): number {
     });
   } else {
     try {
-      const protection = JSON.parse(execFileSync(resolveCommand("gh"), ["api", `repos/${repo}/branches/${branch}/protection`], {
+      const protection = JSON.parse(execCommandSync("gh", ["api", `repos/${repo}/branches/${branch}/protection`], {
         cwd: parsed.rootDir,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],

@@ -2553,7 +2553,7 @@ function resolveCommand(commandName: string): string {
   if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
   const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
   const extensions = process.platform === "win32" && !path.extname(commandName)
-    ? ["", ...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean)]
+    ? [...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean), ""]
     : [""];
   for (const directory of pathEntries) {
     for (const extension of extensions) {
@@ -2562,6 +2562,15 @@ function resolveCommand(commandName: string): string {
     }
   }
   return commandName;
+}
+
+type ExecCommandOptions = NonNullable<Parameters<typeof execFileSync>[2]>;
+
+function execCommandSync(commandName: string, args: string[], options: ExecCommandOptions): string {
+  const commandPath = resolveCommand(commandName);
+  const extension = path.extname(commandPath).toLowerCase();
+  const shell = process.platform === "win32" && (extension === ".cmd" || extension === ".bat");
+  return execFileSync(commandPath, args, { ...options, shell }) as string;
 }
 
 /* c8 ignore next 3 -- Optional fields only make prune output ordering deterministic; rule behavior is asserted through candidate contents. */
@@ -2691,7 +2700,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
 
 function gitCommand(rootDir: string, args: string[]): string {
   try {
-    return execFileSync(resolveCommand("git"), args, {
+    return execCommandSync("git", args, {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
