@@ -41,7 +41,7 @@ class SubjectFailure extends Error {
 }
 
 function usage() {
-  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref]
+  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts]
 
 Runs a frozen-corpus CellFence precision/onboarding pass.
 The script clones each subject at an exact commit, prepares a manifest, runs
@@ -56,6 +56,8 @@ function parseArgs(argv) {
     outPath: defaultOutPath,
     dryRun: false,
     allowFloatingRef: false,
+    cloneMode: "full",
+    discardCheckouts: false,
     maxSubjects: undefined,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -84,6 +86,13 @@ function parseArgs(argv) {
       parsed.dryRun = true;
     } else if (argument === "--allow-floating-ref") {
       parsed.allowFloatingRef = true;
+    } else if (argument === "--clone-mode") {
+      parsed.cloneMode = argv[index + 1] || "";
+      index += 1;
+    } else if (argument.startsWith("--clone-mode=")) {
+      parsed.cloneMode = argument.slice("--clone-mode=".length);
+    } else if (argument === "--discard-checkouts") {
+      parsed.discardCheckouts = true;
     } else if (argument === "--help" || argument === "-h") {
       usage();
       process.exit(0);
@@ -94,6 +103,9 @@ function parseArgs(argv) {
   if (!parsed.corpusPath) throw new Error("--corpus is required");
   if (parsed.maxSubjects !== undefined && (!Number.isInteger(parsed.maxSubjects) || parsed.maxSubjects < 1)) {
     throw new Error("--max-subjects must be a positive integer");
+  }
+  if (!["full", "shallow"].includes(parsed.cloneMode)) {
+    throw new Error("--clone-mode must be full or shallow");
   }
   return parsed;
 }
@@ -368,7 +380,10 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
 function cloneSubject(subject, subjectDir, options) {
   const checkoutDir = path.join(subjectDir, "checkout");
   fs.rmSync(checkoutDir, { recursive: true, force: true });
-  const clone = run("git", ["clone", "--quiet", "--no-tags", subject.repository, checkoutDir], {
+  const cloneArgs = ["clone", "--quiet", "--no-tags"];
+  if (options.cloneMode === "shallow") cloneArgs.push("--depth", "1", "--filter=blob:none");
+  cloneArgs.push(subject.repository, checkoutDir);
+  const clone = run("git", cloneArgs, {
     cwd: options.workDir,
     timeoutMs: commandTimeouts.clone,
   });
@@ -394,6 +409,15 @@ function cloneSubject(subject, subjectDir, options) {
   writeCommandLogs(subjectDir, "tree", tree);
   if (tree.status !== 0) commandFailure("rev-parse", tree);
   return { checkoutDir, actualCommit, gitTree: tree.stdout.trim() };
+}
+
+function discardCheckoutIfRequested(subjectResult, subjectDir, options) {
+  if (!options.discardCheckouts || options.dryRun) return subjectResult;
+  fs.rmSync(path.join(subjectDir, "checkout"), { recursive: true, force: true });
+  return {
+    ...subjectResult,
+    checkoutDiscarded: true,
+  };
 }
 
 function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
@@ -564,12 +588,13 @@ function runSubject(subject, corpusDir, options) {
     }
     const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.effectivePath);
     const expectation = expectationResult(subject.expected, check);
-    return {
+    const result = {
       ...base,
       status: check.status,
       commit: clone.actualCommit,
       gitTree: clone.gitTree,
       subjectDir,
+      cloneMode: options.cloneMode,
       subjectWorktreeCleanBeforeManifest: worktreeBeforeManifest.clean,
       subjectWorktreeCleanBeforeCheck: worktreeBeforeCheck.clean,
       manifest,
@@ -578,8 +603,9 @@ function runSubject(subject, corpusDir, options) {
       completedAt: new Date().toISOString(),
       durationMs: Math.round(performance.now() - startedAtMs),
     };
+    return discardCheckoutIfRequested(result, subjectDir, options);
   } catch (error) {
-    return {
+    const result = {
       ...base,
       status: error instanceof SubjectFailure ? `${error.stage}_failed` : "failed",
       stage: error instanceof SubjectFailure ? error.stage : undefined,
@@ -592,6 +618,7 @@ function runSubject(subject, corpusDir, options) {
       completedAt: new Date().toISOString(),
       durationMs: Math.round(performance.now() - startedAtMs),
     };
+    return discardCheckoutIfRequested(result, subjectDir, options);
   }
 }
 
@@ -657,6 +684,8 @@ function main() {
     corpusPath: options.corpusPath,
     dryRun: options.dryRun,
     allowFloatingRef: options.allowFloatingRef,
+    cloneMode: options.cloneMode,
+    discardCheckouts: options.discardCheckouts,
     environment: environmentMetadata(options.corpusPath),
     subjects,
     summary: summarize(subjects),

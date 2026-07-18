@@ -67,6 +67,18 @@ Build the CLI and run:
 npm run research:corpus -- --corpus docs/research/corpora/ts-monorepo-50.json --out reports/corpus/ts-monorepo-50.json
 ```
 
+For larger onboarding runs where disk is the limiting factor, use shallow clones
+and discard subject checkouts after each check:
+
+```bash
+npm run research:corpus -- \
+  --corpus reports/corpus/oss-ts-js-200-2026-07-18.corpus.json \
+  --out reports/corpus/oss-ts-js-200-2026-07-18.json \
+  --workdir tmp/corpus-precision-study-200 \
+  --clone-mode shallow \
+  --discard-checkouts
+```
+
 The script:
 
 - clones each repository into a hash-suffixed subject directory under
@@ -80,6 +92,9 @@ The script:
 - writes a summary JSON report under `reports/`;
 - records environment metadata, manifest SHA-256, actual commit, Git tree
   hashes, and whether the subject worktree was clean before checking.
+
+With `--discard-checkouts`, the subject checkout directory is removed after the
+run while command logs, audit logs, and control manifests remain.
 
 Subject status is classified as:
 

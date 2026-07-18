@@ -425,6 +425,53 @@ test("corpus precision study supports infer manifests with the default path", ()
   }
 });
 
+test("corpus precision study can use shallow clones and discard checkouts after preserving evidence", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-discard-"));
+  try {
+    const sourceRepo = path.join(rootDir, "source");
+    fs.mkdirSync(sourceRepo, { recursive: true });
+    const commit = createSimpleRepository(sourceRepo, { manifest: false });
+    const corpusPath = path.join(rootDir, "corpus.json");
+    const outPath = path.join(rootDir, "report.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "discard",
+          repository: sourceRepo,
+          commit,
+          manifest: { strategy: "infer" },
+        },
+      ],
+    });
+
+    const result = runCorpusStudy([
+      "--corpus",
+      corpusPath,
+      "--workdir",
+      path.join(rootDir, "work"),
+      "--out",
+      outPath,
+      "--clone-mode",
+      "shallow",
+      "--discard-checkouts",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
+    assert.equal(report.cloneMode, "shallow");
+    assert.equal(report.discardCheckouts, true);
+    assert.equal(report.subjects[0].status, "checked_clean");
+    assert.equal(report.subjects[0].cloneMode, "shallow");
+    assert.equal(report.subjects[0].checkoutDiscarded, true);
+    assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "checkout")), false);
+    assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "control", "cellfence.manifest.json")), true);
+    assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "logs", "check.audit.jsonl")), true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision study infer does not follow a dangling checkout manifest symlink", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-infer-symlink-"));
   try {

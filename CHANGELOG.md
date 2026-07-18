@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Add shallow corpus clone mode and optional checkout disposal so larger onboarding studies can preserve evidence without retaining every cloned worktree.
 
 ## 0.1.13 - 2026-07-18
 
