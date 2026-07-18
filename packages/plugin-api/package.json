@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/plugin-api",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Stable CellFence plugin API types and helpers.",
   "license": "Apache-2.0",
   "type": "module",
@@ -41,7 +41,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/schema": "0.1.12",
+    "@cellfence/schema": "0.1.13",
     "typescript": "^5.5.4"
   }
 }

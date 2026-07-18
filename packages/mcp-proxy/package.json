@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/mcp-proxy",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "CellFence runtime guard for MCP tool calls.",
   "license": "Apache-2.0",
   "type": "module",
@@ -43,7 +43,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.1.12",
+    "@cellfence/engine": "0.1.13",
     "@modelcontextprotocol/sdk": "1.29.0"
   }
 }

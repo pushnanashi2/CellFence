@@ -103,6 +103,53 @@ function git(rootDir, args) {
   return result.stdout.trim();
 }
 
+test("engine treats sibling owned path prefixes as separate path segments", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-sibling-owned-paths-"));
+  try {
+    writeCell(rootDir, "user");
+    writeCell(rootDir, "users");
+    writeCell(rootDir, "cell1");
+    writeCell(rootDir, "cell10");
+    writeManifest(rootDir, [
+      baseCell("user"),
+      baseCell("users"),
+      baseCell("cell1"),
+      baseCell("cell10"),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, true, JSON.stringify(result.findings));
+    assert.equal(result.findings.some((finding) => finding.ruleId === "CELLFENCE_OWNERSHIP_OVERLAP"), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine still rejects nested owned path overlap on a segment boundary", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-nested-owned-paths-"));
+  try {
+    writeCell(rootDir, "shared");
+    fs.mkdirSync(path.join(rootDir, "src/shared/narrow"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/shared/narrow/public.ts"), "export const narrow = true;\n");
+    writeManifest(rootDir, [
+      baseCell("shared"),
+      baseCell("narrow", {
+        ownedPaths: ["src/shared/narrow/**"],
+        publicEntry: "src/shared/narrow/public.ts",
+        publicSymbols: ["narrow"],
+      }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_OWNERSHIP_OVERLAP"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine handles invalid runtime evidence inputs without false green results", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-evidence-"));
   try {

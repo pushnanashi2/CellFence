@@ -9,7 +9,7 @@
 [![CI](https://github.com/pushnanashi2/CellFence/actions/workflows/ci.yml/badge.svg)](https://github.com/pushnanashi2/CellFence/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/cellfence)](https://www.npmjs.com/package/cellfence)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-<!-- TODO: add npm provenance badge after enabling trusted publishing -->
+<!-- TODO: add an npm provenance badge once registry badge support is stable for the trusted-published package set -->
 
 CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, resource, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import and public-surface support. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
 
@@ -307,14 +307,18 @@ Threat model: [docs/threat-model.md](docs/threat-model.md).
 | Command | Purpose |
 |---|---|
 | `cellfence init [--preset python-service\|polyglot-monorepo]` | Write a starter manifest or a checked preset |
+| `cellfence init --from <glob>` / `manifest verify --from <glob>` | Convert and verify service descriptors before they become manifests |
 | `cellfence check [--changed --base <ref>] [--json\|--format markdown\|--format sarif]` | Validate the manifest contract and emit human, PR, or code-scanning output |
 | `cellfence context --cell <id> [--json\|--format agents-md]` | Emit a cell's contract for humans or agents |
 | `cellfence install [--target agents-md\|claude-md] [--check\|--uninstall]` | Manage checksumed agent instruction blocks |
 | `cellfence serve --mcp` | Expose CellFence context, checks, claims, and explanations over MCP stdio |
 | `cellfence graph [--format mermaid\|--json]` | Render the declared and observed dependency graph |
+| `cellfence prune` / `doctor` / `lab` | Find dead declarations, inspect CI/repo setup, and run local readiness probes |
 | `cellfence claim create\|check\|list` | Coordination leases for parallel agents |
-| `cellfence baseline create\|check\|update` | Manage the architectural ratchet |
-| `cellfence evidence check --evidence <file>` | Verify runtime resource evidence |
+| `cellfence task check` | Verify the current diff stays inside a task manifest |
+| `cellfence baseline create\|check\|update\|sign\|verify\|audit` | Manage and seal the architectural ratchet |
+| `cellfence evidence check\|commit` | Verify runtime resource evidence and commit-derived evidence |
+| `cellfence docs check\|stamp` / `mutation check` | Guard design-doc stamps and mutation-score reports |
 | `cellfence waivers list\|request` | Time-boxed, reviewed exceptions |
 
 Exit codes: `0` no violations · `1` governance violations · `2` configuration or manifest error · `3` internal tool error.

@@ -828,9 +828,7 @@ function validateOwnershipOverlap(manifest: CellFenceManifest, findings: Finding
       const rightCell = manifest.cells[rightIndex];
       for (const leftPattern of leftCell.ownedPaths) {
         for (const rightPattern of rightCell.ownedPaths) {
-          const leftPrefix = literalPrefix(leftPattern);
-          const rightPrefix = literalPrefix(rightPattern);
-          if (leftPrefix && rightPrefix && (leftPrefix.startsWith(rightPrefix) || rightPrefix.startsWith(leftPrefix))) {
+          if (pathPatternsOverlap(leftPattern, rightPattern)) {
             addFinding(findings, {
               ruleId: "CELLFENCE_OWNERSHIP_OVERLAP",
               severity: "error",

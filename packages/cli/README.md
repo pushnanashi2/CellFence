@@ -38,16 +38,27 @@ CellFence check failed.
 
 ```bash
 npx cellfence init [--preset python-service|polyglot-monorepo]
+npx cellfence init --from systems/*/service.json
 npx cellfence check [--changed --base origin/main] [--json|--format markdown|--format sarif]
+npx cellfence manifest verify --from systems/*/service.json [--json]
 npx cellfence context --cell <id> [--json|--format agents-md]
 npx cellfence context --auto-allocate --task "task text" [--json]
 npx cellfence install --target agents-md --file AGENTS.md [--check|--uninstall]
 npx cellfence serve --mcp
 npx cellfence graph [--format mermaid|--json]
+npx cellfence prune [--json]
+npx cellfence doctor [--repo owner/name] [--branch main] [--json]
+npx cellfence lab [--json]
 npx cellfence claim create --agent <id> --cell <id> --ttl 2h
 npx cellfence claim check --agent <id>
+npx cellfence claim list
+npx cellfence task check --task .cellfence/tasks/task.json [--json]
 npx cellfence baseline create|check|update
+npx cellfence baseline sign|verify|audit
 npx cellfence evidence check --evidence resource-evidence.json
+npx cellfence evidence commit [--base origin/main] [--head HEAD] [--json]
+npx cellfence docs check|stamp
+npx cellfence mutation check --report reports/mutation/mutation.json [--min-score 90]
 npx cellfence waivers list|request
 ```
 

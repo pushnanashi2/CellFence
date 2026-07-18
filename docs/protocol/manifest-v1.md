@@ -124,7 +124,7 @@ CellFence v0.x enforces:
 
 - manifest shape;
 - duplicate cell IDs;
-- overlapping owned path prefixes;
+- overlapping owned paths using segment-aware literal prefixes plus conservative glob checks;
 - strict governed-source ownership when enabled;
 - governed symlinks that point outside the owning cell, outside the repository, or to broken targets;
 - public entries outside declared ownership;

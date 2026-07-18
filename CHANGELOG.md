@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.13 - 2026-07-18
+
+- Fix owned path overlap detection so sibling path prefixes such as `src/user/**` and `src/users/**` no longer trigger `CELLFENCE_OWNERSHIP_OVERLAP`, while nested ownership such as `src/shared/**` and `src/shared/narrow/**` still fails.
+- Bump all workspace packages and internal `@cellfence/*` dependency pins from `0.1.12` to `0.1.13` for the next pre-release package set.
+- Expand README and package README command coverage for shipped `doctor`, `prune`, `task`, `docs`, `mutation`, `manifest verify`, `evidence commit`, and baseline sealing commands.
+- Clarify that owned-path prefix overlap is segment-aware, arbitrary glob intersection remains conservative, and npm Trusted Publisher configuration is enabled for the configured publish set while first-time scoped package ownership remains separate.
 - Align the reusable GitHub Action wrapper with the published CLI version and add release verification for future Action/MCP version drift.
 - Add `cellfence check --format markdown` for PR-ready summaries and `--format sarif` for GitHub Code Scanning ingestion.
 - Add `cellfence init --preset python-service` and `--preset polyglot-monorepo` with checked starter source files.
