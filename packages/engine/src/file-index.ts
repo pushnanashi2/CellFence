@@ -26,7 +26,7 @@ export type SymlinkEntry = {
 };
 
 export function normalizePath(filePath: string): string {
-  return filePath.split(path.sep).join("/");
+  return filePath.replace(/\\/g, "/");
 }
 
 export function repoPath(rootDir: string, filePath: string): string {

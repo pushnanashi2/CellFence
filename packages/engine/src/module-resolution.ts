@@ -60,13 +60,14 @@ export function literalText(node: ts.Node | undefined): string | undefined {
 }
 
 export function readPathAliases(rootDir: string): PathAlias[] {
-  const tsconfigPath = path.join(rootDir, "tsconfig.json");
+  const normalizedRootDir = normalizePath(rootDir);
+  const tsconfigPath = normalizePath(path.join(rootDir, "tsconfig.json"));
   // Stryker disable next-line ConditionalExpression: missing config and TypeScript parse failure both resolve to an empty alias set.
   if (!fs.existsSync(tsconfigPath)) return [];
   const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
   // Stryker disable next-line ConditionalExpression: invalid config is fail-closed to an empty alias set, matching absent paths.
   if (configFile.error) return [];
-  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, rootDir);
+  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, normalizedRootDir);
   const paths = parsedConfig.options.paths;
   if (!paths) return [];
   const baseUrl = parsedConfig.options.baseUrl || rootDir;
@@ -94,26 +95,28 @@ function sourceExtensionsForRuntimeSpecifier(extension: string): string[] {
 
 export function candidateModulePaths(basePath: string): string[] {
   const candidates: string[] = [];
-  const extension = path.extname(basePath);
-  addUniquePath(candidates, basePath);
+  const normalizedBasePath = normalizePath(basePath);
+  const extension = path.extname(normalizedBasePath);
+  addUniquePath(candidates, normalizedBasePath);
   if (extension) {
-    const basePathWithoutExtension = basePath.slice(0, -extension.length);
+    const basePathWithoutExtension = normalizedBasePath.slice(0, -extension.length);
     for (const sourceExtension of sourceExtensionsForRuntimeSpecifier(extension)) {
       addUniquePath(candidates, `${basePathWithoutExtension}${sourceExtension}`);
     }
     return candidates;
   }
   for (const sourceExtension of SOURCE_EXTENSIONS) {
-    addUniquePath(candidates, `${basePath}${sourceExtension}`);
+    addUniquePath(candidates, `${normalizedBasePath}${sourceExtension}`);
   }
   for (const sourceExtension of SOURCE_EXTENSIONS) {
-    addUniquePath(candidates, path.join(basePath, `index${sourceExtension}`));
+    addUniquePath(candidates, `${normalizedBasePath}/index${sourceExtension}`);
   }
   return candidates;
 }
 
 function candidatePythonModulePaths(basePath: string): string[] {
-  return [`${basePath}.py`, path.join(basePath, "__init__.py")];
+  const normalizedBasePath = normalizePath(basePath);
+  return [`${normalizedBasePath}.py`, `${normalizedBasePath}/__init__.py`];
 }
 
 function existingFileFromCandidates(candidates: string[]): string | undefined {

@@ -44,6 +44,23 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function writeFakeNodeCommand(binDir, commandName, script) {
+  fs.mkdirSync(binDir, { recursive: true });
+  const scriptPath = path.join(binDir, `${commandName}-fake.cjs`);
+  fs.writeFileSync(scriptPath, script);
+  const posixPath = path.join(binDir, commandName);
+  fs.writeFileSync(posixPath, `#!/usr/bin/env node\n${script}`);
+  fs.chmodSync(posixPath, 0o755);
+  fs.writeFileSync(path.join(binDir, `${commandName}.cmd`), `@echo off\r\n"${process.execPath}" "%~dp0${commandName}-fake.cjs" %*\r\n`);
+}
+
+function findExecutable(commandName) {
+  const locator = process.platform === "win32" ? "where.exe" : "which";
+  const result = spawnSync(locator, [commandName], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  return result.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)[0];
+}
+
 function writeCell(rootDir, cellId, sourceText = `export const ${cellId} = true;\n`) {
   fs.mkdirSync(path.join(rootDir, "src", cellId), { recursive: true });
   fs.writeFileSync(path.join(rootDir, "src", cellId, "public.ts"), sourceText);
@@ -655,7 +672,7 @@ test("engine changed check finding identity is stable across message wording cha
 test("engine changed check cleanup does not hide a successful result when worktree removal fails", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-worktree-cleanup-"));
   const fakeBin = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-fake-git-"));
-  const realGit = spawnSync("which", ["git"], { encoding: "utf8" }).stdout.trim();
+  const realGit = findExecutable("git");
   const previousPath = process.env.PATH;
   try {
     initGit(rootDir);
@@ -664,19 +681,17 @@ test("engine changed check cleanup does not hide a successful result when worktr
     git(rootDir, ["add", "."]);
     git(rootDir, ["commit", "-m", "base"]);
 
-    const fakeGitPath = path.join(fakeBin, "git");
-    fs.writeFileSync(
-      fakeGitPath,
+    writeFakeNodeCommand(
+      fakeBin,
+      "git",
       [
-        "#!/bin/sh",
-        "if [ \"$1\" = \"worktree\" ] && [ \"$2\" = \"remove\" ]; then",
-        "  exit 1",
-        "fi",
-        `exec ${JSON.stringify(realGit)} "$@"`,
+        "const { spawnSync } = require('node:child_process');",
+        "if (process.argv[2] === 'worktree' && process.argv[3] === 'remove') process.exit(1);",
+        `const result = spawnSync(${JSON.stringify(realGit)}, process.argv.slice(2), { stdio: 'inherit' });`,
+        "process.exit(result.status ?? 1);",
         "",
       ].join("\n"),
     );
-    fs.chmodSync(fakeGitPath, 0o755);
     process.env.PATH = `${fakeBin}${path.delimiter}${previousPath}`;
 
     const result = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
@@ -696,9 +711,7 @@ test("engine changed check reports git stderr when metadata commands fail", () =
   try {
     writeCell(rootDir, "core");
     writeManifest(rootDir, [baseCell("core")]);
-    const fakeGitPath = path.join(fakeBin, "git");
-    fs.writeFileSync(fakeGitPath, "#!/bin/sh\necho 'fatal: synthetic metadata failure' >&2\nexit 128\n");
-    fs.chmodSync(fakeGitPath, 0o755);
+    writeFakeNodeCommand(fakeBin, "git", "console.error('fatal: synthetic metadata failure');\nprocess.exit(128);\n");
     process.env.PATH = `${fakeBin}${path.delimiter}${previousPath}`;
 
     const result = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });

@@ -1332,14 +1332,16 @@ test("CLI prune reports a clean human result when declarations are all trimmed",
 function writeFakeGh(binDir, protection) {
   fs.mkdirSync(binDir, { recursive: true });
   const script = [
-    "#!/usr/bin/env node",
     "if (process.argv.includes('--version')) { console.log('gh version test'); process.exit(0); }",
     "if (process.env.CELLFENCE_FAKE_GH_FAIL === '1') { console.error('protection missing'); process.exit(1); }",
     "if (process.argv[2] === 'api') { console.log(process.env.CELLFENCE_FAKE_PROTECTION); process.exit(0); }",
     "process.exit(1);",
     "",
   ].join("\n");
-  fs.writeFileSync(path.join(binDir, "gh"), script);
+  const scriptPath = path.join(binDir, "gh-fake.cjs");
+  fs.writeFileSync(scriptPath, script);
+  fs.writeFileSync(path.join(binDir, "gh"), `#!/usr/bin/env node\n${script}`);
+  fs.writeFileSync(path.join(binDir, "gh.cmd"), `@echo off\r\n"${process.execPath}" "%~dp0gh-fake.cjs" %*\r\n`);
   fs.chmodSync(path.join(binDir, "gh"), 0o755);
   return {
     PATH: `${binDir}${path.delimiter}${process.env.PATH}`,

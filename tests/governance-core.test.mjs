@@ -345,7 +345,7 @@ test("pure evaluator dependency closure excludes filesystem, process, git, and c
       if (specifier.startsWith("./")) pendingFiles.push(path.join(path.dirname(filePath), `${specifier.slice(2).replace(/\.js$/, "")}.ts`));
     }
   }
-  assert.deepEqual([...checkedFiles].map((filePath) => path.relative(root, filePath)).sort(), [
+  assert.deepEqual([...checkedFiles].map((filePath) => path.relative(root, filePath).replace(/\\/g, "/")).sort(), [
     "packages/engine/src/governance/evaluator.ts",
     "packages/engine/src/governance/model.ts",
   ]);
