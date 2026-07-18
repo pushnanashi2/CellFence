@@ -6,7 +6,7 @@
 Version 0.x is deliberately narrow:
 
 - Node.js 20 or later;
-- strongest static source analysis for TypeScript and JavaScript; Python support covers `.py` source ownership, AST-based import extraction, public symbols, public-surface hashes, and common `pyproject.toml` / `setup.cfg` package roots;
+- strongest static source analysis for TypeScript and JavaScript; Python support covers `.py` source ownership, AST-based import extraction, public symbols, public-surface hashes, and common `pyproject.toml`, `setup.cfg`, and static `setup.py` package roots;
 - one public entry per cell;
 - repository-local cells only;
 - file-path artifact lanes only;

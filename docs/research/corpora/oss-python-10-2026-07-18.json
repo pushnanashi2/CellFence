@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Frozen public OSS Python onboarding corpus generated on 2026-07-18. This is an infer-manifest onboarding study, not a precision corpus.",
+  "selectionPolicy": {
+    "date": "2026-07-18",
+    "source": "Hand-picked public Python packages and service/framework repositories with exact default-branch HEAD commits recorded before running.",
+    "constraints": [
+      "public repositories",
+      "no target dependency installation",
+      "no target package scripts",
+      "exact 40-hex commit recorded before running",
+      "manifest.strategy=infer with production scope"
+    ],
+    "safety": "Static CellFence checks only; no installs, package scripts, PRs, issues, or target repository writes.",
+    "interpretation": "manifest.strategy=infer results measure Python onboarding and detector pressure only; they are excluded from precision denominators until reviewed manifests exist."
+  },
+  "subjects": [
+    {
+      "id": "psf-requests-2026-07-18",
+      "repository": "https://github.com/psf/requests.git",
+      "commit": "f361ead047be5cb873174218582f7d8b9fcd9f49",
+      "metadata": {
+        "nameWithOwner": "psf/requests",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pallets-flask-2026-07-18",
+      "repository": "https://github.com/pallets/flask.git",
+      "commit": "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+      "metadata": {
+        "nameWithOwner": "pallets/flask",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "encode-httpx-2026-07-18",
+      "repository": "https://github.com/encode/httpx.git",
+      "commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "metadata": {
+        "nameWithOwner": "encode/httpx",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tiangolo-typer-2026-07-18",
+      "repository": "https://github.com/tiangolo/typer.git",
+      "commit": "60af34b60ab2650a74af32c6ce340c5cfbceb3d8",
+      "metadata": {
+        "nameWithOwner": "tiangolo/typer",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pydantic-pydantic-2026-07-18",
+      "repository": "https://github.com/pydantic/pydantic.git",
+      "commit": "428b0dba8924c8c3c588458928fb69c9eb203d3d",
+      "metadata": {
+        "nameWithOwner": "pydantic/pydantic",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pytest-dev-pytest-2026-07-18",
+      "repository": "https://github.com/pytest-dev/pytest.git",
+      "commit": "67a174fcee355334c53588be2eeba8df702477e9",
+      "metadata": {
+        "nameWithOwner": "pytest-dev/pytest",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "textualize-rich-2026-07-18",
+      "repository": "https://github.com/Textualize/rich.git",
+      "commit": "9d8f9a372cc5916fd4781fec207ced7ddac2f08f",
+      "metadata": {
+        "nameWithOwner": "Textualize/rich",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "python-poetry-poetry-2026-07-18",
+      "repository": "https://github.com/python-poetry/poetry.git",
+      "commit": "f46702336862f30050d5c641d5ed6f7568ded793",
+      "metadata": {
+        "nameWithOwner": "python-poetry/poetry",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pypa-pip-2026-07-18",
+      "repository": "https://github.com/pypa/pip.git",
+      "commit": "a986e65c81aa50166bd1c564469ca3223b835fb0",
+      "metadata": {
+        "nameWithOwner": "pypa/pip",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "celery-celery-2026-07-18",
+      "repository": "https://github.com/celery/celery.git",
+      "commit": "d96df921e2e7bf4f520295e344b094952fe1a870",
+      "metadata": {
+        "nameWithOwner": "celery/celery",
+        "primaryLanguage": "Python"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}

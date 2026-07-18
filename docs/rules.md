@@ -54,7 +54,7 @@ CellFence v0.x analyzes:
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
 - tsconfig `compilerOptions.paths` aliases, including aliases inherited through `extends`, that resolve to repository files;
-- Python `.py` source ownership, AST-extracted `import` and `from ... import ...` module references, common package roots from `pyproject.toml` / `setup.cfg`, and public entries described by literal `__all__` or top-level declarations;
+- Python `.py` source ownership, AST-extracted `import` and `from ... import ...` module references, common package roots from `pyproject.toml`, `setup.cfg`, and static `setup.py`, and public entries described by literal `__all__` or top-level declarations;
 - selected static string resource access for file, database, queue, and HTTP patterns;
 - Prisma model delegate calls when `schema.prisma` is present;
 - selected TypeORM entity, repository, and query builder calls;
@@ -70,7 +70,7 @@ CellFence v0.x analyzes:
 
 Computed dynamic imports and computed CommonJS `require()` calls are reported as unsupported fail-closed findings rather than silently ignored.
 
-NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/` and manifest-derived package roots. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
+NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/`, manifest-derived package roots, and common Python packaging metadata. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
 
 The repository CI includes a synthetic scale benchmark for 10,000 files / 20 cells, 50,000 files / 100 cells, and 100,000 files / 300 cells. It is a regression tripwire for file discovery, ownership indexing, and low-signal source scanning; it is not a universal performance guarantee for every monorepo shape.
 

@@ -93,6 +93,20 @@ npm run research:corpus -- \
   --infer-scope production
 ```
 
+The same harness is used for Python onboarding evidence. The first frozen Python
+pilot is documented in
+[oss-python-10-2026-07-18.md](oss-python-10-2026-07-18.md):
+
+```bash
+npm run research:corpus -- \
+  --corpus docs/research/corpora/oss-python-10-2026-07-18.json \
+  --out reports/corpus/oss-python-10-2026-07-18.json \
+  --workdir tmp/corpus-python-10-2026-07-18 \
+  --clone-mode shallow \
+  --discard-checkouts \
+  --infer-scope production
+```
+
 The script:
 
 - clones each repository into a hash-suffixed subject directory under

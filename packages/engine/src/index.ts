@@ -1617,6 +1617,9 @@ function pythonSourceRootsFromPyproject(rootDir: string): string[] {
   for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
     addPythonRoot(roots, match[1]);
   }
+  for (const match of text.matchAll(/\bwhere\s*=\s*\[([^\]]+)\]/g)) {
+    for (const rootMatch of match[1].matchAll(/["']([^"']+)["']/g)) addPythonRoot(roots, rootMatch[1]);
+  }
   for (const match of text.matchAll(/\bfrom\s*=\s*["']([^"']+)["']/g)) {
     addPythonRoot(roots, match[1]);
   }
@@ -1642,10 +1645,28 @@ function pythonSourceRootsFromSetupCfg(rootDir: string): string[] {
   return [...roots];
 }
 
+function pythonSourceRootsFromSetupPy(rootDir: string): string[] {
+  const setupPyPath = path.join(rootDir, "setup.py");
+  if (!fs.existsSync(setupPyPath)) return [];
+  const text = fs.readFileSync(setupPyPath, "utf8");
+  const roots = new Set<string>();
+  for (const match of text.matchAll(/\bpackage_dir\s*=\s*\{[\s\S]{0,1000}?["']\s*["']\s*:\s*["']([^"']+)["']/g)) {
+    addPythonRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\(\s*["']([^"']+)["']/g)) {
+    addPythonRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\([\s\S]{0,500}?\bwhere\s*=\s*["']([^"']+)["']/g)) {
+    addPythonRoot(roots, match[1]);
+  }
+  return [...roots];
+}
+
 function pythonSourceRoots(context: AnalysisContext): string[] {
   const roots = new Set<string>(["", "src"]);
   for (const root of pythonSourceRootsFromPyproject(context.rootDir)) addPythonRoot(roots, root);
   for (const root of pythonSourceRootsFromSetupCfg(context.rootDir)) addPythonRoot(roots, root);
+  for (const root of pythonSourceRootsFromSetupPy(context.rootDir)) addPythonRoot(roots, root);
   for (const cell of context.manifest.cells) {
     if (path.extname(cell.publicEntry) === ".py") {
       const parent = parentPrefix(cell.publicEntry);

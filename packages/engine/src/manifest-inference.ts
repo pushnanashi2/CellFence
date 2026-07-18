@@ -19,6 +19,7 @@ import {
   extractImports,
   extractPublicSymbols,
   readPathAliases,
+  resolvePythonImport,
   resolvePathAliasTarget,
   resolveRelativeImport,
 } from "./module-resolution.js";
@@ -42,6 +43,7 @@ export type InferManifestOptions = {
 };
 
 const PUBLIC_ENTRY_BASENAMES = ["public", "index"];
+const PYTHON_PUBLIC_ENTRY_BASENAMES = ["__init__", "api", "main"];
 const PACKAGE_ENTRY_FIELDS = ["source", "types", "typings", "module", "main", "browser"];
 const PACKAGE_DEPENDENCY_FIELDS = ["dependencies", "peerDependencies", "optionalDependencies", "devDependencies"];
 const SOURCE_CONTAINER_ROOTS = ["apps", "packages", "libs", "services"];
@@ -186,6 +188,14 @@ function packageJsonFromRoot(rootDir: string, relativeRoot: string): Record<stri
   return isRecord(packageJson) ? packageJson : undefined;
 }
 
+function readTextFile(filePath: string): string | undefined {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
 function sanitizeCellId(input: string): string {
   const unscoped = input.includes("/") ? input.split("/").at(-1) || input : input;
   const sanitized = unscoped
@@ -197,6 +207,14 @@ function sanitizeCellId(input: string): string {
   return sanitized || "cell";
 }
 
+function pythonImportPackageName(input: string): string {
+  return input
+    .trim()
+    .replace(/[-.]+/g, "_")
+    .replace(/[^A-Za-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 function uniqueId(baseId: string, usedIds: Set<string>): string {
   let candidateId = baseId;
   let suffix = 2;
@@ -206,6 +224,136 @@ function uniqueId(baseId: string, usedIds: Set<string>): string {
   }
   usedIds.add(candidateId);
   return candidateId;
+}
+
+function pythonMetadataNameFromPyproject(rootDir: string): string | undefined {
+  const text = readTextFile(path.join(rootDir, "pyproject.toml"));
+  if (!text) return undefined;
+  let section = "";
+  for (const line of text.split(/\r?\n/)) {
+    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      continue;
+    }
+    if (!["project", "tool.poetry"].includes(section)) continue;
+    const nameMatch = line.match(/^\s*name\s*=\s*["']([^"']+)["']/);
+    if (nameMatch && nameMatch[1].trim().length > 0) return nameMatch[1].trim();
+  }
+  return undefined;
+}
+
+function pythonMetadataNameFromSetupCfg(rootDir: string): string | undefined {
+  const text = readTextFile(path.join(rootDir, "setup.cfg"));
+  if (!text) return undefined;
+  let section = "";
+  for (const line of text.split(/\r?\n/)) {
+    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      continue;
+    }
+    if (section !== "metadata") continue;
+    const nameMatch = line.match(/^\s*name\s*=\s*([^\s#]+)\s*$/);
+    if (nameMatch && nameMatch[1].trim().length > 0) return nameMatch[1].trim();
+  }
+  return undefined;
+}
+
+function pythonMetadataNameFromSetupPy(rootDir: string): string | undefined {
+  const text = readTextFile(path.join(rootDir, "setup.py"));
+  if (!text) return undefined;
+  const match = text.match(/\bsetup\s*\([\s\S]{0,4000}?\bname\s*=\s*["']([^"']+)["']/);
+  if (match && match[1].trim().length > 0) return match[1].trim();
+  const constants = new Map<string, string>();
+  for (const constantMatch of text.matchAll(/^\s*([A-Z][A-Z0-9_]*)\s*=\s*["']([^"']+)["']/gm)) {
+    constants.set(constantMatch[1], constantMatch[2]);
+  }
+  const identifierMatch = text.match(/\bsetup\s*\([\s\S]{0,4000}?\bname\s*=\s*([A-Za-z_][A-Za-z0-9_]*)\b/);
+  if (identifierMatch) return constants.get(identifierMatch[1]);
+  return undefined;
+}
+
+function addPythonSourceRoot(roots: Set<string>, root: string | undefined): void {
+  if (!root) return;
+  const normalized = normalizePath(root).replace(/\/+$/, "");
+  roots.add(normalized === "." ? "" : normalized);
+}
+
+function pythonSourceRootsFromPyproject(rootDir: string): string[] {
+  const text = readTextFile(path.join(rootDir, "pyproject.toml"));
+  if (!text) return [];
+  const roots = new Set<string>();
+  for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
+    addPythonSourceRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bwhere\s*=\s*\[([^\]]+)\]/g)) {
+    for (const rootMatch of match[1].matchAll(/["']([^"']+)["']/g)) addPythonSourceRoot(roots, rootMatch[1]);
+  }
+  for (const match of text.matchAll(/\bfrom\s*=\s*["']([^"']+)["']/g)) {
+    addPythonSourceRoot(roots, match[1]);
+  }
+  return [...roots];
+}
+
+function pythonSourceRootsFromSetupCfg(rootDir: string): string[] {
+  const text = readTextFile(path.join(rootDir, "setup.cfg"));
+  if (!text) return [];
+  const roots = new Set<string>();
+  let section = "";
+  const lines = text.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      section = sectionMatch[1].trim();
+      continue;
+    }
+    if (section === "options" && /^\s*package_dir\s*=\s*$/.test(line)) {
+      for (let blockIndex = index + 1; blockIndex < lines.length; blockIndex += 1) {
+        const blockLine = lines[blockIndex];
+        if (blockLine.trim().length === 0) continue;
+        if (/^\S/.test(blockLine)) break;
+        const match = blockLine.match(/^\s*=\s*([^\s#]+)\s*$/);
+        if (match) addPythonSourceRoot(roots, match[1]);
+      }
+    }
+    if (section === "options.packages.find") {
+      const match = line.match(/^\s*where\s*=\s*([^\s#]+)\s*$/);
+      if (match) addPythonSourceRoot(roots, match[1]);
+    }
+  }
+  return [...roots];
+}
+
+function pythonSourceRootsFromSetupPy(rootDir: string): string[] {
+  const text = readTextFile(path.join(rootDir, "setup.py"));
+  if (!text) return [];
+  const roots = new Set<string>();
+  for (const match of text.matchAll(/\bpackage_dir\s*=\s*\{[\s\S]{0,1000}?["']\s*["']\s*:\s*["']([^"']+)["']/g)) {
+    addPythonSourceRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\(\s*["']([^"']+)["']/g)) {
+    addPythonSourceRoot(roots, match[1]);
+  }
+  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\([\s\S]{0,500}?\bwhere\s*=\s*["']([^"']+)["']/g)) {
+    addPythonSourceRoot(roots, match[1]);
+  }
+  return [...roots];
+}
+
+function pythonPackagingSourceRoots(rootDir: string): string[] {
+  const roots = new Set<string>();
+  for (const root of pythonSourceRootsFromPyproject(rootDir)) addPythonSourceRoot(roots, root);
+  for (const root of pythonSourceRootsFromSetupCfg(rootDir)) addPythonSourceRoot(roots, root);
+  for (const root of pythonSourceRootsFromSetupPy(rootDir)) addPythonSourceRoot(roots, root);
+  if (fs.existsSync(path.join(rootDir, "src")) && fs.statSync(path.join(rootDir, "src")).isDirectory()) roots.add("src");
+  roots.add("");
+  return [...roots].sort((left, right) => left.localeCompare(right));
+}
+
+function pythonProjectName(rootDir: string): string | undefined {
+  return pythonMetadataNameFromPyproject(rootDir) || pythonMetadataNameFromSetupCfg(rootDir) || pythonMetadataNameFromSetupPy(rootDir);
 }
 
 function workspacePatterns(rootDir: string): string[] {
@@ -256,6 +404,12 @@ function pathWithinRoot(relativeRoot: string, candidatePath: string): boolean {
   return normalizedPath === normalizedRoot || normalizedPath.startsWith(`${normalizedRoot}/`);
 }
 
+function parentPrefix(relativePath: string): string {
+  const normalized = normalizePath(relativePath);
+  const parent = path.posix.dirname(normalized);
+  return parent === "." ? "" : parent;
+}
+
 function existingPackageEntry(rootDir: string, packageRoot: string, relativeRoot: string, entryPath: string, scope?: InferManifestScope): string | undefined {
   const withoutLeadingDot = entryPath.replace(/^\.\//, "");
   if (withoutLeadingDot.startsWith("../") || path.isAbsolute(withoutLeadingDot)) return undefined;
@@ -290,6 +444,11 @@ function publicEntryForRoot(rootDir: string, relativeRoot: string, scope?: Infer
       if (pathExcludedByScope(scope, candidate)) continue;
       if (fs.existsSync(path.join(rootDir, candidate))) return candidate;
     }
+  }
+  for (const basename of PYTHON_PUBLIC_ENTRY_BASENAMES) {
+    const candidate = normalizePath(path.posix.join(relativeRoot, `${basename}.py`));
+    if (pathExcludedByScope(scope, candidate)) continue;
+    if (fs.existsSync(path.join(rootDir, candidate))) return candidate;
   }
   return sourceFilesInRoot(rootDir, relativeRoot, scope)[0];
 }
@@ -358,6 +517,26 @@ function packageLikeRootsInContainer(rootDir: string, containerRoot: string): st
   return packageRoots.sort((left, right) => left.localeCompare(right));
 }
 
+function pythonPackageRootForProject(rootDir: string, sourceRoot: string, projectName: string, scope?: InferManifestScope): string | undefined {
+  const importName = pythonImportPackageName(projectName);
+  if (importName.length === 0) return undefined;
+  const candidateRoot = normalizePath(path.posix.join(sourceRoot, importName));
+  if (fs.existsSync(path.join(rootDir, candidateRoot)) && hasSourceFiles(rootDir, candidateRoot, scope)) return candidateRoot;
+  return undefined;
+}
+
+function pythonPackageRootsInSourceRoot(rootDir: string, sourceRoot: string, scope?: InferManifestScope): string[] {
+  if (sourceRoot === "") return [];
+  const absoluteSourceRoot = path.join(rootDir, sourceRoot);
+  if (!fs.existsSync(absoluteSourceRoot) || !fs.statSync(absoluteSourceRoot).isDirectory()) return [];
+  return fs.readdirSync(absoluteSourceRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+    .map((entry) => normalizePath(path.posix.join(sourceRoot, entry.name)))
+    .filter((packageRoot) => fs.existsSync(path.join(rootDir, packageRoot, "__init__.py")) || sourceFilesDirectlyUnder(rootDir, packageRoot, scope).some((filePath) => path.extname(filePath) === ".py"))
+    .filter((packageRoot) => hasSourceFiles(rootDir, packageRoot, scope))
+    .sort((left, right) => left.localeCompare(right));
+}
+
 function discoverCandidates(rootDir: string, options: InferManifestOptions = {}): CellCandidate[] {
   const usedIds = new Set<string>();
   const candidates: CellCandidate[] = [];
@@ -384,6 +563,18 @@ function discoverCandidates(rootDir: string, options: InferManifestOptions = {})
     for (const packageRoot of packageLikeRootsInContainer(rootDir, containerRoot)) {
       const sourceRoot = sourceRootForPackageLikeRoot(rootDir, packageRoot, options.scope);
       if (sourceRoot) addCandidate(sourceRoot, path.posix.basename(packageRoot), packageNameFromRoot(rootDir, packageRoot), packageRoot);
+    }
+  }
+
+  const pythonName = pythonProjectName(rootDir);
+  for (const sourceRoot of pythonPackagingSourceRoots(rootDir)) {
+    if (pythonName) {
+      const packageRoot = pythonPackageRootForProject(rootDir, sourceRoot, pythonName, options.scope);
+      if (packageRoot) addCandidate(packageRoot, pythonName, pythonName, sourceRoot || ".");
+    }
+    for (const packageRoot of pythonPackageRootsInSourceRoot(rootDir, sourceRoot, options.scope)) {
+      const packageName = pythonName && packageRoot.endsWith(`/${pythonImportPackageName(pythonName)}`) ? pythonName : undefined;
+      addCandidate(packageRoot, path.posix.basename(packageRoot), packageName, sourceRoot || ".");
     }
   }
 
@@ -503,6 +694,12 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
     }
   }
   const pathAliases = readPathAliases(rootDir);
+  const pythonSourceRoots = [
+    ...new Set([
+      ...pythonPackagingSourceRoots(rootDir),
+      ...candidates.map((entry) => parentPrefix(entry.root)),
+    ]),
+  ].sort((left, right) => left.localeCompare(right));
   const context: FileIndexContext = {
     rootDir,
     manifest: { schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION, cells: [] },
@@ -513,8 +710,10 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
   for (const relativePath of sourceFilesOwnedByCandidate(rootDir, candidate, options.scope)) {
     const warnings: never[] = [];
     for (const reference of extractImports(context, path.join(rootDir, relativePath), warnings)) {
-      const targetPath = resolveRelativeImport(rootDir, relativePath, reference.specifier)
-        || resolvePathAliasTarget({ rootDir, pathAliases }, reference.specifier);
+      const targetPath = path.extname(relativePath) === ".py"
+        ? resolvePythonImport(rootDir, relativePath, reference.specifier, pythonSourceRoots)
+        : resolveRelativeImport(rootDir, relativePath, reference.specifier)
+          || resolvePathAliasTarget({ rootDir, pathAliases }, reference.specifier);
       if (!targetPath) continue;
       const targetOwner = ownerForPath(candidates, targetPath);
       if (targetOwner && targetOwner.id !== candidate.id) consumedCells.add(targetOwner.id);

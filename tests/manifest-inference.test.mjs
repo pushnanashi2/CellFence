@@ -172,6 +172,88 @@ test("manifest inference uses package entry metadata and workspace dependency co
   }
 });
 
+test("manifest inference uses pyproject src layouts and Python absolute imports", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-src-"));
+  try {
+    writeText(path.join(rootDir, "pyproject.toml"), [
+      "[project]",
+      "name = \"billing-service\"",
+      "",
+      "[tool.setuptools.packages.find]",
+      "where = [\"src\"]",
+      "",
+    ].join("\n"));
+    writeText(path.join(rootDir, "src/billing_service/__init__.py"), "__all__ = ['charge']\nfrom .public import charge\n");
+    writeText(path.join(rootDir, "src/billing_service/public.py"), "def charge(value: int) -> int:\n    return value\n");
+    writeText(path.join(rootDir, "src/api/routes.py"), "from billing_service.public import charge\n\ndef route() -> int:\n    return charge(1)\n");
+
+    const manifest = inferManifest({ rootDir });
+
+    assert.deepEqual(manifest.governance.include, ["src/**"]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.packageName, cell.consumes]), [
+      ["api", ["src/api/**"], "src/api/routes.py", undefined, [{ cell: "billing-service" }]],
+      ["billing-service", ["src/billing_service/**"], "src/billing_service/public.py", "billing-service", []],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference uses setup.cfg names for flat Python packages", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-flat-"));
+  try {
+    writeText(path.join(rootDir, "setup.cfg"), [
+      "[metadata]",
+      "name = ledger-service",
+      "",
+      "[options]",
+      "packages = find:",
+      "",
+    ].join("\n"));
+    writeText(path.join(rootDir, "ledger_service/__init__.py"), "__all__ = ['run']\nfrom .core import run\n");
+    writeText(path.join(rootDir, "ledger_service/core.py"), "def run() -> bool:\n    return True\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.governance.include, ["ledger_service/**"]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.publicSymbols, cell.packageName]), [
+      ["ledger-service", ["ledger_service/**"], "ledger_service/__init__.py", ["run"], "ledger-service"],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest inference uses setup.py names without executing setup code", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-setuppy-"));
+  try {
+    writeText(path.join(rootDir, "setup.py"), [
+      "from setuptools import find_packages, setup",
+      "NAME = 'queue-worker'",
+      "setup(name=NAME, package_dir={'': 'src'}, packages=find_packages(where='src'))",
+      "",
+    ].join("\n"));
+    writeText(path.join(rootDir, "src/queue_worker/__init__.py"), "__all__ = ['run']\nfrom .main import run\n");
+    writeText(path.join(rootDir, "src/queue_worker/main.py"), "def run() -> str:\n    return 'ok'\n");
+    writeText(path.join(rootDir, "src/api/routes.py"), "from queue_worker import run\n\ndef route() -> str:\n    return run()\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.publicSymbols, cell.packageName, cell.consumes]), [
+      ["api", ["src/api/**"], "src/api/routes.py", ["route", "run"], undefined, [{ cell: "queue-worker" }]],
+      ["queue-worker", ["src/queue_worker/**"], "src/queue_worker/__init__.py", ["run"], "queue-worker", []],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference can ablate package policy hints for oracle studies", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-blind-policy-"));
   try {

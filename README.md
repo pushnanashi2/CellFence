@@ -11,7 +11,7 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 <!-- TODO: add an npm provenance badge once registry badge support is stable for the trusted-published package set -->
 
-CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, resource, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import and public-surface support. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
+CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, resource, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import/public-surface support and packaging-aware manifest inference for common `pyproject.toml`, `setup.cfg`, and static `setup.py` layouts. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
 
 Prompt files are context, not enforcement. An agent can import another module's internals, add an undeclared dependency, or widen a public API — and still merge green. CellFence moves these decisions out of prose and into machine-checkable repository contracts.
 
@@ -325,7 +325,7 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## Status and limitations
 
-Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript; AST-based Python boundary analysis for `.py` imports and public entries; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness or prevent an agent from editing a path at runtime — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
+Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript; AST-based Python boundary analysis for `.py` imports and public entries; packaging-aware Python manifest inference; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness or prevent an agent from editing a path at runtime — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
 
 ## Documentation map
 
