@@ -238,6 +238,20 @@ function validateCheckTimeout(subjectId, timeoutMs) {
   }
 }
 
+function gitWorktreeStatus(checkoutDir, subjectDir, name) {
+  const result = run("git", ["status", "--porcelain=v1", "--untracked-files=all"], {
+    cwd: checkoutDir,
+    timeoutMs: commandTimeouts.revParse,
+  });
+  writeCommandLogs(subjectDir, name, result);
+  if (result.status !== 0) commandFailure("checkout", result);
+  const porcelain = result.stdout.trim();
+  return {
+    clean: porcelain.length === 0,
+    porcelain,
+  };
+}
+
 function validateCorpus(corpus, options, corpusDir) {
   if (corpus.schemaVersion !== "cellfence.corpus.v1") {
     throw new Error("corpus schemaVersion must be cellfence.corpus.v1");
@@ -328,13 +342,15 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
     if (manifestPath !== defaultManifestPath) {
       throw new Error(`manifest.strategy=infer only supports ${defaultManifestPath}`);
     }
-    const args = ["init", "--root", checkoutDir];
+    const controlDir = path.join(subjectDir, "control");
+    const targetPath = resolveWithin(controlDir, manifestPath, "manifest.path");
+    const args = ["init", "--root", checkoutDir, "--output", targetPath, "--no-scaffold"];
     if (subject.manifest?.preset) args.push("--preset", subject.manifest.preset);
     for (const fromPath of subject.manifest?.from || []) args.push("--from", fromPath);
     const result = run(process.execPath, [cellfenceCli, ...args], { cwd: checkoutDir, timeoutMs: commandTimeouts.manifest });
     writeCommandLogs(subjectDir, "manifest", result);
     if (result.status !== 0) commandFailure("manifest", result);
-    effectivePath = manifestPath;
+    effectivePath = targetPath;
   } else {
     throw new Error(`unsupported manifest strategy: ${strategy}`);
   }
@@ -454,9 +470,7 @@ function summarize(subjects) {
     failed: 0,
     checksRun: 0,
     checksClean: 0,
-    checksWithViolations: 0,
-    checkPassed: 0,
-    checkFailed: 0,
+    checksWithFindings: 0,
     configurationErrors: 0,
     toolErrors: 0,
     unparseableOutputs: 0,
@@ -483,10 +497,8 @@ function summarize(subjects) {
         summary.timeouts += 1;
       } else if (subject.check.exitCode === 0) {
         summary.checksClean += 1;
-        summary.checkPassed += 1;
       } else if (subject.check.exitCode === 1) {
-        summary.checksWithViolations += 1;
-        summary.checkFailed += 1;
+        summary.checksWithFindings += 1;
       } else if (subject.check.exitCode === 2) {
         summary.configurationErrors += 1;
       } else {
@@ -536,12 +548,19 @@ function runSubject(subject, corpusDir, options) {
   }
   try {
     const clone = cloneSubject(subject, subjectDir, options);
+    const worktreeBeforeManifest = gitWorktreeStatus(clone.checkoutDir, subjectDir, "status-before-manifest");
     let manifest;
     try {
       manifest = prepareManifest(subject, clone.checkoutDir, corpusDir, subjectDir);
     } catch (error) {
       if (error instanceof SubjectFailure) throw error;
       throw new SubjectFailure("manifest", "manifest_error", error instanceof Error ? error.message : String(error));
+    }
+    const worktreeBeforeCheck = gitWorktreeStatus(clone.checkoutDir, subjectDir, "status-before-check");
+    if (!worktreeBeforeCheck.clean) {
+      throw new SubjectFailure("manifest", "dirty_worktree", "manifest preparation modified the subject checkout", {
+        worktreeStatus: worktreeBeforeCheck.porcelain,
+      });
     }
     const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.effectivePath);
     const expectation = expectationResult(subject.expected, check);
@@ -551,6 +570,8 @@ function runSubject(subject, corpusDir, options) {
       commit: clone.actualCommit,
       gitTree: clone.gitTree,
       subjectDir,
+      subjectWorktreeCleanBeforeManifest: worktreeBeforeManifest.clean,
+      subjectWorktreeCleanBeforeCheck: worktreeBeforeCheck.clean,
       manifest,
       check,
       expectation,
@@ -565,6 +586,7 @@ function runSubject(subject, corpusDir, options) {
       failureKind: error instanceof SubjectFailure ? error.failureKind : "error",
       timeoutMs: error instanceof SubjectFailure ? error.timeoutMs : undefined,
       exitCode: error instanceof SubjectFailure ? error.exitCode : undefined,
+      worktreeStatus: error instanceof SubjectFailure ? error.worktreeStatus : undefined,
       subjectDir,
       error: error instanceof Error ? error.message : String(error),
       completedAt: new Date().toISOString(),

@@ -414,7 +414,47 @@ test("corpus precision study supports infer manifests with the default path", ()
     const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
     assert.equal(report.subjects[0].status, "checked_clean");
     assert.equal(report.subjects[0].manifest.path, "cellfence.manifest.json");
+    assert.ok(report.subjects[0].manifest.effectivePath.includes(`${path.sep}control${path.sep}`));
     assert.match(report.subjects[0].manifest.sha256, /^[a-f0-9]{64}$/);
+    assert.equal(report.subjects[0].subjectWorktreeCleanBeforeManifest, true);
+    assert.equal(report.subjects[0].subjectWorktreeCleanBeforeCheck, true);
+    assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "checkout", "cellfence.manifest.json")), false);
+    assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "checkout", "src", "example", "public.ts")), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision study infer does not follow a dangling checkout manifest symlink", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-infer-symlink-"));
+  try {
+    const sourceRepo = path.join(rootDir, "source");
+    fs.mkdirSync(sourceRepo, { recursive: true });
+    const escapedPath = path.join(rootDir, "escaped-manifest.json");
+    fs.symlinkSync(escapedPath, path.join(sourceRepo, "cellfence.manifest.json"));
+    const commit = createSimpleRepository(sourceRepo, { manifest: false });
+    const corpusPath = path.join(rootDir, "corpus.json");
+    const outPath = path.join(rootDir, "report.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "infer-symlink",
+          repository: sourceRepo,
+          commit,
+          manifest: { strategy: "infer" },
+        },
+      ],
+    });
+
+    const result = runCorpusStudy(["--corpus", corpusPath, "--workdir", path.join(rootDir, "work"), "--out", outPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
+    assert.equal(report.subjects[0].status, "checked_clean");
+    assert.equal(report.subjects[0].subjectWorktreeCleanBeforeCheck, true);
+    assert.equal(fs.existsSync(escapedPath), false);
+    assert.equal(fs.lstatSync(path.join(report.subjects[0].subjectDir, "checkout", "cellfence.manifest.json")).isSymbolicLink(), true);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

@@ -6,6 +6,15 @@ dependencies were installed and no target package scripts were executed.
 Named subjects identify the reproducible corpus only; unlabeled findings should
 not be read as upstream defects.
 
+Update: the first run used the original `infer` path, where `cellfence init`
+could scaffold `src/example/public.ts` into the subject checkout when inference
+fell back to the example cell. A later harness hardening made `infer`
+non-destructive by writing generated manifests to the subject control directory
+with `--no-scaffold` and by checking that the subject worktree stays clean
+before `check`. The original summary below is retained as a historical harness
+pilot; the non-destructive rerun is recorded separately and supersedes any
+interpretation of zero-finding `infer` results as usable starter fences.
+
 ## Corpus
 
 Corpus manifest: `docs/research/corpora/ts-js-workspace-pilot-10.json`
@@ -26,6 +35,8 @@ npm run research:corpus -- \
 ```
 
 ## Summary
+
+This is the original scaffold-enabled pilot summary.
 
 | metric | value |
 |---|---:|
@@ -69,8 +80,9 @@ Subject results:
 
 - The frozen corpus harness can clone, checkout, infer manifests, run checks,
   and produce failure-inclusive aggregate results on real public repositories.
-- Manifest inference can produce usable zero-finding starter fences for several
-  workspace repositories.
+- The original run exposed that scaffolded fallback manifests can mask weak
+  inference. Non-destructive inference is required before using `infer` results
+  as onboarding evidence.
 - Real repositories immediately produce concentrated follow-up work instead of
   vague feature requests.
 
@@ -110,3 +122,39 @@ Next manual labels should start with:
   inferred cells that should be merged or explicitly declared.
 
 Only after that labeling pass should this corpus produce precision numbers.
+
+## Non-Destructive Infer Rerun
+
+After hardening `infer` to write manifests outside the checkout and to avoid
+scaffolding, the same frozen corpus was rerun:
+
+```bash
+npm run research:corpus -- \
+  --corpus docs/research/corpora/ts-js-workspace-pilot-10.json \
+  --out reports/corpus/ts-js-workspace-pilot-10.nondestructive.json
+```
+
+Summary:
+
+| metric | value |
+|---|---:|
+| subjects | 10 |
+| clone/checkout/manifest completed | 10 |
+| failed before check | 0 |
+| CellFence checks run | 10 |
+| checks with exit 0 | 0 |
+| checks with findings | 10 |
+| configuration errors | 0 |
+| total findings | 1,780 |
+| subjects clean before check | 10 |
+
+Additional rule count:
+
+| rule | findings |
+|---|---:|
+| `CELLFENCE_PUBLIC_ENTRY_MISSING` | 7 |
+
+The seven `CELLFENCE_PUBLIC_ENTRY_MISSING` findings are from repositories where
+manifest inference fell back to the example cell. This is an onboarding
+limitation, not evidence about those repositories. It means the next reporting
+corpus must not treat unreviewed `infer` output as a precision denominator.

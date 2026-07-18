@@ -37,8 +37,8 @@ CellFence check failed.
 <!-- Keep in sync with `cellfence --help`; a drift here already shipped once -->
 
 ```bash
-npx cellfence init [--preset python-service|polyglot-monorepo]
-npx cellfence init --from systems/*/service.json
+npx cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold]
+npx cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
 npx cellfence check [--changed --base origin/main] [--json|--format markdown|--format sarif]
 npx cellfence manifest verify --from systems/*/service.json [--json]
 npx cellfence context --cell <id> [--json|--format agents-md]

@@ -72,13 +72,14 @@ The script:
 - clones each repository into a hash-suffixed subject directory under
   `tmp/corpus-precision-study/`;
 - checks out the exact commit;
-- prepares the manifest by `existing`, `copy`, or `infer` strategy;
+- prepares the manifest by `existing`, `copy`, or non-destructive `infer`
+  strategy;
 - runs `cellfence check --json`;
 - writes command logs and a fixed CellFence audit log under each subject
   directory;
 - writes a summary JSON report under `reports/`;
-- records environment metadata, manifest SHA-256, actual commit, and Git tree
-  hashes for replay.
+- records environment metadata, manifest SHA-256, actual commit, Git tree
+  hashes, and whether the subject worktree was clean before checking.
 
 Subject status is classified as:
 
@@ -115,11 +116,12 @@ For safety and reproducibility, `copy` sources must be relative paths inside the
 corpus directory. The effective manifest is copied into the subject control
 directory, outside the target checkout, and passed to CellFence by absolute path.
 
-`infer` runs `cellfence init` inside the checkout. This is useful for onboarding
-friction, but it is not a precision study until the generated manifest is
-reviewed or compared against existing boundary configuration.
-`infer` always writes the default `cellfence.manifest.json`; custom manifest
-paths are rejected for this strategy.
+`infer` runs `cellfence init --output <subject-control-dir>/cellfence.manifest.json --no-scaffold`
+against the checkout. This is useful for onboarding friction, but it is not a
+precision study until the generated manifest is reviewed or compared against
+existing boundary configuration. The generated manifest is stored outside the
+target checkout, custom manifest paths are rejected for this strategy, and the
+harness fails the subject if manifest preparation leaves the checkout dirty.
 
 Additional `subject.check.args` cannot override fixed execution controls such as
 `--root`, `--manifest`, `--json`, `--format`, `--audit-log`, `--summary-json`,

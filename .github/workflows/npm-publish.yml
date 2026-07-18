@@ -172,3 +172,92 @@ jobs:
             (cd "${package_dir}" && npm "${publish_args[@]}")
             echo "::endgroup::"
           done
+
+      - name: Post-publish registry smoke
+        if: ${{ inputs.dry_run == 'false' }}
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          # Keep this in sync with the publish list above.
+          package_dirs=(
+            packages/schema
+            packages/plugin-api
+            packages/adapter-call-pattern
+            packages/adapter-opentelemetry
+            packages/plugin-agent-budget
+            packages/plugin-blast-radius
+            packages/plugin-dependency-sovereignty
+            packages/plugin-geo-purity
+            packages/plugin-legacy-strangler
+            packages/plugin-quants-trend
+            packages/reporter-economy-matrix
+            packages/engine
+            packages/cli
+            packages/github-action
+            packages/trace
+          )
+
+          for package_dir in "${package_dirs[@]}"; do
+            package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
+            for attempt in 1 2 3 4 5 6; do
+              if npm view "${package_name}@${RELEASE_VERSION}" version | grep -Fx "${RELEASE_VERSION}" >/dev/null; then
+                echo "${package_name}@${RELEASE_VERSION} is visible on npm."
+                break
+              fi
+
+              if [[ "${attempt}" -eq 6 ]]; then
+                echo "::error::${package_name}@${RELEASE_VERSION} is not visible on npm."
+                exit 1
+              fi
+
+              sleep 10
+            done
+          done
+
+          fixture_dir="$(mktemp -d)"
+          npm_cache_dir="$(mktemp -d)"
+          mkdir -p "${fixture_dir}/src/example"
+          cat > "${fixture_dir}/src/example/public.ts" <<'EOF'
+          export const example = true;
+          EOF
+          cat > "${fixture_dir}/cellfence.manifest.json" <<'EOF'
+          {
+            "schemaVersion": "cellfence.manifest.v1",
+            "governance": {
+              "requireOwnership": true,
+              "include": ["src/**"],
+              "exclude": [],
+              "requiredRules": [
+                "CELLFENCE_OWNERSHIP_OVERLAP",
+                "CELLFENCE_UNOWNED_SOURCE",
+                "CELLFENCE_UNOWNED_IMPORT_TARGET",
+                "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+                "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+                "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+                "CELLFENCE_PRIVATE_IMPORT",
+                "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+                "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+                "CELLFENCE_REQUIRED_RULE_DISABLED",
+                "CELLFENCE_WAIVER_INVALID"
+              ]
+            },
+            "cells": [
+              {
+                "id": "example",
+                "ownedPaths": ["src/example/**"],
+                "publicEntry": "src/example/public.ts",
+                "publicSymbols": ["example"],
+                "consumes": [],
+                "producesArtifacts": []
+              }
+            ]
+          }
+          EOF
+
+          (
+            cd "${fixture_dir}"
+            npm_config_cache="${npm_cache_dir}" npx --yes "cellfence@${RELEASE_VERSION}" check --manifest cellfence.manifest.json --json
+          )

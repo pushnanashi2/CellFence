@@ -74,6 +74,7 @@ type ParsedArgs = {
   artifactLanes: string[];
   format?: string;
   preset?: string;
+  initOutputPath?: string;
   json: boolean;
   rootDir: string;
   changed: boolean;
@@ -98,6 +99,7 @@ type ParsedArgs = {
   approvedBy?: string;
   checkInstall: boolean;
   uninstall: boolean;
+  noScaffold: boolean;
   mcp: boolean;
 };
 
@@ -105,8 +107,8 @@ function printUsage(): void {
   console.log(`CellFence
 
 Usage:
-  cellfence init [--preset python-service|polyglot-monorepo]
-  cellfence init --from systems/*/service.json
+  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold]
+  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
   cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence manifest verify --from systems/*/service.json [--json]
@@ -160,6 +162,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     autoAllocate: false,
     checkInstall: false,
     uninstall: false,
+    noScaffold: false,
     mcp: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -174,6 +177,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.checkInstall = true;
     } else if (argument === "--uninstall") {
       parsed.uninstall = true;
+    } else if (argument === "--no-scaffold") {
+      parsed.noScaffold = true;
     } else if (argument === "--mcp") {
       parsed.mcp = true;
     } else if (argument === "--base") {
@@ -263,6 +268,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--target=")) {
       parsed.installTarget = argument.slice("--target=".length);
+    } else if (argument === "--output") {
+      parsed.initOutputPath = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--output=")) {
+      parsed.initOutputPath = argument.slice("--output=".length);
     } else if (argument === "--repo") {
       parsed.repo = argv[index + 1];
       index += 1;
@@ -432,6 +442,28 @@ function writeFileEnsuringDirectory(filePath: string, contents: string): void {
   fs.writeFileSync(filePath, contents);
 }
 
+function ensureNewFileTargetAvailable(filePath: string, displayPath: string): boolean {
+  try {
+    fs.lstatSync(filePath);
+    console.error(`${displayPath} already exists`);
+    return false;
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? (error as NodeJS.ErrnoException).code : undefined;
+    if (code !== "ENOENT") {
+      console.error(errorMessage(error));
+      return false;
+    }
+  }
+  return true;
+}
+
+function writeNewFileEnsuringDirectory(filePath: string, contents: string, displayPath: string): boolean {
+  if (!ensureNewFileTargetAvailable(filePath, displayPath)) return false;
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, contents);
+  return true;
+}
+
 type InferredManifest = ReturnType<typeof inferManifest>;
 
 function createRunMetadata(command: string, rootDir: string, startedAtMs: number, startedAt: string): CheckRunMetadata {
@@ -532,11 +564,9 @@ function writeCheckArtifacts(parsed: ParsedArgs, result: CheckResult, metadata: 
 
 function commandInit(parsed: ParsedArgs): number {
   const rootDir = parsed.rootDir;
-  const manifestPath = path.join(rootDir, "cellfence.manifest.json");
-  if (fs.existsSync(manifestPath)) {
-    console.error("cellfence.manifest.json already exists");
-    return 2;
-  }
+  const manifestPath = resolveOutputPath(rootDir, parsed.initOutputPath || "cellfence.manifest.json");
+  const displayManifestPath = parsed.initOutputPath || "cellfence.manifest.json";
+  if (!ensureNewFileTargetAvailable(manifestPath, displayManifestPath)) return 2;
   if (parsed.preset && parsed.fromPaths.length > 0) {
     console.error("cellfence init cannot combine --preset and --from");
     return 2;
@@ -551,11 +581,11 @@ function commandInit(parsed: ParsedArgs): number {
     console.error(errorMessage(error));
     return 2;
   }
-  if (manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
+  if (!parsed.noScaffold && manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
     fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
   }
-  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  if (!writeNewFileEnsuringDirectory(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, displayManifestPath)) return 2;
   console.log(`created ${manifestPath}`);
   if (imported && imported.warnings.length > 0) {
     for (const warning of imported.warnings) console.error(`[warn] ${warning.serviceId}.${warning.field}: ${warning.message}`);

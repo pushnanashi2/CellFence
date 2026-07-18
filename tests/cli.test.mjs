@@ -904,6 +904,60 @@ test("CLI init falls back to the example cell when repository metadata is malfor
   }
 });
 
+test("CLI init can write inferred manifests outside the root without scaffolding", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-output-"));
+  try {
+    fs.writeFileSync(path.join(tempDir, "package.json"), "{");
+    const outputPath = path.join(tempDir, "control", "cellfence.manifest.json");
+
+    const result = runCli(["init", "--output", outputPath, "--no-scaffold"], tempDir);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(fs.existsSync(outputPath), true);
+    assert.equal(fs.existsSync(path.join(tempDir, "cellfence.manifest.json")), false);
+    assert.equal(fs.existsSync(path.join(tempDir, "src/example/public.ts")), false);
+    const manifest = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["example"]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init refuses dangling manifest symlinks instead of following them", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-dangling-manifest-"));
+  try {
+    const escapedPath = path.join(os.tmpdir(), `cellfence-escaped-${crypto.randomUUID()}.json`);
+    fs.symlinkSync(escapedPath, path.join(tempDir, "cellfence.manifest.json"));
+
+    const result = runCli(["init"], tempDir);
+
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /cellfence\.manifest\.json already exists/);
+    assert.equal(fs.existsSync(escapedPath), false);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI init --no-scaffold does not follow a src symlink when inference falls back to example", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-src-symlink-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-outside-src-"));
+  try {
+    fs.writeFileSync(path.join(tempDir, "package.json"), "{");
+    fs.symlinkSync(outsideDir, path.join(tempDir, "src"), "dir");
+    const outputPath = path.join(tempDir, "control", "cellfence.manifest.json");
+
+    const result = runCli(["init", "--output", outputPath, "--no-scaffold"], tempDir);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(fs.existsSync(outputPath), true);
+    assert.equal(fs.existsSync(path.join(outsideDir, "example", "public.ts")), false);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI init refuses to overwrite an existing manifest", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-existing-"));
   try {
