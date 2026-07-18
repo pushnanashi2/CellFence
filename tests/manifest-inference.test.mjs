@@ -172,7 +172,7 @@ test("manifest inference uses package entry metadata and workspace dependency co
   }
 });
 
-test("manifest inference can ignore package policy hints for blind oracle studies", () => {
+test("manifest inference can ablate package policy hints for oracle studies", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-blind-policy-"));
   try {
     writeJson(path.join(rootDir, "package.json"), { workspaces: ["packages/*"] });
@@ -195,7 +195,7 @@ test("manifest inference can ignore package policy hints for blind oracle studie
     writeText(path.join(rootDir, "packages/web/src/index.ts"), "export const web = true;\n");
 
     const hinted = inferManifest({ rootDir });
-    const blind = inferManifest({ rootDir, policyHints: "ignore" });
+    const blind = inferManifest({ rootDir, packagePolicyHints: "ignore" });
 
     assert.deepEqual(hinted.cells.map((cell) => [cell.id, cell.publicEntry, cell.consumes]), [
       ["core", "packages/core/src/entry.ts", []],

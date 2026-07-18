@@ -843,8 +843,8 @@ test("CLI init infers src cells, workspace cells, public entries, and consumers"
   }
 });
 
-test("CLI init can ignore upstream package policy hints for blind inference", () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-ignore-policy-hints-"));
+test("CLI init can ablate upstream package policy hints for research inference", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-package-policy-ablation-"));
   try {
     writeJson(path.join(tempDir, "package.json"), {
       workspaces: ["packages/*"],
@@ -873,7 +873,7 @@ test("CLI init can ignore upstream package policy hints for blind inference", ()
     const blindPath = path.join(tempDir, "control", "blind.manifest.json");
     const hinted = runCli(["init", "--output", hintedPath, "--no-scaffold"], tempDir);
     assert.equal(hinted.status, 0, hinted.stderr || hinted.stdout);
-    const blind = runCli(["init", "--output", blindPath, "--no-scaffold", "--ignore-policy-hints"], tempDir);
+    const blind = runCli(["init", "--output", blindPath, "--no-scaffold", "--research-ablate-package-policy-hints"], tempDir);
     assert.equal(blind.status, 0, blind.stderr || blind.stdout);
 
     const hintedManifest = JSON.parse(fs.readFileSync(hintedPath, "utf8"));

@@ -33,12 +33,12 @@ type CellCandidate = {
 };
 
 export type InferManifestScope = "all" | "production";
-export type InferManifestPolicyHints = "include" | "ignore";
+export type InferManifestPackagePolicyHints = "include" | "ignore";
 
 export type InferManifestOptions = {
   rootDir?: string;
   scope?: InferManifestScope;
-  policyHints?: InferManifestPolicyHints;
+  packagePolicyHints?: InferManifestPackagePolicyHints;
 };
 
 const PUBLIC_ENTRY_BASENAMES = ["public", "index"];
@@ -294,8 +294,8 @@ function publicEntryForRoot(rootDir: string, relativeRoot: string, scope?: Infer
   return sourceFilesInRoot(rootDir, relativeRoot, scope)[0];
 }
 
-function publicEntryForCandidateRoot(rootDir: string, relativeRoot: string, packageRoot?: string, scope?: InferManifestScope, policyHints?: InferManifestPolicyHints): string | undefined {
-  if (packageRoot && policyHints !== "ignore") {
+function publicEntryForCandidateRoot(rootDir: string, relativeRoot: string, packageRoot?: string, scope?: InferManifestScope, packagePolicyHints?: InferManifestPackagePolicyHints): string | undefined {
+  if (packageRoot && packagePolicyHints !== "ignore") {
     const packageEntry = publicEntryFromPackageJson(rootDir, packageRoot, relativeRoot, scope);
     if (packageEntry) return packageEntry;
   }
@@ -310,9 +310,9 @@ function createCandidate(
   packageName?: string,
   packageRoot?: string,
   scope?: InferManifestScope,
-  policyHints?: InferManifestPolicyHints,
+  packagePolicyHints?: InferManifestPackagePolicyHints,
 ): CellCandidate | undefined {
-  const publicEntry = publicEntryForCandidateRoot(rootDir, relativeRoot, packageRoot, scope, policyHints);
+  const publicEntry = publicEntryForCandidateRoot(rootDir, relativeRoot, packageRoot, scope, packagePolicyHints);
   /* c8 ignore next -- addCandidate only calls this for roots where source files exist, so publicEntryForRoot returns at least the first source file. */
   if (!publicEntry) return undefined;
   return {
@@ -366,7 +366,7 @@ function discoverCandidates(rootDir: string, options: InferManifestOptions = {})
   function addCandidate(relativeRoot: string, idHint: string, packageName?: string, packageRoot?: string): void {
     const normalizedRoot = normalizePath(relativeRoot).replace(/\/+$/, "");
     if (seenRoots.has(normalizedRoot)) return;
-    const candidate = createCandidate(rootDir, normalizedRoot, idHint, usedIds, packageName, packageRoot, options.scope, options.policyHints);
+    const candidate = createCandidate(rootDir, normalizedRoot, idHint, usedIds, packageName, packageRoot, options.scope, options.packagePolicyHints);
     /* c8 ignore next -- createCandidate only returns undefined for roots without source files, which are filtered before addCandidate. */
     if (!candidate) return;
     seenRoots.add(normalizedRoot);
@@ -495,7 +495,7 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
     existing.push(packageCandidate);
     packageCandidates.set(packageCandidate.packageName, existing);
   }
-  if (options.policyHints !== "ignore") {
+  if (options.packagePolicyHints !== "ignore") {
     for (const dependencyName of packageDependencyNames(rootDir, candidate.packageRoot)) {
       for (const dependencyCandidate of packageCandidates.get(dependencyName) || []) {
         if (dependencyCandidate.id !== candidate.id) consumedCells.add(dependencyCandidate.id);

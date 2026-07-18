@@ -101,7 +101,7 @@ type ParsedArgs = {
   uninstall: boolean;
   noScaffold: boolean;
   initProductionScope: boolean;
-  initIgnorePolicyHints: boolean;
+  initResearchAblatePackagePolicyHints: boolean;
   mcp: boolean;
 };
 
@@ -109,7 +109,7 @@ function printUsage(): void {
   console.log(`CellFence
 
 Usage:
-  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope] [--ignore-policy-hints]
+  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope] [--research-ablate-package-policy-hints]
   cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
   cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
@@ -166,7 +166,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     uninstall: false,
     noScaffold: false,
     initProductionScope: false,
-    initIgnorePolicyHints: false,
+    initResearchAblatePackagePolicyHints: false,
     mcp: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -185,8 +185,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.noScaffold = true;
     } else if (argument === "--production-scope") {
       parsed.initProductionScope = true;
-    } else if (argument === "--ignore-policy-hints") {
-      parsed.initIgnorePolicyHints = true;
+    } else if (argument === "--research-ablate-package-policy-hints") {
+      parsed.initResearchAblatePackagePolicyHints = true;
     } else if (argument === "--mcp") {
       parsed.mcp = true;
     } else if (argument === "--base") {
@@ -601,7 +601,7 @@ function commandInit(parsed: ParsedArgs): number {
       || inferManifest({
         rootDir,
         scope: parsed.initProductionScope ? "production" : "all",
-        policyHints: parsed.initIgnorePolicyHints ? "ignore" : "include",
+        packagePolicyHints: parsed.initResearchAblatePackagePolicyHints ? "ignore" : "include",
       });
   } catch (error) {
     console.error(errorMessage(error));

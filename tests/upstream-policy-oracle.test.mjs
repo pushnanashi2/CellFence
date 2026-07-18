@@ -34,7 +34,7 @@ function runGit(args, cwd) {
   return result.stdout.trim();
 }
 
-test("upstream policy oracle builds a reference manifest and resolves blind inference questions", () => {
+test("upstream policy oracle builds a reference manifest and resolves ablation questions", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-upstream-oracle-"));
   const fixtureRepo = path.join(tempDir, "fixture-repo");
   const corpusPath = path.join(tempDir, "corpus.json");
@@ -110,14 +110,35 @@ test("upstream policy oracle builds a reference manifest and resolves blind infe
       "consumer-visibility": 1,
       "public-entry": 1,
     });
-    assert.equal(report.summary.before.consumerEdgeRecall, 0);
-    assert.equal(report.summary.after.consumerEdgeRecall, 1);
-    assert.equal(report.summary.before.publicEntryExactMatchRate, 0.5);
-    assert.equal(report.summary.after.publicEntryExactMatchRate, 1);
+    assert.equal(report.summary.rawFindingToPolicyQuestionCountRatio, 0);
+    assert.deepEqual(report.summary.before.consumerEdges, {
+      reference: 1,
+      inferred: 0,
+      common: 0,
+      microPrecision: null,
+      microRecall: 0,
+      subjectMacroPrecision: null,
+      subjectMacroRecall: 0,
+      subjectsWithExactEdgeSetAgreement: 0,
+      subjectsWithNoReferenceConsumerEdges: 0,
+      subjectsWithNoInferredConsumerEdges: 1,
+    });
+    assert.equal(report.summary.after.consumerEdges.microPrecision, 1);
+    assert.equal(report.summary.after.consumerEdges.microRecall, 1);
+    assert.equal(report.summary.before.publicEntryExactMatchRateSubjectMacro, 0.5);
+    assert.equal(report.summary.after.publicEntryExactMatchRateSubjectMacro, 1);
     const subject = report.subjects[0];
     assert.equal(subject.checkoutDiscarded, true);
     assert.equal(subject.policyQuestions.oracleResolvable, 2);
+    assert.equal(subject.policyQuestions.rawFindingToPolicyQuestionCountRatio, 0);
+    assert.equal(subject.policyQuestions.findingMapping.zeroImpactQuestions, 2);
+    assert.equal(subject.policyQuestions.findingMapping.uniquelyMappedFindings, 0);
+    assert.equal(subject.policyQuestions.findingMapping.observedResolvedFindingToActionableQuestionRatio, null);
+    assert.equal(subject.blindInference.packagePolicyHints, "ignore");
+    assert.equal(subject.blindInference.ablation, "entry-and-dependency-hints");
+    assert.equal(subject.resolvedCheck.exitCode, 0);
     assert.equal(subject.mutations.planned, 2);
+    assert.equal(subject.artifactSetSha256.length, 64);
 
     const reference = JSON.parse(fs.readFileSync(path.join(outDir, "references", "fixture-workspace.reference-manifest.json"), "utf8"));
     const inferred = JSON.parse(fs.readFileSync(path.join(outDir, "inferred", "fixture-workspace.manifest.json"), "utf8"));
@@ -132,6 +153,7 @@ test("upstream policy oracle builds a reference manifest and resolves blind infe
     const questions = JSON.parse(fs.readFileSync(path.join(outDir, "questions", "fixture-workspace.questions.json"), "utf8"));
     assert.equal(questions.schemaVersion, "cellfence.policy-questions.v1");
     assert.ok(questions.questions.every((question) => Array.isArray(question.choices[0].manifestPatch)));
+    assert.ok(questions.questions.every((question) => Array.isArray(question.affectedFindingFingerprints)));
     assert.ok(questions.questions.some((question) => question.choices[0].manifestPatch.some((operation) => operation.op === "add")));
     const provenance = JSON.parse(fs.readFileSync(path.join(outDir, "provenance", "fixture-workspace.provenance.json"), "utf8"));
     assert.equal(provenance.policySources.length, 3);

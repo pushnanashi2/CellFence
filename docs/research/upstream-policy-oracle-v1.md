@@ -6,7 +6,7 @@ This study treats existing upstream package/workspace policy as a reference orac
 
 The measurable claim is:
 
-> CellFence can turn blind manifest inference gaps into deterministic policy questions, attach manifest patches to those questions, answer them from upstream-declared reference policy, and improve manifest agreement after applying the answers.
+> CellFence can turn package-policy-hint ablation gaps into deterministic policy questions, attach manifest patches to those questions, answer them from upstream-declared reference policy, and improve manifest agreement after applying the answers.
 
 This is different from proving that a third-party maintainer can complete onboarding quickly. That user-experience claim needs real users. The oracle study measures the step before that: whether the tool can express the missing design decisions in a reviewable, patchable form.
 
@@ -39,7 +39,7 @@ For each subject, the harness:
 
 1. Clones the repository and checks out the exact commit.
 2. Builds a reference CellFence manifest from upstream `package.json` workspaces, package names, package entry fields, `exports`, and workspace dependency declarations.
-3. Runs CellFence blind inference with `policyHints: "ignore"`, so package `exports` and dependency declarations are not used by the inferred manifest.
+3. Runs CellFence inference with `packagePolicyHints: "ignore"`, so package `exports` and dependency declarations are not used by the inferred manifest. Workspace membership and package names are still available in v1; this is an entry/dependency ablation, not strict structure-blind inference.
 4. Compares the inferred manifest against the reference manifest.
 5. Generates deterministic policy questions for missing or extra cell boundaries, consumer edges, and public entries.
 6. Answers those questions from the reference manifest and applies their manifest patches.
@@ -65,7 +65,9 @@ reports/upstream-policy-oracle-v1/
   report.json
 ```
 
-`questions/*.json` is the core product evidence. Every question includes a `decisionKey`, affected finding count, evidence, choices, and a manifest patch. The patch is the bridge from noisy observations to a reviewable governance change.
+`questions/*.json` is the core product evidence. Every question includes a `decisionKey`, affected finding fingerprints, evidence, choices, and a manifest patch. The patch is the bridge from observed differences to a reviewable governance change.
+
+In v1, policy questions are generated from the comparison between the ablated manifest and the upstream-declared reference manifest. Therefore, the study validates deterministic question and patch construction once a reference difference is known. It does not yet evaluate whether CellFence can discover the required policy questions from blind repository observations alone.
 
 ## Metrics
 
@@ -74,15 +76,32 @@ The report includes:
 - file ownership agreement against reference-owned files;
 - cell id precision and recall;
 - public entry exact match rate;
-- consumer edge precision and recall;
-- raw CellFence findings on the blind inferred manifest;
+- consumer edge micro precision and recall;
+- consumer edge subject-macro precision and recall;
+- subject counts for exact consumer-edge-set agreement and empty edge sets;
+- raw CellFence findings on the package-policy-hint ablated manifest;
 - policy question count;
-- compression ratio from raw findings to questions;
+- raw-finding-to-policy-question count ratio;
+- finding-to-question mapping coverage;
 - oracle-resolvable question count;
 - before/after agreement after oracle answers;
 - planned mutation count.
 
-The precision wording is intentionally scoped. This run can say that CellFence moved closer to upstream-declared policy after deterministic questions were answered. It cannot say that every upstream policy is correct, that every CellFence finding is a true positive, or that onboarding time has been proven.
+The precision wording is intentionally scoped. This run can say that CellFence moved closer to upstream-declared policy after deterministic oracle-conditioned questions were answered. It cannot say that every upstream policy is correct, that every CellFence finding is a true positive, that CellFence independently discovered every needed question without the reference manifest, or that onboarding time has been proven.
+
+## V2 Separation
+
+The next version should split discovery from oracle evaluation:
+
+```text
+Phase A: ablated repository observations + ablated manifest + findings
+  -> candidate policy questions
+
+Phase B: candidate policy questions + upstream-declared reference manifest
+  -> question precision/recall, oracle answers, resolved manifest
+```
+
+That separation would measure whether CellFence can discover the required decision keys without seeing the reference manifest. V1 intentionally stops earlier: it verifies the round-trip contract for serializing known reference differences into questions, choices, patches, oracle answers, and a resolved manifest.
 
 ## Running
 

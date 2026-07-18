@@ -99,7 +99,7 @@ function usage() {
   console.error(`Usage: node scripts/upstream-policy-oracle.mjs [--corpus docs/research/upstream-policy-oracle-v1/corpus.json] [--out-dir reports/upstream-policy-oracle-v1] [--workdir tmp/upstream-policy-oracle-v1] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts] [--blind-scope all|production]
 
 Builds upstream-declared reference manifests from existing package/workspace
-policy, runs blind CellFence inference without package policy hints, compresses
+policy, runs package-policy-hint ablation inference, compresses
 differences into policy questions with manifest patches, answers them from the
 reference policy, and writes a reproducible evidence bundle. It clones only the
 explicit corpus subjects and never runs target package install scripts.`);
@@ -186,6 +186,18 @@ function hashText(value) {
 
 function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function stableCanonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map((entry) => stableCanonicalJson(entry)).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort((left, right) => left.localeCompare(right)).map((key) => `${JSON.stringify(key)}:${stableCanonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function canonicalSha256(value) {
+  return hashText(stableCanonicalJson(value));
 }
 
 function normalizePath(value) {
@@ -801,8 +813,13 @@ function ownerForPath(manifest, relativePath) {
   return null;
 }
 
-function ratio(numerator, denominator) {
-  if (denominator === 0) return denominator === numerator ? 1 : 0;
+function safeRatio(numerator, denominator) {
+  if (denominator === 0) return null;
+  return Number((numerator / denominator).toFixed(6));
+}
+
+function countRatio(numerator, denominator) {
+  if (denominator === 0) return null;
   return Number((numerator / denominator).toFixed(6));
 }
 
@@ -841,19 +858,19 @@ function compareManifests(rootDir, referenceManifest, inferredManifest, scope) {
       common: commonIds.size,
       missingInferred: [...referenceIds].filter((id) => !inferredIds.has(id)).sort((left, right) => left.localeCompare(right)),
       extraInferred: [...inferredIds].filter((id) => !referenceIds.has(id)).sort((left, right) => left.localeCompare(right)),
-      precision: ratio(commonIds.size, inferredIds.size),
-      recall: ratio(commonIds.size, referenceIds.size),
+      precision: safeRatio(commonIds.size, inferredIds.size),
+      recall: safeRatio(commonIds.size, referenceIds.size),
     },
     ownership: {
       referenceOwnedFiles: referenceOwnedPaths.length,
       matches: ownershipMatches,
       inferredUnownedReferenceFiles,
-      agreement: ratio(ownershipMatches, referenceOwnedPaths.length),
+      agreement: safeRatio(ownershipMatches, referenceOwnedPaths.length),
     },
     publicEntries: {
       compared: publicEntryComparisons.length,
       matches: publicEntryMatches,
-      exactMatchRate: ratio(publicEntryMatches, publicEntryComparisons.length),
+      exactMatchRate: safeRatio(publicEntryMatches, publicEntryComparisons.length),
       mismatches: publicEntryComparisons.filter((entry) => !entry.match),
     },
     consumerEdges: {
@@ -862,18 +879,14 @@ function compareManifests(rootDir, referenceManifest, inferredManifest, scope) {
       common: edgeIntersection,
       missingInferred: [...referenceEdges].filter((edge) => !inferredEdges.has(edge)).sort((left, right) => left.localeCompare(right)),
       extraInferred: [...inferredEdges].filter((edge) => !referenceEdges.has(edge)).sort((left, right) => left.localeCompare(right)),
-      precision: ratio(edgeIntersection, inferredEdges.size),
-      recall: ratio(edgeIntersection, referenceEdges.size),
+      precision: safeRatio(edgeIntersection, inferredEdges.size),
+      recall: safeRatio(edgeIntersection, referenceEdges.size),
     },
   };
 }
 
 function questionId(subjectId, decisionKey) {
   return `PQ-${hashText(`${subjectId}:${JSON.stringify(decisionKey)}`).slice(0, 12)}`;
-}
-
-function jsonPointerSegment(value) {
-  return String(value).replace(/~/g, "~0").replace(/\//g, "~1");
 }
 
 function cellIndex(manifest, cellId) {
@@ -888,31 +901,97 @@ function findingCountsByRule(findings) {
   return counts;
 }
 
-function affectedFindingCount(findings, decisionKey) {
-  if (!Array.isArray(findings) || findings.length === 0) return 0;
+function findingFingerprint(finding) {
+  return hashText(stableCanonicalJson({
+    ruleId: finding.ruleId,
+    severity: finding.severity,
+    filePath: finding.filePath || null,
+    line: finding.line || null,
+    cellId: finding.cellId || null,
+    producerCellId: finding.producerCellId || null,
+    message: finding.message || null,
+    details: finding.details || null,
+  })).slice(0, 24);
+}
+
+const policyQuestionFindingRules = new Set([
+  "CELLFENCE_PRIVATE_IMPORT",
+  "CELLFENCE_UNDECLARED_CONSUMER",
+  "CELLFENCE_PUBLIC_ENTRY_MISSING",
+  "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+]);
+
+function findingsForDecisionKey(findings, decisionKey) {
+  if (!Array.isArray(findings) || findings.length === 0) return [];
   if (decisionKey.kind === "consumer-visibility") {
     return findings.filter((finding) => (
       finding.cellId === decisionKey.sourceCell
       && finding.producerCellId === decisionKey.targetCell
       && ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"].includes(finding.ruleId)
-    )).length;
+    ));
   }
   if (decisionKey.kind === "consumer-deny") {
     return findings.filter((finding) => (
       finding.cellId === decisionKey.sourceCell
       && finding.producerCellId === decisionKey.targetCell
-    )).length;
+    ));
   }
   if (decisionKey.kind === "public-entry") {
     return findings.filter((finding) => (
       finding.cellId === decisionKey.cell
       && ["CELLFENCE_PUBLIC_ENTRY_MISSING", "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"].includes(finding.ruleId)
-    )).length;
+    ));
   }
   if (decisionKey.kind === "cell-boundary") {
-    return findings.filter((finding) => finding.cellId === decisionKey.cell || finding.producerCellId === decisionKey.cell).length;
+    return findings.filter((finding) => finding.cellId === decisionKey.cell || finding.producerCellId === decisionKey.cell);
   }
-  return 0;
+  return [];
+}
+
+function affectedFindingFingerprints(findings, decisionKey) {
+  return findingsForDecisionKey(findings, decisionKey).map((finding) => findingFingerprint(finding)).sort((left, right) => left.localeCompare(right));
+}
+
+function affectedFindingCount(findings, decisionKey) {
+  return findingsForDecisionKey(findings, decisionKey).length;
+}
+
+function mappedFindingCoverage(questions, beforeFindings, afterFindings) {
+  const allBefore = new Set((beforeFindings || []).map((finding) => findingFingerprint(finding)));
+  const policyRelevant = new Set((beforeFindings || [])
+    .filter((finding) => policyQuestionFindingRules.has(finding.ruleId))
+    .map((finding) => findingFingerprint(finding)));
+  const after = new Set((afterFindings || []).map((finding) => findingFingerprint(finding)));
+  const mapping = new Map();
+  for (const question of questions) {
+    for (const fingerprint of question.affectedFindingFingerprints || []) {
+      const questionIds = mapping.get(fingerprint) || [];
+      questionIds.push(question.questionId);
+      mapping.set(fingerprint, questionIds);
+    }
+  }
+  const mapped = new Set(mapping.keys());
+  const overlappingMappings = [...mapping.values()].filter((questionIds) => questionIds.length > 1).length;
+  const zeroImpactQuestions = questions.filter((question) => (question.affectedFindingFingerprints || []).length === 0).length;
+  const mappedPolicyRelevant = [...mapped].filter((fingerprint) => policyRelevant.has(fingerprint)).length;
+  const unmappedPolicyRelevant = [...policyRelevant].filter((fingerprint) => !mapped.has(fingerprint)).length;
+  const mappedResolved = [...mapped].filter((fingerprint) => !after.has(fingerprint)).length;
+  const actionablePolicyQuestions = questions.length - zeroImpactQuestions;
+  return {
+    rawFindings: allBefore.size,
+    policyRelevantFindings: policyRelevant.size,
+    uniquelyMappedFindings: mapped.size,
+    mappedPolicyRelevantFindings: mappedPolicyRelevant,
+    unmappedFindings: [...allBefore].filter((fingerprint) => !mapped.has(fingerprint)).length,
+    unmappedPolicyRelevantFindings: unmappedPolicyRelevant,
+    zeroImpactQuestions,
+    overlappingMappings,
+    projectedResolvedFindings: mapped.size,
+    observedResolvedMappedFindings: mappedResolved,
+    observedTotalFindingReduction: (beforeFindings || []).length - (afterFindings || []).length,
+    actionablePolicyQuestions,
+    observedResolvedFindingToActionableQuestionRatio: countRatio(mappedResolved, actionablePolicyQuestions),
+  };
 }
 
 function createChoice(id, label, manifestPatch, semanticPatch, oracleMatchesReference = true) {
@@ -1085,7 +1164,13 @@ function generateQuestions(subjectId, referenceManifest, inferredManifest, compa
       oracleAnswer: "replace-public-entry",
     });
   }
-  return questions.sort((left, right) => left.questionId.localeCompare(right.questionId));
+  return questions
+    .map((question) => ({
+      ...question,
+      affectedFindings: affectedFindingCount(checkFindings, question.decisionKey),
+      affectedFindingFingerprints: affectedFindingFingerprints(checkFindings, question.decisionKey),
+    }))
+    .sort((left, right) => left.questionId.localeCompare(right.questionId));
 }
 
 function applySemanticPatch(manifest, semanticPatch) {
@@ -1250,7 +1335,7 @@ async function runSubject(subject, options, engine) {
     const inferredManifest = engine.inferManifest({
       rootDir: clone.checkoutDir,
       scope: options.blindScope,
-      policyHints: "ignore",
+      packagePolicyHints: "ignore",
     });
     const artifactPaths = {
       referenceManifest: path.join(options.outDir, "references", `${slugSubjectId(subject.id)}.reference-manifest.json`),
@@ -1289,7 +1374,12 @@ async function runSubject(subject, options, engine) {
     };
     writeJson(artifactPaths.oracleAnswers, answersArtifact);
     writeJson(artifactPaths.resolvedManifest, resolved.resolvedManifest);
+    const resolvedCheckResult = engine.checkRepository({
+      rootDir: clone.checkoutDir,
+      manifestPath: artifactPaths.resolvedManifest,
+    });
     const comparisonAfter = compareManifests(clone.checkoutDir, reference.manifest, resolved.resolvedManifest, scope);
+    const findingMapping = mappedFindingCoverage(questions, checkResult.findings, resolvedCheckResult.findings);
     const mutationPlans = generateMutationPlans(clone.checkoutDir, subject.id, reference.manifest, scope);
     writeJson(artifactPaths.mutations, mutationPlans);
     const worktreeAfter = gitWorktreeStatus(clone.checkoutDir, subjectDir, "status-after-oracle");
@@ -1298,6 +1388,13 @@ async function runSubject(subject, options, engine) {
         worktreeStatus: worktreeAfter.porcelain,
       });
     }
+    const artifacts = Object.fromEntries(Object.entries(artifactPaths).map(([key, filePath]) => [
+      key,
+      {
+        path: path.relative(repoRoot, filePath),
+        sha256: hashFile(filePath),
+      },
+    ]));
     const result = {
       ...base,
       status: "completed",
@@ -1307,13 +1404,8 @@ async function runSubject(subject, options, engine) {
       subjectWorktreeCleanBefore: worktreeBefore.clean,
       subjectWorktreeCleanAfter: worktreeAfter.clean,
       policy: reference.provenance.policy,
-      artifacts: Object.fromEntries(Object.entries(artifactPaths).map(([key, filePath]) => [
-        key,
-        {
-          path: path.relative(repoRoot, filePath),
-          sha256: hashFile(filePath),
-        },
-      ])),
+      artifacts,
+      artifactSetSha256: canonicalSha256(artifacts),
       reference: {
         cells: reference.manifest.cells.length,
         consumerEdges: edgeSet(reference.manifest).size,
@@ -1321,7 +1413,8 @@ async function runSubject(subject, options, engine) {
       },
       blindInference: {
         scope: options.blindScope,
-        policyHints: "ignore",
+        packagePolicyHints: "ignore",
+        ablation: "entry-and-dependency-hints",
         cells: inferredManifest.cells.length,
         consumerEdges: edgeSet(inferredManifest).size,
       },
@@ -1332,13 +1425,21 @@ async function runSubject(subject, options, engine) {
         warnings: checkResult.warnings.length,
         findingsByRule: findingCountsByRule(checkResult.findings),
       },
+      resolvedCheck: {
+        ok: resolvedCheckResult.ok,
+        exitCode: resolvedCheckResult.exitCode,
+        findings: resolvedCheckResult.findings.length,
+        warnings: resolvedCheckResult.warnings.length,
+        findingsByRule: findingCountsByRule(resolvedCheckResult.findings),
+      },
       comparisonBefore,
       policyQuestions: {
         total: questions.length,
         byKind: questionKindCounts(questions),
         affectedFindings: questions.reduce((sum, question) => sum + Number(question.affectedFindings || 0), 0),
-        compressionRatio: ratio(checkResult.findings.length, questions.length),
+        rawFindingToPolicyQuestionCountRatio: countRatio(checkResult.findings.length, questions.length),
         oracleResolvable: questions.filter((question) => question.oracleAnswer).length,
+        findingMapping,
       },
       comparisonAfter,
       mutations: {
@@ -1401,6 +1502,53 @@ function averageRatio(subjects, getter) {
   return Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(6));
 }
 
+function summarizeConsumerEdges(subjects, comparisonKey) {
+  const comparisons = subjects.map((subject) => subject[comparisonKey]?.consumerEdges).filter(Boolean);
+  const reference = comparisons.reduce((sum, comparison) => sum + Number(comparison.reference || 0), 0);
+  const inferred = comparisons.reduce((sum, comparison) => sum + Number(comparison.inferred || 0), 0);
+  const common = comparisons.reduce((sum, comparison) => sum + Number(comparison.common || 0), 0);
+  return {
+    reference,
+    inferred,
+    common,
+    microPrecision: safeRatio(common, inferred),
+    microRecall: safeRatio(common, reference),
+    subjectMacroPrecision: averageRatio(subjects, (subject) => subject[comparisonKey]?.consumerEdges?.precision),
+    subjectMacroRecall: averageRatio(subjects, (subject) => subject[comparisonKey]?.consumerEdges?.recall),
+    subjectsWithExactEdgeSetAgreement: comparisons.filter((comparison) => (
+      (comparison.missingInferred || []).length === 0
+      && (comparison.extraInferred || []).length === 0
+    )).length,
+    subjectsWithNoReferenceConsumerEdges: comparisons.filter((comparison) => Number(comparison.reference || 0) === 0).length,
+    subjectsWithNoInferredConsumerEdges: comparisons.filter((comparison) => Number(comparison.inferred || 0) === 0).length,
+  };
+}
+
+function summarizeFindingMappings(subjects, policyQuestions) {
+  const totals = {
+    rawFindings: 0,
+    policyRelevantFindings: 0,
+    uniquelyMappedFindings: 0,
+    mappedPolicyRelevantFindings: 0,
+    unmappedFindings: 0,
+    unmappedPolicyRelevantFindings: 0,
+    zeroImpactQuestions: 0,
+    overlappingMappings: 0,
+    projectedResolvedFindings: 0,
+    observedResolvedMappedFindings: 0,
+    observedTotalFindingReduction: 0,
+  };
+  for (const subject of subjects) {
+    const mapping = subject.policyQuestions?.findingMapping || {};
+    for (const key of Object.keys(totals)) totals[key] += Number(mapping[key] || 0);
+  }
+  return {
+    ...totals,
+    actionablePolicyQuestions: policyQuestions - totals.zeroImpactQuestions,
+    observedResolvedFindingToActionableQuestionRatio: countRatio(totals.observedResolvedMappedFindings, policyQuestions - totals.zeroImpactQuestions),
+  };
+}
+
 function aggregateQuestionKinds(subjects) {
   const counts = {};
   for (const subject of subjects) {
@@ -1424,21 +1572,24 @@ function summarize(subjects) {
     failed: failedSubjects.length,
     rawFindings,
     policyQuestions,
-    compressionRatio: ratio(rawFindings, policyQuestions),
+    rawFindingToPolicyQuestionCountRatio: countRatio(rawFindings, policyQuestions),
     oracleResolvableQuestions: sumSubjectMetric(completedSubjects, (subject) => subject.policyQuestions?.oracleResolvable),
     questionKinds: aggregateQuestionKinds(completedSubjects),
+    findingMapping: summarizeFindingMappings(completedSubjects, policyQuestions),
     mutationPlans: sumSubjectMetric(completedSubjects, (subject) => subject.mutations?.planned),
+    artifactSetSha256: canonicalSha256(completedSubjects.map((subject) => ({
+      id: subject.id,
+      artifactSetSha256: subject.artifactSetSha256,
+    }))),
     before: {
-      ownershipAgreement: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.ownership?.agreement),
-      publicEntryExactMatchRate: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.publicEntries?.exactMatchRate),
-      consumerEdgePrecision: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.consumerEdges?.precision),
-      consumerEdgeRecall: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.consumerEdges?.recall),
+      ownershipAgreementSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.ownership?.agreement),
+      publicEntryExactMatchRateSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonBefore?.publicEntries?.exactMatchRate),
+      consumerEdges: summarizeConsumerEdges(completedSubjects, "comparisonBefore"),
     },
     after: {
-      ownershipAgreement: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.ownership?.agreement),
-      publicEntryExactMatchRate: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.publicEntries?.exactMatchRate),
-      consumerEdgePrecision: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.consumerEdges?.precision),
-      consumerEdgeRecall: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.consumerEdges?.recall),
+      ownershipAgreementSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.ownership?.agreement),
+      publicEntryExactMatchRateSubjectMacro: averageRatio(completedSubjects, (subject) => subject.comparisonAfter?.publicEntries?.exactMatchRate),
+      consumerEdges: summarizeConsumerEdges(completedSubjects, "comparisonAfter"),
     },
     failureKinds: failedSubjects.reduce((counts, subject) => {
       const key = subject.failureKind || subject.status;
