@@ -395,17 +395,15 @@ function resolveCommand(commandName: string): string {
 
 type ExecCommandOptions = NonNullable<Parameters<typeof execFileSync>[2]>;
 
-function quoteWindowsCommandArgument(argument: string): string {
-  const escaped = argument.replace(/(["^&|<>()%])/g, "^$1");
-  return `"${escaped}"`;
+function escapeWindowsShellArgument(argument: string): string {
+  return argument.replace(/\^/g, "^^");
 }
 
 function execCommandSync(commandName: string, args: string[], options: ExecCommandOptions): string {
   const commandPath = resolveCommand(commandName);
   const extension = path.extname(commandPath).toLowerCase();
   if (process.platform === "win32" && (extension === ".cmd" || extension === ".bat")) {
-    const commandLine = [commandPath, ...args].map(quoteWindowsCommandArgument).join(" ");
-    return execFileSync(process.env.ComSpec || "cmd.exe", ["/d", "/c", commandLine], options) as string;
+    return execFileSync(commandPath, args.map(escapeWindowsShellArgument), { ...options, shell: true }) as string;
   }
   return execFileSync(commandPath, args, options) as string;
 }
