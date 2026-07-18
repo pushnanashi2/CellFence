@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
@@ -8,6 +10,35 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const defaultWorkDir = path.join(repoRoot, "tmp", "corpus-precision-study");
 const defaultOutPath = path.join(repoRoot, "reports", "corpus-precision-study.json");
 const cellfenceCli = path.join(repoRoot, "packages", "cli", "dist", "index.js");
+const defaultManifestPath = "cellfence.manifest.json";
+const commandTimeouts = {
+  clone: 600_000,
+  checkout: 120_000,
+  revParse: 60_000,
+  manifest: 180_000,
+  check: 300_000,
+};
+const fixedCheckArguments = new Set([
+  "--root",
+  "--manifest",
+  "--json",
+  "--format",
+  "--audit-log",
+  "--summary-json",
+  "--changed",
+  "--base",
+  "--head",
+]);
+
+class SubjectFailure extends Error {
+  constructor(stage, failureKind, message, details = {}) {
+    super(message);
+    this.name = "SubjectFailure";
+    this.stage = stage;
+    this.failureKind = failureKind;
+    Object.assign(this, details);
+  }
+}
 
 function usage() {
   console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref]
@@ -76,8 +107,52 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function safeName(value) {
-  return String(value).replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "subject";
+function hashText(value) {
+  return crypto.createHash("sha256").update(String(value)).digest("hex");
+}
+
+function hashFile(filePath) {
+  return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function slugSubjectId(value) {
+  return String(value).replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 64) || "subject";
+}
+
+function isPathWithin(baseDir, candidatePath, allowBase = false) {
+  const relative = path.relative(path.resolve(baseDir), path.resolve(candidatePath));
+  if (relative === "") return allowBase;
+  return relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+}
+
+function resolveWithin(baseDir, relativePath, label, options = {}) {
+  if (typeof relativePath !== "string" || relativePath.length === 0 || path.isAbsolute(relativePath)) {
+    throw new Error(`${label} must be a non-empty relative path`);
+  }
+  const resolved = path.resolve(baseDir, relativePath);
+  if (!isPathWithin(baseDir, resolved, options.allowBase === true)) {
+    throw new Error(`${label} escapes its root: ${relativePath}`);
+  }
+  return resolved;
+}
+
+function validateContainedRelativePath(relativePath, label) {
+  resolveWithin(path.join(repoRoot, ".cellfence-path-root"), relativePath, label);
+}
+
+function assertRealPathWithin(baseDir, candidatePath, label) {
+  const base = fs.realpathSync(baseDir);
+  const candidate = fs.realpathSync(candidatePath);
+  if (!isPathWithin(base, candidate, false)) {
+    throw new Error(`${label} resolves outside its root: ${candidatePath}`);
+  }
+  return candidate;
+}
+
+function subjectDirectory(workDir, id) {
+  const slug = slugSubjectId(id);
+  const digest = hashText(id).slice(0, 12);
+  return resolveWithin(workDir, `${slug}-${digest}`, "subject id");
 }
 
 function isExactCommit(value) {
@@ -89,15 +164,30 @@ function run(command, args, options) {
   const result = spawnSync(command, args, {
     cwd: options.cwd,
     encoding: "utf8",
-    env: { ...process.env, ...options.env },
+    env: {
+      ...process.env,
+      ...options.env,
+      GIT_TERMINAL_PROMPT: "0",
+      GIT_LFS_SKIP_SMUDGE: "1",
+      LC_ALL: "C",
+      TZ: "UTC",
+    },
     maxBuffer: 100 * 1024 * 1024,
+    timeout: options.timeoutMs,
   });
+  const errorCode = result.error && typeof result.error === "object" && "code" in result.error
+    ? String(result.error.code)
+    : undefined;
+  const timedOut = errorCode === "ETIMEDOUT";
   return {
     command: [command, ...args].join(" "),
-    status: result.status ?? 1,
+    status: result.status ?? (timedOut ? 124 : 1),
     stdout: result.stdout || "",
     stderr: result.stderr || "",
     error: result.error ? String(result.error.message || result.error) : undefined,
+    errorCode,
+    timedOut,
+    timeoutMs: options.timeoutMs,
     durationMs: Math.round(performance.now() - startedAt),
   };
 }
@@ -113,7 +203,42 @@ function summarizeFailure(result) {
   return result.error || result.stderr.trim().split(/\r?\n/).filter(Boolean).slice(-3).join("\n") || result.stdout.trim().split(/\r?\n/).filter(Boolean).slice(-3).join("\n") || `exit ${result.status}`;
 }
 
-function validateCorpus(corpus, options) {
+function commandFailure(stage, result) {
+  if (result.timedOut) {
+    throw new SubjectFailure(stage, "timeout", `${stage} timed out after ${result.timeoutMs}ms`, {
+      timeoutMs: result.timeoutMs,
+      exitCode: result.status,
+      durationMs: result.durationMs,
+    });
+  }
+  throw new SubjectFailure(stage, "command_failed", summarizeFailure(result), {
+    exitCode: result.status,
+    durationMs: result.durationMs,
+  });
+}
+
+function validateCheckArgs(subjectId, args) {
+  if (args === undefined) return;
+  if (!Array.isArray(args)) throw new Error(`${subjectId} check.args must be an array`);
+  for (const argument of args) {
+    if (typeof argument !== "string" || argument.length === 0) {
+      throw new Error(`${subjectId} check.args entries must be non-empty strings`);
+    }
+    const optionName = argument.includes("=") ? argument.slice(0, argument.indexOf("=")) : argument;
+    if (fixedCheckArguments.has(optionName)) {
+      throw new Error(`${subjectId} check.args cannot override fixed CellFence check argument ${optionName}`);
+    }
+  }
+}
+
+function validateCheckTimeout(subjectId, timeoutMs) {
+  if (timeoutMs === undefined) return;
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > commandTimeouts.check) {
+    throw new Error(`${subjectId} check.timeoutMs must be an integer from 1 to ${commandTimeouts.check}`);
+  }
+}
+
+function validateCorpus(corpus, options, corpusDir) {
   if (corpus.schemaVersion !== "cellfence.corpus.v1") {
     throw new Error("corpus schemaVersion must be cellfence.corpus.v1");
   }
@@ -121,18 +246,39 @@ function validateCorpus(corpus, options) {
     throw new Error("corpus must contain at least one subject");
   }
   const ids = new Set();
+  const subjectDirs = new Set();
   for (const subject of corpus.subjects) {
     if (!subject || typeof subject !== "object") throw new Error("each subject must be an object");
-    if (!subject.id) throw new Error("each subject requires id");
+    if (typeof subject.id !== "string" || subject.id.length === 0) throw new Error("each subject requires id");
+    if (subject.id === "." || subject.id === "..") throw new Error(`subject id is not allowed: ${subject.id}`);
     if (ids.has(subject.id)) throw new Error(`duplicate subject id: ${subject.id}`);
     ids.add(subject.id);
+    const subjectDir = subjectDirectory(options.workDir, subject.id);
+    if (subjectDirs.has(subjectDir)) throw new Error(`duplicate subject directory for id: ${subject.id}`);
+    subjectDirs.add(subjectDir);
     if (!subject.repository) throw new Error(`${subject.id} requires repository`);
     if (!options.allowFloatingRef && !isExactCommit(subject.commit)) {
       throw new Error(`${subject.id} requires exact 40-hex commit; use --allow-floating-ref only for exploratory runs`);
     }
+    const strategy = subject.manifest?.strategy || "existing";
+    const manifestPath = subject.manifest?.path || defaultManifestPath;
+    if (strategy === "infer" && manifestPath !== defaultManifestPath) {
+      throw new Error(`${subject.id} manifest.strategy=infer only supports ${defaultManifestPath}`);
+    }
+    validateContainedRelativePath(manifestPath, `${subject.id} manifest.path`);
     if (subject.manifest?.strategy === "copy" && !subject.manifest.source) {
       throw new Error(`${subject.id} manifest.strategy=copy requires manifest.source`);
     }
+    if (strategy === "copy") {
+      const sourcePath = resolveWithin(corpusDir, subject.manifest.source, `${subject.id} manifest.source`);
+      if (!fs.existsSync(sourcePath)) throw new Error(`${subject.id} manifest.source not found: ${subject.manifest.source}`);
+      assertRealPathWithin(corpusDir, sourcePath, `${subject.id} manifest.source`);
+    }
+    for (const fromPath of subject.manifest?.from || []) {
+      validateContainedRelativePath(fromPath, `${subject.id} manifest.from`);
+    }
+    validateCheckArgs(subject.id, subject.check?.args);
+    validateCheckTimeout(subject.id, subject.check?.timeoutMs);
   }
 }
 
@@ -160,35 +306,44 @@ function expectationResult(expected, checkResult) {
   return { status: failures.length === 0 ? "passed" : "failed", failures };
 }
 
-function resolveManifestSource(corpusDir, sourcePath) {
-  return path.isAbsolute(sourcePath) ? sourcePath : path.resolve(corpusDir, sourcePath);
-}
-
 function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
   const strategy = subject.manifest?.strategy || "existing";
-  const manifestPath = subject.manifest?.path || "cellfence.manifest.json";
+  const manifestPath = subject.manifest?.path || defaultManifestPath;
   const startedAt = performance.now();
+  let effectivePath;
   if (strategy === "existing") {
-    const fullPath = path.resolve(checkoutDir, manifestPath);
+    const fullPath = resolveWithin(checkoutDir, manifestPath, "manifest.path");
     if (!fs.existsSync(fullPath)) throw new Error(`manifest not found: ${manifestPath}`);
+    assertRealPathWithin(checkoutDir, fullPath, "manifest.path");
+    effectivePath = manifestPath;
   } else if (strategy === "copy") {
-    const sourcePath = resolveManifestSource(corpusDir, subject.manifest.source);
-    const targetPath = path.resolve(checkoutDir, manifestPath);
+    const sourcePath = resolveWithin(corpusDir, subject.manifest.source, "manifest.source");
+    assertRealPathWithin(corpusDir, sourcePath, "manifest.source");
+    const controlDir = path.join(subjectDir, "control");
+    const targetPath = resolveWithin(controlDir, manifestPath, "manifest.path");
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     fs.copyFileSync(sourcePath, targetPath);
+    effectivePath = targetPath;
   } else if (strategy === "infer") {
+    if (manifestPath !== defaultManifestPath) {
+      throw new Error(`manifest.strategy=infer only supports ${defaultManifestPath}`);
+    }
     const args = ["init", "--root", checkoutDir];
     if (subject.manifest?.preset) args.push("--preset", subject.manifest.preset);
     for (const fromPath of subject.manifest?.from || []) args.push("--from", fromPath);
-    const result = run(process.execPath, [cellfenceCli, ...args], { cwd: checkoutDir });
+    const result = run(process.execPath, [cellfenceCli, ...args], { cwd: checkoutDir, timeoutMs: commandTimeouts.manifest });
     writeCommandLogs(subjectDir, "manifest", result);
-    if (result.status !== 0) throw new Error(summarizeFailure(result));
+    if (result.status !== 0) commandFailure("manifest", result);
+    effectivePath = manifestPath;
   } else {
     throw new Error(`unsupported manifest strategy: ${strategy}`);
   }
+  const manifestFilePath = path.isAbsolute(effectivePath) ? effectivePath : path.resolve(checkoutDir, effectivePath);
   return {
     strategy,
     path: manifestPath,
+    effectivePath,
+    sha256: hashFile(manifestFilePath),
     status: "completed",
     durationMs: Math.round(performance.now() - startedAt),
   };
@@ -197,26 +352,39 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir) {
 function cloneSubject(subject, subjectDir, options) {
   const checkoutDir = path.join(subjectDir, "checkout");
   fs.rmSync(checkoutDir, { recursive: true, force: true });
-  const clone = run("git", ["clone", "--quiet", "--no-tags", subject.repository, checkoutDir], { cwd: options.workDir });
+  const clone = run("git", ["clone", "--quiet", "--no-tags", subject.repository, checkoutDir], {
+    cwd: options.workDir,
+    timeoutMs: commandTimeouts.clone,
+  });
   writeCommandLogs(subjectDir, "clone", clone);
-  if (clone.status !== 0) throw new Error(summarizeFailure(clone));
+  if (clone.status !== 0) commandFailure("clone", clone);
 
   const checkoutTarget = subject.commit || subject.ref || "HEAD";
-  const checkout = run("git", ["checkout", "--quiet", "--detach", checkoutTarget], { cwd: checkoutDir });
+  const checkout = run("git", ["checkout", "--quiet", "--detach", checkoutTarget], {
+    cwd: checkoutDir,
+    timeoutMs: commandTimeouts.checkout,
+  });
   writeCommandLogs(subjectDir, "checkout", checkout);
-  if (checkout.status !== 0) throw new Error(summarizeFailure(checkout));
+  if (checkout.status !== 0) commandFailure("checkout", checkout);
 
-  const revParse = run("git", ["rev-parse", "HEAD"], { cwd: checkoutDir });
+  const revParse = run("git", ["rev-parse", "HEAD"], { cwd: checkoutDir, timeoutMs: commandTimeouts.revParse });
   writeCommandLogs(subjectDir, "rev-parse", revParse);
-  if (revParse.status !== 0) throw new Error(summarizeFailure(revParse));
+  if (revParse.status !== 0) commandFailure("rev-parse", revParse);
   const actualCommit = revParse.stdout.trim();
   if (subject.commit && actualCommit !== subject.commit) {
-    throw new Error(`checked out ${actualCommit}, expected ${subject.commit}`);
+    throw new SubjectFailure("checkout", "commit_mismatch", `checked out ${actualCommit}, expected ${subject.commit}`);
   }
-  return { checkoutDir, actualCommit };
+  const tree = run("git", ["rev-parse", "HEAD^{tree}"], { cwd: checkoutDir, timeoutMs: commandTimeouts.revParse });
+  writeCommandLogs(subjectDir, "tree", tree);
+  if (tree.status !== 0) commandFailure("rev-parse", tree);
+  return { checkoutDir, actualCommit, gitTree: tree.stdout.trim() };
 }
 
 function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
+  validateCheckArgs(subject.id, subject.check?.args);
+  validateCheckTimeout(subject.id, subject.check?.timeoutMs);
+  const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
+  fs.mkdirSync(path.dirname(auditLogPath), { recursive: true });
   const args = [
     cellfenceCli,
     "check",
@@ -225,16 +393,31 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
     "--manifest",
     manifestPath,
     "--json",
+    "--audit-log",
+    auditLogPath,
     ...(subject.check?.args || []),
   ];
-  const result = run(process.execPath, args, { cwd: checkoutDir });
+  const result = run(process.execPath, args, { cwd: checkoutDir, timeoutMs: subject.check?.timeoutMs || commandTimeouts.check });
   writeCommandLogs(subjectDir, "check", result);
+  if (result.timedOut) {
+    return {
+      status: "timeout",
+      exitCode: result.status,
+      ok: false,
+      findings: null,
+      warnings: null,
+      findingsByRule: {},
+      durationMs: result.durationMs,
+      timeoutMs: result.timeoutMs,
+      error: `CellFence check timed out after ${result.timeoutMs}ms`,
+    };
+  }
   let parsed;
   try {
     parsed = JSON.parse(result.stdout);
   } catch (error) {
     return {
-      status: "unparseable",
+      status: "unparseable_output",
       exitCode: result.status,
       ok: false,
       findings: null,
@@ -246,13 +429,19 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
   }
   const findings = Array.isArray(parsed.findings) ? parsed.findings : [];
   const warnings = Array.isArray(parsed.warnings) ? parsed.warnings : [];
+  let status = "tool_error";
+  if (result.status === 0) status = "checked_clean";
+  else if (result.status === 1) status = "checked_findings";
+  else if (result.status === 2) status = "configuration_error";
   return {
-    status: "completed",
+    status,
     exitCode: result.status,
     ok: parsed.ok === true,
     findings: findings.length,
     warnings: warnings.length,
     findingsByRule: findingsByRule(findings),
+    auditLogPath,
+    auditLogSha256: fs.existsSync(auditLogPath) ? hashFile(auditLogPath) : null,
     durationMs: result.durationMs,
   };
 }
@@ -264,9 +453,14 @@ function summarize(subjects) {
     planned: 0,
     failed: 0,
     checksRun: 0,
+    checksClean: 0,
+    checksWithViolations: 0,
     checkPassed: 0,
     checkFailed: 0,
     configurationErrors: 0,
+    toolErrors: 0,
+    unparseableOutputs: 0,
+    timeouts: 0,
     totalFindings: 0,
     findingsByRule: {},
     expectations: {
@@ -277,14 +471,27 @@ function summarize(subjects) {
     },
   };
   for (const subject of subjects) {
-    if (subject.status === "completed") summary.completed += 1;
+    if (subject.status === "checked_clean" || subject.status === "checked_findings") summary.completed += 1;
     else if (subject.status === "planned") summary.planned += 1;
     else summary.failed += 1;
+    if (subject.failureKind === "timeout") summary.timeouts += 1;
     if (subject.check) {
       summary.checksRun += 1;
-      if (subject.check.exitCode === 0) summary.checkPassed += 1;
-      else if (subject.check.exitCode === 1) summary.checkFailed += 1;
-      else summary.configurationErrors += 1;
+      if (subject.check.status === "unparseable_output") {
+        summary.unparseableOutputs += 1;
+      } else if (subject.check.status === "timeout") {
+        summary.timeouts += 1;
+      } else if (subject.check.exitCode === 0) {
+        summary.checksClean += 1;
+        summary.checkPassed += 1;
+      } else if (subject.check.exitCode === 1) {
+        summary.checksWithViolations += 1;
+        summary.checkFailed += 1;
+      } else if (subject.check.exitCode === 2) {
+        summary.configurationErrors += 1;
+      } else {
+        summary.toolErrors += 1;
+      }
       summary.totalFindings += Number(subject.check.findings || 0);
       for (const [ruleId, count] of Object.entries(subject.check.findingsByRule || {})) {
         summary.findingsByRule[ruleId] = (summary.findingsByRule[ruleId] || 0) + count;
@@ -302,7 +509,7 @@ function summarize(subjects) {
 }
 
 function runSubject(subject, corpusDir, options) {
-  const subjectDir = path.join(options.workDir, safeName(subject.id));
+  const subjectDir = subjectDirectory(options.workDir, subject.id);
   fs.rmSync(subjectDir, { recursive: true, force: true });
   fs.mkdirSync(subjectDir, { recursive: true });
   const startedAt = new Date().toISOString();
@@ -320,21 +527,30 @@ function runSubject(subject, corpusDir, options) {
       status: "planned",
       manifest: {
         strategy: subject.manifest?.strategy || "existing",
-        path: subject.manifest?.path || "cellfence.manifest.json",
+        path: subject.manifest?.path || defaultManifestPath,
       },
+      subjectDir,
       completedAt: new Date().toISOString(),
       durationMs: Math.round(performance.now() - startedAtMs),
     };
   }
   try {
     const clone = cloneSubject(subject, subjectDir, options);
-    const manifest = prepareManifest(subject, clone.checkoutDir, corpusDir, subjectDir);
-    const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.path);
+    let manifest;
+    try {
+      manifest = prepareManifest(subject, clone.checkoutDir, corpusDir, subjectDir);
+    } catch (error) {
+      if (error instanceof SubjectFailure) throw error;
+      throw new SubjectFailure("manifest", "manifest_error", error instanceof Error ? error.message : String(error));
+    }
+    const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.effectivePath);
     const expectation = expectationResult(subject.expected, check);
     return {
       ...base,
-      status: check.status === "completed" ? "completed" : "failed",
+      status: check.status,
       commit: clone.actualCommit,
+      gitTree: clone.gitTree,
+      subjectDir,
       manifest,
       check,
       expectation,
@@ -344,12 +560,43 @@ function runSubject(subject, corpusDir, options) {
   } catch (error) {
     return {
       ...base,
-      status: "failed",
+      status: error instanceof SubjectFailure ? `${error.stage}_failed` : "failed",
+      stage: error instanceof SubjectFailure ? error.stage : undefined,
+      failureKind: error instanceof SubjectFailure ? error.failureKind : "error",
+      timeoutMs: error instanceof SubjectFailure ? error.timeoutMs : undefined,
+      exitCode: error instanceof SubjectFailure ? error.exitCode : undefined,
+      subjectDir,
       error: error instanceof Error ? error.message : String(error),
       completedAt: new Date().toISOString(),
       durationMs: Math.round(performance.now() - startedAtMs),
     };
   }
+}
+
+function readTextIfOk(command, args) {
+  const result = run(command, args, { cwd: repoRoot, timeoutMs: 30_000 });
+  return result.status === 0 ? result.stdout.trim() : null;
+}
+
+function environmentMetadata(corpusPath) {
+  const packageJson = readJson(path.join(repoRoot, "package.json"));
+  const harnessCommit = readTextIfOk("git", ["rev-parse", "HEAD"]);
+  const gitVersion = readTextIfOk("git", ["--version"]);
+  const gitStatus = readTextIfOk("git", ["status", "--short"]);
+  return {
+    harnessCommit,
+    harnessDirty: gitStatus === null ? null : gitStatus.length > 0,
+    cellfenceVersion: packageJson.version,
+    cellfenceSourceCommit: harnessCommit,
+    cellfenceCliSha256: fs.existsSync(cellfenceCli) ? hashFile(cellfenceCli) : null,
+    corpusSha256: hashFile(corpusPath),
+    nodeVersion: process.version,
+    gitVersion,
+    platform: process.platform,
+    arch: process.arch,
+    osRelease: os.release(),
+    timezone: process.env.TZ || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+  };
 }
 
 function main() {
@@ -368,15 +615,16 @@ function main() {
   }
 
   let corpus;
+  let corpusDir;
   try {
     corpus = readJson(options.corpusPath);
-    validateCorpus(corpus, options);
+    corpusDir = path.dirname(options.corpusPath);
+    validateCorpus(corpus, options, corpusDir);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     return 2;
   }
 
-  const corpusDir = path.dirname(options.corpusPath);
   fs.mkdirSync(options.workDir, { recursive: true });
   const subjects = corpus.subjects.slice(0, options.maxSubjects || corpus.subjects.length)
     .map((subject) => runSubject(subject, corpusDir, options));
@@ -387,13 +635,21 @@ function main() {
     corpusPath: options.corpusPath,
     dryRun: options.dryRun,
     allowFloatingRef: options.allowFloatingRef,
+    environment: environmentMetadata(options.corpusPath),
     subjects,
     summary: summarize(subjects),
   };
   writeJson(options.outPath, report);
   console.log(JSON.stringify(report.summary, null, 2));
 
-  if (report.summary.failed > 0 || report.summary.expectations.failed > 0) return 1;
+  if (
+    report.summary.failed > 0 ||
+    report.summary.configurationErrors > 0 ||
+    report.summary.toolErrors > 0 ||
+    report.summary.unparseableOutputs > 0 ||
+    report.summary.timeouts > 0 ||
+    report.summary.expectations.failed > 0
+  ) return 1;
   return 0;
 }
 

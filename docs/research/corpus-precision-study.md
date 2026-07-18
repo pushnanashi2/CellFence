@@ -19,6 +19,11 @@ The corpus pass measures:
 It does not measure long-term operational value. That belongs to dogfooding and
 agent A/B runs.
 
+This study estimates conditional finding precision and onboarding friction. It
+does not estimate recall, false-negative rate, causal effectiveness, or
+long-term operational value. Recall requires history replay, mutation
+injection, or an independent ground-truth boundary set.
+
 ## Frozen Corpus Manifest
 
 Store the corpus manifest before running the study:
@@ -64,12 +69,27 @@ npm run research:corpus -- --corpus docs/research/corpora/ts-monorepo-50.json --
 
 The script:
 
-- clones each repository into `tmp/corpus-precision-study/`;
+- clones each repository into a hash-suffixed subject directory under
+  `tmp/corpus-precision-study/`;
 - checks out the exact commit;
 - prepares the manifest by `existing`, `copy`, or `infer` strategy;
 - runs `cellfence check --json`;
-- writes command logs under each subject directory;
-- writes a summary JSON report under `reports/`.
+- writes command logs and a fixed CellFence audit log under each subject
+  directory;
+- writes a summary JSON report under `reports/`;
+- records environment metadata, manifest SHA-256, actual commit, and Git tree
+  hashes for replay.
+
+Subject status is classified as:
+
+| Status | Meaning |
+| --- | --- |
+| `checked_clean` | CellFence exited 0. |
+| `checked_findings` | CellFence exited 1 with parsed findings. This is a normal research result, not a harness failure. |
+| `configuration_error` | CellFence exited 2. The harness exits non-zero. |
+| `tool_error` | CellFence exited with an internal/tool error. |
+| `unparseable_output` | CellFence output could not be parsed as JSON. |
+| `timeout` | A command exceeded its stage timeout. |
 
 It does not install dependencies or execute target repository package scripts.
 If a separate experiment needs package installation, use an isolated runner and
@@ -87,13 +107,23 @@ report without cloning repositories.
 `existing` uses a manifest already present in the target repository. This is the
 cleanest strategy for CellFence's own dogfood and future adopters.
 
-`copy` copies a checked manifest from the corpus directory into the checkout.
+`copy` copies a checked manifest from the corpus directory into the subject
+control directory.
 Use this when comparing against an existing boundary tool and preserving the
 reviewed CellFence translation next to the corpus manifest.
+For safety and reproducibility, `copy` sources must be relative paths inside the
+corpus directory. The effective manifest is copied into the subject control
+directory, outside the target checkout, and passed to CellFence by absolute path.
 
 `infer` runs `cellfence init` inside the checkout. This is useful for onboarding
 friction, but it is not a precision study until the generated manifest is
 reviewed or compared against existing boundary configuration.
+`infer` always writes the default `cellfence.manifest.json`; custom manifest
+paths are rejected for this strategy.
+
+Additional `subject.check.args` cannot override fixed execution controls such as
+`--root`, `--manifest`, `--json`, `--format`, `--audit-log`, `--summary-json`,
+`--changed`, `--base`, or `--head`.
 
 ## Manual Labels
 
@@ -108,6 +138,15 @@ Raw findings are not truth. For each rule family, sample findings and label:
 - invalid setup: the manifest translation, not the detector, caused the finding.
 
 Report precision only on labeled rows. Report onboarding failures separately.
+Use a predeclared sampling rule. A recommended default is to label every finding
+for rule families with 50 or fewer findings and otherwise sample 50 findings per
+rule using a seed derived from the corpus hash.
+
+Report at least:
+
+- semantic correctness: `(true positive + needs policy) / (true positive + needs policy + false positive)`;
+- blocking precision: `true positive / (true positive + needs policy + false positive)`;
+- translation error rate: `invalid setup / all labeled findings`.
 
 ## Ethical Boundaries
 
