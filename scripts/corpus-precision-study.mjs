@@ -394,6 +394,10 @@ function prepareManifest(subject, checkoutDir, corpusDir, subjectDir, options) {
   const manifestFilePath = path.isAbsolute(effectivePath) ? effectivePath : path.resolve(checkoutDir, effectivePath);
   return {
     strategy,
+    ...(subject.manifest?.source ? { source: subject.manifest.source } : {}),
+    ...(subject.manifest?.reviewStatus ? { reviewStatus: subject.manifest.reviewStatus } : {}),
+    ...(subject.manifest?.reviewedBy ? { reviewedBy: subject.manifest.reviewedBy } : {}),
+    ...(subject.manifest?.review ? { review: subject.manifest.review } : {}),
     ...(strategy === "infer" ? { scope: inferScope } : {}),
     path: manifestPath,
     effectivePath,
@@ -644,6 +648,10 @@ function runSubject(subject, corpusDir, options) {
       status: "planned",
       manifest: {
         strategy,
+        ...(subject.manifest?.source ? { source: subject.manifest.source } : {}),
+        ...(subject.manifest?.reviewStatus ? { reviewStatus: subject.manifest.reviewStatus } : {}),
+        ...(subject.manifest?.reviewedBy ? { reviewedBy: subject.manifest.reviewedBy } : {}),
+        ...(subject.manifest?.review ? { review: subject.manifest.review } : {}),
         path: subject.manifest?.path || defaultManifestPath,
         ...(strategy === "infer"
           ? { scope: subject.manifest?.scope || options.inferScope }

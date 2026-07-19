@@ -1,0 +1,647 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "examples/action-listener/counter/src/**",
+      "examples/query/react/advanced/src/**",
+      "examples/query/react/authentication-with-extrareducers/src/**",
+      "examples/query/react/authentication/src/**",
+      "examples/query/react/basic/src/**",
+      "examples/query/react/conditional-fetching/src/**",
+      "examples/query/react/deduping-queries/src/**",
+      "examples/query/react/graphql-codegen/src/**",
+      "examples/query/react/graphql/src/**",
+      "examples/query/react/infinite-queries/src/**",
+      "examples/query/react/kitchen-sink/src/**",
+      "examples/query/react/mutations/src/**",
+      "examples/query/react/optimistic-update/src/**",
+      "examples/query/react/pagination/src/**",
+      "examples/query/react/polling/src/**",
+      "examples/query/react/prefetching-automatic-waterfall/src/**",
+      "examples/query/react/prefetching-automatic/src/**",
+      "examples/query/react/prefetching/src/**",
+      "examples/query/react/with-apiprovider/src/**",
+      "examples/type-portability/bundler/src/**",
+      "examples/type-portability/nodenext-cjs/src/**",
+      "examples/type-portability/nodenext-esm/src/**",
+      "packages/rtk-codemods/**",
+      "packages/rtk-query-codegen-openapi/src/**",
+      "packages/rtk-query-graphql-request-base-query/src/**",
+      "packages/toolkit/src/**",
+      "website/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "advanced",
+      "ownedPaths": [
+        "examples/query/react/advanced/src/**"
+      ],
+      "publicEntry": "examples/query/react/advanced/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/advanced",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "authentication",
+      "ownedPaths": [
+        "examples/query/react/authentication/src/**"
+      ],
+      "publicEntry": "examples/query/react/authentication/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/authentication",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "authentication-with-extrareducers",
+      "ownedPaths": [
+        "examples/query/react/authentication-with-extrareducers/src/**"
+      ],
+      "publicEntry": "examples/query/react/authentication-with-extrareducers/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/authentication-with-extrareducers",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "basic",
+      "ownedPaths": [
+        "examples/query/react/basic/src/**"
+      ],
+      "publicEntry": "examples/query/react/basic/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/basic",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler",
+      "ownedPaths": [
+        "examples/type-portability/bundler/src/**"
+      ],
+      "publicEntry": "examples/type-portability/bundler/src/index.tsx",
+      "publicSymbols": [
+        "container"
+      ],
+      "packageName": "@examples-type-portability/bundler",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "codegen-openapi",
+      "ownedPaths": [
+        "packages/rtk-query-codegen-openapi/src/**"
+      ],
+      "publicEntry": "packages/rtk-query-codegen-openapi/src/index.ts",
+      "publicSymbols": [
+        "ConfigFile",
+        "generateEndpoints",
+        "parseConfig"
+      ],
+      "packageName": "@rtk-query/codegen-openapi",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "conditional-fetching",
+      "ownedPaths": [
+        "examples/query/react/conditional-fetching/src/**"
+      ],
+      "publicEntry": "examples/query/react/conditional-fetching/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/conditional-fetching",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "counter",
+      "ownedPaths": [
+        "examples/action-listener/counter/src/**"
+      ],
+      "publicEntry": "examples/action-listener/counter/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-action-listener/counter",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "deduping-queries",
+      "ownedPaths": [
+        "examples/query/react/deduping-queries/src/**"
+      ],
+      "publicEntry": "examples/query/react/deduping-queries/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/deduping-queries",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "graphql",
+      "ownedPaths": [
+        "examples/query/react/graphql/src/**"
+      ],
+      "publicEntry": "examples/query/react/graphql/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/graphql",
+      "consumes": [
+        {
+          "cell": "graphql-request-base-query"
+        },
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "graphql-codegen",
+      "ownedPaths": [
+        "examples/query/react/graphql-codegen/src/**"
+      ],
+      "publicEntry": "examples/query/react/graphql-codegen/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/graphql-codegen",
+      "consumes": [
+        {
+          "cell": "graphql-request-base-query"
+        },
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "graphql-request-base-query",
+      "ownedPaths": [
+        "packages/rtk-query-graphql-request-base-query/src/**"
+      ],
+      "publicEntry": "packages/rtk-query-graphql-request-base-query/src/index.ts",
+      "publicSymbols": [
+        "graphqlRequestBaseQuery"
+      ],
+      "packageName": "@rtk-query/graphql-request-base-query",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "infinite-queries",
+      "ownedPaths": [
+        "examples/query/react/infinite-queries/src/**"
+      ],
+      "publicEntry": "examples/query/react/infinite-queries/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@examples-query-react/infinite-queries",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "kitchen-sink",
+      "ownedPaths": [
+        "examples/query/react/kitchen-sink/src/**"
+      ],
+      "publicEntry": "examples/query/react/kitchen-sink/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/kitchen-sink",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mutations",
+      "ownedPaths": [
+        "examples/query/react/mutations/src/**"
+      ],
+      "publicEntry": "examples/query/react/mutations/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/mutations",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nodenext-cjs",
+      "ownedPaths": [
+        "examples/type-portability/nodenext-cjs/src/**"
+      ],
+      "publicEntry": "examples/type-portability/nodenext-cjs/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@examples-type-portability/nodenext-cjs",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nodenext-esm",
+      "ownedPaths": [
+        "examples/type-portability/nodenext-esm/src/**"
+      ],
+      "publicEntry": "examples/type-portability/nodenext-esm/src/index.tsx",
+      "publicSymbols": [
+        "container"
+      ],
+      "packageName": "@examples-type-portability/nodenext-esm",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "optimistic-update",
+      "ownedPaths": [
+        "examples/query/react/optimistic-update/src/**"
+      ],
+      "publicEntry": "examples/query/react/optimistic-update/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/optimistic-update",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pagination",
+      "ownedPaths": [
+        "examples/query/react/pagination/src/**"
+      ],
+      "publicEntry": "examples/query/react/pagination/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/pagination",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "polling",
+      "ownedPaths": [
+        "examples/query/react/polling/src/**"
+      ],
+      "publicEntry": "examples/query/react/polling/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/polling",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prefetching",
+      "ownedPaths": [
+        "examples/query/react/prefetching/src/**"
+      ],
+      "publicEntry": "examples/query/react/prefetching/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/prefetching",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prefetching-automatic",
+      "ownedPaths": [
+        "examples/query/react/prefetching-automatic/src/**"
+      ],
+      "publicEntry": "examples/query/react/prefetching-automatic/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/prefetching-automatic",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prefetching-automatic-waterfall",
+      "ownedPaths": [
+        "examples/query/react/prefetching-automatic-waterfall/src/**"
+      ],
+      "publicEntry": "examples/query/react/prefetching-automatic-waterfall/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/prefetching-automatic-waterfall",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rtk-codemods",
+      "ownedPaths": [
+        "packages/rtk-codemods/**"
+      ],
+      "publicEntry": "packages/rtk-codemods/bin/cli.mjs",
+      "publicSymbols": [],
+      "packageName": "@reduxjs/rtk-codemods",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "toolkit",
+      "ownedPaths": [
+        "packages/toolkit/src/**"
+      ],
+      "publicEntry": "packages/toolkit/src/index.ts",
+      "publicSymbols": [
+        "ActionCreatorInvariantMiddlewareOptions",
+        "ActionCreatorWithNonInferrablePayload",
+        "ActionCreatorWithOptionalPayload",
+        "ActionCreatorWithoutPayload",
+        "ActionCreatorWithPayload",
+        "ActionCreatorWithPreparedPayload",
+        "ActionMatchingAllOf",
+        "ActionMatchingAnyOf",
+        "ActionReducerMapBuilder",
+        "Actions",
+        "addListener",
+        "AddMiddleware",
+        "AnyListenerPredicate",
+        "AsyncTaskExecutor",
+        "AsyncThunk",
+        "AsyncThunkAction",
+        "AsyncThunkConfig",
+        "asyncThunkCreator",
+        "AsyncThunkDispatchConfig",
+        "AsyncThunkOptions",
+        "AsyncThunkPayloadCreator",
+        "AsyncThunkPayloadCreatorReturnValue",
+        "AsyncThunkReducers",
+        "autoBatchEnhancer",
+        "AutoBatchOptions",
+        "buildCreateSlice",
+        "CaseReducer",
+        "CaseReducerActions",
+        "CaseReducers",
+        "CaseReducerWithPrepare",
+        "clearAllListeners",
+        "CombinedSliceReducer",
+        "combineSlices",
+        "Comparer",
+        "configureStore",
+        "ConfigureStoreOptions",
+        "createAction",
+        "createActionCreatorInvariantMiddleware",
+        "createAsyncThunk",
+        "CreateAsyncThunkFunction",
+        "createDraftSafeSelector",
+        "createDraftSafeSelectorCreator",
+        "createDynamicMiddleware",
+        "createEntityAdapter",
+        "createImmutableStateInvariantMiddleware",
+        "createListenerMiddleware",
+        "CreateListenerMiddlewareOptions",
+        "createNextState",
+        "createReducer",
+        "createSelector",
+        "createSelectorCreator",
+        "createSerializableStateInvariantMiddleware",
+        "createSlice",
+        "CreateSliceOptions",
+        "current",
+        "DevToolsEnhancerOptions",
+        "Draft",
+        "DynamicDispatch",
+        "DynamicMiddlewareInstance",
+        "EnhancedStore",
+        "EntityAdapter",
+        "EntityId",
+        "EntitySelectors",
+        "EntityState",
+        "EntityStateAdapter",
+        "findNonSerializableValue",
+        "ForkedTask",
+        "ForkedTaskAPI",
+        "ForkedTaskExecutor",
+        "formatProdErrorMessage",
+        "freeze",
+        "GetDispatch",
+        "GetState",
+        "GetThunkAPI",
+        "IdSelector",
+        "ImmutableStateInvariantMiddlewareOptions",
+        "isActionCreator",
+        "isAllOf",
+        "isAnyOf",
+        "isAsyncThunkAction",
+        "isDraft",
+        "isFluxStandardAction",
+        "isFulfilled",
+        "isImmutableDefault",
+        "isPending",
+        "isPlain",
+        "isRejected",
+        "isRejectedWithValue",
+        "ListenerEffect",
+        "ListenerEffectAPI",
+        "ListenerErrorHandler",
+        "ListenerMiddleware",
+        "ListenerMiddlewareInstance",
+        "lruMemoize",
+        "MiddlewareApiConfig",
+        "miniSerializeError",
+        "nanoid",
+        "original",
+        "OutputSelector",
+        "PayloadAction",
+        "PayloadActionCreator",
+        "PrepareAction",
+        "prepareAutoBatched",
+        "ReducerCreators",
+        "ReducerType",
+        "removeListener",
+        "SafePromise",
+        "Selector",
+        "SerializableStateInvariantMiddlewareOptions",
+        "SerializedError",
+        "SHOULD_AUTOBATCH",
+        "Slice",
+        "SliceCaseReducers",
+        "SliceSelectors",
+        "SyncTaskExecutor",
+        "TaskAbortError",
+        "TaskCancelled",
+        "TaskRejected",
+        "TaskResolved",
+        "TaskResult",
+        "ThunkAction",
+        "ThunkDispatch",
+        "ThunkMiddleware",
+        "TSHelpersExtractDispatchExtensions",
+        "Tuple",
+        "TypedAddListener",
+        "TypedRemoveListener",
+        "TypedStartListening",
+        "TypedStopListening",
+        "UnsubscribeListener",
+        "UnsubscribeListenerOptions",
+        "unwrapResult",
+        "Update",
+        "ValidateSliceCaseReducers",
+        "weakMapMemoize",
+        "WithSlice",
+        "WithSlicePreloadedState",
+        "WritableDraft"
+      ],
+      "packageName": "@reduxjs/toolkit",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "website/src/**"
+      ],
+      "publicEntry": "website/src/js/monokaiTheme.js",
+      "publicSymbols": [],
+      "packageName": "website",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "with-apiprovider",
+      "ownedPaths": [
+        "examples/query/react/with-apiprovider/src/**"
+      ],
+      "publicEntry": "examples/query/react/with-apiprovider/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@examples-query-react/with-apiprovider",
+      "consumes": [
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

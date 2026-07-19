@@ -372,14 +372,43 @@ function pythonProjectName(rootDir: string): string | undefined {
 }
 
 function workspacePatterns(rootDir: string): string[] {
+  const patterns = new Set<string>();
   const packageJson = readJsonFile(path.join(rootDir, "package.json"));
-  if (!isRecord(packageJson)) return [];
-  const workspaces = packageJson.workspaces;
-  if (Array.isArray(workspaces)) return workspaces.filter((entry): entry is string => typeof entry === "string");
-  if (isRecord(workspaces) && Array.isArray(workspaces.packages)) {
-    return workspaces.packages.filter((entry): entry is string => typeof entry === "string");
+  if (isRecord(packageJson)) {
+    const workspaces = packageJson.workspaces;
+    if (Array.isArray(workspaces)) {
+      for (const entry of workspaces) {
+        if (typeof entry === "string" && !entry.startsWith("!")) patterns.add(entry);
+      }
+    } else if (isRecord(workspaces) && Array.isArray(workspaces.packages)) {
+      for (const entry of workspaces.packages) {
+        if (typeof entry === "string" && !entry.startsWith("!")) patterns.add(entry);
+      }
+    }
   }
-  return [];
+  for (const entry of pnpmWorkspacePatterns(rootDir)) patterns.add(entry);
+  return [...patterns].sort((left, right) => left.localeCompare(right));
+}
+
+function pnpmWorkspacePatterns(rootDir: string): string[] {
+  const text = readTextFile(path.join(rootDir, "pnpm-workspace.yaml"));
+  if (!text) return [];
+  const patterns: string[] = [];
+  let inPackages = false;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.replace(/\s+#.*$/, "");
+    if (/^\s*packages\s*:\s*$/.test(line)) {
+      inPackages = true;
+      continue;
+    }
+    if (inPackages && /^\S/.test(line)) break;
+    if (!inPackages) continue;
+    const match = line.match(/^\s*-\s*['"]?([^'"\s][^'"]*?)['"]?\s*$/);
+    if (!match) continue;
+    const pattern = match[1].trim();
+    if (pattern.length > 0 && !pattern.startsWith("!")) patterns.push(pattern);
+  }
+  return patterns;
 }
 
 function expandWorkspacePattern(rootDir: string, pattern: string): string[] {
@@ -391,11 +420,24 @@ function expandWorkspacePattern(rootDir: string, pattern: string): string[] {
   const suffix = normalized.slice(wildcardIndex + 1);
   const absoluteParent = path.join(rootDir, parent);
   if (!fs.existsSync(absoluteParent) || !fs.statSync(absoluteParent).isDirectory()) return [];
-  return fs.readdirSync(absoluteParent, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => normalizePath(path.posix.join(parent, `${entry.name}${suffix}`)))
-    .filter((workspaceRoot) => fs.existsSync(path.join(rootDir, workspaceRoot)))
-    .sort((left, right) => left.localeCompare(right));
+  const roots: string[] = [];
+  for (const entry of fs.readdirSync(absoluteParent, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const firstLevel = normalizePath(path.posix.join(parent, `${entry.name}${suffix}`));
+    if (fs.existsSync(path.join(rootDir, firstLevel, "package.json"))) {
+      roots.push(firstLevel);
+      continue;
+    }
+    if (!entry.name.startsWith("@")) continue;
+    const scopedParent = path.join(rootDir, firstLevel);
+    if (!fs.existsSync(scopedParent) || !fs.statSync(scopedParent).isDirectory()) continue;
+    for (const scopedEntry of fs.readdirSync(scopedParent, { withFileTypes: true })) {
+      if (!scopedEntry.isDirectory()) continue;
+      const scopedRoot = normalizePath(path.posix.join(firstLevel, scopedEntry.name));
+      if (fs.existsSync(path.join(rootDir, scopedRoot, "package.json"))) roots.push(scopedRoot);
+    }
+  }
+  return roots.sort((left, right) => left.localeCompare(right));
 }
 
 function exportValueStrings(value: unknown): string[] {

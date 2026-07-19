@@ -1,0 +1,1000 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/ast-spec/src/**",
+      "packages/eslint-plugin-internal/src/**",
+      "packages/eslint-plugin/src/**",
+      "packages/integration-tests/**",
+      "packages/parser/src/**",
+      "packages/project-service/src/**",
+      "packages/rule-schema-to-typescript-types/src/**",
+      "packages/rule-tester/src/**",
+      "packages/scope-manager/src/**",
+      "packages/tsconfig-utils/src/**",
+      "packages/type-utils/src/**",
+      "packages/types/src/**",
+      "packages/typescript-eslint/src/**",
+      "packages/typescript-estree/src/**",
+      "packages/utils/src/**",
+      "packages/visitor-keys/src/**",
+      "packages/website-eslint/src/**",
+      "packages/website/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "ast-spec",
+      "ownedPaths": [
+        "packages/ast-spec/src/**"
+      ],
+      "publicEntry": "packages/ast-spec/src/index.ts",
+      "publicSymbols": [
+        "Accessibility",
+        "AccessorProperty",
+        "AccessorPropertyComputedName",
+        "AccessorPropertyNonComputedName",
+        "ArrayExpression",
+        "ArrayPattern",
+        "ArrowFunctionExpression",
+        "ArrowFunctionExpressionWithBlockBody",
+        "ArrowFunctionExpressionWithExpressionBody",
+        "AssignmentExpression",
+        "AssignmentOperatorToText",
+        "AssignmentPattern",
+        "AST_NODE_TYPES",
+        "AST_TOKEN_TYPES",
+        "AwaitExpression",
+        "BaseNode",
+        "BigIntLiteral",
+        "BinaryExpression",
+        "BinaryOperatorToText",
+        "BindingName",
+        "BindingPattern",
+        "BlockComment",
+        "BlockStatement",
+        "BooleanLiteral",
+        "BooleanToken",
+        "BreakStatement",
+        "CallExpression",
+        "CallExpressionArgument",
+        "CatchClause",
+        "ChainElement",
+        "ChainExpression",
+        "ClassBody",
+        "ClassDeclaration",
+        "ClassDeclarationWithName",
+        "ClassDeclarationWithOptionalName",
+        "ClassElement",
+        "ClassExpression",
+        "ClassPropertyNameNonComputed",
+        "Comment",
+        "ConditionalExpression",
+        "ConstDeclaration",
+        "ContinueStatement",
+        "DebuggerStatement",
+        "DeclarationStatement",
+        "Decorator",
+        "DefaultExportDeclarations",
+        "DestructuringPattern",
+        "DoWhileStatement",
+        "EmptyStatement",
+        "EntityName",
+        "ExportAllDeclaration",
+        "ExportDeclaration",
+        "ExportDefaultDeclaration",
+        "ExportNamedDeclaration",
+        "ExportNamedDeclarationWithoutSource",
+        "ExportNamedDeclarationWithoutSourceWithMultiple",
+        "ExportNamedDeclarationWithoutSourceWithSingle",
+        "ExportNamedDeclarationWithSource",
+        "ExportSpecifier",
+        "ExportSpecifierWithIdentifierLocal",
+        "ExportSpecifierWithStringOrLiteralLocal",
+        "Expression",
+        "ExpressionStatement",
+        "ForInitialiser",
+        "ForInStatement",
+        "ForOfStatement",
+        "ForStatement",
+        "FunctionDeclaration",
+        "FunctionDeclarationWithName",
+        "FunctionDeclarationWithOptionalName",
+        "FunctionExpression",
+        "FunctionLike",
+        "Identifier",
+        "IdentifierToken",
+        "IfStatement",
+        "ImportAttribute",
+        "ImportClause",
+        "ImportDeclaration",
+        "ImportDefaultSpecifier",
+        "ImportExpression",
+        "ImportNamespaceSpecifier",
+        "ImportSpecifier",
+        "IterationStatement",
+        "JSXAttribute",
+        "JSXChild",
+        "JSXClosingElement",
+        "JSXClosingFragment",
+        "JSXElement",
+        "JSXEmptyExpression",
+        "JSXExpression",
+        "JSXExpressionContainer",
+        "JSXFragment",
+        "JSXIdentifier",
+        "JSXIdentifierToken",
+        "JSXMemberExpression",
+        "JSXNamespacedName",
+        "JSXOpeningElement",
+        "JSXOpeningFragment",
+        "JSXSpreadAttribute",
+        "JSXSpreadChild",
+        "JSXTagNameExpression",
+        "JSXText",
+        "JSXTextToken",
+        "KeywordToken",
+        "LabeledStatement",
+        "LeftHandSideExpression",
+        "LetOrConstOrVarDeclaration",
+        "LetOrConstOrVarDeclarator",
+        "LetOrVarDeclaredDeclaration",
+        "LetOrVarNonDeclaredDeclaration",
+        "LineComment",
+        "Literal",
+        "LiteralExpression",
+        "LogicalExpression",
+        "MemberExpression",
+        "MemberExpressionComputedName",
+        "MemberExpressionNonComputedName",
+        "MetaProperty",
+        "MethodDefinition",
+        "MethodDefinitionComputedName",
+        "MethodDefinitionNonComputedName",
+        "NamedExportDeclarations",
+        "NewExpression",
+        "Node",
+        "NodeOrTokenData",
+        "NullLiteral",
+        "NullToken",
+        "NumberLiteral",
+        "NumericToken",
+        "ObjectExpression",
+        "ObjectLiteralElement",
+        "ObjectLiteralElementLike",
+        "ObjectPattern",
+        "OptionalRangeAndLoc",
+        "Parameter",
+        "Position",
+        "PrimaryExpression",
+        "PrivateIdentifier",
+        "PrivateIdentifierToken",
+        "PrivateInExpression",
+        "Program",
+        "ProgramStatement",
+        "Property",
+        "PropertyComputedName",
+        "PropertyDefinition",
+        "PropertyDefinitionComputedName",
+        "PropertyDefinitionNonComputedName",
+        "PropertyName",
+        "PropertyNameComputed",
+        "PropertyNameNonComputed",
+        "PropertyNonComputedName",
+        "PunctuatorToken",
+        "PunctuatorTokenToText",
+        "Range",
+        "RegExpLiteral",
+        "RegularExpressionToken",
+        "RestElement",
+        "ReturnStatement",
+        "SequenceExpression",
+        "SourceLocation",
+        "SpreadElement",
+        "Statement",
+        "StaticBlock",
+        "StringLiteral",
+        "StringToken",
+        "Super",
+        "SwitchCase",
+        "SwitchStatement",
+        "SymmetricBinaryExpression",
+        "TaggedTemplateExpression",
+        "TemplateElement",
+        "TemplateLiteral",
+        "TemplateToken",
+        "ThisExpression",
+        "ThrowStatement",
+        "Token",
+        "TryStatement",
+        "TSAbstractAccessorProperty",
+        "TSAbstractAccessorPropertyComputedName",
+        "TSAbstractAccessorPropertyNonComputedName",
+        "TSAbstractKeyword",
+        "TSAbstractMethodDefinition",
+        "TSAbstractMethodDefinitionComputedName",
+        "TSAbstractMethodDefinitionNonComputedName",
+        "TSAbstractPropertyDefinition",
+        "TSAbstractPropertyDefinitionComputedName",
+        "TSAbstractPropertyDefinitionNonComputedName",
+        "TSAnyKeyword",
+        "TSArrayType",
+        "TSAsExpression",
+        "TSAsyncKeyword",
+        "TSBigIntKeyword",
+        "TSBooleanKeyword",
+        "TSCallSignatureDeclaration",
+        "TSClassImplements",
+        "TSConditionalType",
+        "TSConstructorType",
+        "TSConstructSignatureDeclaration",
+        "TSDeclareFunction",
+        "TSDeclareFunctionNoDeclare",
+        "TSDeclareFunctionWithDeclare",
+        "TSDeclareKeyword",
+        "TSEmptyBodyFunctionExpression",
+        "TSEnumBody",
+        "TSEnumDeclaration",
+        "TSEnumMember",
+        "TSExportAssignment",
+        "TSExportKeyword",
+        "TSExternalModuleReference",
+        "TSFunctionType",
+        "TSImportEqualsDeclaration",
+        "TSImportEqualsNamespaceDeclaration",
+        "TSImportEqualsRequireDeclaration",
+        "TSImportType",
+        "TSIndexedAccessType",
+        "TSIndexSignature",
+        "TSInferType",
+        "TSInstantiationExpression",
+        "TSInterfaceBody",
+        "TSInterfaceDeclaration",
+        "TSInterfaceHeritage",
+        "TSIntersectionType",
+        "TSIntrinsicKeyword",
+        "TSLiteralType",
+        "TSMappedType",
+        "TSMethodSignature",
+        "TSMethodSignatureComputedName",
+        "TSMethodSignatureNonComputedName",
+        "TSModuleBlock",
+        "TSModuleDeclaration",
+        "TSModuleDeclarationGlobal",
+        "TSModuleDeclarationKind",
+        "TSModuleDeclarationModule",
+        "TSModuleDeclarationModuleWithIdentifierId",
+        "TSModuleDeclarationModuleWithStringId",
+        "TSModuleDeclarationModuleWithStringIdDeclared",
+        "TSModuleDeclarationModuleWithStringIdNotDeclared",
+        "TSModuleDeclarationNamespace",
+        "TSNamedTupleMember",
+        "TSNamespaceExportDeclaration",
+        "TSNeverKeyword",
+        "TSNonNullExpression",
+        "TSNullKeyword",
+        "TSNumberKeyword",
+        "TSObjectKeyword",
+        "TSOptionalType",
+        "TSParameterProperty",
+        "TSPrivateKeyword",
+        "TSPropertySignature",
+        "TSPropertySignatureComputedName",
+        "TSPropertySignatureNonComputedName",
+        "TSProtectedKeyword",
+        "TSPublicKeyword",
+        "TSQualifiedName",
+        "TSReadonlyKeyword",
+        "TSRestType",
+        "TSSatisfiesExpression",
+        "TSStaticKeyword",
+        "TSStringKeyword",
+        "TSSymbolKeyword",
+        "TSTemplateLiteralType",
+        "TSThisType",
+        "TSTupleType",
+        "TSTypeAliasDeclaration",
+        "TSTypeAnnotation",
+        "TSTypeAssertion",
+        "TSTypeLiteral",
+        "TSTypeOperator",
+        "TSTypeParameter",
+        "TSTypeParameterDeclaration",
+        "TSTypeParameterInstantiation",
+        "TSTypePredicate",
+        "TSTypePredicateNoAsserts",
+        "TSTypePredicateWithAsserts",
+        "TSTypeQuery",
+        "TSTypeReference",
+        "TSUnaryExpression",
+        "TSUndefinedKeyword",
+        "TSUnionType",
+        "TSUnknownKeyword",
+        "TSVoidKeyword",
+        "TypeElement",
+        "TypeNode",
+        "UnaryExpression",
+        "UnaryExpressionBitwiseNot",
+        "UnaryExpressionDelete",
+        "UnaryExpressionMinus",
+        "UnaryExpressionNot",
+        "UnaryExpressionPlus",
+        "UnaryExpressionTypeof",
+        "UnaryExpressionVoid",
+        "UpdateExpression",
+        "UsingDeclaration",
+        "UsingDeclarator",
+        "UsingInForOfDeclaration",
+        "UsingInForOfDeclarator",
+        "UsingInNormalContextDeclaration",
+        "UsingInNormalContextDeclarator",
+        "VariableDeclaration",
+        "VariableDeclarator",
+        "VariableDeclaratorDefiniteAssignment",
+        "VariableDeclaratorMaybeInit",
+        "VariableDeclaratorNoInit",
+        "WhileStatement",
+        "WithStatement",
+        "YieldExpression",
+        "YieldNoStarExpression",
+        "YieldStarExpression"
+      ],
+      "packageName": "@typescript-eslint/ast-spec",
+      "consumes": [
+        {
+          "cell": "typescript-estree"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-plugin",
+      "ownedPaths": [
+        "packages/eslint-plugin/src/**"
+      ],
+      "publicEntry": "packages/eslint-plugin/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@typescript-eslint/eslint-plugin",
+      "consumes": [
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "rule-schema-to-typescript-types"
+        },
+        {
+          "cell": "rule-tester"
+        },
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "type-utils"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "visitor-keys"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-plugin-internal",
+      "ownedPaths": [
+        "packages/eslint-plugin-internal/src/**"
+      ],
+      "publicEntry": "packages/eslint-plugin-internal/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@typescript-eslint/eslint-plugin-internal",
+      "consumes": [
+        {
+          "cell": "rule-tester"
+        },
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "type-utils"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "integration-tests",
+      "ownedPaths": [
+        "packages/integration-tests/**"
+      ],
+      "publicEntry": "packages/integration-tests/tools/integration-test-base.ts",
+      "publicSymbols": [
+        "eslintIntegrationTest",
+        "typescriptIntegrationTest"
+      ],
+      "packageName": "@typescript-eslint/integration-tests",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "parser",
+      "ownedPaths": [
+        "packages/parser/src/**"
+      ],
+      "publicEntry": "packages/parser/src/index.ts",
+      "publicSymbols": [
+        "clearCaches",
+        "createProgram",
+        "meta",
+        "parse",
+        "parseForESLint",
+        "ParserOptions",
+        "ParserServices",
+        "ParserServicesWithoutTypeInformation",
+        "ParserServicesWithTypeInformation",
+        "version",
+        "withoutProjectParserOptions"
+      ],
+      "packageName": "@typescript-eslint/parser",
+      "consumes": [
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "visitor-keys"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "project-service",
+      "ownedPaths": [
+        "packages/project-service/src/**"
+      ],
+      "publicEntry": "packages/project-service/src/index.ts",
+      "publicSymbols": [
+        "createProjectService",
+        "CreateProjectServiceSettings",
+        "ProjectServiceAndMetadata",
+        "ProjectServiceOptions",
+        "TypeScriptProjectService"
+      ],
+      "packageName": "@typescript-eslint/project-service",
+      "consumes": [
+        {
+          "cell": "tsconfig-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rule-schema-to-typescript-types",
+      "ownedPaths": [
+        "packages/rule-schema-to-typescript-types/src/**"
+      ],
+      "publicEntry": "packages/rule-schema-to-typescript-types/src/index.ts",
+      "publicSymbols": [
+        "schemaToTypes"
+      ],
+      "packageName": "@typescript-eslint/rule-schema-to-typescript-types",
+      "consumes": [
+        {
+          "cell": "type-utils"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rule-tester",
+      "ownedPaths": [
+        "packages/rule-tester/src/**"
+      ],
+      "publicEntry": "packages/rule-tester/src/index.ts",
+      "publicSymbols": [
+        "AtLeastVersionConstraint",
+        "DependencyConstraint",
+        "InvalidTestCase",
+        "noFormat",
+        "RuleTester",
+        "RuleTesterConfig",
+        "RunTests",
+        "SemverVersionConstraint",
+        "SuggestionOutput",
+        "TestCaseError",
+        "TestLanguageOptions",
+        "ValidTestCase",
+        "VersionConstraint"
+      ],
+      "packageName": "@typescript-eslint/rule-tester",
+      "consumes": [
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scope-manager",
+      "ownedPaths": [
+        "packages/scope-manager/src/**"
+      ],
+      "publicEntry": "packages/scope-manager/src/index.ts",
+      "publicSymbols": [
+        "analyze",
+        "AnalyzeOptions",
+        "BlockScope",
+        "CatchClauseDefinition",
+        "CatchScope",
+        "ClassFieldInitializerScope",
+        "ClassNameDefinition",
+        "ClassScope",
+        "ClassStaticBlockScope",
+        "ConditionalTypeScope",
+        "Definition",
+        "DefinitionType",
+        "ESLintScopeVariable",
+        "ForScope",
+        "FunctionExpressionNameScope",
+        "FunctionNameDefinition",
+        "FunctionScope",
+        "FunctionTypeScope",
+        "GlobalScope",
+        "ImplicitGlobalVariableDefinition",
+        "ImplicitLibVariable",
+        "ImplicitLibVariableOptions",
+        "ImportBindingDefinition",
+        "LibDefinition",
+        "MappedTypeScope",
+        "ModuleScope",
+        "ParameterDefinition",
+        "PatternVisitor",
+        "PatternVisitorCallback",
+        "PatternVisitorOptions",
+        "Reference",
+        "Scope",
+        "ScopeManager",
+        "ScopeType",
+        "ScopeVariable",
+        "SwitchScope",
+        "TSEnumMemberDefinition",
+        "TSEnumNameDefinition",
+        "TSEnumScope",
+        "TSModuleNameDefinition",
+        "TSModuleScope",
+        "TypeDefinition",
+        "TypeScope",
+        "Variable",
+        "VariableDefinition",
+        "Visitor",
+        "WithScope"
+      ],
+      "packageName": "@typescript-eslint/scope-manager",
+      "consumes": [
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "visitor-keys"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tsconfig-utils",
+      "ownedPaths": [
+        "packages/tsconfig-utils/src/**"
+      ],
+      "publicEntry": "packages/tsconfig-utils/src/index.ts",
+      "publicSymbols": [
+        "CORE_COMPILER_OPTIONS",
+        "getParsedConfigFile"
+      ],
+      "packageName": "@typescript-eslint/tsconfig-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "type-utils",
+      "ownedPaths": [
+        "packages/type-utils/src/**"
+      ],
+      "publicEntry": "packages/type-utils/src/index.ts",
+      "publicSymbols": [
+        "AnyType",
+        "containsAllTypesByName",
+        "discriminateAnyType",
+        "FileSpecifier",
+        "getConstrainedTypeAtLocation",
+        "getContextualType",
+        "getDeclaration",
+        "getDecorators",
+        "getModifiers",
+        "getSourceFileOfNode",
+        "getTypeFlags",
+        "getTypeName",
+        "getTypeOfPropertyOfName",
+        "getTypeOfPropertyOfType",
+        "isBuiltinSymbolLike",
+        "isBuiltinSymbolLikeRecurser",
+        "isBuiltinTypeAliasLike",
+        "isErrorLike",
+        "isNullableType",
+        "isPromiseConstructorLike",
+        "isPromiseLike",
+        "isReadonlyErrorLike",
+        "isReadonlyTypeLike",
+        "isSymbolFromDefaultLibrary",
+        "isTypeAnyArrayType",
+        "isTypeAnyType",
+        "isTypeArrayTypeOrUnionOfArrayTypes",
+        "isTypeBigIntLiteralType",
+        "isTypeBrandedLiteralLike",
+        "isTypeFlagSet",
+        "isTypeNeverType",
+        "isTypeReadonly",
+        "isTypeReferenceType",
+        "isTypeTemplateLiteralType",
+        "isTypeUnknownArrayType",
+        "isTypeUnknownType",
+        "isUnsafeAssignment",
+        "LibSpecifier",
+        "PackageSpecifier",
+        "ReadonlynessOptions",
+        "readonlynessOptionsDefaults",
+        "readonlynessOptionsSchema",
+        "requiresQuoting",
+        "typeIsOrHasBaseType",
+        "typeMatchesSomeSpecifier",
+        "typeMatchesSpecifier",
+        "TypeOrValueSpecifier",
+        "typeOrValueSpecifiersSchema",
+        "typescriptVersionIsAtLeast",
+        "valueMatchesSomeSpecifier",
+        "valueMatchesSpecifier"
+      ],
+      "packageName": "@typescript-eslint/type-utils",
+      "consumes": [
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/types/src/**"
+      ],
+      "publicEntry": "packages/types/src/index.ts",
+      "publicSymbols": [
+        "AST_NODE_TYPES",
+        "AST_TOKEN_TYPES",
+        "CacheDurationSeconds",
+        "DebugLevel",
+        "EcmaVersion",
+        "JSDocParsingMode",
+        "Lib",
+        "NodeWithParent",
+        "ParserOptions",
+        "ProjectServiceOptions",
+        "SourceType",
+        "SourceTypeClassic",
+        "TSESTree"
+      ],
+      "packageName": "@typescript-eslint/types",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "typescript-eslint",
+      "ownedPaths": [
+        "packages/typescript-eslint/src/**"
+      ],
+      "publicEntry": "packages/typescript-eslint/src/index.ts",
+      "publicSymbols": [
+        "CompatibleConfig",
+        "CompatibleConfigArray",
+        "CompatibleParser",
+        "CompatiblePlugin",
+        "config",
+        "Config",
+        "ConfigArray",
+        "configs",
+        "ConfigWithExtends",
+        "default",
+        "FlatConfig",
+        "InfiniteDepthConfigWithExtends",
+        "parser",
+        "plugin"
+      ],
+      "packageName": "typescript-eslint",
+      "consumes": [
+        {
+          "cell": "eslint-plugin"
+        },
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "typescript-estree",
+      "ownedPaths": [
+        "packages/typescript-estree/src/**"
+      ],
+      "publicEntry": "packages/typescript-estree/src/index.ts",
+      "publicSymbols": [
+        "addCandidateTSConfigRootDir",
+        "AssertClause",
+        "AssertEntry",
+        "AST",
+        "AST_NODE_TYPES",
+        "AST_TOKEN_TYPES",
+        "clearCaches",
+        "clearCandidateTSConfigRootDirs",
+        "clearProgramCache",
+        "createProgram",
+        "EstreeToTsNodeTypes",
+        "getCanonicalFileName",
+        "getDecorators",
+        "getLanguageVariant",
+        "getModifiers",
+        "getScriptKind",
+        "ImportAttribute",
+        "ImportAttributes",
+        "JsxNamespacedName",
+        "parse",
+        "parseAndGenerateServices",
+        "ParseAndGenerateServicesResult",
+        "ParserServices",
+        "ParserServicesWithoutTypeInformation",
+        "ParserServicesWithTypeInformation",
+        "SatisfiesExpression",
+        "simpleTraverse",
+        "TSError",
+        "TSESTree",
+        "TSESTreeOptions",
+        "TSESTreeToTSNode",
+        "TSNode",
+        "TSToken",
+        "typescriptVersionIsAtLeast",
+        "version",
+        "withoutProjectParserOptions"
+      ],
+      "packageName": "@typescript-eslint/typescript-estree",
+      "consumes": [
+        {
+          "cell": "project-service"
+        },
+        {
+          "cell": "tsconfig-utils"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "visitor-keys"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/utils/src/**"
+      ],
+      "publicEntry": "packages/utils/src/index.ts",
+      "publicSymbols": [
+        "AST_NODE_TYPES",
+        "AST_TOKEN_TYPES",
+        "ASTUtils",
+        "ESLintUtils",
+        "JSONSchema",
+        "NodeWithParent",
+        "ParserServices",
+        "ParserServicesWithoutTypeInformation",
+        "ParserServicesWithTypeInformation",
+        "TSESLint",
+        "TSESTree",
+        "TSUtils"
+      ],
+      "packageName": "@typescript-eslint/utils",
+      "consumes": [
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "typescript-estree"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "visitor-keys",
+      "ownedPaths": [
+        "packages/visitor-keys/src/**"
+      ],
+      "publicEntry": "packages/visitor-keys/src/index.ts",
+      "publicSymbols": [
+        "getKeys",
+        "visitorKeys",
+        "VisitorKeys"
+      ],
+      "packageName": "@typescript-eslint/visitor-keys",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "packages/website/src/**"
+      ],
+      "publicEntry": "packages/website/src/clientModules.js",
+      "publicSymbols": [],
+      "packageName": "website",
+      "consumes": [
+        {
+          "cell": "eslint-plugin"
+        },
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "rule-schema-to-typescript-types"
+        },
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "website-eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website-eslint",
+      "ownedPaths": [
+        "packages/website-eslint/src/**"
+      ],
+      "publicEntry": "packages/website-eslint/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@typescript-eslint/website-eslint",
+      "consumes": [
+        {
+          "cell": "eslint-plugin"
+        },
+        {
+          "cell": "parser"
+        },
+        {
+          "cell": "scope-manager"
+        },
+        {
+          "cell": "typescript-estree"
+        },
+        {
+          "cell": "visitor-keys"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

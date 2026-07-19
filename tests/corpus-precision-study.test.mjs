@@ -410,7 +410,16 @@ test("corpus precision study supports copy manifests from the corpus directory",
           id: "copy",
           repository: sourceRepo,
           commit,
-          manifest: { strategy: "copy", source: "manifests/copied.json" },
+          manifest: {
+            strategy: "copy",
+            source: "manifests/copied.json",
+            reviewStatus: "reviewed",
+            reviewedBy: ["reviewer-a"],
+            review: {
+              reviewers: ["reviewer-a"],
+              boundaryEvidence: ["fixture manifest"],
+            },
+          },
         },
       ],
     });
@@ -420,6 +429,10 @@ test("corpus precision study supports copy manifests from the corpus directory",
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
     assert.equal(report.subjects[0].status, "checked_clean");
+    assert.equal(report.subjects[0].manifest.source, "manifests/copied.json");
+    assert.equal(report.subjects[0].manifest.reviewStatus, "reviewed");
+    assert.deepEqual(report.subjects[0].manifest.reviewedBy, ["reviewer-a"]);
+    assert.deepEqual(report.subjects[0].manifest.review.reviewers, ["reviewer-a"]);
     assert.match(report.subjects[0].manifest.sha256, /^[a-f0-9]{64}$/);
     assert.ok(report.subjects[0].manifest.effectivePath.includes(`${path.sep}control${path.sep}`));
     assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "checkout", "cellfence.manifest.json")), false);

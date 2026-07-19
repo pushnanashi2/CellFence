@@ -165,3 +165,79 @@ test("upstream policy oracle builds a reference manifest and resolves ablation q
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test("upstream policy oracle reads pnpm workspace packages and scoped roots", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-upstream-oracle-pnpm-"));
+  const fixtureRepo = path.join(tempDir, "fixture-repo");
+  const corpusPath = path.join(tempDir, "corpus.json");
+  const outDir = path.join(tempDir, "oracle-out");
+  const workDir = path.join(tempDir, "oracle-work");
+  try {
+    fs.mkdirSync(fixtureRepo, { recursive: true });
+    writeJson(path.join(fixtureRepo, "package.json"), { private: true });
+    writeText(path.join(fixtureRepo, "pnpm-workspace.yaml"), [
+      "packages:",
+      "  - 'packages/*'",
+      "  - 'packages/@scope/*'",
+      "",
+    ].join("\n"));
+    writeJson(path.join(fixtureRepo, "packages/core/package.json"), {
+      name: "@demo/core",
+    });
+    writeJson(path.join(fixtureRepo, "packages/@scope/web/package.json"), {
+      name: "@demo/web",
+      dependencies: {
+        "@demo/core": "workspace:*",
+      },
+    });
+    writeText(path.join(fixtureRepo, "packages/core/src/index.ts"), "export const core = true;\n");
+    writeText(path.join(fixtureRepo, "packages/@scope/web/src/index.ts"), "export const web = true;\n");
+    runGit(["init", "--initial-branch=main"], fixtureRepo);
+    runGit(["add", "."], fixtureRepo);
+    runGit(["commit", "-m", "Fixture pnpm upstream policy"], fixtureRepo);
+    const commit = runGit(["rev-parse", "HEAD"], fixtureRepo);
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.upstream-policy-oracle.corpus.v1",
+      subjects: [
+        {
+          id: "fixture-pnpm-workspace",
+          repository: fixtureRepo,
+          commit,
+          policy: {
+            strategy: "package-workspaces",
+            packageRoot: ".",
+            scope: "production",
+          },
+        },
+      ],
+    });
+
+    const result = spawnSync(process.execPath, [
+      oracleScript,
+      "--corpus",
+      corpusPath,
+      "--out-dir",
+      outDir,
+      "--workdir",
+      workDir,
+      "--clone-mode",
+      "full",
+      "--discard-checkouts",
+    ], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 20 * 1024 * 1024,
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const reference = JSON.parse(fs.readFileSync(path.join(outDir, "references", "fixture-pnpm-workspace.reference-manifest.json"), "utf8"));
+    assert.deepEqual(reference.cells.map((cell) => [cell.id, cell.ownedPaths[0], cell.packageName, cell.consumes]), [
+      ["core", "packages/core/src/**", "@demo/core", []],
+      ["web", "packages/@scope/web/src/**", "@demo/web", [{ cell: "core" }]],
+    ]);
+    const provenance = JSON.parse(fs.readFileSync(path.join(outDir, "provenance", "fixture-pnpm-workspace.provenance.json"), "utf8"));
+    assert.ok(provenance.policySources.some((source) => source.kind === "pnpm-workspace"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});

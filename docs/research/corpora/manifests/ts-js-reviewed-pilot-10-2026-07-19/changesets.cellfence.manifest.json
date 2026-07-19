@@ -1,0 +1,659 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/apply-release-plan/src/**",
+      "packages/assemble-release-plan/src/**",
+      "packages/changelog-git/src/**",
+      "packages/changelog-github/src/**",
+      "packages/cli/src/**",
+      "packages/color/src/**",
+      "packages/config/src/**",
+      "packages/errors/src/**",
+      "packages/get-dependents-graph/src/**",
+      "packages/get-github-info/src/**",
+      "packages/get-release-plan/src/**",
+      "packages/get-version-range-type/src/**",
+      "packages/git/src/**",
+      "packages/logger/src/**",
+      "packages/parse/src/**",
+      "packages/pre/src/**",
+      "packages/read/src/**",
+      "packages/release-utils/src/**",
+      "packages/should-skip-package/src/**",
+      "packages/types/src/**",
+      "packages/write/src/**",
+      "scripts/test-utils/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "apply-release-plan",
+      "ownedPaths": [
+        "packages/apply-release-plan/src/**"
+      ],
+      "publicEntry": "packages/apply-release-plan/src/index.ts",
+      "publicSymbols": [
+        "applyReleasePlan",
+        "default"
+      ],
+      "packageName": "@changesets/apply-release-plan",
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "should-skip-package"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "assemble-release-plan",
+      "ownedPaths": [
+        "packages/assemble-release-plan/src/**"
+      ],
+      "publicEntry": "packages/assemble-release-plan/src/index.ts",
+      "publicSymbols": [
+        "assembleReleasePlan",
+        "default"
+      ],
+      "packageName": "@changesets/assemble-release-plan",
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "errors"
+        },
+        {
+          "cell": "get-dependents-graph"
+        },
+        {
+          "cell": "should-skip-package"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "changelog-git",
+      "ownedPaths": [
+        "packages/changelog-git/src/**"
+      ],
+      "publicEntry": "packages/changelog-git/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@changesets/changelog-git",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "changelog-github",
+      "ownedPaths": [
+        "packages/changelog-github/src/**"
+      ],
+      "publicEntry": "packages/changelog-github/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@changesets/changelog-github",
+      "consumes": [
+        {
+          "cell": "get-github-info"
+        },
+        {
+          "cell": "parse"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@changesets/cli",
+      "consumes": [
+        {
+          "cell": "apply-release-plan"
+        },
+        {
+          "cell": "assemble-release-plan"
+        },
+        {
+          "cell": "changelog-git"
+        },
+        {
+          "cell": "color"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "errors"
+        },
+        {
+          "cell": "get-dependents-graph"
+        },
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "pre"
+        },
+        {
+          "cell": "read"
+        },
+        {
+          "cell": "should-skip-package"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "write"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "color",
+      "ownedPaths": [
+        "packages/color/src/**"
+      ],
+      "publicEntry": "packages/color/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@changesets/color",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "config",
+      "ownedPaths": [
+        "packages/config/src/**"
+      ],
+      "publicEntry": "packages/config/src/index.ts",
+      "publicSymbols": [
+        "defaultConfig",
+        "defaultWrittenConfig",
+        "readConfig",
+        "validateConfig"
+      ],
+      "packageName": "@changesets/config",
+      "consumes": [
+        {
+          "cell": "get-dependents-graph"
+        },
+        {
+          "cell": "should-skip-package"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "errors",
+      "ownedPaths": [
+        "packages/errors/src/**"
+      ],
+      "publicEntry": "packages/errors/src/index.ts",
+      "publicSymbols": [
+        "ExitError",
+        "GitError",
+        "InternalError",
+        "PreEnterButInPreModeError",
+        "PreExitButNotInPreModeError"
+      ],
+      "packageName": "@changesets/errors",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "get-dependents-graph",
+      "ownedPaths": [
+        "packages/get-dependents-graph/src/**"
+      ],
+      "publicEntry": "packages/get-dependents-graph/src/index.ts",
+      "publicSymbols": [
+        "getDependentsGraph"
+      ],
+      "packageName": "@changesets/get-dependents-graph",
+      "consumes": [
+        {
+          "cell": "color"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "get-github-info",
+      "ownedPaths": [
+        "packages/get-github-info/src/**"
+      ],
+      "publicEntry": "packages/get-github-info/src/index.ts",
+      "publicSymbols": [
+        "CommitInfo",
+        "CommitInfoOptions",
+        "getCommitInfo",
+        "getPullRequestInfo",
+        "PullRequestInfo",
+        "PullRequestInfoOptions"
+      ],
+      "packageName": "@changesets/get-github-info",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "get-release-plan",
+      "ownedPaths": [
+        "packages/get-release-plan/src/**"
+      ],
+      "publicEntry": "packages/get-release-plan/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "getReleasePlan"
+      ],
+      "packageName": "@changesets/get-release-plan",
+      "consumes": [
+        {
+          "cell": "assemble-release-plan"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "pre"
+        },
+        {
+          "cell": "read"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "get-version-range-type",
+      "ownedPaths": [
+        "packages/get-version-range-type/src/**"
+      ],
+      "publicEntry": "packages/get-version-range-type/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionRangeType"
+      ],
+      "packageName": "@changesets/get-version-range-type",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "git",
+      "ownedPaths": [
+        "packages/git/src/**"
+      ],
+      "publicEntry": "packages/git/src/index.ts",
+      "publicSymbols": [
+        "add",
+        "commit",
+        "deepenCloneBy",
+        "getAllTags",
+        "getChangedChangesetFilesSinceRef",
+        "getChangedFilesSince",
+        "getChangedPackagesSinceRef",
+        "getCommitsThatAddFiles",
+        "getCurrentCommitId",
+        "getDivergedCommit",
+        "isRepoShallow",
+        "remoteTagExists",
+        "tag",
+        "tagExists"
+      ],
+      "packageName": "@changesets/git",
+      "consumes": [
+        {
+          "cell": "errors"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "write"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger",
+      "ownedPaths": [
+        "packages/logger/src/**"
+      ],
+      "publicEntry": "packages/logger/src/index.ts",
+      "publicSymbols": [
+        "error",
+        "info",
+        "log",
+        "prefix",
+        "success",
+        "warn"
+      ],
+      "packageName": "@changesets/logger",
+      "consumes": [
+        {
+          "cell": "color"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "parse",
+      "ownedPaths": [
+        "packages/parse/src/**"
+      ],
+      "publicEntry": "packages/parse/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "parseChangesetFile"
+      ],
+      "packageName": "@changesets/parse",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pre",
+      "ownedPaths": [
+        "packages/pre/src/**"
+      ],
+      "publicEntry": "packages/pre/src/index.ts",
+      "publicSymbols": [
+        "enterPre",
+        "exitPre",
+        "readPreState"
+      ],
+      "packageName": "@changesets/pre",
+      "consumes": [
+        {
+          "cell": "errors"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "read",
+      "ownedPaths": [
+        "packages/read/src/**"
+      ],
+      "publicEntry": "packages/read/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "readChangesets"
+      ],
+      "packageName": "@changesets/read",
+      "consumes": [
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "parse"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "write"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "release-utils",
+      "ownedPaths": [
+        "packages/release-utils/src/**"
+      ],
+      "publicEntry": "packages/release-utils/src/index.ts",
+      "publicSymbols": [
+        "BumpLevels",
+        "getChangelogEntry",
+        "publish",
+        "readChangesetState",
+        "sortChangelogEntries",
+        "version"
+      ],
+      "packageName": "@changesets/release-utils",
+      "consumes": [
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "pre"
+        },
+        {
+          "cell": "read"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "write"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "should-skip-package",
+      "ownedPaths": [
+        "packages/should-skip-package/src/**"
+      ],
+      "publicEntry": "packages/should-skip-package/src/index.ts",
+      "publicSymbols": [
+        "shouldSkipPackage"
+      ],
+      "packageName": "@changesets/should-skip-package",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-utils",
+      "ownedPaths": [
+        "scripts/test-utils/src/**"
+      ],
+      "publicEntry": "scripts/test-utils/src/index.ts",
+      "publicSymbols": [
+        "disableGitBackgroundMaintenance",
+        "Fixture",
+        "gitdir",
+        "linkNodeModules",
+        "outputFile",
+        "silenceLogsInBlock",
+        "temporarilySilenceLogs",
+        "testdir"
+      ],
+      "packageName": "@changesets/test-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/types/src/**"
+      ],
+      "publicEntry": "packages/types/src/index.ts",
+      "publicSymbols": [
+        "AccessType",
+        "ChangelogFunctions",
+        "Changeset",
+        "CommitFunctions",
+        "ComprehensiveRelease",
+        "Config",
+        "DependencyType",
+        "ExperimentalOptions",
+        "Fixed",
+        "GetAddMessage",
+        "GetDependencyReleaseLine",
+        "GetReleaseLine",
+        "GetVersionMessage",
+        "Linked",
+        "ModCompWithPackage",
+        "NewChangeset",
+        "NewChangesetWithCommit",
+        "Package",
+        "PackageGroup",
+        "PackageJSON",
+        "Packages",
+        "PreState",
+        "PrivatePackages",
+        "Release",
+        "ReleasePlan",
+        "VersionType",
+        "WrittenConfig"
+      ],
+      "packageName": "@changesets/types",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "write",
+      "ownedPaths": [
+        "packages/write/src/**"
+      ],
+      "publicEntry": "packages/write/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "writeChangeset"
+      ],
+      "packageName": "@changesets/write",
+      "consumes": [
+        {
+          "cell": "parse"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

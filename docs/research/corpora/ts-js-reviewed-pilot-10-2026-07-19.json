@@ -1,0 +1,318 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Reviewed TS/JS public-OSS precision pilot corpus. Subjects are exact-commit public repositories with package/workspace-derived CellFence manifests reviewed and frozen before the precision run. This is a preliminary agent-reviewed study, not a human blind-label claim.",
+  "selectionPolicy": {
+    "date": "2026-07-19",
+    "source": "Existing frozen TS/JS workspace pilot plus upstream policy oracle subjects, using public OSS repositories only.",
+    "constraints": [
+      "exact 40-hex commit pins",
+      "static CellFence checks only",
+      "no dependency install and no target package scripts",
+      "manifest source must be reviewed copy, not infer strategy"
+    ],
+    "manifestReview": "Manifests are package/workspace-policy reference or resolved manifests generated from package.json/pnpm workspace package roots, entry fields, exports, and workspace dependency declarations, then frozen as reviewed copy inputs.",
+    "limitation": "Labels produced by Codex are preliminary agent labels; external precision claims still need independent human or organizational raters."
+  },
+  "subjects": [
+    {
+      "id": "changesets",
+      "repository": "https://github.com/changesets/changesets.git",
+      "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/changesets.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "redux-toolkit",
+      "repository": "https://github.com/reduxjs/redux-toolkit.git",
+      "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/redux-toolkit.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "typescript-eslint",
+      "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+      "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/typescript-eslint.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "jest",
+      "repository": "https://github.com/jestjs/jest.git",
+      "commit": "f49721c78e195558b40913977c9230f5b7f559d8",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/jest.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "lerna",
+      "repository": "https://github.com/lerna/lerna.git",
+      "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/lerna.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "vue-core",
+      "repository": "https://github.com/vuejs/core.git",
+      "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/vue-core.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "tanstack-query",
+      "repository": "https://github.com/TanStack/query.git",
+      "commit": "b955f60d7965cc521df6ee8b1ce91b3d0e8c046d",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/tanstack-query.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "tanstack-router",
+      "repository": "https://github.com/TanStack/router.git",
+      "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/tanstack-router.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "remix",
+      "repository": "https://github.com/remix-run/remix.git",
+      "commit": "2c0ef67220714e1005162be4acdb91fbf355c664",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/remix-oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/remix.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "hono",
+      "repository": "https://github.com/honojs/hono.git",
+      "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/hono-oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-reference-policy-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/hono.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,2367 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "examples/angular/**",
+      "examples/async/**",
+      "examples/automatic-mocks/**",
+      "examples/expect-extend/**",
+      "examples/getting-started/**",
+      "examples/jquery/**",
+      "examples/manual-mocks/**",
+      "examples/module-mock/**",
+      "examples/react-native/**",
+      "examples/react-testing-library/**",
+      "examples/react/**",
+      "examples/snapshot/**",
+      "examples/timer/**",
+      "examples/typescript/**",
+      "packages/babel-jest/src/**",
+      "packages/babel-plugin-jest-hoist/src/**",
+      "packages/babel-preset-jest/**",
+      "packages/create-jest/src/**",
+      "packages/diff-sequences/src/**",
+      "packages/expect-utils/src/**",
+      "packages/expect/src/**",
+      "packages/jest-changed-files/src/**",
+      "packages/jest-circus/src/**",
+      "packages/jest-cli/src/**",
+      "packages/jest-config/src/**",
+      "packages/jest-console/src/**",
+      "packages/jest-core/src/**",
+      "packages/jest-create-cache-key-function/src/**",
+      "packages/jest-diff/src/**",
+      "packages/jest-docblock/src/**",
+      "packages/jest-each/src/**",
+      "packages/jest-environment-jsdom-abstract/src/**",
+      "packages/jest-environment-jsdom/src/**",
+      "packages/jest-environment-node/src/**",
+      "packages/jest-environment/src/**",
+      "packages/jest-expect/src/**",
+      "packages/jest-fake-timers/src/**",
+      "packages/jest-get-type/src/**",
+      "packages/jest-globals/src/**",
+      "packages/jest-haste-map/src/**",
+      "packages/jest-jasmine2/src/**",
+      "packages/jest-leak-detector/src/**",
+      "packages/jest-matcher-utils/src/**",
+      "packages/jest-message-util/src/**",
+      "packages/jest-mock/src/**",
+      "packages/jest-pattern/src/**",
+      "packages/jest-phabricator/src/**",
+      "packages/jest-regex-util/src/**",
+      "packages/jest-reporters/src/**",
+      "packages/jest-resolve-dependencies/src/**",
+      "packages/jest-resolve/src/**",
+      "packages/jest-runner/src/**",
+      "packages/jest-runtime/src/**",
+      "packages/jest-schemas/src/**",
+      "packages/jest-snapshot-utils/src/**",
+      "packages/jest-snapshot/src/**",
+      "packages/jest-source-map/src/**",
+      "packages/jest-test-result/src/**",
+      "packages/jest-test-sequencer/src/**",
+      "packages/jest-transform/src/**",
+      "packages/jest-types/src/**",
+      "packages/jest-util/src/**",
+      "packages/jest-validate/src/**",
+      "packages/jest-watcher/src/**",
+      "packages/jest-worker/src/**",
+      "packages/jest/src/**",
+      "packages/pretty-format/src/**",
+      "packages/test-globals/src/**",
+      "packages/test-utils/src/**",
+      "website/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "babel-jest",
+      "ownedPaths": [
+        "packages/babel-jest/src/**"
+      ],
+      "publicEntry": "packages/babel-jest/src/index.ts",
+      "publicSymbols": [
+        "createTransformer",
+        "default",
+        "TransformerConfig"
+      ],
+      "packageName": "babel-jest",
+      "consumes": [
+        {
+          "cell": "babel-preset-jest"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "babel-plugin-jest-hoist",
+      "ownedPaths": [
+        "packages/babel-plugin-jest-hoist/src/**"
+      ],
+      "publicEntry": "packages/babel-plugin-jest-hoist/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "babel-plugin-jest-hoist",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "babel-preset-jest",
+      "ownedPaths": [
+        "packages/babel-preset-jest/**"
+      ],
+      "publicEntry": "packages/babel-preset-jest/index.js",
+      "publicSymbols": [],
+      "packageName": "babel-preset-jest",
+      "consumes": [
+        {
+          "cell": "babel-plugin-jest-hoist"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "console",
+      "ownedPaths": [
+        "packages/jest-console/src/**"
+      ],
+      "publicEntry": "packages/jest-console/src/index.ts",
+      "publicSymbols": [
+        "BufferedConsole",
+        "ConsoleBuffer",
+        "CustomConsole",
+        "getConsoleOutput",
+        "LogEntry",
+        "LogMessage",
+        "LogType",
+        "NullConsole"
+      ],
+      "packageName": "@jest/console",
+      "consumes": [
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/jest-core/src/**"
+      ],
+      "publicEntry": "packages/jest-core/src/index.ts",
+      "publicSymbols": [
+        "createTestScheduler",
+        "getVersion",
+        "runCLI",
+        "SearchSource"
+      ],
+      "packageName": "@jest/core",
+      "consumes": [
+        {
+          "cell": "console"
+        },
+        {
+          "cell": "jest-changed-files"
+        },
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-resolve-dependencies"
+        },
+        {
+          "cell": "jest-runner"
+        },
+        {
+          "cell": "jest-runtime"
+        },
+        {
+          "cell": "jest-snapshot"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-validate"
+        },
+        {
+          "cell": "jest-watcher"
+        },
+        {
+          "cell": "pattern"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "reporters"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "test-sequencer"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-cache-key-function",
+      "ownedPaths": [
+        "packages/jest-create-cache-key-function/src/**"
+      ],
+      "publicEntry": "packages/jest-create-cache-key-function/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@jest/create-cache-key-function",
+      "consumes": [
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-jest",
+      "ownedPaths": [
+        "packages/create-jest/src/**"
+      ],
+      "publicEntry": "packages/create-jest/src/index.ts",
+      "publicSymbols": [
+        "runCLI",
+        "runCreate"
+      ],
+      "packageName": "create-jest",
+      "consumes": [
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "diff-sequences",
+      "ownedPaths": [
+        "packages/diff-sequences/src/**"
+      ],
+      "publicEntry": "packages/diff-sequences/src/index.ts",
+      "publicSymbols": [
+        "Callbacks",
+        "default"
+      ],
+      "packageName": "@jest/diff-sequences",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "environment",
+      "ownedPaths": [
+        "packages/jest-environment/src/**"
+      ],
+      "publicEntry": "packages/jest-environment/src/index.ts",
+      "publicSymbols": [
+        "EnvironmentContext",
+        "Jest",
+        "JestEnvironment",
+        "JestEnvironmentConfig",
+        "JestImportMeta",
+        "Module",
+        "ModuleWrapper"
+      ],
+      "packageName": "@jest/environment",
+      "consumes": [
+        {
+          "cell": "fake-timers"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "environment-jsdom-abstract",
+      "ownedPaths": [
+        "packages/jest-environment-jsdom-abstract/src/**"
+      ],
+      "publicEntry": "packages/jest-environment-jsdom-abstract/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@jest/environment-jsdom-abstract",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "fake-timers"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-angular",
+      "ownedPaths": [
+        "examples/angular/**"
+      ],
+      "publicEntry": "examples/angular/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "example-angular",
+      "consumes": [
+        {
+          "cell": "globals"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-async",
+      "ownedPaths": [
+        "examples/async/**"
+      ],
+      "publicEntry": "examples/async/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-async",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-automatic-mocks",
+      "ownedPaths": [
+        "examples/automatic-mocks/**"
+      ],
+      "publicEntry": "examples/automatic-mocks/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-automatic-mocks",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-expect-extend",
+      "ownedPaths": [
+        "examples/expect-extend/**"
+      ],
+      "publicEntry": "examples/expect-extend/toBeWithinRange.ts",
+      "publicSymbols": [],
+      "packageName": "example-expect-extend",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "expect"
+        },
+        {
+          "cell": "globals"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-getting-started",
+      "ownedPaths": [
+        "examples/getting-started/**"
+      ],
+      "publicEntry": "examples/getting-started/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-getting-started",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-jquery",
+      "ownedPaths": [
+        "examples/jquery/**"
+      ],
+      "publicEntry": "examples/jquery/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-jquery",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        },
+        {
+          "cell": "jest-environment-jsdom"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-manual-mock",
+      "ownedPaths": [
+        "examples/module-mock/**"
+      ],
+      "publicEntry": "examples/module-mock/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-manual-mock",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-manual-mocks",
+      "ownedPaths": [
+        "examples/manual-mocks/**"
+      ],
+      "publicEntry": "examples/manual-mocks/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-manual-mocks",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-react",
+      "ownedPaths": [
+        "examples/react/**"
+      ],
+      "publicEntry": "examples/react/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-react",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        },
+        {
+          "cell": "jest-environment-jsdom"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-react-native",
+      "ownedPaths": [
+        "examples/react-native/**"
+      ],
+      "publicEntry": "examples/react-native/index.js",
+      "publicSymbols": [],
+      "packageName": "example-react-native",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-react-testing-library",
+      "ownedPaths": [
+        "examples/react-testing-library/**"
+      ],
+      "publicEntry": "examples/react-testing-library/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-react-testing-library",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        },
+        {
+          "cell": "jest-environment-jsdom"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-snapshot",
+      "ownedPaths": [
+        "examples/snapshot/**"
+      ],
+      "publicEntry": "examples/snapshot/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-snapshot",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-timer",
+      "ownedPaths": [
+        "examples/timer/**"
+      ],
+      "publicEntry": "examples/timer/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-timer",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "jest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-typescript",
+      "ownedPaths": [
+        "examples/typescript/**"
+      ],
+      "publicEntry": "examples/typescript/.babelrc.js",
+      "publicSymbols": [],
+      "packageName": "example-typescript",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "globals"
+        },
+        {
+          "cell": "jest"
+        },
+        {
+          "cell": "jest-environment-jsdom"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "expect",
+      "ownedPaths": [
+        "packages/expect/src/**"
+      ],
+      "publicEntry": "packages/expect/src/index.ts",
+      "publicSymbols": [
+        "AsymmetricMatcher",
+        "AsymmetricMatchers",
+        "AsyncExpectationResult",
+        "BaseExpect",
+        "default",
+        "expect",
+        "Expect",
+        "ExpectationResult",
+        "Inverse",
+        "JestAssertionError",
+        "MatcherContext",
+        "MatcherFunction",
+        "MatcherFunctionWithContext",
+        "Matchers",
+        "MatcherState",
+        "MatcherUtils",
+        "SyncExpectationResult",
+        "Tester",
+        "TesterContext"
+      ],
+      "packageName": "expect",
+      "consumes": [
+        {
+          "cell": "expect-utils"
+        },
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-matcher-utils"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "expect-2",
+      "ownedPaths": [
+        "packages/jest-expect/src/**"
+      ],
+      "publicEntry": "packages/jest-expect/src/index.ts",
+      "publicSymbols": [
+        "AsymmetricMatchers",
+        "jestExpect",
+        "JestExpect",
+        "MatcherContext",
+        "MatcherFunction",
+        "MatcherFunctionWithContext",
+        "Matchers",
+        "MatcherState",
+        "MatcherUtils"
+      ],
+      "packageName": "@jest/expect",
+      "consumes": [
+        {
+          "cell": "expect"
+        },
+        {
+          "cell": "jest-snapshot"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "expect-utils",
+      "ownedPaths": [
+        "packages/expect-utils/src/**"
+      ],
+      "publicEntry": "packages/expect-utils/src/index.ts",
+      "publicSymbols": [
+        "arrayBufferEquality",
+        "AsymmetricMatcher",
+        "emptyObject",
+        "equals",
+        "EqualsFunction",
+        "FunctionParameters",
+        "getObjectKeys",
+        "getObjectSubset",
+        "getPath",
+        "isA",
+        "isError",
+        "isOneline",
+        "iterableEquality",
+        "partition",
+        "pathAsArray",
+        "sparseArrayEquality",
+        "subsetEquality",
+        "Tester",
+        "TesterContext",
+        "typeEquality"
+      ],
+      "packageName": "@jest/expect-utils",
+      "consumes": [
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-matcher-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fake-timers",
+      "ownedPaths": [
+        "packages/jest-fake-timers/src/**"
+      ],
+      "publicEntry": "packages/jest-fake-timers/src/index.ts",
+      "publicSymbols": [
+        "LegacyFakeTimers",
+        "ModernFakeTimers",
+        "TemporalDurationLike",
+        "TemporalEpochLike"
+      ],
+      "packageName": "@jest/fake-timers",
+      "consumes": [
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "get-type",
+      "ownedPaths": [
+        "packages/jest-get-type/src/**"
+      ],
+      "publicEntry": "packages/jest-get-type/src/index.ts",
+      "publicSymbols": [
+        "getType",
+        "isPrimitive"
+      ],
+      "packageName": "@jest/get-type",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "globals",
+      "ownedPaths": [
+        "packages/jest-globals/src/**"
+      ],
+      "publicEntry": "packages/jest-globals/src/index.ts",
+      "publicSymbols": [
+        "afterAll",
+        "afterEach",
+        "beforeAll",
+        "beforeEach",
+        "describe",
+        "expect",
+        "fdescribe",
+        "fit",
+        "it",
+        "jest",
+        "Mock",
+        "Mocked",
+        "MockedClass",
+        "MockedFunction",
+        "MockedObject",
+        "Replaced",
+        "Spied",
+        "SpiedClass",
+        "SpiedFunction",
+        "SpiedGetter",
+        "SpiedSetter",
+        "test",
+        "xdescribe",
+        "xit",
+        "xtest"
+      ],
+      "packageName": "@jest/globals",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "expect-2"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest",
+      "ownedPaths": [
+        "packages/jest/src/**"
+      ],
+      "publicEntry": "packages/jest/src/index.ts",
+      "publicSymbols": [
+        "buildArgv",
+        "Config",
+        "createTestScheduler",
+        "defineConfig",
+        "getVersion",
+        "GlobalConfig",
+        "mergeConfig",
+        "ProjectConfig",
+        "run",
+        "runCLI",
+        "SearchSource"
+      ],
+      "packageName": "jest",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "jest-cli"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-changed-files",
+      "ownedPaths": [
+        "packages/jest-changed-files/src/**"
+      ],
+      "publicEntry": "packages/jest-changed-files/src/index.ts",
+      "publicSymbols": [
+        "ChangedFiles",
+        "ChangedFilesPromise",
+        "findRepos",
+        "getChangedFilesForRoots"
+      ],
+      "packageName": "jest-changed-files",
+      "consumes": [
+        {
+          "cell": "jest-util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-circus",
+      "ownedPaths": [
+        "packages/jest-circus/src/**"
+      ],
+      "publicEntry": "packages/jest-circus/src/index.ts",
+      "publicSymbols": [
+        "addEventHandler",
+        "afterAll",
+        "afterEach",
+        "beforeAll",
+        "beforeEach",
+        "default",
+        "describe",
+        "Event",
+        "getState",
+        "it",
+        "removeEventHandler",
+        "resetState",
+        "run",
+        "setState",
+        "State",
+        "test"
+      ],
+      "packageName": "jest-circus",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "expect-2"
+        },
+        {
+          "cell": "jest-each"
+        },
+        {
+          "cell": "jest-matcher-utils"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-runtime"
+        },
+        {
+          "cell": "jest-snapshot"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-cli",
+      "ownedPaths": [
+        "packages/jest-cli/src/**"
+      ],
+      "publicEntry": "packages/jest-cli/src/index.ts",
+      "publicSymbols": [
+        "buildArgv",
+        "run",
+        "yargsOptions"
+      ],
+      "packageName": "jest-cli",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-validate"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-config",
+      "ownedPaths": [
+        "packages/jest-config/src/**"
+      ],
+      "publicEntry": "packages/jest-config/src/index.ts",
+      "publicSymbols": [
+        "constants",
+        "defaults",
+        "defineConfig",
+        "deprecationEntries",
+        "descriptions",
+        "isJSONString",
+        "mergeConfig",
+        "normalize",
+        "readConfig",
+        "readConfigs",
+        "readInitialOptions",
+        "ReadJestConfigOptions",
+        "replaceRootDirInPath"
+      ],
+      "packageName": "jest-config",
+      "consumes": [
+        {
+          "cell": "babel-jest"
+        },
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-circus"
+        },
+        {
+          "cell": "jest-docblock"
+        },
+        {
+          "cell": "jest-environment-node"
+        },
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-runner"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-validate"
+        },
+        {
+          "cell": "pattern"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "test-sequencer"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-diff",
+      "ownedPaths": [
+        "packages/jest-diff/src/**"
+      ],
+      "publicEntry": "packages/jest-diff/src/index.ts",
+      "publicSymbols": [
+        "diff",
+        "Diff",
+        "DIFF_DELETE",
+        "DIFF_EQUAL",
+        "DIFF_INSERT",
+        "diffLinesRaw",
+        "diffLinesUnified",
+        "diffLinesUnified2",
+        "DiffOptions",
+        "DiffOptionsColor",
+        "diffStringsRaw",
+        "diffStringsUnified"
+      ],
+      "packageName": "jest-diff",
+      "consumes": [
+        {
+          "cell": "diff-sequences"
+        },
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-docblock",
+      "ownedPaths": [
+        "packages/jest-docblock/src/**"
+      ],
+      "publicEntry": "packages/jest-docblock/src/index.ts",
+      "publicSymbols": [
+        "extract",
+        "parse",
+        "parseWithComments",
+        "Pragmas",
+        "print",
+        "strip"
+      ],
+      "packageName": "jest-docblock",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-each",
+      "ownedPaths": [
+        "packages/jest-each/src/**"
+      ],
+      "publicEntry": "packages/jest-each/src/index.ts",
+      "publicSymbols": [
+        "bind",
+        "default"
+      ],
+      "packageName": "jest-each",
+      "consumes": [
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-environment-jsdom",
+      "ownedPaths": [
+        "packages/jest-environment-jsdom/src/**"
+      ],
+      "publicEntry": "packages/jest-environment-jsdom/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "TestEnvironment"
+      ],
+      "packageName": "jest-environment-jsdom",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "environment-jsdom-abstract"
+        },
+        {
+          "cell": "test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-environment-node",
+      "ownedPaths": [
+        "packages/jest-environment-node/src/**"
+      ],
+      "publicEntry": "packages/jest-environment-node/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "TestEnvironment"
+      ],
+      "packageName": "jest-environment-node",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "fake-timers"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-validate"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-haste-map",
+      "ownedPaths": [
+        "packages/jest-haste-map/src/**"
+      ],
+      "publicEntry": "packages/jest-haste-map/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "DuplicateError",
+        "IHasteFS",
+        "IHasteMap",
+        "IModuleMap",
+        "ModuleMap",
+        "SerializableModuleMap"
+      ],
+      "packageName": "jest-haste-map",
+      "consumes": [
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-worker"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-jasmine2",
+      "ownedPaths": [
+        "packages/jest-jasmine2/src/**"
+      ],
+      "publicEntry": "packages/jest-jasmine2/src/index.ts",
+      "publicSymbols": [
+        "buildCollectedTestResult",
+        "collectSpecs",
+        "default",
+        "Jasmine",
+        "SpecLike",
+        "SuiteLike"
+      ],
+      "packageName": "jest-jasmine2",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "expect-2"
+        },
+        {
+          "cell": "jest-each"
+        },
+        {
+          "cell": "jest-matcher-utils"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-runtime"
+        },
+        {
+          "cell": "jest-snapshot"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "source-map"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-leak-detector",
+      "ownedPaths": [
+        "packages/jest-leak-detector/src/**"
+      ],
+      "publicEntry": "packages/jest-leak-detector/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "jest-leak-detector",
+      "consumes": [
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "pretty-format"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-matcher-utils",
+      "ownedPaths": [
+        "packages/jest-matcher-utils/src/**"
+      ],
+      "publicEntry": "packages/jest-matcher-utils/src/index.ts",
+      "publicSymbols": [
+        "BOLD_WEIGHT",
+        "diff",
+        "DiffOptions",
+        "DIM_COLOR",
+        "ensureActualIsNumber",
+        "ensureExpectedIsNonNegativeInteger",
+        "ensureExpectedIsNumber",
+        "ensureNoExpected",
+        "ensureNumbers",
+        "EXPECTED_COLOR",
+        "getLabelPrinter",
+        "highlightTrailingWhitespace",
+        "INVERTED_COLOR",
+        "matcherErrorMessage",
+        "matcherHint",
+        "MatcherHintOptions",
+        "pluralize",
+        "printDiffOrStringify",
+        "printExpected",
+        "printReceived",
+        "printWithType",
+        "RECEIVED_COLOR",
+        "replaceMatchedToAsymmetricMatcher",
+        "SERIALIZABLE_PROPERTIES",
+        "stringify",
+        "SUGGEST_TO_CONTAIN_EQUAL"
+      ],
+      "packageName": "jest-matcher-utils",
+      "consumes": [
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-diff"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-message-util",
+      "ownedPaths": [
+        "packages/jest-message-util/src/**"
+      ],
+      "publicEntry": "packages/jest-message-util/src/index.ts",
+      "publicSymbols": [
+        "formatExecError",
+        "formatPath",
+        "formatResultsErrors",
+        "formatStackTrace",
+        "Frame",
+        "getStackTraceLines",
+        "getTopFrame",
+        "indentAllLines",
+        "separateMessageFromStack",
+        "StackTraceConfig",
+        "StackTraceOptions"
+      ],
+      "packageName": "jest-message-util",
+      "consumes": [
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-mock",
+      "ownedPaths": [
+        "packages/jest-mock/src/**"
+      ],
+      "publicEntry": "packages/jest-mock/src/index.ts",
+      "publicSymbols": [
+        "ClassLike",
+        "ConstructorLikeKeys",
+        "fn",
+        "FunctionLike",
+        "MethodLikeKeys",
+        "Mock",
+        "mocked",
+        "Mocked",
+        "MockedClass",
+        "MockedFunction",
+        "MockedObject",
+        "MockedShallow",
+        "MockInstance",
+        "MockMetadata",
+        "MockMetadataType",
+        "ModuleMocker",
+        "PropertyLikeKeys",
+        "Replaced",
+        "replaceProperty",
+        "Spied",
+        "SpiedClass",
+        "SpiedFunction",
+        "SpiedGetter",
+        "SpiedSetter",
+        "spyOn",
+        "UnknownClass",
+        "UnknownFunction"
+      ],
+      "packageName": "jest-mock",
+      "consumes": [
+        {
+          "cell": "expect-utils"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-phabricator",
+      "ownedPaths": [
+        "packages/jest-phabricator/src/**"
+      ],
+      "publicEntry": "packages/jest-phabricator/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "jest-phabricator",
+      "consumes": [
+        {
+          "cell": "test-result"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-regex-util",
+      "ownedPaths": [
+        "packages/jest-regex-util/src/**"
+      ],
+      "publicEntry": "packages/jest-regex-util/src/index.ts",
+      "publicSymbols": [
+        "escapePathForRegex",
+        "escapeStrForRegex",
+        "replacePathSepForRegex"
+      ],
+      "packageName": "jest-regex-util",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-resolve",
+      "ownedPaths": [
+        "packages/jest-resolve/src/**"
+      ],
+      "publicEntry": "packages/jest-resolve/src/index.ts",
+      "publicSymbols": [
+        "AsyncResolver",
+        "default",
+        "FindNodeModuleConfig",
+        "JestResolver",
+        "PackageJSON",
+        "ResolveModuleConfig",
+        "ResolverOptions",
+        "resolveRunner",
+        "resolveSequencer",
+        "resolveTestEnvironment",
+        "resolveWatchPlugin",
+        "SyncResolver"
+      ],
+      "packageName": "jest-resolve",
+      "consumes": [
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-validate"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-resolve-dependencies",
+      "ownedPaths": [
+        "packages/jest-resolve-dependencies/src/**"
+      ],
+      "publicEntry": "packages/jest-resolve-dependencies/src/index.ts",
+      "publicSymbols": [
+        "DependencyResolver",
+        "ResolvedModule"
+      ],
+      "packageName": "jest-resolve-dependencies",
+      "consumes": [
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-runtime"
+        },
+        {
+          "cell": "jest-snapshot"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-runner",
+      "ownedPaths": [
+        "packages/jest-runner/src/**"
+      ],
+      "publicEntry": "packages/jest-runner/src/index.ts",
+      "publicSymbols": [
+        "CallbackTestRunner",
+        "CallbackTestRunnerInterface",
+        "Config",
+        "default",
+        "EmittingTestRunner",
+        "EmittingTestRunnerInterface",
+        "JestTestRunner",
+        "OnTestFailure",
+        "OnTestStart",
+        "OnTestSuccess",
+        "Test",
+        "TestEvents",
+        "TestRunnerContext",
+        "TestRunnerOptions",
+        "TestWatcher",
+        "UnsubscribeFn"
+      ],
+      "packageName": "jest-runner",
+      "consumes": [
+        {
+          "cell": "console"
+        },
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "jest-docblock"
+        },
+        {
+          "cell": "jest-environment-node"
+        },
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-jasmine2"
+        },
+        {
+          "cell": "jest-leak-detector"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-runtime"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-watcher"
+        },
+        {
+          "cell": "jest-worker"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-runtime",
+      "ownedPaths": [
+        "packages/jest-runtime/src/**"
+      ],
+      "publicEntry": "packages/jest-runtime/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "jest-runtime",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "fake-timers"
+        },
+        {
+          "cell": "globals"
+        },
+        {
+          "cell": "jest-environment-node"
+        },
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-snapshot"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "source-map"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-snapshot",
+      "ownedPaths": [
+        "packages/jest-snapshot/src/**"
+      ],
+      "publicEntry": "packages/jest-snapshot/src/index.ts",
+      "publicSymbols": [
+        "addSerializer",
+        "buildSnapshotResolver",
+        "cleanup",
+        "Context",
+        "EXTENSION",
+        "getSerializers",
+        "isSnapshotPath",
+        "SnapshotMatchers",
+        "SnapshotResolver",
+        "SnapshotState",
+        "toMatchInlineSnapshot",
+        "toMatchSnapshot",
+        "toThrowErrorMatchingInlineSnapshot",
+        "toThrowErrorMatchingSnapshot"
+      ],
+      "packageName": "jest-snapshot",
+      "consumes": [
+        {
+          "cell": "expect"
+        },
+        {
+          "cell": "expect-utils"
+        },
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "jest-diff"
+        },
+        {
+          "cell": "jest-matcher-utils"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "snapshot-utils"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-util",
+      "ownedPaths": [
+        "packages/jest-util/src/**"
+      ],
+      "publicEntry": "packages/jest-util/src/index.ts",
+      "publicSymbols": [
+        "canDeleteProperties",
+        "clearLine",
+        "convertDescriptorToString",
+        "createDirectory",
+        "deepCyclicCopy",
+        "deleteProperties",
+        "DeletionMode",
+        "ErrorWithStack",
+        "formatTime",
+        "globsToMatcher",
+        "initializeGarbageCollectionUtils",
+        "installCommonGlobals",
+        "interopRequireDefault",
+        "invariant",
+        "isError",
+        "isInteractive",
+        "isNonNullable",
+        "isPromise",
+        "pluralize",
+        "preRunMessage",
+        "protectProperties",
+        "replacePathSepForGlob",
+        "requireOrImportModule",
+        "setGlobal",
+        "specialChars",
+        "tryRealpath"
+      ],
+      "packageName": "jest-util",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-validate",
+      "ownedPaths": [
+        "packages/jest-validate/src/**"
+      ],
+      "publicEntry": "packages/jest-validate/src/index.ts",
+      "publicSymbols": [
+        "createDidYouMeanMessage",
+        "DeprecatedOptions",
+        "format",
+        "logValidationWarning",
+        "multipleValidOptions",
+        "validate",
+        "validateCLIOptions",
+        "ValidationError",
+        "ValidationOptions"
+      ],
+      "packageName": "jest-validate",
+      "consumes": [
+        {
+          "cell": "get-type"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-watcher",
+      "ownedPaths": [
+        "packages/jest-watcher/src/**"
+      ],
+      "publicEntry": "packages/jest-watcher/src/index.ts",
+      "publicSymbols": [
+        "AllowedConfigOptions",
+        "BaseWatchPlugin",
+        "JestHook",
+        "JestHookEmitter",
+        "JestHookSubscriber",
+        "KEYS",
+        "PatternPrompt",
+        "printPatternCaret",
+        "printRestoredPatternCaret",
+        "Prompt",
+        "ScrollOptions",
+        "TestWatcher",
+        "UpdateConfigCallback",
+        "UsageData",
+        "WatchPlugin",
+        "WatchPluginClass"
+      ],
+      "packageName": "jest-watcher",
+      "consumes": [
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-website",
+      "ownedPaths": [
+        "website/src/**"
+      ],
+      "publicEntry": "website/src/components/v1/Container.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "jest-website",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-worker",
+      "ownedPaths": [
+        "packages/jest-worker/src/**"
+      ],
+      "publicEntry": "packages/jest-worker/src/index.ts",
+      "publicSymbols": [
+        "FifoQueue",
+        "JestWorkerFarm",
+        "messageParent",
+        "PriorityQueue",
+        "PromiseWithCustomMessage",
+        "TaskQueue",
+        "Worker",
+        "WorkerFarmOptions",
+        "WorkerPoolInterface",
+        "WorkerPoolOptions"
+      ],
+      "packageName": "jest-worker",
+      "consumes": [
+        {
+          "cell": "jest-leak-detector"
+        },
+        {
+          "cell": "jest-util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pattern",
+      "ownedPaths": [
+        "packages/jest-pattern/src/**"
+      ],
+      "publicEntry": "packages/jest-pattern/src/index.ts",
+      "publicSymbols": [
+        "TestPathPatterns",
+        "TestPathPatternsExecutor",
+        "TestPathPatternsExecutorOptions"
+      ],
+      "packageName": "@jest/pattern",
+      "consumes": [
+        {
+          "cell": "jest-regex-util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pretty-format",
+      "ownedPaths": [
+        "packages/pretty-format/src/**"
+      ],
+      "publicEntry": "packages/pretty-format/src/index.ts",
+      "publicSymbols": [
+        "Colors",
+        "CompareKeys",
+        "Config",
+        "default",
+        "DEFAULT_OPTIONS",
+        "format",
+        "NewPlugin",
+        "OldPlugin",
+        "Options",
+        "OptionsReceived",
+        "Plugin",
+        "plugins",
+        "Plugins",
+        "PrettyFormatOptions",
+        "Printer",
+        "Refs",
+        "Theme"
+      ],
+      "packageName": "pretty-format",
+      "consumes": [
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "schemas"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reporters",
+      "ownedPaths": [
+        "packages/jest-reporters/src/**"
+      ],
+      "publicEntry": "packages/jest-reporters/src/index.ts",
+      "publicSymbols": [
+        "AgentReporter",
+        "AggregatedResult",
+        "BaseReporter",
+        "Config",
+        "CoverageReporter",
+        "DefaultReporter",
+        "GitHubActionsReporter",
+        "NotifyReporter",
+        "Reporter",
+        "ReporterContext",
+        "ReporterOnStartOptions",
+        "SnapshotSummary",
+        "SummaryOptions",
+        "SummaryReporter",
+        "SummaryReporterOptions",
+        "Test",
+        "TestCaseResult",
+        "TestContext",
+        "TestResult",
+        "utils",
+        "VerboseReporter"
+      ],
+      "packageName": "@jest/reporters",
+      "consumes": [
+        {
+          "cell": "console"
+        },
+        {
+          "cell": "jest-message-util"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "jest-worker"
+        },
+        {
+          "cell": "pattern"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "transform"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "schemas",
+      "ownedPaths": [
+        "packages/jest-schemas/src/**"
+      ],
+      "publicEntry": "packages/jest-schemas/src/index.ts",
+      "publicSymbols": [
+        "FakeTimers",
+        "InitialOptions",
+        "SnapshotFormat"
+      ],
+      "packageName": "@jest/schemas",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "snapshot-utils",
+      "ownedPaths": [
+        "packages/jest-snapshot-utils/src/**"
+      ],
+      "publicEntry": "packages/jest-snapshot-utils/src/index.ts",
+      "publicSymbols": [
+        "ensureDirectoryExists",
+        "escapeBacktickString",
+        "getSnapshotData",
+        "keyToTestName",
+        "normalizeNewlines",
+        "saveSnapshotFile",
+        "SNAPSHOT_GUIDE_LINK",
+        "SNAPSHOT_VERSION",
+        "SNAPSHOT_VERSION_WARNING",
+        "SnapshotData",
+        "testNameToKey"
+      ],
+      "packageName": "@jest/snapshot-utils",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "source-map",
+      "ownedPaths": [
+        "packages/jest-source-map/src/**"
+      ],
+      "publicEntry": "packages/jest-source-map/src/index.ts",
+      "publicSymbols": [
+        "getCallsite",
+        "SourceMapRegistry"
+      ],
+      "packageName": "@jest/source-map",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-globals",
+      "ownedPaths": [
+        "packages/test-globals/src/**"
+      ],
+      "publicEntry": "packages/test-globals/src/index.ts",
+      "publicSymbols": [
+        "Mock",
+        "Mocked",
+        "MockedClass",
+        "MockedFunction",
+        "MockedObject",
+        "Spied",
+        "SpiedClass",
+        "SpiedFunction",
+        "SpiedGetter",
+        "SpiedSetter"
+      ],
+      "packageName": "@jest/test-globals",
+      "consumes": [
+        {
+          "cell": "environment"
+        },
+        {
+          "cell": "expect-2"
+        },
+        {
+          "cell": "jest-mock"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-result",
+      "ownedPaths": [
+        "packages/jest-test-result/src/**"
+      ],
+      "publicEntry": "packages/jest-test-result/src/index.ts",
+      "publicSymbols": [
+        "addResult",
+        "AggregatedResult",
+        "AssertionLocation",
+        "AssertionResult",
+        "buildFailureTestResult",
+        "createEmptyTestResult",
+        "FailedAssertion",
+        "FormattedTestResults",
+        "formatTestResults",
+        "makeEmptyAggregatedTestResult",
+        "RuntimeTransformResult",
+        "SerializableError",
+        "SnapshotSummary",
+        "Status",
+        "Suite",
+        "Test",
+        "TestCaseResult",
+        "TestContext",
+        "TestEvents",
+        "TestFileEvent",
+        "TestResult",
+        "TestResultsProcessor",
+        "V8CoverageResult"
+      ],
+      "packageName": "@jest/test-result",
+      "consumes": [
+        {
+          "cell": "console"
+        },
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-resolve"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-sequencer",
+      "ownedPaths": [
+        "packages/jest-test-sequencer/src/**"
+      ],
+      "publicEntry": "packages/jest-test-sequencer/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "ShardOptions",
+        "TestSequencerOptions"
+      ],
+      "packageName": "@jest/test-sequencer",
+      "consumes": [
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "test-result"
+        },
+        {
+          "cell": "test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-utils",
+      "ownedPaths": [
+        "packages/test-utils/src/**"
+      ],
+      "publicEntry": "packages/test-utils/src/index.ts",
+      "publicSymbols": [
+        "alignedAnsiStyleSerializer",
+        "isJestJasmineRun",
+        "makeGlobalConfig",
+        "makeProjectConfig",
+        "normalizeIcons",
+        "onNodeVersions",
+        "skipSuiteOnJasmine",
+        "skipSuiteOnJestCircus",
+        "testWithLinkedSyntheticModule",
+        "testWithoutSyncEsm",
+        "testWithSyncEsm",
+        "testWithVmEsm"
+      ],
+      "packageName": "@jest/test-utils",
+      "consumes": [
+        {
+          "cell": "globals"
+        },
+        {
+          "cell": "pattern"
+        },
+        {
+          "cell": "pretty-format"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "transform",
+      "ownedPaths": [
+        "packages/jest-transform/src/**"
+      ],
+      "publicEntry": "packages/jest-transform/src/index.ts",
+      "publicSymbols": [
+        "AsyncTransformer",
+        "CallerTransformOptions",
+        "createScriptTransformer",
+        "createTranspilingRequire",
+        "handlePotentialSyntaxError",
+        "ScriptTransformer",
+        "shouldInstrument",
+        "ShouldInstrumentOptions",
+        "SyncTransformer",
+        "TransformationOptions",
+        "TransformedSource",
+        "Transformer",
+        "TransformerCreator",
+        "TransformerFactory",
+        "TransformOptions",
+        "TransformResult"
+      ],
+      "packageName": "@jest/transform",
+      "consumes": [
+        {
+          "cell": "jest-haste-map"
+        },
+        {
+          "cell": "jest-regex-util"
+        },
+        {
+          "cell": "jest-util"
+        },
+        {
+          "cell": "test-utils"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/jest-types/src/**"
+      ],
+      "publicEntry": "packages/jest-types/src/index.ts",
+      "publicSymbols": [
+        "Circus",
+        "Config",
+        "Global",
+        "TestResult",
+        "TransformTypes"
+      ],
+      "packageName": "@jest/types",
+      "consumes": [
+        {
+          "cell": "pattern"
+        },
+        {
+          "cell": "schemas"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

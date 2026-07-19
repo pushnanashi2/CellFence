@@ -174,6 +174,42 @@ test("manifest inference uses package entry metadata and workspace dependency co
   }
 });
 
+test("manifest inference reads pnpm workspace packages and scoped workspace roots", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-pnpm-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), { private: true });
+    writeText(path.join(rootDir, "pnpm-workspace.yaml"), [
+      "packages:",
+      "  - 'packages/*'",
+      "  - 'packages/@scope/*'",
+      "  - '!packages/ignored'",
+      "",
+    ].join("\n"));
+    writeJson(path.join(rootDir, "packages/core/package.json"), {
+      name: "@demo/core",
+    });
+    writeJson(path.join(rootDir, "packages/@scope/web/package.json"), {
+      name: "@demo/web",
+      dependencies: {
+        "@demo/core": "workspace:*",
+      },
+    });
+    writeText(path.join(rootDir, "packages/core/src/index.ts"), "export const core = true;\n");
+    writeText(path.join(rootDir, "packages/@scope/web/src/index.ts"), "export const web = true;\n");
+
+    const manifest = inferManifest({ rootDir });
+
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths[0], cell.packageName, cell.consumes]), [
+      ["core", "packages/core/src/**", "@demo/core", []],
+      ["web", "packages/@scope/web/src/**", "@demo/web", [{ cell: "core" }]],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference uses pyproject src layouts and Python absolute imports", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-src-"));
   try {

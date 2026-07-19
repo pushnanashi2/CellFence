@@ -500,14 +500,51 @@ function readJsonIfExists(filePath) {
   }
 }
 
-function workspacePatterns(packageJson) {
-  if (!isRecord(packageJson)) return [];
-  const workspaces = packageJson.workspaces;
-  if (Array.isArray(workspaces)) return workspaces.filter((entry) => typeof entry === "string" && !entry.startsWith("!"));
-  if (isRecord(workspaces) && Array.isArray(workspaces.packages)) {
-    return workspaces.packages.filter((entry) => typeof entry === "string" && !entry.startsWith("!"));
+function readTextFile(filePath) {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return undefined;
   }
-  return [];
+}
+
+function pnpmWorkspacePatterns(rootDir, packageRoot) {
+  const text = readTextFile(path.join(rootDir, packageRoot, "pnpm-workspace.yaml"));
+  if (!text) return [];
+  const patterns = [];
+  let inPackages = false;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.replace(/\s+#.*$/, "");
+    if (/^\s*packages\s*:\s*$/.test(line)) {
+      inPackages = true;
+      continue;
+    }
+    if (inPackages && /^\S/.test(line)) break;
+    if (!inPackages) continue;
+    const match = line.match(/^\s*-\s*['"]?([^'"\s][^'"]*?)['"]?\s*$/);
+    if (!match) continue;
+    const pattern = match[1].trim();
+    if (pattern.length > 0 && !pattern.startsWith("!")) patterns.push(pattern);
+  }
+  return patterns;
+}
+
+function workspacePatterns(rootDir, packageRoot, packageJson) {
+  const patterns = new Set();
+  if (isRecord(packageJson)) {
+    const workspaces = packageJson.workspaces;
+    if (Array.isArray(workspaces)) {
+      for (const entry of workspaces) {
+        if (typeof entry === "string" && !entry.startsWith("!")) patterns.add(entry);
+      }
+    } else if (isRecord(workspaces) && Array.isArray(workspaces.packages)) {
+      for (const entry of workspaces.packages) {
+        if (typeof entry === "string" && !entry.startsWith("!")) patterns.add(entry);
+      }
+    }
+  }
+  for (const entry of pnpmWorkspacePatterns(rootDir, packageRoot)) patterns.add(entry);
+  return [...patterns].sort((left, right) => left.localeCompare(right));
 }
 
 function expandWorkspacePattern(rootDir, packageRoot, pattern) {
@@ -547,7 +584,7 @@ function expandWorkspacePattern(rootDir, packageRoot, pattern) {
 function discoverPackageRoots(rootDir, packageRoot) {
   const rootPackageJson = readJsonIfExists(path.join(rootDir, packageRoot, "package.json"));
   if (!isRecord(rootPackageJson)) throw new Error(`package policy root has no readable package.json: ${packageRoot}`);
-  const patterns = workspacePatterns(rootPackageJson);
+  const patterns = workspacePatterns(rootDir, packageRoot, rootPackageJson);
   if (patterns.length === 0) return [packageRoot];
   return [...new Set(patterns.flatMap((pattern) => expandWorkspacePattern(rootDir, packageRoot, pattern)))]
     .filter((workspaceRoot) => fs.existsSync(path.join(rootDir, workspaceRoot, "package.json")))
@@ -704,9 +741,15 @@ function createReferenceManifest(rootDir, subject) {
   const cells = [];
   const rootPackageJsonPath = normalizePath(path.posix.join(packageRoot, "package.json"));
   const rootPackageJson = readJsonIfExists(path.join(rootDir, rootPackageJsonPath));
-  const provenanceSources = isRecord(rootPackageJson) && workspacePatterns(rootPackageJson).length > 0
-    ? [sourceHashRecord(rootDir, rootPackageJsonPath, "package-json", ["workspaces"])]
-    : [];
+  const rootWorkspacePatterns = workspacePatterns(rootDir, packageRoot, rootPackageJson);
+  const provenanceSources = [];
+  if (isRecord(rootPackageJson) && isRecord(rootPackageJson.workspaces) || Array.isArray(rootPackageJson?.workspaces)) {
+    provenanceSources.push(sourceHashRecord(rootDir, rootPackageJsonPath, "package-json", ["workspaces"]));
+  }
+  const pnpmWorkspacePath = normalizePath(path.posix.join(packageRoot, "pnpm-workspace.yaml"));
+  if (rootWorkspacePatterns.length > 0 && fs.existsSync(path.join(rootDir, pnpmWorkspacePath))) {
+    provenanceSources.push(sourceHashRecord(rootDir, pnpmWorkspacePath, "pnpm-workspace", ["packages"]));
+  }
   for (const packageCandidateRoot of packageRoots) {
     const packageJsonPath = normalizePath(path.posix.join(packageCandidateRoot, "package.json"));
     const packageJson = readJsonIfExists(path.join(rootDir, packageJsonPath));
@@ -721,7 +764,7 @@ function createReferenceManifest(rootDir, subject) {
     const id = uniqueId(sanitizeCellId(packageName || path.posix.basename(packageCandidateRoot)), usedIds);
     const dependencyNames = packageDependencyNames(packageJson);
     const fields = ["name"];
-    if (workspacePatterns(packageJson).length > 0) fields.push("workspaces");
+    if (workspacePatterns(rootDir, packageCandidateRoot, packageJson).length > 0) fields.push("workspaces");
     if (packageJson.exports !== undefined) fields.push("exports");
     for (const field of packageEntryFields) {
       if (packageJson[field] !== undefined) fields.push(field);

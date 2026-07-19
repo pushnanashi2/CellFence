@@ -1,0 +1,1929 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "api/src/**",
+      "demos/assets/**",
+      "demos/bookstore/**",
+      "demos/frame-navigation/**",
+      "demos/frames/**",
+      "demos/social-auth/**",
+      "demos/sse/**",
+      "demos/timeboxer/**",
+      "demos/unpkg/**",
+      "guides/**",
+      "packages/assert/src/**",
+      "packages/assets/src/**",
+      "packages/async-context-middleware/src/**",
+      "packages/auth-middleware/src/**",
+      "packages/auth/src/**",
+      "packages/cli/src/**",
+      "packages/compression-middleware/src/**",
+      "packages/cookie/src/**",
+      "packages/cop-middleware/src/**",
+      "packages/cors-middleware/src/**",
+      "packages/csrf-middleware/src/**",
+      "packages/data-schema/src/**",
+      "packages/data-table-mysql/src/**",
+      "packages/data-table-postgres/src/**",
+      "packages/data-table-sqlite/src/**",
+      "packages/data-table/src/**",
+      "packages/fetch-proxy/src/**",
+      "packages/fetch-router/src/**",
+      "packages/file-storage-s3/src/**",
+      "packages/file-storage/src/**",
+      "packages/form-data-middleware/src/**",
+      "packages/form-data-parser/src/**",
+      "packages/fs/src/**",
+      "packages/headers/src/**",
+      "packages/html-template/src/**",
+      "packages/lazy-file/src/**",
+      "packages/logger-middleware/src/**",
+      "packages/method-override-middleware/src/**",
+      "packages/mime/src/**",
+      "packages/multipart-parser/src/**",
+      "packages/node-fetch-server/src/**",
+      "packages/node-tsx/src/**",
+      "packages/remix/src/**",
+      "packages/render-middleware/src/**",
+      "packages/response/src/**",
+      "packages/route-pattern/src/**",
+      "packages/session-middleware/src/**",
+      "packages/session-storage-memcache/src/**",
+      "packages/session-storage-redis/src/**",
+      "packages/session/src/**",
+      "packages/static-middleware/src/**",
+      "packages/tar-parser/src/**",
+      "packages/terminal/src/**",
+      "packages/ui/src/**",
+      "scripts/**",
+      "template/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "assert",
+      "ownedPaths": [
+        "packages/assert/src/**"
+      ],
+      "publicEntry": "packages/assert/src/index.ts",
+      "publicSymbols": [
+        "assert",
+        "AssertionError",
+        "deepEqual",
+        "default",
+        "doesNotMatch",
+        "doesNotReject",
+        "doesNotThrow",
+        "equal",
+        "expect",
+        "Expect",
+        "Expectation",
+        "fail",
+        "match",
+        "notDeepEqual",
+        "notEqual",
+        "ok",
+        "partialDeepEqual",
+        "rejects",
+        "throws"
+      ],
+      "packageName": "@remix-run/assert",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "assets",
+      "ownedPaths": [
+        "packages/assets/src/**"
+      ],
+      "publicEntry": "packages/assets/src/assets.ts",
+      "publicSymbols": [
+        "AssetServer",
+        "AssetServerOptions",
+        "createAssetServer",
+        "defineFileTransform"
+      ],
+      "packageName": "@remix-run/assets",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "file-storage"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "mime"
+        },
+        {
+          "cell": "route-pattern"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "assets-demo",
+      "ownedPaths": [
+        "demos/assets/**"
+      ],
+      "publicEntry": "demos/assets/app/actions/controller.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "assets-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "async-context-middleware",
+      "ownedPaths": [
+        "packages/async-context-middleware/src/**"
+      ],
+      "publicEntry": "packages/async-context-middleware/src/index.ts",
+      "publicSymbols": [
+        "asyncContext",
+        "AsyncRequestContext",
+        "getContext"
+      ],
+      "packageName": "@remix-run/async-context-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth",
+      "ownedPaths": [
+        "packages/auth/src/**"
+      ],
+      "publicEntry": "packages/auth/src/index.ts",
+      "publicSymbols": [
+        "AtmosphereAuthorizationServerMetadata",
+        "AtmosphereAuthProfile",
+        "AtmosphereAuthProvider",
+        "AtmosphereAuthProviderMapProfileInput",
+        "AtmosphereAuthProviderOptions",
+        "AtmosphereClientAuthentication",
+        "AtmosphereOAuthTokens",
+        "AtmosphereTokenAuthorizationServer",
+        "Auth0AuthProfile",
+        "Auth0AuthProviderOptions",
+        "completeAuth",
+        "createAtmosphereAuthProvider",
+        "createAuth0AuthProvider",
+        "createCredentialsAuthProvider",
+        "createFacebookAuthProvider",
+        "createGitHubAuthProvider",
+        "createGoogleAuthProvider",
+        "createMicrosoftAuthProvider",
+        "createOIDCAuthProvider",
+        "createOktaAuthProvider",
+        "createXAuthProvider",
+        "CredentialsAuthProvider",
+        "CredentialsAuthProviderOptions",
+        "FacebookAuthProfile",
+        "FacebookAuthProviderOptions",
+        "FacebookAuthProviderPicture",
+        "FinishedExternalAuthResult",
+        "finishExternalAuth",
+        "FinishExternalAuthOptions",
+        "GitHubAuthProfile",
+        "GitHubAuthProviderEmail",
+        "GitHubAuthProviderOptions",
+        "GoogleAuthProfile",
+        "GoogleAuthProviderOptions",
+        "MicrosoftAuthProfile",
+        "MicrosoftAuthProviderOptions",
+        "OAuthAccount",
+        "OAuthDpopBinding",
+        "OAuthDpopTokens",
+        "OAuthProvider",
+        "OAuthResult",
+        "OAuthStandardTokens",
+        "OAuthTokens",
+        "OIDCAuthProfile",
+        "OIDCAuthProviderMetadata",
+        "OIDCAuthProviderOptions",
+        "OktaAuthProfile",
+        "OktaAuthProviderOptions",
+        "RefreshedExternalAuthResult",
+        "refreshExternalAuth",
+        "startExternalAuth",
+        "StartExternalAuthOptions",
+        "verifyCredentials",
+        "XAuthProfile",
+        "XAuthProviderOptions"
+      ],
+      "packageName": "@remix-run/auth",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "auth-middleware"
+        },
+        {
+          "cell": "cookie"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "form-data-middleware"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "session"
+        },
+        {
+          "cell": "session-middleware"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth-middleware",
+      "ownedPaths": [
+        "packages/auth-middleware/src/**"
+      ],
+      "publicEntry": "packages/auth-middleware/src/index.ts",
+      "publicSymbols": [
+        "APIAuthSchemeOptions",
+        "auth",
+        "Auth",
+        "AuthFailure",
+        "AuthOptions",
+        "AuthScheme",
+        "AuthSchemeAuthenticateResult",
+        "AuthSchemeFailure",
+        "AuthSchemeResult",
+        "AuthSchemeSuccess",
+        "AuthState",
+        "BadAuth",
+        "BearerTokenAuthSchemeOptions",
+        "createAPIAuthScheme",
+        "createBearerTokenAuthScheme",
+        "createSessionAuthScheme",
+        "GoodAuth",
+        "requireAuth",
+        "RequireAuthOptions",
+        "SessionAuthSchemeOptions"
+      ],
+      "packageName": "@remix-run/auth-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "cookie"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "session"
+        },
+        {
+          "cell": "session-middleware"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bookstore-demo",
+      "ownedPaths": [
+        "demos/bookstore/**"
+      ],
+      "publicEntry": "demos/bookstore/app/actions/about.tsx",
+      "publicSymbols": [
+        "AboutPage"
+      ],
+      "packageName": "bookstore-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/index.ts",
+      "publicSymbols": [
+        "runRemix",
+        "RunRemixOptions"
+      ],
+      "packageName": "@remix-run/cli",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "terminal"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "compression-middleware",
+      "ownedPaths": [
+        "packages/compression-middleware/src/**"
+      ],
+      "publicEntry": "packages/compression-middleware/src/index.ts",
+      "publicSymbols": [
+        "compression",
+        "CompressionOptions"
+      ],
+      "packageName": "@remix-run/compression-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "mime"
+        },
+        {
+          "cell": "response"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cookie",
+      "ownedPaths": [
+        "packages/cookie/src/**"
+      ],
+      "publicEntry": "packages/cookie/src/index.ts",
+      "publicSymbols": [
+        "Cookie",
+        "CookieOptions",
+        "createCookie"
+      ],
+      "packageName": "@remix-run/cookie",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "headers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cop-middleware",
+      "ownedPaths": [
+        "packages/cop-middleware/src/**"
+      ],
+      "publicEntry": "packages/cop-middleware/src/index.ts",
+      "publicSymbols": [
+        "cop",
+        "CopDenyHandler",
+        "CopFailureReason",
+        "CopOptions"
+      ],
+      "packageName": "@remix-run/cop-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cors-middleware",
+      "ownedPaths": [
+        "packages/cors-middleware/src/**"
+      ],
+      "publicEntry": "packages/cors-middleware/src/index.ts",
+      "publicSymbols": [
+        "cors",
+        "CorsAllowedHeadersResolver",
+        "CorsAllowedHeadersResolverResult",
+        "CorsOptions",
+        "CorsOrigin",
+        "CorsOriginResolver",
+        "CorsOriginResolverResult"
+      ],
+      "packageName": "@remix-run/cors-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "headers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "csrf-middleware",
+      "ownedPaths": [
+        "packages/csrf-middleware/src/**"
+      ],
+      "publicEntry": "packages/csrf-middleware/src/index.ts",
+      "publicSymbols": [
+        "csrf",
+        "CsrfFailureReason",
+        "CsrfOptions",
+        "CsrfOrigin",
+        "CsrfOriginResolver",
+        "CsrfOriginResolverResult",
+        "CsrfTokenResolver",
+        "CsrfTokenResolverResult",
+        "getCsrfToken"
+      ],
+      "packageName": "@remix-run/csrf-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "cookie"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "form-data-middleware"
+        },
+        {
+          "cell": "session"
+        },
+        {
+          "cell": "session-middleware"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-schema",
+      "ownedPaths": [
+        "packages/data-schema/src/**"
+      ],
+      "publicEntry": "packages/data-schema/src/index.ts",
+      "publicSymbols": [
+        "any",
+        "array",
+        "bigint",
+        "boolean",
+        "Check",
+        "createIssue",
+        "createSchema",
+        "defaulted",
+        "enum_",
+        "ErrorMap",
+        "ErrorMapContext",
+        "fail",
+        "InferInput",
+        "InferOutput",
+        "instanceof_",
+        "Issue",
+        "literal",
+        "map",
+        "null_",
+        "nullable",
+        "number",
+        "object",
+        "optional",
+        "parse",
+        "ParseOptions",
+        "parseSafe",
+        "record",
+        "Schema",
+        "set",
+        "string",
+        "symbol",
+        "tuple",
+        "undefined_",
+        "union",
+        "ValidationError",
+        "ValidationOptions",
+        "ValidationResult",
+        "variant"
+      ],
+      "packageName": "@remix-run/data-schema",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-table",
+      "ownedPaths": [
+        "packages/data-table/src/**"
+      ],
+      "publicEntry": "packages/data-table/src/index.ts",
+      "publicSymbols": [
+        "AdapterCapabilities",
+        "AdapterCapabilityOverrides",
+        "and",
+        "AnyColumn",
+        "AnyQuery",
+        "AnyRelation",
+        "AnyTable",
+        "belongsTo",
+        "BelongsToOptions",
+        "between",
+        "column",
+        "ColumnBuilder",
+        "ColumnCheck",
+        "ColumnComputed",
+        "ColumnDefault",
+        "ColumnDefinition",
+        "columnMetadataKey",
+        "ColumnNamespace",
+        "ColumnReference",
+        "ColumnReferenceForQualifiedName",
+        "ColumnTypeName",
+        "CountOperation",
+        "CountOptions",
+        "createDatabase",
+        "CreateManyResultOptions",
+        "CreateManyRowsOptions",
+        "CreateResultOptions",
+        "CreateRowOptions",
+        "Database",
+        "DatabaseAdapter",
+        "DataManipulationOperation",
+        "DataManipulationRequest",
+        "DataManipulationResult",
+        "DataTableAdapterError",
+        "DataTableConstraintError",
+        "DataTableError",
+        "DataTableQueryError",
+        "DataTableValidationError",
+        "DeleteManyOptions",
+        "DeleteOperation",
+        "eq",
+        "ExistsOperation",
+        "fail",
+        "FindManyOptions",
+        "FindOneOptions",
+        "ForeignKeyAction",
+        "getTableAfterDelete",
+        "getTableAfterRead",
+        "getTableAfterWrite",
+        "getTableBeforeDelete",
+        "getTableBeforeWrite",
+        "getTableColumnDefinitions",
+        "getTableColumns",
+        "getTableName",
+        "getTablePrimaryKey",
+        "getTableReference",
+        "getTableTimestamps",
+        "getTableValidator",
+        "gt",
+        "gte",
+        "hasMany",
+        "HasManyOptions",
+        "hasManyThrough",
+        "HasManyThroughOptions",
+        "hasOne",
+        "HasOneOptions",
+        "IdentityOptions",
+        "ilike",
+        "inList",
+        "InsertManyOperation",
+        "InsertOperation",
+        "isNull",
+        "JoinClause",
+        "JoinType",
+        "KeySelector",
+        "like",
+        "lt",
+        "lte",
+        "ne",
+        "notInList",
+        "notNull",
+        "or",
+        "OrderByClause",
+        "OrderByInput",
+        "OrderByTuple",
+        "OrderDirection",
+        "Predicate",
+        "PrimaryKeyInput",
+        "query",
+        "Query",
+        "QueryColumnTypesForTable",
+        "QueryForTable",
+        "QueryTableInput",
+        "RawOperation",
+        "rawSql",
+        "Relation",
+        "RelationCardinality",
+        "RelationKind",
+        "RelationMapForTable",
+        "ReturningSelection",
+        "SelectColumn",
+        "SelectOperation",
+        "SingleTableColumn",
+        "SingleTableWhere",
+        "sql",
+        "SqlStatement",
+        "table",
+        "Table",
+        "TableAfterDelete",
+        "TableAfterDeleteContext",
+        "TableAfterRead",
+        "TableAfterReadContext",
+        "TableAfterReadResult",
+        "TableAfterWrite",
+        "TableAfterWriteContext",
+        "TableBeforeDelete",
+        "TableBeforeDeleteContext",
+        "TableBeforeDeleteResult",
+        "TableBeforeWrite",
+        "TableBeforeWriteContext",
+        "TableBeforeWriteResult",
+        "TableColumnInput",
+        "TableColumnName",
+        "TableColumns",
+        "TableColumnsDefinition",
+        "TableLifecycleOperation",
+        "tableMetadataKey",
+        "TableName",
+        "TablePrimaryKey",
+        "TableRef",
+        "TableReference",
+        "TableRow",
+        "TableRowWith",
+        "TableValidate",
+        "TableValidationContext",
+        "TableValidationOperation",
+        "TableValidationResult",
+        "TableWriteOperation",
+        "TimestampConfig",
+        "TimestampOptions",
+        "timestamps",
+        "TransactionOptions",
+        "TransactionToken",
+        "UpdateManyOptions",
+        "UpdateOperation",
+        "UpdateOptions",
+        "UpsertOperation",
+        "ValidationFailure",
+        "ValidationIssue",
+        "WhereInput",
+        "WhereObject",
+        "WriteResult",
+        "WriteRowResult",
+        "WriteRowsResult"
+      ],
+      "packageName": "@remix-run/data-table",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-table-mysql",
+      "ownedPaths": [
+        "packages/data-table-mysql/src/**"
+      ],
+      "publicEntry": "packages/data-table-mysql/src/index.ts",
+      "publicSymbols": [
+        "createMysqlDatabaseAdapter",
+        "MysqlDatabaseAdapter"
+      ],
+      "packageName": "@remix-run/data-table-mysql",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "data-table"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-table-postgres",
+      "ownedPaths": [
+        "packages/data-table-postgres/src/**"
+      ],
+      "publicEntry": "packages/data-table-postgres/src/index.ts",
+      "publicSymbols": [
+        "createPostgresDatabaseAdapter",
+        "PostgresDatabaseAdapter"
+      ],
+      "packageName": "@remix-run/data-table-postgres",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "data-table"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-table-sqlite",
+      "ownedPaths": [
+        "packages/data-table-sqlite/src/**"
+      ],
+      "publicEntry": "packages/data-table-sqlite/src/index.ts",
+      "publicSymbols": [
+        "createSqliteDatabaseAdapter",
+        "SqliteDatabase",
+        "SqliteDatabaseAdapter",
+        "SqliteRunResult",
+        "SqliteStatement"
+      ],
+      "packageName": "@remix-run/data-table-sqlite",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "data-table"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fetch-proxy",
+      "ownedPaths": [
+        "packages/fetch-proxy/src/**"
+      ],
+      "publicEntry": "packages/fetch-proxy/src/index.ts",
+      "publicSymbols": [
+        "createFetchProxy",
+        "FetchProxy",
+        "FetchProxyOptions"
+      ],
+      "packageName": "@remix-run/fetch-proxy",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "response"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fetch-router",
+      "ownedPaths": [
+        "packages/fetch-router/src/**"
+      ],
+      "publicEntry": "packages/fetch-router/src/index.ts",
+      "publicSymbols": [
+        "Action",
+        "AnyParams",
+        "ContextEntries",
+        "ContextEntry",
+        "ContextValue",
+        "ContextWithEntries",
+        "ContextWithEntry",
+        "ContextWithParams",
+        "Controller",
+        "createAction",
+        "createContextKey",
+        "createController",
+        "createMiddleware",
+        "createRouter",
+        "GetContextValue",
+        "isRequestMethod",
+        "MatchData",
+        "Middleware",
+        "MiddlewareContext",
+        "NextFunction",
+        "RequestContext",
+        "RequestHandler",
+        "RequestMethod",
+        "RequestMethods",
+        "RouteBuilder",
+        "RouteEntry",
+        "RouteInstaller",
+        "Router",
+        "RouterContext",
+        "RouterOptions",
+        "RouterTypes"
+      ],
+      "packageName": "@remix-run/fetch-router",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "route-pattern"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "file-storage",
+      "ownedPaths": [
+        "packages/file-storage/src/**"
+      ],
+      "publicEntry": "packages/file-storage/src/index.ts",
+      "publicSymbols": [
+        "FileKey",
+        "FileLike",
+        "FileMetadata",
+        "FileStorage",
+        "ListOptions",
+        "ListResult"
+      ],
+      "packageName": "@remix-run/file-storage",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "form-data-parser"
+        },
+        {
+          "cell": "fs"
+        },
+        {
+          "cell": "lazy-file"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "file-storage-s3",
+      "ownedPaths": [
+        "packages/file-storage-s3/src/**"
+      ],
+      "publicEntry": "packages/file-storage-s3/src/index.ts",
+      "publicSymbols": [
+        "createS3FileStorage",
+        "S3FileStorageOptions"
+      ],
+      "packageName": "@remix-run/file-storage-s3",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "file-storage"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "form-data-middleware",
+      "ownedPaths": [
+        "packages/form-data-middleware/src/**"
+      ],
+      "publicEntry": "packages/form-data-middleware/src/index.ts",
+      "publicSymbols": [
+        "FileUpload",
+        "FileUploadHandler",
+        "formData",
+        "FormDataOptions",
+        "FormDataParseError"
+      ],
+      "packageName": "@remix-run/form-data-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "form-data-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "form-data-parser",
+      "ownedPaths": [
+        "packages/form-data-parser/src/**"
+      ],
+      "publicEntry": "packages/form-data-parser/src/index.ts",
+      "publicSymbols": [
+        "FileUpload",
+        "FileUploadHandler",
+        "FormDataParseError",
+        "MaxFilesExceededError",
+        "MaxFileSizeExceededError",
+        "MaxHeaderSizeExceededError",
+        "MaxPartsExceededError",
+        "MaxTotalSizeExceededError",
+        "MultipartParseError",
+        "parseFormData",
+        "ParseFormDataOptions"
+      ],
+      "packageName": "@remix-run/form-data-parser",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "data-schema"
+        },
+        {
+          "cell": "multipart-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "frame-navigation-demo",
+      "ownedPaths": [
+        "demos/frame-navigation/**"
+      ],
+      "publicEntry": "demos/frame-navigation/app/actions/auth/controller.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "frame-navigation-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "frames-demo",
+      "ownedPaths": [
+        "demos/frames/**"
+      ],
+      "publicEntry": "demos/frames/app/actions/client-mounted.tsx",
+      "publicSymbols": [
+        "ClientMountedPage"
+      ],
+      "packageName": "frames-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fs",
+      "ownedPaths": [
+        "packages/fs/src/**"
+      ],
+      "publicEntry": "packages/fs/src/index.ts",
+      "publicSymbols": [
+        "openLazyFile",
+        "OpenLazyFileOptions",
+        "writeFile"
+      ],
+      "packageName": "@remix-run/fs",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "lazy-file"
+        },
+        {
+          "cell": "mime"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "headers",
+      "ownedPaths": [
+        "packages/headers/src/**"
+      ],
+      "publicEntry": "packages/headers/src/index.ts",
+      "publicSymbols": [
+        "Accept",
+        "AcceptEncoding",
+        "AcceptEncodingInit",
+        "AcceptInit",
+        "AcceptLanguage",
+        "AcceptLanguageInit",
+        "CacheControl",
+        "CacheControlInit",
+        "ContentDisposition",
+        "ContentDispositionInit",
+        "ContentRange",
+        "ContentRangeInit",
+        "ContentType",
+        "ContentTypeInit",
+        "Cookie",
+        "CookieInit",
+        "CookieProperties",
+        "default",
+        "IfMatch",
+        "IfMatchInit",
+        "IfNoneMatch",
+        "IfNoneMatchInit",
+        "IfRange",
+        "parse",
+        "Range",
+        "RangeInit",
+        "SetCookie",
+        "SetCookieInit",
+        "stringify",
+        "SuperHeaders",
+        "SuperHeadersInit",
+        "SuperHeadersPropertyInit",
+        "Vary",
+        "VaryInit"
+      ],
+      "packageName": "@remix-run/headers",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "html-template",
+      "ownedPaths": [
+        "packages/html-template/src/**"
+      ],
+      "publicEntry": "packages/html-template/src/index.ts",
+      "publicSymbols": [
+        "html",
+        "HtmlTemplateTag",
+        "isSafeHtml",
+        "SafeHtml"
+      ],
+      "packageName": "@remix-run/html-template",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lazy-file",
+      "ownedPaths": [
+        "packages/lazy-file/src/**"
+      ],
+      "publicEntry": "packages/lazy-file/src/index.ts",
+      "publicSymbols": [
+        "ByteRange",
+        "getByteLength",
+        "getIndexes",
+        "LazyBlob",
+        "LazyBlobOptions",
+        "LazyContent",
+        "LazyFile",
+        "LazyFileOptions"
+      ],
+      "packageName": "@remix-run/lazy-file",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "mime"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger-middleware",
+      "ownedPaths": [
+        "packages/logger-middleware/src/**"
+      ],
+      "publicEntry": "packages/logger-middleware/src/index.ts",
+      "publicSymbols": [
+        "logger",
+        "Logger",
+        "LoggerFunction",
+        "LoggerOptions"
+      ],
+      "packageName": "@remix-run/logger-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "terminal"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "method-override-middleware",
+      "ownedPaths": [
+        "packages/method-override-middleware/src/**"
+      ],
+      "publicEntry": "packages/method-override-middleware/src/index.ts",
+      "publicSymbols": [
+        "methodOverride",
+        "MethodOverrideOptions"
+      ],
+      "packageName": "@remix-run/method-override-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "form-data-middleware"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mime",
+      "ownedPaths": [
+        "packages/mime/src/**"
+      ],
+      "publicEntry": "packages/mime/src/index.ts",
+      "publicSymbols": [
+        "defineMimeType",
+        "detectContentType",
+        "detectMimeType",
+        "isCompressibleMimeType",
+        "MimeTypeDefinition",
+        "mimeTypeToContentType"
+      ],
+      "packageName": "@remix-run/mime",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "multipart-parser",
+      "ownedPaths": [
+        "packages/multipart-parser/src/**"
+      ],
+      "publicEntry": "packages/multipart-parser/src/index.ts",
+      "publicSymbols": [
+        "getMultipartBoundary",
+        "isMultipartRequest",
+        "MaxFileSizeExceededError",
+        "MaxHeaderSizeExceededError",
+        "MaxPartsExceededError",
+        "MaxTotalSizeExceededError",
+        "MultipartHeaders",
+        "MultipartParseError",
+        "MultipartParser",
+        "MultipartParserOptions",
+        "MultipartPart",
+        "parseMultipart",
+        "ParseMultipartOptions",
+        "parseMultipartRequest",
+        "parseMultipartStream"
+      ],
+      "packageName": "@remix-run/multipart-parser",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "headers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "node-fetch-server",
+      "ownedPaths": [
+        "packages/node-fetch-server/src/**"
+      ],
+      "publicEntry": "packages/node-fetch-server/src/index.ts",
+      "publicSymbols": [
+        "ClientAddress",
+        "createHeaders",
+        "createRequest",
+        "createRequestListener",
+        "ErrorHandler",
+        "FetchHandler",
+        "RequestListenerOptions",
+        "RequestOptions",
+        "sendResponse"
+      ],
+      "packageName": "@remix-run/node-fetch-server",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "node-tsx",
+      "ownedPaths": [
+        "packages/node-tsx/src/**"
+      ],
+      "publicEntry": "packages/node-tsx/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@remix-run/node-tsx",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remix",
+      "ownedPaths": [
+        "packages/remix/src/**"
+      ],
+      "publicEntry": "packages/remix/src/assert.ts",
+      "publicSymbols": [],
+      "packageName": "remix",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "assets"
+        },
+        {
+          "cell": "async-context-middleware"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "auth-middleware"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "compression-middleware"
+        },
+        {
+          "cell": "cookie"
+        },
+        {
+          "cell": "cop-middleware"
+        },
+        {
+          "cell": "cors-middleware"
+        },
+        {
+          "cell": "csrf-middleware"
+        },
+        {
+          "cell": "data-schema"
+        },
+        {
+          "cell": "data-table"
+        },
+        {
+          "cell": "data-table-mysql"
+        },
+        {
+          "cell": "data-table-postgres"
+        },
+        {
+          "cell": "data-table-sqlite"
+        },
+        {
+          "cell": "fetch-proxy"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "file-storage"
+        },
+        {
+          "cell": "file-storage-s3"
+        },
+        {
+          "cell": "form-data-middleware"
+        },
+        {
+          "cell": "form-data-parser"
+        },
+        {
+          "cell": "fs"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "html-template"
+        },
+        {
+          "cell": "lazy-file"
+        },
+        {
+          "cell": "logger-middleware"
+        },
+        {
+          "cell": "method-override-middleware"
+        },
+        {
+          "cell": "mime"
+        },
+        {
+          "cell": "multipart-parser"
+        },
+        {
+          "cell": "node-fetch-server"
+        },
+        {
+          "cell": "node-tsx"
+        },
+        {
+          "cell": "render-middleware"
+        },
+        {
+          "cell": "response"
+        },
+        {
+          "cell": "route-pattern"
+        },
+        {
+          "cell": "session"
+        },
+        {
+          "cell": "session-middleware"
+        },
+        {
+          "cell": "session-storage-memcache"
+        },
+        {
+          "cell": "session-storage-redis"
+        },
+        {
+          "cell": "static-middleware"
+        },
+        {
+          "cell": "tar-parser"
+        },
+        {
+          "cell": "terminal"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remix-api",
+      "ownedPaths": [
+        "api/src/**"
+      ],
+      "publicEntry": "api/src/client/entry.tsx",
+      "publicSymbols": [],
+      "packageName": "remix-api",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remix-guides",
+      "ownedPaths": [
+        "guides/**"
+      ],
+      "publicEntry": "guides/app/actions/controller.tsx",
+      "publicSymbols": [
+        "createRootController"
+      ],
+      "packageName": "remix-guides",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remix-template",
+      "ownedPaths": [
+        "template/**"
+      ],
+      "publicEntry": "template/app/actions/controller.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "remix-template",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remix-the-scripts",
+      "ownedPaths": [
+        "scripts/**"
+      ],
+      "publicEntry": "scripts/changes-preview.ts",
+      "publicSymbols": [],
+      "packageName": "remix-the-scripts",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "render-middleware",
+      "ownedPaths": [
+        "packages/render-middleware/src/**"
+      ],
+      "publicEntry": "packages/render-middleware/src/index.ts",
+      "publicSymbols": [
+        "AnyRenderer",
+        "Renderer",
+        "renderWith"
+      ],
+      "packageName": "@remix-run/render-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "response",
+      "ownedPaths": [
+        "packages/response/src/**"
+      ],
+      "publicEntry": "packages/response/src/compress.ts",
+      "publicSymbols": [
+        "compressResponse",
+        "CompressResponseOptions",
+        "Encoding"
+      ],
+      "packageName": "@remix-run/response",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "html-template"
+        },
+        {
+          "cell": "lazy-file"
+        },
+        {
+          "cell": "mime"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "route-pattern",
+      "ownedPaths": [
+        "packages/route-pattern/src/**"
+      ],
+      "publicEntry": "packages/route-pattern/src/route-pattern.ts",
+      "publicSymbols": [
+        "getRoutePatternCaptures",
+        "ParseError",
+        "RoutePattern"
+      ],
+      "packageName": "@remix-run/route-pattern",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "session",
+      "ownedPaths": [
+        "packages/session/src/**"
+      ],
+      "publicEntry": "packages/session/src/index.ts",
+      "publicSymbols": [
+        "createSession",
+        "createSessionId",
+        "Session",
+        "SessionStorage"
+      ],
+      "packageName": "@remix-run/session",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "session-middleware",
+      "ownedPaths": [
+        "packages/session-middleware/src/**"
+      ],
+      "publicEntry": "packages/session-middleware/src/index.ts",
+      "publicSymbols": [
+        "session"
+      ],
+      "packageName": "@remix-run/session-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "cookie"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "headers"
+        },
+        {
+          "cell": "session"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "session-storage-memcache",
+      "ownedPaths": [
+        "packages/session-storage-memcache/src/**"
+      ],
+      "publicEntry": "packages/session-storage-memcache/src/index.ts",
+      "publicSymbols": [
+        "createMemcacheSessionStorage",
+        "MemcacheSessionStorageOptions"
+      ],
+      "packageName": "@remix-run/session-storage-memcache",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "session"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "session-storage-redis",
+      "ownedPaths": [
+        "packages/session-storage-redis/src/**"
+      ],
+      "publicEntry": "packages/session-storage-redis/src/index.ts",
+      "publicSymbols": [
+        "createRedisSessionStorage",
+        "RedisSessionStorageClient",
+        "RedisSessionStorageOptions"
+      ],
+      "packageName": "@remix-run/session-storage-redis",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "session"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "social-auth-demo",
+      "ownedPaths": [
+        "demos/social-auth/**"
+      ],
+      "publicEntry": "demos/social-auth/app/actions/auth/controller.tsx",
+      "publicSymbols": [
+        "createAuthController"
+      ],
+      "packageName": "social-auth-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sse-demo",
+      "ownedPaths": [
+        "demos/sse/**"
+      ],
+      "publicEntry": "demos/sse/app/actions/controller.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "sse-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "static-middleware",
+      "ownedPaths": [
+        "packages/static-middleware/src/**"
+      ],
+      "publicEntry": "packages/static-middleware/src/index.ts",
+      "publicSymbols": [
+        "staticFiles",
+        "StaticFilesOptions"
+      ],
+      "packageName": "@remix-run/static-middleware",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fetch-router"
+        },
+        {
+          "cell": "form-data-middleware"
+        },
+        {
+          "cell": "fs"
+        },
+        {
+          "cell": "html-template"
+        },
+        {
+          "cell": "method-override-middleware"
+        },
+        {
+          "cell": "mime"
+        },
+        {
+          "cell": "response"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tar-parser",
+      "ownedPaths": [
+        "packages/tar-parser/src/**"
+      ],
+      "publicEntry": "packages/tar-parser/src/index.ts",
+      "publicSymbols": [
+        "parseTar",
+        "parseTarHeader",
+        "ParseTarHeaderOptions",
+        "ParseTarOptions",
+        "TarEntry",
+        "TarHeader",
+        "TarParseError",
+        "TarParser",
+        "TarParserOptions"
+      ],
+      "packageName": "@remix-run/tar-parser",
+      "consumes": [
+        {
+          "cell": "assert"
+        },
+        {
+          "cell": "fs"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "terminal",
+      "ownedPaths": [
+        "packages/terminal/src/**"
+      ],
+      "publicEntry": "packages/terminal/src/index.ts",
+      "publicSymbols": [
+        "ansi",
+        "Ansi",
+        "AnsiStyleCodes",
+        "ColorSupportOptions",
+        "createStyles",
+        "CreateStylesOptions",
+        "createTerminal",
+        "shouldUseColors",
+        "stripAnsi",
+        "Terminal",
+        "TerminalBackgroundColorName",
+        "TerminalEnvironment",
+        "TerminalForegroundColorName",
+        "TerminalInputStream",
+        "TerminalModifierName",
+        "TerminalOptions",
+        "TerminalOutputStream",
+        "TerminalStyle",
+        "TerminalStyleName",
+        "TerminalStyles"
+      ],
+      "packageName": "@remix-run/terminal",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "timeboxer-demo",
+      "ownedPaths": [
+        "demos/timeboxer/**"
+      ],
+      "publicEntry": "demos/timeboxer/app/actions/assets/controller.ts",
+      "publicSymbols": [
+        "assets",
+        "assetServer"
+      ],
+      "packageName": "timeboxer-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/src/**"
+      ],
+      "publicEntry": "packages/ui/src/index.ts",
+      "publicSymbols": [
+        "addEventListeners",
+        "AppRuntime",
+        "AppRuntimeEventMap",
+        "attrs",
+        "clientEntry",
+        "ComponentErrorEvent",
+        "Context",
+        "createElement",
+        "createMixin",
+        "createRangeRoot",
+        "createRoot",
+        "createScheduler",
+        "css",
+        "CSSMixinDescriptor",
+        "Dispatched",
+        "ElementProps",
+        "ElementType",
+        "EntryComponent",
+        "Fragment",
+        "Frame",
+        "FrameContent",
+        "FrameHandle",
+        "FrameHandleEventMap",
+        "FrameProps",
+        "Handle",
+        "HostProps",
+        "LayoutAnimationConfig",
+        "link",
+        "LoadModule",
+        "MixinDescriptor",
+        "MixinFactory",
+        "MixinHandle",
+        "MixInput",
+        "MixinType",
+        "MixValue",
+        "navigate",
+        "NavigationOptions",
+        "on",
+        "Props",
+        "ref",
+        "RefCallback",
+        "RemixElement",
+        "RemixNode",
+        "Renderable",
+        "ResolveFrame",
+        "run",
+        "RunInit",
+        "Scheduler",
+        "SerializableArray",
+        "SerializableObject",
+        "SerializablePrimitive",
+        "SerializableProps",
+        "SerializableValue",
+        "Task",
+        "TypedEventTarget",
+        "VirtualRoot",
+        "VirtualRootEventMap",
+        "VirtualRootOptions"
+      ],
+      "packageName": "@remix-run/ui",
+      "consumes": [
+        {
+          "cell": "assert"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "unpkg-demo",
+      "ownedPaths": [
+        "demos/unpkg/**"
+      ],
+      "publicEntry": "demos/unpkg/app/actions/controller.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "unpkg-demo",
+      "consumes": [
+        {
+          "cell": "remix"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

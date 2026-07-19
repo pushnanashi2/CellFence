@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-10-2026-07-19",
+  "claim": {
+    "targetPopulation": "preliminary reviewed TypeScript/JavaScript public-OSS workspace corpus; agent-reviewed manifests and agent labels only",
+    "supportedSyntaxProfile": "ts-js-supported-v1 plus known limitations around package subpath exports and route-style $ filenames",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": [
+      "error"
+    ]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "deterministic per-rule sampling with perRuleCap=2 and minPerRepository=1 for pilot diagnosis",
+    "maxRepositoryContribution": 0.5
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure",
+    "limitation": "Raters are Codex-generated preliminary labels, not independent human blind labels."
+  },
+  "exclusionRules": [
+    "out_of_scope labels are excluded from blocking precision denominator by the claim script label taxonomy",
+    "invalid_setup labels identify manifest/review setup failures and are not counted as upstream defects"
+  ]
+}

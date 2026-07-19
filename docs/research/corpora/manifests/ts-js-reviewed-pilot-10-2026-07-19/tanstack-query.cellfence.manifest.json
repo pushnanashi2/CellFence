@@ -1,0 +1,2712 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "examples/angular/auto-refetching/src/**",
+      "examples/angular/basic-persister/src/**",
+      "examples/angular/basic/src/**",
+      "examples/angular/devtools-panel/src/**",
+      "examples/angular/infinite-query-with-max-pages/src/**",
+      "examples/angular/optimistic-updates/src/**",
+      "examples/angular/pagination/src/**",
+      "examples/angular/query-options-from-a-service/src/**",
+      "examples/angular/router/src/**",
+      "examples/angular/rxjs/src/**",
+      "examples/angular/simple/src/**",
+      "examples/lit/basic/src/**",
+      "examples/lit/pagination/src/**",
+      "examples/lit/ssr/src/**",
+      "examples/preact/simple/src/**",
+      "examples/react/algolia/src/**",
+      "examples/react/auto-refetching/src/**",
+      "examples/react/basic-graphql-request/src/**",
+      "examples/react/basic/src/**",
+      "examples/react/chat/src/**",
+      "examples/react/default-query-function/src/**",
+      "examples/react/devtools-panel/src/**",
+      "examples/react/eslint-legacy/src/**",
+      "examples/react/eslint-plugin-demo/src/**",
+      "examples/react/infinite-query-with-max-pages/src/**",
+      "examples/react/load-more-infinite-scroll/src/**",
+      "examples/react/nextjs-app-prefetching/**",
+      "examples/react/nextjs-suspense-streaming/src/**",
+      "examples/react/nextjs/src/**",
+      "examples/react/offline/src/**",
+      "examples/react/optimistic-updates-cache/src/**",
+      "examples/react/optimistic-updates-ui/src/**",
+      "examples/react/pagination/src/**",
+      "examples/react/playground/src/**",
+      "examples/react/prefetching/src/**",
+      "examples/react/react-native/src/**",
+      "examples/react/react-router/src/**",
+      "examples/react/rick-morty/src/**",
+      "examples/react/shadow-dom/src/**",
+      "examples/react/simple/src/**",
+      "examples/react/star-wars/src/**",
+      "examples/react/suspense/src/**",
+      "examples/solid/astro/src/**",
+      "examples/solid/basic-graphql-request/src/**",
+      "examples/solid/basic/src/**",
+      "examples/solid/default-query-function/src/**",
+      "examples/solid/offline/src/**",
+      "examples/solid/simple/src/**",
+      "examples/solid/solid-start-streaming/src/**",
+      "examples/svelte/auto-refetching/src/**",
+      "examples/svelte/basic/src/**",
+      "examples/svelte/load-more-infinite-scroll/**",
+      "examples/svelte/optimistic-updates/src/**",
+      "examples/svelte/playground/src/**",
+      "examples/svelte/simple/src/**",
+      "examples/svelte/ssr/src/**",
+      "examples/svelte/star-wars/src/**",
+      "examples/vue/2.6-basic/src/**",
+      "examples/vue/2.7-basic/src/**",
+      "examples/vue/basic/src/**",
+      "examples/vue/dependent-queries/src/**",
+      "examples/vue/nuxt3/**",
+      "examples/vue/persister/src/**",
+      "examples/vue/simple/src/**",
+      "integrations/angular-cli-20/src/**",
+      "integrations/lit-vite/src/**",
+      "integrations/react-next-14/**",
+      "integrations/react-next-15/**",
+      "integrations/react-next-16/**",
+      "integrations/react-vite/src/**",
+      "integrations/react-webpack-4/src/**",
+      "integrations/react-webpack-5/src/**",
+      "integrations/solid-vite/src/**",
+      "integrations/svelte-vite/src/**",
+      "integrations/vue-vite/src/**",
+      "packages/angular-query-experimental/src/**",
+      "packages/angular-query-persist-client/src/**",
+      "packages/eslint-plugin-query/src/**",
+      "packages/lit-query/src/**",
+      "packages/preact-query-devtools/src/**",
+      "packages/preact-query-persist-client/src/**",
+      "packages/preact-query/src/**",
+      "packages/query-async-storage-persister/src/**",
+      "packages/query-broadcast-client-experimental/src/**",
+      "packages/query-codemods/src/**",
+      "packages/query-core/src/**",
+      "packages/query-devtools/src/**",
+      "packages/query-persist-client-core/src/**",
+      "packages/query-sync-storage-persister/src/**",
+      "packages/query-test-utils/src/**",
+      "packages/react-query-devtools/src/**",
+      "packages/react-query-next-experimental/src/**",
+      "packages/react-query-persist-client/src/**",
+      "packages/react-query/src/**",
+      "packages/solid-query-devtools/src/**",
+      "packages/solid-query-persist-client/src/**",
+      "packages/solid-query/src/**",
+      "packages/svelte-query-devtools/src/**",
+      "packages/svelte-query-persist-client/src/**",
+      "packages/svelte-query/src/**",
+      "packages/vue-query-devtools/src/**",
+      "packages/vue-query/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "angular-cli-20",
+      "ownedPaths": [
+        "integrations/angular-cli-20/src/**"
+      ],
+      "publicEntry": "integrations/angular-cli-20/src/app/app.config.ts",
+      "publicSymbols": [
+        "appConfig"
+      ],
+      "packageName": "angular-cli-20",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "angular-query-experimental",
+      "ownedPaths": [
+        "packages/angular-query-experimental/src/**"
+      ],
+      "publicEntry": "packages/angular-query-experimental/src/index.ts",
+      "publicSymbols": [
+        "BaseMutationNarrowing",
+        "BaseQueryNarrowing",
+        "CreateBaseMutationResult",
+        "CreateBaseQueryOptions",
+        "CreateBaseQueryResult",
+        "CreateInfiniteQueryOptions",
+        "CreateInfiniteQueryResult",
+        "CreateMutateAsyncFunction",
+        "CreateMutateFunction",
+        "CreateMutationOptions",
+        "CreateMutationResult",
+        "CreateQueryOptions",
+        "CreateQueryResult",
+        "DefinedCreateInfiniteQueryResult",
+        "DefinedCreateQueryResult",
+        "DefinedInitialDataInfiniteOptions",
+        "DefinedInitialDataOptions",
+        "DevtoolsFeature",
+        "infiniteQueryOptions",
+        "injectInfiniteQuery",
+        "InjectInfiniteQueryOptions",
+        "injectIsFetching",
+        "InjectIsFetchingOptions",
+        "injectIsMutating",
+        "InjectIsMutatingOptions",
+        "injectIsRestoring",
+        "injectMutation",
+        "InjectMutationOptions",
+        "injectMutationState",
+        "InjectMutationStateOptions",
+        "injectQuery",
+        "injectQueryClient",
+        "InjectQueryOptions",
+        "mutationOptions",
+        "PersistQueryClientFeature",
+        "provideAngularQuery",
+        "provideIsRestoring",
+        "provideQueryClient",
+        "provideTanStackQuery",
+        "QueriesOptions",
+        "QueriesResults",
+        "queryFeature",
+        "QueryFeature",
+        "QueryFeatures",
+        "queryOptions",
+        "UndefinedInitialDataInfiniteOptions",
+        "UndefinedInitialDataOptions",
+        "UnusedSkipTokenInfiniteOptions",
+        "UnusedSkipTokenOptions"
+      ],
+      "packageName": "@tanstack/angular-query-experimental",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-devtools"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "angular-query-persist-client",
+      "ownedPaths": [
+        "packages/angular-query-persist-client/src/**"
+      ],
+      "publicEntry": "packages/angular-query-persist-client/src/index.ts",
+      "publicSymbols": [
+        "withPersistQueryClient"
+      ],
+      "packageName": "@tanstack/angular-query-persist-client",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-plugin-query",
+      "ownedPaths": [
+        "packages/eslint-plugin-query/src/**"
+      ],
+      "publicEntry": "packages/eslint-plugin-query/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "plugin",
+        "Plugin"
+      ],
+      "packageName": "@tanstack/eslint-plugin-query",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lit-query",
+      "ownedPaths": [
+        "packages/lit-query/src/**"
+      ],
+      "publicEntry": "packages/lit-query/src/index.ts",
+      "publicSymbols": [
+        "Accessor",
+        "createInfiniteQueryController",
+        "CreateInfiniteQueryOptions",
+        "createMutationController",
+        "CreateMutationOptions",
+        "createQueriesController",
+        "CreateQueriesControllerOptions",
+        "CreateQueriesInput",
+        "createQueryController",
+        "CreateQueryOptions",
+        "DefinedInitialDataOptions",
+        "getDefaultQueryClient",
+        "InfiniteQueryControllerOptions",
+        "infiniteQueryOptions",
+        "InfiniteQueryResultAccessor",
+        "IsFetchingAccessor",
+        "IsMutatingAccessor",
+        "MutationControllerOptions",
+        "MutationControllerResult",
+        "mutationOptions",
+        "MutationResultAccessor",
+        "MutationStateAccessor",
+        "MutationStateOptions",
+        "QueriesControllerOptions",
+        "QueriesResultAccessor",
+        "queryClientContext",
+        "QueryClientProvider",
+        "QueryControllerOptions",
+        "QueryControllerResult",
+        "queryOptions",
+        "QueryResultAccessor",
+        "registerDefaultQueryClient",
+        "resolveQueryClient",
+        "UndefinedInitialDataOptions",
+        "unregisterDefaultQueryClient",
+        "UnusedSkipTokenOptions",
+        "useIsFetching",
+        "useIsMutating",
+        "useMutationState",
+        "useQueryClient",
+        "ValueAccessor"
+      ],
+      "packageName": "@tanstack/lit-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lit-vite",
+      "ownedPaths": [
+        "integrations/lit-vite/src/**"
+      ],
+      "publicEntry": "integrations/lit-vite/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "lit-vite",
+      "consumes": [
+        {
+          "cell": "lit-query"
+        },
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preact-query",
+      "ownedPaths": [
+        "packages/preact-query/src/**"
+      ],
+      "publicEntry": "packages/preact-query/src/index.ts",
+      "publicSymbols": [
+        "AnyUseBaseQueryOptions",
+        "AnyUseInfiniteQueryOptions",
+        "AnyUseMutationOptions",
+        "AnyUseQueryOptions",
+        "AnyUseSuspenseInfiniteQueryOptions",
+        "AnyUseSuspenseQueryOptions",
+        "DefinedInitialDataInfiniteOptions",
+        "DefinedInitialDataOptions",
+        "DefinedUseInfiniteQueryResult",
+        "DefinedUseQueryResult",
+        "HydrationBoundary",
+        "HydrationBoundaryProps",
+        "infiniteQueryOptions",
+        "IsRestoringProvider",
+        "mutationOptions",
+        "QueriesOptions",
+        "QueriesResults",
+        "QueryClientContext",
+        "QueryClientProvider",
+        "QueryClientProviderProps",
+        "QueryErrorClearResetFunction",
+        "QueryErrorIsResetFunction",
+        "QueryErrorResetBoundary",
+        "QueryErrorResetBoundaryFunction",
+        "QueryErrorResetBoundaryProps",
+        "QueryErrorResetFunction",
+        "queryOptions",
+        "SuspenseQueriesOptions",
+        "SuspenseQueriesResults",
+        "UndefinedInitialDataInfiniteOptions",
+        "UndefinedInitialDataOptions",
+        "UnusedSkipTokenInfiniteOptions",
+        "UnusedSkipTokenOptions",
+        "UseBaseMutationResult",
+        "UseBaseQueryOptions",
+        "UseBaseQueryResult",
+        "useInfiniteQuery",
+        "UseInfiniteQueryOptions",
+        "UseInfiniteQueryResult",
+        "useIsFetching",
+        "useIsMutating",
+        "useIsRestoring",
+        "UseMutateAsyncFunction",
+        "UseMutateFunction",
+        "useMutation",
+        "UseMutationOptions",
+        "UseMutationResult",
+        "useMutationState",
+        "usePrefetchInfiniteQuery",
+        "usePrefetchQuery",
+        "UsePrefetchQueryOptions",
+        "useQueries",
+        "useQuery",
+        "useQueryClient",
+        "useQueryErrorResetBoundary",
+        "UseQueryOptions",
+        "UseQueryResult",
+        "useSuspenseInfiniteQuery",
+        "UseSuspenseInfiniteQueryOptions",
+        "UseSuspenseInfiniteQueryResult",
+        "useSuspenseQueries",
+        "useSuspenseQuery",
+        "UseSuspenseQueryOptions",
+        "UseSuspenseQueryResult"
+      ],
+      "packageName": "@tanstack/preact-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preact-query-devtools",
+      "ownedPaths": [
+        "packages/preact-query-devtools/src/**"
+      ],
+      "publicEntry": "packages/preact-query-devtools/src/index.ts",
+      "publicSymbols": [
+        "DevtoolsPanelOptions",
+        "PreactQueryDevtools",
+        "PreactQueryDevtoolsPanel"
+      ],
+      "packageName": "@tanstack/preact-query-devtools",
+      "consumes": [
+        {
+          "cell": "preact-query"
+        },
+        {
+          "cell": "query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preact-query-persist-client",
+      "ownedPaths": [
+        "packages/preact-query-persist-client/src/**"
+      ],
+      "publicEntry": "packages/preact-query-persist-client/src/index.ts",
+      "publicSymbols": [
+        "PersistQueryClientProvider",
+        "PersistQueryClientProviderProps"
+      ],
+      "packageName": "@tanstack/preact-query-persist-client",
+      "consumes": [
+        {
+          "cell": "preact-query"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-async-storage-persister",
+      "ownedPaths": [
+        "packages/query-async-storage-persister/src/**"
+      ],
+      "publicEntry": "packages/query-async-storage-persister/src/index.ts",
+      "publicSymbols": [
+        "AsyncPersistRetryer",
+        "createAsyncStoragePersister"
+      ],
+      "packageName": "@tanstack/query-async-storage-persister",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-broadcast-client-experimental",
+      "ownedPaths": [
+        "packages/query-broadcast-client-experimental/src/**"
+      ],
+      "publicEntry": "packages/query-broadcast-client-experimental/src/index.ts",
+      "publicSymbols": [
+        "broadcastQueryClient"
+      ],
+      "packageName": "@tanstack/query-broadcast-client-experimental",
+      "consumes": [
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-codemods",
+      "ownedPaths": [
+        "packages/query-codemods/src/**"
+      ],
+      "publicEntry": "packages/query-codemods/src/utils/index.cjs",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-codemods",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-core",
+      "ownedPaths": [
+        "packages/query-core/src/**"
+      ],
+      "publicEntry": "packages/query-core/src/index.ts",
+      "publicSymbols": [
+        "AnyDataTag",
+        "CancelledError",
+        "CancelOptions",
+        "DataTag",
+        "dataTagErrorSymbol",
+        "dataTagSymbol",
+        "DefaultedInfiniteQueryObserverOptions",
+        "DefaultedQueryObserverOptions",
+        "DefaultError",
+        "DefaultOptions",
+        "defaultScheduler",
+        "defaultShouldDehydrateMutation",
+        "defaultShouldDehydrateQuery",
+        "DefinedInfiniteQueryObserverResult",
+        "DefinedQueryObserverResult",
+        "dehydrate",
+        "DehydratedState",
+        "DehydrateOptions",
+        "DistributiveOmit",
+        "EnsureInfiniteQueryDataOptions",
+        "EnsureQueryDataOptions",
+        "environmentManager",
+        "experimental_streamedQuery",
+        "FetchInfiniteQueryOptions",
+        "FetchNextPageOptions",
+        "FetchPreviousPageOptions",
+        "FetchQueryOptions",
+        "FetchStatus",
+        "focusManager",
+        "GetNextPageParamFunction",
+        "GetPreviousPageParamFunction",
+        "hashKey",
+        "hydrate",
+        "HydrateOptions",
+        "InferDataFromTag",
+        "InferErrorFromTag",
+        "InfiniteData",
+        "InfiniteQueryObserver",
+        "InfiniteQueryObserverBaseResult",
+        "InfiniteQueryObserverLoadingErrorResult",
+        "InfiniteQueryObserverLoadingResult",
+        "InfiniteQueryObserverOptions",
+        "InfiniteQueryObserverPendingResult",
+        "InfiniteQueryObserverPlaceholderResult",
+        "InfiniteQueryObserverRefetchErrorResult",
+        "InfiniteQueryObserverResult",
+        "InfiniteQueryObserverSuccessResult",
+        "InfiniteQueryPageParamsOptions",
+        "InitialDataFunction",
+        "InitialPageParam",
+        "InvalidateOptions",
+        "InvalidateQueryFilters",
+        "isCancelledError",
+        "isServer",
+        "keepPreviousData",
+        "ManagedTimerId",
+        "matchMutation",
+        "matchQuery",
+        "MutateFunction",
+        "MutateOptions",
+        "Mutation",
+        "MutationCache",
+        "MutationCacheNotifyEvent",
+        "MutationFilters",
+        "MutationFunction",
+        "MutationFunctionContext",
+        "MutationKey",
+        "MutationMeta",
+        "MutationObserver",
+        "MutationObserverBaseResult",
+        "MutationObserverErrorResult",
+        "MutationObserverIdleResult",
+        "MutationObserverLoadingResult",
+        "MutationObserverOptions",
+        "MutationObserverResult",
+        "MutationObserverSuccessResult",
+        "MutationOptions",
+        "MutationScope",
+        "MutationState",
+        "MutationStatus",
+        "NetworkMode",
+        "NonUndefinedGuard",
+        "noop",
+        "NotifyEvent",
+        "NotifyEventType",
+        "notifyManager",
+        "NotifyOnChangeProps",
+        "OmitKeyof",
+        "onlineManager",
+        "Override",
+        "partialMatchKey",
+        "PlaceholderDataFunction",
+        "QueriesObserver",
+        "QueriesObserverOptions",
+        "QueriesPlaceholderDataFunction",
+        "Query",
+        "QueryBooleanOption",
+        "QueryCache",
+        "QueryCacheNotifyEvent",
+        "QueryClient",
+        "QueryClientConfig",
+        "QueryFilters",
+        "QueryFunction",
+        "QueryFunctionContext",
+        "QueryKey",
+        "QueryKeyHashFunction",
+        "QueryMeta",
+        "QueryObserver",
+        "QueryObserverBaseResult",
+        "QueryObserverLoadingErrorResult",
+        "QueryObserverLoadingResult",
+        "QueryObserverOptions",
+        "QueryObserverPendingResult",
+        "QueryObserverPlaceholderResult",
+        "QueryObserverRefetchErrorResult",
+        "QueryObserverResult",
+        "QueryObserverSuccessResult",
+        "QueryOptions",
+        "QueryPersister",
+        "QueryState",
+        "QueryStatus",
+        "RefetchOptions",
+        "RefetchQueryFilters",
+        "Register",
+        "replaceEqualDeep",
+        "ResetOptions",
+        "ResultOptions",
+        "SetDataOptions",
+        "shouldThrowError",
+        "skipToken",
+        "SkipToken",
+        "StaleTime",
+        "StaleTimeFunction",
+        "ThrowOnError",
+        "TimeoutCallback",
+        "timeoutManager",
+        "TimeoutProvider",
+        "unsetMarker",
+        "UnsetMarker",
+        "Updater",
+        "WithRequired"
+      ],
+      "packageName": "@tanstack/query-core",
+      "consumes": [
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-devtools",
+      "ownedPaths": [
+        "packages/query-devtools/src/**"
+      ],
+      "publicEntry": "packages/query-devtools/src/index.ts",
+      "publicSymbols": [
+        "DevtoolsButtonPosition",
+        "DevtoolsErrorType",
+        "DevtoolsPosition",
+        "TanstackQueryDevtools",
+        "TanstackQueryDevtoolsConfig",
+        "TanstackQueryDevtoolsPanel",
+        "TanstackQueryDevtoolsPanelConfig",
+        "Theme"
+      ],
+      "packageName": "@tanstack/query-devtools",
+      "consumes": [
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-auto-refetching",
+      "ownedPaths": [
+        "examples/angular/auto-refetching/src/**"
+      ],
+      "publicEntry": "examples/angular/auto-refetching/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-auto-refetching",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-basic",
+      "ownedPaths": [
+        "examples/angular/basic/src/**"
+      ],
+      "publicEntry": "examples/angular/basic/src/app/app.component.ts",
+      "publicSymbols": [
+        "BasicExampleComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-basic",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-basic-persister",
+      "ownedPaths": [
+        "examples/angular/basic-persister/src/**"
+      ],
+      "publicEntry": "examples/angular/basic-persister/src/app/app.component.ts",
+      "publicSymbols": [
+        "BasicExampleComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-basic-persister",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        },
+        {
+          "cell": "angular-query-persist-client"
+        },
+        {
+          "cell": "query-async-storage-persister"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-devtools-panel",
+      "ownedPaths": [
+        "examples/angular/devtools-panel/src/**"
+      ],
+      "publicEntry": "examples/angular/devtools-panel/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-devtools-panel",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-infinite-query-with-max-pages",
+      "ownedPaths": [
+        "examples/angular/infinite-query-with-max-pages/src/**"
+      ],
+      "publicEntry": "examples/angular/infinite-query-with-max-pages/src/app/api/projects-mock.interceptor.ts",
+      "publicSymbols": [
+        "projectsMockInterceptor"
+      ],
+      "packageName": "@tanstack/query-example-angular-infinite-query-with-max-pages",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-optimistic-updates",
+      "ownedPaths": [
+        "examples/angular/optimistic-updates/src/**"
+      ],
+      "publicEntry": "examples/angular/optimistic-updates/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-optimistic-updates",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-pagination",
+      "ownedPaths": [
+        "examples/angular/pagination/src/**"
+      ],
+      "publicEntry": "examples/angular/pagination/src/app/api/projects-mock.interceptor.ts",
+      "publicSymbols": [
+        "projectsMockInterceptor"
+      ],
+      "packageName": "@tanstack/query-example-angular-pagination",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-query-options-from-a-service",
+      "ownedPaths": [
+        "examples/angular/query-options-from-a-service/src/**"
+      ],
+      "publicEntry": "examples/angular/query-options-from-a-service/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-query-options-from-a-service",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-router",
+      "ownedPaths": [
+        "examples/angular/router/src/**"
+      ],
+      "publicEntry": "examples/angular/router/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-router",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-rxjs",
+      "ownedPaths": [
+        "examples/angular/rxjs/src/**"
+      ],
+      "publicEntry": "examples/angular/rxjs/src/app/api/autocomplete-mock.interceptor.ts",
+      "publicSymbols": [
+        "autocompleteMockInterceptor"
+      ],
+      "packageName": "@tanstack/query-example-angular-rxjs",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-angular-simple",
+      "ownedPaths": [
+        "examples/angular/simple/src/**"
+      ],
+      "publicEntry": "examples/angular/simple/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "packageName": "@tanstack/query-example-angular-simple",
+      "consumes": [
+        {
+          "cell": "angular-query-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-chat",
+      "ownedPaths": [
+        "examples/react/chat/src/**"
+      ],
+      "publicEntry": "examples/react/chat/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-chat",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-eslint-legacy",
+      "ownedPaths": [
+        "examples/react/eslint-legacy/src/**"
+      ],
+      "publicEntry": "examples/react/eslint-legacy/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-eslint-legacy",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-query"
+        },
+        {
+          "cell": "query-async-storage-persister"
+        },
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        },
+        {
+          "cell": "react-query-persist-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-eslint-plugin-demo",
+      "ownedPaths": [
+        "examples/react/eslint-plugin-demo/src/**"
+      ],
+      "publicEntry": "examples/react/eslint-plugin-demo/src/allowlist-demo.tsx",
+      "publicSymbols": [
+        "todosByApiOptions",
+        "todosOptions",
+        "todosWithClientOptions",
+        "todosWithTrackingOptions"
+      ],
+      "packageName": "@tanstack/query-example-eslint-plugin-demo",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-query"
+        },
+        {
+          "cell": "react-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-lit-basic",
+      "ownedPaths": [
+        "examples/lit/basic/src/**"
+      ],
+      "publicEntry": "examples/lit/basic/src/basic-query.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-lit-basic",
+      "consumes": [
+        {
+          "cell": "lit-query"
+        },
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-lit-pagination",
+      "ownedPaths": [
+        "examples/lit/pagination/src/**"
+      ],
+      "publicEntry": "examples/lit/pagination/src/api.ts",
+      "publicSymbols": [
+        "armNextProjectMutationFailureOnServer",
+        "CreateProjectInput",
+        "createProjectOnServer",
+        "fetchProjectsPage",
+        "Project",
+        "ProjectMutationResponse",
+        "ProjectsPageResponse",
+        "projectsQueryKey",
+        "ProjectsQueryKey",
+        "resetProjectsApiState",
+        "ToggleProjectFavoriteInput",
+        "toggleProjectFavoriteOnServer"
+      ],
+      "packageName": "@tanstack/query-example-lit-pagination",
+      "consumes": [
+        {
+          "cell": "lit-query"
+        },
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-lit-ssr",
+      "ownedPaths": [
+        "examples/lit/ssr/src/**"
+      ],
+      "publicEntry": "examples/lit/ssr/src/api.ts",
+      "publicSymbols": [
+        "createDataQueryOptions",
+        "DATA_QUERY_KEY",
+        "DataResponse",
+        "DEFAULT_MESSAGE",
+        "QUERY_STALE_TIME"
+      ],
+      "packageName": "@tanstack/query-example-lit-ssr",
+      "consumes": [
+        {
+          "cell": "lit-query"
+        },
+        {
+          "cell": "query-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-nextjs-suspense-streaming",
+      "ownedPaths": [
+        "examples/react/nextjs-suspense-streaming/src/**"
+      ],
+      "publicEntry": "examples/react/nextjs-suspense-streaming/src/app/api/wait/route.ts",
+      "publicSymbols": [
+        "GET"
+      ],
+      "packageName": "@tanstack/query-example-nextjs-suspense-streaming",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        },
+        {
+          "cell": "react-query-next-experimental"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-preact-simple",
+      "ownedPaths": [
+        "examples/preact/simple/src/**"
+      ],
+      "publicEntry": "examples/preact/simple/src/index.tsx",
+      "publicSymbols": [
+        "App"
+      ],
+      "packageName": "@tanstack/query-example-preact-simple",
+      "consumes": [
+        {
+          "cell": "preact-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-algolia",
+      "ownedPaths": [
+        "examples/react/algolia/src/**"
+      ],
+      "publicEntry": "examples/react/algolia/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-algolia",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-query"
+        },
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-auto-refetching",
+      "ownedPaths": [
+        "examples/react/auto-refetching/src/**"
+      ],
+      "publicEntry": "examples/react/auto-refetching/src/pages/api/data.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-auto-refetching",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-basic",
+      "ownedPaths": [
+        "examples/react/basic/src/**"
+      ],
+      "publicEntry": "examples/react/basic/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-basic",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-query"
+        },
+        {
+          "cell": "query-async-storage-persister"
+        },
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        },
+        {
+          "cell": "react-query-persist-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-basic-graphql-request",
+      "ownedPaths": [
+        "examples/react/basic-graphql-request/src/**"
+      ],
+      "publicEntry": "examples/react/basic-graphql-request/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-basic-graphql-request",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-default-query-function",
+      "ownedPaths": [
+        "examples/react/default-query-function/src/**"
+      ],
+      "publicEntry": "examples/react/default-query-function/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-default-query-function",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-devtools-panel",
+      "ownedPaths": [
+        "examples/react/devtools-panel/src/**"
+      ],
+      "publicEntry": "examples/react/devtools-panel/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-devtools-panel",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-infinite-query-with-max-pages",
+      "ownedPaths": [
+        "examples/react/infinite-query-with-max-pages/src/**"
+      ],
+      "publicEntry": "examples/react/infinite-query-with-max-pages/src/pages/api/projects.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-infinite-query-with-max-pages",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-load-more-infinite-scroll",
+      "ownedPaths": [
+        "examples/react/load-more-infinite-scroll/src/**"
+      ],
+      "publicEntry": "examples/react/load-more-infinite-scroll/src/pages/about.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-load-more-infinite-scroll",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-nextjs",
+      "ownedPaths": [
+        "examples/react/nextjs/src/**"
+      ],
+      "publicEntry": "examples/react/nextjs/src/components/Header.tsx",
+      "publicSymbols": [
+        "Header"
+      ],
+      "packageName": "@tanstack/query-example-react-nextjs",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-nextjs-app-prefetching",
+      "ownedPaths": [
+        "examples/react/nextjs-app-prefetching/**"
+      ],
+      "publicEntry": "examples/react/nextjs-app-prefetching/.eslintrc.cjs",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-nextjs-app-prefetching",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-offline",
+      "ownedPaths": [
+        "examples/react/offline/src/**"
+      ],
+      "publicEntry": "examples/react/offline/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-offline",
+      "consumes": [
+        {
+          "cell": "query-async-storage-persister"
+        },
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        },
+        {
+          "cell": "react-query-persist-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-optimistic-updates-cache",
+      "ownedPaths": [
+        "examples/react/optimistic-updates-cache/src/**"
+      ],
+      "publicEntry": "examples/react/optimistic-updates-cache/src/pages/api/data.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-optimistic-updates-cache",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-optimistic-updates-ui",
+      "ownedPaths": [
+        "examples/react/optimistic-updates-ui/src/**"
+      ],
+      "publicEntry": "examples/react/optimistic-updates-ui/src/pages/api/data.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-optimistic-updates-ui",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-pagination",
+      "ownedPaths": [
+        "examples/react/pagination/src/**"
+      ],
+      "publicEntry": "examples/react/pagination/src/pages/api/projects.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-pagination",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-playground",
+      "ownedPaths": [
+        "examples/react/playground/src/**"
+      ],
+      "publicEntry": "examples/react/playground/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-playground",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-prefetching",
+      "ownedPaths": [
+        "examples/react/prefetching/src/**"
+      ],
+      "publicEntry": "examples/react/prefetching/src/pages/_app.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-prefetching",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-react-native",
+      "ownedPaths": [
+        "examples/react/react-native/src/**"
+      ],
+      "publicEntry": "examples/react/react-native/src/components/Divider.tsx",
+      "publicSymbols": [
+        "Divider"
+      ],
+      "packageName": "@tanstack/query-example-react-react-native",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-rick-morty",
+      "ownedPaths": [
+        "examples/react/rick-morty/src/**"
+      ],
+      "publicEntry": "examples/react/rick-morty/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-rick-morty",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-router",
+      "ownedPaths": [
+        "examples/react/react-router/src/**"
+      ],
+      "publicEntry": "examples/react/react-router/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-router",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-shadow-dom",
+      "ownedPaths": [
+        "examples/react/shadow-dom/src/**"
+      ],
+      "publicEntry": "examples/react/shadow-dom/src/DogList.tsx",
+      "publicSymbols": [
+        "DogList"
+      ],
+      "packageName": "@tanstack/query-example-react-shadow-dom",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-simple",
+      "ownedPaths": [
+        "examples/react/simple/src/**"
+      ],
+      "publicEntry": "examples/react/simple/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-react-simple",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-star-wars",
+      "ownedPaths": [
+        "examples/react/star-wars/src/**"
+      ],
+      "publicEntry": "examples/react/star-wars/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-star-wars",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-react-suspense",
+      "ownedPaths": [
+        "examples/react/suspense/src/**"
+      ],
+      "publicEntry": "examples/react/suspense/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-react-suspense",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-astro",
+      "ownedPaths": [
+        "examples/solid/astro/src/**"
+      ],
+      "publicEntry": "examples/solid/astro/src/components/Link.tsx",
+      "publicSymbols": [
+        "Link"
+      ],
+      "packageName": "@tanstack/query-example-solid-astro",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-basic",
+      "ownedPaths": [
+        "examples/solid/basic/src/**"
+      ],
+      "publicEntry": "examples/solid/basic/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-solid-basic",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-basic-graphql-request",
+      "ownedPaths": [
+        "examples/solid/basic-graphql-request/src/**"
+      ],
+      "publicEntry": "examples/solid/basic-graphql-request/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-solid-basic-graphql-request",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-default-query-function",
+      "ownedPaths": [
+        "examples/solid/default-query-function/src/**"
+      ],
+      "publicEntry": "examples/solid/default-query-function/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-solid-default-query-function",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-offline",
+      "ownedPaths": [
+        "examples/solid/offline/src/**"
+      ],
+      "publicEntry": "examples/solid/offline/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-solid-offline",
+      "consumes": [
+        {
+          "cell": "query-async-storage-persister"
+        },
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        },
+        {
+          "cell": "solid-query-persist-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-simple",
+      "ownedPaths": [
+        "examples/solid/simple/src/**"
+      ],
+      "publicEntry": "examples/solid/simple/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-solid-simple",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-query"
+        },
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-solid-start-streaming",
+      "ownedPaths": [
+        "examples/solid/solid-start-streaming/src/**"
+      ],
+      "publicEntry": "examples/solid/solid-start-streaming/src/app.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-solid-start-streaming",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-auto-refetching",
+      "ownedPaths": [
+        "examples/svelte/auto-refetching/src/**"
+      ],
+      "publicEntry": "examples/svelte/auto-refetching/src/routes/api/data/+server.ts",
+      "publicSymbols": [
+        "GET"
+      ],
+      "packageName": "@tanstack/query-example-svelte-auto-refetching",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-basic",
+      "ownedPaths": [
+        "examples/svelte/basic/src/**"
+      ],
+      "publicEntry": "examples/svelte/basic/src/lib/data.ts",
+      "publicSymbols": [
+        "getPostById",
+        "getPosts"
+      ],
+      "packageName": "@tanstack/query-example-svelte-basic",
+      "consumes": [
+        {
+          "cell": "query-async-storage-persister"
+        },
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        },
+        {
+          "cell": "svelte-query-persist-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-load-more-infinite-scroll",
+      "ownedPaths": [
+        "examples/svelte/load-more-infinite-scroll/**"
+      ],
+      "publicEntry": "examples/svelte/load-more-infinite-scroll/svelte.config.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-svelte-load-more-infinite-scroll",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-optimistic-updates",
+      "ownedPaths": [
+        "examples/svelte/optimistic-updates/src/**"
+      ],
+      "publicEntry": "examples/svelte/optimistic-updates/src/routes/api/data/+server.ts",
+      "publicSymbols": [
+        "GET",
+        "POST"
+      ],
+      "packageName": "@tanstack/query-example-svelte-optimistic-updates",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-playground",
+      "ownedPaths": [
+        "examples/svelte/playground/src/**"
+      ],
+      "publicEntry": "examples/svelte/playground/src/lib/stores.svelte.ts",
+      "publicSymbols": [
+        "editingIndex",
+        "errorRate",
+        "gcTime",
+        "id",
+        "list",
+        "queryTimeMax",
+        "queryTimeMin",
+        "ref",
+        "staleTime",
+        "Todo",
+        "Todos",
+        "views"
+      ],
+      "packageName": "@tanstack/query-example-svelte-playground",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-simple",
+      "ownedPaths": [
+        "examples/svelte/simple/src/**"
+      ],
+      "publicEntry": "examples/svelte/simple/src/main.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-svelte-simple",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-ssr",
+      "ownedPaths": [
+        "examples/svelte/ssr/src/**"
+      ],
+      "publicEntry": "examples/svelte/ssr/src/lib/api.ts",
+      "publicSymbols": [
+        "api"
+      ],
+      "packageName": "@tanstack/query-example-svelte-ssr",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-svelte-star-wars",
+      "ownedPaths": [
+        "examples/svelte/star-wars/src/**"
+      ],
+      "publicEntry": "examples/svelte/star-wars/src/lib/api.ts",
+      "publicSymbols": [
+        "getCharacter",
+        "getCharacters",
+        "getFilm",
+        "getFilms",
+        "getPlanet"
+      ],
+      "packageName": "@tanstack/query-example-svelte-star-wars",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-2-6-basic",
+      "ownedPaths": [
+        "examples/vue/2.6-basic/src/**"
+      ],
+      "publicEntry": "examples/vue/2.6-basic/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-2.6-basic",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-2-7-basic",
+      "ownedPaths": [
+        "examples/vue/2.7-basic/src/**"
+      ],
+      "publicEntry": "examples/vue/2.7-basic/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-2.7-basic",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-basic",
+      "ownedPaths": [
+        "examples/vue/basic/src/**"
+      ],
+      "publicEntry": "examples/vue/basic/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-basic",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        },
+        {
+          "cell": "vue-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-dependent-queries",
+      "ownedPaths": [
+        "examples/vue/dependent-queries/src/**"
+      ],
+      "publicEntry": "examples/vue/dependent-queries/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-dependent-queries",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-nuxt3",
+      "ownedPaths": [
+        "examples/vue/nuxt3/**"
+      ],
+      "publicEntry": "examples/vue/nuxt3/nuxt.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@tanstack/query-example-vue-nuxt3",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-persister",
+      "ownedPaths": [
+        "examples/vue/persister/src/**"
+      ],
+      "publicEntry": "examples/vue/persister/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-persister",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-sync-storage-persister"
+        },
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-example-vue-simple",
+      "ownedPaths": [
+        "examples/vue/simple/src/**"
+      ],
+      "publicEntry": "examples/vue/simple/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@tanstack/query-example-vue-simple",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        },
+        {
+          "cell": "vue-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-persist-client-core",
+      "ownedPaths": [
+        "packages/query-persist-client-core/src/**"
+      ],
+      "publicEntry": "packages/query-persist-client-core/src/index.ts",
+      "publicSymbols": [
+        "AsyncStorage",
+        "experimental_createQueryPersister",
+        "MaybePromise",
+        "PersistedClient",
+        "PersistedQuery",
+        "PersistedQueryClientRestoreOptions",
+        "PersistedQueryClientSaveOptions",
+        "Persister",
+        "PERSISTER_KEY_PREFIX",
+        "persistQueryClient",
+        "PersistQueryClientOptions",
+        "persistQueryClientRestore",
+        "PersistQueryClientRootOptions",
+        "persistQueryClientSave",
+        "persistQueryClientSubscribe",
+        "PersistRetryer",
+        "Promisable",
+        "removeOldestQuery",
+        "StoragePersisterOptions"
+      ],
+      "packageName": "@tanstack/query-persist-client-core",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-sync-storage-persister",
+      "ownedPaths": [
+        "packages/query-sync-storage-persister/src/**"
+      ],
+      "publicEntry": "packages/query-sync-storage-persister/src/index.ts",
+      "publicSymbols": [
+        "createSyncStoragePersister"
+      ],
+      "packageName": "@tanstack/query-sync-storage-persister",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-test-utils",
+      "ownedPaths": [
+        "packages/query-test-utils/src/**"
+      ],
+      "publicEntry": "packages/query-test-utils/src/index.ts",
+      "publicSymbols": [
+        "mockVisibilityState",
+        "queryKey",
+        "sleep"
+      ],
+      "packageName": "@tanstack/query-test-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-next-14",
+      "ownedPaths": [
+        "integrations/react-next-14/**"
+      ],
+      "publicEntry": "integrations/react-next-14/.eslintrc.cjs",
+      "publicSymbols": [],
+      "packageName": "react-next-14",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-next-15",
+      "ownedPaths": [
+        "integrations/react-next-15/**"
+      ],
+      "publicEntry": "integrations/react-next-15/.eslintrc.cjs",
+      "publicSymbols": [],
+      "packageName": "react-next-15",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-next-16",
+      "ownedPaths": [
+        "integrations/react-next-16/**"
+      ],
+      "publicEntry": "integrations/react-next-16/.eslintrc.cjs",
+      "publicSymbols": [],
+      "packageName": "react-next-16",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query",
+      "ownedPaths": [
+        "packages/react-query/src/**"
+      ],
+      "publicEntry": "packages/react-query/src/index.ts",
+      "publicSymbols": [
+        "AnyUseBaseQueryOptions",
+        "AnyUseInfiniteQueryOptions",
+        "AnyUseMutationOptions",
+        "AnyUseQueryOptions",
+        "AnyUseSuspenseInfiniteQueryOptions",
+        "AnyUseSuspenseQueryOptions",
+        "DefinedInitialDataInfiniteOptions",
+        "DefinedInitialDataOptions",
+        "DefinedUseInfiniteQueryResult",
+        "DefinedUseQueryResult",
+        "HydrationBoundary",
+        "HydrationBoundaryProps",
+        "infiniteQueryOptions",
+        "IsRestoringProvider",
+        "mutationOptions",
+        "QueriesOptions",
+        "QueriesResults",
+        "QueryClientContext",
+        "QueryClientProvider",
+        "QueryClientProviderProps",
+        "QueryErrorClearResetFunction",
+        "QueryErrorIsResetFunction",
+        "QueryErrorResetBoundary",
+        "QueryErrorResetBoundaryFunction",
+        "QueryErrorResetBoundaryProps",
+        "QueryErrorResetFunction",
+        "queryOptions",
+        "SuspenseQueriesOptions",
+        "SuspenseQueriesResults",
+        "UndefinedInitialDataInfiniteOptions",
+        "UndefinedInitialDataOptions",
+        "UnusedSkipTokenInfiniteOptions",
+        "UnusedSkipTokenOptions",
+        "UseBaseMutationResult",
+        "UseBaseQueryOptions",
+        "UseBaseQueryResult",
+        "useInfiniteQuery",
+        "UseInfiniteQueryOptions",
+        "UseInfiniteQueryResult",
+        "useIsFetching",
+        "useIsMutating",
+        "useIsRestoring",
+        "UseMutateAsyncFunction",
+        "UseMutateFunction",
+        "useMutation",
+        "UseMutationOptions",
+        "UseMutationResult",
+        "useMutationState",
+        "usePrefetchInfiniteQuery",
+        "usePrefetchQuery",
+        "UsePrefetchQueryOptions",
+        "useQueries",
+        "useQuery",
+        "useQueryClient",
+        "useQueryErrorResetBoundary",
+        "UseQueryOptions",
+        "UseQueryResult",
+        "useSuspenseInfiniteQuery",
+        "UseSuspenseInfiniteQueryOptions",
+        "UseSuspenseInfiniteQueryResult",
+        "useSuspenseQueries",
+        "useSuspenseQuery",
+        "UseSuspenseQueryOptions",
+        "UseSuspenseQueryResult"
+      ],
+      "packageName": "@tanstack/react-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query-devtools",
+      "ownedPaths": [
+        "packages/react-query-devtools/src/**"
+      ],
+      "publicEntry": "packages/react-query-devtools/src/index.ts",
+      "publicSymbols": [
+        "DevtoolsPanelOptions",
+        "ReactQueryDevtools",
+        "ReactQueryDevtoolsPanel"
+      ],
+      "packageName": "@tanstack/react-query-devtools",
+      "consumes": [
+        {
+          "cell": "query-devtools"
+        },
+        {
+          "cell": "react-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query-next-experimental",
+      "ownedPaths": [
+        "packages/react-query-next-experimental/src/**"
+      ],
+      "publicEntry": "packages/react-query-next-experimental/src/index.ts",
+      "publicSymbols": [
+        "ReactQueryStreamedHydration"
+      ],
+      "packageName": "@tanstack/react-query-next-experimental",
+      "consumes": [
+        {
+          "cell": "react-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query-persist-client",
+      "ownedPaths": [
+        "packages/react-query-persist-client/src/**"
+      ],
+      "publicEntry": "packages/react-query-persist-client/src/index.ts",
+      "publicSymbols": [
+        "PersistQueryClientProvider",
+        "PersistQueryClientProviderProps"
+      ],
+      "packageName": "@tanstack/react-query-persist-client",
+      "consumes": [
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        },
+        {
+          "cell": "react-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-vite",
+      "ownedPaths": [
+        "integrations/react-vite/src/**"
+      ],
+      "publicEntry": "integrations/react-vite/src/App.jsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "react-vite",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-webpack-4",
+      "ownedPaths": [
+        "integrations/react-webpack-4/src/**"
+      ],
+      "publicEntry": "integrations/react-webpack-4/src/index.js",
+      "publicSymbols": [],
+      "packageName": "react-webpack-4",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-webpack-5",
+      "ownedPaths": [
+        "integrations/react-webpack-5/src/**"
+      ],
+      "publicEntry": "integrations/react-webpack-5/src/index.js",
+      "publicSymbols": [],
+      "packageName": "react-webpack-5",
+      "consumes": [
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-query",
+      "ownedPaths": [
+        "packages/solid-query/src/**"
+      ],
+      "publicEntry": "packages/solid-query/src/index.ts",
+      "publicSymbols": [
+        "CreateBaseMutationResult",
+        "CreateBaseQueryOptions",
+        "CreateBaseQueryResult",
+        "createInfiniteQuery",
+        "CreateInfiniteQueryOptions",
+        "CreateInfiniteQueryResult",
+        "createIsFetching",
+        "createIsMutating",
+        "CreateMutateAsyncFunction",
+        "CreateMutateFunction",
+        "createMutation",
+        "CreateMutationOptions",
+        "CreateMutationResult",
+        "createMutationState",
+        "createQueries",
+        "createQuery",
+        "CreateQueryOptions",
+        "CreateQueryResult",
+        "DefaultOptions",
+        "DefinedCreateBaseQueryResult",
+        "DefinedCreateInfiniteQueryResult",
+        "DefinedCreateQueryResult",
+        "DefinedInitialDataInfiniteOptions",
+        "DefinedInitialDataOptions",
+        "DefinedUseBaseQueryResult",
+        "DefinedUseInfiniteQueryResult",
+        "DefinedUseQueryResult",
+        "InfiniteQueryObserverOptions",
+        "infiniteQueryOptions",
+        "InfiniteQueryOptions",
+        "IsRestoringProvider",
+        "mutationOptions",
+        "MutationOptions",
+        "QueryClient",
+        "QueryClientConfig",
+        "QueryClientContext",
+        "QueryClientProvider",
+        "QueryClientProviderProps",
+        "QueryObserverOptions",
+        "queryOptions",
+        "QueryOptions",
+        "UndefinedInitialDataInfiniteOptions",
+        "UndefinedInitialDataOptions",
+        "UseBaseMutationResult",
+        "UseBaseQueryOptions",
+        "UseBaseQueryResult",
+        "useInfiniteQuery",
+        "UseInfiniteQueryOptions",
+        "UseInfiniteQueryResult",
+        "useIsFetching",
+        "useIsMutating",
+        "useIsRestoring",
+        "UseMutateAsyncFunction",
+        "UseMutateFunction",
+        "useMutation",
+        "UseMutationOptions",
+        "UseMutationResult",
+        "useMutationState",
+        "useQueries",
+        "useQuery",
+        "useQueryClient",
+        "UseQueryOptions",
+        "UseQueryResult"
+      ],
+      "packageName": "@tanstack/solid-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-query-devtools",
+      "ownedPaths": [
+        "packages/solid-query-devtools/src/**"
+      ],
+      "publicEntry": "packages/solid-query-devtools/src/index.tsx",
+      "publicSymbols": [
+        "DevtoolsPanelOptions",
+        "SolidQueryDevtools",
+        "SolidQueryDevtoolsPanel"
+      ],
+      "packageName": "@tanstack/solid-query-devtools",
+      "consumes": [
+        {
+          "cell": "query-devtools"
+        },
+        {
+          "cell": "solid-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-query-persist-client",
+      "ownedPaths": [
+        "packages/solid-query-persist-client/src/**"
+      ],
+      "publicEntry": "packages/solid-query-persist-client/src/index.ts",
+      "publicSymbols": [
+        "PersistQueryClientProvider",
+        "PersistQueryClientProviderProps"
+      ],
+      "packageName": "@tanstack/solid-query-persist-client",
+      "consumes": [
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        },
+        {
+          "cell": "solid-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-vite",
+      "ownedPaths": [
+        "integrations/solid-vite/src/**"
+      ],
+      "publicEntry": "integrations/solid-vite/src/index.jsx",
+      "publicSymbols": [],
+      "packageName": "solid-vite",
+      "consumes": [
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "solid-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svelte-query",
+      "ownedPaths": [
+        "packages/svelte-query/src/**"
+      ],
+      "publicEntry": "packages/svelte-query/src/index.ts",
+      "publicSymbols": [
+        "Accessor",
+        "CreateBaseMutationResult",
+        "CreateBaseQueryOptions",
+        "CreateBaseQueryResult",
+        "createInfiniteQuery",
+        "CreateInfiniteQueryOptions",
+        "CreateInfiniteQueryResult",
+        "CreateMutateAsyncFunction",
+        "CreateMutateFunction",
+        "createMutation",
+        "CreateMutationOptions",
+        "CreateMutationResult",
+        "createQueries",
+        "createQuery",
+        "CreateQueryOptions",
+        "CreateQueryResult",
+        "DefinedCreateBaseQueryResult",
+        "DefinedCreateQueryResult",
+        "DefinedInitialDataOptions",
+        "getIsRestoringContext",
+        "getQueryClientContext",
+        "HydrationBoundary",
+        "infiniteQueryOptions",
+        "mutationOptions",
+        "MutationStateOptions",
+        "QueriesOptions",
+        "QueriesResults",
+        "QueryClientProvider",
+        "QueryClientProviderProps",
+        "queryOptions",
+        "setIsRestoringContext",
+        "setQueryClientContext",
+        "UndefinedInitialDataOptions",
+        "useHydrate",
+        "useIsFetching",
+        "useIsMutating",
+        "useIsRestoring",
+        "useMutationState",
+        "useQueryClient"
+      ],
+      "packageName": "@tanstack/svelte-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svelte-query-devtools",
+      "ownedPaths": [
+        "packages/svelte-query-devtools/src/**"
+      ],
+      "publicEntry": "packages/svelte-query-devtools/src/index.ts",
+      "publicSymbols": [
+        "SvelteQueryDevtools"
+      ],
+      "packageName": "@tanstack/svelte-query-devtools",
+      "consumes": [
+        {
+          "cell": "query-devtools"
+        },
+        {
+          "cell": "svelte-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svelte-query-persist-client",
+      "ownedPaths": [
+        "packages/svelte-query-persist-client/src/**"
+      ],
+      "publicEntry": "packages/svelte-query-persist-client/src/index.ts",
+      "publicSymbols": [
+        "PersistQueryClientProvider"
+      ],
+      "packageName": "@tanstack/svelte-query-persist-client",
+      "consumes": [
+        {
+          "cell": "query-persist-client-core"
+        },
+        {
+          "cell": "query-test-utils"
+        },
+        {
+          "cell": "svelte-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svelte-vite",
+      "ownedPaths": [
+        "integrations/svelte-vite/src/**"
+      ],
+      "publicEntry": "integrations/svelte-vite/src/main.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "svelte-vite",
+      "consumes": [
+        {
+          "cell": "svelte-query"
+        },
+        {
+          "cell": "svelte-query-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-query",
+      "ownedPaths": [
+        "packages/vue-query/src/**"
+      ],
+      "publicEntry": "packages/vue-query/src/index.ts",
+      "publicSymbols": [
+        "DefinedInitialDataInfiniteOptions",
+        "DefinedInitialQueryOptions",
+        "infiniteQueryOptions",
+        "MutationCache",
+        "MutationFilters",
+        "mutationOptions",
+        "MutationOptions",
+        "MutationStateOptions",
+        "QueryCache",
+        "QueryClient",
+        "QueryFilters",
+        "queryOptions",
+        "QueryOptions",
+        "UndefinedInitialDataInfiniteOptions",
+        "UndefinedInitialQueryOptions",
+        "useInfiniteQuery",
+        "UseInfiniteQueryOptions",
+        "UseInfiniteQueryReturnType",
+        "useIsFetching",
+        "useIsMutating",
+        "useMutation",
+        "UseMutationOptions",
+        "UseMutationReturnType",
+        "useMutationState",
+        "usePrefetchInfiniteQuery",
+        "UsePrefetchInfiniteQueryOptions",
+        "usePrefetchQuery",
+        "UsePrefetchQueryOptions",
+        "useQueries",
+        "UseQueriesOptions",
+        "UseQueriesResults",
+        "useQuery",
+        "useQueryClient",
+        "UseQueryDefinedReturnType",
+        "UseQueryOptions",
+        "UseQueryReturnType",
+        "VUE_QUERY_CLIENT",
+        "VueQueryPlugin",
+        "VueQueryPluginOptions"
+      ],
+      "packageName": "@tanstack/vue-query",
+      "consumes": [
+        {
+          "cell": "query-core"
+        },
+        {
+          "cell": "query-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-query-devtools",
+      "ownedPaths": [
+        "packages/vue-query-devtools/src/**"
+      ],
+      "publicEntry": "packages/vue-query-devtools/src/index.ts",
+      "publicSymbols": [
+        "VueQueryDevtools",
+        "VueQueryDevtoolsPanel"
+      ],
+      "packageName": "@tanstack/vue-query-devtools",
+      "consumes": [
+        {
+          "cell": "query-devtools"
+        },
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-vite",
+      "ownedPaths": [
+        "integrations/vue-vite/src/**"
+      ],
+      "publicEntry": "integrations/vue-vite/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "vue-vite",
+      "consumes": [
+        {
+          "cell": "vue-query"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}
