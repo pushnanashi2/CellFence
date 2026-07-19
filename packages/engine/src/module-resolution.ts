@@ -50,9 +50,17 @@ type ImportScanContext = FileIndexContext & {
 
 export type PackageConditionMode = "import" | "require" | "types";
 
+export type PackageExportResolutionState =
+  | "PUBLIC_RESOLVED"
+  | "PUBLIC_DECLARED_GENERATED_TARGET_MISSING"
+  | "NOT_EXPORTED_PRIVATE"
+  | "UNRESOLVED_UNKNOWN";
+
 export type PackageExportTarget = {
+  state: PackageExportResolutionState;
   exported: boolean;
   targetPath?: string;
+  reason?: string;
 };
 
 type PathAliasContext = {
@@ -428,16 +436,49 @@ export function resolvePackageExportTarget(
   mode: PackageConditionMode = "import",
 ): PackageExportTarget {
   const packageSpecifier = packageNameFromSpecifier(specifier);
-  if (packageSpecifier !== packageName) return { exported: false };
+  if (packageSpecifier !== packageName) {
+    return {
+      state: "UNRESOLVED_UNKNOWN",
+      exported: false,
+      reason: "specifier does not target the workspace package",
+    };
+  }
   const packageJson = readJsonRecord(path.join(rootDir, packageRoot, "package.json"));
-  if (!packageJson || packageJson.exports === undefined) return { exported: false };
+  if (!packageJson) {
+    return {
+      state: "UNRESOLVED_UNKNOWN",
+      exported: false,
+      reason: "package.json could not be read",
+    };
+  }
+  if (packageJson.exports === undefined) {
+    return {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "package has no exports map",
+    };
+  }
   const subpath = specifier === packageName ? "." : `./${specifier.slice(packageName.length + 1)}`;
   const exportTarget = packageMapTarget(packageJson.exports, subpath, mode);
-  if (!exportTarget) return { exported: false };
+  if (!exportTarget) {
+    return {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is not declared in the package exports map",
+    };
+  }
   const absoluteTarget = resolvePackageTargetFile(path.resolve(rootDir, packageRoot), exportTarget);
+  if (!absoluteTarget) {
+    return {
+      state: "PUBLIC_DECLARED_GENERATED_TARGET_MISSING",
+      exported: true,
+      reason: "export target is declared but no source checkout file was found",
+    };
+  }
   return {
+    state: "PUBLIC_RESOLVED",
     exported: true,
-    ...(absoluteTarget ? { targetPath: repoPath(rootDir, absoluteTarget) } : {}),
+    targetPath: repoPath(rootDir, absoluteTarget),
   };
 }
 

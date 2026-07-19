@@ -159,6 +159,10 @@ The round3 diagnostic rerun is documented in
 it narrows the concrete resource detector false positives and reduces raw
 findings from 89 to 75 while leaving generated artifacts and internal wiring as
 explicit decision-required evidence.
+The round4 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round4.md](ts-js-reviewed-pilot-10-2026-07-19-round4.md):
+it adds explicit package-export resolution states and method-name-only
+HTTP/queue near-miss guards while preserving the round3 raw finding count.
 
 The script:
 

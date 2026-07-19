@@ -446,7 +446,7 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
 }
 
 function routeReceiverLooksHttp(expression: ts.Expression): boolean {
-  if (!ts.isPropertyAccessExpression(expression)) return true;
+  if (!ts.isPropertyAccessExpression(expression)) return false;
   const rootName = expressionRootName(expression.expression)?.toLowerCase();
   if (!rootName) return false;
   return ["app", "api", "router", "server", "fastify"].includes(rootName)
@@ -456,7 +456,7 @@ function routeReceiverLooksHttp(expression: ts.Expression): boolean {
 }
 
 function queueReceiverLooksExternal(expression: ts.Expression): boolean {
-  if (!ts.isPropertyAccessExpression(expression)) return true;
+  if (!ts.isPropertyAccessExpression(expression)) return false;
   const rootName = expressionRootName(expression.expression)?.toLowerCase();
   if (!rootName) return false;
   return rootName.includes("bus")

@@ -813,7 +813,11 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
     const mode = reference.typeOnly ? "types" : reference.kind === "require" ? "require" : "import";
     const exportedTarget = packageRoot
       ? resolvePackageExportTarget(context.rootDir, packageRoot, packageName, reference.specifier, mode)
-      : { exported: false };
+      : {
+        state: "UNRESOLVED_UNKNOWN" as const,
+        exported: false,
+        reason: "workspace package root could not be resolved",
+      };
     if (exportedTarget.exported) {
       return {
         targetPath: exportedTarget.targetPath,

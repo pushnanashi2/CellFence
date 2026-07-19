@@ -71,3 +71,6 @@ These are not detector fixes and must not be silently allowed by CellFence:
 The remaining resource findings in round3 are concrete dynamic SQL / package
 metadata file accesses and are candidates for policy review, not automatic
 detector suppression.
+
+The follow-up round4 diagnostic is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round4.md](ts-js-reviewed-pilot-10-2026-07-19-round4.md).

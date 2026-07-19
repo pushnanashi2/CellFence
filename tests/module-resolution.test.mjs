@@ -14,6 +14,7 @@ import {
   literalText,
   publicSurfaceHash,
   readPathAliases,
+  resolvePackageExportTarget,
   resolvePathAliasTarget,
   resolvePythonImport,
   resolveRelativeImport,
@@ -192,6 +193,44 @@ test("module resolution reads alias edge cases without widening invalid config",
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@core/index.js"), "packages/core/src/index.ts");
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@feature/core/public"), "packages/features/core/index.ts");
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@feature/core/private"), undefined);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("workspace package export resolution separates public, private, generated, and unknown states", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-package-export-state-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "packages/core/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/core/src/public.ts"), "export const publicSymbol = true;\n");
+    writeJson(path.join(rootDir, "packages/core/package.json"), {
+      name: "@scope/core",
+      exports: {
+        ".": "./src/public.js",
+        "./generated": "./dist/generated.js",
+      },
+    });
+
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/core"), {
+      state: "PUBLIC_RESOLVED",
+      exported: true,
+      targetPath: "packages/core/src/public.ts",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/core/generated"), {
+      state: "PUBLIC_DECLARED_GENERATED_TARGET_MISSING",
+      exported: true,
+      reason: "export target is declared but no source checkout file was found",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/core/private"), {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is not declared in the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/other"), {
+      state: "UNRESOLVED_UNKNOWN",
+      exported: false,
+      reason: "specifier does not target the workspace package",
+    });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
