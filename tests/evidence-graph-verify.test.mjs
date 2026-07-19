@@ -107,7 +107,75 @@ test("evidence graph verifier accepts a structurally complete graph", () => {
     assert.equal(report.ok, true);
     assert.equal(report.summary.findings, 1);
     assert.equal(report.summary.findingWitnesses, 1);
+    assert.equal(report.summary.policySupportedFindings, 1);
+    assert.equal(report.summary.policyVerifiedFindings, 1);
+    assert.equal(report.policy.schemaVersion, "cellfence.evidence-graph-policy-witness-verifier.v1");
     assert.match(report.input.graphCanonicalSha256, /^[a-f0-9]{64}$/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier rejects supported policy witnesses without required facts", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-policy-"));
+  try {
+    const graph = validGraph();
+    graph.findingWitnesses[0] = {
+      ...graph.findingWitnesses[0],
+      subjects: [
+        { kind: "file", key: "filePath", value: "src/app/public.ts" },
+      ],
+    };
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, graph);
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, false);
+    assert.equal(report.summary.structuralDefects, 0);
+    assert.equal(report.summary.policyDefects, 1);
+    assert.ok(report.defects.some((defect) =>
+      defect.code === "POLICY_WITNESS_MISSING_SUBJECT"
+      && defect.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && defect.requiredKey === "targetPath"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier reports unsupported policy rules without claiming verification", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-unsupported-"));
+  try {
+    const graph = validGraph();
+    graph.nodes[1] = {
+      ...graph.nodes[1],
+      label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    };
+    graph.edges[0] = {
+      ...graph.edges[0],
+      label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    };
+    graph.findingWitnesses[0] = {
+      ...graph.findingWitnesses[0],
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      subjects: [
+        { kind: "file", key: "filePath", value: "src/app/public.ts" },
+        { kind: "cell", key: "cellId", value: "app" },
+      ],
+    };
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, graph);
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.policySupportedFindings, 0);
+    assert.equal(report.summary.policyVerifiedFindings, 0);
+    assert.equal(report.summary.policyUnsupportedFindings, 1);
+    assert.deepEqual(report.policy.unsupportedRules, ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -228,6 +296,7 @@ test("evidence graph smoke validates graph emitted by the engine", () => {
     assert.equal(report.check.exitCode, 1);
     assert.ok(report.check.findingRules.includes("CELLFENCE_PRIVATE_IMPORT"));
     assert.equal(report.verifier.ok, true);
+    assert.equal(report.verifier.summary.policyVerifiedFindings, 1);
     assert.equal(fs.existsSync(report.verifierReportPath), true);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

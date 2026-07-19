@@ -21,6 +21,57 @@ const allowedFamilies = new Set([
 const allowedObservationStatuses = new Set(["processed", "not-applicable", "parse-error", "unsupported"]);
 const allowedSeverities = new Set(["error", "warning"]);
 const allowedWitnessSubjectKinds = new Set(["file", "cell", "producer-cell", "detail"]);
+const policyVerifierVersion = "cellfence.evidence-graph-policy-witness-verifier.v1";
+const policyRuleProfiles = {
+  CELLFENCE_PRIVATE_IMPORT: {
+    family: "imports",
+    observation: "same-file",
+    allOf: [
+      { kind: "detail", key: "targetPath" },
+    ],
+  },
+  CELLFENCE_UNDECLARED_CONSUMER: {
+    family: "imports",
+    observation: "same-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "producer-cell", key: "producerCellId" },
+      { kind: "detail", key: "specifier" },
+    ],
+  },
+  CELLFENCE_UNOWNED_IMPORT_TARGET: {
+    family: "imports",
+    observation: "same-file",
+    allOf: [
+      { kind: "detail", key: "targetPath" },
+    ],
+  },
+  CELLFENCE_UNRESOLVED_IMPORT: {
+    family: "imports",
+    observation: "same-file",
+    allOf: [
+      { kind: "detail", key: "specifier" },
+    ],
+  },
+  CELLFENCE_UNDECLARED_RESOURCE_ACCESS: {
+    family: "resources",
+    observation: "same-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "kind" },
+      { kind: "detail", key: "access" },
+      { kind: "detail", key: "selector" },
+    ],
+  },
+  CELLFENCE_UNOWNED_SOURCE: {
+    family: "ownership",
+    observation: "any-file",
+    anyOf: [
+      { kind: "detail", key: "path" },
+      { kind: "file", key: "filePath" },
+    ],
+  },
+};
 
 function usage() {
   console.error(`Usage:
@@ -29,7 +80,9 @@ function usage() {
 
 Validates the structural integrity of a CellFence evidence graph. This is a
 standalone structural verifier for graph shape, canonical ordering, references,
-finding witnesses, and file anchors. It is not a formal policy re-evaluator.`);
+finding witnesses, and file anchors. For supported rules, it also performs a
+conservative pure witness check that required policy facts are present in the
+graph. It is not a full formal policy re-evaluator.`);
 }
 
 function parseArgs(argv) {
@@ -119,6 +172,10 @@ function addDefect(defects, code, message, detail = {}) {
   defects.push({ code, message, ...detail });
 }
 
+function addPolicyDefect(defects, code, message, detail = {}) {
+  addDefect(defects, code, message, { category: "policy", ...detail });
+}
+
 function nodeSortKey(node) {
   return isRecord(node) && typeof node.id === "string" ? node.id : "";
 }
@@ -146,6 +203,98 @@ function witnessMatchesFindingNode(witness, node) {
   return witness.ruleId === node.ruleId
     && witness.severity === node.severity
     && (node.filePath === undefined || witness.filePath === node.filePath);
+}
+
+function subjectMatchesRequirement(subject, requirement) {
+  return subject.kind === requirement.kind && subject.key === requirement.key;
+}
+
+function witnessHasSubject(witness, requirement) {
+  return Array.isArray(witness.subjects)
+    && witness.subjects.some((subject) => isRecord(subject) && subjectMatchesRequirement(subject, requirement));
+}
+
+function observationIndex(nodes) {
+  const byFamily = new Map();
+  const byFamilyAndFile = new Set();
+  for (const node of nodes) {
+    if (node.kind !== "observation" || node.status !== "processed" || typeof node.family !== "string") continue;
+    byFamily.set(node.family, (byFamily.get(node.family) || 0) + 1);
+    if (typeof node.filePath === "string") byFamilyAndFile.add(`${node.family}\0${node.filePath}`);
+  }
+  return { byFamily, byFamilyAndFile };
+}
+
+function policyObservationIsPresent(profile, witness, observations) {
+  if (profile.observation === "any-file") return observations.byFamily.has(profile.family);
+  if (profile.observation === "same-file" && witness.filePath) {
+    return observations.byFamilyAndFile.has(`${profile.family}\0${witness.filePath}`);
+  }
+  return false;
+}
+
+function verifyWitnessAgainstPolicyProfile(defects, witness, profile, observations, index) {
+  let defectCount = 0;
+  if (!policyObservationIsPresent(profile, witness, observations)) {
+    addPolicyDefect(defects, "POLICY_WITNESS_MISSING_OBSERVATION", "supported finding witness must be backed by a processed observation family", {
+      witnessIndex: index,
+      ruleId: witness.ruleId,
+      family: profile.family,
+      filePath: witness.filePath ?? null,
+    });
+    defectCount += 1;
+  }
+  for (const requirement of profile.allOf || []) {
+    if (witnessHasSubject(witness, requirement)) continue;
+    addPolicyDefect(defects, "POLICY_WITNESS_MISSING_SUBJECT", "supported finding witness is missing a required policy subject", {
+      witnessIndex: index,
+      ruleId: witness.ruleId,
+      requiredKind: requirement.kind,
+      requiredKey: requirement.key,
+    });
+    defectCount += 1;
+  }
+  if (Array.isArray(profile.anyOf) && profile.anyOf.length > 0 && !profile.anyOf.some((requirement) => witnessHasSubject(witness, requirement))) {
+    addPolicyDefect(defects, "POLICY_WITNESS_MISSING_ALTERNATIVE_SUBJECT", "supported finding witness is missing all accepted policy subject anchors", {
+      witnessIndex: index,
+      ruleId: witness.ruleId,
+      acceptedSubjects: profile.anyOf.map((requirement) => `${requirement.kind}:${requirement.key}`),
+    });
+    defectCount += 1;
+  }
+  return defectCount;
+}
+
+function verifyPolicyWitnesses(defects, nodes, witnesses) {
+  const observations = observationIndex(nodes);
+  const supportedRules = new Set(Object.keys(policyRuleProfiles));
+  const unsupportedRules = new Set();
+  let supportedFindings = 0;
+  let verifiedFindings = 0;
+  let policyDefects = 0;
+
+  for (const [index, witness] of witnesses.entries()) {
+    const profile = policyRuleProfiles[witness.ruleId];
+    if (!profile) {
+      if (typeof witness.ruleId === "string") unsupportedRules.add(witness.ruleId);
+      continue;
+    }
+    supportedFindings += 1;
+    const before = defects.length;
+    const newDefects = verifyWitnessAgainstPolicyProfile(defects, witness, profile, observations, index);
+    policyDefects += newDefects;
+    if (defects.length === before) verifiedFindings += 1;
+  }
+
+  return {
+    schemaVersion: policyVerifierVersion,
+    supportedRules: [...supportedRules].sort((left, right) => left.localeCompare(right)),
+    supportedFindings,
+    verifiedFindings,
+    unsupportedFindings: witnesses.length - supportedFindings,
+    unsupportedRules: [...unsupportedRules].sort((left, right) => left.localeCompare(right)),
+    policyDefects,
+  };
 }
 
 function summarizeNodes(nodes) {
@@ -284,8 +433,9 @@ export function verifyEvidenceGraph(graph, options = {}) {
 
   const witnesses = validateWitnesses(defects, rawWitnesses, subjectFileByPath);
   validateNodeAnchors(defects, validNodes, validEdges, witnesses, subjectFileByPath);
+  const policy = verifyPolicyWitnesses(defects, validNodes, witnesses);
 
-  return createReport({ graph, defects, options, validNodes, validEdges, witnesses });
+  return createReport({ graph, defects, options, validNodes, validEdges, witnesses, policy });
 }
 
 function validateEdgeShape(defects, edge, fromNode, toNode, edgeIndex) {
@@ -497,11 +647,21 @@ function validateFindingNodeAnchor(defects, node, edges, witnesses, subjectFileB
   }
 }
 
-function createReport({ graph, defects, options, validNodes = [], validEdges = [], witnesses = [] }) {
+function createReport({ graph, defects, options, validNodes = [], validEdges = [], witnesses = [], policy }) {
   const byKind = summarizeNodes(validNodes);
+  const structuralDefectCount = defects.filter((defect) => defect.category !== "policy").length;
+  const policyReport = policy || {
+    schemaVersion: policyVerifierVersion,
+    supportedRules: Object.keys(policyRuleProfiles).sort((left, right) => left.localeCompare(right)),
+    supportedFindings: 0,
+    verifiedFindings: 0,
+    unsupportedFindings: 0,
+    unsupportedRules: [],
+    policyDefects: 0,
+  };
   return {
     schemaVersion: reportSchemaVersion,
-    verifier: "cellfence-evidence-graph-structural-verifier.v1",
+    verifier: "cellfence-evidence-graph-verifier.v1",
     ok: defects.length === 0,
     input: {
       source: options.source || "memory",
@@ -516,8 +676,13 @@ function createReport({ graph, defects, options, validNodes = [], validEdges = [
       findings: byKind.finding,
       evidenceDefects: byKind["evidence-defect"],
       findingWitnesses: witnesses.length,
-      structuralDefects: defects.length,
+      structuralDefects: structuralDefectCount,
+      policySupportedFindings: policyReport.supportedFindings,
+      policyVerifiedFindings: policyReport.verifiedFindings,
+      policyUnsupportedFindings: policyReport.unsupportedFindings,
+      policyDefects: policyReport.policyDefects,
     },
+    policy: policyReport,
     defects,
   };
 }

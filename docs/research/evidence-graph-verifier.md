@@ -1,13 +1,15 @@
-# Evidence Graph Structural Verifier
+# Evidence Graph Verifier
 
 The evidence graph verifier is a small independent check for CellFence evidence
 graph artifacts. It validates graph shape, canonical ordering, node and edge
-references, finding witness records, and file anchors.
+references, finding witness records, and file anchors. It also performs a
+conservative policy-witness check for a limited set of supported rules.
 
-This is not a formal policy-conformance proof. It does not re-run the boundary
-rules or prove that a finding is a true positive. It makes the next layer easier
-to trust by rejecting malformed evidence before a human label, corpus claim, or
-future pure policy checker consumes it.
+This is not a full formal policy-conformance proof. It does not re-run every
+boundary rule or prove corpus precision. For supported rules, it independently
+checks that the graph contains the required observation family and witness facts
+needed to make the finding auditable. Unsupported rules are reported as
+unsupported rather than silently treated as verified.
 
 ## Running
 
@@ -44,17 +46,40 @@ to `tmp/evidence-graph-smoke`, and verifies it with
 - finding nodes without matching `findingWitnesses`;
 - witness file subjects that do not point at a subject file;
 - non-canonical node, edge, or witness ordering.
+- supported policy witnesses that lack required facts, for example a
+  `CELLFENCE_PRIVATE_IMPORT` witness without a `targetPath` detail subject;
+- supported policy witnesses without the processed observation family needed by
+  the rule, for example an import finding without a processed `imports`
+  observation.
+
+## Supported Policy Witness Rules
+
+The v1 policy-witness verifier supports conservative checks for:
+
+- `CELLFENCE_PRIVATE_IMPORT`;
+- `CELLFENCE_UNDECLARED_CONSUMER`;
+- `CELLFENCE_UNOWNED_IMPORT_TARGET`;
+- `CELLFENCE_UNRESOLVED_IMPORT`;
+- `CELLFENCE_UNDECLARED_RESOURCE_ACCESS`;
+- `CELLFENCE_UNOWNED_SOURCE`.
+
+The verifier output includes `policy.supportedFindings`,
+`policy.verifiedFindings`, `policy.unsupportedFindings`, and
+`policy.unsupportedRules`. A finding for an unsupported rule can still pass the
+structural verifier, but it is not counted as independently policy verified.
 
 ## Claim Boundary
 
-Passing this verifier means the evidence graph is structurally usable. It does
-not mean:
+Passing this verifier means the evidence graph is structurally usable and that
+supported finding witnesses contain the required auditable facts. It does not
+mean:
 
 - the manifest is reviewed;
 - the finding is a true positive;
+- unsupported rule findings are independently checked;
 - the detector has high precision;
 - CellFence has complete recall;
-- the policy checker is formally verified.
+- the policy checker is formally verified end to end.
 
 Those stronger claims still require reviewed manifests, corpus labels, history
-replay or mutation evidence, and an independent rule-level checker.
+replay or mutation evidence, and broader independent rule-level checking.

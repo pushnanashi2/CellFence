@@ -16,8 +16,9 @@ function usage() {
   console.error(`Usage: node scripts/evidence-graph-smoke.mjs [--workdir tmp/evidence-graph-smoke] [--out reports/evidence-graph-smoke.json]
 
 Runs CellFence against the private-cross-cell-import fixture with evidence graph
-output enabled, then validates the graph with the standalone structural
-verifier. This is a verifier smoke, not a formal policy-conformance proof.`);
+output enabled, then validates the graph with the standalone evidence verifier.
+This smoke includes conservative policy-witness verification for supported
+rules, but it is not a full formal policy-conformance proof.`);
 }
 
 function parseArgs(argv) {
@@ -94,6 +95,7 @@ function assertSmokeResult(checkResult, verifierResult, verifierReport) {
   if (!verifierReport.ok) failures.push("evidence graph verifier reported structural defects");
   if (verifierReport.summary.findings < 1) failures.push("expected at least one finding node");
   if (verifierReport.summary.findingWitnesses < 1) failures.push("expected at least one finding witness");
+  if (verifierReport.summary.policyVerifiedFindings < 1) failures.push("expected at least one independently verified policy witness");
   if (failures.length > 0) throw new Error(failures.join("\n"));
 }
 
@@ -140,7 +142,7 @@ function main() {
       },
     };
     writeJson(options.outPath, report);
-    console.log(`evidence graph smoke passed: ${report.verifier.summary.findings} finding node(s), ${report.verifier.summary.findingWitnesses} witness(es)`);
+    console.log(`evidence graph smoke passed: ${report.verifier.summary.findings} finding node(s), ${report.verifier.summary.findingWitnesses} witness(es), ${report.verifier.summary.policyVerifiedFindings} policy witness(es)`);
     return 0;
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
