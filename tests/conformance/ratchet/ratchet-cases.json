@@ -94,7 +94,13 @@
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_RATCHET_CELL_SET_GROWTH", "severity": "error", "cellId": "newcell" }
+          {
+            "ruleId": "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+            "severity": "error",
+            "cellId": "newcell",
+            "baselineCellIds": ["core"],
+            "currentCellIds": ["core", "newcell"]
+          }
         ]
       }
     },
@@ -133,7 +139,13 @@
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE", "severity": "error", "cellId": "core" }
+          {
+            "ruleId": "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE",
+            "severity": "error",
+            "cellId": "core",
+            "previous": "src/core/public.ts",
+            "current": "src/core/new-public.ts"
+          }
         ]
       }
     },
@@ -175,8 +187,22 @@
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH", "severity": "error", "cellId": "core" },
-          { "ruleId": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE", "severity": "error", "cellId": "core", "addedSymbols": ["extra"] }
+          {
+            "ruleId": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
+            "severity": "error",
+            "cellId": "core",
+            "metric": "publicSymbols",
+            "previous": 1,
+            "current": 2
+          },
+          {
+            "ruleId": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+            "severity": "error",
+            "cellId": "core",
+            "previous": ["core"],
+            "current": ["core", "extra"],
+            "addedSymbols": ["extra"]
+          }
         ]
       }
     },
@@ -232,8 +258,22 @@
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH", "severity": "error", "cellId": "app" },
-          { "ruleId": "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE", "severity": "error", "cellId": "app", "addedEdges": ["app->core"] }
+          {
+            "ruleId": "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH",
+            "severity": "error",
+            "cellId": "app",
+            "metric": "crossCellDependencies",
+            "previous": 0,
+            "current": 1
+          },
+          {
+            "ruleId": "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE",
+            "severity": "error",
+            "cellId": "app",
+            "previous": [],
+            "current": ["app->core"],
+            "addedEdges": ["app->core"]
+          }
         ]
       }
     },
@@ -268,7 +308,14 @@
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION", "severity": "error", "cellId": "core", "metric": "publicSymbols" },
+          {
+            "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION",
+            "severity": "error",
+            "cellId": "core",
+            "metric": "publicSymbols",
+            "previous": 1,
+            "current": 2
+          },
           { "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION", "severity": "error", "cellId": "core", "metric": "publicSymbolSet", "addedPublicSymbols": ["extra"] }
         ]
       }

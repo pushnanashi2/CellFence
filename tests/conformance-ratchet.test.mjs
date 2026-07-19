@@ -45,6 +45,10 @@ function normalizedFinding(finding) {
   for (const key of [
     "addedSymbols",
     "addedEdges",
+    "baselineCellIds",
+    "currentCellIds",
+    "previous",
+    "current",
     "metric",
     "addedPublicSymbols",
     "resourceAccess",

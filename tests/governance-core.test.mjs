@@ -255,7 +255,7 @@ test("evidence graph connects subject files, observations, defects, and finding 
     cellId: "a",
     producerCellId: "b",
     message: "a imports private implementation from b",
-    details: { line: 3, specifier: "../b/private" },
+    details: { line: 3, specifier: "../b/private", baselineCellIds: [], addedSymbols: ["extra"] },
     fingerprint: "abc123",
   };
   const first = createEvidenceGraph({ snapshot, report, assessment, findings: [finding], warnings: [] });
@@ -269,6 +269,14 @@ test("evidence graph connects subject files, observations, defects, and finding 
   assert.deepEqual(findingWitness(finding), first.findingWitnesses[0]);
   assert.equal(first.findingWitnesses[0].line, 3);
   assert.ok(first.findingWitnesses[0].subjects.some((subject) => subject.kind === "producer-cell" && subject.value === "b"));
+  assert.ok(first.findingWitnesses[0].subjects.some((subject) =>
+    subject.kind === "detail"
+    && subject.key === "addedSymbols"
+    && subject.value === "[\"extra\"]"));
+  assert.ok(first.findingWitnesses[0].subjects.some((subject) =>
+    subject.kind === "detail"
+    && subject.key === "baselineCellIds"
+    && subject.value === "[]"));
 });
 
 test("finding witnesses preserve supplied subjects and deterministic tie ordering", () => {

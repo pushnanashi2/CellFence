@@ -63,12 +63,132 @@ const policyRuleProfiles = {
       { kind: "detail", key: "selector" },
     ],
   },
+  CELLFENCE_PUBLIC_SYMBOL_MISMATCH: {
+    family: "public-surface",
+    observation: "same-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+    ],
+    anyOf: [
+      { kind: "detail", key: "missingSymbols" },
+      { kind: "detail", key: "undeclaredSymbols" },
+    ],
+  },
   CELLFENCE_UNOWNED_SOURCE: {
     family: "ownership",
     observation: "any-file",
     anyOf: [
       { kind: "detail", key: "path" },
       { kind: "file", key: "filePath" },
+    ],
+  },
+  CELLFENCE_UNDECLARED_ARTIFACT: {
+    family: "imports",
+    observation: "same-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "producer-cell", key: "producerCellId" },
+      { kind: "detail", key: "specifier" },
+      { kind: "detail", key: "artifactLaneId" },
+    ],
+  },
+  CELLFENCE_RATCHET_CELL_SET_GROWTH: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "baselineCellIds" },
+      { kind: "detail", key: "currentCellIds" },
+    ],
+  },
+  CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
+    ],
+  },
+  CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "uncovered" },
+    ],
+  },
+  CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "addedSymbols" },
+    ],
+  },
+  CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "addedEdges" },
+    ],
+  },
+  CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "addedArtifacts" },
+    ],
+  },
+  CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
+    ],
+  },
+  CELLFENCE_RATCHET_OWNED_PATH_GROWTH: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "metric" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
+    ],
+  },
+  CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "metric" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
+    ],
+  },
+  CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "metric" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
+    ],
+  },
+  CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH: {
+    family: "baseline",
+    observation: "any-file",
+    allOf: [
+      { kind: "cell", key: "cellId" },
+      { kind: "detail", key: "metric" },
+      { kind: "detail", key: "previous" },
+      { kind: "detail", key: "current" },
     ],
   },
 };

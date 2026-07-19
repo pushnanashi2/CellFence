@@ -61,12 +61,29 @@ The v1 policy-witness verifier supports conservative checks for:
 - `CELLFENCE_UNOWNED_IMPORT_TARGET`;
 - `CELLFENCE_UNRESOLVED_IMPORT`;
 - `CELLFENCE_UNDECLARED_RESOURCE_ACCESS`;
-- `CELLFENCE_UNOWNED_SOURCE`.
+- `CELLFENCE_PUBLIC_SYMBOL_MISMATCH`;
+- `CELLFENCE_UNOWNED_SOURCE`;
+- `CELLFENCE_UNDECLARED_ARTIFACT`;
+- `CELLFENCE_RATCHET_CELL_SET_GROWTH`;
+- `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE`;
+- `CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE`;
+- `CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE`;
+- `CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE`;
+- `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE`;
+- `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE`;
+- `CELLFENCE_RATCHET_OWNED_PATH_GROWTH`;
+- `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH`;
+- `CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH`;
+- `CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH`.
 
 The verifier output includes `policy.supportedFindings`,
 `policy.verifiedFindings`, `policy.unsupportedFindings`, and
 `policy.unsupportedRules`. A finding for an unsupported rule can still pass the
 structural verifier, but it is not counted as independently policy verified.
+Ratchet profiles require the concrete baseline delta facts that make the claim
+auditable, such as `previous`/`current` metric values, `addedSymbols`,
+`addedEdges`, or accepted/current cell sets; a `cellId` alone is not enough to
+count a ratchet finding as policy verified.
 
 ## Claim Boundary
 

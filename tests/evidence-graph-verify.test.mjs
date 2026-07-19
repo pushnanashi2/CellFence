@@ -94,6 +94,147 @@ function validGraph() {
   };
 }
 
+function publicSurfaceGraph() {
+  return {
+    schemaVersion: "cellfence.evidence-graph.v1",
+    snapshotDigest: "a".repeat(64),
+    nodes: [
+      {
+        id: "file:1",
+        kind: "subject-file",
+        label: "src/core/public.ts",
+        filePath: "src/core/public.ts",
+        digest: "b".repeat(64),
+      },
+      {
+        id: "finding:1",
+        kind: "finding",
+        label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        filePath: "src/core/public.ts",
+        ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        severity: "error",
+      },
+      {
+        id: "observation:1",
+        kind: "observation",
+        label: "public-surface:processed",
+        filePath: "src/core/public.ts",
+        family: "public-surface",
+        status: "processed",
+      },
+    ],
+    edges: [
+      {
+        from: "file:1",
+        to: "finding:1",
+        kind: "reported-finding",
+        label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      },
+      {
+        from: "file:1",
+        to: "observation:1",
+        kind: "observed-as",
+        label: "public-surface",
+      },
+      {
+        from: "finding:1",
+        to: "file:1",
+        kind: "witnesses",
+        label: "filePath",
+      },
+    ],
+    findingWitnesses: [
+      {
+        ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        severity: "error",
+        message: "public symbols for cell core do not match manifest",
+        filePath: "src/core/public.ts",
+        subjects: [
+          { kind: "cell", key: "cellId", value: "core" },
+          { kind: "detail", key: "undeclaredSymbols", value: "[\"extra\"]" },
+          { kind: "file", key: "filePath", value: "src/core/public.ts" },
+        ],
+      },
+    ],
+  };
+}
+
+function ratchetGraph() {
+  return {
+    schemaVersion: "cellfence.evidence-graph.v1",
+    snapshotDigest: "a".repeat(64),
+    nodes: [
+      {
+        id: "file:baseline",
+        kind: "subject-file",
+        label: "cellfence.baseline.json",
+        filePath: "cellfence.baseline.json",
+        digest: "b".repeat(64),
+      },
+      {
+        id: "finding:ratchet",
+        kind: "finding",
+        label: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+        severity: "error",
+      },
+      {
+        id: "observation:baseline",
+        kind: "observation",
+        label: "baseline:processed",
+        filePath: "cellfence.baseline.json",
+        family: "baseline",
+        status: "processed",
+      },
+    ],
+    edges: [
+      {
+        from: "file:baseline",
+        to: "observation:baseline",
+        kind: "observed-as",
+        label: "baseline",
+      },
+    ],
+    findingWitnesses: [
+      {
+        ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
+        severity: "error",
+        message: "core added public symbols outside the accepted baseline",
+        subjects: [
+          { kind: "cell", key: "cellId", value: "core" },
+          { kind: "detail", key: "addedSymbols", value: "[\"extra\"]" },
+        ],
+      },
+    ],
+  };
+}
+
+function emptyBaselineCellGrowthGraph() {
+  return {
+    ...ratchetGraph(),
+    nodes: ratchetGraph().nodes.map((node) =>
+      node.id === "finding:ratchet"
+        ? {
+          ...node,
+          label: "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+          ruleId: "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        }
+        : node),
+    findingWitnesses: [
+      {
+        ruleId: "CELLFENCE_RATCHET_CELL_SET_GROWTH",
+        severity: "error",
+        message: "core is not present in the accepted baseline cell set",
+        subjects: [
+          { kind: "cell", key: "cellId", value: "core" },
+          { kind: "detail", key: "baselineCellIds", value: "[]" },
+          { kind: "detail", key: "currentCellIds", value: "[\"core\"]" },
+        ],
+      },
+    ],
+  };
+}
+
 test("evidence graph verifier accepts a structurally complete graph", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-ok-"));
   try {
@@ -111,6 +252,93 @@ test("evidence graph verifier accepts a structurally complete graph", () => {
     assert.equal(report.summary.policyVerifiedFindings, 1);
     assert.equal(report.policy.schemaVersion, "cellfence.evidence-graph-policy-witness-verifier.v1");
     assert.match(report.input.graphCanonicalSha256, /^[a-f0-9]{64}$/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier policy-checks public surface findings", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-public-surface-"));
+  try {
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, publicSurfaceGraph());
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.policySupportedFindings, 1);
+    assert.equal(report.summary.policyVerifiedFindings, 1);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier policy-checks ratchet findings against baseline observations", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-ratchet-"));
+  try {
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, ratchetGraph());
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.policySupportedFindings, 1);
+    assert.equal(report.summary.policyVerifiedFindings, 1);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier accepts empty baseline cell-set witnesses", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-empty-baseline-"));
+  try {
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, emptyBaselineCellGrowthGraph());
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.policySupportedFindings, 1);
+    assert.equal(report.summary.policyVerifiedFindings, 1);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("evidence graph verifier rejects ratchet policy witnesses without delta facts", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-graph-verify-ratchet-delta-"));
+  try {
+    const graph = ratchetGraph();
+    graph.findingWitnesses[0] = {
+      ...graph.findingWitnesses[0],
+      ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
+      subjects: [
+        { kind: "cell", key: "cellId", value: "core" },
+      ],
+    };
+    graph.nodes[1] = {
+      ...graph.nodes[1],
+      label: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
+      ruleId: "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH",
+    };
+    const graphPath = path.join(rootDir, "graph.json");
+    writeJson(graphPath, graph);
+    const result = runVerifier(["--graph", graphPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, false);
+    assert.equal(report.summary.structuralDefects, 0);
+    assert.equal(report.summary.policyDefects, 3);
+    for (const key of ["metric", "previous", "current"]) {
+      assert.ok(report.defects.some((defect) =>
+        defect.code === "POLICY_WITNESS_MISSING_SUBJECT"
+        && defect.ruleId === "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH"
+        && defect.requiredKey === key));
+    }
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -150,16 +378,16 @@ test("evidence graph verifier reports unsupported policy rules without claiming 
     const graph = validGraph();
     graph.nodes[1] = {
       ...graph.nodes[1],
-      label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
-      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      label: "CELLFENCE_PUBLIC_ENTRY_MISSING",
+      ruleId: "CELLFENCE_PUBLIC_ENTRY_MISSING",
     };
     graph.edges[0] = {
       ...graph.edges[0],
-      label: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      label: "CELLFENCE_PUBLIC_ENTRY_MISSING",
     };
     graph.findingWitnesses[0] = {
       ...graph.findingWitnesses[0],
-      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      ruleId: "CELLFENCE_PUBLIC_ENTRY_MISSING",
       subjects: [
         { kind: "file", key: "filePath", value: "src/app/public.ts" },
         { kind: "cell", key: "cellId", value: "app" },
@@ -175,7 +403,7 @@ test("evidence graph verifier reports unsupported policy rules without claiming 
     assert.equal(report.summary.policySupportedFindings, 0);
     assert.equal(report.summary.policyVerifiedFindings, 0);
     assert.equal(report.summary.policyUnsupportedFindings, 1);
-    assert.deepEqual(report.policy.unsupportedRules, ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]);
+    assert.deepEqual(report.policy.unsupportedRules, ["CELLFENCE_PUBLIC_ENTRY_MISSING"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

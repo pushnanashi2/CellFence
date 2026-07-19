@@ -117,6 +117,10 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} is not present in the accepted baseline cell set`,
+        details: {
+          baselineCellIds: [...baselineCellIds].sort((left, right) => left.localeCompare(right)),
+          currentCellIds: Object.keys(metrics).sort((left, right) => left.localeCompare(right)),
+        },
         suggestedResolutions: [
           codeResolution("Move the new source under an existing accepted cell if this is not an intentional architecture addition"),
           baselineResolution("Accept the new cell in the baseline", locked, { cell: cellId }),
@@ -131,6 +135,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} public entry changed from ${baselineRecord.publicEntryPath} to ${metric.publicEntryPath}`,
+        details: { previous: baselineRecord.publicEntryPath, current: metric.publicEntryPath },
         suggestedResolutions: [
           codeResolution("Keep the existing public entry path and move implementation detail behind it"),
           baselineResolution("Accept the public entry contract change in the baseline", locked, { cell: cellId, previous: baselineRecord.publicEntryPath, current: metric.publicEntryPath }),
@@ -215,7 +220,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} public surface signature hash changed from the accepted baseline`,
-        details: { previous: baselineRecord.publicSurfaceHash },
+        details: { previous: baselineRecord.publicSurfaceHash, current: metric.publicSurfaceHash },
         suggestedResolutions: [
           codeResolution("Keep the public type/signature contract stable or move changes behind existing exports"),
           baselineResolution("Accept the public signature change in the baseline", locked, { cell: cellId }),
@@ -229,6 +234,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} owned path patterns grew from ${baselineRecord.ownedPathPatterns} to ${metric.ownedPathPatterns}`,
+        details: { metric: "ownedPathPatterns", previous: baselineRecord.ownedPathPatterns, current: metric.ownedPathPatterns },
         suggestedResolutions: [
           codeResolution("Move new files under existing owned path patterns or reduce the owned path expansion"),
           baselineResolution("Accept the owned path growth in the baseline", locked, { cell: cellId, metric: "ownedPathPatterns" }),
@@ -241,6 +247,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} public symbols grew from ${baselineRecord.publicSymbols} to ${metric.publicSymbols}`,
+        details: { metric: "publicSymbols", previous: baselineRecord.publicSymbols, current: metric.publicSymbols },
         suggestedResolutions: [
           codeResolution("Keep the new API internal or remove public exports that are not part of the intended contract"),
           baselineResolution("Accept the public symbol growth in the baseline", locked, { cell: cellId, metric: "publicSymbols" }),
@@ -253,6 +260,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} public surface lines grew from ${baselineRecord.publicSurfaceLines} to ${metric.publicSurfaceLines}`,
+        details: { metric: "publicSurfaceLines", previous: baselineRecord.publicSurfaceLines, current: metric.publicSurfaceLines },
         suggestedResolutions: [
           codeResolution("Move implementation detail out of the public entry or reduce public surface size"),
           baselineResolution("Accept the public surface growth in the baseline", locked, { cell: cellId, metric: "publicSurfaceLines" }),
@@ -265,6 +273,7 @@ export function compareBaseline(
         severity: "error",
         cellId,
         message: `${cellId} cross-cell dependencies grew from ${baselineRecord.crossCellDependencies} to ${metric.crossCellDependencies}`,
+        details: { metric: "crossCellDependencies", previous: baselineRecord.crossCellDependencies, current: metric.crossCellDependencies },
         suggestedResolutions: [
           codeResolution("Remove the new cross-cell dependency or route it through an existing allowed dependency"),
           baselineResolution("Accept the cross-cell dependency growth in the baseline", locked, { cell: cellId, metric: "crossCellDependencies" }),

@@ -1,4 +1,4 @@
-import { stableDigest } from "./canonicalization.js";
+import { stableCanonicalJson, stableDigest } from "./canonicalization.js";
 import type {
   EvidenceAssessment,
   EvidenceDefect,
@@ -109,6 +109,15 @@ function stringDetailSubjects(details: Record<string, unknown> | undefined): Fin
     if (typeof value === "string") subjects.push({ kind: "detail", key, value });
     if (typeof value === "number" || typeof value === "boolean") {
       subjects.push({ kind: "detail", key, value: String(value) });
+    }
+    if (
+      Array.isArray(value)
+      && value.every((entry) =>
+        typeof entry === "string"
+        || typeof entry === "number"
+        || typeof entry === "boolean")
+    ) {
+      subjects.push({ kind: "detail", key, value: stableCanonicalJson(value) });
     }
   }
   return subjects;
