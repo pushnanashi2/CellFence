@@ -3,6 +3,10 @@
 This is the first reviewed-manifest public-OSS precision pilot for CellFence.
 It is a pipeline and diagnosis artifact, not a public precision claim.
 
+Round2 follow-up: `docs/research/ts-js-reviewed-pilot-10-2026-07-19-round2.md`
+reruns the same frozen corpus after package-export, resolver, scope, and
+public-surface tuning.
+
 ## Scope
 
 - Date: 2026-07-19

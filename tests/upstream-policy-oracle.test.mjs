@@ -61,7 +61,10 @@ test("upstream policy oracle builds a reference manifest and resolves ablation q
       },
     });
     writeText(path.join(fixtureRepo, "packages/core/src/index.ts"), "export const internal = true;\n");
-    writeText(path.join(fixtureRepo, "packages/core/src/entry.ts"), "export const core = true;\n");
+    writeText(path.join(fixtureRepo, "packages/core/src/types.ts"), "export type SharedType = { value: true };\n");
+    writeText(path.join(fixtureRepo, "packages/core/src/entry.ts"), "export * from './types.js';\nexport const core = true;\n");
+    writeText(path.join(fixtureRepo, "packages/core/e2e/spec.ts"), "export const e2e = true;\n");
+    writeText(path.join(fixtureRepo, "packages/core/codemods/rename.ts"), "export const codemod = true;\n");
     writeText(path.join(fixtureRepo, "packages/web/src/index.ts"), "export const web = true;\n");
     runGit(["init", "--initial-branch=main"], fixtureRepo);
     runGit(["add", "."], fixtureRepo);
@@ -144,6 +147,16 @@ test("upstream policy oracle builds a reference manifest and resolves ablation q
     const inferred = JSON.parse(fs.readFileSync(path.join(outDir, "inferred", "fixture-workspace.manifest.json"), "utf8"));
     const resolved = JSON.parse(fs.readFileSync(path.join(outDir, "resolved-manifests", "fixture-workspace.manifest.json"), "utf8"));
     assert.deepEqual(reference.cells.find((cell) => cell.id === "core").publicEntry, "packages/core/src/entry.ts");
+    assert.deepEqual(reference.cells.find((cell) => cell.id === "core").publicSymbols, ["core", "SharedType"]);
+    assert.ok(reference.governance.exclude.includes("**/e2e/**"));
+    assert.ok(reference.governance.exclude.includes("e2e/**"));
+    assert.ok(reference.governance.exclude.includes("**/codemods/**"));
+    assert.ok(reference.governance.exclude.includes("codemods/**"));
+    assert.ok(reference.governance.exclude.includes("**/dts-test/**"));
+    assert.ok(reference.governance.exclude.includes("**/*playground*/**"));
+    assert.ok(reference.governance.exclude.includes("template/**"));
+    assert.ok(reference.governance.exclude.includes("guides/**"));
+    assert.ok(reference.governance.exclude.includes("integrations/**"));
     assert.deepEqual(inferred.cells.find((cell) => cell.id === "core").publicEntry, "packages/core/src/index.ts");
     assert.deepEqual(reference.cells.find((cell) => cell.id === "web").consumes, [{ cell: "core" }]);
     assert.deepEqual(inferred.cells.find((cell) => cell.id === "web").consumes, []);

@@ -46,12 +46,25 @@ test("module resolution maps NodeNext runtime specifiers to source files", () =>
     fs.writeFileSync(path.join(rootDir, "src/core/view.tsx"), "export const view = true;\n");
     fs.writeFileSync(path.join(rootDir, "src/core/mod.mts"), "export const mod = true;\n");
     fs.writeFileSync(path.join(rootDir, "src/core/legacy.cts"), "export const legacy = true;\n");
+    fs.mkdirSync(path.join(rootDir, "src/routes"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/routes/posts.$postId.tsx"), "export const route = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/routes/es2015.symbol.ts"), "export const symbol = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/routes/raw-template.ts"), "export const raw = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/routes/package.json"), "{\"name\":\"fixture\"}\n");
+    fs.writeFileSync(path.join(rootDir, "src/rules.d.ts"), "export interface RuleDocs {}\n");
+    fs.writeFileSync(path.join(rootDir, "src/dom.ts"), "export interface DOMShape {}\n");
     fs.writeFileSync(path.join(rootDir, "src/app.ts"), "export const app = true;\n");
 
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core/public.js"), "src/core/public.ts");
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core/view.jsx"), "src/core/view.tsx");
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core/mod.mjs"), "src/core/mod.mts");
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core/legacy.cjs"), "src/core/legacy.cts");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./routes/posts.$postId"), "src/routes/posts.$postId.tsx");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./routes/es2015.symbol"), "src/routes/es2015.symbol.ts");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./routes/raw-template?script-string"), "src/routes/raw-template.ts");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./routes/package.json?raw"), "src/routes/package.json");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./rules"), "src/rules.d.ts");
+    assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./dom.d.ts"), "src/dom.ts");
     assert.ok(candidateModulePaths(path.join(rootDir, "src/core/public.js")).some((candidate) => candidate.endsWith("public.ts")));
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core/missing.js"), undefined);
     assert.equal(resolveRelativeImport(rootDir, "src/app.ts", "./core"), undefined);
@@ -83,6 +96,14 @@ test("module resolution candidate paths preserve runtime and source extension or
   assert.deepEqual(candidateModulePaths(path.join(root, "file.json")).map((candidate) => candidate.slice(root.length + 1)), [
     "file.json",
   ]);
+  const dottedBasename = candidateModulePaths(path.join(root, "routes/posts.$postId")).map((candidate) => candidate.slice(root.length + 1));
+  assert.deepEqual(dottedBasename.slice(0, 4), [
+    "routes/posts.$postId",
+    "routes/posts.$postId.ts",
+    "routes/posts.$postId.tsx",
+    "routes/posts.$postId.js",
+  ]);
+  assert.ok(dottedBasename.includes("routes/posts.$postId/index.ts"));
   const noExtension = candidateModulePaths(path.join(root, "dir/file")).map((candidate) => candidate.slice(root.length + 1));
   assert.deepEqual(noExtension.slice(0, 9), [
     "dir/file",
@@ -98,7 +119,12 @@ test("module resolution candidate paths preserve runtime and source extension or
   assert.deepEqual(noExtension.slice(9, 10), [
     "dir/file.py",
   ]);
-  assert.deepEqual(noExtension.slice(10), [
+  assert.deepEqual(noExtension.slice(10, 13), [
+    "dir/file.d.ts",
+    "dir/file.d.mts",
+    "dir/file.d.cts",
+  ]);
+  assert.deepEqual(noExtension.slice(13), [
     "dir/file/index.ts",
     "dir/file/index.tsx",
     "dir/file/index.js",
@@ -108,6 +134,9 @@ test("module resolution candidate paths preserve runtime and source extension or
     "dir/file/index.mjs",
     "dir/file/index.cjs",
     "dir/file/index.py",
+    "dir/file/index.d.ts",
+    "dir/file/index.d.mts",
+    "dir/file/index.d.cts",
   ]);
 });
 

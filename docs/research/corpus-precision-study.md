@@ -149,6 +149,11 @@ The first reviewed-manifest TS/JS precision pilot is documented in
 It is a pipeline and diagnosis artifact, not a public precision claim: the
 preliminary labels exposed package subpath export, resolver, and scope hygiene
 work that must be fixed before an external precision number is defensible.
+The round2 rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round2.md](ts-js-reviewed-pilot-10-2026-07-19-round2.md):
+it reduces the same frozen corpus from 2406 raw findings to 89, but still
+reports `insufficient_evidence` because preliminary labels identify resource
+detector, generated-artifact, and internal package-policy blockers.
 
 The script:
 

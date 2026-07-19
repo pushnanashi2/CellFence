@@ -11,6 +11,7 @@ const defaultCorpusPath = path.join(repoRoot, "docs", "research", "upstream-poli
 const defaultOutDir = path.join(repoRoot, "reports", "upstream-policy-oracle-v1");
 const defaultWorkDir = path.join(repoRoot, "tmp", "upstream-policy-oracle-v1");
 const engineDist = path.join(repoRoot, "packages", "engine", "dist", "index.js");
+const moduleResolutionDist = path.join(repoRoot, "packages", "engine", "dist", "module-resolution.js");
 const corpusSchemaVersion = "cellfence.upstream-policy-oracle.corpus.v1";
 const reportSchemaVersion = "cellfence.upstream-policy-oracle.report.v1";
 const manifestSchemaVersion = "cellfence.manifest.v1";
@@ -23,7 +24,10 @@ const packageEntryFields = ["source", "types", "typings", "module", "main", "bro
 const packageDependencyFields = ["dependencies", "peerDependencies", "optionalDependencies", "devDependencies"];
 const productionScopeExcludes = [
   "**/__fixtures__/**",
+  "**/__generated__/**",
   "**/__mocks__/**",
+  "**/__snapshots__/**",
+  "**/__testfixtures__/**",
   "**/__tests__/**",
   "**/*.bench.*",
   "**/*.benchmark.*",
@@ -41,7 +45,10 @@ const productionScopeExcludes = [
   "**/*.png",
   "**/*.sass",
   "**/*.scss",
+  "**/*.snap",
+  "**/*.snapshot.*",
   "**/*.spec.*",
+  "**/*.test-*.*",
   "**/*.stories.*",
   "**/*.story.*",
   "**/*.styl",
@@ -53,18 +60,69 @@ const productionScopeExcludes = [
   "**/benchmark/**",
   "**/benchmarks/**",
   "**/build/**",
+  "**/codemod/**",
+  "**/codemods/**",
   "**/demo/**",
   "**/demos/**",
   "**/dist/**",
+  "**/dts-test/**",
+  "**/e2e/**",
+  "**/e2e-tests/**",
   "**/example/**",
   "**/examples/**",
   "**/fixture/**",
+  "**/fixture-generated/**",
   "**/fixtures/**",
+  "**/fixtures-generated/**",
   "**/generated/**",
+  "**/guides/**",
+  "**/integration-tests/**",
+  "**/playground/**",
+  "**/playgrounds/**",
+  "**/*playground*/**",
+  "**/template/**",
+  "**/templates/**",
   "**/test/**",
   "**/tests/**",
   "**/third_party/**",
   "**/vendor/**",
+  "__fixtures__/**",
+  "__generated__/**",
+  "__mocks__/**",
+  "__snapshots__/**",
+  "__testfixtures__/**",
+  "__tests__/**",
+  "bench/**",
+  "benchmark/**",
+  "benchmarks/**",
+  "build/**",
+  "codemod/**",
+  "codemods/**",
+  "demo/**",
+  "demos/**",
+  "dist/**",
+  "dts-test/**",
+  "e2e/**",
+  "e2e-tests/**",
+  "example/**",
+  "examples/**",
+  "fixture/**",
+  "fixture-generated/**",
+  "fixtures/**",
+  "fixtures-generated/**",
+  "generated/**",
+  "guides/**",
+  "integrations/**",
+  "integration-tests/**",
+  "playground/**",
+  "playgrounds/**",
+  "*playground*/**",
+  "template/**",
+  "templates/**",
+  "test/**",
+  "tests/**",
+  "third_party/**",
+  "vendor/**",
 ];
 const defaultRequiredRules = [
   "CELLFENCE_OWNERSHIP_OVERLAP",
@@ -691,8 +749,11 @@ function uniqueId(baseId, usedIds) {
   return candidateId;
 }
 
-function extractPublicSymbols(filePath) {
+function extractPublicSymbols(filePath, moduleResolution) {
   if (!filePath || !fs.existsSync(filePath)) return [];
+  if (moduleResolution?.extractPublicSymbols) {
+    return [...moduleResolution.extractPublicSymbols(filePath)].sort((left, right) => left.localeCompare(right));
+  }
   const text = fs.readFileSync(filePath, "utf8");
   const symbols = new Set();
   for (const match of text.matchAll(/\bexport\s+(?:declare\s+)?(?:async\s+)?(?:function|class|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g)) {
@@ -732,7 +793,7 @@ function sourceHashRecord(rootDir, relativePath, kind, fields) {
   };
 }
 
-function createReferenceManifest(rootDir, subject) {
+function createReferenceManifest(rootDir, subject, moduleResolution) {
   const policy = subject.policy || {};
   const scope = policy.scope || "production";
   const packageRoot = normalizePath(policy.packageRoot || ".");
@@ -781,7 +842,7 @@ function createReferenceManifest(rootDir, subject) {
       dependencyNames,
       ownedPaths: [`${sourceRoot}/**`],
       publicEntry,
-      publicSymbols: extractPublicSymbols(path.join(rootDir, publicEntry)),
+      publicSymbols: extractPublicSymbols(path.join(rootDir, publicEntry), moduleResolution),
       consumes: [],
       producesArtifacts: [],
     });
@@ -1349,7 +1410,7 @@ function discardCheckoutIfRequested(subjectResult, subjectDir, options) {
   };
 }
 
-async function runSubject(subject, options, engine) {
+async function runSubject(subject, options, engine, moduleResolution) {
   const subjectDir = subjectDirectory(options.workDir, subject.id);
   fs.rmSync(subjectDir, { recursive: true, force: true });
   fs.mkdirSync(subjectDir, { recursive: true });
@@ -1380,7 +1441,7 @@ async function runSubject(subject, options, engine) {
     const clone = cloneSubject(subject, subjectDir, options);
     const worktreeBefore = gitWorktreeStatus(clone.checkoutDir, subjectDir, "status-before-oracle");
     const scope = subject.policy?.scope || options.blindScope;
-    const reference = createReferenceManifest(clone.checkoutDir, subject);
+    const reference = createReferenceManifest(clone.checkoutDir, subject, moduleResolution);
     const inferredManifest = engine.inferManifest({
       rootDir: clone.checkoutDir,
       scope: options.blindScope,
@@ -1662,6 +1723,10 @@ async function main() {
     console.error("CellFence engine dist is missing; run npm run build before the upstream policy oracle");
     return 2;
   }
+  if (!options.dryRun && !fs.existsSync(moduleResolutionDist)) {
+    console.error("CellFence module-resolution dist is missing; run npm run build before the upstream policy oracle");
+    return 2;
+  }
 
   let corpus;
   try {
@@ -1680,10 +1745,13 @@ async function main() {
   const engine = options.dryRun
     ? undefined
     : await import(pathToFileURL(engineDist).href);
+  const moduleResolution = options.dryRun
+    ? undefined
+    : await import(pathToFileURL(moduleResolutionDist).href);
   const selectedSubjects = corpus.subjects.slice(0, options.maxSubjects || corpus.subjects.length);
   const subjects = [];
   for (const subject of selectedSubjects) {
-    subjects.push(await runSubject(subject, options, engine));
+    subjects.push(await runSubject(subject, options, engine, moduleResolution));
   }
 
   const report = {

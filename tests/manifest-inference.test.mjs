@@ -210,6 +210,42 @@ test("manifest inference reads pnpm workspace packages and scoped workspace root
   }
 });
 
+test("manifest inference production scope excludes e2e, codemod, generated, and snapshot paths", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-production-excludes-"));
+  try {
+    writeJson(path.join(rootDir, "package.json"), { workspaces: ["packages/*"] });
+    writeJson(path.join(rootDir, "packages/app/package.json"), {
+      name: "@demo/app",
+    });
+    writeText(path.join(rootDir, "packages/app/src/index.ts"), "export const app = true;\n");
+    writeText(path.join(rootDir, "packages/app/e2e/spec.ts"), "export const e2e = true;\n");
+    writeText(path.join(rootDir, "packages/app/codemods/rename.ts"), "export const codemod = true;\n");
+    writeText(path.join(rootDir, "packages/app/src/__generated__/api.ts"), "export const generated = true;\n");
+    writeText(path.join(rootDir, "packages/app/src/__snapshots__/api.snap.ts"), "export const snapshot = true;\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.ok(manifest.governance.exclude.includes("**/e2e/**"));
+    assert.ok(manifest.governance.exclude.includes("e2e/**"));
+    assert.ok(manifest.governance.exclude.includes("**/codemods/**"));
+    assert.ok(manifest.governance.exclude.includes("codemods/**"));
+    assert.ok(manifest.governance.exclude.includes("**/dts-test/**"));
+    assert.ok(manifest.governance.exclude.includes("**/*playground*/**"));
+    assert.ok(manifest.governance.exclude.includes("template/**"));
+    assert.ok(manifest.governance.exclude.includes("guides/**"));
+    assert.ok(manifest.governance.exclude.includes("integrations/**"));
+    assert.ok(manifest.governance.exclude.includes("**/__generated__/**"));
+    assert.ok(manifest.governance.exclude.includes("**/__snapshots__/**"));
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry]), [
+      ["app", ["packages/app/src/**"], "packages/app/src/index.ts"],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference uses pyproject src layouts and Python absolute imports", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-python-src-"));
   try {

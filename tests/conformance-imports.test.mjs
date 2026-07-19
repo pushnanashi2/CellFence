@@ -61,7 +61,7 @@ function renderCase(testRoot, conformanceCase) {
       main: "./public.js",
       exports: {
         ".": "./public.js",
-        "./internal": "./internal.js",
+        ...(conformanceCase.producerPackageJsonExportsInternal ? { "./internal": "./internal.js" } : {}),
       },
     });
   }

@@ -711,6 +711,43 @@
       }
     },
     {
+      "id": "ts-package-subpath-exported-public-allowed",
+      "status": "supported-and-tested",
+      "syntaxFamily": "package-subpath",
+      "producerPackageName": "@cellfence-fixture/producer",
+      "producerPackageJson": true,
+      "producerPackageJsonExportsInternal": true,
+      "sourceFile": "src/consumer/use.ts",
+      "source": [
+        "import { secret } from \"@cellfence-fixture/producer/internal\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "clean"
+      }
+    },
+    {
+      "id": "ts-package-subpath-exported-public-beats-path-alias",
+      "status": "supported-and-tested",
+      "syntaxFamily": "package-subpath",
+      "producerPackageName": "@cellfence-fixture/producer",
+      "producerPackageJson": true,
+      "producerPackageJsonExportsInternal": true,
+      "extraFiles": {
+        "tsconfig.json": [
+          "{\"compilerOptions\":{\"baseUrl\":\".\",\"paths\":{\"@cellfence-fixture/producer\":[\"src/producer/public.ts\"],\"@cellfence-fixture/producer/*\":[\"src/producer/*\"]}}}"
+        ]
+      },
+      "sourceFile": "src/consumer/use.ts",
+      "source": [
+        "import { secret } from \"@cellfence-fixture/producer/internal\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "clean"
+      }
+    },
+    {
       "id": "ts-path-alias-private",
       "status": "supported-and-tested",
       "syntaxFamily": "esm-import",

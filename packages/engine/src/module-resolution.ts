@@ -48,7 +48,12 @@ type ImportScanContext = FileIndexContext & {
   rootDir: string;
 };
 
-type PackageConditionMode = "import" | "require" | "types";
+export type PackageConditionMode = "import" | "require" | "types";
+
+export type PackageExportTarget = {
+  exported: boolean;
+  targetPath?: string;
+};
 
 type PathAliasContext = {
   rootDir?: string;
@@ -73,6 +78,25 @@ type FunctionLikeWithBody =
   | ts.ConstructorDeclaration;
 
 const IMPORT_SCAN_HINT = /\b(?:from|import|export|require)\b/;
+const EXACT_SPECIFIER_EXTENSIONS = new Set([
+  ...SOURCE_EXTENSIONS,
+  ".css",
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".json",
+  ".less",
+  ".node",
+  ".png",
+  ".sass",
+  ".scss",
+  ".styl",
+  ".svg",
+  ".txt",
+  ".wasm",
+  ".webp",
+]);
+const DECLARATION_EXTENSIONS = [".d.ts", ".d.mts", ".d.cts"];
 
 export function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
@@ -139,23 +163,51 @@ function sourceExtensionsForRuntimeSpecifier(extension: string): string[] {
   return [];
 }
 
+function sourceExtensionsForDeclarationSpecifier(basePath: string): { basePath: string; extensions: string[] } | undefined {
+  if (basePath.endsWith(".d.ts")) return { basePath: basePath.slice(0, -".d.ts".length), extensions: [".ts", ".tsx"] };
+  if (basePath.endsWith(".d.mts")) return { basePath: basePath.slice(0, -".d.mts".length), extensions: [".mts"] };
+  if (basePath.endsWith(".d.cts")) return { basePath: basePath.slice(0, -".d.cts".length), extensions: [".cts"] };
+  return undefined;
+}
+
 export function candidateModulePaths(basePath: string): string[] {
   const candidates: string[] = [];
   const normalizedBasePath = normalizePath(basePath);
   const extension = path.extname(normalizedBasePath);
   addUniquePath(candidates, normalizedBasePath);
+  const declarationSource = sourceExtensionsForDeclarationSpecifier(normalizedBasePath);
+  if (declarationSource) {
+    for (const sourceExtension of declarationSource.extensions) {
+      addUniquePath(candidates, `${declarationSource.basePath}${sourceExtension}`);
+    }
+    return candidates;
+  }
   if (extension) {
-    const basePathWithoutExtension = normalizedBasePath.slice(0, -extension.length);
-    for (const sourceExtension of sourceExtensionsForRuntimeSpecifier(extension)) {
+    const sourceExtensions = sourceExtensionsForRuntimeSpecifier(extension);
+    if (sourceExtensions.length === 0 && EXACT_SPECIFIER_EXTENSIONS.has(extension)) return candidates;
+    const basePathWithoutExtension = sourceExtensions.length > 0
+      ? normalizedBasePath.slice(0, -extension.length)
+      : normalizedBasePath;
+    for (const sourceExtension of sourceExtensions.length > 0 ? sourceExtensions : [...SOURCE_EXTENSIONS, ...DECLARATION_EXTENSIONS]) {
       addUniquePath(candidates, `${basePathWithoutExtension}${sourceExtension}`);
+    }
+    if (sourceExtensions.length > 0) return candidates;
+    for (const sourceExtension of [...SOURCE_EXTENSIONS, ...DECLARATION_EXTENSIONS]) {
+      addUniquePath(candidates, `${normalizedBasePath}/index${sourceExtension}`);
     }
     return candidates;
   }
   for (const sourceExtension of SOURCE_EXTENSIONS) {
     addUniquePath(candidates, `${normalizedBasePath}${sourceExtension}`);
   }
+  for (const declarationExtension of DECLARATION_EXTENSIONS) {
+    addUniquePath(candidates, `${normalizedBasePath}${declarationExtension}`);
+  }
   for (const sourceExtension of SOURCE_EXTENSIONS) {
     addUniquePath(candidates, `${normalizedBasePath}/index${sourceExtension}`);
+  }
+  for (const declarationExtension of DECLARATION_EXTENSIONS) {
+    addUniquePath(candidates, `${normalizedBasePath}/index${declarationExtension}`);
   }
   return candidates;
 }
@@ -170,6 +222,11 @@ function existingFileFromCandidates(candidates: string[]): string | undefined {
     if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) return candidatePath;
   }
   return undefined;
+}
+
+function stripResourceQuery(specifier: string): string {
+  const queryIndex = specifier.search(/[?#]/);
+  return queryIndex === -1 ? specifier : specifier.slice(0, queryIndex);
 }
 
 function isPythonPath(filePath: string): boolean {
@@ -208,7 +265,7 @@ export function resolveRelativeImport(rootDir: string, importerPath: string, spe
     return resolvePythonRelativeModule(rootDir, importerPath, specifier);
   }
   const importerAbsolutePath = absolutePath(rootDir, importerPath);
-  const basePath = path.resolve(path.dirname(importerAbsolutePath), specifier);
+  const basePath = path.resolve(path.dirname(importerAbsolutePath), stripResourceQuery(specifier));
   const target = existingFileFromCandidates(candidateModulePaths(basePath));
   return target ? repoPath(rootDir, target) : undefined;
 }
@@ -361,6 +418,27 @@ function resolvePackageSelfSubpathFile(fromFilePath: string, specifier: string, 
   const subpath = specifier.slice(packageInfo.name.length + 1);
   const exportTarget = packageMapTarget(packageInfo.exports, `./${subpath}`, mode);
   return resolvePackageTargetFile(packageInfo.rootDir, exportTarget || `./${subpath}`);
+}
+
+export function resolvePackageExportTarget(
+  rootDir: string,
+  packageRoot: string,
+  packageName: string,
+  specifier: string,
+  mode: PackageConditionMode = "import",
+): PackageExportTarget {
+  const packageSpecifier = packageNameFromSpecifier(specifier);
+  if (packageSpecifier !== packageName) return { exported: false };
+  const packageJson = readJsonRecord(path.join(rootDir, packageRoot, "package.json"));
+  if (!packageJson || packageJson.exports === undefined) return { exported: false };
+  const subpath = specifier === packageName ? "." : `./${specifier.slice(packageName.length + 1)}`;
+  const exportTarget = packageMapTarget(packageJson.exports, subpath, mode);
+  if (!exportTarget) return { exported: false };
+  const absoluteTarget = resolvePackageTargetFile(path.resolve(rootDir, packageRoot), exportTarget);
+  return {
+    exported: true,
+    ...(absoluteTarget ? { targetPath: repoPath(rootDir, absoluteTarget) } : {}),
+  };
 }
 
 export function resolvePackageImportsTarget(rootDir: string, importerPath: string, specifier: string, mode: PackageConditionMode = "import"): string | undefined {
@@ -910,7 +988,7 @@ function bindingNames(name: ts.BindingName): string[] {
 function resolveLocalModuleFile(fromFilePath: string, specifier: string): string | undefined {
   // Stryker disable next-line MethodExpression: package specifiers are rejected by the leading-dot check; changing the secondary absolute-path guard is equivalent for non-local specifiers.
   if (!specifier.startsWith(".") && !specifier.startsWith("/")) return undefined;
-  const basePath = path.resolve(path.dirname(fromFilePath), specifier);
+  const basePath = path.resolve(path.dirname(fromFilePath), stripResourceQuery(specifier));
   for (const candidatePath of candidateModulePaths(basePath)) {
     if (fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()) return candidatePath;
   }
