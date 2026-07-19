@@ -178,6 +178,20 @@ report without cloning repositories.
 
 ## Evidence Bundles
 
+Run the local evidence-pipeline smoke before publishing or sharing a corpus
+claim:
+
+```bash
+npm run precision:pipeline:smoke
+```
+
+The smoke builds a tiny local corpus report, freezes an evidence bundle, injects
+two independent labels for each sampled finding, validates checksums, and runs
+`corpus-precision-claim`. The expected claim decision is
+`insufficient_evidence`: the sample is deliberately too small for a 99% lower
+bound. A passing smoke proves the bundle, labeling, and claim machinery is wired;
+it is not public-OSS precision evidence.
+
 After a corpus run, freeze the evidence bundle before labeling:
 
 ```bash
