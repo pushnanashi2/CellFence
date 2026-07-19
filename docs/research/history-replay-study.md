@@ -47,6 +47,18 @@ package scripts, never opens pull requests, and never files issues.
 
 ## Running
 
+Run the local mechanism smoke first:
+
+```bash
+npm run history:replay:smoke
+```
+
+The smoke creates a temporary local git repository, replays a clean before
+commit against an after commit that introduces a private import, runs baseline
+create/check, and writes `reports/history-replay-smoke.json`. It proves the
+history-replay machinery works on exact commits; it is not public-OSS precision,
+public-OSS recall, or upstream-defect evidence.
+
 ```bash
 npm run research:history -- \
   --corpus docs/research/corpora/history-replay.json \
