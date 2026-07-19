@@ -3,6 +3,11 @@
 This is a round2 diagnostic rerun of the reviewed-manifest public-OSS precision
 pilot. It is not a public precision claim.
 
+Follow-up: `docs/research/ts-js-reviewed-pilot-10-2026-07-19-round3.md`
+narrows the concrete resource detector false positives identified here. The
+generated-artifact and internal-wiring findings remain decision-required
+evidence, not detector fixes.
+
 ## Scope
 
 - Date: 2026-07-19
@@ -105,7 +110,7 @@ runtime loaders. These remain the strongest externally legible rule families.
 The corpus runner, evidence graph verification, deterministic sampling, label
 readiness validation, and claim verifier all worked end to end.
 
-## Remaining Precision Blockers
+## Remaining Precision Blockers As Of Round2
 
 The resource detector still overreaches in several important cases:
 

@@ -7,6 +7,11 @@ Round2 follow-up: `docs/research/ts-js-reviewed-pilot-10-2026-07-19-round2.md`
 reruns the same frozen corpus after package-export, resolver, scope, and
 public-surface tuning.
 
+Round3 follow-up: `docs/research/ts-js-reviewed-pilot-10-2026-07-19-round3.md`
+reruns the same corpus after narrowing resource detector false positives. It
+keeps generated artifacts and internal wiring as explicit decision-required
+evidence rather than auto-accepting them.
+
 ## Scope
 
 - Date: 2026-07-19

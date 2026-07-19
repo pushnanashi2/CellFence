@@ -154,6 +154,11 @@ The round2 rerun is documented in
 it reduces the same frozen corpus from 2406 raw findings to 89, but still
 reports `insufficient_evidence` because preliminary labels identify resource
 detector, generated-artifact, and internal package-policy blockers.
+The round3 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round3.md](ts-js-reviewed-pilot-10-2026-07-19-round3.md):
+it narrows the concrete resource detector false positives and reduces raw
+findings from 89 to 75 while leaving generated artifacts and internal wiring as
+explicit decision-required evidence.
 
 The script:
 

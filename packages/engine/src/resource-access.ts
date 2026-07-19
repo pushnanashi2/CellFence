@@ -87,6 +87,16 @@ function objectStringProperty(expression: ts.Expression | undefined, propertyNam
   return undefined;
 }
 
+function objectHasProperty(expression: ts.Expression | undefined, propertyNameText: string): boolean {
+  if (!expression || !ts.isObjectLiteralExpression(expression)) return false;
+  for (const property of expression.properties) {
+    if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) continue;
+    const name = property.name;
+    if ((ts.isIdentifier(name) && name.text === propertyNameText) || (ts.isStringLiteral(name) && name.text === propertyNameText)) return true;
+  }
+  return false;
+}
+
 function objectArrayStringProperty(expression: ts.ObjectLiteralExpression, propertyNameText: string): string[] {
   for (const property of expression.properties) {
     if (!ts.isPropertyAssignment(property)) continue;
@@ -435,6 +445,36 @@ function queueAccessMode(name: string): "publish" | "subscribe" | undefined {
   return undefined;
 }
 
+function routeReceiverLooksHttp(expression: ts.Expression): boolean {
+  if (!ts.isPropertyAccessExpression(expression)) return true;
+  const rootName = expressionRootName(expression.expression)?.toLowerCase();
+  if (!rootName) return false;
+  return ["app", "api", "router", "server", "fastify"].includes(rootName)
+    || rootName.endsWith("app")
+    || rootName.endsWith("router")
+    || rootName.endsWith("server");
+}
+
+function queueReceiverLooksExternal(expression: ts.Expression): boolean {
+  if (!ts.isPropertyAccessExpression(expression)) return true;
+  const rootName = expressionRootName(expression.expression)?.toLowerCase();
+  if (!rootName) return false;
+  return rootName.includes("bus")
+    || rootName.includes("broker")
+    || rootName.includes("channel")
+    || rootName.includes("consumer")
+    || rootName.includes("message")
+    || rootName.includes("producer")
+    || rootName.includes("pubsub")
+    || rootName.includes("queue")
+    || rootName.includes("topic");
+}
+
+function selectorLooksQueueTopic(selector: string): boolean {
+  if (selector.startsWith("/") || /^https?:\/\//.test(selector)) return false;
+  return !/^on[A-Z]/.test(selector);
+}
+
 function resourceAdapterEnabled(context: ResourceAccessAnalysisContext, adapter: BuiltInResourceAdapter): boolean {
   return context.manifest.governance?.resourceAdapters?.[adapter] !== "off";
 }
@@ -617,8 +657,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
         const isTypeOrmQueryBuilderMethod = typeOrmEnabled && ["from", "into", "update"].includes(methodName)
           && (chainContainsMethod(node.expression.expression, "createQueryBuilder")
             || chainContainsMethod(node.expression.expression, "delete")
-            || chainContainsMethod(node.expression.expression, "insert")
-            || chainContainsMethod(node.expression.expression, "update"));
+            || chainContainsMethod(node.expression.expression, "insert"));
         // Stryker restore all
         // Stryker disable all: read/write classification is asserted by select/from/delete/insert/update query-builder cases.
         const queryBuilderAccess = (isGenericQueryBuilderMethod || isTypeOrmQueryBuilderMethod) && QUERY_BUILDER_WRITE_METHODS.has(methodName)
@@ -803,7 +842,10 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
 
       // Stryker disable all: literal file/http/queue dispatch is fixed by adapter-off and near-miss black-box tests; remaining mutants only toggle equivalent dispatcher guard forms.
       if (name && firstArgumentText) {
-        if (FILE_READ_METHODS.has(name)) {
+        const hasFdOption = name === "createReadStream" || name === "createWriteStream"
+          ? objectHasProperty(node.arguments[1], "fd")
+          : false;
+        if (FILE_READ_METHODS.has(name) && !hasFdOption) {
             // Stryker disable next-line ConditionalExpression: file adapter-off behavior is covered by the all-adapters-disabled contract.
             if (fileEnabled) {
             addResourceAccess(accesses, {
@@ -815,7 +857,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               ...resourceAccessSource(name),
             });
           }
-        } else if (FILE_WRITE_METHODS.has(name)) {
+        } else if (FILE_WRITE_METHODS.has(name) && !hasFdOption) {
           if (fileEnabled) {
             addResourceAccess(accesses, {
               kind: "file",
@@ -839,7 +881,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               ...resourceAccessSource(name),
             });
           }
-        } else if (["get", "post", "put", "patch", "delete"].includes(name) && firstArgumentText.startsWith("/")) {
+        } else if (["get", "post", "put", "patch", "delete"].includes(name) && firstArgumentText.startsWith("/") && routeReceiverLooksHttp(node.expression)) {
           if (httpEnabled) {
             addResourceAccess(accesses, {
               kind: "http",
@@ -854,7 +896,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
 
         const queueMode = queueAccessMode(name);
         // Stryker disable next-line Regex: queue detection must reject HTTP-looking topics, covered by queue near-miss tests.
-        if (queueEnabled && queueMode && !firstArgumentText.startsWith("/") && !/^https?:\/\//.test(firstArgumentText)) {
+        if (queueEnabled && queueMode && selectorLooksQueueTopic(firstArgumentText) && queueReceiverLooksExternal(node.expression)) {
           addResourceAccess(accesses, {
             kind: "queue",
             access: queueMode,
