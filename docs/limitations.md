@@ -18,7 +18,7 @@ Version 0.x is deliberately narrow:
 - computed dynamic imports and computed CommonJS `require()` calls cannot be resolved statically;
 - `check --changed` still performs full head/base repository analysis in v0.x, then compares stable finding fingerprints to report only newly introduced findings;
 - Markdown and SARIF output are report formats over the same deterministic findings, not separate analyzers;
-- the reusable GitHub Action is pre-release and invokes the published CLI pinned to the package version verified by `npm run release:verify`;
+- the reusable GitHub Action is pre-release and invokes the published CLI through a `version` input; the default follows npm `latest`, while required checks should set an exact published version;
 - CellFence does not identify which particular agent wrote a changed file;
 - CellFence does not prevent an agent from editing a path at runtime.
 

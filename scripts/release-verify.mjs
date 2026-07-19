@@ -79,14 +79,18 @@ if (strictChangelog && !unreleasedHasOnlyPlaceholder(unreleasedSection)) {
 }
 
 const githubAction = fs.readFileSync("packages/github-action/action.yml", "utf8");
-const actionCliVersions = [...githubAction.matchAll(/\bcellfence@(\d+\.\d+\.\d+)\b/g)].map((match) => match[1]);
-if (actionCliVersions.length === 0) {
-  findings.push("packages/github-action/action.yml must pin the published cellfence CLI version");
+const hardcodedActionCliVersions = [...githubAction.matchAll(/\bcellfence@(\d+\.\d+\.\d+)\b/g)].map((match) => match[1]);
+if (hardcodedActionCliVersions.length > 0) {
+  findings.push(`packages/github-action/action.yml must not hard-code an exact CLI version; found ${[...new Set(hardcodedActionCliVersions)].join(", ")}`);
 }
-for (const actionCliVersion of new Set(actionCliVersions)) {
-  if (actionCliVersion !== packageJson.version) {
-    findings.push(`packages/github-action/action.yml pins cellfence@${actionCliVersion}, expected ${packageJson.version}`);
-  }
+if (!/^\s{2}version:\r?\n\s{4}description:/m.test(githubAction)) {
+  findings.push("packages/github-action/action.yml must expose a version input for the published CLI");
+}
+if (!/^\s{4}default:\s*latest\s*$/m.test(githubAction)) {
+  findings.push("packages/github-action/action.yml version input must default to npm latest so main does not reference an unpublished CLI");
+}
+if (!/cli_package="cellfence@\$\{cli_version\}"/.test(githubAction)) {
+  findings.push("packages/github-action/action.yml must invoke cellfence through the version input");
 }
 
 const cliSource = fs.readFileSync("packages/cli/src/index.ts", "utf8");

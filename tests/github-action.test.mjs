@@ -40,9 +40,16 @@ function writeValidProject(tempDir, { writeDefaultManifest = false } = {}) {
 test("GitHub Action wrapper does not assume CellFence source checkout in consumer repositories", () => {
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
-  assert.match(actionYaml, new RegExp(`npx --yes cellfence@${packageJson.version.replaceAll(".", "\\.")} baseline check`));
-  assert.match(actionYaml, new RegExp(`npx --yes cellfence@${packageJson.version.replaceAll(".", "\\.")} check`));
-  assert.match(actionYaml, /check --manifest "\$\{\{ inputs\.manifest \}\}" "\$\{evidence_args\[@\]\}"/);
+  assert.match(actionYaml, /^\s{2}version:\r?\n/m);
+  assert.match(actionYaml, /^\s{4}default:\s*latest\s*$/m);
+  assert.match(actionYaml, /cli_package="cellfence@\$\{cli_version\}"/);
+  assert.doesNotMatch(actionYaml, new RegExp(`cellfence@${packageJson.version.replaceAll(".", "\\.")}`));
+  assert.match(actionYaml, /CELLFENCE_ACTION_VERSION:\s*\$\{\{ inputs\.version \}\}/);
+  assert.match(actionYaml, /CELLFENCE_ACTION_MANIFEST:\s*\$\{\{ inputs\.manifest \}\}/);
+  assert.match(actionYaml, /npx --yes "\$\{cli_package\}" baseline check/);
+  assert.match(actionYaml, /npx --yes "\$\{cli_package\}" check/);
+  assert.match(actionYaml, /check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}" "\$\{evidence_args\[@\]\}"/);
+  assert.doesNotMatch(actionYaml, /--manifest "\$\{\{ inputs\.manifest \}\}"/);
 });
 
 test("GitHub Action entrypoint reads action inputs and runs the repository check", () => {

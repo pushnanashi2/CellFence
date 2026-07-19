@@ -73,6 +73,8 @@ npm publish --provenance --access public
 
 Do not put this command in a root npm script during v0.x; `release:verify` intentionally fails if the root package defines a publish script.
 
+The reusable GitHub Action must not hard-code the next package version while that version is still unpublished. It runs `cellfence@${{ inputs.version }}` and defaults that input to npm `latest`; required consumer workflows should set an exact version after that version exists on npm.
+
 ## Publish Workflow
 
 Create and push the release tag only after the release commit and CI are green:

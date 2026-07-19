@@ -13,18 +13,32 @@ inputs:
     description: Optional runtime resource evidence JSON path.
     required: false
     default: ""
+  version:
+    description: Published CellFence CLI version to run. Use an exact version for required checks.
+    required: false
+    default: latest
 runs:
   using: composite
   steps:
     - shell: bash
+      env:
+        CELLFENCE_ACTION_MANIFEST: ${{ inputs.manifest }}
+        CELLFENCE_ACTION_BASELINE: ${{ inputs.baseline }}
+        CELLFENCE_ACTION_EVIDENCE: ${{ inputs.evidence }}
+        CELLFENCE_ACTION_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
-        evidence_args=()
-        if [ -n "${{ inputs.evidence }}" ]; then
-          evidence_args=(--evidence "${{ inputs.evidence }}")
+        cli_version="${CELLFENCE_ACTION_VERSION}"
+        if [ -z "${cli_version}" ]; then
+          cli_version="latest"
         fi
-        if [ -n "${{ inputs.baseline }}" ]; then
-          npx --yes cellfence@0.1.14 baseline check --manifest "${{ inputs.manifest }}" --baseline "${{ inputs.baseline }}" "${evidence_args[@]}"
+        cli_package="cellfence@${cli_version}"
+        evidence_args=()
+        if [ -n "${CELLFENCE_ACTION_EVIDENCE}" ]; then
+          evidence_args=(--evidence "${CELLFENCE_ACTION_EVIDENCE}")
+        fi
+        if [ -n "${CELLFENCE_ACTION_BASELINE}" ]; then
+          npx --yes "${cli_package}" baseline check --manifest "${CELLFENCE_ACTION_MANIFEST}" --baseline "${CELLFENCE_ACTION_BASELINE}" "${evidence_args[@]}"
         else
-          npx --yes cellfence@0.1.14 check --manifest "${{ inputs.manifest }}" "${evidence_args[@]}"
+          npx --yes "${cli_package}" check --manifest "${CELLFENCE_ACTION_MANIFEST}" "${evidence_args[@]}"
         fi

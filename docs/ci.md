@@ -92,11 +92,21 @@ jobs:
         run: exit 1
 ```
 
-The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release.
+The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release and runs the published npm CLI, not the source tree from the Action ref.
 
 For PR discussion, post or summarize `tmp/cellfence/comment.md`; it is generated from the same findings as JSON and SARIF.
 
-The reusable Action wrapper invokes the published CLI with an exact `cellfence@<version>` pin. `npm run release:verify` fails if that pin drifts from the package version, so Action users do not silently run an older CLI than the tag they selected.
+The reusable Action wrapper accepts a `version` input. Its default is npm `latest` so the `main` branch does not point at an unpublished pre-release CLI. For required checks, set an exact published version:
+
+```yaml
+- uses: OWNER/REPOSITORY/packages/github-action@v0.1.13
+  with:
+    version: 0.1.13
+    manifest: cellfence.manifest.json
+    baseline: cellfence.baseline.json
+```
+
+`npm run release:verify` fails if the Action hard-codes an exact CLI version. This prevents release-preparation commits from publishing an Action that tries to download a package version that is not yet on npm.
 
 For real enforcement, configure the architecture job as a required status check on a protected branch. A workflow file inside the repository is not, by itself, a root of trust.
 
@@ -162,7 +172,9 @@ jobs:
         with:
           node-version: 22
       - name: Install reviewed CellFence package
-        run: npm install --global cellfence@0.1.14
+        env:
+          CELLFENCE_VERSION: 0.1.13 # replace with the exact published version approved for this workflow
+        run: npm install --global "cellfence@${CELLFENCE_VERSION}"
       - name: Sign reviewed baseline only
         env:
           CELLFENCE_BASELINE_ED25519_PRIVATE_KEY: ${{ secrets.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY }}
