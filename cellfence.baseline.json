@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-19T15:48:53.192Z",
+  "generatedAt": "2026-07-19T17:14:06.464Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -74,7 +74,7 @@
     "plugin-api": {
       "ownedPathPatterns": 1,
       "publicSymbols": 23,
-      "publicSurfaceLines": 174,
+      "publicSurfaceLines": 176,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-api/**"
@@ -105,7 +105,7 @@
         "defineReporter",
         "defineRule"
       ],
-      "publicSurfaceHash": "e1d0fb0a6f77d99222e9c8d21b0883560538c16984120dd4f938b3396aff06ec",
+      "publicSurfaceHash": "2421d635410b331b6e9dc760aa3fbea2b63481cb46883d8e84fbfe02ae6deeca",
       "dependencyEdges": [
         "plugin-api->schema"
       ],
@@ -115,7 +115,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 85,
-      "publicSurfaceLines": 1934,
+      "publicSurfaceLines": 1972,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -208,7 +208,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "e9f73c699d1fd044a193788ed99ad19d9a28fc487e65e2b33510ea428508377b",
+      "publicSurfaceHash": "45c287c09deba524b04474d27ff167ed1134aca6cd958148931d01b46c34dc03",
       "dependencyEdges": [
         "engine->schema"
       ],

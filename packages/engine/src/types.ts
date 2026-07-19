@@ -13,7 +13,7 @@ import type {
 } from "@cellfence/schema";
 import type { FileIndexContext } from "./file-index.js";
 import type { EvidenceGraph, FindingWitness } from "./governance/model.js";
-import type { PathAlias } from "./module-resolution.js";
+import type { PackageExportResolutionState, PathAlias } from "./module-resolution.js";
 import type { ResourceAccessMode } from "./resource-access.js";
 
 export type RuleId =
@@ -114,6 +114,8 @@ export type PluginImportReference = {
   artifactLaneId?: string;
   isExternal: boolean;
   isPublicPackage: boolean;
+  packageExportState?: PackageExportResolutionState;
+  packageExportReason?: string;
 };
 
 export type PluginResourceAccess = {
@@ -485,6 +487,8 @@ export type ResolvedImport = {
   matchedSpecifier?: string;
   isExternal: boolean;
   isPublicPackage: boolean;
+  packageExportState?: PackageExportResolutionState;
+  packageExportReason?: string;
 };
 
 export type AnalysisContext = FileIndexContext & {

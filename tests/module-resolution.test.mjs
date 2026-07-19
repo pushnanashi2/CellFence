@@ -208,7 +208,40 @@ test("workspace package export resolution separates public, private, generated, 
       exports: {
         ".": "./src/public.js",
         "./generated": "./dist/generated.js",
+        "./blocked": null,
       },
+    });
+    fs.mkdirSync(path.join(rootDir, "packages/wildcard/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/wildcard/src/public.ts"), "export const wildcardPublic = true;\n");
+    fs.writeFileSync(path.join(rootDir, "packages/wildcard/src/feature.ts"), "export const wildcard = true;\n");
+    writeJson(path.join(rootDir, "packages/wildcard/package.json"), {
+      name: "@scope/wildcard",
+      exports: {
+        ".": "./src/public.js",
+        "./*": "./src/*.js",
+        "./suffix/*": "./src/*.js",
+        "./suffix/*.private": null,
+        "./private/*": null,
+        "./array-private/*": [null],
+      },
+    });
+    fs.mkdirSync(path.join(rootDir, "packages/array/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/array/src/index.ts"), "export const arrayRoot = true;\n");
+    writeJson(path.join(rootDir, "packages/array/package.json"), {
+      name: "@scope/array-root",
+      exports: [null, "./src/index.js"],
+    });
+    fs.mkdirSync(path.join(rootDir, "packages/string/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/string/src/index.ts"), "export const stringRoot = true;\n");
+    writeJson(path.join(rootDir, "packages/string/package.json"), {
+      name: "@scope/string-root",
+      exports: "./src/index.js",
+    });
+    fs.mkdirSync(path.join(rootDir, "packages/conditional/src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "packages/conditional/src/index.ts"), "export const conditionalRoot = true;\n");
+    writeJson(path.join(rootDir, "packages/conditional/package.json"), {
+      name: "@scope/conditional-root",
+      exports: { import: "./src/index.js" },
     });
 
     assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/core"), {
@@ -225,6 +258,46 @@ test("workspace package export resolution separates public, private, generated, 
       state: "NOT_EXPORTED_PRIVATE",
       exported: false,
       reason: "specifier is not declared in the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/core/blocked"), {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is explicitly excluded by the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/wildcard", "@scope/wildcard", "@scope/wildcard/feature"), {
+      state: "PUBLIC_RESOLVED",
+      exported: true,
+      targetPath: "packages/wildcard/src/feature.ts",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/wildcard", "@scope/wildcard", "@scope/wildcard/private/feature"), {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is explicitly excluded by the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/wildcard", "@scope/wildcard", "@scope/wildcard/suffix/feature.private"), {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is explicitly excluded by the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/wildcard", "@scope/wildcard", "@scope/wildcard/array-private/feature"), {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is explicitly excluded by the package exports map",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/array", "@scope/array-root", "@scope/array-root"), {
+      state: "PUBLIC_RESOLVED",
+      exported: true,
+      targetPath: "packages/array/src/index.ts",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/string", "@scope/string-root", "@scope/string-root"), {
+      state: "PUBLIC_RESOLVED",
+      exported: true,
+      targetPath: "packages/string/src/index.ts",
+    });
+    assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/conditional", "@scope/conditional-root", "@scope/conditional-root"), {
+      state: "PUBLIC_RESOLVED",
+      exported: true,
+      targetPath: "packages/conditional/src/index.ts",
     });
     assert.deepEqual(resolvePackageExportTarget(rootDir, "packages/core", "@scope/core", "@scope/other"), {
       state: "UNRESOLVED_UNKNOWN",

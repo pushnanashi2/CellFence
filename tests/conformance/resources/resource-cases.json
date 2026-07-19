@@ -28,7 +28,7 @@
       "resourceFamily": "typescript-file-http",
       "files": {
         "src/runtime/public.ts": [
-          "declare const fs: { readFileSync(path: string): string };",
+          "import * as fs from 'node:fs';",
           "declare const fetch: (url: string) => unknown;",
           "export function runRuntime(): void {",
           "  fs.readFileSync('data/input.json');",
@@ -62,7 +62,7 @@
       "resourceFamily": "typescript-file-http",
       "files": {
         "src/runtime/public.ts": [
-          "declare const fs: { readFileSync(path: string): string };",
+          "import * as fs from 'node:fs';",
           "export function runRuntime(): void {",
           "  fs.readFileSync('data/input.json');",
           "}"
@@ -88,7 +88,7 @@
       "resourceFamily": "typescript-file-unresolved",
       "files": {
         "src/runtime/public.ts": [
-          "declare const fs: { readFileSync(path: string): string };",
+          "import * as fs from 'node:fs';",
           "export function runRuntime(fileName: string): void {",
           "  fs.readFileSync(fileName);",
           "}"

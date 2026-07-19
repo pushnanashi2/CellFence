@@ -72,3 +72,6 @@ These remain explicit review decisions, not auto-acceptance targets:
 - file resource detection still needs a separate import/binding provenance pass
   before direct `readFile`-style helpers can be treated as confirmed Node fs
   calls rather than ambiguous local functions.
+
+The follow-up round5 diagnostic is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round5.md](ts-js-reviewed-pilot-10-2026-07-19-round5.md).

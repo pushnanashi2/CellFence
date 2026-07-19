@@ -163,6 +163,23 @@ The round4 diagnostic rerun is documented in
 [ts-js-reviewed-pilot-10-2026-07-19-round4.md](ts-js-reviewed-pilot-10-2026-07-19-round4.md):
 it adds explicit package-export resolution states and method-name-only
 HTTP/queue near-miss guards while preserving the round3 raw finding count.
+The round5 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round5.md](ts-js-reviewed-pilot-10-2026-07-19-round5.md):
+it adds Node fs import/require provenance and package exports null/shorthand
+semantics while preserving the round4 raw finding count.
+The round6 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round6.md](ts-js-reviewed-pilot-10-2026-07-19-round6.md):
+it closes second-pass review gaps for scoped fs bindings, fs namespace aliases,
+wildcard export specificity, package target array fallback, and exact package
+import state propagation while preserving the round4/round5 raw finding count.
+The round7 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round7.md](ts-js-reviewed-pilot-10-2026-07-19-round7.md):
+it closes the final scoped fs leakage and array-wrapped null export gaps while
+preserving the round4-round6 raw finding count.
+The round8 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-19-round8.md](ts-js-reviewed-pilot-10-2026-07-19-round8.md):
+it adds inline fs require support while preserving the round4-round7 raw
+finding count.
 
 The script:
 

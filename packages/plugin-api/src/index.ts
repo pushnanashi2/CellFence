@@ -62,6 +62,8 @@ export type CellFenceImportReference = {
   artifactLaneId?: string;
   isExternal: boolean;
   isPublicPackage: boolean;
+  packageExportState?: "PUBLIC_RESOLVED" | "PUBLIC_DECLARED_GENERATED_TARGET_MISSING" | "NOT_EXPORTED_PRIVATE" | "UNRESOLVED_UNKNOWN";
+  packageExportReason?: string;
 };
 
 export type CellFenceResourceAccess = {

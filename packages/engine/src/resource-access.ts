@@ -175,6 +175,7 @@ const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
 const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
 const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
+const FS_MODULE_SPECIFIERS = new Set(["fs", "node:fs", "fs/promises", "node:fs/promises"]);
 const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|Queue|Worker|fetch|request|query|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
 const PYTHON_RESOURCE_SCAN_HINT = /\b(?:django|FastAPI|APIRouter|Celery|shared_task|sqlalchemy|models\.Model|objects|path|re_path|url|select|insert|update|delete|Table|text|query|execute|get|send_task|delay|apply_async|bulk_save_objects|bulk_insert_mappings|bulk_update_mappings)\b|__tablename__/;
 const PYTHON_RESOURCE_ADAPTERS = new Map<string, BuiltInResourceAdapter>([
@@ -370,6 +371,305 @@ function collectDynamicSqlVariables(sourceFile: ts.SourceFile): Set<string> {
   return dynamicSqlVariables;
 }
 
+type FsBindings = {
+  namespaces: Map<string, FsBindingDeclaration[]>;
+  callees: Map<string, FsCalleeBinding[]>;
+};
+
+type FsBindingDeclaration = {
+  start: number;
+  scopeStart: number;
+  scopeEnd: number;
+  hoisted: boolean;
+};
+
+type FsCalleeBinding = FsBindingDeclaration & {
+  methodName: string;
+};
+
+function bindingNameIncludes(bindingName: ts.BindingName, targetName: string): boolean {
+  if (ts.isIdentifier(bindingName)) return bindingName.text === targetName;
+  return bindingName.elements.some((element) => {
+    if (ts.isOmittedExpression(element)) return false;
+    return bindingNameIncludes(element.name, targetName);
+  });
+}
+
+function variableDeclarationListForBinding(name: ts.Identifier): ts.VariableDeclarationList | undefined {
+  let current: ts.Node | undefined = name;
+  while (current) {
+    if (ts.isVariableDeclaration(current) && ts.isVariableDeclarationList(current.parent)) return current.parent;
+    current = current.parent;
+  }
+  return undefined;
+}
+
+function lexicalScopeForBinding(name: ts.Identifier): ts.Node {
+  const declarationList = variableDeclarationListForBinding(name);
+  const usesFunctionScope = declarationList ? (declarationList.flags & ts.NodeFlags.BlockScoped) === 0 : false;
+  let current: ts.Node = name;
+  while (current.parent) {
+    current = current.parent;
+    if (ts.isSourceFile(current)) return current;
+    if (usesFunctionScope) {
+      if (ts.isFunctionLike(current)) return current;
+    } else if (ts.isBlock(current) || ts.isModuleBlock(current) || ts.isCaseClause(current) || ts.isDefaultClause(current)) {
+      return current;
+    }
+  }
+  return name.getSourceFile();
+}
+
+function fsBindingDeclaration(sourceFile: ts.SourceFile, name: ts.Identifier, options: { hoisted?: boolean } = {}): FsBindingDeclaration {
+  const scope = lexicalScopeForBinding(name);
+  return {
+    start: name.getStart(sourceFile),
+    scopeStart: scope.getStart(sourceFile),
+    scopeEnd: scope.getEnd(),
+    hoisted: Boolean(options.hoisted),
+  };
+}
+
+function addFsNamespaceBinding(bindings: FsBindings, sourceFile: ts.SourceFile, name: ts.Identifier, options: { hoisted?: boolean } = {}): void {
+  const declarations = bindings.namespaces.get(name.text) || [];
+  declarations.push(fsBindingDeclaration(sourceFile, name, options));
+  bindings.namespaces.set(name.text, declarations);
+}
+
+function addFsCalleeBinding(bindings: FsBindings, sourceFile: ts.SourceFile, name: ts.Identifier, methodName: string, options: { hoisted?: boolean } = {}): void {
+  const declarations = bindings.callees.get(name.text) || [];
+  declarations.push({ ...fsBindingDeclaration(sourceFile, name, options), methodName });
+  bindings.callees.set(name.text, declarations);
+}
+
+function addFsObjectBinding(bindings: FsBindings, sourceFile: ts.SourceFile, bindingName: ts.BindingName): void {
+  if (ts.isIdentifier(bindingName)) {
+    addFsNamespaceBinding(bindings, sourceFile, bindingName);
+    return;
+  }
+  for (const element of bindingName.elements) {
+    if (ts.isOmittedExpression(element)) continue;
+    const property = element.propertyName;
+    const importedName = property && ts.isIdentifier(property) ? property.text : ts.isIdentifier(element.name) ? element.name.text : undefined;
+    if (!importedName) continue;
+    if (importedName === "promises") {
+      if (ts.isIdentifier(element.name)) addFsNamespaceBinding(bindings, sourceFile, element.name);
+      else addFsObjectBinding(bindings, sourceFile, element.name);
+      continue;
+    }
+    if (ts.isIdentifier(element.name) && (FILE_READ_METHODS.has(importedName) || FILE_WRITE_METHODS.has(importedName))) addFsCalleeBinding(bindings, sourceFile, element.name, importedName);
+  }
+}
+
+function requireModuleSpecifier(sourceFile: ts.SourceFile, expression: ts.Expression): string | undefined {
+  if (!ts.isCallExpression(expression) || !ts.isIdentifier(expression.expression) || expression.expression.text !== "require") return undefined;
+  if (declarationShadowsName(sourceFile, expression.expression, "require")) return undefined;
+  return literalText(expression.arguments[0]);
+}
+
+function collectFsBindings(sourceFile: ts.SourceFile): FsBindings {
+  const bindings: FsBindings = { namespaces: new Map<string, FsBindingDeclaration[]>(), callees: new Map<string, FsCalleeBinding[]>() };
+  function visit(node: ts.Node): void {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && FS_MODULE_SPECIFIERS.has(node.moduleSpecifier.text)) {
+      const importClause = node.importClause;
+      if (importClause?.isTypeOnly) {
+        ts.forEachChild(node, visit);
+        return;
+      }
+      if (importClause?.name) addFsNamespaceBinding(bindings, sourceFile, importClause.name, { hoisted: true });
+      if (importClause?.namedBindings) {
+        if (ts.isNamespaceImport(importClause.namedBindings)) {
+          addFsNamespaceBinding(bindings, sourceFile, importClause.namedBindings.name, { hoisted: true });
+        } else {
+          for (const element of importClause.namedBindings.elements) {
+            if (element.isTypeOnly) continue;
+            const importedName = (element.propertyName || element.name).text;
+            if (importedName === "promises") addFsNamespaceBinding(bindings, sourceFile, element.name, { hoisted: true });
+            if (FILE_READ_METHODS.has(importedName) || FILE_WRITE_METHODS.has(importedName)) addFsCalleeBinding(bindings, sourceFile, element.name, importedName, { hoisted: true });
+          }
+        }
+      }
+    }
+
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      const moduleSpecifier = requireModuleSpecifier(sourceFile, node.initializer);
+      if (moduleSpecifier && FS_MODULE_SPECIFIERS.has(moduleSpecifier)) {
+        addFsObjectBinding(bindings, sourceFile, node.name);
+      } else if (ts.isPropertyAccessExpression(node.initializer)) {
+        const property = node.initializer.name.text;
+        const requiredModule = requireModuleSpecifier(sourceFile, node.initializer.expression);
+        if (requiredModule && FS_MODULE_SPECIFIERS.has(requiredModule)) {
+          if (property === "promises") {
+            if (ts.isIdentifier(node.name)) addFsNamespaceBinding(bindings, sourceFile, node.name);
+            else addFsObjectBinding(bindings, sourceFile, node.name);
+          } else if ((FILE_READ_METHODS.has(property) || FILE_WRITE_METHODS.has(property)) && ts.isIdentifier(node.name)) {
+            addFsCalleeBinding(bindings, sourceFile, node.name, property);
+          }
+        } else if (fsNamespaceMethodName(sourceFile, node.initializer, bindings) && ts.isIdentifier(node.name)) {
+          addFsCalleeBinding(bindings, sourceFile, node.name, fsNamespaceMethodName(sourceFile, node.initializer, bindings) as string);
+        } else if (property === "promises" && fsNamespaceExpressionRootIsBound(sourceFile, node.initializer.expression, bindings)) {
+          addFsObjectBinding(bindings, sourceFile, node.name);
+        }
+      } else if (fsNamespaceExpressionRootIsBound(sourceFile, node.initializer, bindings)) {
+        addFsObjectBinding(bindings, sourceFile, node.name);
+      } else if (ts.isIdentifier(node.name)) {
+        const methodName = fsNamespaceMethodName(sourceFile, node.initializer, bindings);
+        if (methodName) {
+          addFsCalleeBinding(bindings, sourceFile, node.name, methodName);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return bindings;
+}
+
+function bindingNameDeclarationStarts(sourceFile: ts.SourceFile, bindingName: ts.BindingName, targetName: string): number[] {
+  if (ts.isIdentifier(bindingName)) return bindingName.text === targetName ? [bindingName.getStart(sourceFile)] : [];
+  return bindingName.elements.flatMap((element) => {
+    if (ts.isOmittedExpression(element)) return [];
+    return bindingNameDeclarationStarts(sourceFile, element.name, targetName);
+  });
+}
+
+function fsBindingIsVisible(declaration: FsBindingDeclaration, nodeStart: number): boolean {
+  return (declaration.hoisted || declaration.start < nodeStart) && declaration.scopeStart <= nodeStart && nodeStart <= declaration.scopeEnd;
+}
+
+function fsVisibleNamespaceStarts(bindings: FsBindings, targetName: string, nodeStart: number): Set<number> {
+  return new Set((bindings.namespaces.get(targetName) || [])
+    .filter((declaration) => fsBindingIsVisible(declaration, nodeStart))
+    .map((declaration) => declaration.start));
+}
+
+function fsVisibleCalleeBinding(bindings: FsBindings, targetName: string, nodeStart: number): FsCalleeBinding | undefined {
+  return (bindings.callees.get(targetName) || [])
+    .filter((declaration) => fsBindingIsVisible(declaration, nodeStart))
+    .sort((left, right) => right.start - left.start)[0];
+}
+
+function fsVisibleCalleeStarts(bindings: FsBindings, targetName: string, nodeStart: number): Set<number> {
+  return new Set((bindings.callees.get(targetName) || [])
+    .filter((declaration) => fsBindingIsVisible(declaration, nodeStart))
+    .map((declaration) => declaration.start));
+}
+
+function declarationStartIsShadow(start: number, allowedStarts: ReadonlySet<number>): boolean {
+  return !allowedStarts.has(start);
+}
+
+function statementDeclarationStarts(sourceFile: ts.SourceFile, statement: ts.Statement, targetName: string): number[] {
+  if (ts.isVariableStatement(statement)) {
+    return statement.declarationList.declarations.flatMap((declaration) => bindingNameDeclarationStarts(sourceFile, declaration.name, targetName));
+  }
+  if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) && statement.name?.text === targetName) {
+    return [statement.name.getStart(sourceFile)];
+  }
+  return [];
+}
+
+function functionScopedVarDeclarationStarts(sourceFile: ts.SourceFile, scope: ts.SignatureDeclaration, targetName: string): number[] {
+  const body = (scope as { body?: ts.Node }).body;
+  if (!body) return [];
+  const starts: number[] = [];
+  function visit(node: ts.Node): void {
+    if (node !== body && ts.isFunctionLike(node)) return;
+    if (ts.isVariableDeclarationList(node) && (node.flags & ts.NodeFlags.BlockScoped) === 0) {
+      for (const declaration of node.declarations) starts.push(...bindingNameDeclarationStarts(sourceFile, declaration.name, targetName));
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(body);
+  return starts;
+}
+
+function hasShadowStart(starts: readonly number[], allowedStarts: ReadonlySet<number>): boolean {
+  return starts.some((start) => declarationStartIsShadow(start, allowedStarts));
+}
+
+function hasAllowedStart(starts: readonly number[], allowedStarts: ReadonlySet<number>): boolean {
+  return starts.some((start) => !declarationStartIsShadow(start, allowedStarts));
+}
+
+function declarationShadowsName(sourceFile: ts.SourceFile, node: ts.Node, targetName: string, allowedStarts: ReadonlySet<number> = new Set<number>()): boolean {
+  let current: ts.Node | undefined = node.parent;
+  while (current) {
+    if (ts.isFunctionLike(current) && current.parameters.some((parameter) => bindingNameIncludes(parameter.name, targetName))) return true;
+    if (ts.isFunctionLike(current)) {
+      const varStarts = functionScopedVarDeclarationStarts(sourceFile, current, targetName);
+      if (hasShadowStart(varStarts, allowedStarts)) return true;
+      if (hasAllowedStart(varStarts, allowedStarts)) return false;
+    }
+    if (ts.isCatchClause(current) && current.variableDeclaration && bindingNameIncludes(current.variableDeclaration.name, targetName)) return true;
+    if (ts.isForInStatement(current) || ts.isForOfStatement(current)) {
+      const initializer = current.initializer;
+      if (ts.isVariableDeclarationList(initializer) && initializer.declarations.some((declaration) => bindingNameIncludes(declaration.name, targetName))) return true;
+    }
+    if (ts.isForStatement(current) && current.initializer && ts.isVariableDeclarationList(current.initializer)) {
+      if (current.initializer.declarations.some((declaration) => bindingNameIncludes(declaration.name, targetName))) return true;
+    }
+    if (ts.isSourceFile(current) || ts.isBlock(current) || ts.isModuleBlock(current) || ts.isCaseClause(current) || ts.isDefaultClause(current)) {
+      let sawAllowedDeclarationInScope = false;
+      for (const statement of current.statements) {
+        const starts = statementDeclarationStarts(sourceFile, statement, targetName);
+        if (hasShadowStart(starts, allowedStarts)) return true;
+        if (hasAllowedStart(starts, allowedStarts)) sawAllowedDeclarationInScope = true;
+      }
+      if (sawAllowedDeclarationInScope) return false;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+function fsNamespaceExpressionRootIsBound(sourceFile: ts.SourceFile, expression: ts.Expression, bindings: FsBindings): boolean {
+  const rootName = expressionRootName(expression);
+  if (!rootName) return false;
+  const nodeStart = expression.getStart(sourceFile);
+  const allowedStarts = fsVisibleNamespaceStarts(bindings, rootName, nodeStart);
+  return allowedStarts.size > 0 && !declarationShadowsName(sourceFile, expression, rootName, allowedStarts);
+}
+
+function fsNamespaceMethodName(sourceFile: ts.SourceFile, expression: ts.Expression, bindings: FsBindings): string | undefined {
+  if (!ts.isPropertyAccessExpression(expression)) return undefined;
+  const methodName = expression.name.text;
+  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  return fsNamespaceExpressionRootIsBound(sourceFile, expression.expression, bindings) ? methodName : undefined;
+}
+
+function fsInlineRequireMethodName(sourceFile: ts.SourceFile, expression: ts.PropertyAccessExpression): string | undefined {
+  const methodName = expression.name.text;
+  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  const directModule = requireModuleSpecifier(sourceFile, expression.expression);
+  if (directModule && FS_MODULE_SPECIFIERS.has(directModule)) return methodName;
+  if (ts.isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "promises") {
+    const promiseModule = requireModuleSpecifier(sourceFile, expression.expression.expression);
+    if (promiseModule === "fs" || promiseModule === "node:fs") return methodName;
+  }
+  return undefined;
+}
+
+function fsFileMethodName(sourceFile: ts.SourceFile, callExpression: ts.Expression, bindings: FsBindings): string | undefined {
+  if (ts.isIdentifier(callExpression)) {
+    const nodeStart = callExpression.getStart(sourceFile);
+    const calleeBinding = fsVisibleCalleeBinding(bindings, callExpression.text, nodeStart);
+    if (!calleeBinding) return undefined;
+    const allowedStarts = fsVisibleCalleeStarts(bindings, callExpression.text, nodeStart);
+    return !declarationShadowsName(sourceFile, callExpression, callExpression.text, allowedStarts) ? calleeBinding.methodName : undefined;
+  }
+  if (!ts.isPropertyAccessExpression(callExpression)) return undefined;
+  const inlineRequireMethodName = fsInlineRequireMethodName(sourceFile, callExpression);
+  if (inlineRequireMethodName) return inlineRequireMethodName;
+  const rootName = expressionRootName(callExpression.expression);
+  if (!rootName) return undefined;
+  const methodName = callExpression.name.text;
+  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  const nodeStart = callExpression.getStart(sourceFile);
+  const allowedStarts = fsVisibleNamespaceStarts(bindings, rootName, nodeStart);
+  return allowedStarts.size > 0 && !declarationShadowsName(sourceFile, callExpression, rootName, allowedStarts) ? methodName : undefined;
+}
+
 function chainContainsMethod(expression: ts.Expression, methodName: string): boolean {
   let current: ts.Expression | undefined = expression;
   while (current) {
@@ -536,6 +836,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
   const drizzleTableSelectors = drizzleEnabled ? collectDrizzleTableSelectors(sourceFile) : new Map<string, string>();
   const bullQueuesByVariable = bullmqEnabled ? collectBullQueueVariables(sourceFile) : new Map<string, string>();
   const dynamicSqlVariables = sqlLiteralEnabled ? collectDynamicSqlVariables(sourceFile) : new Set<string>();
+  const fsBindings = fileEnabled ? collectFsBindings(sourceFile) : { namespaces: new Map<string, FsBindingDeclaration[]>(), callees: new Map<string, FsCalleeBinding[]>() };
   if (nestjsEnabled) {
     for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
       addResourceAccess(accesses, access);
@@ -827,10 +1128,14 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
       }
 
       // Stryker disable next-line ConditionalExpression,LogicalOperator: dynamic file-path detection is covered by adapter-off and dynamic-argument tests.
-      if (fileEnabled && name && (FILE_READ_METHODS.has(name) || FILE_WRITE_METHODS.has(name)) && !firstArgumentText && node.arguments.length > 0) {
+      const fsMethodName = name ? fsFileMethodName(sourceFile, node.expression, fsBindings) : undefined;
+      const hasFdOption = fsMethodName === "createReadStream" || fsMethodName === "createWriteStream"
+        ? objectHasProperty(node.arguments[1], "fd")
+        : false;
+      if (fileEnabled && name && fsMethodName && !hasFdOption && !firstArgumentText && node.arguments.length > 0) {
         addResourceAccess(accesses, {
           kind: "file",
-          access: FILE_READ_METHODS.has(name) ? "read" : "write",
+          access: FILE_READ_METHODS.has(fsMethodName) ? "read" : "write",
           selector: "unresolved:dynamic-file-path",
           filePath: relativeFilePath,
           line: getLineNumber(sourceFile, node),
@@ -842,10 +1147,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
 
       // Stryker disable all: literal file/http/queue dispatch is fixed by adapter-off and near-miss black-box tests; remaining mutants only toggle equivalent dispatcher guard forms.
       if (name && firstArgumentText) {
-        const hasFdOption = name === "createReadStream" || name === "createWriteStream"
-          ? objectHasProperty(node.arguments[1], "fd")
-          : false;
-        if (FILE_READ_METHODS.has(name) && !hasFdOption) {
+        if (fsMethodName && FILE_READ_METHODS.has(fsMethodName) && !hasFdOption) {
             // Stryker disable next-line ConditionalExpression: file adapter-off behavior is covered by the all-adapters-disabled contract.
             if (fileEnabled) {
             addResourceAccess(accesses, {
@@ -857,7 +1159,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               ...resourceAccessSource(name),
             });
           }
-        } else if (FILE_WRITE_METHODS.has(name) && !hasFdOption) {
+        } else if (fsMethodName && FILE_WRITE_METHODS.has(fsMethodName) && !hasFdOption) {
           if (fileEnabled) {
             addResourceAccess(accesses, {
               kind: "file",

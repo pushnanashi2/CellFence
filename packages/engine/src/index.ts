@@ -797,12 +797,40 @@ function findArtifactLaneForPath(cell: CellManifest, relativePath: string): stri
 function resolveWorkspacePackageImport(context: AnalysisContext, reference: ImportReference): ResolvedImport | undefined {
   const exactPackageCell = context.packageToCell.get(reference.specifier);
   if (exactPackageCell) {
+    const packageRoot = context.packageRoots.get(reference.specifier);
+    const mode = reference.typeOnly ? "types" : reference.kind === "require" ? "require" : "import";
+    const exportedTarget = packageRoot
+      ? resolvePackageExportTarget(context.rootDir, packageRoot, reference.specifier, reference.specifier, mode)
+      : undefined;
+    if (exportedTarget?.exported) {
+      return {
+        targetPath: exportedTarget.targetPath,
+        targetCell: exactPackageCell,
+        matchedSpecifier: reference.specifier,
+        isExternal: false,
+        isPublicPackage: true,
+        packageExportState: exportedTarget.state,
+        packageExportReason: exportedTarget.reason,
+      };
+    }
+    if (exportedTarget && exportedTarget.reason !== "package has no exports map") {
+      return {
+        targetCell: exactPackageCell,
+        matchedSpecifier: reference.specifier,
+        isExternal: false,
+        isPublicPackage: false,
+        packageExportState: exportedTarget.state,
+        packageExportReason: exportedTarget.reason,
+      };
+    }
     return {
       targetPath: exactPackageCell.publicEntry,
       targetCell: exactPackageCell,
       matchedSpecifier: reference.specifier,
       isExternal: false,
       isPublicPackage: true,
+      packageExportState: exportedTarget ? "UNRESOLVED_UNKNOWN" : "PUBLIC_RESOLVED",
+      packageExportReason: exportedTarget ? "package has no exports map; using manifest packageName public entry" : undefined,
     };
   }
 
@@ -825,6 +853,8 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
         matchedSpecifier: reference.specifier,
         isExternal: false,
         isPublicPackage: true,
+        packageExportState: exportedTarget.state,
+        packageExportReason: exportedTarget.reason,
       };
     }
     const subpath = reference.specifier.slice(subpathPrefix.length);
@@ -838,6 +868,8 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
       matchedSpecifier: reference.specifier,
       isExternal: false,
       isPublicPackage: false,
+      packageExportState: exportedTarget.state,
+      packageExportReason: exportedTarget.reason,
     };
   }
 
@@ -901,6 +933,10 @@ function consumerDeclaration(cell: CellManifest, producerCellId: string): CellCo
 }
 
 function importTargetsPrivateImplementation(resolvedImport: ResolvedImport, producerCell: CellManifest): boolean {
+  if (
+    resolvedImport.packageExportState === "NOT_EXPORTED_PRIVATE"
+    && resolvedImport.packageExportReason === "specifier is explicitly excluded by the package exports map"
+  ) return true;
   if (resolvedImport.isPublicPackage) return false;
   const targetIsPublicEntry = normalizePath(resolvedImport.targetPath || "") === normalizePath(producerCell.publicEntry);
   if (targetIsPublicEntry) return false;
@@ -1004,6 +1040,8 @@ function validateImports(
           artifactLaneId: resolvedImport.artifactLaneId,
           isExternal: resolvedImport.isExternal,
           isPublicPackage: resolvedImport.isPublicPackage,
+          packageExportState: resolvedImport.packageExportState,
+          packageExportReason: resolvedImport.packageExportReason,
         });
         if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
           addFinding(findings, {

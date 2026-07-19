@@ -225,7 +225,7 @@ const mutationTemplates = [
     prepare(rootDir) {
       writeBaseProject(rootDir);
       writeFile(path.join(rootDir, "src/app/public.ts"), [
-        "declare const fs: { readFileSync(path: string): string };",
+        "import * as fs from 'node:fs';",
         "export function app(): string {",
         "  return fs.readFileSync('data/input.json');",
         "}",

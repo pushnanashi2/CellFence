@@ -342,45 +342,76 @@ function packageConditionOrder(mode: PackageConditionMode): string[] {
   return ["import", "node", "default", "require", "types"];
 }
 
-function packageMapEntryTarget(entry: unknown, mode: PackageConditionMode): string | undefined {
+function packageMapEntryTarget(entry: unknown, mode: PackageConditionMode): string | null | undefined {
+  if (entry === null) return null;
   if (typeof entry === "string") return entry;
   if (Array.isArray(entry)) {
+    let sawNullTarget = false;
     for (const item of entry) {
       const target = packageMapEntryTarget(item, mode);
-      if (target) return target;
+      if (target === null) {
+        sawNullTarget = true;
+        continue;
+      }
+      if (target !== undefined) return target;
     }
-    return undefined;
+    return sawNullTarget ? null : undefined;
   }
   if (entry && typeof entry === "object") {
     const record = entry as Record<string, unknown>;
     const seenConditions = new Set<string>();
     for (const condition of packageConditionOrder(mode)) {
       seenConditions.add(condition);
+      if (!Object.prototype.hasOwnProperty.call(record, condition)) continue;
       const target = packageMapEntryTarget(record[condition], mode);
-      if (target) return target;
+      if (target !== undefined) return target;
     }
     for (const [condition, value] of Object.entries(record)) {
       if (seenConditions.has(condition)) continue;
       const target = packageMapEntryTarget(value, mode);
-      if (target) return target;
+      if (target !== undefined) return target;
     }
   }
   return undefined;
 }
 
-function packageMapTarget(map: unknown, specifier: string, mode: PackageConditionMode): string | undefined {
+function packageMapLooksSubpathMap(record: Record<string, unknown>): boolean {
+  return Object.keys(record).some((key) => key === "." || key.startsWith("./"));
+}
+
+function packageMapTarget(map: unknown, specifier: string, mode: PackageConditionMode): string | null | undefined {
+  if (specifier === "." && (!map || typeof map !== "object" || Array.isArray(map))) {
+    return packageMapEntryTarget(map, mode);
+  }
   if (!map || typeof map !== "object" || Array.isArray(map)) return undefined;
   const record = map as Record<string, unknown>;
-  const exactTarget = packageMapEntryTarget(record[specifier], mode);
-  if (exactTarget) return exactTarget;
-  for (const [pattern, entry] of Object.entries(record)) {
-    const wildcardIndex = pattern.indexOf("*");
-    if (wildcardIndex === -1) continue;
-    const prefix = pattern.slice(0, wildcardIndex);
-    const suffix = pattern.slice(wildcardIndex + 1);
+  if (specifier === "." && !packageMapLooksSubpathMap(record)) return packageMapEntryTarget(record, mode);
+  if (Object.prototype.hasOwnProperty.call(record, specifier)) {
+    return packageMapEntryTarget(record[specifier], mode);
+  }
+  const wildcardEntries = Object.entries(record)
+    .map(([pattern, entry], index) => {
+      const wildcardIndex = pattern.indexOf("*");
+      if (wildcardIndex === -1) return undefined;
+      return {
+        pattern,
+        entry,
+        index,
+        prefix: pattern.slice(0, wildcardIndex),
+        suffix: pattern.slice(wildcardIndex + 1),
+      };
+    })
+    .filter((entry): entry is { pattern: string; entry: unknown; index: number; prefix: string; suffix: string } => Boolean(entry))
+    .sort((left, right) =>
+      right.prefix.length - left.prefix.length
+      || right.suffix.length - left.suffix.length
+      || left.index - right.index
+    );
+  for (const { entry, prefix, suffix } of wildcardEntries) {
     if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue;
     const wildcardValue = specifier.slice(prefix.length, specifier.length - suffix.length);
     const target = packageMapEntryTarget(entry, mode);
+    if (target === null) return null;
     if (target) return target.replace(/\*/g, wildcardValue);
   }
   return undefined;
@@ -425,6 +456,7 @@ function resolvePackageSelfSubpathFile(fromFilePath: string, specifier: string, 
   }
   const subpath = specifier.slice(packageInfo.name.length + 1);
   const exportTarget = packageMapTarget(packageInfo.exports, `./${subpath}`, mode);
+  if (exportTarget === null) return undefined;
   return resolvePackageTargetFile(packageInfo.rootDir, exportTarget || `./${subpath}`);
 }
 
@@ -460,6 +492,13 @@ export function resolvePackageExportTarget(
   }
   const subpath = specifier === packageName ? "." : `./${specifier.slice(packageName.length + 1)}`;
   const exportTarget = packageMapTarget(packageJson.exports, subpath, mode);
+  if (exportTarget === null) {
+    return {
+      state: "NOT_EXPORTED_PRIVATE",
+      exported: false,
+      reason: "specifier is explicitly excluded by the package exports map",
+    };
+  }
   if (!exportTarget) {
     return {
       state: "NOT_EXPORTED_PRIVATE",

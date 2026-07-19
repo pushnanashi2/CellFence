@@ -172,6 +172,131 @@ test("repeated engine checks see source files added after the first check", () =
   }
 });
 
+test("plugin repository imports expose package export resolution state", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-plugin-import-state-"));
+  let observedImports = [];
+  const importObserverPlugin = definePlugin({
+    apiVersion: 1,
+    name: "@company/import-observer",
+    version: "1.0.0",
+    rules: {
+      "company/import-observer": defineRule({
+        id: "company/import-observer",
+        meta: {
+          description: "Captures import resolver metadata for plugin API regression coverage.",
+          defaultSeverity: "error",
+          category: "test",
+        },
+        run(context) {
+          observedImports = context.repository.imports
+            .map((reference) => ({
+              specifier: reference.specifier,
+              targetCellId: reference.targetCellId,
+              targetPath: reference.targetPath,
+              isPublicPackage: reference.isPublicPackage,
+              packageExportState: reference.packageExportState,
+              packageExportReason: reference.packageExportReason,
+            }))
+            .sort((left, right) => left.specifier.localeCompare(right.specifier));
+          return [];
+        },
+      }),
+    },
+  });
+
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const publicValue = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/blocked.ts"), "export const privateValue = true;\n");
+    fs.writeFileSync(
+      path.join(rootDir, "src/consumer/public.ts"),
+      [
+        "import { publicValue } from '@scope/producer';",
+        "import { privateValue } from '@scope/producer/blocked';",
+        "import { generatedValue } from '@scope/producer/generated';",
+        "export const used = publicValue || privateValue || generatedValue;",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(rootDir, "src/producer/package.json"), {
+      name: "@scope/producer",
+      type: "module",
+      exports: {
+        ".": "./public.js",
+        "./blocked": null,
+        "./generated": "./dist/generated.js",
+      },
+    });
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**"],
+        exclude: [],
+      },
+      cells: [
+        {
+          id: "producer",
+          ownedPaths: ["src/producer/**"],
+          publicEntry: "src/producer/public.ts",
+          publicSymbols: ["publicValue"],
+          packageName: "@scope/producer",
+          consumes: [],
+          producesArtifacts: [],
+        },
+        {
+          id: "consumer",
+          ownedPaths: ["src/consumer/**"],
+          publicEntry: "src/consumer/public.ts",
+          publicSymbols: ["used"],
+          consumes: [{ cell: "producer" }],
+          producesArtifacts: [],
+        },
+      ],
+    });
+
+    const result = checkRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      plugins: [importObserverPlugin],
+    });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && finding.details?.specifier === "@scope/producer/blocked"));
+    assert.deepEqual(observedImports, [
+      {
+        specifier: "@scope/producer",
+        targetCellId: "producer",
+        targetPath: "src/producer/public.ts",
+        isPublicPackage: true,
+        packageExportState: "PUBLIC_RESOLVED",
+        packageExportReason: undefined,
+      },
+      {
+        specifier: "@scope/producer/blocked",
+        targetCellId: "producer",
+        targetPath: "src/producer/blocked.ts",
+        isPublicPackage: false,
+        packageExportState: "NOT_EXPORTED_PRIVATE",
+        packageExportReason: "specifier is explicitly excluded by the package exports map",
+      },
+      {
+        specifier: "@scope/producer/generated",
+        targetCellId: "producer",
+        targetPath: undefined,
+        isPublicPackage: true,
+        packageExportState: "PUBLIC_DECLARED_GENERATED_TARGET_MISSING",
+        packageExportReason: "export target is declared but no source checkout file was found",
+      },
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("declared unresolved file access is recorded without warning", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-dynamic-file-contract-"));
   try {
