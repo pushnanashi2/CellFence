@@ -941,6 +941,16 @@ test("engine changed checks cover explicit head refs and base-check failure path
     assert.equal(explicitHead.exitCode, 0);
     assert.deepEqual(explicitHead.changedFiles, []);
 
+    const evidenceGraphIgnored = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      headRef: head,
+      includeEvidenceGraph: true,
+    });
+    assert.equal(evidenceGraphIgnored.exitCode, 0);
+    assert.equal(evidenceGraphIgnored.evidenceGraph, undefined);
+
     git(rootDir, ["update-ref", "refs/remotes/origin/main", "HEAD"]);
     const previousCwd = process.cwd();
     try {

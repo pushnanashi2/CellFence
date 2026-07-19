@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { checkRepository } from "../packages/engine/dist/index.js";
+import { checkRepository, createEvidenceGraph, findingWitness } from "../packages/engine/dist/index.js";
 import { stableCanonicalJson, stableDigest } from "../packages/engine/dist/governance/canonicalization.js";
 import { createGovernanceControlState } from "../packages/engine/dist/governance/control-state.js";
 import { assessEvidence } from "../packages/engine/dist/governance/evidence-assessment.js";
@@ -237,6 +237,143 @@ test("evidence assessment supplies default messages for parse and unsupported de
     && defect.message === "unsupported observation for src/a/public.ts"));
 });
 
+test("evidence graph connects subject files, observations, defects, and finding witnesses", () => {
+  const snapshot = completeSnapshot();
+  const report = createRawObservationReport({
+    observer: "unit-test",
+    snapshot,
+    statuses: [
+      { filePath: "cellfence.manifest.json", family: "manifest", status: "processed" },
+      { filePath: "src/a/public.ts", family: "imports", status: "parse-error", message: "bad import" },
+    ],
+  });
+  const assessment = assessEvidence(snapshot, report, { requiredFamilies: ["manifest", "imports", "resources"] });
+  const finding = {
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    severity: "error",
+    filePath: "src/a/public.ts",
+    cellId: "a",
+    producerCellId: "b",
+    message: "a imports private implementation from b",
+    details: { line: 3, specifier: "../b/private" },
+    fingerprint: "abc123",
+  };
+  const first = createEvidenceGraph({ snapshot, report, assessment, findings: [finding], warnings: [] });
+  const second = createEvidenceGraph({ snapshot, report, assessment, findings: [finding], warnings: [] });
+  assert.deepEqual(first, second);
+  assert.equal(first.schemaVersion, "cellfence.evidence-graph.v1");
+  assert.ok(first.nodes.some((node) => node.kind === "subject-file" && node.filePath === "src/a/public.ts"));
+  assert.ok(first.nodes.some((node) => node.kind === "observation" && node.family === "imports" && node.status === "parse-error"));
+  assert.ok(first.nodes.some((node) => node.kind === "evidence-defect" && node.label === "MISSING_OBSERVATION_FAMILY"));
+  assert.ok(first.edges.some((edge) => edge.kind === "reported-finding" && edge.label === "CELLFENCE_PRIVATE_IMPORT"));
+  assert.deepEqual(findingWitness(finding), first.findingWitnesses[0]);
+  assert.equal(first.findingWitnesses[0].line, 3);
+  assert.ok(first.findingWitnesses[0].subjects.some((subject) => subject.kind === "producer-cell" && subject.value === "b"));
+});
+
+test("finding witnesses preserve supplied subjects and deterministic tie ordering", () => {
+  const suppliedWitness = findingWitness({
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    severity: "error",
+    filePath: "src/a/public.ts",
+    cellId: "a",
+    message: "original finding",
+    fingerprint: "finding-fingerprint",
+    witness: {
+      ruleId: "IGNORED_WITNESS_RULE",
+      severity: "warning",
+      message: "ignored witness message",
+      fingerprint: "witness-fingerprint",
+      filePath: "src/a/public.ts",
+      line: 7,
+      subjects: [
+        { kind: "detail", key: "specifier", value: "../b/private" },
+        { kind: "cell", key: "cellId", value: "a" },
+      ],
+    },
+  });
+  assert.equal(suppliedWitness.ruleId, "CELLFENCE_PRIVATE_IMPORT");
+  assert.equal(suppliedWitness.severity, "error");
+  assert.equal(suppliedWitness.message, "original finding");
+  assert.equal(suppliedWitness.fingerprint, "witness-fingerprint");
+  assert.equal(suppliedWitness.line, 7);
+  assert.deepEqual(suppliedWitness.subjects.map((subject) => subject.kind), ["cell", "detail"]);
+
+  const snapshot = completeSnapshot();
+  const report = createRawObservationReport({ observer: "unit-test", snapshot, statuses: [] });
+  const assessment = assessEvidence(snapshot, report, { requiredFamilies: [] });
+  const firstFinding = {
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    severity: "error",
+    filePath: "src/a/public.ts",
+    message: "first",
+    details: { targetPath: "src/b/private.ts" },
+  };
+  const secondFinding = {
+    ...firstFinding,
+    message: "second",
+    details: { targetPath: "src/c/private.ts" },
+  };
+  const forward = createEvidenceGraph({ snapshot, report, assessment, findings: [firstFinding, secondFinding], warnings: [] });
+  const reverse = createEvidenceGraph({ snapshot, report, assessment, findings: [secondFinding, firstFinding], warnings: [] });
+  assert.deepEqual(forward.findingWitnesses, reverse.findingWitnesses);
+
+  const witnessAnchored = createEvidenceGraph({
+    snapshot,
+    report,
+    assessment,
+    findings: [{
+      ...firstFinding,
+      filePath: "src/not-in-snapshot.ts",
+      witness: {
+        ruleId: firstFinding.ruleId,
+        severity: firstFinding.severity,
+        message: firstFinding.message,
+        filePath: "src/a/public.ts",
+        subjects: [{ kind: "file", key: "filePath", value: "src/a/public.ts" }],
+      },
+    }],
+    warnings: [],
+  });
+  assert.ok(witnessAnchored.nodes.some((node) =>
+    node.kind === "finding"
+    && node.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+    && node.filePath === "src/a/public.ts"));
+  assert.ok(witnessAnchored.edges.some((edge) => edge.kind === "reported-finding"));
+
+  const multiFileSnapshot = createSubjectSnapshotFromFiles([
+    { path: "src/a/public.ts", role: "source", content: "export const a = 1;\n" },
+    { path: "src/b/public.ts", role: "source", content: "export const b = 1;\n" },
+  ]);
+  const multiFileReport = createRawObservationReport({ observer: "unit-test", snapshot: multiFileSnapshot, statuses: [] });
+  const multiFileAssessment = assessEvidence(multiFileSnapshot, multiFileReport, { requiredFamilies: [] });
+  const sharedFinding = {
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    severity: "error",
+    message: "same finding",
+  };
+  const aWitness = {
+    ...sharedFinding,
+    witness: {
+      ...sharedFinding,
+      filePath: "src/a/public.ts",
+      subjects: [{ kind: "file", key: "filePath", value: "src/a/public.ts" }],
+    },
+  };
+  const bWitness = {
+    ...sharedFinding,
+    witness: {
+      ...sharedFinding,
+      filePath: "src/b/public.ts",
+      subjects: [{ kind: "file", key: "filePath", value: "src/b/public.ts" }],
+    },
+  };
+  const witnessForward = createEvidenceGraph({ snapshot: multiFileSnapshot, report: multiFileReport, assessment: multiFileAssessment, findings: [aWitness, bWitness], warnings: [] });
+  const witnessReverse = createEvidenceGraph({ snapshot: multiFileSnapshot, report: multiFileReport, assessment: multiFileAssessment, findings: [bWitness, aWitness], warnings: [] });
+  assert.deepEqual(witnessForward, witnessReverse);
+  assert.equal(witnessForward.nodes.filter((node) => node.kind === "finding").length, 2);
+});
+
 test("control state digest changes when governance controls change", () => {
   const base = createGovernanceControlState({
     declared: {
@@ -333,6 +470,19 @@ test("checkRepository characterization is stable for valid and invalid fixtures"
     baselinePath: "cellfence.baseline.json",
     evidencePaths: ["resource-evidence.json"],
   }).ok, true);
+});
+
+test("checkRepository can return an opt-in evidence graph with finding witnesses", () => {
+  const result = checkFixture("invalid/private-cross-cell-import", { includeEvidenceGraph: true });
+  assert.equal(result.ok, false);
+  assert.equal(result.evidenceGraph?.schemaVersion, "cellfence.evidence-graph.v1");
+  assert.equal(result.evidenceGraph?.snapshotDigest.length, 64);
+  assert.ok(result.evidenceGraph.nodes.some((node) => node.kind === "finding" && node.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+  assert.ok(result.evidenceGraph.findingWitnesses.some((witness) =>
+    witness.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+    && witness.filePath === "src/consumer/public.ts"
+    && witness.subjects.some((subject) => subject.kind === "detail" && subject.key === "targetPath")));
+  assert.equal(checkFixture("invalid/private-cross-cell-import").evidenceGraph, undefined);
 });
 
 test("pure evaluator dependency closure excludes filesystem, process, git, and compiler imports", () => {

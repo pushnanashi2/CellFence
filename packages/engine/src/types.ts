@@ -12,6 +12,7 @@ import type {
   RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
 import type { FileIndexContext } from "./file-index.js";
+import type { EvidenceGraph, FindingWitness } from "./governance/model.js";
 import type { PathAlias } from "./module-resolution.js";
 import type { ResourceAccessMode } from "./resource-access.js";
 
@@ -96,6 +97,7 @@ export type PluginFinding<RuleIdentifier extends string = string> = {
   details?: Record<string, unknown>;
   suggestedResolutions?: SuggestedResolution[];
   fingerprint?: string;
+  witness?: FindingWitness;
 };
 
 export type Finding = PluginFinding<RuleId | string>;
@@ -213,6 +215,7 @@ export type CheckOptions = {
   plugins?: PluginDefinition[];
   ruleSeverities?: Record<string, ConfiguredRuleSeverity>;
   changedFiles?: string[];
+  includeEvidenceGraph?: boolean;
 };
 
 export type CheckResult = {
@@ -223,6 +226,7 @@ export type CheckResult = {
   metrics: Record<string, CellBaselineRecord>;
   changedFiles?: string[];
   baseFindingCount?: number;
+  evidenceGraph?: EvidenceGraph;
 };
 
 export type PruneCandidateKind =
@@ -260,7 +264,7 @@ export type PruneReport = {
   };
 };
 
-export type ChangedCheckOptions = CheckOptions & {
+export type ChangedCheckOptions = Omit<CheckOptions, "includeEvidenceGraph"> & {
   baseRef?: string;
   headRef?: string;
 };

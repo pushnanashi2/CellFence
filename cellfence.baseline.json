@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-19T04:41:40.643Z",
+  "generatedAt": "2026-07-19T05:12:12.394Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -114,8 +114,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 75,
-      "publicSurfaceLines": 2282,
+      "publicSymbols": 85,
+      "publicSurfaceLines": 2319,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -160,12 +160,22 @@
         "createCellContext",
         "createClaim",
         "createCouplingGraph",
+        "createEvidenceGraph",
         "createManifestFromServiceManifests",
         "createPruneReport",
         "createWaiverRequest",
         "defaultBaselinePath",
         "DocsCheckResult",
+        "EvidenceGraph",
+        "EvidenceGraphEdge",
+        "EvidenceGraphEdgeKind",
+        "EvidenceGraphInput",
+        "EvidenceGraphNode",
+        "EvidenceGraphNodeKind",
         "Finding",
+        "findingWitness",
+        "FindingWitness",
+        "FindingWitnessSubject",
         "formatCouplingGraphMermaid",
         "formatHumanResult",
         "guardBaselineUpdate",
@@ -198,7 +208,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "74a8886161b13b5df33cdf09a0738fe3fbd9d04d9609faa425cac574cbe48063",
+      "publicSurfaceHash": "feae2952c8028f5260099e4f154a339e50023e660827a738a55f3bd4aeaae8ef",
       "dependencyEdges": [
         "engine->schema"
       ],

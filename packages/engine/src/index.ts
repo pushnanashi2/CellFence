@@ -66,11 +66,12 @@ import {
   resourceEvidenceAccesses as resourceEvidenceAccessesOperation,
 } from "./resource-evidence.js";
 import { assessEvidence } from "./governance/evidence-assessment.js";
+import { createEvidenceGraph } from "./governance/evidence-graph.js";
 import { createRawObservationReport } from "./governance/observation-report.js";
 import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
 import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
-import type { FileObservation, ObservationFamily } from "./governance/model.js";
+import type { EvidenceAssessment, FileObservation, ObservationFamily, RawObservationReport, SubjectSnapshot } from "./governance/model.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
 import { CORE_REQUIRED_RULES, DEFAULT_BASELINE_PATH, DEFAULT_CLAIMS_PATH, DEFAULT_MANIFEST_PATH } from "./constants.js";
 import { readJsonFile } from "./json-file.js";
@@ -191,6 +192,20 @@ export {
   createWaiverRequest,
   formatCouplingGraphMermaid,
 } from "./graph.js";
+export {
+  createEvidenceGraph,
+  findingWitness,
+  type EvidenceGraphInput,
+} from "./governance/evidence-graph.js";
+export type {
+  EvidenceGraph,
+  EvidenceGraphEdge,
+  EvidenceGraphEdgeKind,
+  EvidenceGraphNode,
+  EvidenceGraphNodeKind,
+  FindingWitness,
+  FindingWitnessSubject,
+} from "./governance/model.js";
 export type {
   AutoAllocation,
   AutoAllocateOptions,
@@ -818,14 +833,20 @@ function requiredGovernanceFamilies(baselinePath: string | undefined): Observati
   return families;
 }
 
-function governanceEvidenceForCheck(
+type GovernanceEvidenceEnvelope = {
+  snapshot: SubjectSnapshot;
+  report: RawObservationReport;
+  assessment: EvidenceAssessment;
+};
+
+function governanceEvidenceEnvelopeForCheck(
   context: AnalysisContext,
   manifestPath: string,
   baselinePath: string | undefined,
   evidencePaths: string[],
   observedImports: PluginImportReference[],
   accessesByCell: Map<string, ResourceAccessReference[]>,
-): ReturnType<typeof assessEvidence> {
+): GovernanceEvidenceEnvelope {
   const snapshot = createSubjectSnapshotFromFiles(governanceSubjectFiles(context, manifestPath, baselinePath, evidencePaths));
   const statuses: FileObservation[] = snapshot.files.flatMap((file): FileObservation[] => {
     if (file.role === "manifest") {
@@ -857,7 +878,11 @@ function governanceEvidenceForCheck(
     resourceObservationCount,
     publicSurfaceObservationCount: context.manifest.cells.length,
   });
-  return assessEvidence(snapshot, report, { requiredFamilies: requiredGovernanceFamilies(baselinePath) });
+  return {
+    snapshot,
+    report,
+    assessment: assessEvidence(snapshot, report, { requiredFamilies: requiredGovernanceFamilies(baselinePath) }),
+  };
 }
 
 function qualifiedExpressionName(node: ts.Node): string | undefined {
@@ -1701,7 +1726,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const active = applyWaiversToFindings(context, severityAdjusted.findings, severityAdjusted.warnings);
-  const evidence = governanceEvidenceForCheck(
+  const evidenceEnvelope = governanceEvidenceEnvelopeForCheck(
     context,
     manifestPath,
     baselinePath,
@@ -1710,19 +1735,29 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     accessesByCell,
   );
   const evaluation = evaluateGovernance({
-    evidence,
+    evidence: evidenceEnvelope.assessment,
     findings: active.findings,
     warnings: active.warnings,
     metrics,
     requiredRules: [...requiredRuleSet(context)].sort((left, right) => left.localeCompare(right)),
   });
   const decision = legacyDecisionFromEvaluation(evaluation);
+  const evidenceGraph = options.includeEvidenceGraph
+    ? createEvidenceGraph({
+      snapshot: evidenceEnvelope.snapshot,
+      report: evidenceEnvelope.report,
+      assessment: evidenceEnvelope.assessment,
+      findings: decision.findings,
+      warnings: decision.warnings,
+    })
+    : undefined;
   return {
     ok: decision.ok,
     exitCode: decision.exitCode,
     findings: decision.findings,
     warnings: decision.warnings,
     metrics: decision.metrics,
+    ...(evidenceGraph ? { evidenceGraph } : {}),
   };
 }
 
@@ -2149,6 +2184,18 @@ function checkOptionsForBase(baseRootDir: string, options: ChangedCheckOptions):
   return baseOptions;
 }
 
+function checkOptionsForChangedCurrent(options: ChangedCheckOptions, changedFiles: string[]): CheckOptions {
+  return {
+    rootDir: options.rootDir,
+    manifestPath: options.manifestPath,
+    baselinePath: options.baselinePath,
+    evidencePaths: options.evidencePaths,
+    plugins: options.plugins,
+    ruleSeverities: options.ruleSeverities,
+    changedFiles,
+  };
+}
+
 function findingKey(finding: Finding): string {
   return finding.fingerprint || findingFingerprint(finding);
 }
@@ -2162,7 +2209,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
     if (options.headRef) assertGitCommit(rootDir, options.headRef);
     const changedFiles = changedFilesForRefs(rootDir, baseRef, options.headRef);
     const movements = movementEntriesForRefs(rootDir, baseRef, options.headRef);
-    const currentResult = checkRepository({ ...options, changedFiles });
+    const currentResult = checkRepository(checkOptionsForChangedCurrent(options, changedFiles));
     if (currentResult.exitCode === 2 || currentResult.exitCode === 3) {
       return { ...currentResult, changedFiles };
     }

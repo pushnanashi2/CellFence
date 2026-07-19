@@ -105,6 +105,59 @@ export type GovernanceFinding = {
   ruleId: string;
   severity: "error" | "warning";
   message: string;
+  filePath?: string;
+  cellId?: string;
+  producerCellId?: string;
+  fingerprint?: string;
+  details?: Record<string, unknown>;
+  witness?: FindingWitness;
+};
+
+export type FindingWitnessSubject = {
+  kind: "file" | "cell" | "producer-cell" | "detail";
+  key: string;
+  value: string;
+};
+
+export type FindingWitness = {
+  ruleId: string;
+  severity: "error" | "warning";
+  message: string;
+  fingerprint?: string;
+  filePath?: string;
+  line?: number;
+  subjects: FindingWitnessSubject[];
+};
+
+export type EvidenceGraphNodeKind = "subject-file" | "observation" | "finding" | "evidence-defect";
+
+export type EvidenceGraphNode = {
+  id: string;
+  kind: EvidenceGraphNodeKind;
+  label: string;
+  filePath?: string;
+  family?: ObservationFamily;
+  status?: ObservationStatus;
+  ruleId?: string;
+  severity?: "error" | "warning";
+  digest?: string;
+};
+
+export type EvidenceGraphEdgeKind = "observed-as" | "reported-finding" | "has-defect" | "witnesses";
+
+export type EvidenceGraphEdge = {
+  from: string;
+  to: string;
+  kind: EvidenceGraphEdgeKind;
+  label: string;
+};
+
+export type EvidenceGraph = {
+  schemaVersion: "cellfence.evidence-graph.v1";
+  snapshotDigest: string;
+  nodes: EvidenceGraphNode[];
+  edges: EvidenceGraphEdge[];
+  findingWitnesses: FindingWitness[];
 };
 
 export type RuleResult = {
