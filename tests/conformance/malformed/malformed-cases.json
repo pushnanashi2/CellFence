@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "cellfence.malformed-conformance.v1",
+  "statuses": [
+    "supported-and-tested",
+    "unsupported-but-diagnosed",
+    "not-applicable"
+  ],
+  "coverageAxes": {
+    "malformedFamilies": [
+      "manifest-json",
+      "manifest-schema",
+      "baseline-json",
+      "baseline-schema",
+      "resource-evidence-json",
+      "resource-evidence-schema",
+      "resource-evidence-cell-reference",
+      "waiver-syntax"
+    ]
+  },
+  "cases": [
+    {
+      "id": "malformed-manifest-json",
+      "status": "supported-and-tested",
+      "malformedFamily": "manifest-json",
+      "manifestText": "{not-json",
+      "expected": {
+        "ok": false,
+        "exitCode": 2,
+        "findings": [
+          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "invalid-manifest-schema",
+      "status": "supported-and-tested",
+      "malformedFamily": "manifest-schema",
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v0",
+        "cells": []
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 2,
+        "findings": [
+          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "malformed-baseline-json",
+      "status": "supported-and-tested",
+      "malformedFamily": "baseline-json",
+      "files": {
+        "src/core/public.ts": ["export const core = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "baselineText": "{not-json",
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "invalid-baseline-schema",
+      "status": "supported-and-tested",
+      "malformedFamily": "baseline-schema",
+      "files": {
+        "src/core/public.ts": ["export const core = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "baseline": {
+        "schemaVersion": "wrong",
+        "cells": {}
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "malformed-resource-evidence-json",
+      "status": "supported-and-tested",
+      "malformedFamily": "resource-evidence-json",
+      "files": {
+        "src/core/public.ts": ["export const core = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "evidenceText": {
+        "cellfence.resource-evidence.json": "{not-json"
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "invalid-resource-evidence-schema",
+      "status": "supported-and-tested",
+      "malformedFamily": "resource-evidence-schema",
+      "files": {
+        "src/core/public.ts": ["export const core = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "evidence": {
+        "cellfence.resource-evidence.json": {
+          "schemaVersion": "wrong",
+          "accesses": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "resource-evidence-unknown-cell",
+      "status": "supported-and-tested",
+      "malformedFamily": "resource-evidence-cell-reference",
+      "files": {
+        "src/core/public.ts": ["export const core = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "evidence": {
+        "cellfence.resource-evidence.json": {
+          "schemaVersion": "cellfence.resource-evidence.v1",
+          "cellId": "missing",
+          "accesses": [
+            { "kind": "file", "access": "read", "selector": "data/input.json" }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json", "cellId": "missing" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "invalid-waiver-syntax",
+      "status": "supported-and-tested",
+      "malformedFamily": "waiver-syntax",
+      "files": {
+        "src/core/public.ts": [
+          "// cellfence-ignore * expires:2099-01-01 approved-by:test-owner reason:temporary invalid wildcard waiver",
+          "export const core = true;"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "ok": false,
+        "exitCode": 1,
+        "findings": [
+          { "ruleId": "CELLFENCE_WAIVER_INVALID", "severity": "error", "filePath": "src/core/public.ts" }
+        ],
+        "warnings": []
+      }
+    }
+  ]
+}

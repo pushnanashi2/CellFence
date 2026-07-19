@@ -1,0 +1,201 @@
+{
+  "schemaVersion": "cellfence.ownership-conformance.v1",
+  "statuses": [
+    "supported-and-tested",
+    "unsupported-but-diagnosed",
+    "not-applicable"
+  ],
+  "coverageAxes": {
+    "ownershipFamilies": [
+      "sibling-prefixes",
+      "nested-overlap",
+      "wildcard-overlap",
+      "root-file-glob",
+      "public-entry-ownership",
+      "artifact-ownership",
+      "strict-coverage",
+      "coverage-warning"
+    ],
+    "policyStates": [
+      "clean",
+      "overlap",
+      "outside-ownership",
+      "unowned-source",
+      "coverage-disabled"
+    ]
+  },
+  "cases": [
+    {
+      "id": "sibling-prefixes-are-distinct",
+      "status": "supported-and-tested",
+      "ownershipFamily": "sibling-prefixes",
+      "files": {
+        "src/user/public.ts": ["export const user = true;"],
+        "src/users/public.ts": ["export const users = true;"],
+        "src/cell1/public.ts": ["export const cell1 = true;"],
+        "src/cell10/public.ts": ["export const cell10 = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "user", "ownedPaths": ["src/user/**"], "publicEntry": "src/user/public.ts", "publicSymbols": ["user"], "consumes": [], "producesArtifacts": [] },
+          { "id": "users", "ownedPaths": ["src/users/**"], "publicEntry": "src/users/public.ts", "publicSymbols": ["users"], "consumes": [], "producesArtifacts": [] },
+          { "id": "cell1", "ownedPaths": ["src/cell1/**"], "publicEntry": "src/cell1/public.ts", "publicSymbols": ["cell1"], "consumes": [], "producesArtifacts": [] },
+          { "id": "cell10", "ownedPaths": ["src/cell10/**"], "publicEntry": "src/cell10/public.ts", "publicSymbols": ["cell10"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "findings": [], "warnings": [] }
+    },
+    {
+      "id": "nested-owned-path-overlap",
+      "status": "supported-and-tested",
+      "ownershipFamily": "nested-overlap",
+      "files": {
+        "src/shared/public.ts": ["export const shared = true;"],
+        "src/shared/narrow/public.ts": ["export const narrow = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "shared", "ownedPaths": ["src/shared/**"], "publicEntry": "src/shared/public.ts", "publicSymbols": ["shared"], "consumes": [], "producesArtifacts": [] },
+          { "id": "narrow", "ownedPaths": ["src/shared/narrow/**"], "publicEntry": "src/shared/narrow/public.ts", "publicSymbols": ["narrow"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "findings": [
+          { "ruleId": "CELLFENCE_OWNERSHIP_OVERLAP", "severity": "error", "cellId": "shared", "producerCellId": "narrow", "leftPattern": "src/shared/**", "rightPattern": "src/shared/narrow/**" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "wildcard-owned-path-overlap",
+      "status": "supported-and-tested",
+      "ownershipFamily": "wildcard-overlap",
+      "files": {
+        "src/a/public.ts": ["export const rootApi = true;"],
+        "src/a/feature.ts": ["export const featureApi = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "root", "ownedPaths": ["src/*/public.ts"], "publicEntry": "src/a/public.ts", "publicSymbols": ["rootApi"], "consumes": [], "producesArtifacts": [] },
+          { "id": "feature", "ownedPaths": ["src/a/*.ts"], "publicEntry": "src/a/feature.ts", "publicSymbols": ["featureApi"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "findings": [
+          { "ruleId": "CELLFENCE_OWNERSHIP_OVERLAP", "severity": "error", "cellId": "root", "producerCellId": "feature", "leftPattern": "src/*/public.ts", "rightPattern": "src/a/*.ts" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "root-file-glob-does-not-own-nested-directory",
+      "status": "supported-and-tested",
+      "ownershipFamily": "root-file-glob",
+      "files": {
+        "src/root.ts": ["export const root = true;"],
+        "src/build/public.ts": ["export const build = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "src-root", "ownedPaths": ["src/*"], "publicEntry": "src/root.ts", "publicSymbols": ["root"], "consumes": [], "producesArtifacts": [] },
+          { "id": "build", "ownedPaths": ["src/build/**"], "publicEntry": "src/build/public.ts", "publicSymbols": ["build"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "findings": [], "warnings": [] }
+    },
+    {
+      "id": "public-entry-outside-owned-path",
+      "status": "supported-and-tested",
+      "ownershipFamily": "public-entry-ownership",
+      "files": {
+        "src/api/public.ts": ["export const api = true;"],
+        "src/api/internal/owned.ts": ["export const owned = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/api/internal/**"], "exclude": [] },
+        "cells": [
+          { "id": "api", "ownedPaths": ["src/api/internal/**"], "publicEntry": "src/api/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "findings": [
+          { "ruleId": "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP", "severity": "error", "cellId": "api", "filePath": "src/api/public.ts", "publicEntry": "src/api/public.ts" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "artifact-lane-outside-owned-path",
+      "status": "supported-and-tested",
+      "ownershipFamily": "artifact-ownership",
+      "files": {
+        "src/api/public.ts": ["export const api = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "api", "ownedPaths": ["src/api/**"], "publicEntry": "src/api/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [{ "id": "snapshots", "paths": ["dist/api/**"] }] }
+        ]
+      },
+      "expected": {
+        "findings": [
+          { "ruleId": "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP", "severity": "error", "cellId": "api", "filePath": "dist/api/**", "artifactLaneId": "snapshots", "artifactPath": "dist/api/**" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "strict-coverage-reports-unowned-source",
+      "status": "supported-and-tested",
+      "ownershipFamily": "strict-coverage",
+      "files": {
+        "src/api/public.ts": ["export const api = true;"],
+        "src/orphan/util.ts": ["export const orphan = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "api", "ownedPaths": ["src/api/**"], "publicEntry": "src/api/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "findings": [
+          { "ruleId": "CELLFENCE_UNOWNED_SOURCE", "severity": "error", "filePath": "src/orphan/util.ts", "path": "src/orphan/util.ts" }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "coverage-disabled-emits-warning",
+      "status": "supported-and-tested",
+      "ownershipFamily": "coverage-warning",
+      "files": {
+        "src/api/public.ts": ["export const api = true;"],
+        "src/orphan/util.ts": ["export const orphan = true;"]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "cells": [
+          { "id": "api", "ownedPaths": ["src/api/**"], "publicEntry": "src/api/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": {
+        "findings": [],
+        "warnings": [
+          { "ruleId": "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED", "severity": "warning" }
+        ]
+      }
+    }
+  ]
+}

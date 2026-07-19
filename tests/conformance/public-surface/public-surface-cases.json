@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "cellfence.public-surface-conformance.v1",
+  "statuses": [
+    "supported-and-tested",
+    "unsupported-but-diagnosed",
+    "not-applicable"
+  ],
+  "coverageAxes": {
+    "surfaceFamilies": [
+      "typescript-named",
+      "typescript-default",
+      "typescript-renamed-reexport",
+      "typescript-star-reexport",
+      "typescript-namespace-reexport",
+      "python-all",
+      "missing-declared-symbol",
+      "undeclared-actual-symbol",
+      "bidirectional-mismatch",
+      "missing-public-entry"
+    ],
+    "policyStates": [
+      "clean",
+      "symbol-mismatch",
+      "entry-missing"
+    ]
+  },
+  "cases": [
+    {
+      "id": "typescript-named-export-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "typescript-named",
+      "files": {
+        "src/core/public.ts": [
+          "export const api = true;",
+          "export function run() { return api; }",
+          "export type Shape = { ok: boolean };"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["Shape", "api", "run"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "typescript-default-export-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "typescript-default",
+      "files": {
+        "src/core/public.ts": [
+          "export default function run() { return true; }"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["default"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "typescript-renamed-reexport-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "typescript-renamed-reexport",
+      "files": {
+        "src/core/internal.ts": [
+          "export const internalName = true;"
+        ],
+        "src/core/public.ts": [
+          "export { internalName as api } from './internal';"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "typescript-star-reexport-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "typescript-star-reexport",
+      "files": {
+        "src/core/internal.ts": [
+          "export const api = true;",
+          "export default api;"
+        ],
+        "src/core/public.ts": [
+          "export * from './internal';"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "typescript-namespace-reexport-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "typescript-namespace-reexport",
+      "files": {
+        "src/core/internal.ts": [
+          "export const internalApi = true;"
+        ],
+        "src/core/public.ts": [
+          "export * as api from './internal';"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "python-all-clean",
+      "status": "supported-and-tested",
+      "surfaceFamily": "python-all",
+      "files": {
+        "src/core/public.py": [
+          "__all__ = ['api']",
+          "def api():",
+          "    return True",
+          "def helper():",
+          "    return False"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.py", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "clean" }
+    },
+    {
+      "id": "missing-declared-symbol",
+      "status": "supported-and-tested",
+      "surfaceFamily": "missing-declared-symbol",
+      "files": {
+        "src/core/public.ts": [
+          "export const api = true;"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api", "ghost"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "symbol-mismatch", "missingSymbols": ["ghost"], "undeclaredSymbols": [] }
+    },
+    {
+      "id": "undeclared-actual-symbol",
+      "status": "supported-and-tested",
+      "surfaceFamily": "undeclared-actual-symbol",
+      "files": {
+        "src/core/public.ts": [
+          "export const api = true;",
+          "export const extra = true;"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "symbol-mismatch", "missingSymbols": [], "undeclaredSymbols": ["extra"] }
+    },
+    {
+      "id": "bidirectional-mismatch",
+      "status": "supported-and-tested",
+      "surfaceFamily": "bidirectional-mismatch",
+      "files": {
+        "src/core/public.ts": [
+          "export const actual = true;"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["declared"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "symbol-mismatch", "missingSymbols": ["declared"], "undeclaredSymbols": ["actual"] }
+    },
+    {
+      "id": "missing-public-entry",
+      "status": "supported-and-tested",
+      "surfaceFamily": "missing-public-entry",
+      "files": {
+        "src/core/internal.ts": [
+          "export const api = true;"
+        ]
+      },
+      "manifest": {
+        "schemaVersion": "cellfence.manifest.v1",
+        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "cells": [
+          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["api"], "consumes": [], "producesArtifacts": [] }
+        ]
+      },
+      "expected": { "profile": "entry-missing" }
+    }
+  ]
+}

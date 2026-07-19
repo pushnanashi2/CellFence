@@ -1,0 +1,256 @@
+{
+  "schemaVersion": "cellfence.resolution-conformance.v1",
+  "statuses": [
+    "supported-and-tested",
+    "unsupported-but-diagnosed",
+    "not-applicable"
+  ],
+  "coverageAxes": {
+    "resolverFamilies": [
+      "relative-runtime-extension",
+      "tsconfig-paths",
+      "nearest-tsconfig-paths",
+      "package-imports",
+      "package-name",
+      "package-subpath",
+      "python-source-root",
+      "unresolved-relative"
+    ],
+    "policyStates": [
+      "allowed-public",
+      "private-import",
+      "undeclared-consumer",
+      "unresolved-import"
+    ]
+  },
+  "cases": [
+    {
+      "id": "relative-js-extension-public",
+      "status": "supported-and-tested",
+      "resolverFamily": "relative-runtime-extension",
+      "sourceFile": "src/consumer/use.ts",
+      "source": [
+        "import { exposed } from \"../producer/public.js\";",
+        "export const value = exposed;"
+      ],
+      "expected": {
+        "profile": "clean"
+      }
+    },
+    {
+      "id": "relative-mjs-extension-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "relative-runtime-extension",
+      "sourceFile": "src/consumer/use.ts",
+      "extraFiles": {
+        "src/producer/esm-internal.mts": [
+          "export const esmSecret = true;"
+        ]
+      },
+      "source": [
+        "import { esmSecret } from \"../producer/esm-internal.mjs\";",
+        "export const value = esmSecret;"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "../producer/esm-internal.mjs",
+        "targetPath": "src/producer/esm-internal.mts",
+        "line": 1
+      }
+    },
+    {
+      "id": "tsconfig-root-path-alias-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "tsconfig-paths",
+      "sourceFile": "src/consumer/use.ts",
+      "tsconfigs": {
+        "tsconfig.json": {
+          "compilerOptions": {
+            "baseUrl": ".",
+            "paths": {
+              "@producer/*": [
+                "src/producer/*"
+              ]
+            }
+          }
+        }
+      },
+      "source": [
+        "import { secret } from \"@producer/internal.js\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "@producer/internal.js",
+        "targetPath": "src/producer/internal.ts",
+        "line": 1
+      }
+    },
+    {
+      "id": "tsconfig-nearest-path-alias-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "nearest-tsconfig-paths",
+      "sourceFile": "src/consumer/feature/use.ts",
+      "tsconfigs": {
+        "tsconfig.json": {
+          "compilerOptions": {
+            "baseUrl": ".",
+            "paths": {
+              "@domain/*": [
+                "src/not-producer/*"
+              ]
+            }
+          }
+        },
+        "src/consumer/tsconfig.json": {
+          "compilerOptions": {
+            "baseUrl": ".",
+            "paths": {
+              "@domain/*": [
+                "../producer/*"
+              ]
+            }
+          }
+        }
+      },
+      "source": [
+        "import { secret } from \"@domain/internal\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "@domain/internal",
+        "targetPath": "src/producer/internal.ts",
+        "line": 1
+      }
+    },
+    {
+      "id": "package-imports-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "package-imports",
+      "sourceFile": "src/consumer/use.ts",
+      "rootPackageJson": {
+        "name": "@demo/root",
+        "type": "module",
+        "imports": {
+          "#producer/*": "./src/producer/*"
+        }
+      },
+      "source": [
+        "import { secret } from \"#producer/internal.js\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "#producer/internal.js",
+        "targetPath": "src/producer/internal.ts",
+        "line": 1
+      }
+    },
+    {
+      "id": "package-name-public-allowed",
+      "status": "supported-and-tested",
+      "resolverFamily": "package-name",
+      "sourceFile": "src/consumer/use.ts",
+      "producerPackageName": "@demo/producer",
+      "producerPackageJson": {
+        "name": "@demo/producer",
+        "type": "module",
+        "exports": {
+          ".": "./public.js"
+        }
+      },
+      "source": [
+        "import { exposed } from \"@demo/producer\";",
+        "export const value = exposed;"
+      ],
+      "expected": {
+        "profile": "clean"
+      }
+    },
+    {
+      "id": "package-subpath-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "package-subpath",
+      "sourceFile": "src/consumer/use.ts",
+      "producerPackageName": "@demo/producer",
+      "producerPackageJson": {
+        "name": "@demo/producer",
+        "type": "module",
+        "exports": {
+          ".": "./public.js",
+          "./internal": "./internal.js"
+        }
+      },
+      "source": [
+        "import { secret } from \"@demo/producer/internal.js\";",
+        "export const value = secret;"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "@demo/producer/internal.js",
+        "targetPath": "src/producer/internal.ts",
+        "line": 1
+      }
+    },
+    {
+      "id": "package-subpath-public-undeclared",
+      "status": "supported-and-tested",
+      "resolverFamily": "package-subpath",
+      "sourceFile": "src/consumer/use.ts",
+      "producerPackageName": "@demo/producer",
+      "consumerConsumesProducer": false,
+      "producerPackageJson": {
+        "name": "@demo/producer",
+        "type": "module",
+        "exports": {
+          ".": "./public.js",
+          "./public": "./public.js"
+        }
+      },
+      "source": [
+        "import { exposed } from \"@demo/producer/public.js\";",
+        "export const value = exposed;"
+      ],
+      "expected": {
+        "profile": "undeclared-public",
+        "specifier": "@demo/producer/public.js",
+        "line": 1,
+        "kind": "import",
+        "typeOnly": false
+      }
+    },
+    {
+      "id": "python-source-root-private",
+      "status": "supported-and-tested",
+      "resolverFamily": "python-source-root",
+      "language": "python",
+      "sourceFile": "src/consumer/use.py",
+      "source": [
+        "from producer.internal import secret",
+        "consumer_value = secret"
+      ],
+      "expected": {
+        "profile": "private-import",
+        "specifier": "producer.internal",
+        "targetPath": "src/producer/internal.py",
+        "line": 1
+      }
+    },
+    {
+      "id": "relative-missing-fail-closed",
+      "status": "supported-and-tested",
+      "resolverFamily": "unresolved-relative",
+      "sourceFile": "src/consumer/use.ts",
+      "source": [
+        "import { missing } from \"../producer/missing\";",
+        "export const value = missing;"
+      ],
+      "expected": {
+        "profile": "unresolved-import",
+        "specifier": "../producer/missing",
+        "line": 1
+      }
+    }
+  ]
+}
