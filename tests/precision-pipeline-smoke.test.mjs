@@ -32,6 +32,11 @@ test("precision pipeline smoke builds, labels, validates, and reports insufficie
     assert.equal(report.decision.observedBlockingPrecision, 1);
     assert.match(report.artifactSetSha256, /^[a-f0-9]{64}$/);
     assert.equal(fs.existsSync(path.join(report.bundleDir, "SHA256SUMS")), true);
+    assert.equal(fs.existsSync(report.reviewedCorpusReportPath), true);
+    assert.equal(fs.existsSync(report.labelReadinessPath), true);
+    const labelReadiness = JSON.parse(fs.readFileSync(report.labelReadinessPath, "utf8"));
+    assert.equal(labelReadiness.ok, true);
+    assert.equal(labelReadiness.summary.fullyLabeledFindings, 3);
     const protocol = JSON.parse(fs.readFileSync(report.protocolPath, "utf8"));
     assert.equal(protocol.claim.artifactSetSha256, report.artifactSetSha256);
   } finally {

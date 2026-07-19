@@ -94,6 +94,46 @@ function createSimpleRepository(rootDir, options = {}) {
   return git(rootDir, ["rev-parse", "HEAD"]);
 }
 
+function createPrivateImportRepository(rootDir) {
+  git(rootDir, ["init"]);
+  git(rootDir, ["config", "user.email", "cellfence@example.invalid"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  fs.mkdirSync(path.join(rootDir, "src/producer"), { recursive: true });
+  fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const exposed = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/producer/internal.ts"), "export const hidden = true;\n");
+  fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), "import { hidden } from '../producer/internal';\nexport const used = hidden;\n");
+  writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      requiredRules: ["CELLFENCE_PRIVATE_IMPORT"],
+    },
+    cells: [
+      {
+        id: "producer",
+        ownedPaths: ["src/producer/**"],
+        publicEntry: "src/producer/public.ts",
+        publicSymbols: ["exposed"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "consumer",
+        ownedPaths: ["src/consumer/**"],
+        publicEntry: "src/consumer/public.ts",
+        publicSymbols: ["used"],
+        consumes: [{ cell: "producer" }],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  git(rootDir, ["add", "."]);
+  git(rootDir, ["commit", "--quiet", "-m", "initial"]);
+  return git(rootDir, ["rev-parse", "HEAD"]);
+}
+
 test("corpus precision study clones an exact commit and records CellFence check results", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-study-"));
   try {
@@ -383,6 +423,55 @@ test("corpus precision study supports copy manifests from the corpus directory",
     assert.match(report.subjects[0].manifest.sha256, /^[a-f0-9]{64}$/);
     assert.ok(report.subjects[0].manifest.effectivePath.includes(`${path.sep}control${path.sep}`));
     assert.equal(fs.existsSync(path.join(report.subjects[0].subjectDir, "checkout", "cellfence.manifest.json")), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision study can emit and independently verify evidence graphs", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-evidence-graph-"));
+  try {
+    const sourceRepo = path.join(rootDir, "source");
+    fs.mkdirSync(sourceRepo, { recursive: true });
+    const commit = createPrivateImportRepository(sourceRepo);
+    const corpusPath = path.join(rootDir, "corpus.json");
+    const outPath = path.join(rootDir, "report.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "private-import",
+          repository: sourceRepo,
+          commit,
+          manifest: { strategy: "existing" },
+          expected: {
+            exitCode: 1,
+            requiredRuleIds: ["CELLFENCE_PRIVATE_IMPORT"],
+          },
+        },
+      ],
+    });
+
+    const result = runCorpusStudy([
+      "--corpus",
+      corpusPath,
+      "--workdir",
+      path.join(rootDir, "work"),
+      "--out",
+      outPath,
+      "--verify-evidence-graphs",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
+    assert.equal(report.verifyEvidenceGraphs, true);
+    assert.equal(report.summary.evidenceGraphsVerified, 1);
+    assert.equal(report.summary.evidenceGraphFailures, 0);
+    assert.equal(report.subjects[0].status, "checked_findings");
+    assert.equal(report.subjects[0].check.evidenceGraph.ok, true);
+    assert.equal(report.subjects[0].check.evidenceGraph.summary.policyDefects, 0);
+    assert.ok(fs.existsSync(report.subjects[0].check.evidenceGraph.graphPath));
+    assert.ok(fs.existsSync(report.subjects[0].check.evidenceGraph.reportPath));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

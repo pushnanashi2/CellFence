@@ -1908,6 +1908,44 @@ test("CLI check writes audit JSONL and summary JSON artifacts", () => {
   }
 });
 
+test("CLI check can write an evidence graph artifact for independent verification", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-evidence-graph-"));
+  try {
+    writePrivateImportProject(tempDir);
+    const graphPath = path.join(tempDir, "tmp", "evidence-graph.json");
+    const result = runCli(["check", "--json", "--evidence-graph", graphPath], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+
+    const graph = JSON.parse(fs.readFileSync(graphPath, "utf8"));
+    assert.equal(graph.schemaVersion, "cellfence.evidence-graph.v1");
+    assert.ok(graph.findingWitnesses.some((witness) => witness.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+
+    const verify = runExecutable(process.execPath, [
+      path.join(root, "scripts", "evidence-graph-verify.mjs"),
+      "--graph",
+      graphPath,
+    ]);
+    assert.equal(verify.status, 0, verify.stderr || verify.stdout);
+    const verifierReport = JSON.parse(verify.stdout);
+    assert.equal(verifierReport.summary.policyDefects, 0);
+    assert.ok(verifierReport.summary.policyVerifiedFindings >= 1);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI changed check rejects evidence graph output instead of emitting partial proof artifacts", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-changed-evidence-graph-"));
+  try {
+    writePrivateImportProject(tempDir);
+    const result = runCli(["check", "--changed", "--json", "--evidence-graph", "tmp/graph.json"], tempDir);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /only supported for full repository checks/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI summary records null commit when git returns an empty HEAD", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-summary-empty-head-"));
   const fakeBin = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-fake-empty-git-"));

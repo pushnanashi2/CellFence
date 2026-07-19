@@ -44,6 +44,20 @@ Resource rules, Python framework adapters, inferred manifests, and public
 surface drift should be reported as separate studies until they have their own
 reviewed manifests, labels, and recall evidence.
 
+Before a corpus can feed a blocking-precision claim, validate that it is a
+reviewed-manifest corpus:
+
+```bash
+npm run research:reviewed-corpus -- \
+  --corpus docs/research/corpora/ts-js-blocking-reviewed.json \
+  --out reports/corpus/ts-js-blocking-reviewed.corpus-validation.json
+```
+
+This intentionally rejects `manifest.strategy: infer` corpora. Infer runs are
+still valuable for onboarding, robustness, and tuning, but their findings are
+not treated as evidence of real repository defects until the manifest is
+reviewed and frozen.
+
 ## Frozen Corpus Manifest
 
 Store the corpus manifest before running the study:
@@ -204,6 +218,22 @@ witnesses, and missing file anchors. It is documented in
 [evidence-graph-verifier.md](evidence-graph-verifier.md). Passing it means the
 artifact is structurally usable; it is not a formal policy proof.
 
+For corpus studies that should produce independently checkable witness
+artifacts, enable graph verification during the run:
+
+```bash
+npm run research:corpus -- \
+  --corpus docs/research/corpora/ts-js-blocking-reviewed.json \
+  --out reports/corpus/ts-js-blocking-reviewed.json \
+  --workdir tmp/corpus-ts-js-blocking-reviewed \
+  --verify-evidence-graphs
+```
+
+Each successful subject writes `logs/evidence-graph.json` and
+`logs/evidence-graph-verifier.json`. The verifier is a separate Node process
+over the serialized graph; a missing or rejected graph makes the corpus harness
+fail.
+
 After a corpus run, freeze the evidence bundle before labeling:
 
 ```bash
@@ -219,6 +249,20 @@ Validate an existing bundle with:
 ```bash
 npm run research:bundle -- --validate --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle
 ```
+
+Before running the statistical claim evaluator, validate label readiness:
+
+```bash
+npm run precision:labels:validate -- \
+  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
+  --out reports/corpus/ts-js-workspace-pilot-2026-07-18-label-readiness.json
+```
+
+The label readiness gate requires the sampled precision-eligible findings to
+have independent labels from separate raters. If independent labels disagree, a
+separate adjudicator must resolve the final label. This gate only checks the
+labeling process; `corpus-precision-claim` still decides whether the labeled
+sample supports a pre-registered precision claim.
 
 The bundle contains:
 

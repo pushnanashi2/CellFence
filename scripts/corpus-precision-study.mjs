@@ -10,6 +10,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const defaultWorkDir = path.join(repoRoot, "tmp", "corpus-precision-study");
 const defaultOutPath = path.join(repoRoot, "reports", "corpus-precision-study.json");
 const cellfenceCli = path.join(repoRoot, "packages", "cli", "dist", "index.js");
+const evidenceGraphVerifier = path.join(repoRoot, "scripts", "evidence-graph-verify.mjs");
 const defaultManifestPath = "cellfence.manifest.json";
 const commandTimeouts = {
   clone: 600_000,
@@ -17,6 +18,7 @@ const commandTimeouts = {
   revParse: 60_000,
   manifest: 180_000,
   check: 300_000,
+  evidenceGraphVerify: 120_000,
 };
 const fixedCheckArguments = new Set([
   "--root",
@@ -26,6 +28,7 @@ const fixedCheckArguments = new Set([
   "--audit-log",
   "--summary-json",
   "--changed",
+  "--evidence-graph",
   "--base",
   "--head",
 ]);
@@ -41,12 +44,14 @@ class SubjectFailure extends Error {
 }
 
 function usage() {
-  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts] [--infer-scope all|production]
+  console.error(`Usage: node scripts/corpus-precision-study.mjs --corpus corpus.json [--workdir tmp/corpus] [--out reports/corpus.json] [--max-subjects n] [--dry-run] [--allow-floating-ref] [--clone-mode full|shallow] [--discard-checkouts] [--infer-scope all|production] [--verify-evidence-graphs]
 
 Runs a frozen-corpus CellFence precision/onboarding pass.
 The script clones each subject at an exact commit, prepares a manifest, runs
 cellfence check --json, and writes a failure-inclusive report. It never runs
-package install scripts in the target repositories.`);
+package install scripts in the target repositories. With --verify-evidence-graphs
+it also emits a per-subject evidence graph and verifies it with the standalone
+graph verifier.`);
 }
 
 function parseArgs(argv) {
@@ -59,6 +64,7 @@ function parseArgs(argv) {
     cloneMode: "full",
     discardCheckouts: false,
     inferScope: "all",
+    verifyEvidenceGraphs: false,
     maxSubjects: undefined,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -94,6 +100,8 @@ function parseArgs(argv) {
       parsed.cloneMode = argument.slice("--clone-mode=".length);
     } else if (argument === "--discard-checkouts") {
       parsed.discardCheckouts = true;
+    } else if (argument === "--verify-evidence-graphs") {
+      parsed.verifyEvidenceGraphs = true;
     } else if (argument === "--infer-scope") {
       parsed.inferScope = argv[index + 1] || "";
       index += 1;
@@ -438,10 +446,50 @@ function discardCheckoutIfRequested(subjectResult, subjectDir, options) {
   };
 }
 
-function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
+function evidenceGraphVerification(subjectDir, evidenceGraphPath) {
+  const reportPath = path.join(subjectDir, "logs", "evidence-graph-verifier.json");
+  if (!fs.existsSync(evidenceGraphPath)) {
+    return {
+      ok: false,
+      status: "missing_graph",
+      graphPath: evidenceGraphPath,
+      reportPath,
+      error: "CellFence did not write the requested evidence graph",
+    };
+  }
+  const result = run(process.execPath, [
+    evidenceGraphVerifier,
+    "--graph",
+    evidenceGraphPath,
+    "--out",
+    reportPath,
+  ], { cwd: repoRoot, timeoutMs: commandTimeouts.evidenceGraphVerify });
+  writeCommandLogs(subjectDir, "evidence-graph-verify", result);
+  let report = null;
+  try {
+    if (fs.existsSync(reportPath)) report = readJson(reportPath);
+  } catch (error) {
+    report = { parseError: error instanceof Error ? error.message : String(error) };
+  }
+  return {
+    ok: result.status === 0,
+    status: result.status === 0 ? "verified" : "verification_failed",
+    graphPath: evidenceGraphPath,
+    graphSha256: hashFile(evidenceGraphPath),
+    reportPath,
+    reportSha256: fs.existsSync(reportPath) ? hashFile(reportPath) : null,
+    exitCode: result.status,
+    durationMs: result.durationMs,
+    summary: report?.summary || null,
+    error: result.status === 0 ? undefined : summarizeFailure(result),
+  };
+}
+
+function runCheck(subject, checkoutDir, subjectDir, manifestPath, options) {
   validateCheckArgs(subject.id, subject.check?.args);
   validateCheckTimeout(subject.id, subject.check?.timeoutMs);
   const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
+  const evidenceGraphPath = path.join(subjectDir, "logs", "evidence-graph.json");
   fs.mkdirSync(path.dirname(auditLogPath), { recursive: true });
   const args = [
     cellfenceCli,
@@ -455,6 +503,7 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
     auditLogPath,
     ...(subject.check?.args || []),
   ];
+  if (options.verifyEvidenceGraphs) args.push("--evidence-graph", evidenceGraphPath);
   const result = run(process.execPath, args, { cwd: checkoutDir, timeoutMs: subject.check?.timeoutMs || commandTimeouts.check });
   writeCommandLogs(subjectDir, "check", result);
   if (result.timedOut) {
@@ -491,7 +540,7 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
   if (result.status === 0) status = "checked_clean";
   else if (result.status === 1) status = "checked_findings";
   else if (result.status === 2) status = "configuration_error";
-  return {
+  const checkResult = {
     status,
     exitCode: result.status,
     ok: parsed.ok === true,
@@ -501,6 +550,13 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath) {
     auditLogPath,
     auditLogSha256: fs.existsSync(auditLogPath) ? hashFile(auditLogPath) : null,
     durationMs: result.durationMs,
+  };
+  if (!options.verifyEvidenceGraphs || (result.status !== 0 && result.status !== 1)) return checkResult;
+  const verification = evidenceGraphVerification(subjectDir, evidenceGraphPath);
+  return {
+    ...checkResult,
+    ...(verification.ok ? {} : { status: verification.status, ok: false }),
+    evidenceGraph: verification,
   };
 }
 
@@ -517,6 +573,8 @@ function summarize(subjects) {
     toolErrors: 0,
     unparseableOutputs: 0,
     timeouts: 0,
+    evidenceGraphsVerified: 0,
+    evidenceGraphFailures: 0,
     totalFindings: 0,
     findingsByRule: {},
     expectations: {
@@ -537,6 +595,8 @@ function summarize(subjects) {
         summary.unparseableOutputs += 1;
       } else if (subject.check.status === "timeout") {
         summary.timeouts += 1;
+      } else if (subject.check.status === "missing_graph" || subject.check.status === "verification_failed") {
+        summary.toolErrors += 1;
       } else if (subject.check.exitCode === 0) {
         summary.checksClean += 1;
       } else if (subject.check.exitCode === 1) {
@@ -550,6 +610,8 @@ function summarize(subjects) {
       for (const [ruleId, count] of Object.entries(subject.check.findingsByRule || {})) {
         summary.findingsByRule[ruleId] = (summary.findingsByRule[ruleId] || 0) + count;
       }
+      if (subject.check.evidenceGraph?.ok) summary.evidenceGraphsVerified += 1;
+      if (subject.check.evidenceGraph && !subject.check.evidenceGraph.ok) summary.evidenceGraphFailures += 1;
     }
     const expectation = subject.expectation?.status || "unlabeled";
     if (expectation === "unlabeled") summary.expectations.unlabeled += 1;
@@ -608,7 +670,7 @@ function runSubject(subject, corpusDir, options) {
         worktreeStatus: worktreeBeforeCheck.porcelain,
       });
     }
-    const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.effectivePath);
+    const check = runCheck(subject, clone.checkoutDir, subjectDir, manifest.effectivePath, options);
     const expectation = expectationResult(subject.expected, check);
     const result = {
       ...base,
@@ -709,6 +771,7 @@ function main() {
     cloneMode: options.cloneMode,
     discardCheckouts: options.discardCheckouts,
     inferScope: options.inferScope,
+    verifyEvidenceGraphs: options.verifyEvidenceGraphs,
     environment: environmentMetadata(options.corpusPath),
     subjects,
     summary: summarize(subjects),
@@ -722,6 +785,7 @@ function main() {
     report.summary.toolErrors > 0 ||
     report.summary.unparseableOutputs > 0 ||
     report.summary.timeouts > 0 ||
+    report.summary.evidenceGraphFailures > 0 ||
     report.summary.expectations.failed > 0
   ) return 1;
   return 0;

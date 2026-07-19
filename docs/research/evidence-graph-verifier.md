@@ -19,6 +19,17 @@ Verify a graph file:
 npm run evidence:graph:verify -- --graph reports/example/evidence-graph.json
 ```
 
+Generate a graph from the CLI and then verify it with the standalone verifier:
+
+```bash
+cellfence check --json --evidence-graph reports/example/evidence-graph.json
+npm run evidence:graph:verify -- --graph reports/example/evidence-graph.json
+```
+
+`cellfence baseline check` supports the same `--evidence-graph` artifact. The
+changed-file mode does not, because the verifier input must represent a full
+repository observation envelope rather than a partial diff filter.
+
 Verify a `cellfence check` JSON wrapper that contains `evidenceGraph`:
 
 ```bash

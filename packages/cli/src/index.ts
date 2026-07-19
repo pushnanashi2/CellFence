@@ -60,6 +60,7 @@ type ParsedArgs = {
   baselinePath?: string;
   auditLogPath?: string;
   summaryJsonPath?: string;
+  evidenceGraphPath?: string;
   cellId?: string;
   claimId?: string;
   claimsPath?: string;
@@ -111,7 +112,7 @@ function printUsage(): void {
 Usage:
   cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope] [--research-ablate-package-policy-hints]
   cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
-  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence manifest verify --from systems/*/service.json [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
@@ -127,7 +128,7 @@ Usage:
   cellfence claim list [--claims .cellfence/claims.json] [--json]
   cellfence task check --task .cellfence/tasks/task.json [--base origin/main] [--head HEAD] [--json]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
-  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
@@ -224,6 +225,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--summary-json=")) {
       parsed.summaryJsonPath = argument.slice("--summary-json=".length);
+    } else if (argument === "--evidence-graph") {
+      parsed.evidenceGraphPath = argv[index + 1];
+      index += 1;
+    } else if (argument.startsWith("--evidence-graph=")) {
+      parsed.evidenceGraphPath = argument.slice("--evidence-graph=".length);
     } else if (argument === "--cell") {
       parsed.cellId = argv[index + 1];
       parsed.claimCells.push(argv[index + 1]);
@@ -580,6 +586,9 @@ function writeCheckArtifacts(parsed: ParsedArgs, result: CheckResult, metadata: 
   if (parsed.summaryJsonPath) {
     writeFileEnsuringDirectory(resolveOutputPath(parsed.rootDir, parsed.summaryJsonPath), `${JSON.stringify(checkSummary(result, metadata), null, 2)}\n`);
   }
+  if (parsed.evidenceGraphPath && result.evidenceGraph) {
+    writeFileEnsuringDirectory(resolveOutputPath(parsed.rootDir, parsed.evidenceGraphPath), `${JSON.stringify(result.evidenceGraph, null, 2)}\n`);
+  }
 }
 
 function commandInit(parsed: ParsedArgs): number {
@@ -642,6 +651,10 @@ function commandCheck(parsed: ParsedArgs): number {
   const startedAtMs = Date.now();
   const startedAt = new Date(startedAtMs).toISOString();
   const shouldRunChanged = parsed.changed || Boolean(profile?.changedOnly);
+  if (parsed.evidenceGraphPath && shouldRunChanged) {
+    console.error("cellfence check --evidence-graph is only supported for full repository checks");
+    return 2;
+  }
   const result = shouldRunChanged
     ? checkChangedRepository({
       ...options,
@@ -650,7 +663,10 @@ function commandCheck(parsed: ParsedArgs): number {
       baseRef: parsed.baseRef,
       headRef: parsed.headRef,
     })
-    : checkRepository(options);
+    : checkRepository({
+      ...options,
+      includeEvidenceGraph: Boolean(parsed.evidenceGraphPath),
+    });
   const effectiveResult: CheckResult = profile?.reportOnly
     ? {
       ...result,
@@ -1061,6 +1077,7 @@ function commandBaselineCheck(parsed: ParsedArgs, commandName = "baseline check"
     manifestPath: parsed.manifestPath,
     baselinePath: effectiveParsed.baselinePath,
     evidencePaths: parsed.evidencePaths,
+    includeEvidenceGraph: Boolean(parsed.evidenceGraphPath),
   });
   const metadata = createRunMetadata(commandName, parsed.rootDir, startedAtMs, startedAt);
   writeCheckArtifacts(effectiveParsed, result, metadata);

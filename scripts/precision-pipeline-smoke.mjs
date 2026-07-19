@@ -111,11 +111,12 @@ function requireStatus(result, expectedStatus, label) {
 function createFixture(runDir) {
   const subjectDir = path.join(runDir, "subjects", "reviewed-demo");
   const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
+  const reviewedManifestSourcePath = path.join(runDir, "manifests", "reviewed-demo.cellfence.manifest.json");
   const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
   const corpusPath = path.join(runDir, "corpus.json");
   const reportPath = path.join(runDir, "corpus-report.json");
 
-  writeJson(manifestPath, {
+  const reviewedManifest = {
     schemaVersion: "cellfence.manifest.v1",
     governance: {
       requireOwnership: true,
@@ -144,7 +145,9 @@ function createFixture(runDir) {
         producesArtifacts: [],
       },
     ],
-  });
+  };
+  writeJson(manifestPath, reviewedManifest);
+  writeJson(reviewedManifestSourcePath, reviewedManifest);
   writeJsonl(auditLogPath, [
     {
       schemaVersion: "cellfence.audit-event.v1",
@@ -209,6 +212,10 @@ function createFixture(runDir) {
           strategy: "copy",
           source: "manifests/reviewed-demo.cellfence.manifest.json",
           reviewStatus: "reviewed",
+          review: {
+            reviewers: ["reviewer-a"],
+            boundaryEvidence: ["fixture manifest derived from declared package boundary"],
+          },
         },
       },
     ],
@@ -331,7 +338,17 @@ function main() {
     const labeledBundleDir = path.join(runDir, "bundle-labeled");
     const labelsPath = path.join(runDir, "labels.jsonl");
     const protocolPath = path.join(runDir, "protocol.json");
+    const reviewedCorpusReportPath = path.join(runDir, "reviewed-corpus-report.json");
+    const labelReadinessPath = path.join(runDir, "label-readiness.json");
     const claimPath = path.join(runDir, "claim-report.json");
+
+    requireStatus(run(process.execPath, [
+      path.join(repoRoot, "scripts", "reviewed-corpus-validate.mjs"),
+      "--corpus",
+      corpusPath,
+      "--out",
+      reviewedCorpusReportPath,
+    ]), 0, "reviewed corpus validate");
 
     requireStatus(run(process.execPath, [
       path.join(repoRoot, "scripts", "corpus-evidence-bundle.mjs"),
@@ -370,6 +387,13 @@ function main() {
       "--bundle",
       labeledBundleDir,
     ]), 0, "bundle validate");
+    requireStatus(run(process.execPath, [
+      path.join(repoRoot, "scripts", "precision-labels-validate.mjs"),
+      "--bundle",
+      labeledBundleDir,
+      "--out",
+      labelReadinessPath,
+    ]), 0, "label readiness validate");
     const artifactSetSha256 = hashFile(path.join(labeledBundleDir, "SHA256SUMS"));
     writeProtocol(protocolPath, artifactSetSha256);
 
@@ -398,6 +422,8 @@ function main() {
       studyId,
       runDir,
       bundleDir: labeledBundleDir,
+      reviewedCorpusReportPath,
+      labelReadinessPath,
       protocolPath,
       claimReportPath: claimPath,
       normalizedFindings: findings.length,
