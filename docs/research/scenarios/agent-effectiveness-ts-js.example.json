@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "cellfence.agent-effectiveness.scenarios.v1",
+  "scenarios": [
+    {
+      "id": "extract-client",
+      "title": "Extract a reusable client layer",
+      "task": "Move duplicated HTTP request construction into a shared client module while keeping existing public imports stable.",
+      "expectedScale": {
+        "filesChanged": 6,
+        "insertions": 180,
+        "deletions": 80
+      },
+      "riskTags": [
+        "ownership",
+        "public-api",
+        "resource-contract"
+      ],
+      "successCriteria": [
+        "The feature still builds or the attempted build failure is explained.",
+        "No private implementation module is imported across a declared boundary.",
+        "New external resource access is declared or avoided."
+      ],
+      "antiGoals": [
+        "Do not change package publishing metadata.",
+        "Do not update CellFence baselines as a shortcut."
+      ]
+    }
+  ]
+}

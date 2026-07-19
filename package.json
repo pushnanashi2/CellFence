@@ -26,6 +26,7 @@
     "research:corpus": "npm run build && node scripts/corpus-precision-study.mjs",
     "research:history": "npm run build && node scripts/history-replay-study.mjs",
     "research:oracle": "npm run build && node scripts/upstream-policy-oracle.mjs",
+    "research:effectiveness": "node scripts/agent-effectiveness-study.mjs",
     "research:bundle": "node scripts/corpus-evidence-bundle.mjs",
     "research:claim": "node scripts/corpus-precision-claim.mjs",
     "pack:smoke": "node scripts/pack-smoke.mjs",

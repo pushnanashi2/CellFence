@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNOWNED_SOURCE"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "src/app/**"
+      ],
+      "publicEntry": "src/app/public.ts",
+      "publicSymbols": [
+        "app"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

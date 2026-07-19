@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "cellfence.agent-effectiveness.corpus.v1",
+  "studyId": "agent-effectiveness-ts-js-example",
+  "seed": "agent-effectiveness-ts-js-example-v1",
+  "subjects": [
+    {
+      "id": "example-project",
+      "repository": "https://github.com/example/project.git",
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/example-project.cellfence.manifest.json",
+        "reviewStatus": "reviewed"
+      }
+    }
+  ]
+}
