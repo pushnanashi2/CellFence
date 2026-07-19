@@ -29,7 +29,7 @@ The public claim must name the layer being measured:
 
 | Layer | What it can prove | Appropriate evidence |
 | --- | --- | --- |
-| Policy conformance | A finding violates the reviewed manifest semantics. | Formal rule spec, proof witnesses, independent verifier. |
+| Policy conformance | A finding violates the reviewed manifest semantics. | Formal rule spec, proof witnesses, structural evidence graph verification, and an independent rule verifier. |
 | Frontend correctness | Imports, ownership, resolution, and public surface extraction are correct. | Conformance, property, and differential tests. |
 | Blocking precision | A blocking finding should have failed CI in a real repository. | Sealed holdout corpus, independent labels, statistical lower bound. |
 
@@ -191,6 +191,18 @@ two independent labels for each sampled finding, validates checksums, and runs
 `insufficient_evidence`: the sample is deliberately too small for a 99% lower
 bound. A passing smoke proves the bundle, labeling, and claim machinery is wired;
 it is not public-OSS precision evidence.
+
+Run the evidence graph structural smoke before using graph artifacts as witness
+inputs:
+
+```bash
+npm run evidence:graph:smoke
+```
+
+The verifier rejects malformed graph shape, dangling references, missing finding
+witnesses, and missing file anchors. It is documented in
+[evidence-graph-verifier.md](evidence-graph-verifier.md). Passing it means the
+artifact is structurally usable; it is not a formal policy proof.
 
 After a corpus run, freeze the evidence bundle before labeling:
 
