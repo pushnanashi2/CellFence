@@ -6,7 +6,6 @@ import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 import {
-  type CellBaselineRecord,
   type CellFenceBaseline,
   type CellFenceManifest,
   type CellManifest,
@@ -21,7 +20,6 @@ import {
 } from "@cellfence/schema";
 import {
   absolutePath,
-  listFiles,
   listSymlinks,
   literalPrefix,
   matchesPattern,
@@ -45,7 +43,6 @@ import {
   literalText,
   resolvePythonImport,
   resolveNearestPathAliasTarget,
-  readWorkspacePathAliases,
   resolvePackageImportsTarget,
   resolvePathAliasTarget,
   resolveRelativeImport,
@@ -65,13 +62,11 @@ import {
   mergeAccessesByCell,
   resourceEvidenceAccesses as resourceEvidenceAccessesOperation,
 } from "./resource-evidence.js";
-import { assessEvidence } from "./governance/evidence-assessment.js";
 import { createEvidenceGraph } from "./governance/evidence-graph.js";
-import { createRawObservationReport } from "./governance/observation-report.js";
-import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
+import { governanceEvidenceEnvelopeForCheck } from "./governance/evidence-envelope.js";
+import type { SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
 import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
-import type { EvidenceAssessment, FileObservation, ObservationFamily, RawObservationReport, SubjectSnapshot } from "./governance/model.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
 import { CORE_REQUIRED_RULES, DEFAULT_BASELINE_PATH, DEFAULT_CLAIMS_PATH, DEFAULT_MANIFEST_PATH } from "./constants.js";
 import { readJsonFile } from "./json-file.js";
@@ -86,7 +81,6 @@ import {
 } from "./findings.js";
 import { ownedPathPatternsOverlap, pathPatternsOverlap } from "./glob-overlap.js";
 import { errorMessage } from "./errors.js";
-import { isIsoDate, todayIsoDate } from "./dates.js";
 import {
   validateBaselineSealFindings,
 } from "./baseline-seal.js";
@@ -117,6 +111,15 @@ import {
   createAutoAllocation as createAutoAllocationOperation,
   createCouplingGraph as createCouplingGraphOperation,
 } from "./graph.js";
+import { createRepositoryModel } from "./repository-model.js";
+import { createContext, findOwningCell, owningCells } from "./analysis-context.js";
+import {
+  applyWaiversToFindings,
+  collectWaiversForManifest,
+  listWaivers as listWaiversOperation,
+  waiverMatchesFinding,
+} from "./waivers.js";
+import { pythonSourceRoots } from "./python-roots.js";
 import type {
   AnalysisContext,
   AutoAllocation,
@@ -243,163 +246,8 @@ export type {
   WriteAccessResult,
 } from "./types.js";
 
-const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
-
-function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string): CellFenceWaiver | undefined {
-  const match = WAIVER_PATTERN.exec(text);
-  if (!match) return undefined;
-  const [, ruleId, suffix] = match;
-  const expiresMatch = /\bexpires:(\d{4}-\d{2}-\d{2})\b/.exec(suffix);
-  const approvedByMatch = /\bapproved-by:([^\s]+)/.exec(suffix);
-  const reasonMatch = /\breason:(.+)$/.exec(suffix);
-  const expires = expiresMatch?.[1] || "";
-  const approvedBy = approvedByMatch?.[1] || "";
-  const reason = reasonMatch ? reasonMatch[1].trim() : "";
-  const errors: string[] = [];
-  if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
-  if (!expires || !isIsoDate(expires)) errors.push("expires must be YYYY-MM-DD");
-  if (!approvedBy) errors.push("approved-by is required");
-  if (approvedBy.toUpperCase() === "PENDING") errors.push("approved-by:PENDING is a request placeholder, not an approval");
-  if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
-  const expired = Boolean(expires) && expires < todayIsoDate();
-  if (expired) errors.push("waiver is expired");
-  return {
-    ruleId,
-    filePath: repoPath(rootDir, filePath),
-    line,
-    expires,
-    approvedBy,
-    reason,
-    expired,
-    valid: errors.length === 0,
-    errors,
-  };
-}
-
-function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): string[] {
-  const context = createContext(rootDir, manifest);
-  const files = new Set<string>();
-  for (const cell of manifest.cells) {
-    for (const sourceFile of sourceFilesForCell(rootDir, cell, context)) {
-      files.add(sourceFile);
-    }
-  }
-  return [...files].sort((left, right) => left.localeCompare(right));
-}
-
-function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest): CellFenceWaiver[] {
-  const waivers: CellFenceWaiver[] = [];
-  for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
-    const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
-    for (const [index, line] of lines.entries()) {
-      const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line);
-      if (waiver) waivers.push(waiver);
-    }
-  }
-  return waivers;
-}
-
 export function listWaivers(options: CheckOptions = {}): CellFenceWaiver[] {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const manifest = loadManifestFromFile(manifestPath);
-  return collectWaiversForManifest(rootDir, manifest);
-}
-
-function lineForFinding(finding: Finding): number | undefined {
-  const line = finding.details?.line;
-  return Number.isInteger(line) ? Number(line) : undefined;
-}
-
-function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
-  if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
-  if (waiver.ruleId !== finding.ruleId) return false;
-  const findingLine = lineForFinding(finding);
-  if (!findingLine) return true;
-  return waiver.line === findingLine || waiver.line === findingLine - 1;
-}
-
-function applyWaiversToFindings(
-  context: AnalysisContext,
-  findings: Finding[],
-  warnings: Finding[],
-): { findings: Finding[]; warnings: Finding[] } {
-  const waivers = collectWaiversForManifest(context.rootDir, context.manifest);
-  const validWaivers = waivers.filter((waiver) => waiver.valid);
-  const waiverFindings = waivers
-    .filter((waiver) => !waiver.valid)
-    .map((waiver): Finding => ({
-      ruleId: "CELLFENCE_WAIVER_INVALID",
-      severity: "error",
-      filePath: waiver.filePath,
-      message: `invalid CellFence waiver at line ${waiver.line}: ${waiver.errors.join("; ")}`,
-      details: {
-        line: waiver.line,
-        ruleId: waiver.ruleId,
-        expires: waiver.expires,
-        approvedBy: waiver.approvedBy,
-        reason: waiver.reason,
-      },
-    }));
-
-  const requiredRules = new Set<string>([
-    ...CORE_REQUIRED_RULES,
-    ...(context.manifest.governance?.requiredRules || []),
-  ]);
-  const isWaived = (finding: Finding) =>
-    !requiredRules.has(finding.ruleId)
-    && validWaivers.some((waiver) => waiverMatchesFinding(waiver, finding));
-  return {
-    findings: [...findings.filter((finding) => !isWaived(finding)), ...waiverFindings],
-    warnings: warnings.filter((warning) => !isWaived(warning)),
-  };
-}
-
-function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
-  return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
-}
-
-function owningCells(manifest: CellFenceManifest, relativePath: string): CellManifest[] {
-  return manifest.cells.filter((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
-}
-
-function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {
-  let directoryPath = path.dirname(absolutePath(rootDir, publicEntry));
-  while (directoryPath.startsWith(rootDir)) {
-    if (fs.existsSync(path.join(directoryPath, "package.json"))) {
-      return repoPath(rootDir, directoryPath);
-    }
-    const parentPath = path.dirname(directoryPath);
-    /* c8 ignore next -- Safety guard for filesystem roots; normal repo roots exit via the while condition. */
-    if (parentPath === directoryPath) break;
-    directoryPath = parentPath;
-  }
-  return undefined;
-}
-
-function createContext(rootDir: string, manifest: CellFenceManifest): AnalysisContext {
-  const cellsById = new Map<string, CellManifest>();
-  const packageToCell = new Map<string, CellManifest>();
-  const packageRoots = new Map<string, string>();
-  for (const cell of manifest.cells) {
-    cellsById.set(cell.id, cell);
-    if (cell.packageName) {
-      packageToCell.set(cell.packageName, cell);
-      const packageRoot = findPackageRoot(rootDir, cell.publicEntry);
-      if (packageRoot) packageRoots.set(cell.packageName, packageRoot);
-    }
-  }
-  return {
-    rootDir,
-    manifest,
-    cellsById,
-    packageToCell,
-    packageRoots,
-    pathAliases: readWorkspacePathAliases(rootDir),
-    sourceFilesForCellCache: new Map<string, string[]>(),
-    sourceTextCache: new Map<string, string>(),
-    sourceFileCache: new Map<string, ts.SourceFile>(),
-  };
+  return listWaiversOperation(options);
 }
 
 function validateDuplicateCellIds(manifest: CellFenceManifest, findings: Finding[]): void {
@@ -714,177 +562,6 @@ function resourceEvidenceAccesses(
 ): Map<string, ResourceAccessReference[]> {
   return resourceEvidenceAccessesOperation(context, evidencePaths, findings, baseline, resourceEvidenceDependencies());
 }
-function allSourceFilesByCell(context: AnalysisContext): Record<string, readonly string[]> {
-  const byCell: Record<string, readonly string[]> = {};
-  for (const cell of context.manifest.cells) {
-    byCell[cell.id] = sourceFilesForCell(context.rootDir, cell, context).map((filePath) => repoPath(context.rootDir, filePath));
-  }
-  return byCell;
-}
-
-function repositoryFiles(context: AnalysisContext): readonly string[] {
-  return listFiles(context.rootDir, context).map((filePath) => repoPath(context.rootDir, filePath));
-}
-
-function sourceContentsByPath(context: AnalysisContext, byCell: Record<string, readonly string[]>): Record<string, string> {
-  const contents: Record<string, string> = {};
-  const sourceFiles = new Set(Object.values(byCell).flat());
-  for (const filePath of sourceFiles) {
-    contents[filePath] = readSourceText(context, path.join(context.rootDir, filePath));
-  }
-  return contents;
-}
-
-function resourceAccessForPlugin(cellId: string, access: ResourceAccessReference): PluginResourceAccess {
-  return {
-    kind: access.kind,
-    access: access.access,
-    selector: access.selector,
-    filePath: access.filePath,
-    line: access.line,
-    source: access.source,
-    detectedBy: access.detectedBy,
-    confidence: access.confidence,
-    cellId,
-    unresolved: access.unresolved,
-    reason: access.reason,
-  };
-}
-
-function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessReference[]>): PluginResourceAccess[] {
-  const accesses: PluginResourceAccess[] = [];
-  for (const [cellId, cellAccesses] of accessesByCell.entries()) {
-    for (const access of cellAccesses) accesses.push(resourceAccessForPlugin(cellId, access));
-  }
-  return accesses.sort((left, right) =>
-    `${left.cellId}:${left.kind}:${left.access}:${left.selector}:${left.filePath}:${left.line}`
-      .localeCompare(`${right.cellId}:${right.kind}:${right.access}:${right.selector}:${right.filePath}:${right.line}`));
-}
-
-function createRepositoryModel(
-  context: AnalysisContext,
-  baseline: CellFenceBaseline | undefined,
-  observedImports: PluginImportReference[],
-  accessesByCell: Map<string, ResourceAccessReference[]>,
-  metrics: Record<string, CellBaselineRecord>,
-  changedFiles: string[] = [],
-): PluginRepositoryModel {
-  const byCell = allSourceFilesByCell(context);
-  return {
-    rootDir: context.rootDir,
-    manifest: context.manifest,
-    baseline: baseline || null,
-    files: {
-      all: repositoryFiles(context),
-      governed: sourceFilesUnderGovernance(context.rootDir, context.manifest, context).map((filePath) => repoPath(context.rootDir, filePath)),
-      byCell,
-      contents: sourceContentsByPath(context, byCell),
-    },
-    imports: observedImports,
-    resources: flattenResourceAccesses(accessesByCell),
-    metrics,
-    changedFiles: new Set(changedFiles.map(normalizePath)),
-  };
-}
-
-function addGovernanceSubjectFile(
-  subjectFiles: Map<string, SubjectSnapshotInputFile>,
-  rootDir: string,
-  relativePath: string,
-  role: SubjectSnapshotInputFile["role"],
-): void {
-  const normalizedPath = normalizePath(relativePath);
-  if (subjectFiles.has(normalizedPath)) return;
-  const absoluteFilePath = absolutePath(rootDir, normalizedPath);
-  if (!fs.existsSync(absoluteFilePath) || !fs.statSync(absoluteFilePath).isFile()) return;
-  subjectFiles.set(normalizedPath, {
-    path: normalizedPath,
-    content: fs.readFileSync(absoluteFilePath, "utf8"),
-    role,
-  });
-}
-
-function governanceSubjectFiles(
-  context: AnalysisContext,
-  manifestPath: string,
-  baselinePath: string | undefined,
-  evidencePaths: string[],
-): SubjectSnapshotInputFile[] {
-  const subjectFiles = new Map<string, SubjectSnapshotInputFile>();
-  addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, manifestPath), "manifest");
-  if (baselinePath) addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, baselinePath), "baseline");
-  const tsconfigPath = path.join(context.rootDir, "tsconfig.json");
-  addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, tsconfigPath), "config");
-  for (const evidencePath of evidencePaths) addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, evidencePath), "runtime-evidence");
-  for (const cell of context.manifest.cells) {
-    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
-      addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, sourceFilePath), "source");
-    }
-  }
-  for (const governedFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest, context)) {
-    addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, governedFilePath), "source");
-  }
-  return [...subjectFiles.values()].sort((left, right) => left.path.localeCompare(right.path));
-}
-
-function requiredGovernanceFamilies(baselinePath: string | undefined): ObservationFamily[] {
-  const families: ObservationFamily[] = ["manifest", "ownership", "public-surface", "imports", "resources"];
-  if (baselinePath) families.push("baseline");
-  return families;
-}
-
-type GovernanceEvidenceEnvelope = {
-  snapshot: SubjectSnapshot;
-  report: RawObservationReport;
-  assessment: EvidenceAssessment;
-};
-
-function governanceEvidenceEnvelopeForCheck(
-  context: AnalysisContext,
-  manifestPath: string,
-  baselinePath: string | undefined,
-  evidencePaths: string[],
-  observedImports: PluginImportReference[],
-  accessesByCell: Map<string, ResourceAccessReference[]>,
-): GovernanceEvidenceEnvelope {
-  const snapshot = createSubjectSnapshotFromFiles(governanceSubjectFiles(context, manifestPath, baselinePath, evidencePaths));
-  const statuses: FileObservation[] = snapshot.files.flatMap((file): FileObservation[] => {
-    if (file.role === "manifest") {
-      return [
-        { filePath: file.path, family: "manifest" as const, status: "processed" as const },
-        { filePath: file.path, family: "ownership" as const, status: "processed" as const },
-      ];
-    }
-    if (file.role === "baseline") return [{ filePath: file.path, family: "baseline" as const, status: "processed" as const }];
-    if (file.role === "runtime-evidence") return [{ filePath: file.path, family: "resources" as const, status: "processed" as const }];
-    if (file.role === "source") {
-      return [
-        { filePath: file.path, family: "imports" as const, status: "processed" as const },
-        { filePath: file.path, family: "public-surface" as const, status: "processed" as const },
-        { filePath: file.path, family: "resources" as const, status: "processed" as const },
-      ];
-    }
-    return [{ filePath: file.path, family: "imports" as const, status: "not-applicable" as const }];
-  });
-  const resourceObservationCount = [...accessesByCell.values()].reduce(
-    (count, accesses) => count + accesses.length,
-    0,
-  );
-  const report = createRawObservationReport({
-    observer: "cellfence-engine",
-    snapshot,
-    statuses,
-    importObservationCount: observedImports.length,
-    resourceObservationCount,
-    publicSurfaceObservationCount: context.manifest.cells.length,
-  });
-  return {
-    snapshot,
-    report,
-    assessment: assessEvidence(snapshot, report, { requiredFamilies: requiredGovernanceFamilies(baselinePath) }),
-  };
-}
-
 function qualifiedExpressionName(node: ts.Node): string | undefined {
   if (ts.isIdentifier(node)) return node.text;
   if (ts.isPropertyAccessExpression(node)) {
@@ -1114,104 +791,6 @@ function findArtifactLaneForPath(cell: CellManifest, relativePath: string): stri
     if (lane.paths.some((pattern) => matchesPattern(relativePath, pattern))) return lane.id;
   }
   return undefined;
-}
-
-function parentPrefix(relativePath: string): string {
-  const normalized = normalizePath(relativePath);
-  const parent = path.dirname(normalized);
-  return parent === "." ? "" : parent;
-}
-
-function addPythonRoot(roots: Set<string>, root: string | undefined): void {
-  if (!root) return;
-  const normalized = normalizePath(root).replace(/\/+$/, "");
-  if (normalized === "." || normalized === "") roots.add("");
-  else roots.add(normalized);
-}
-
-function pythonSourceRootsFromPyproject(rootDir: string): string[] {
-  const pyprojectPath = path.join(rootDir, "pyproject.toml");
-  if (!fs.existsSync(pyprojectPath)) return [];
-  const text = fs.readFileSync(pyprojectPath, "utf8");
-  const roots = new Set<string>();
-  for (const match of text.matchAll(/(?:package-dir|package_dir)\s*=\s*\{[^}]*["']{0,1}["']{0,1}\s*=\s*["']([^"']+)["'][^}]*\}/g)) {
-    addPythonRoot(roots, match[1]);
-  }
-  let section = "";
-  for (const line of text.split(/\r?\n/)) {
-    const sectionMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
-    if (sectionMatch) {
-      section = sectionMatch[1].trim();
-      continue;
-    }
-    if (section === "tool.setuptools.package-dir") {
-      const match = line.match(/^\s*["']?\s*["']?\s*=\s*["']([^"']+)["']/);
-      if (match) addPythonRoot(roots, match[1]);
-    }
-  }
-  for (const match of text.matchAll(/\bwhere\s*=\s*\[([^\]]+)\]/g)) {
-    for (const rootMatch of match[1].matchAll(/["']([^"']+)["']/g)) addPythonRoot(roots, rootMatch[1]);
-  }
-  for (const match of text.matchAll(/\bfrom\s*=\s*["']([^"']+)["']/g)) {
-    addPythonRoot(roots, match[1]);
-  }
-  return [...roots];
-}
-
-function pythonSourceRootsFromSetupCfg(rootDir: string): string[] {
-  const setupCfgPath = path.join(rootDir, "setup.cfg");
-  if (!fs.existsSync(setupCfgPath)) return [];
-  const text = fs.readFileSync(setupCfgPath, "utf8");
-  const roots = new Set<string>();
-  const lines = text.split(/\r?\n/);
-  for (let index = 0; index < lines.length; index += 1) {
-    if (!/^\s*package_dir\s*=\s*$/.test(lines[index])) continue;
-    for (let blockIndex = index + 1; blockIndex < lines.length; blockIndex += 1) {
-      const line = lines[blockIndex];
-      if (line.trim().length === 0) continue;
-      if (/^\S/.test(line)) break;
-      const match = line.match(/^\s*=\s*([^\s#]+)\s*$/);
-      if (match) addPythonRoot(roots, match[1]);
-    }
-  }
-  return [...roots];
-}
-
-function pythonSourceRootsFromSetupPy(rootDir: string): string[] {
-  const setupPyPath = path.join(rootDir, "setup.py");
-  if (!fs.existsSync(setupPyPath)) return [];
-  const text = fs.readFileSync(setupPyPath, "utf8");
-  const roots = new Set<string>();
-  for (const match of text.matchAll(/\bpackage_dir\s*=\s*\{[\s\S]{0,1000}?["']\s*["']\s*:\s*["']([^"']+)["']/g)) {
-    addPythonRoot(roots, match[1]);
-  }
-  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\(\s*["']([^"']+)["']/g)) {
-    addPythonRoot(roots, match[1]);
-  }
-  for (const match of text.matchAll(/\bfind(?:_namespace)?_packages\s*\([\s\S]{0,500}?\bwhere\s*=\s*["']([^"']+)["']/g)) {
-    addPythonRoot(roots, match[1]);
-  }
-  return [...roots];
-}
-
-function pythonSourceRoots(context: AnalysisContext): string[] {
-  const roots = new Set<string>(["", "src"]);
-  for (const root of pythonSourceRootsFromPyproject(context.rootDir)) addPythonRoot(roots, root);
-  for (const root of pythonSourceRootsFromSetupCfg(context.rootDir)) addPythonRoot(roots, root);
-  for (const root of pythonSourceRootsFromSetupPy(context.rootDir)) addPythonRoot(roots, root);
-  for (const cell of context.manifest.cells) {
-    if (path.extname(cell.publicEntry) === ".py") {
-      const parent = parentPrefix(cell.publicEntry);
-      const packageRoot = parentPrefix(parent);
-      roots.add(packageRoot);
-    }
-    for (const pattern of cell.ownedPaths) {
-      const prefix = literalPrefix(pattern);
-      if (!prefix) continue;
-      roots.add(parentPrefix(prefix));
-    }
-  }
-  return [...roots].sort((left, right) => left.localeCompare(right));
 }
 
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {

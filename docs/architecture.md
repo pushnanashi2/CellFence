@@ -12,6 +12,24 @@ The enforced source of truth is `cellfence.manifest.json`; this document is a hu
 - `cli`: process argument parsing, human/JSON output, audit/summary artifacts, and command dispatch. It depends on `engine`.
 - `github-action`: thin GitHub Action wrapper around the engine/CLI policy. It depends on `engine`.
 
+## Engine Internal Modules
+
+The `engine` package keeps `src/index.ts` as the public API and orchestration
+surface. Shared policy mechanics live in narrower modules:
+
+- `analysis-context.ts`: manifest-derived lookup maps, package roots, and
+  ownership lookup helpers;
+- `repository-model.ts`: plugin-facing repository model projection;
+- `governance/evidence-envelope.ts`: subject snapshot, raw observation report,
+  and evidence assessment construction;
+- `governance/evidence-graph.ts`: opt-in finding witness graph construction;
+- `waivers.ts`: source waiver parsing, matching, listing, and enforcement;
+- `python-roots.ts`: Python package-root inference used by import resolution;
+- `baseline.ts`, `baseline-ratchet.ts`, and `baseline-seal.ts`: baseline
+  creation, comparison, update guards, and signature/seal verification;
+- `claims.ts`, `context.ts`, and `graph.ts`: agent claim leases, cell context
+  projection, and coupling graph/auto-allocation outputs.
+
 ## Agent And Runtime Cells
 
 - `mcp-proxy`: stdio MCP write guard and proxy helpers. It depends on `engine`.
