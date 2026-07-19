@@ -6,8 +6,6 @@ import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 import {
-  CELLFENCE_BASELINE_SCHEMA_VERSION,
-  type CellFenceResourceEvidence,
   type CellBaselineRecord,
   type CellFenceBaseline,
   type CellFenceManifest,
@@ -19,7 +17,6 @@ import {
   type ResourceContractManifest,
   validateBaseline,
   validateManifest,
-  validateResourceEvidence,
   type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
 import {
@@ -62,6 +59,12 @@ import {
   type ResourceAccessMode,
   type ResourceAccessReference,
 } from "./resource-access.js";
+import {
+  addAccessToCell,
+  evidencePathsForOptions,
+  mergeAccessesByCell,
+  resourceEvidenceAccesses as resourceEvidenceAccessesOperation,
+} from "./resource-evidence.js";
 import { assessEvidence } from "./governance/evidence-assessment.js";
 import { createRawObservationReport } from "./governance/observation-report.js";
 import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
@@ -69,11 +72,21 @@ import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import type { FileObservation, ObservationFamily } from "./governance/model.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
-import { stableCanonicalJson } from "./governance/canonicalization.js";
+import { CORE_REQUIRED_RULES, DEFAULT_BASELINE_PATH, DEFAULT_CLAIMS_PATH, DEFAULT_MANIFEST_PATH } from "./constants.js";
+import { readJsonFile } from "./json-file.js";
 import {
-  BASELINE_ED25519_PRIVATE_KEY_ENV,
-  BASELINE_HMAC_KEY_ENV,
-  sealBaselineIfConfigured,
+  addFinding,
+  baselineResolution,
+  codeResolution,
+  findingFingerprint,
+  humanResolution,
+  manifestResolution,
+  withFindingFingerprint,
+} from "./findings.js";
+import { ownedPathPatternsOverlap, pathPatternsOverlap } from "./glob-overlap.js";
+import { errorMessage } from "./errors.js";
+import { isIsoDate, todayIsoDate } from "./dates.js";
+import {
   validateBaselineSealFindings,
 } from "./baseline-seal.js";
 import {
@@ -83,6 +96,70 @@ import {
   resourceBaselineKey,
   sortedResourceBaselineEntries,
 } from "./baseline-ratchet.js";
+import {
+  createBaseline as createBaselineOperation,
+  defaultBaselinePath,
+  guardBaselineUpdate as guardBaselineUpdateOperation,
+  loadBaselineFromFile,
+  sealBaselineWithConfiguredKey,
+  verifyBaselineSeal as verifyBaselineSealOperation,
+  writeBaselineFile,
+} from "./baseline.js";
+import {
+  checkClaims as checkClaimsOperation,
+  checkWriteAccess as checkWriteAccessOperation,
+  createClaim as createClaimOperation,
+  listClaims as listClaimsOperation,
+} from "./claims.js";
+import { createCellContext as createCellContextOperation } from "./context.js";
+import {
+  createAutoAllocation as createAutoAllocationOperation,
+  createCouplingGraph as createCouplingGraphOperation,
+} from "./graph.js";
+import type {
+  AnalysisContext,
+  AutoAllocation,
+  AutoAllocateOptions,
+  BaselineUpdateGuardOptions,
+  BaselineUpdateGuardResult,
+  CellFenceClaim,
+  CellFenceClaimStore,
+  CellFenceContext,
+  CellFenceWaiver,
+  ChangedCheckOptions,
+  CheckOptions,
+  CheckResult,
+  ClaimCheckOptions,
+  ClaimCheckResult,
+  ClaimCreateOptions,
+  ClaimCreateResult,
+  ContextAllowedImport,
+  ContextBudgetEntry,
+  ContextOptions,
+  CouplingGraph,
+  CouplingGraphEdge,
+  CouplingGraphNode,
+  Finding,
+  PluginAdapterHelpers,
+  PluginDefinition,
+  PluginFinding,
+  PluginImportReference,
+  PluginRepositoryModel,
+  PluginResourceAccess,
+  PluginRuleContext,
+  PruneCandidate,
+  PruneCandidateKind,
+  PruneReport,
+  ResolvedImport,
+  RuleId,
+  Severity,
+  SuggestedResolution,
+  WaiverRequest,
+  WaiverRequestOptions,
+  WriteAccessOptions,
+  WriteAccessPathDecision,
+  WriteAccessResult,
+} from "./types.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
 export {
@@ -104,610 +181,54 @@ export {
   type ServiceManifestVerifyResult,
   type TaskCheckResult,
 } from "./advanced-governance.js";
-
-export type RuleId =
-  | "CELLFENCE_MANIFEST_INVALID"
-  | "CELLFENCE_DUPLICATE_CELL_ID"
-  | "CELLFENCE_OWNERSHIP_OVERLAP"
-  | "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
-  | "CELLFENCE_UNOWNED_SOURCE"
-  | "CELLFENCE_UNOWNED_IMPORT_TARGET"
-  | "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP"
-  | "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
-  | "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP"
-  | "CELLFENCE_PRIVATE_IMPORT"
-  | "CELLFENCE_UNDECLARED_CONSUMER"
-  | "CELLFENCE_PUBLIC_ENTRY_MISSING"
-  | "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
-  | "CELLFENCE_UNDECLARED_ARTIFACT"
-  | "CELLFENCE_RATCHET_OWNED_PATH_GROWTH"
-  | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH"
-  | "CELLFENCE_RATCHET_PUBLIC_SURFACE_LINE_GROWTH"
-  | "CELLFENCE_RATCHET_CROSS_CELL_DEPENDENCY_GROWTH"
-  | "CELLFENCE_RATCHET_CELL_SET_GROWTH"
-  | "CELLFENCE_RATCHET_OWNERSHIP_SCOPE_CHANGE"
-  | "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE"
-  | "CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE"
-  | "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE"
-  | "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE"
-  | "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"
-  | "CELLFENCE_BASELINE_SEAL_INVALID"
-  | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
-  | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
-  | "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
-  | "CELLFENCE_PLUGIN_INVALID"
-  | "CELLFENCE_REQUIRED_RULE_DISABLED"
-  | "CELLFENCE_CLAIM_INVALID"
-  | "CELLFENCE_ACTIVE_CLAIM_CONFLICT"
-  | "CELLFENCE_UNCLAIMED_CHANGE"
-  | "CELLFENCE_UNRESOLVED_IMPORT"
-  | "CELLFENCE_CROSS_CELL_MOVE"
-  | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
-  | "CELLFENCE_WAIVER_INVALID"
-  | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
-  | "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
-  | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
-  | "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
-  | "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
-  | "CELLFENCE_SOURCE_IMPORTS_RUNTIME"
-  | "CELLFENCE_MIXED_SOURCE_RUNTIME_CHANGE"
-  | "CELLFENCE_GENERATED_PATH_CHANGED"
-  | "CELLFENCE_SERVICE_MANIFEST_DRIFT"
-  | "CELLFENCE_COMMIT_EVIDENCE_MISSING"
-  | "CELLFENCE_COMMIT_TRAILER_MISSING"
-  | "CELLFENCE_COMMIT_CHANGED_CELLS_MISMATCH"
-  | "CELLFENCE_COMMIT_TEST_EVIDENCE_MISMATCH"
-  | "CELLFENCE_COMMIT_TEST_REASON_REQUIRED"
-  | "CELLFENCE_COMMIT_TEST_WEAKENING"
-  | "CELLFENCE_TASK_INVALID"
-  | "CELLFENCE_TASK_WRITE_OUTSIDE_ALLOWLIST"
-  | "CELLFENCE_TASK_FORBIDDEN_PATH"
-  | "CELLFENCE_TASK_CHANGE_BUDGET_EXCEEDED"
-  | "CELLFENCE_DOC_UNKNOWN_CELL"
-  | "CELLFENCE_DOC_SURFACE_STALE"
-  | "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD";
-
-export type Severity = "error" | "warning";
-
-export type SuggestedResolution = {
-  kind: "change-code" | "change-manifest" | "update-baseline" | "ask-human";
-  title: string;
-  approvalRequired: boolean;
-  details?: Record<string, unknown>;
-};
-
-type PluginFinding<RuleIdentifier extends string = string> = {
-  ruleId: RuleIdentifier;
-  severity: Severity;
-  message: string;
-  filePath?: string;
-  cellId?: string;
-  producerCellId?: string;
-  details?: Record<string, unknown>;
-  suggestedResolutions?: SuggestedResolution[];
-  fingerprint?: string;
-};
-
-export type Finding = PluginFinding<RuleId | string>;
-
-type PluginImportReference = {
-  importerPath: string;
-  importerCellId: string;
-  specifier: string;
-  kind: "import" | "export-from" | "require" | "dynamic-import";
-  typeOnly: boolean;
-  line: number;
-  targetPath?: string;
-  targetCellId?: string;
-  artifactLaneId?: string;
-  isExternal: boolean;
-  isPublicPackage: boolean;
-};
-
-type PluginResourceAccess = {
-  kind: ResourceContractKind;
-  access: ResourceAccessMode;
-  selector: string;
-  filePath: string;
-  line: number;
-  source: string;
-  detectedBy: string;
-  confidence: ResourceAccessConfidence;
-  cellId?: string;
-  unresolved?: boolean;
-  reason?: string;
-};
-
-type PluginRepositoryModel = {
-  rootDir: string;
-  manifest: CellFenceManifest;
-  baseline: CellFenceBaseline | null;
-  files: {
-    all: readonly string[];
-    governed: readonly string[];
-    byCell: Readonly<Record<string, readonly string[]>>;
-    contents: Readonly<Record<string, string>>;
-  };
-  imports: readonly PluginImportReference[];
-  resources: readonly PluginResourceAccess[];
-  metrics: Readonly<Record<string, CellBaselineRecord>>;
-  changedFiles: ReadonlySet<string>;
-};
-
-type PluginRuleContext = {
-  repository: PluginRepositoryModel;
-  cells: readonly CellManifest[];
-  report(finding: PluginFinding): void;
-};
-
-type PluginAdapterHelpers = {
-  getQualifiedCallName(node: ts.Node): string | undefined;
-  getStaticStringArgument(node: ts.CallExpression, index: number): string | undefined;
-  lineOf(node: ts.Node): number;
-};
-
-type PluginAdapter = {
-  name: string;
-  detect(context: {
-    repository: PluginRepositoryModel;
-    cell: CellManifest;
-    filePath: string;
-    sourceText: string;
-    sourceFile: ts.SourceFile;
-    helpers: PluginAdapterHelpers;
-  }): PluginResourceAccess[];
-};
-
-type PluginRule = {
-  id: string;
-  meta: {
-    description: string;
-    defaultSeverity: ConfiguredRuleSeverity;
-    category: string;
-    docsUrl?: string;
-  };
-  run(context: PluginRuleContext): void | PluginFinding[];
-};
-
-type PluginReporter = {
-  name: string;
-  report(context: {
-    repository: PluginRepositoryModel;
-    findings: readonly PluginFinding[];
-    warnings: readonly PluginFinding[];
-  }): string;
-};
-
-type PluginDefinition = {
-  apiVersion: 1;
-  name: string;
-  version: string;
-  capabilities?: {
-    needsAst?: boolean;
-    needsTypeChecker?: boolean;
-    needsGitDiff?: boolean;
-    needsRuntimeEvidence?: boolean;
-    needsNetwork?: boolean;
-  };
-  rules?: Record<string, PluginRule>;
-  adapters?: PluginAdapter[];
-  reporters?: PluginReporter[];
-  manifestSchema?: unknown;
-};
-
-export type CheckOptions = {
-  rootDir?: string;
-  manifestPath?: string;
-  baselinePath?: string;
-  evidencePaths?: string[];
-  plugins?: PluginDefinition[];
-  ruleSeverities?: Record<string, ConfiguredRuleSeverity>;
-  changedFiles?: string[];
-};
-
-export type CheckResult = {
-  ok: boolean;
-  exitCode: 0 | 1 | 2 | 3;
-  findings: Finding[];
-  warnings: Finding[];
-  metrics: Record<string, CellBaselineRecord>;
-  changedFiles?: string[];
-  baseFindingCount?: number;
-};
-
-export type PruneCandidateKind =
-  | "unused-consumer"
-  | "unused-public-symbol"
-  | "unconsumed-artifact-lane"
-  | "stale-waiver"
-  | "stale-baseline-resource";
-
-export type PruneCandidate = {
-  kind: PruneCandidateKind;
-  cellId?: string;
-  producerCellId?: string;
-  filePath?: string;
-  line?: number;
-  ruleId?: string;
-  symbol?: string;
-  artifactLaneId?: string;
-  resource?: ResourceBaselineEntry;
-  message: string;
-  details?: Record<string, unknown>;
-};
-
-export type PruneReport = {
-  schemaVersion: "cellfence.prune.v1";
-  ok: boolean;
-  candidates: PruneCandidate[];
-  metrics: {
-    candidates: number;
-    unusedConsumers: number;
-    unusedPublicSymbols: number;
-    unconsumedArtifactLanes: number;
-    staleWaivers: number;
-    staleBaselineResources: number;
-  };
-};
-
-export type ChangedCheckOptions = CheckOptions & {
-  baseRef?: string;
-  headRef?: string;
-};
-
-export type ContextBudgetEntry = {
-  current: number;
-  limit: number;
-  remaining: number;
-  source: "manifest-budget" | "baseline-ratchet";
-};
-
-export type ContextAllowedImport = {
-  cell: string;
-  publicEntry: string;
-  packageName?: string;
-  locked?: boolean;
-  artifactLanes: string[];
-};
-
-type ContextBudgetMetric = "ownedPathPatterns" | "publicSymbols" | "publicSurfaceLines" | "crossCellDependencies";
-
-export type CouplingGraphNode = {
-  id: string;
-  label: string;
-  kind: "cell" | "resource" | "artifact";
-};
-
-export type CouplingGraphEdgeKind = "declared-consumer" | "observed-import" | "artifact-lane" | "resource-access";
-
-export type CouplingGraphEdge = {
-  from: string;
-  to: string;
-  kind: CouplingGraphEdgeKind;
-  label: string;
-};
-
-export type CouplingGraph = {
-  schemaVersion: "cellfence.coupling-graph.v1";
-  nodes: CouplingGraphNode[];
-  edges: CouplingGraphEdge[];
-};
-
-export type AutoAllocation = {
-  schemaVersion: "cellfence.auto-allocation.v1";
-  task: string;
-  selectedCells: string[];
-  contextCells: string[];
-  includePaths: string[];
-  publicEntries: string[];
-  resourceSelectors: string[];
-  budgets: Record<string, Record<string, ContextBudgetEntry>>;
-  guidance: string[];
-};
-
-export type CellFenceClaim = {
-  id: string;
-  agent: string;
-  task?: string;
-  cells: string[];
-  paths: string[];
-  symbols: string[];
-  resources: string[];
-  artifactLanes: string[];
-  createdAt: string;
-  expiresAt: string;
-};
-
-export type CellFenceClaimStore = {
-  schemaVersion: "cellfence.claims.v1";
-  claims: CellFenceClaim[];
-};
-
-export type ClaimCreateOptions = CheckOptions & {
-  claimsPath?: string;
-  claimId?: string;
-  agent: string;
-  task?: string;
-  ttl?: string;
-  expiresAt?: string;
-  cells?: string[];
-  paths?: string[];
-  symbols?: string[];
-  resources?: string[];
-  artifactLanes?: string[];
-  now?: Date;
-};
-
-export type ClaimCheckOptions = CheckOptions & {
-  claimsPath?: string;
-  agent?: string;
-  baseRef?: string;
-  headRef?: string;
-  now?: Date;
-};
-
-export type ClaimCheckResult = {
-  schemaVersion: "cellfence.claim-check.v1";
-  ok: boolean;
-  exitCode: 0 | 1 | 2 | 3;
-  findings: Finding[];
-  warnings: Finding[];
-  claims: CellFenceClaim[];
-  activeClaims: CellFenceClaim[];
-  changedFiles?: string[];
-};
-
-export type ClaimCreateResult = ClaimCheckResult & {
-  createdClaim?: CellFenceClaim;
-  claimsPath: string;
-};
-
-export type WriteAccessPathDecision = {
-  requestedPath: string;
-  relativePath?: string;
-  canonicalPath?: string;
-  allowed: boolean;
-  reason: string;
-  cellId?: string;
-  claimIds: string[];
-};
-
-export type WriteAccessOptions = CheckOptions & {
-  agent: string;
-  paths: string[];
-  claimsPath?: string;
-  now?: Date;
-};
-
-export type WriteAccessResult = {
-  schemaVersion: "cellfence.write-access.v1";
-  ok: boolean;
-  exitCode: 0 | 1 | 2 | 3;
-  agent: string;
-  paths: WriteAccessPathDecision[];
-  findings: Finding[];
-  warnings: Finding[];
-  activeClaims: CellFenceClaim[];
-};
-
-export type CellFenceContext = {
-  schemaVersion: "cellfence.context.v1";
-  cell: {
-    id: string;
-    packageName?: string;
-    locked: boolean;
-    ownedPaths: string[];
-    publicEntry: string;
-    publicSymbols: string[];
-  };
-  allowedImports: ContextAllowedImport[];
-  allowedResources: ResourceContractManifest[];
-  baselineResources: ResourceBaselineEntry[];
-  producedArtifacts: Array<{ id: string; paths: string[]; description?: string }>;
-  budgets: Partial<Record<ContextBudgetMetric, ContextBudgetEntry>>;
-  guidance: string[];
-};
-
-export type ContextOptions = CheckOptions & {
-  cellId: string;
-};
-
-export type AutoAllocateOptions = CheckOptions & {
-  task?: string;
-  cellId?: string;
-};
-
-export type WaiverRequestOptions = {
-  ruleId: RuleId;
-  filePath: string;
-  line: number;
-  expires: string;
-  approvedBy?: string;
-  reason: string;
-};
-
-export type WaiverRequest = {
-  schemaVersion: "cellfence.waiver-request.v1";
-  directive: string;
-  markdown: string;
-  approvalRequired: true;
-  ruleId: RuleId;
-  filePath: string;
-  line: number;
-  expires: string;
-  approvedBy: string;
-  reason: string;
-};
-
-export type BaselineUpdateGuardResult = {
-  ok: boolean;
-  findings: Finding[];
-};
-
-export type BaselineUpdateGuardOptions = CheckOptions & {
-  nextBaseline: CellFenceBaseline;
-};
-
-export type CellFenceWaiver = {
-  ruleId: string;
-  filePath: string;
-  line: number;
-  expires: string;
-  approvedBy: string;
-  reason: string;
-  expired: boolean;
-  valid: boolean;
-  errors: string[];
-};
-
-type ResolvedImport = {
-  targetPath?: string;
-  targetCell?: CellManifest;
-  artifactLaneId?: string;
-  matchedSpecifier?: string;
-  isExternal: boolean;
-  isPublicPackage: boolean;
-};
-
-type AnalysisContext = FileIndexContext & {
-  cellsById: Map<string, CellManifest>;
-  packageToCell: Map<string, CellManifest>;
-  packageRoots: Map<string, string>;
-  pathAliases: PathAlias[];
-};
-
-const DEFAULT_MANIFEST_PATH = "cellfence.manifest.json";
-const DEFAULT_BASELINE_PATH = "cellfence.baseline.json";
-const DEFAULT_CLAIMS_PATH = ".cellfence/claims.json";
-const CORE_REQUIRED_RULES = [
-  "CELLFENCE_OWNERSHIP_OVERLAP",
-  "CELLFENCE_UNOWNED_SOURCE",
-  "CELLFENCE_UNOWNED_IMPORT_TARGET",
-  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_PRIVATE_IMPORT",
-  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
-  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
-  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
-  "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
-  "CELLFENCE_REQUIRED_RULE_DISABLED",
-  "CELLFENCE_WAIVER_INVALID",
-];
-
-function readJsonFile(filePath: string): unknown {
-  const text = fs.readFileSync(filePath, "utf8");
-  const duplicateKeys = duplicateJsonKeys(text);
-  if (duplicateKeys.length > 0) throw new Error(`duplicate JSON keys are not allowed: ${duplicateKeys.join(", ")}`);
-  return JSON.parse(text);
-}
-
-function duplicateJsonKeys(text: string): string[] {
-  type Frame = { kind: "object"; keys: Set<string>; expectingKey: boolean } | { kind: "array" };
-  const frames: Frame[] = [];
-  const duplicates = new Set<string>();
-
-  function skipWhitespace(index: number): number {
-    let cursor = index;
-    while (cursor < text.length && /\s/.test(text[cursor])) cursor += 1;
-    return cursor;
-  }
-
-  function readString(index: number): { value: string; end: number } {
-    let cursor = index + 1;
-    while (cursor < text.length) {
-      const character = text[cursor];
-      if (character === "\\") {
-        cursor += 2;
-        continue;
-      }
-      if (character === "\"") {
-        const rawString = text.slice(index, cursor + 1);
-        try {
-          return { value: JSON.parse(rawString) as string, end: cursor + 1 };
-        } catch {
-          return { value: rawString, end: cursor + 1 };
-        }
-      }
-      cursor += 1;
-    }
-    return { value: text.slice(index, cursor), end: cursor };
-  }
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    if (character === "\"") {
-      const stringValue = readString(index);
-      const current = frames[frames.length - 1];
-      const colonIndex = skipWhitespace(stringValue.end);
-      if (current?.kind === "object" && current.expectingKey && text[colonIndex] === ":") {
-        if (current.keys.has(stringValue.value)) duplicates.add(stringValue.value);
-        current.keys.add(stringValue.value);
-        current.expectingKey = false;
-      }
-      index = stringValue.end - 1;
-      continue;
-    }
-    if (character === "{") {
-      frames.push({ kind: "object", keys: new Set<string>(), expectingKey: true });
-    } else if (character === "[") {
-      frames.push({ kind: "array" });
-    } else if (character === "}" || character === "]") {
-      frames.pop();
-    } else if (character === ",") {
-      const current = frames[frames.length - 1];
-      if (current?.kind === "object") current.expectingKey = true;
-    }
-  }
-  return [...duplicates].sort((left, right) => left.localeCompare(right));
-}
-
-function normalizedFindingDetails(details: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
-  if (!details) return undefined;
-  const normalizedEntries = Object.entries(details)
-    .filter(([key]) => !["message", "currentHash", "nextHash"].includes(key))
-    .map(([key, value]) => [key, value] as const);
-  return normalizedEntries.length > 0 ? Object.fromEntries(normalizedEntries) : undefined;
-}
-
-function findingFingerprint(finding: Finding): string {
-  return crypto
-    .createHash("sha256")
-    .update(stableCanonicalJson({
-      ruleId: finding.ruleId,
-      severity: finding.severity,
-      filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
-      cellId: finding.cellId,
-      producerCellId: finding.producerCellId,
-      details: normalizedFindingDetails(finding.details),
-    }))
-    .digest("hex");
-}
-
-function withFindingFingerprint(finding: Finding): Finding {
-  return {
-    ...finding,
-    fingerprint: finding.fingerprint || findingFingerprint(finding),
-  };
-}
-
-function addFinding(findings: Finding[], finding: Finding): void {
-  findings.push(withFindingFingerprint(finding));
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
+export {
+  defaultBaselinePath,
+  loadBaselineFromFile,
+  sealBaselineWithConfiguredKey,
+  writeBaselineFile,
+} from "./baseline.js";
+export {
+  createWaiverRequest,
+  formatCouplingGraphMermaid,
+} from "./graph.js";
+export type {
+  AutoAllocation,
+  AutoAllocateOptions,
+  BaselineUpdateGuardOptions,
+  BaselineUpdateGuardResult,
+  CellFenceClaim,
+  CellFenceClaimStore,
+  CellFenceContext,
+  CellFenceWaiver,
+  ChangedCheckOptions,
+  CheckOptions,
+  CheckResult,
+  ClaimCheckOptions,
+  ClaimCheckResult,
+  ClaimCreateOptions,
+  ClaimCreateResult,
+  ContextAllowedImport,
+  ContextBudgetEntry,
+  ContextOptions,
+  CouplingGraph,
+  CouplingGraphEdge,
+  CouplingGraphEdgeKind,
+  CouplingGraphNode,
+  Finding,
+  PruneCandidate,
+  PruneCandidateKind,
+  PruneReport,
+  RuleId,
+  Severity,
+  SuggestedResolution,
+  WaiverRequest,
+  WaiverRequestOptions,
+  WriteAccessOptions,
+  WriteAccessPathDecision,
+  WriteAccessResult,
+} from "./types.js";
 
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
-
-function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function isIsoDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
-}
 
 function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string): CellFenceWaiver | undefined {
   const match = WAIVER_PATTERN.exec(text);
@@ -817,22 +338,6 @@ function applyWaiversToFindings(
     findings: [...findings.filter((finding) => !isWaived(finding)), ...waiverFindings],
     warnings: warnings.filter((warning) => !isWaived(warning)),
   };
-}
-
-function codeResolution(title: string, details?: Record<string, unknown>): SuggestedResolution {
-  return { kind: "change-code", title, approvalRequired: false, details };
-}
-
-function manifestResolution(title: string, approvalRequired: boolean, details?: Record<string, unknown>): SuggestedResolution {
-  return { kind: "change-manifest", title, approvalRequired, details };
-}
-
-function baselineResolution(title: string, approvalRequired: boolean, details?: Record<string, unknown>): SuggestedResolution {
-  return { kind: "update-baseline", title, approvalRequired, details };
-}
-
-function humanResolution(title: string, details?: Record<string, unknown>): SuggestedResolution {
-  return { kind: "ask-human", title, approvalRequired: true, details };
 }
 
 function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
@@ -1176,41 +681,14 @@ function validateResourceAccesses(context: AnalysisContext, findings: Finding[],
   return accessesByCell;
 }
 
-function addAccessToCell(accessesByCell: Map<string, ResourceAccessReference[]>, cellId: string, access: ResourceAccessReference): void {
-  const currentAccesses = accessesByCell.get(cellId) || [];
-  addResourceAccess(currentAccesses, access);
-  accessesByCell.set(cellId, currentAccesses);
-}
-
-function evidencePathsForOptions(rootDir: string, evidencePaths: string[] | undefined): string[] {
-  return (evidencePaths || []).map((evidencePath) => path.resolve(rootDir, evidencePath));
-}
-
-function comparableRealPath(inputPath: string): string {
-  const absolutePath = path.resolve(inputPath);
-  let realPath: string;
-  try {
-    realPath = fs.realpathSync.native(absolutePath);
-  } catch {
-    try {
-      realPath = fs.realpathSync(absolutePath);
-    } catch {
-      realPath = absolutePath;
-    }
-  }
-  const normalized = path.normalize(realPath);
-  if (process.platform !== "win32") return normalized;
-  return normalized.replace(/^\\\\\?\\/, "").replace(/\\/g, "/").toLowerCase();
-}
-
-function gitHeadForExactRoot(rootDir: string): string | undefined {
-  try {
-    const topLevel = gitCommand(rootDir, ["rev-parse", "--show-toplevel"]);
-    if (comparableRealPath(topLevel) !== comparableRealPath(rootDir)) return undefined;
-    return gitCommand(rootDir, ["rev-parse", "HEAD"]);
-  } catch {
-    return undefined;
-  }
+function resourceEvidenceDependencies() {
+  return {
+    gitCommand,
+    resourceAccessDeclaredByBaseline,
+    resourceAccessDeclaredByManifest,
+    resourceAccessVerb,
+    targetIsInsideRoot,
+  };
 }
 
 function resourceEvidenceAccesses(
@@ -1219,124 +697,8 @@ function resourceEvidenceAccesses(
   findings: Finding[],
   baseline: CellFenceBaseline | undefined,
 ): Map<string, ResourceAccessReference[]> {
-  const accessesByCell = new Map<string, ResourceAccessReference[]>();
-  const headCommit = gitHeadForExactRoot(context.rootDir);
-  for (const evidencePath of evidencePaths) {
-    const evidenceRealPath = fs.existsSync(evidencePath) ? fs.realpathSync(evidencePath) : path.resolve(evidencePath);
-    if (!targetIsInsideRoot(context.rootDir, evidenceRealPath)) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
-        severity: "error",
-        filePath: repoPath(context.rootDir, evidencePath),
-        message: `resource evidence path is outside the repository: ${repoPath(context.rootDir, evidencePath)}`,
-      });
-      continue;
-    }
-
-    let evidence: CellFenceResourceEvidence;
-    try {
-      const validation = validateResourceEvidence(readJsonFile(evidencePath));
-      if (!validation.ok || !validation.value) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
-          severity: "error",
-          filePath: repoPath(context.rootDir, evidencePath),
-          message: `resource evidence is invalid: ${validation.errors.join("; ")}`,
-        });
-        continue;
-      }
-      evidence = validation.value;
-    } catch (error) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
-        severity: "error",
-        filePath: repoPath(context.rootDir, evidencePath),
-        message: `failed to read resource evidence: ${errorMessage(error)}`,
-      });
-      continue;
-    }
-
-    if (headCommit && evidence.commitSha && evidence.commitSha !== headCommit) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
-        severity: "error",
-        filePath: repoPath(context.rootDir, evidencePath),
-        message: `resource evidence commitSha ${evidence.commitSha} does not match repository HEAD ${headCommit}`,
-        details: { evidenceCommitSha: evidence.commitSha, headCommit },
-      });
-      continue;
-    }
-
-    for (const [entryIndex, entry] of evidence.accesses.entries()) {
-      const cellId = entry.cellId || evidence.cellId;
-      if (!cellId || !context.cellsById.has(cellId)) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
-          severity: "error",
-          filePath: repoPath(context.rootDir, evidencePath),
-          message: `resource evidence access ${entryIndex} references unknown cell ${cellId || "(missing)"}`,
-          details: { entryIndex, cellId },
-        });
-        continue;
-      }
-
-      const cell = context.cellsById.get(cellId) as CellManifest;
-      const access: ResourceAccessReference = {
-        kind: entry.kind,
-        access: entry.access,
-        selector: entry.selector,
-        filePath: repoPath(context.rootDir, evidencePath),
-        line: 1,
-        source: entry.detectedBy || "resource-evidence",
-        detectedBy: entry.detectedBy || "runtime-evidence",
-        confidence: entry.confidence || "runtime",
-      };
-      addAccessToCell(accessesByCell, cellId, access);
-
-      if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) continue;
-      addFinding(findings, {
-        ruleId: "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
-        severity: "error",
-        cellId,
-        filePath: access.filePath,
-        message: `${cellId} ${resourceAccessVerb(access.access)} undeclared runtime ${access.kind} resource ${access.selector}`,
-        details: {
-          kind: access.kind,
-          access: access.access,
-          selector: access.selector,
-          source: access.source,
-          detectedBy: access.detectedBy,
-          confidence: access.confidence,
-        },
-        suggestedResolutions: [
-          codeResolution(`Stop emitting runtime evidence for undeclared ${access.kind} access if it is accidental`, {
-            kind: access.kind,
-            access: access.access,
-            selector: access.selector,
-          }),
-          manifestResolution(`Declare runtime ${access.kind} ${access.access} access for ${access.selector}`, Boolean(cell.locked), {
-            cell: cell.id,
-            resourceContract: {
-              kind: access.kind,
-              access: [access.access],
-              selectors: [access.selector],
-            },
-          }),
-        ],
-      });
-    }
-  }
-  return accessesByCell;
+  return resourceEvidenceAccessesOperation(context, evidencePaths, findings, baseline, resourceEvidenceDependencies());
 }
-
-function mergeAccessesByCell(target: Map<string, ResourceAccessReference[]>, source: Map<string, ResourceAccessReference[]>): void {
-  for (const [cellId, accesses] of source.entries()) {
-    for (const access of accesses) {
-      addAccessToCell(target, cellId, access);
-    }
-  }
-}
-
 function allSourceFilesByCell(context: AnalysisContext): Record<string, readonly string[]> {
   const byCell: Record<string, readonly string[]> = {};
   for (const cell of context.manifest.cells) {
@@ -2480,6 +1842,14 @@ function pruneCandidateSortKey(candidate: PruneCandidate): string {
   return `${candidate.kind}:${candidate.cellId || ""}:${candidate.producerCellId || ""}:${candidate.filePath || ""}:${candidate.symbol || ""}:${candidate.artifactLaneId || ""}:${candidate.ruleId || ""}`;
 }
 
+function loadOptionalBaseline(rootDir: string, baselinePath: string | undefined): CellFenceBaseline | undefined {
+  const resolvedBaselinePath = baselinePath
+    ? path.resolve(rootDir, baselinePath)
+    : defaultBaselinePath(rootDir);
+  if (!fs.existsSync(resolvedBaselinePath)) return undefined;
+  return loadBaselineFromFile(resolvedBaselinePath);
+}
+
 export function createPruneReport(options: CheckOptions = {}): PruneReport {
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
@@ -2831,1301 +2201,75 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
   }
 }
 
-function claimConfigurationFailure(message: string, claimsPath = ""): ClaimCheckResult {
+function claimOperationDependencies() {
   return {
-    schemaVersion: "cellfence.claim-check.v1",
-    ok: false,
-    exitCode: 2,
-    findings: [
-      {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        message,
-        filePath: claimsPath || undefined,
-      },
-    ],
-    warnings: [],
-    claims: [],
-    activeClaims: [],
-  };
-}
-
-function sortedUnique(values: readonly string[] | undefined): string[] {
-  return [...new Set((values || []).map((value) => normalizePath(String(value).trim())).filter(Boolean))]
-    .sort((left, right) => left.localeCompare(right));
-}
-
-function claimStorePath(rootDir: string, claimsPath: string | undefined): string {
-  return path.resolve(rootDir, claimsPath || DEFAULT_CLAIMS_PATH);
-}
-
-function parseTtlMillis(value: string): number | undefined {
-  const match = /^(\d+)(m|h|d)$/.exec(value.trim());
-  if (!match) return undefined;
-  const amount = Number(match[1]);
-  const unit = match[2];
-  if (!Number.isSafeInteger(amount) || amount <= 0) return undefined;
-  if (unit === "m") return amount * 60 * 1000;
-  if (unit === "h") return amount * 60 * 60 * 1000;
-  return amount * 24 * 60 * 60 * 1000;
-}
-
-function computeClaimExpiresAt(now: Date, ttl: string | undefined, expiresAt: string | undefined): string | undefined {
-  if (expiresAt) {
-    const parsed = Date.parse(expiresAt);
-    if (Number.isNaN(parsed)) return undefined;
-    return new Date(parsed).toISOString();
-  }
-  const ttlMillis = parseTtlMillis(ttl || "2h");
-  if (!ttlMillis) return undefined;
-  return new Date(now.getTime() + ttlMillis).toISOString();
-}
-
-function claimIsActive(claim: CellFenceClaim, now: Date): boolean {
-  return Date.parse(claim.expiresAt) > now.getTime();
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((entry) => typeof entry === "string");
-}
-
-function validateClaimShape(claim: unknown, index: number, findings: Finding[], claimsPath: string): claim is CellFenceClaim {
-  if (!claim || typeof claim !== "object") {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: claimsPath,
-      message: `claim at index ${index} must be an object`,
-    });
-    return false;
-  }
-  const candidate = claim as Partial<CellFenceClaim>;
-  const errors: string[] = [];
-  if (!candidate.id || typeof candidate.id !== "string") errors.push("id is required");
-  if (!candidate.agent || typeof candidate.agent !== "string") errors.push("agent is required");
-  if (!isStringArray(candidate.cells)) errors.push("cells must be a string array");
-  if (!isStringArray(candidate.paths)) errors.push("paths must be a string array");
-  if (!isStringArray(candidate.symbols)) errors.push("symbols must be a string array");
-  if (!isStringArray(candidate.resources)) errors.push("resources must be a string array");
-  if (!isStringArray(candidate.artifactLanes)) errors.push("artifactLanes must be a string array");
-  if (!candidate.createdAt || typeof candidate.createdAt !== "string" || Number.isNaN(Date.parse(candidate.createdAt))) errors.push("createdAt must be an ISO timestamp");
-  if (!candidate.expiresAt || typeof candidate.expiresAt !== "string" || Number.isNaN(Date.parse(candidate.expiresAt))) errors.push("expiresAt must be an ISO timestamp");
-  if (errors.length > 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: claimsPath,
-      message: `claim ${candidate.id || `at index ${index}`} is invalid: ${errors.join("; ")}`,
-      details: { index, errors },
-    });
-    return false;
-  }
-  return true;
-}
-
-function readClaimStore(rootDir: string, claimsPathOption: string | undefined, findings: Finding[]): { path: string; claims: CellFenceClaim[] } {
-  const resolvedPath = claimStorePath(rootDir, claimsPathOption);
-  const relativePath = repoPath(rootDir, resolvedPath);
-  if (!fs.existsSync(resolvedPath)) return { path: resolvedPath, claims: [] };
-  let raw: unknown;
-  try {
-    raw = readJsonFile(resolvedPath);
-  } catch (error) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: relativePath,
-      message: `failed to read claim store: ${errorMessage(error)}`,
-    });
-    return { path: resolvedPath, claims: [] };
-  }
-  if (!raw || typeof raw !== "object" || (raw as { schemaVersion?: unknown }).schemaVersion !== "cellfence.claims.v1" || !Array.isArray((raw as { claims?: unknown }).claims)) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: relativePath,
-      message: "claim store must have schemaVersion cellfence.claims.v1 and claims array",
-    });
-    return { path: resolvedPath, claims: [] };
-  }
-  const claims = (raw as CellFenceClaimStore).claims.filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
-  return { path: resolvedPath, claims };
-}
-
-function sleepSync(ms: number): void {
-  const buffer = new SharedArrayBuffer(4);
-  const view = new Int32Array(buffer);
-  Atomics.wait(view, 0, 0, ms);
-}
-
-function acquireClaimStoreLock(filePath: string): () => void {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  const lockPath = `${filePath}.lock`;
-  const deadline = Date.now() + 5_000;
-  while (true) {
-    try {
-      const fd = fs.openSync(lockPath, "wx");
-      fs.writeFileSync(fd, `${process.pid}\n${new Date().toISOString()}\n`);
-      return () => {
-        fs.closeSync(fd);
-        try {
-          fs.unlinkSync(lockPath);
-        } catch {
-          // The lock is already gone; release stays idempotent for process cleanup races.
-        }
-      };
-    } catch (error) {
-      const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
-      const lockIsBusy = code === "EEXIST" || code === "EPERM" || code === "EACCES" || code === "EBUSY";
-      if (!lockIsBusy || Date.now() >= deadline) {
-        throw new Error(`failed to acquire claim store lock ${lockPath}: ${errorMessage(error)}`, { cause: error });
-      }
-      sleepSync(25);
-    }
-  }
-}
-
-function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  const store: CellFenceClaimStore = {
-    schemaVersion: "cellfence.claims.v1",
-    claims: [...claims].sort((left, right) => left.id.localeCompare(right.id)),
-  };
-  const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(temporaryPath, `${JSON.stringify(store, null, 2)}\n`, { flag: "wx" });
-  fs.renameSync(temporaryPath, filePath);
-}
-
-type GlobTransition =
-  | { kind: "epsilon"; to: number }
-  | { kind: "any"; to: number }
-  | { kind: "non-slash"; to: number }
-  | { kind: "literal"; to: number; value: string };
-
-type GlobAutomaton = {
-  accept: number;
-  transitions: GlobTransition[][];
-};
-
-function patternAutomaton(pattern: string): GlobAutomaton {
-  const normalized = normalizePath(pattern);
-  const transitions: GlobTransition[][] = [[]];
-  let state = 0;
-  const nextState = (): number => {
-    transitions.push([]);
-    return transitions.length - 1;
-  };
-  for (let index = 0; index < normalized.length; index += 1) {
-    const character = normalized[index];
-    const nextCharacter = normalized[index + 1];
-    if (character === "*" && nextCharacter === "*") {
-      const next = nextState();
-      transitions[state].push({ kind: "epsilon", to: next });
-      transitions[state].push({ kind: "any", to: state });
-      state = next;
-      index += 1;
-    } else if (character === "*") {
-      const next = nextState();
-      transitions[state].push({ kind: "epsilon", to: next });
-      transitions[state].push({ kind: "non-slash", to: state });
-      state = next;
-    } else {
-      const next = nextState();
-      transitions[state].push({ kind: "literal", value: character, to: next });
-      state = next;
-    }
-  }
-  return { accept: state, transitions };
-}
-
-function epsilonClosure(automaton: GlobAutomaton, state: number): Set<number> {
-  const closure = new Set<number>([state]);
-  const stack = [state];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (current === undefined) continue;
-    for (const transition of automaton.transitions[current] || []) {
-      if (transition.kind !== "epsilon" || closure.has(transition.to)) continue;
-      closure.add(transition.to);
-      stack.push(transition.to);
-    }
-  }
-  return closure;
-}
-
-function transitionLabelsIntersect(left: GlobTransition, right: GlobTransition): boolean {
-  if (left.kind === "epsilon" || right.kind === "epsilon") return false;
-  if (left.kind === "any" || right.kind === "any") return true;
-  if (left.kind === "non-slash" && right.kind === "non-slash") return true;
-  if (left.kind === "non-slash" && right.kind === "literal") return right.value !== "/";
-  if (right.kind === "non-slash" && left.kind === "literal") return left.value !== "/";
-  return left.kind === "literal" && right.kind === "literal" && left.value === right.value;
-}
-
-function patternAutomataIntersect(leftPattern: string, rightPattern: string): boolean {
-  const left = patternAutomaton(leftPattern);
-  const right = patternAutomaton(rightPattern);
-  const queue: Array<[number, number]> = [];
-  const seen = new Set<string>();
-  const enqueueClosures = (leftState: number, rightState: number): void => {
-    for (const leftClosed of epsilonClosure(left, leftState)) {
-      for (const rightClosed of epsilonClosure(right, rightState)) {
-        const key = `${leftClosed}:${rightClosed}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        queue.push([leftClosed, rightClosed]);
-      }
-    }
-  };
-  enqueueClosures(0, 0);
-  while (queue.length > 0) {
-    const [leftState, rightState] = queue.shift() as [number, number];
-    if (leftState === left.accept && rightState === right.accept) return true;
-    for (const leftTransition of left.transitions[leftState] || []) {
-      if (leftTransition.kind === "epsilon") continue;
-      for (const rightTransition of right.transitions[rightState] || []) {
-        if (!transitionLabelsIntersect(leftTransition, rightTransition)) continue;
-        enqueueClosures(leftTransition.to, rightTransition.to);
-      }
-    }
-  }
-  return false;
-}
-
-function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  if (patternAutomataIntersect(leftPattern, rightPattern)) return true;
-  const left = normalizePath(leftPattern);
-  const right = normalizePath(rightPattern);
-  const leftHasWildcard = left.includes("*");
-  const rightHasWildcard = right.includes("*");
-  return !leftHasWildcard && !rightHasWildcard && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));
-}
-
-function ownedPathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  return patternAutomataIntersect(leftPattern, rightPattern);
-}
-
-function intersectingValues(left: readonly string[], right: readonly string[]): string[] {
-  const rightSet = new Set(right);
-  return left.filter((value) => rightSet.has(value));
-}
-
-function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim): string[] {
-  const surfaces: string[] = [];
-  for (const cell of intersectingValues(left.cells, right.cells)) surfaces.push(`cell:${cell}`);
-  for (const symbol of intersectingValues(left.symbols, right.symbols)) surfaces.push(`symbol:${symbol}`);
-  for (const resource of intersectingValues(left.resources, right.resources)) surfaces.push(`resource:${resource}`);
-  for (const lane of intersectingValues(left.artifactLanes, right.artifactLanes)) surfaces.push(`artifact:${lane}`);
-  for (const leftPath of left.paths) {
-    for (const rightPath of right.paths) {
-      if (pathPatternsOverlap(leftPath, rightPath)) surfaces.push(`path:${leftPath}<->${rightPath}`);
-    }
-  }
-  return [...new Set(surfaces)].sort((first, second) => first.localeCompare(second));
-}
-
-function validateClaimCells(context: AnalysisContext, claim: CellFenceClaim, findings: Finding[], claimsPath: string): void {
-  const unknownCells = claim.cells.filter((cellId) => !context.cellsById.has(cellId));
-  if (unknownCells.length > 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: claimsPath,
-      message: `claim ${claim.id} references unknown cells: ${unknownCells.join(", ")}`,
-      details: { claimId: claim.id, unknownCells },
-    });
-  }
-  if (claim.cells.length > 0) {
-    const claimedCells = claim.cells.map((cellId) => context.cellsById.get(cellId)).filter((cell): cell is CellManifest => Boolean(cell));
-    for (const claimedPath of claim.paths) {
-      if (!claimedCells.some((cell) => patternCoveredByOwnedPaths(claimedPath, cell.ownedPaths))) {
-        addFinding(findings, {
-          ruleId: "CELLFENCE_CLAIM_INVALID",
-          severity: "error",
-          filePath: claimsPath,
-          message: `claim ${claim.id} path ${claimedPath} is outside claimed cell ownership`,
-          details: { claimId: claim.id, path: claimedPath, cells: claim.cells },
-        });
-      }
-    }
-  }
-}
-
-function addClaimConflictFinding(findings: Finding[], left: CellFenceClaim, right: CellFenceClaim, surfaces: string[]): void {
-  addFinding(findings, {
-    ruleId: "CELLFENCE_ACTIVE_CLAIM_CONFLICT",
-    severity: "error",
-    message: `active claims ${left.id} and ${right.id} conflict`,
-    details: {
-      left: { id: left.id, agent: left.agent, expiresAt: left.expiresAt },
-      right: { id: right.id, agent: right.agent, expiresAt: right.expiresAt },
-      surfaces,
-    },
-    suggestedResolutions: [
-      humanResolution("Wait for one claim to expire, narrow the claim surface, or assign a human owner to serialize the work", {
-        leftClaim: left.id,
-        rightClaim: right.id,
-        surfaces,
-      }),
-    ],
-  });
-}
-
-function validateActiveClaimConflicts(activeClaims: CellFenceClaim[], findings: Finding[]): void {
-  for (let leftIndex = 0; leftIndex < activeClaims.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < activeClaims.length; rightIndex += 1) {
-      const left = activeClaims[leftIndex];
-      const right = activeClaims[rightIndex];
-      if (left.id === right.id) continue;
-      const surfaces = claimConflictSurfaces(left, right);
-      if (surfaces.length > 0) addClaimConflictFinding(findings, left, right, surfaces);
-    }
-  }
-}
-
-function workingTreeChangedFiles(rootDir: string): string[] {
-  const files = new Set<string>();
-  const add = (args: string[]): void => {
-    const output = gitCommand(rootDir, args);
-    for (const entry of output.split(/\r?\n/)) {
-      const normalized = normalizePath(entry.trim());
-      if (normalized) files.add(normalized);
-    }
-  };
-  gitCommand(rootDir, ["rev-parse", "--is-inside-work-tree"]);
-  assertGitCommit(rootDir, "HEAD");
-  add(["diff", "--name-only", "--diff-filter=ACMR", "HEAD"]);
-  add(["ls-files", "--others", "--exclude-standard"]);
-  return [...files].sort((left, right) => left.localeCompare(right));
-}
-
-function changedFilesForClaimCheck(rootDir: string, options: ClaimCheckOptions): string[] {
-  if (options.baseRef) {
-    assertGitCommit(rootDir, options.baseRef);
-    if (options.headRef) assertGitCommit(rootDir, options.headRef);
-    return changedFilesForRefs(rootDir, options.baseRef, options.headRef);
-  }
-  return workingTreeChangedFiles(rootDir);
-}
-
-function claimCoversFile(manifest: CellFenceManifest, claim: CellFenceClaim, relativePath: string): boolean {
-  if (claim.paths.some((pattern) => matchesPattern(relativePath, pattern))) return true;
-  return claim.cells.some((cellId) => {
-    const cell = manifest.cells.find((candidate) => candidate.id === cellId);
-    return cell ? cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)) : false;
-  });
-}
-
-function canonicalizePotentialPath(targetPath: string): string {
-  const resolvedPath = path.resolve(targetPath);
-  const parsedPath = path.parse(resolvedPath);
-  const relativeParts = path.relative(parsedPath.root, resolvedPath).split(path.sep).filter(Boolean);
-  let currentPath = parsedPath.root;
-  let firstMissingIndex = relativeParts.length;
-  for (let index = 0; index < relativeParts.length; index += 1) {
-    const nextPath = path.join(currentPath, relativeParts[index]);
-    if (!fs.existsSync(nextPath)) {
-      firstMissingIndex = index;
-      break;
-    }
-    currentPath = fs.realpathSync(nextPath);
-  }
-  return path.resolve(currentPath, ...relativeParts.slice(firstMissingIndex));
-}
-
-function normalizeWriteAccessPath(rootDir: string, requestedPath: string): { relativePath: string; canonicalPath: string } {
-  if (requestedPath.trim().length === 0) throw new Error("path is empty");
-  const rootRealPath = fs.realpathSync(rootDir);
-  const targetPath = path.isAbsolute(requestedPath)
-    ? path.resolve(requestedPath)
-    : path.resolve(rootDir, requestedPath);
-  const canonicalPath = canonicalizePotentialPath(targetPath);
-  const relativeFromRoot = path.relative(rootRealPath, canonicalPath);
-  if (relativeFromRoot === "" || relativeFromRoot.startsWith("..") || path.isAbsolute(relativeFromRoot)) {
-    throw new Error(`path escapes repository root: ${requestedPath}`);
-  }
-  return {
-    relativePath: normalizePath(relativeFromRoot),
-    canonicalPath,
-  };
-}
-
-function writeAccessResult(
-  agent: string,
-  pathDecisions: WriteAccessPathDecision[],
-  findings: Finding[],
-  warnings: Finding[],
-  activeClaims: CellFenceClaim[],
-): WriteAccessResult {
-  const hasErrors = findings.some((finding) => finding.severity === "error");
-  return {
-    schemaVersion: "cellfence.write-access.v1",
-    ok: !hasErrors && pathDecisions.every((decision) => decision.allowed),
-    exitCode: hasErrors || pathDecisions.some((decision) => !decision.allowed) ? 1 : 0,
-    agent,
-    paths: pathDecisions,
-    findings,
-    warnings,
-    activeClaims,
+    assertGitCommit,
+    changedFilesForRefs,
+    createContext,
+    gitCommand,
+    loadManifestFromFile,
   };
 }
 
 export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const agent = options.agent.trim();
-  const findings: Finding[] = [];
-  const warnings: Finding[] = [];
-  if (agent.length === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      message: "write access check requires a non-empty agent",
-    });
-  }
-  if (options.paths.length === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
-      severity: "error",
-      message: "write access check requires at least one path",
-    });
-  }
-
-  let manifest: CellFenceManifest;
-  try {
-    manifest = loadManifestFromFile(manifestPath);
-  } catch (error) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_MANIFEST_INVALID",
-      severity: "error",
-      message: `failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`,
-    });
-    return writeAccessResult(agent, options.paths.map((requestedPath) => ({
-      requestedPath,
-      allowed: false,
-      reason: "manifest is unavailable",
-      claimIds: [],
-    })), findings, warnings, []);
-  }
-
-  const claimResultForPolicy = checkClaims({
-    rootDir,
-    manifestPath: repoPath(rootDir, manifestPath),
-    claimsPath: options.claimsPath,
-    now: options.now,
-  });
-  findings.push(...claimResultForPolicy.findings);
-  warnings.push(...claimResultForPolicy.warnings);
-  const activeClaims = claimResultForPolicy.activeClaims;
-  const agentClaims = activeClaims.filter((claim) => claim.agent === agent);
-  const otherClaims = activeClaims.filter((claim) => claim.agent !== agent);
-
-  const pathDecisions = options.paths.map((requestedPath): WriteAccessPathDecision => {
-    let normalizedPath: { relativePath: string; canonicalPath: string };
-    try {
-      normalizedPath = normalizeWriteAccessPath(rootDir, requestedPath);
-    } catch (error) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
-        severity: "error",
-        message: `write access denied for ${requestedPath}: ${errorMessage(error)}`,
-        details: { requestedPath },
-      });
-      return {
-        requestedPath,
-        allowed: false,
-        reason: errorMessage(error),
-        claimIds: [],
-      };
-    }
-
-    if (!claimResultForPolicy.ok) {
-      return {
-        requestedPath,
-        relativePath: normalizedPath.relativePath,
-        canonicalPath: normalizedPath.canonicalPath,
-        allowed: false,
-        reason: "claim policy is invalid or conflicting",
-        claimIds: agentClaims.map((claim) => claim.id),
-      };
-    }
-
-    /* c8 ignore start -- checkClaims rejects overlapping active claims before write-path evaluation; this branch remains as a defensive guard for externally supplied policy results. */
-    const conflictingClaim = otherClaims.find((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
-    if (conflictingClaim) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_ACTIVE_CLAIM_CONFLICT",
-        severity: "error",
-        filePath: normalizedPath.relativePath,
-        message: `${agent} cannot write ${normalizedPath.relativePath}; active claim ${conflictingClaim.id} belongs to ${conflictingClaim.agent}`,
-        details: { agent, requestedPath, relativePath: normalizedPath.relativePath, conflictingClaim },
-      });
-      return {
-        requestedPath,
-        relativePath: normalizedPath.relativePath,
-        canonicalPath: normalizedPath.canonicalPath,
-        allowed: false,
-        reason: `active claim ${conflictingClaim.id} belongs to ${conflictingClaim.agent}`,
-        claimIds: agentClaims.map((claim) => claim.id),
-      };
-    }
-    /* c8 ignore stop */
-
-    const coveringClaims = agentClaims.filter((claim) => claimCoversFile(manifest, claim, normalizedPath.relativePath));
-    if (coveringClaims.length === 0) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
-        severity: "error",
-        filePath: normalizedPath.relativePath,
-        message: `${agent} cannot write ${normalizedPath.relativePath}; no active claim covers that path`,
-        details: { agent, requestedPath, relativePath: normalizedPath.relativePath, activeClaimIds: agentClaims.map((claim) => claim.id) },
-      });
-      return {
-        requestedPath,
-        relativePath: normalizedPath.relativePath,
-        canonicalPath: normalizedPath.canonicalPath,
-        allowed: false,
-        reason: "no active claim covers that path",
-        claimIds: agentClaims.map((claim) => claim.id),
-      };
-    }
-
-    const firstClaim = coveringClaims[0];
-    const firstCellId = firstClaim.cells.find((cellId) => {
-      /* c8 ignore next -- checkClaims validates claim cell references before write access computes the accepted cell id. */
-      const cell = manifest.cells.find((candidate) => candidate.id === cellId);
-      /* c8 ignore next -- checkClaims validates claim cell references before write access computes the accepted cell id. */
-      return cell ? pathOwnedByCell(cell, normalizedPath.relativePath) : false;
-    });
-    return {
-      requestedPath,
-      relativePath: normalizedPath.relativePath,
-      canonicalPath: normalizedPath.canonicalPath,
-      allowed: true,
-      reason: `covered by active claim ${firstClaim.id}`,
-      cellId: firstCellId,
-      claimIds: coveringClaims.map((claim) => claim.id),
-    };
-  });
-
-  return writeAccessResult(agent, pathDecisions, findings, warnings, activeClaims);
-}
-
-function validateAgentChangedFiles(
-  context: AnalysisContext,
-  agent: string,
-  activeClaims: CellFenceClaim[],
-  changedFiles: string[],
-  claimsPath: string,
-  findings: Finding[],
-): void {
-  const claimsRelativePath = repoPath(context.rootDir, claimsPath);
-  const agentClaims = activeClaims.filter((claim) => claim.agent === agent);
-  const otherClaims = activeClaims.filter((claim) => claim.agent !== agent);
-  for (const changedFile of changedFiles.filter((filePath) => normalizePath(filePath) !== claimsRelativePath)) {
-    const coveredByAgent = agentClaims.some((claim) => claimCoversFile(context.manifest, claim, changedFile));
-    const conflictingClaim = otherClaims.find((claim) => claimCoversFile(context.manifest, claim, changedFile));
-    if (conflictingClaim) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_ACTIVE_CLAIM_CONFLICT",
-        severity: "error",
-        filePath: changedFile,
-        message: `${agent} changed ${changedFile}, but active claim ${conflictingClaim.id} belongs to ${conflictingClaim.agent}`,
-        details: { agent, changedFile, conflictingClaim },
-        suggestedResolutions: [
-          humanResolution("Serialize the work or create a non-overlapping claim before editing this path", {
-            changedFile,
-            conflictingClaim: conflictingClaim.id,
-          }),
-        ],
-      });
-    } else if (!coveredByAgent) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
-        severity: "error",
-        filePath: changedFile,
-        message: `${agent} changed ${changedFile} without an active claim covering that path`,
-        details: { agent, changedFile, activeClaimIds: agentClaims.map((claim) => claim.id) },
-        suggestedResolutions: [
-          humanResolution("Create or narrow an active CellFence claim before editing this path", {
-            changedFile,
-            agent,
-          }),
-        ],
-      });
-    }
-  }
-}
-
-function claimResult(findings: Finding[], warnings: Finding[], claims: CellFenceClaim[], activeClaims: CellFenceClaim[], changedFiles?: string[]): ClaimCheckResult {
-  const hasErrors = findings.some((finding) => finding.severity === "error");
-  return {
-    schemaVersion: "cellfence.claim-check.v1",
-    ok: !hasErrors,
-    exitCode: hasErrors ? 1 : 0,
-    findings,
-    warnings,
-    claims,
-    activeClaims,
-    changedFiles,
-  };
+  return checkWriteAccessOperation(options, claimOperationDependencies());
 }
 
 export function checkClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  let manifest: CellFenceManifest;
-  try {
-    manifest = loadManifestFromFile(manifestPath);
-  } catch (error) {
-    return claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`);
-  }
-  const context = createContext(rootDir, manifest);
-  const findings: Finding[] = [];
-  const warnings: Finding[] = [];
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
-  const claimsPath = repoPath(rootDir, store.path);
-  const now = options.now || new Date();
-  for (const claim of store.claims) validateClaimCells(context, claim, findings, claimsPath);
-  const activeClaims = store.claims.filter((claim) => claimIsActive(claim, now));
-  validateActiveClaimConflicts(activeClaims, findings);
-
-  let changedFiles: string[] | undefined;
-  if (options.agent) {
-    try {
-      const claimsRelativePath = repoPath(rootDir, store.path);
-      changedFiles = changedFilesForClaimCheck(rootDir, options).filter((filePath) => normalizePath(filePath) !== claimsRelativePath);
-      validateAgentChangedFiles(context, options.agent, activeClaims, changedFiles, store.path, findings);
-    } catch (error) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_GIT_METADATA_UNAVAILABLE",
-        severity: "error",
-        message: `claim check --agent requires git metadata to compare changed files: ${errorMessage(error)}`,
-      });
-    }
-  }
-
-  return claimResult(findings, warnings, store.claims, activeClaims, changedFiles);
-}
-
-function claimIdFor(claim: Omit<CellFenceClaim, "id">): string {
-  const digest = crypto.createHash("sha256").update(JSON.stringify(claim)).digest("hex").slice(0, 12);
-  return `claim-${digest}`;
+  return checkClaimsOperation(options, claimOperationDependencies());
 }
 
 export function createClaim(options: ClaimCreateOptions): ClaimCreateResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  let manifest: CellFenceManifest;
-  try {
-    manifest = loadManifestFromFile(manifestPath);
-  } catch (error) {
-    return { ...claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`), claimsPath: claimStorePath(rootDir, options.claimsPath) };
-  }
-  const context = createContext(rootDir, manifest);
-  const findings: Finding[] = [];
-  const warnings: Finding[] = [];
-  const claimsStorePath = claimStorePath(rootDir, options.claimsPath);
-  let releaseClaimLock: (() => void) | undefined;
-  try {
-    releaseClaimLock = acquireClaimStoreLock(claimsStorePath);
-  } catch (error) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      filePath: repoPath(rootDir, claimsStorePath),
-      message: errorMessage(error),
-    });
-    return {
-      ...claimResult(findings, warnings, [], []),
-      claimsPath: claimsStorePath,
-    };
-  }
-  try {
-    const store = readClaimStore(rootDir, options.claimsPath, findings);
-    const claimsPath = repoPath(rootDir, store.path);
-    const now = options.now || new Date();
-    const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
-    if (!expiresAt) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: "claim requires --ttl like 30m, 2h, 1d or --expires as an ISO timestamp",
-      });
-    }
-    const agent = options.agent?.trim() || "";
-    if (agent.length === 0) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: "claim requires a non-empty agent",
-      });
-    }
-    const draft: Omit<CellFenceClaim, "id"> = {
-      agent,
-      task: options.task?.trim() || undefined,
-      cells: sortedUnique(options.cells),
-      paths: sortedUnique(options.paths),
-      symbols: sortedUnique(options.symbols),
-      resources: sortedUnique(options.resources),
-      artifactLanes: sortedUnique(options.artifactLanes),
-      createdAt: now.toISOString(),
-      expiresAt: expiresAt || now.toISOString(),
-    };
-    const claimedSurfaceCount = draft.cells.length + draft.paths.length + draft.symbols.length + draft.resources.length + draft.artifactLanes.length;
-    if (claimedSurfaceCount === 0) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
-      });
-    }
-    const claim: CellFenceClaim = {
-      ...draft,
-      id: options.claimId?.trim() || claimIdFor(draft),
-    };
-    validateClaimCells(context, claim, findings, claimsPath);
-    const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
-    for (const existingClaim of activeClaims) {
-      const surfaces = claimConflictSurfaces(existingClaim, claim);
-      if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
-    }
-    if (findings.some((finding) => finding.severity === "error")) {
-      return {
-        ...claimResult(findings, warnings, store.claims, activeClaims),
-        claimsPath: store.path,
-      };
-    }
-    const nextClaims = [
-      ...store.claims.filter((candidate) => candidate.id !== claim.id),
-      claim,
-    ];
-    writeClaimStore(store.path, nextClaims);
-    const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
-    return {
-      ...claimResult(findings, warnings, nextClaims, nextActiveClaims),
-      createdClaim: claim,
-      claimsPath: store.path,
-    };
-  } finally {
-    releaseClaimLock?.();
-  }
+  return createClaimOperation(options, claimOperationDependencies());
 }
 
 export function listClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
-  const findings: Finding[] = [];
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
-  const now = options.now || new Date();
-  return claimResult(findings, [], store.claims, store.claims.filter((claim) => claimIsActive(claim, now)));
+  return listClaimsOperation(options);
 }
-
 export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
-  const result = checkRepository({ ...options, baselinePath: undefined });
-  if (result.exitCode === 2 || result.exitCode === 3) {
-    throw new Error(result.findings.map((finding) => finding.message).join("; "));
-  }
-  return {
-    schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
-    generatedAt: new Date().toISOString(),
-    cellIds: Object.keys(result.metrics).sort((left, right) => left.localeCompare(right)),
-    cells: result.metrics,
-  };
-}
-
-export function loadBaselineFromFile(baselinePath: string): CellFenceBaseline {
-  const baselineValidation = validateBaseline(readJsonFile(baselinePath));
-  if (!baselineValidation.ok || !baselineValidation.value) {
-    throw new Error(`baseline is invalid: ${baselineValidation.errors.join("; ")}`);
-  }
-  return baselineValidation.value;
-}
-
-export function sealBaselineWithConfiguredKey(baseline: CellFenceBaseline): CellFenceBaseline {
-  const sealedBaseline = sealBaselineIfConfigured(baseline);
-  if (!sealedBaseline.seal) {
-    throw new Error(`baseline signing requires ${BASELINE_ED25519_PRIVATE_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`);
-  }
-  return sealedBaseline;
+  return createBaselineOperation(options, { checkRepository, loadManifestFromFile });
 }
 
 export function verifyBaselineSeal(options: CheckOptions = {}): CheckResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const baselinePath = path.resolve(rootDir, options.baselinePath || defaultBaselinePath(rootDir));
-  const manifest = loadManifestFromFile(manifestPath);
-  const baseline = loadBaselineFromFile(baselinePath);
-  const findings: Finding[] = [];
-  for (const finding of validateBaselineSealFindings(manifest, baseline, baselinePath, true)) {
-    addFinding(findings, finding);
-  }
-  return {
-    ok: findings.length === 0,
-    exitCode: findings.length === 0 ? 0 : 1,
-    findings,
-    warnings: [],
-    metrics: baseline.cells,
-  };
-}
-
-function addLockedBaselineFinding(
-  findings: Finding[],
-  cellId: string,
-  message: string,
-  details: Record<string, unknown>,
-): void {
-  addFinding(findings, {
-    ruleId: "CELLFENCE_LOCKED_BASELINE_EXPANSION",
-    severity: "error",
-    cellId,
-    message,
-    details,
-    suggestedResolutions: [
-      codeResolution("Reduce the change so the locked cell stays within the accepted baseline", details),
-      humanResolution("Ask a human owner to review and unlock or manually accept this architectural expansion", details),
-    ],
-  });
+  return verifyBaselineSealOperation(options, { checkRepository, loadManifestFromFile });
 }
 
 export function guardBaselineUpdate(options: BaselineUpdateGuardOptions): BaselineUpdateGuardResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const baselinePath = path.resolve(rootDir, options.baselinePath || defaultBaselinePath(rootDir));
-  if (!fs.existsSync(baselinePath)) return { ok: true, findings: [] };
-
-  const manifest = loadManifestFromFile(manifestPath);
-  const existingBaselineValidation = validateBaseline(readJsonFile(baselinePath));
-  if (!existingBaselineValidation.ok || !existingBaselineValidation.value) {
-    throw new Error(`baseline is invalid: ${existingBaselineValidation.errors.join("; ")}`);
-  }
-
-  const findings: Finding[] = [];
-  const existingBaseline = existingBaselineValidation.value;
-  for (const cell of manifest.cells) {
-    if (!cell.locked) continue;
-    const current = options.nextBaseline.cells[cell.id];
-    const previous = existingBaseline.cells[cell.id];
-    if (!previous) {
-      if (current) {
-        addLockedBaselineFinding(
-          findings,
-          cell.id,
-          `${cell.id} is locked and is absent from the existing baseline`,
-          { cell: cell.id, metric: "cellIds", previous: null, current: true },
-        );
-      }
-      continue;
-    }
-    if (!current) continue;
-
-    for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
-      if (current[metric] > previous[metric]) {
-        addLockedBaselineFinding(
-          findings,
-          cell.id,
-          `${cell.id} is locked and ${metric} would grow from ${previous[metric]} to ${current[metric]}`,
-          { cell: cell.id, metric, previous: previous[metric], current: current[metric] },
-        );
-      }
-    }
-
-    const scopeExpansion = current.ownedPathSet && previous.ownedPathSet
-      ? current.ownedPathSet.filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet as string[]))
-      : [];
-    if (scopeExpansion.length > 0) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and ownership scope would expand or shift: ${scopeExpansion.join(", ")}`,
-        { cell: cell.id, metric: "ownedPathSet", previous: previous.ownedPathSet, current: current.ownedPathSet, scopeExpansion },
-      );
-    }
-
-    if (current.publicEntryPath && previous.publicEntryPath && current.publicEntryPath !== previous.publicEntryPath) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and public entry would change from ${previous.publicEntryPath} to ${current.publicEntryPath}`,
-        { cell: cell.id, metric: "publicEntryPath", previous: previous.publicEntryPath, current: current.publicEntryPath },
-      );
-    }
-
-    const addedPublicSymbols = current.publicSymbolSet && previous.publicSymbolSet
-      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet as string[]).includes(symbol))
-      : [];
-    if (addedPublicSymbols.length > 0) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and public symbols would be added: ${addedPublicSymbols.join(", ")}`,
-        { cell: cell.id, metric: "publicSymbolSet", addedPublicSymbols },
-      );
-    }
-
-    const addedDependencyEdges = current.dependencyEdges && previous.dependencyEdges
-      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges as string[]).includes(edge))
-      : [];
-    if (addedDependencyEdges.length > 0) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and dependency edges would be added: ${addedDependencyEdges.join(", ")}`,
-        { cell: cell.id, metric: "dependencyEdges", addedDependencyEdges },
-      );
-    }
-
-    const addedArtifacts = current.artifactContracts && previous.artifactContracts
-      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts as string[]).includes(artifact))
-      : [];
-    if (addedArtifacts.length > 0) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and artifact contracts would be added: ${addedArtifacts.join(", ")}`,
-        { cell: cell.id, metric: "artifactContracts", addedArtifacts },
-      );
-    }
-
-    if (current.publicSurfaceHash && previous.publicSurfaceHash && current.publicSurfaceHash !== previous.publicSurfaceHash) {
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and public surface signature hash would change`,
-        { cell: cell.id, metric: "publicSurfaceHash", previous: previous.publicSurfaceHash, current: current.publicSurfaceHash },
-      );
-    }
-
-    const previousResourceKeys = new Set((previous.resourceAccesses || []).map(resourceBaselineKey));
-    for (const resourceAccess of current.resourceAccesses || []) {
-      const resourceKey = resourceBaselineKey(resourceAccess);
-      if (previousResourceKeys.has(resourceKey)) continue;
-      addLockedBaselineFinding(
-        findings,
-        cell.id,
-        `${cell.id} is locked and baseline update would grandfather ${resourceAccess.kind} ${resourceAccess.access} ${resourceAccess.selector}`,
-        { cell: cell.id, resourceAccess },
-      );
-    }
-  }
-
-  return { ok: findings.length === 0, findings };
+  return guardBaselineUpdateOperation(options, { checkRepository, loadManifestFromFile });
 }
 
-function loadOptionalBaseline(rootDir: string, baselinePath: string | undefined): CellFenceBaseline | undefined {
-  const resolvedBaselinePath = baselinePath
-    ? path.resolve(rootDir, baselinePath)
-    : defaultBaselinePath(rootDir);
-  if (!fs.existsSync(resolvedBaselinePath)) return undefined;
-  const validation = validateBaseline(readJsonFile(resolvedBaselinePath));
-  if (!validation.ok || !validation.value) {
-    throw new Error(`baseline is invalid: ${validation.errors.join("; ")}`);
-  }
-  return validation.value;
-}
-
-function budgetEntry(current: number, limit: number, source: ContextBudgetEntry["source"]): ContextBudgetEntry {
+function contextOperationDependencies() {
   return {
-    current,
-    limit,
-    remaining: limit - current,
-    source,
+    checkRepository,
+    createContext,
+    loadManifestFromFile,
   };
 }
 
 export function createCellContext(options: ContextOptions): CellFenceContext {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const manifest = loadManifestFromFile(manifestPath);
-  const context = createContext(rootDir, manifest);
-  const cell = context.cellsById.get(options.cellId);
-  if (!cell) {
-    throw new Error(`unknown cell ${options.cellId}`);
-  }
+  return createCellContextOperation(options, contextOperationDependencies());
+}
 
-  const baseline = loadOptionalBaseline(rootDir, options.baselinePath);
-  const currentResult = checkRepository({
-    rootDir,
-    manifestPath: repoPath(rootDir, manifestPath),
-    evidencePaths: options.evidencePaths,
-  });
-  const currentMetrics = currentResult.metrics[cell.id];
-  const baselineRecord = baseline?.cells[cell.id];
-  const budgets: CellFenceContext["budgets"] = {};
-
-  for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
-    const current = (currentMetrics as CellBaselineRecord)[metric];
-    const manifestLimit = cell.budgets?.[metric];
-    if (typeof manifestLimit === "number") {
-      budgets[metric] = budgetEntry(current, manifestLimit, "manifest-budget");
-    } else if (baselineRecord && typeof baselineRecord[metric] === "number") {
-      budgets[metric] = budgetEntry(current, baselineRecord[metric], "baseline-ratchet");
-    }
-  }
-
-  const allowedImports: ContextAllowedImport[] = (cell.consumes ?? []).flatMap((consumer) => {
-    const producer = context.cellsById.get(consumer.cell);
-    if (!producer) return [];
-    return [{
-      cell: producer.id,
-      publicEntry: producer.publicEntry,
-      packageName: producer.packageName,
-      locked: Boolean(producer.locked),
-      artifactLanes: consumer.artifactLanes || [],
-    }];
-  });
-
+function graphOperationDependencies() {
   return {
-    schemaVersion: "cellfence.context.v1",
-    cell: {
-      id: cell.id,
-      packageName: cell.packageName,
-      locked: Boolean(cell.locked),
-      ownedPaths: cell.ownedPaths,
-      publicEntry: cell.publicEntry,
-      publicSymbols: cell.publicSymbols,
-    },
-    allowedImports,
-    allowedResources: cell.resourceContracts || [],
-    baselineResources: baselineRecord?.resourceAccesses || [],
-    producedArtifacts: cell.producesArtifacts || [],
-    budgets,
-    guidance: [
-      "Create and edit source only inside ownedPaths unless a human changes the manifest.",
-      "Cross-cell imports must use the listed publicEntry or packageName surfaces.",
-      "Do not import another cell's internal implementation paths.",
-      "Resource access must match allowedResources or existing baselineResources.",
-      "Baseline updates expand the fence and should be treated as review-sensitive changes.",
-    ],
+    createCellContext,
+    createContext,
+    evidencePathsForOptions,
+    loadManifestFromFile,
+    mergeAccessesByCell,
+    resourceEvidenceAccesses,
+    validateImports,
+    validateResourceAccesses,
   };
-}
-
-function graphNodeKey(kind: CouplingGraphNode["kind"], id: string): string {
-  return `${kind}:${id}`;
-}
-
-function addGraphNode(nodes: Map<string, CouplingGraphNode>, node: CouplingGraphNode): void {
-  nodes.set(graphNodeKey(node.kind, node.id), node);
-}
-
-function addGraphEdge(edges: Map<string, CouplingGraphEdge>, edge: CouplingGraphEdge): void {
-  edges.set(`${edge.from}->${edge.to}:${edge.kind}:${edge.label}`, edge);
-}
-
-function resourceNodeId(access: ResourceBaselineEntry): string {
-  return `${access.kind}:${access.selector}`;
 }
 
 export function createCouplingGraph(options: CheckOptions = {}): CouplingGraph {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const manifest = loadManifestFromFile(manifestPath);
-  const context = createContext(rootDir, manifest);
-  const findings: Finding[] = [];
-  const warnings: Finding[] = [];
-  const nodes = new Map<string, CouplingGraphNode>();
-  const edges = new Map<string, CouplingGraphEdge>();
-
-  for (const cell of manifest.cells) {
-    addGraphNode(nodes, { id: cell.id, label: cell.id, kind: "cell" });
-    for (const consumer of cell.consumes ?? []) {
-      addGraphEdge(edges, {
-        from: cell.id,
-        to: consumer.cell,
-        kind: "declared-consumer",
-        label: "declares",
-      });
-      for (const lane of consumer.artifactLanes || []) {
-        const artifactId = `artifact:${consumer.cell}:${lane}`;
-        addGraphNode(nodes, { id: artifactId, label: lane, kind: "artifact" });
-        addGraphEdge(edges, {
-          from: consumer.cell,
-          to: artifactId,
-          kind: "artifact-lane",
-          label: "produces",
-        });
-        addGraphEdge(edges, {
-          from: cell.id,
-          to: artifactId,
-          kind: "artifact-lane",
-          label: "consumes",
-        });
-      }
-    }
-  }
-
-  const observedImports = validateImports(context, findings, warnings);
-  for (const [consumerCellId, producerCells] of observedImports.entries()) {
-    for (const producerCellId of producerCells) {
-      addGraphEdge(edges, {
-        from: consumerCellId,
-        to: producerCellId,
-        kind: "observed-import",
-        label: "imports",
-      });
-    }
-  }
-
-  const accessesByCell = validateResourceAccesses(context, findings, warnings, undefined);
-  mergeAccessesByCell(
-    accessesByCell,
-    resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, undefined),
-  );
-  for (const [cellId, accesses] of accessesByCell.entries()) {
-    for (const access of sortedResourceBaselineEntries(accesses)) {
-      const nodeId = resourceNodeId(access);
-      addGraphNode(nodes, { id: nodeId, label: nodeId, kind: "resource" });
-      addGraphEdge(edges, {
-        from: cellId,
-        to: nodeId,
-        kind: "resource-access",
-        label: access.access,
-      });
-    }
-  }
-
-  return {
-    schemaVersion: "cellfence.coupling-graph.v1",
-    nodes: [...nodes.values()].sort((left, right) => graphNodeKey(left.kind, left.id).localeCompare(graphNodeKey(right.kind, right.id))),
-    edges: [...edges.values()].sort((left, right) => `${left.from}:${left.to}:${left.kind}:${left.label}`.localeCompare(`${right.from}:${right.to}:${right.kind}:${right.label}`)),
-  };
-}
-
-function mermaidId(value: string): string {
-  return value.replace(/[^A-Za-z0-9_]/g, "_");
-}
-
-export function formatCouplingGraphMermaid(graph: CouplingGraph): string {
-  const lines = ["flowchart LR"];
-  for (const node of graph.nodes) {
-    lines.push(`  ${mermaidId(node.id)}["${node.label.replace(/"/g, "'")}"]`);
-  }
-  for (const edge of graph.edges) {
-    lines.push(`  ${mermaidId(edge.from)} -- "${edge.label} (${edge.kind})" --> ${mermaidId(edge.to)}`);
-  }
-  return lines.join("\n");
-}
-
-function taskMatchesCell(task: string, cell: CellManifest): boolean {
-  const text = task.toLowerCase();
-  if (cell.id.toLowerCase().split(/[-_]/).some((part) => part.length > 2 && text.includes(part))) return true;
-  if (text.includes(cell.id.toLowerCase())) return true;
-  if (cell.packageName && text.includes(cell.packageName.toLowerCase())) return true;
-  if (cell.publicSymbols.some((symbol) => text.includes(symbol.toLowerCase()))) return true;
-  return cell.ownedPaths.some((ownedPath) => text.includes(ownedPath.toLowerCase().replace(/\*\*/g, "").replace(/\*/g, "")));
+  return createCouplingGraphOperation(options, graphOperationDependencies());
 }
 
 export function createAutoAllocation(options: AutoAllocateOptions = {}): AutoAllocation {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const manifest = loadManifestFromFile(manifestPath);
-  const graph = createCouplingGraph(options);
-  const selectedCells = new Set<string>();
-  const task = options.task || "";
-  if (options.cellId) selectedCells.add(options.cellId);
-  if (task.trim().length > 0) {
-    for (const cell of manifest.cells) {
-      if (taskMatchesCell(task, cell)) selectedCells.add(cell.id);
-    }
-  }
-
-  const contextCells = new Set(selectedCells);
-  for (const edge of graph.edges) {
-    if (selectedCells.has(edge.from) && graph.nodes.some((node) => node.kind === "cell" && node.id === edge.to)) {
-      contextCells.add(edge.to);
-    }
-  }
-
-  const includePaths = new Set<string>();
-  const publicEntries = new Set<string>();
-  const resourceSelectors = new Set<string>();
-  const budgets: Record<string, Record<string, ContextBudgetEntry>> = {};
-  for (const cell of manifest.cells) {
-    if (selectedCells.has(cell.id)) {
-      cell.ownedPaths.forEach((ownedPath) => includePaths.add(ownedPath));
-    }
-    if (contextCells.has(cell.id)) {
-      const cellContext = createCellContext({
-        rootDir,
-        manifestPath,
-        baselinePath: options.baselinePath,
-        evidencePaths: options.evidencePaths,
-        cellId: cell.id,
-      });
-      publicEntries.add(cell.publicEntry);
-      budgets[cell.id] = Object.fromEntries(Object.entries(cellContext.budgets));
-      for (const contract of cellContext.allowedResources) {
-        for (const access of contract.access) {
-          for (const selector of contract.selectors) resourceSelectors.add(`${contract.kind}:${access}:${selector}`);
-        }
-      }
-      for (const resource of cellContext.baselineResources) {
-        resourceSelectors.add(`${resource.kind}:${resource.access}:${resource.selector}`);
-      }
-    }
-  }
-
-  return {
-    schemaVersion: "cellfence.auto-allocation.v1",
-    task,
-    selectedCells: [...selectedCells].sort(),
-    contextCells: [...contextCells].sort(),
-    includePaths: [...includePaths].sort(),
-    publicEntries: [...publicEntries].sort(),
-    resourceSelectors: [...resourceSelectors].sort(),
-    budgets,
-    guidance: [
-      "Read selected cell owned paths only when implementation edits are needed.",
-      "Read context cell public entries for dependency contracts; avoid internal files from context cells.",
-      "If selectedCells is empty, ask for a target cell or a more specific task before editing.",
-    ],
-  };
+  return createAutoAllocationOperation(options, graphOperationDependencies());
 }
-
-export function createWaiverRequest(options: WaiverRequestOptions): WaiverRequest {
-  if (!isIsoDate(options.expires)) throw new Error("expires must be YYYY-MM-DD");
-  if (options.reason.trim().length < 12) throw new Error("reason must explain the waiver in at least 12 characters");
-  const approvedBy = options.approvedBy || "PENDING";
-  const directive = `// cellfence-ignore ${options.ruleId} expires:${options.expires} approved-by:${approvedBy} reason:${options.reason.trim()}`;
-  const markdown = [
-    "## CellFence Waiver Request",
-    "",
-    `- Rule: ${options.ruleId}`,
-    `- File: ${normalizePath(options.filePath)}:${options.line}`,
-    `- Expires: ${options.expires}`,
-    `- Approved by: ${approvedBy}`,
-    `- Reason: ${options.reason.trim()}`,
-    "",
-    "Approved directive:",
-    "",
-    "```ts",
-    directive,
-    "```",
-  ].join("\n");
-  return {
-    schemaVersion: "cellfence.waiver-request.v1",
-    directive,
-    markdown,
-    approvalRequired: true,
-    ruleId: options.ruleId,
-    filePath: normalizePath(options.filePath),
-    line: options.line,
-    expires: options.expires,
-    approvedBy,
-    reason: options.reason.trim(),
-  };
-}
-
-export function writeBaselineFile(filePath: string, baseline: CellFenceBaseline): void {
-  fs.writeFileSync(filePath, `${JSON.stringify(sealBaselineIfConfigured(baseline), null, 2)}\n`);
-}
-
-export function defaultBaselinePath(rootDir = process.cwd()): string {
-  return path.resolve(rootDir, DEFAULT_BASELINE_PATH);
-}
-
 export function formatHumanResult(result: CheckResult): string {
   const lines: string[] = [];
   lines.push(result.ok ? "CellFence check passed." : "CellFence check failed.");

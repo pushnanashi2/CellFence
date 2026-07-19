@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 
 import type { CellFenceBaseline, CellFenceManifest } from "@cellfence/schema";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
-import type { Finding } from "./index.js";
+import type { Finding } from "./types.js";
 
 export const BASELINE_HMAC_KEY_ENV = "CELLFENCE_BASELINE_HMAC_KEY";
 export const BASELINE_HMAC_KEY_ID_ENV = "CELLFENCE_BASELINE_HMAC_KEY_ID";

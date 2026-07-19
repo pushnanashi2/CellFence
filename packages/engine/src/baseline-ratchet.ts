@@ -10,7 +10,7 @@ import type {
 import { absolutePath, normalizePath, patternCoveredByOwnedPaths } from "./file-index.js";
 import { publicSurfaceHash } from "./module-resolution.js";
 import type { ResourceAccessReference } from "./resource-access.js";
-import type { Finding, SuggestedResolution } from "./index.js";
+import type { Finding, SuggestedResolution } from "./types.js";
 
 type RatchetContext = {
   rootDir: string;
