@@ -26,6 +26,7 @@
     "conformance:all": "npm run build && node --test tests/conformance-imports.test.mjs tests/conformance-resolution.test.mjs tests/conformance-ownership.test.mjs tests/conformance-public-surface.test.mjs tests/conformance-resources.test.mjs tests/conformance-ratchet.test.mjs tests/conformance-malformed.test.mjs",
     "mutation": "npm run build && stryker run stryker.conf.mjs",
     "mutation:dry": "npm run build && stryker run stryker.conf.mjs --dryRunOnly",
+    "mutation:injection": "npm run build && node scripts/mutation-injection-study.mjs",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",
     "ci:count": "npm run build && node scripts/ci-counts.mjs",
     "benchmark:scale": "npm run build && node scripts/scale-benchmark.mjs",
