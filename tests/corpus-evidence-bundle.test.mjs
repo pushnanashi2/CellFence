@@ -55,10 +55,14 @@ function label(findingId, patch = {}) {
     studyId: "fixture-study",
     findingId,
     rater: "reviewer-a",
+    raterType: "human",
+    role: "independent",
     round: "blind_first",
     assignmentId: `blind-first-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
     evidencePackageId: `evidence-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
     sawPeerLabels: false,
+    sourceBundleContainsLabels: false,
+    claimUse: "blind_labeling",
     label: "true_positive",
     rationale: "fixture label",
     ...patch,
@@ -316,6 +320,7 @@ test("corpus evidence bundle validator rejects labels with bad schema or study i
       label(findingId, {
         schemaVersion: "wrong",
         studyId: "other-study",
+        peerLabels: ["true_positive"],
       }),
     ]);
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
@@ -323,6 +328,7 @@ test("corpus evidence bundle validator rejects labels with bad schema or study i
     assert.equal(validate.status, 1);
     assert.match(validate.stderr, /unexpected schemaVersion/);
     assert.match(validate.stderr, /unexpected studyId/);
+    assert.match(validate.stderr, /unexpected field peerLabels/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -369,6 +375,71 @@ test("corpus evidence bundle validator binds raw findings to the report audit ha
 
     assert.equal(validate.status, 1);
     assert.match(validate.stderr, /does not match copied report audit log event/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator rejects copy paths that escape the bundle", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-copy-escape-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const outsideManifest = path.join(tempDir, "outside-manifest.json");
+    writeJson(outsideManifest, { schemaVersion: "cellfence.manifest.v1", cells: [] });
+    const studyPath = path.join(bundleDir, "study.json");
+    const study = JSON.parse(fs.readFileSync(studyPath, "utf8"));
+    study.manifestCopies[0].path = "../outside-manifest.json";
+    study.manifestCopies[0].sha256 = hashFile(outsideManifest);
+    writeJson(studyPath, study);
+    writeSha256Sums(bundleDir);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /unsafe bundle path: \.\.\/outside-manifest\.json/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator rejects duplicate or unsafe checksum paths", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-sums-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const sumsPath = path.join(bundleDir, "SHA256SUMS");
+    const firstLine = fs.readFileSync(sumsPath, "utf8").split(/\r?\n/).find(Boolean);
+    fs.appendFileSync(sumsPath, `${firstLine}\n${"0".repeat(64)}  ../outside.json\n`);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /duplicates/);
+    assert.match(validate.stderr, /unsafe path \.\.\/outside\.json/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

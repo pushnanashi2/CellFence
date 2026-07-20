@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isAdjudication, validateClaimLabelMetadata } from "./precision-worklist-lib.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const allowedLabels = new Set([
@@ -13,6 +14,25 @@ const allowedLabels = new Set([
   "needs_review",
   "invalid_setup",
   "out_of_scope",
+]);
+const labelAllowedKeys = new Set([
+  "schemaVersion",
+  "studyId",
+  "findingId",
+  "rater",
+  "raterType",
+  "raterClass",
+  "role",
+  "round",
+  "assignmentId",
+  "evidencePackageId",
+  "sawPeerLabels",
+  "sourceBundleContainsLabels",
+  "claimUse",
+  "label",
+  "rationale",
+  "adjudication",
+  "adjudicated",
 ]);
 const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
@@ -167,6 +187,21 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateLabelShape(label, lineNumber, findings) {
+  if (!isRecord(label)) {
+    findings.push(`labels.jsonl:${lineNumber} must be an object`);
+    return false;
+  }
+  for (const key of Object.keys(label)) {
+    if (!labelAllowedKeys.has(key)) findings.push(`labels.jsonl:${lineNumber} has unexpected field ${key}`);
+  }
+  return true;
+}
+
 function readJsonl(filePath) {
   if (!fs.existsSync(filePath)) return [];
   const records = [];
@@ -207,23 +242,61 @@ function posixify(value) {
   return String(value).replace(/\\/g, "/").split(path.sep).join("/");
 }
 
+function resolveBundleRelativePath(bundleDir, relativePath, findings, label) {
+  if (typeof relativePath !== "string" || relativePath.length === 0) {
+    findings.push(`${label} is missing`);
+    return null;
+  }
+  const normalized = posixify(relativePath);
+  const segments = normalized.split("/");
+  if (
+    relativePath.includes("\0")
+    || path.isAbsolute(relativePath)
+    || segments.includes("")
+    || segments.includes(".")
+    || segments.includes("..")
+  ) {
+    findings.push(`${label} has unsafe bundle path: ${relativePath}`);
+    return null;
+  }
+  const bundleRoot = path.resolve(bundleDir);
+  const resolved = path.resolve(bundleRoot, relativePath);
+  const lexicalRelative = path.relative(bundleRoot, resolved);
+  if (lexicalRelative === "" || lexicalRelative.startsWith("..") || path.isAbsolute(lexicalRelative)) {
+    findings.push(`${label} escapes bundle root: ${relativePath}`);
+    return null;
+  }
+  if (fs.existsSync(resolved)) {
+    const realRoot = fs.realpathSync.native(bundleRoot);
+    const realResolved = fs.realpathSync.native(resolved);
+    const realRelative = path.relative(realRoot, realResolved);
+    if (realRelative === "" || realRelative.startsWith("..") || path.isAbsolute(realRelative)) {
+      findings.push(`${label} resolves outside bundle root: ${relativePath}`);
+      return null;
+    }
+  }
+  return resolved;
+}
+
 function safeName(value) {
   const slug = String(value).replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 64) || "subject";
   return `${slug}-${hashText(value).slice(0, 12)}`;
 }
 
-function listFilesRecursive(baseDir) {
+function listFilesRecursive(baseDir, findings = null, rootDir = baseDir) {
   if (!fs.existsSync(baseDir)) return [];
   const entries = [];
   for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
     const fullPath = path.join(baseDir, entry.name);
-    if (entry.isDirectory()) {
-      entries.push(...listFilesRecursive(fullPath));
+    if (entry.isSymbolicLink()) {
+      if (findings) findings.push(`bundle contains symlink: ${posixify(path.relative(rootDir, fullPath))}`);
+    } else if (entry.isDirectory()) {
+      entries.push(...listFilesRecursive(fullPath, findings, rootDir));
     } else if (entry.isFile()) {
       entries.push(fullPath);
     }
   }
-  return entries.sort((left, right) => posixify(path.relative(baseDir, left)).localeCompare(posixify(path.relative(baseDir, right))));
+  return entries.sort((left, right) => posixify(path.relative(rootDir, left)).localeCompare(posixify(path.relative(rootDir, right))));
 }
 
 function copyFileEnsuringDirectory(sourcePath, targetPath) {
@@ -496,22 +569,42 @@ function writeSha256Sums(bundleDir) {
   fs.writeFileSync(path.join(bundleDir, "SHA256SUMS"), `${lines.join("\n")}\n`);
 }
 
-function readSha256Sums(bundleDir) {
+function readSha256Sums(bundleDir, findings) {
   const sumsPath = path.join(bundleDir, "SHA256SUMS");
-  if (!fs.existsSync(sumsPath)) throw new Error("SHA256SUMS is missing");
+  if (!fs.existsSync(sumsPath)) {
+    findings.push("SHA256SUMS is missing");
+    return new Map();
+  }
   const sums = new Map();
   for (const [index, line] of fs.readFileSync(sumsPath, "utf8").split(/\r?\n/).entries()) {
     if (!line.trim()) continue;
     const match = /^([a-f0-9]{64}) {2}(.+)$/.exec(line);
-    if (!match) throw new Error(`SHA256SUMS:${index + 1} is malformed`);
-    sums.set(match[2], match[1]);
+    if (!match) {
+      findings.push(`SHA256SUMS:${index + 1} is malformed`);
+      continue;
+    }
+    const relativePath = match[2];
+    if (sums.has(relativePath)) findings.push(`SHA256SUMS:${index + 1} duplicates ${relativePath}`);
+    const segments = posixify(relativePath).split("/");
+    if (
+      relativePath.length === 0
+      || relativePath.includes("\0")
+      || path.isAbsolute(relativePath)
+      || segments.includes("")
+      || segments.includes(".")
+      || segments.includes("..")
+      || relativePath === "SHA256SUMS"
+    ) {
+      findings.push(`SHA256SUMS:${index + 1} has unsafe path ${relativePath}`);
+    }
+    sums.set(relativePath, match[1]);
   }
   return sums;
 }
 
 function validateSha256Sums(bundleDir, findings) {
-  const expected = readSha256Sums(bundleDir);
-  const actualFiles = listFilesRecursive(bundleDir)
+  const expected = readSha256Sums(bundleDir, findings);
+  const actualFiles = listFilesRecursive(bundleDir, findings)
     .filter((filePath) => path.basename(filePath) !== "SHA256SUMS")
     .map((filePath) => posixify(path.relative(bundleDir, filePath)))
     .sort();
@@ -539,6 +632,7 @@ function validateLabels(bundleDir, normalizedFindings, sampling, findings) {
   const seenRaterFinding = new Set();
   for (const [index, label] of readJsonl(labelsPath).entries()) {
     const lineNumber = index + 1;
+    if (!validateLabelShape(label, lineNumber, findings)) continue;
     if (label.schemaVersion !== "cellfence.corpus-label.v1") findings.push(`labels.jsonl:${lineNumber} has unexpected schemaVersion`);
     if (label.studyId !== study.studyId) findings.push(`labels.jsonl:${lineNumber} has unexpected studyId`);
     if (!findingIds.has(label.findingId)) findings.push(`labels.jsonl:${lineNumber} references unknown findingId ${label.findingId}`);
@@ -547,7 +641,8 @@ function validateLabels(bundleDir, normalizedFindings, sampling, findings) {
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
       findings.push(`labels.jsonl:${lineNumber} is missing rationale`);
     }
-    if (label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true) {
+    validateClaimLabelMetadata(label, lineNumber, findings);
+    if (isAdjudication(label)) {
       if (label.round && label.round !== "adjudication") findings.push(`labels.jsonl:${lineNumber} adjudication label must use round=adjudication`);
     } else {
       if (label.round !== "blind_first" && label.round !== "blind_second") {
@@ -585,15 +680,17 @@ function validateStudyCopies(bundleDir, study, findings) {
     findings.push("study.json is missing manifestCopies");
   } else {
     for (const copy of study.manifestCopies) {
-      if (!copy?.path || !fs.existsSync(path.join(bundleDir, copy.path))) findings.push(`manifest copy is missing: ${copy?.path || "<unknown>"}`);
-      else if (copy.sha256 && hashFile(path.join(bundleDir, copy.path)) !== copy.sha256) findings.push(`manifest copy hash mismatch: ${copy.path}`);
+      const copyPath = resolveBundleRelativePath(bundleDir, copy?.path, findings, `manifest copy path ${copy?.path || "<unknown>"}`);
+      if (!copyPath || !fs.existsSync(copyPath)) findings.push(`manifest copy is missing: ${copy?.path || "<unknown>"}`);
+      else if (copy.sha256 && hashFile(copyPath) !== copy.sha256) findings.push(`manifest copy hash mismatch: ${copy.path}`);
     }
   }
   if (!Array.isArray(study.logCopies)) {
     findings.push("study.json is missing logCopies");
   } else {
     for (const copy of study.logCopies) {
-      if (!copy?.path || !fs.existsSync(path.join(bundleDir, copy.path))) findings.push(`log copy is missing: ${copy?.path || "<unknown>"}`);
+      const copyPath = resolveBundleRelativePath(bundleDir, copy?.path, findings, `log copy path ${copy?.path || "<unknown>"}`);
+      if (!copyPath || !fs.existsSync(copyPath)) findings.push(`log copy is missing: ${copy?.path || "<unknown>"}`);
     }
   }
 }
@@ -605,8 +702,8 @@ function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, f
   const eventsFor = (copy) => {
     if (!copy?.path) return [];
     if (!logEvents.has(copy.path)) {
-      const logPath = path.join(bundleDir, copy.path);
-      logEvents.set(copy.path, fs.existsSync(logPath) ? readJsonl(logPath) : []);
+      const logPath = resolveBundleRelativePath(bundleDir, copy.path, findings, `log copy path ${copy.path}`);
+      logEvents.set(copy.path, logPath && fs.existsSync(logPath) ? readJsonl(logPath) : []);
     }
     return logEvents.get(copy.path) || [];
   };
@@ -625,7 +722,10 @@ function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, f
       findings.push(`report audit log copy is missing for ${subject.id}`);
       continue;
     }
-    const matchingCopies = candidates.filter((copy) => hashFile(path.join(bundleDir, copy.path)) === subject.check.auditLogSha256);
+    const matchingCopies = candidates.filter((copy) => {
+      const copyPath = resolveBundleRelativePath(bundleDir, copy.path, findings, `log copy path ${copy.path}`);
+      return copyPath && fs.existsSync(copyPath) && hashFile(copyPath) === subject.check.auditLogSha256;
+    });
     if (matchingCopies.length === 0) {
       findings.push(`report audit log hash does not match copied log for ${subject.id}`);
       continue;
@@ -683,6 +783,9 @@ function validateBundle(bundleDir) {
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") findings.push("study.json has unexpected schemaVersion");
   if (corpus.schemaVersion !== "cellfence.corpus.v1") findings.push("corpus.json has unexpected schemaVersion");
   if (report.schemaVersion !== "cellfence.corpus-study.v1") findings.push("report.json has unexpected schemaVersion");
+  if (canonicalJson(study.environment || {}) !== canonicalJson(report.environment || {})) {
+    findings.push("study.environment does not match sealed report.environment");
+  }
   if (Number.isInteger(study.summary?.rawFindings) && study.summary.rawFindings !== rawFindings.length) {
     findings.push("study.summary.rawFindings does not match findings.raw.jsonl");
   }

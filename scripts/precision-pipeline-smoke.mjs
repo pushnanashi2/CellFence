@@ -271,37 +271,23 @@ function createFixture(runDir) {
   return { corpusPath, reportPath };
 }
 
-function writeLabels(labelsPath, findings) {
-  const labels = findings.flatMap((finding) => [
-    {
-      schemaVersion: "cellfence.corpus-label.v1",
-      studyId,
-      findingId: finding.findingId,
-      rater: "reviewer-a",
-      round: "blind_first",
-      assignmentId: `blind-first-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
-      evidencePackageId: `fixture-evidence-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
-      sawPeerLabels: false,
+function writeLabelsFromWorklist(labelsPath, worklistDir) {
+  const worklist = readJson(path.join(worklistDir, "worklist.json"));
+  const labels = worklist.assignments.map((assignmentEntry) => {
+    const assignment = readJson(path.join(worklistDir, assignmentEntry.path));
+    if (assignment.assignment.peerLabelsIncluded !== false || assignment.labelTemplate.sawPeerLabels !== false) {
+      throw new Error(`assignment is not blind: ${assignmentEntry.path}`);
+    }
+    return {
+      ...assignment.labelTemplate,
       label: "true_positive",
       rationale: "fixture finding matches the reviewed manifest violation",
-    },
-    {
-      schemaVersion: "cellfence.corpus-label.v1",
-      studyId,
-      findingId: finding.findingId,
-      rater: "reviewer-b",
-      round: "blind_second",
-      assignmentId: `blind-second-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
-      evidencePackageId: `fixture-evidence-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
-      sawPeerLabels: false,
-      label: "true_positive",
-      rationale: "independent fixture label agrees with the manifest violation",
-    },
-  ]);
+    };
+  });
   writeJsonl(labelsPath, labels);
 }
 
-function writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256) {
+function writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256, worklistArtifactSetSha256) {
   writeJson(protocolPath, {
     schemaVersion: "cellfence.precision-claim-protocol.v1",
     studyId,
@@ -309,6 +295,7 @@ function writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha25
       toolCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       artifactSetSha256,
       preLabelArtifactSetSha256,
+      worklistArtifactSetSha256,
       targetPopulation: "local reviewed-manifest precision pipeline smoke fixture",
       supportedSyntaxProfile: "ts-js-supported-v1",
       includedRules: [
@@ -345,6 +332,7 @@ function main() {
     const { corpusPath, reportPath } = createFixture(runDir);
     const firstBundleDir = path.join(runDir, "bundle-unlabeled");
     const labeledBundleDir = path.join(runDir, "bundle-labeled");
+    const worklistDir = path.join(runDir, "worklist");
     const labelsPath = path.join(runDir, "labels.jsonl");
     const protocolPath = path.join(runDir, "protocol.json");
     const reviewedCorpusReportPath = path.join(runDir, "reviewed-corpus-report.json");
@@ -377,7 +365,27 @@ function main() {
     }
     const preLabelArtifactSetSha256 = readJson(path.join(firstBundleDir, "study.json")).preregistration.preLabelArtifactSetSha256;
 
-    writeLabels(labelsPath, findings);
+    requireStatus(run(process.execPath, [
+      path.join(repoRoot, "scripts", "precision-label-worklist.mjs"),
+      "--bundle",
+      firstBundleDir,
+      "--out-dir",
+      worklistDir,
+      "--raters",
+      "reviewer-a,reviewer-b",
+      "--rater-types",
+      "human,human",
+    ]), 0, "label worklist build");
+    const worklist = readJson(path.join(worklistDir, "worklist.json"));
+    const worklistArtifactSetSha256 = hashFile(path.join(worklistDir, "SHA256SUMS"));
+    if (worklist.summary.selectedFindings !== findings.length) {
+      throw new Error(`expected ${findings.length} worklist findings, got ${worklist.summary.selectedFindings}`);
+    }
+    if (worklist.summary.assignments !== findings.length * 2) {
+      throw new Error(`expected ${findings.length * 2} worklist assignments, got ${worklist.summary.assignments}`);
+    }
+
+    writeLabelsFromWorklist(labelsPath, worklistDir);
     requireStatus(run(process.execPath, [
       path.join(repoRoot, "scripts", "corpus-evidence-bundle.mjs"),
       "--study-id",
@@ -403,11 +411,13 @@ function main() {
       path.join(repoRoot, "scripts", "precision-labels-validate.mjs"),
       "--bundle",
       labeledBundleDir,
+      "--worklist",
+      worklistDir,
       "--out",
       labelReadinessPath,
     ]), 0, "label readiness validate");
     const artifactSetSha256 = hashFile(path.join(labeledBundleDir, "SHA256SUMS"));
-    writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256);
+    writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256, worklistArtifactSetSha256);
 
     const claim = run(process.execPath, [
       path.join(repoRoot, "scripts", "corpus-precision-claim.mjs"),
@@ -415,6 +425,8 @@ function main() {
       labeledBundleDir,
       "--protocol",
       protocolPath,
+      "--worklist",
+      worklistDir,
       "--out",
       claimPath,
     ]);
@@ -434,6 +446,8 @@ function main() {
       studyId,
       runDir,
       bundleDir: labeledBundleDir,
+      worklistDir,
+      worklistSummary: worklist.summary,
       reviewedCorpusReportPath,
       labelReadinessPath,
       protocolPath,
@@ -444,6 +458,7 @@ function main() {
       decision: claimReport.decision,
       artifactSetSha256: claimReport.bundle.artifactSetSha256,
       preLabelArtifactSetSha256,
+      worklistArtifactSetSha256,
     });
     console.log(`precision pipeline smoke passed: ${findings.length} labeled findings; claim=${claimReport.decision.status}`);
     return 0;

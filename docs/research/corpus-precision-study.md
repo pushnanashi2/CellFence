@@ -265,8 +265,9 @@ claim:
 npm run precision:pipeline:smoke
 ```
 
-The smoke builds a tiny local corpus report, freezes an evidence bundle, injects
-two independent labels for each sampled finding, validates checksums, and runs
+The smoke builds a tiny local corpus report, freezes an evidence bundle,
+generates blind assignment packages, fills two independent fixture labels for
+each sampled finding from those packages, validates checksums, and runs
 `corpus-precision-claim`. The expected claim decision is
 `insufficient_evidence`: the sample is deliberately too small for a 99% lower
 bound. A passing smoke proves the bundle, labeling, and claim machinery is wired;
@@ -319,6 +320,45 @@ from corpus, report, findings, sampling, manifests, and logs, excluding
 node -e 'const fs=require("fs"); const s=JSON.parse(fs.readFileSync("reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle/study.json","utf8")); console.log(s.preregistration.preLabelArtifactSetSha256)'
 ```
 
+Generate blind labeling worklists from the unlabeled sealed bundle:
+
+```bash
+npm run precision:labels:worklist -- \
+  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
+  --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-worklist \
+  --raters reviewer-a,reviewer-b \
+  --rater-types human,human
+```
+
+The worklist command validates the bundle, rejects bundles that already contain
+labels by default, writes one assignment package per sampled finding per blind
+round, and seals the assignment set with its own `SHA256SUMS`. Assignment files
+include the selected evidence, allowed labels, and an empty `labelTemplate`; they
+do not include peer labels or adjudication outcomes. Claim-bound worklists must
+keep `labelTemplate.label` and `labelTemplate.rationale` empty, declare
+`role=independent`, `sourceBundleContainsLabels=false`, and
+`claimUse=blind_labeling`, and contain only regular files listed in the worklist
+`SHA256SUMS`. The sealed worklist file set is restricted to `worklist.json` plus
+declared assignment files; extra sealed files such as answer keys, peer labels,
+or notes make the worklist claim-ineligible. `worklist.json` and assignment JSON
+must also match the v1 allow-listed field shape; embedded answer keys, labels,
+peer labels, adjudication material, or other unknown fields make the worklist
+claim-ineligible. Symlinked assignment paths are rejected. `--rater-types` is
+required, and only `human`, `organization`, or `agent` are accepted. Agent raters
+are useful for diagnostic dry runs only and must be declared with
+`--rater-types agent,agent` rather than described as human review.
+Assignment IDs, evidence package IDs, assignment paths, label-template
+`schemaVersion`, `studyId`, rater, rater type, role, and round must match the
+generator-derived values for the sealed finding, study, round, and rater; rater
+IDs and structural identifiers must not contain label- or answer-suggestive
+tokens.
+
+Record the worklist artifact set for the claim protocol:
+
+```bash
+sha256sum reports/corpus/ts-js-workspace-pilot-2026-07-18-worklist/SHA256SUMS
+```
+
 When rebuilding the labeled bundle, pass that digest back into the bundle so the
 final artifact records the pre-label registration boundary:
 
@@ -342,20 +382,34 @@ Before running the statistical claim evaluator, validate label readiness:
 
 ```bash
 npm run precision:labels:validate -- \
-  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
+  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-labeled-bundle \
+  --worklist reports/corpus/ts-js-workspace-pilot-2026-07-18-worklist \
   --out reports/corpus/ts-js-workspace-pilot-2026-07-18-label-readiness.json
 ```
 
 The label readiness gate requires the sampled precision-eligible findings to
 have exactly one `blind_first` and one `blind_second` independent label from
-separate raters. Independent label rows must declare `assignmentId`,
-`evidencePackageId`, and `sawPeerLabels: false`. If independent labels
-disagree, a separate adjudicator must resolve the final label with
+separate raters. Independent label rows must declare `role: "independent"`,
+`assignmentId`, `evidencePackageId`, `raterType`,
+`sawPeerLabels: false`, `sourceBundleContainsLabels: false`, and
+`claimUse: "blind_labeling"`. When `--worklist` is supplied, independent labels
+must match a sealed assignment's finding, rater, rater type, role, round,
+assignment ID, evidence package ID, and claim-use metadata. Sealed claim labels
+must use canonical `raterType`; `raterClass` is rejected to avoid contradictory
+provenance. If independent labels disagree, a separate adjudicator must resolve
+the final label with
 `round: "adjudication"`; adjudication by an independent rater, missing
 adjudication for a disagreement, or adjudication after unanimous independent
 labels is rejected. This gate only checks the labeling process;
 `corpus-precision-claim` still decides whether the labeled sample supports a
 pre-registered precision claim.
+
+Claim-bound `labels.jsonl` rows use a strict allow-listed shape. Extra fields
+such as peer labels, answer keys, transfer metadata, method notes, or post-label
+artifact references make the bundle invalid for a precision claim. Boolean
+provenance fields must be real booleans, not strings, and non-rationale metadata
+must not carry label- or answer-suggestive tokens. Label-transfer provenance is
+recorded in the transfer report, not embedded back into label rows.
 
 When rerunning a fixed corpus, transfer existing labels by stable finding ID and
 record any newly sampled findings for supplemental labeling:
@@ -393,18 +447,22 @@ final claim evaluator:
 
 ```bash
 npm run precision:claim:preflight -- \
-  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
+  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-labeled-bundle \
   --protocol docs/research/protocols/ts-js-confirmation-v1.json \
+  --worklist reports/corpus/ts-js-workspace-pilot-2026-07-18-worklist \
   --out reports/corpus/ts-js-confirmation-v1-preflight.json
 ```
 
 The preflight can run before labeling. It reports the protocol-selected
 findings, per-rule sample deficits, repository concentration, dirty harness
 state, missing independent labels, and whether any labels appear to be
-agent-only. Exit code `0` means the bundle is ready to attempt the claim. Exit
-code `1` means the bundle is well-formed but underpowered, unbalanced, or
-incompletely labeled. Exit code `2` means the protocol and bundle do not match,
-the labeling provenance violates protocol, manifest review provenance is not
+agent-only. A pass-eligible claim must bind labels to a sealed worklist with
+`--worklist` and `claim.worklistArtifactSetSha256`; no-worklist mode is
+diagnostic and cannot be claim-ready. Exit code `0` means the bundle is ready to
+attempt the claim. Exit code `1` means the bundle is well-formed but
+underpowered, unbalanced, incompletely labeled, or missing pass-eligible
+worklist binding. Exit code `2` means the protocol and bundle do not match, the
+labeling provenance violates protocol, manifest review provenance is not
 hash-bound, or the inputs are malformed. A preflight failure is not a detector
 failure; it is the guardrail that prevents a small tuning corpus from being
 presented as a 99% precision result.
@@ -440,14 +498,29 @@ is desired, pre-register it and pass matching `--minimum-precision`,
 `corpus-precision-claim` is deliberately harder to pass than a pooled
 occurrence precision calculation. A claim protocol must pre-register
 `claim.toolCommit`, `claim.preLabelArtifactSetSha256`,
-`claim.artifactSetSha256`, included rules, target precision, confidence,
-blocking severities, and repository contribution limit. The pre-label digest
-binds the corpus, report, findings, sampling, manifests, and logs before
-labeling, excluding mutable labeling and bundle metadata files; the final
-artifact digest binds the labeled bundle. The claim
-evaluator recomputes every bundle file listed in `SHA256SUMS`; changing
-`labels.jsonl`, `study.json`, sampled findings, manifests, or logs after sealing
-makes the claim invalid even if `SHA256SUMS` itself is unchanged.
+`claim.artifactSetSha256`, `claim.worklistArtifactSetSha256`, included rules,
+target precision, confidence, blocking severities, and repository contribution
+limit. The pre-label digest binds the corpus, report, findings, sampling,
+manifests, and logs before labeling, excluding mutable labeling and bundle
+metadata files; the worklist digest binds the blind assignment set; the final
+artifact digest binds the labeled bundle. The claim evaluator recomputes every
+bundle and worklist file listed in `SHA256SUMS`; changing `labels.jsonl`,
+`study.json`, sampled findings, manifests, logs, worklist assignments, or the
+worklist manifest after sealing makes the claim invalid even if `SHA256SUMS`
+itself is unchanged.
+
+The sealed bundle must also bind tool provenance: `study.environment` must match
+the pre-label-hashed `report.environment`, `study.environment.harnessCommit` is
+required, must be a 40-hex commit, and must match `claim.toolCommit`.
+`study.environment.harnessDirty` must be explicitly `false`; dirty, rewritten, or
+ambiguous harness evidence cannot support a pass decision.
+
+`precision:claim:preflight` verifies the same claim-binding fields before it can
+return `claimReady: true`; it recomputes the files listed in the bundle and
+worklist `SHA256SUMS`, recomputes the pre-label artifact digest, rejects
+symlinked sealed artifacts, and treats missing or mismatched `toolCommit`,
+`artifactSetSha256`, `preLabelArtifactSetSha256`, or
+`worklistArtifactSetSha256` as outside pass-eligible claim mode.
 
 A `pass` decision requires all of these to meet the requested threshold:
 
@@ -457,12 +530,18 @@ A `pass` decision requires all of these to meet the requested threshold:
 - every included rule's lower bound;
 - repository macro observed precision;
 - every repository's observed blocking precision;
+- labels bound to a sealed blind-assignment worklist;
 - no design warnings, including excessive single-repository contribution.
 
 If any gate fails, the result is `insufficient_evidence` when the evidence is
 well-formed, or `invalid` when the protocol, bundle, hashing, or label process
 is malformed. This is intentional: a small or skewed perfect sample must not be
 reported as 99% precision.
+
+Worklist v1 binds independent blind labels only. If independent labels disagree,
+do not use an unsealed adjudication row for a public claim; either report the
+study as unresolved/diagnostic or create a later protocol with sealed
+adjudication provenance.
 
 For example, the default bundle sampling plan is equivalent to:
 
@@ -553,6 +632,9 @@ Before looking at confirmation results, write a protocol file:
     "toolCommit": "0123456789abcdef0123456789abcdef01234567",
     "targetPopulation": "reviewed TS/JS workspace repositories",
     "supportedSyntaxProfile": "ts-js-supported-v1",
+    "preLabelArtifactSetSha256": "replace-with-pre-label-artifact-set-sha256",
+    "artifactSetSha256": "replace-with-labeled-bundle-SHA256SUMS-sha256",
+    "worklistArtifactSetSha256": "replace-with-worklist-SHA256SUMS-sha256",
     "includedRules": [
       "CELLFENCE_PRIVATE_IMPORT",
       "CELLFENCE_UNDECLARED_CONSUMER"
@@ -580,8 +662,9 @@ Then evaluate the labeled bundle:
 
 ```bash
 npm run research:claim -- \
-  --bundle reports/corpus/ts-js-confirmation-v1-bundle \
+  --bundle reports/corpus/ts-js-confirmation-v1-labeled-bundle \
   --protocol docs/research/protocols/ts-js-confirmation-v1.json \
+  --worklist reports/corpus/ts-js-confirmation-v1-worklist \
   --out reports/corpus/ts-js-confirmation-v1-claim.json
 ```
 

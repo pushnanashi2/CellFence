@@ -32,8 +32,12 @@ test("precision pipeline smoke builds, labels, validates, and reports insufficie
     assert.equal(report.decision.observedBlockingPrecision, 1);
     assert.match(report.artifactSetSha256, /^[a-f0-9]{64}$/);
     assert.match(report.preLabelArtifactSetSha256, /^[a-f0-9]{64}$/);
+    assert.match(report.worklistArtifactSetSha256, /^[a-f0-9]{64}$/);
     assert.notEqual(report.preLabelArtifactSetSha256, report.artifactSetSha256);
     assert.equal(fs.existsSync(path.join(report.bundleDir, "SHA256SUMS")), true);
+    assert.equal(fs.existsSync(path.join(report.worklistDir, "SHA256SUMS")), true);
+    assert.equal(report.worklistSummary.selectedFindings, 3);
+    assert.equal(report.worklistSummary.assignments, 6);
     assert.equal(fs.existsSync(report.reviewedCorpusReportPath), true);
     assert.equal(fs.existsSync(report.labelReadinessPath), true);
     const labelReadiness = JSON.parse(fs.readFileSync(report.labelReadinessPath, "utf8"));
@@ -42,6 +46,7 @@ test("precision pipeline smoke builds, labels, validates, and reports insufficie
     const protocol = JSON.parse(fs.readFileSync(report.protocolPath, "utf8"));
     assert.equal(protocol.claim.artifactSetSha256, report.artifactSetSha256);
     assert.equal(protocol.claim.preLabelArtifactSetSha256, report.preLabelArtifactSetSha256);
+    assert.equal(protocol.claim.worklistArtifactSetSha256, report.worklistArtifactSetSha256);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

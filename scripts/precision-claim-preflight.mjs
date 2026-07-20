@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isAdjudication, labelRaterType, posixify, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const reportSchemaVersion = "cellfence.precision-claim-preflight.v1";
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
@@ -10,13 +11,33 @@ const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
+const allowedLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review", "invalid_setup", "out_of_scope"]);
 const blockingDenominatorLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review"]);
 const blockingSuccessLabels = new Set(["true_positive"]);
 const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
+const labelAllowedKeys = new Set([
+  "schemaVersion",
+  "studyId",
+  "findingId",
+  "rater",
+  "raterType",
+  "raterClass",
+  "role",
+  "round",
+  "assignmentId",
+  "evidencePackageId",
+  "sawPeerLabels",
+  "sourceBundleContainsLabels",
+  "claimUse",
+  "label",
+  "rationale",
+  "adjudication",
+  "adjudicated",
+]);
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-claim-preflight.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--out report.json]
+  node scripts/precision-claim-preflight.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--worklist reports/corpus/id-worklist] [--out report.json]
 
 Reports whether a sealed precision bundle has enough sampled, reviewed,
 balanced, independently labeled evidence to attempt the requested claim. This is
@@ -26,7 +47,7 @@ malformed.`);
 }
 
 function parseArgs(argv) {
-  const parsed = { bundleDir: "", protocolPath: "", outPath: "" };
+  const parsed = { bundleDir: "", protocolPath: "", worklistDir: "", outPath: "" };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--bundle") {
@@ -39,6 +60,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--protocol=")) {
       parsed.protocolPath = path.resolve(requireInlineValue(argument, "--protocol=", "--protocol"));
+    } else if (argument === "--worklist") {
+      parsed.worklistDir = path.resolve(requireValue(argv, index, "--worklist"));
+      index += 1;
+    } else if (argument.startsWith("--worklist=")) {
+      parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -95,8 +121,153 @@ function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
+function hashText(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function resolveBundleRelativePath(bundleDir, relativePath, issues, label) {
+  if (typeof relativePath !== "string" || relativePath.length === 0) {
+    issues.push(`${label} is missing`);
+    return null;
+  }
+  const normalized = posixify(relativePath);
+  const segments = normalized.split("/");
+  if (
+    relativePath.includes("\0")
+    || path.isAbsolute(relativePath)
+    || segments.includes("")
+    || segments.includes(".")
+    || segments.includes("..")
+  ) {
+    issues.push(`${label} has unsafe bundle path: ${relativePath}`);
+    return null;
+  }
+  const bundleRoot = path.resolve(bundleDir);
+  const resolved = path.resolve(bundleRoot, relativePath);
+  const lexicalRelative = path.relative(bundleRoot, resolved);
+  if (lexicalRelative === "" || lexicalRelative.startsWith("..") || path.isAbsolute(lexicalRelative)) {
+    issues.push(`${label} escapes bundle root: ${relativePath}`);
+    return null;
+  }
+  if (fs.existsSync(resolved)) {
+    const realRoot = fs.realpathSync.native(bundleRoot);
+    const realResolved = fs.realpathSync.native(resolved);
+    const realRelative = path.relative(realRoot, realResolved);
+    if (realRelative === "" || realRelative.startsWith("..") || path.isAbsolute(realRelative)) {
+      issues.push(`${label} resolves outside bundle root: ${relativePath}`);
+      return null;
+    }
+  }
+  return resolved;
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
+function canonicalJson(value) {
+  return JSON.stringify(canonicalize(value));
+}
+
+function listFilesRecursive(baseDir, issues = [], rootDir = baseDir) {
+  if (!fs.existsSync(baseDir)) return [];
+  const entries = [];
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    const fullPath = path.join(baseDir, entry.name);
+    if (entry.isSymbolicLink()) {
+      issues.push(`bundle contains symlink: ${posixify(path.relative(rootDir, fullPath))}`);
+    } else if (entry.isDirectory()) {
+      entries.push(...listFilesRecursive(fullPath, issues, rootDir));
+    } else if (entry.isFile()) {
+      entries.push(fullPath);
+    }
+  }
+  return entries.sort((left, right) => posixify(path.relative(rootDir, left)).localeCompare(posixify(path.relative(rootDir, right))));
+}
+
+function readSha256Sums(bundleDir, issues) {
+  const sumsPath = path.join(bundleDir, "SHA256SUMS");
+  if (!fs.existsSync(sumsPath)) {
+    issues.push("bundle SHA256SUMS is missing");
+    return new Map();
+  }
+  const sums = new Map();
+  for (const [index, line] of fs.readFileSync(sumsPath, "utf8").split(/\r?\n/).entries()) {
+    if (!line.trim()) continue;
+    const match = /^([a-f0-9]{64}) {2}(.+)$/.exec(line);
+    if (!match) {
+      issues.push(`bundle SHA256SUMS:${index + 1} is malformed`);
+      continue;
+    }
+    const relativePath = match[2];
+    if (sums.has(relativePath)) issues.push(`bundle SHA256SUMS:${index + 1} duplicates ${relativePath}`);
+    const segments = posixify(relativePath).split("/");
+    if (
+      relativePath.length === 0
+      || relativePath.includes("\0")
+      || path.isAbsolute(relativePath)
+      || segments.includes("")
+      || segments.includes(".")
+      || segments.includes("..")
+      || relativePath === "SHA256SUMS"
+    ) {
+      issues.push(`bundle SHA256SUMS:${index + 1} has unsafe path ${relativePath}`);
+    }
+    sums.set(relativePath, match[1]);
+  }
+  return sums;
+}
+
+function validateBundleSha256Sums(bundleDir, issues) {
+  const expected = readSha256Sums(bundleDir, issues);
+  const actualFiles = listFilesRecursive(bundleDir, issues)
+    .filter((filePath) => path.basename(filePath) !== "SHA256SUMS")
+    .map((filePath) => posixify(path.relative(bundleDir, filePath)))
+    .sort();
+  const expectedFiles = [...expected.keys()].sort();
+  if (JSON.stringify(actualFiles) !== JSON.stringify(expectedFiles)) {
+    issues.push("bundle SHA256SUMS file list does not match bundle contents");
+    return;
+  }
+  for (const relativePath of actualFiles) {
+    const actualHash = hashFile(path.join(bundleDir, relativePath));
+    if (actualHash !== expected.get(relativePath)) {
+      issues.push(`bundle SHA256 mismatch for ${relativePath}`);
+    }
+  }
+}
+
+function preLabelArtifactSetSha256(bundleDir) {
+  const excluded = new Set(["SHA256SUMS", "labels.jsonl", "study.json"]);
+  const artifacts = listFilesRecursive(bundleDir)
+    .map((filePath) => posixify(path.relative(bundleDir, filePath)))
+    .filter((relativePath) => !excluded.has(relativePath))
+    .sort()
+    .map((relativePath) => ({
+      path: relativePath,
+      sha256: hashFile(path.join(bundleDir, relativePath)),
+    }));
+  return hashText(canonicalJson(artifacts));
+}
+
+
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateLabelShape(label, line, issues) {
+  if (!isRecord(label)) {
+    issues.push(`labels.jsonl:${line} must be an object`);
+    return false;
+  }
+  for (const key of Object.keys(label)) {
+    if (!labelAllowedKeys.has(key)) issues.push(`labels.jsonl:${line} has unexpected field ${key}`);
+  }
+  return true;
 }
 
 function parseUnitInterval(value, label, issues) {
@@ -123,7 +294,19 @@ function normalizeProtocol(protocol, issues) {
   if (protocol.schemaVersion !== protocolSchemaVersion) issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
   const claim = protocolClaim(protocol);
   const includedRules = claim.includedRules || protocol.includedRules;
+  const toolCommit = claim.toolCommit || protocol.toolCommit || null;
+  const artifactSetSha256 = claim.artifactSetSha256 || protocol.artifactSetSha256 || null;
+  const preLabelArtifactSetSha256 = claim.preLabelArtifactSetSha256 || protocol.preLabelArtifactSetSha256 || null;
   if (!protocol.studyId || typeof protocol.studyId !== "string") issues.push("protocol studyId is required");
+  if (toolCommit !== null && !/^[a-f0-9]{40}$/.test(String(toolCommit))) {
+    issues.push("claim.toolCommit must be a lowercase 40-hex commit when present");
+  }
+  if (artifactSetSha256 !== null && !/^[a-f0-9]{64}$/.test(String(artifactSetSha256))) {
+    issues.push("claim.artifactSetSha256 must be a lowercase 64-hex SHA-256 digest when present");
+  }
+  if (preLabelArtifactSetSha256 !== null && !/^[a-f0-9]{64}$/.test(String(preLabelArtifactSetSha256))) {
+    issues.push("claim.preLabelArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest when present");
+  }
   if (!Array.isArray(includedRules) || includedRules.length === 0 || includedRules.some((ruleId) => typeof ruleId !== "string" || ruleId.length === 0)) {
     issues.push("protocol claim.includedRules must be a non-empty string array");
   }
@@ -149,6 +332,10 @@ function normalizeProtocol(protocol, issues) {
   if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
   const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
   if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const worklistArtifactSetSha256 = claim.worklistArtifactSetSha256 || labelingPlan.worklistArtifactSetSha256 || protocol.worklistArtifactSetSha256 || null;
+  if (worklistArtifactSetSha256 !== null && !/^[a-f0-9]{64}$/.test(String(worklistArtifactSetSha256))) {
+    issues.push("claim.worklistArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest when present");
+  }
   const manifestReviewPlan = protocol.manifestReviewPlan || {};
   const requireExternalManifestReview = manifestReviewPlan.requireExternalAttestations ?? false;
   if (typeof requireExternalManifestReview !== "boolean") {
@@ -169,9 +356,49 @@ function normalizeProtocol(protocol, issues) {
     allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
     allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
     requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    worklistArtifactSetSha256,
+    toolCommit,
+    artifactSetSha256,
+    preLabelArtifactSetSha256,
     requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
     allowedManifestReviewerTypes: Array.isArray(allowedManifestReviewerTypes) ? allowedManifestReviewerTypes : ["human", "organization"],
   };
+}
+
+function validateClaimBinding(bundleDir, study, protocol, issues) {
+  if (!protocol.toolCommit) issues.push("protocol claim.toolCommit is required");
+  if (!protocol.artifactSetSha256) issues.push("protocol claim.artifactSetSha256 is required");
+  if (!protocol.preLabelArtifactSetSha256) issues.push("protocol claim.preLabelArtifactSetSha256 is required");
+  const computedPreLabelArtifactSetSha256 = preLabelArtifactSetSha256(bundleDir);
+  if (!study.preregistration?.preLabelArtifactSetSha256) {
+    issues.push("study.preregistration.preLabelArtifactSetSha256 is required");
+  } else if (study.preregistration.preLabelArtifactSetSha256 !== computedPreLabelArtifactSetSha256) {
+    issues.push("study.preregistration.preLabelArtifactSetSha256 does not match bundle artifacts");
+  }
+  const sumsPath = path.join(bundleDir, "SHA256SUMS");
+  if (fs.existsSync(sumsPath) && protocol.artifactSetSha256 && protocol.artifactSetSha256 !== hashFile(sumsPath)) {
+    issues.push("protocol artifactSetSha256 does not match bundle SHA256SUMS");
+  }
+  if (protocol.preLabelArtifactSetSha256 && study.preregistration?.preLabelArtifactSetSha256 !== protocol.preLabelArtifactSetSha256) {
+    issues.push("protocol preLabelArtifactSetSha256 does not match bundle preregistration.preLabelArtifactSetSha256");
+  }
+  if (!study.environment?.harnessCommit) {
+    issues.push("bundle study.environment.harnessCommit is required");
+  } else if (!/^[a-f0-9]{40}$/.test(String(study.environment.harnessCommit))) {
+    issues.push("bundle study.environment.harnessCommit must be a lowercase 40-hex commit");
+  } else if (protocol.toolCommit && protocol.toolCommit !== study.environment.harnessCommit) {
+    issues.push("protocol toolCommit does not match bundle environment.harnessCommit");
+  }
+}
+
+function validateStudyEnvironmentBinding(study, report, issues) {
+  if (!report) {
+    issues.push("bundle report.json is required to verify sealed study.environment");
+    return;
+  }
+  if (canonicalJson(study.environment || {}) !== canonicalJson(report.environment || {})) {
+    issues.push("study.environment does not match sealed report.environment");
+  }
 }
 
 function groupBy(values, keyFn) {
@@ -243,10 +470,6 @@ function additionalTruePositiveTrialsNeeded(successes, trials, minimumPrecision,
   return null;
 }
 
-function isAdjudication(label) {
-  return label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true;
-}
-
 function finalLabelForFinding(finding, labels) {
   const independent = labels.filter((label) => !isAdjudication(label));
   const adjudications = labels.filter(isAdjudication);
@@ -300,30 +523,26 @@ function raterSummary(labels) {
   for (const label of labels) {
     const existing = raters.get(label.rater) || { labels: 0, nonHuman: false };
     existing.labels += 1;
-    existing.nonHuman = existing.nonHuman || nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(label.raterType || label.raterClass || "");
+    existing.nonHuman = existing.nonHuman || nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
     raters.set(label.rater, existing);
   }
   return {
     totalRaters: raters.size,
     nonHumanRaters: [...raters.values()].filter((entry) => entry.nonHuman).length,
-    missingRaterClassLabels: labels.filter((label) => !label.raterType && !label.raterClass).length,
+    missingRaterClassLabels: labels.filter((label) => !labelRaterType(label)).length,
     raters: Object.fromEntries([...raters.entries()].sort(([left], [right]) => left.localeCompare(right))),
   };
 }
 
-function raterType(label) {
-  return label.raterType || label.raterClass || "";
-}
-
 function validateLabelRaterProvenance(labels, protocol, issues) {
   const allowed = new Set(protocol.allowedRaterTypes);
-  const missingType = labels.filter((label) => !raterType(label)).length;
+  const missingType = labels.filter((label) => !labelRaterType(label)).length;
   if ((protocol.requireKnownRaterType || allowed.size > 0) && missingType > 0) {
     issues.push(`${missingType} labels are missing raterType/raterClass required by the protocol`);
   }
   if (allowed.size > 0) {
     const disallowed = labels.filter((label) => {
-      const type = raterType(label);
+      const type = labelRaterType(label);
       return type && !allowed.has(type);
     });
     if (disallowed.length > 0) {
@@ -332,10 +551,53 @@ function validateLabelRaterProvenance(labels, protocol, issues) {
   }
   if (!protocol.allowNonHumanRaters) {
     const nonHumanLabels = labels.filter((label) => {
-      const type = raterType(label);
+      const type = labelRaterType(label);
       return nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(type);
     });
     if (nonHumanLabels.length > 0) issues.push(`${nonHumanLabels.length} labels appear to be non-human but protocol disallows non-human raters`);
+  }
+}
+
+function validateLabelClaimUse(labels, issues) {
+  for (const [index, label] of labels.entries()) {
+    if (isAdjudication(label)) continue;
+    const line = index + 1;
+    if (label.claimUse && label.claimUse !== "blind_labeling") {
+      issues.push(`labels.jsonl:${line} is marked ${label.claimUse} and cannot support a claim`);
+    }
+    if (label.sourceBundleContainsLabels === true) {
+      issues.push(`labels.jsonl:${line} came from a diagnostic label-bearing source bundle`);
+    }
+  }
+}
+
+function validateLabelRows(labels, studyId, knownFindingIds, issues) {
+  const seen = new Set();
+  for (const [index, label] of labels.entries()) {
+    const line = index + 1;
+    if (!validateLabelShape(label, line, issues)) continue;
+    validateClaimLabelMetadata(label, line, issues);
+    if (label.schemaVersion !== "cellfence.corpus-label.v1") issues.push(`labels.jsonl:${line} has unexpected schemaVersion`);
+    if (label.studyId !== studyId) issues.push(`labels.jsonl:${line} has unexpected studyId`);
+    if (!knownFindingIds.has(label.findingId)) issues.push(`labels.jsonl:${line} references unknown findingId ${label.findingId}`);
+    if (!allowedLabels.has(label.label)) issues.push(`labels.jsonl:${line} has unknown label ${label.label}`);
+    if (!label.rater || typeof label.rater !== "string") issues.push(`labels.jsonl:${line} is missing rater`);
+    if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
+      issues.push(`labels.jsonl:${line} is missing rationale`);
+    }
+    if (!label.assignmentId || typeof label.assignmentId !== "string") issues.push(`labels.jsonl:${line} is missing assignmentId`);
+    if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") issues.push(`labels.jsonl:${line} is missing evidencePackageId`);
+    if (isAdjudication(label)) {
+      if (label.round && label.round !== "adjudication") issues.push(`labels.jsonl:${line} adjudication label must use round=adjudication`);
+    } else {
+      if (label.round !== "blind_first" && label.round !== "blind_second") {
+        issues.push(`labels.jsonl:${line} independent label must use round=blind_first or round=blind_second`);
+      }
+      if (label.sawPeerLabels !== false) issues.push(`labels.jsonl:${line} independent label must declare sawPeerLabels=false`);
+    }
+    const duplicateKey = `${label.findingId}\0${label.rater}\0${isAdjudication(label) ? "adjudication" : "independent"}`;
+    if (seen.has(duplicateKey)) issues.push(`labels.jsonl:${line} duplicates finding/rater/role label`);
+    seen.add(duplicateKey);
   }
 }
 
@@ -347,14 +609,14 @@ function reviewAttestations(manifest) {
   return [];
 }
 
-function manifestCopiesBySubject(study, bundleDir) {
+function manifestCopiesBySubject(study, bundleDir, issues) {
   const copies = new Map();
   for (const copy of study.manifestCopies || []) {
     if (!copy?.subjectId || !copy?.path) continue;
-    const absolutePath = path.join(bundleDir, copy.path);
+    const absolutePath = resolveBundleRelativePath(bundleDir, copy.path, issues, `manifest copy path ${copy.path}`);
     copies.set(copy.subjectId, {
       ...copy,
-      actualSha256: fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
+      actualSha256: absolutePath && fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
     });
   }
   return copies;
@@ -363,7 +625,7 @@ function manifestCopiesBySubject(study, bundleDir) {
 function validateManifestReviewProvenance(corpus, study, bundleDir, protocol, issues) {
   if (!protocol.requireExternalManifestReview) return;
   const allowedReviewerTypes = new Set(protocol.allowedManifestReviewerTypes);
-  const manifestCopies = manifestCopiesBySubject(study, bundleDir);
+  const manifestCopies = manifestCopiesBySubject(study, bundleDir, issues);
   for (const subject of corpus.subjects || []) {
     const id = subject?.id || "subject";
     const manifest = subject?.manifest || {};
@@ -466,18 +728,51 @@ function evaluatePreflight(options) {
   const warnings = [];
   const protocolRaw = readJson(options.protocolPath);
   const protocol = normalizeProtocol(protocolRaw, issues);
+  validateBundleSha256Sums(options.bundleDir, issues);
   const study = readJson(path.join(options.bundleDir, "study.json"));
+  const reportPath = path.join(options.bundleDir, "report.json");
+  const report = fs.existsSync(reportPath) ? readJson(reportPath) : null;
   const corpus = readJson(path.join(options.bundleDir, "corpus.json"));
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
+  let worklistVerification = null;
 
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") issues.push("study.json has unexpected schemaVersion");
   if (sampling.schemaVersion !== "cellfence.corpus-sampling.v1") issues.push("sampling.json has unexpected schemaVersion");
+  if (report && report.schemaVersion !== "cellfence.corpus-study.v1") issues.push("report.json has unexpected schemaVersion");
   if (study.studyId !== protocol.studyId) issues.push(`bundle studyId ${study.studyId} does not match protocol studyId ${protocol.studyId}`);
-  if (study.environment?.harnessDirty === true) gateFailures.push("bundle was produced from a dirty CellFence worktree");
-  if (study.environment && study.environment.harnessDirty !== false) warnings.push("study.environment.harnessDirty is not explicitly false");
+  validateStudyEnvironmentBinding(study, report, issues);
+  validateClaimBinding(options.bundleDir, study, protocol, issues);
+  if (study.environment?.harnessDirty === true) {
+    gateFailures.push("bundle was produced from a dirty CellFence worktree");
+  } else if (study.environment?.harnessDirty !== false) {
+    gateFailures.push("bundle must declare study.environment.harnessDirty=false");
+  }
+  validateLabelRows(labels, protocol.studyId, new Set(findings.map((finding) => finding.findingId)), issues);
   validateLabelRaterProvenance(labels, protocol, issues);
+  validateLabelClaimUse(labels, issues);
+  if (options.worklistDir || protocol.worklistArtifactSetSha256) {
+    if (!options.worklistDir) {
+      issues.push("protocol claim.worklistArtifactSetSha256 requires --worklist");
+    } else if (!protocol.worklistArtifactSetSha256) {
+      issues.push("--worklist requires protocol claim.worklistArtifactSetSha256");
+    } else {
+      worklistVerification = verifyWorklistLabels(options.worklistDir, labels, {
+        bundleDir: options.bundleDir,
+        findings,
+        studyId: protocol.studyId,
+        expectedArtifactSetSha256: protocol.worklistArtifactSetSha256,
+        preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
+      });
+      issues.push(...worklistVerification.issues.map((issue) => `worklist: ${issue}`));
+    }
+  }
+  if (!worklistVerification) {
+    gateFailures.push("sealed worklist binding is required for pass-eligible precision claims");
+  } else if (labels.some(isAdjudication)) {
+    issues.push("worklist-bound precision claims require sealed adjudication provenance; worklist v1 supports independent labels only");
+  }
   validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
   const selected = selectedFindings(findings, sampling, protocol);
@@ -535,9 +830,19 @@ function evaluatePreflight(options) {
       allowedRaterTypes: protocol.allowedRaterTypes,
       allowNonHumanRaters: protocol.allowNonHumanRaters,
       requireKnownRaterType: protocol.requireKnownRaterType,
+      worklistArtifactSetSha256: protocol.worklistArtifactSetSha256,
+      toolCommit: protocol.toolCommit,
+      artifactSetSha256: protocol.artifactSetSha256,
+      preLabelArtifactSetSha256: protocol.preLabelArtifactSetSha256,
       requireExternalManifestReview: protocol.requireExternalManifestReview,
       allowedManifestReviewerTypes: protocol.allowedManifestReviewerTypes,
     },
+    worklist: worklistVerification ? {
+      path: posixify(options.worklistDir),
+      artifactSetSha256: worklistVerification.artifactSetSha256,
+      assignments: worklistVerification.assignments,
+      issues: worklistVerification.issues.length,
+    } : null,
     summary: {
       totalFindings: findings.length,
       sampledFindings: sampling.sampledFindingIds?.length ?? null,

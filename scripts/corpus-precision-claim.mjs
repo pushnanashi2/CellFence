@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { validateBundle as validateEvidenceBundle } from "./corpus-evidence-bundle.mjs";
+import { isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
 const reportSchemaVersion = "cellfence.precision-claim-report.v1";
@@ -26,10 +27,29 @@ const blockingDenominatorLabels = new Set([
   "needs_policy",
   "needs_review",
 ]);
+const labelAllowedKeys = new Set([
+  "schemaVersion",
+  "studyId",
+  "findingId",
+  "rater",
+  "raterType",
+  "raterClass",
+  "role",
+  "round",
+  "assignmentId",
+  "evidencePackageId",
+  "sawPeerLabels",
+  "sourceBundleContainsLabels",
+  "claimUse",
+  "label",
+  "rationale",
+  "adjudication",
+  "adjudicated",
+]);
 
 function usage() {
   console.error(`Usage:
-  node scripts/corpus-precision-claim.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--out report.json]
+  node scripts/corpus-precision-claim.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--worklist reports/corpus/id-worklist] [--out report.json]
 
 Evaluates a labeled CellFence evidence bundle against a pre-registered precision
 claim protocol. Exit 0 means the claim passes, exit 1 means the evidence is
@@ -41,6 +61,7 @@ function parseArgs(argv) {
   const parsed = {
     bundleDir: "",
     protocolPath: "",
+    worklistDir: "",
     outPath: "",
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -55,6 +76,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--protocol=")) {
       parsed.protocolPath = path.resolve(requireInlineValue(argument, "--protocol=", "--protocol"));
+    } else if (argument === "--worklist") {
+      parsed.worklistDir = path.resolve(requireValue(argv, index, "--worklist"));
+      index += 1;
+    } else if (argument.startsWith("--worklist=")) {
+      parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -119,8 +145,55 @@ function posixify(value) {
   return String(value).replace(/\\/g, "/").split(path.sep).join("/");
 }
 
+function resolveBundleRelativePath(bundleDir, relativePath, issues, label) {
+  if (typeof relativePath !== "string" || relativePath.length === 0) {
+    issues.push(`${label} is missing`);
+    return null;
+  }
+  const normalized = posixify(relativePath);
+  const segments = normalized.split("/");
+  if (
+    relativePath.includes("\0")
+    || path.isAbsolute(relativePath)
+    || segments.includes("")
+    || segments.includes(".")
+    || segments.includes("..")
+  ) {
+    issues.push(`${label} has unsafe bundle path: ${relativePath}`);
+    return null;
+  }
+  const bundleRoot = path.resolve(bundleDir);
+  const resolved = path.resolve(bundleRoot, relativePath);
+  const lexicalRelative = path.relative(bundleRoot, resolved);
+  if (lexicalRelative === "" || lexicalRelative.startsWith("..") || path.isAbsolute(lexicalRelative)) {
+    issues.push(`${label} escapes bundle root: ${relativePath}`);
+    return null;
+  }
+  if (fs.existsSync(resolved)) {
+    const realRoot = fs.realpathSync.native(bundleRoot);
+    const realResolved = fs.realpathSync.native(resolved);
+    const realRelative = path.relative(realRoot, realResolved);
+    if (realRelative === "" || realRelative.startsWith("..") || path.isAbsolute(realRelative)) {
+      issues.push(`${label} resolves outside bundle root: ${relativePath}`);
+      return null;
+    }
+  }
+  return resolved;
+}
+
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateLabelShape(label, lineNumber, issues) {
+  if (!isRecord(label)) {
+    issues.push(`labels.jsonl:${lineNumber} must be an object`);
+    return false;
+  }
+  for (const key of Object.keys(label)) {
+    if (!labelAllowedKeys.has(key)) issues.push(`labels.jsonl:${lineNumber} has unexpected field ${key}`);
+  }
+  return true;
 }
 
 function parseUnitInterval(value, label, issues) {
@@ -174,6 +247,10 @@ function normalizeProtocol(protocol, issues) {
   if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
   const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
   if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const worklistArtifactSetSha256 = claim.worklistArtifactSetSha256 || labelingPlan.worklistArtifactSetSha256 || protocol.worklistArtifactSetSha256 || null;
+  if (worklistArtifactSetSha256 !== null && !/^[a-f0-9]{64}$/.test(String(worklistArtifactSetSha256))) {
+    issues.push("claim.worklistArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest when present");
+  }
   const manifestReviewPlan = protocol.manifestReviewPlan || {};
   const requireExternalManifestReview = manifestReviewPlan.requireExternalAttestations ?? false;
   if (typeof requireExternalManifestReview !== "boolean") {
@@ -209,6 +286,7 @@ function normalizeProtocol(protocol, issues) {
     allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
     allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
     requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    worklistArtifactSetSha256,
     requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
     allowedManifestReviewerTypes: Array.isArray(allowedManifestReviewerTypes) ? allowedManifestReviewerTypes : ["human", "organization"],
     maxRepositoryContribution: maxRepositoryContribution ?? defaultMaxRepositoryContribution,
@@ -235,14 +313,12 @@ function increment(counts, key) {
   counts[key] = (counts[key] || 0) + 1;
 }
 
-function isAdjudication(label) {
-  return label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true;
-}
-
 function validateLabelRows(labels, knownFindingIds, studyId, issues) {
   const seen = new Set();
   for (const [index, label] of labels.entries()) {
     const lineNumber = index + 1;
+    if (!validateLabelShape(label, lineNumber, issues)) continue;
+    validateClaimLabelMetadata(label, lineNumber, issues);
     if (label.schemaVersion !== "cellfence.corpus-label.v1") {
       issues.push(`labels.jsonl:${lineNumber} has unexpected schemaVersion`);
     }
@@ -267,6 +343,12 @@ function validateLabelRows(labels, knownFindingIds, studyId, issues) {
     if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") {
       issues.push(`labels.jsonl:${lineNumber} is missing evidencePackageId`);
     }
+    if (!isAdjudication(label) && label.claimUse && label.claimUse !== "blind_labeling") {
+      issues.push(`labels.jsonl:${lineNumber} is marked ${label.claimUse} and cannot support a claim`);
+    }
+    if (!isAdjudication(label) && label.sourceBundleContainsLabels === true) {
+      issues.push(`labels.jsonl:${lineNumber} came from a diagnostic label-bearing source bundle`);
+    }
     if (isAdjudication(label)) {
       if (label.round && label.round !== "adjudication") issues.push(`labels.jsonl:${lineNumber} adjudication label must use round=adjudication`);
     } else {
@@ -283,10 +365,6 @@ function validateLabelRows(labels, knownFindingIds, studyId, issues) {
     }
     seen.add(duplicateKey);
   }
-}
-
-function labelRaterType(label) {
-  return label.raterType || label.raterClass || "";
 }
 
 function validateLabelRaterProvenance(labels, protocol, issues) {
@@ -375,14 +453,19 @@ function finalLabelForFinding(finding, labels, protocol, issues) {
   };
 }
 
-function listFilesRecursive(baseDir) {
+function listFilesRecursive(baseDir, issues = null, rootDir = baseDir) {
   const entries = [];
   for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
     const fullPath = path.join(baseDir, entry.name);
-    if (entry.isDirectory()) entries.push(...listFilesRecursive(fullPath));
-    else if (entry.isFile()) entries.push(fullPath);
+    if (entry.isSymbolicLink()) {
+      if (issues) issues.push(`bundle contains symlink: ${posixify(path.relative(rootDir, fullPath))}`);
+    } else if (entry.isDirectory()) {
+      entries.push(...listFilesRecursive(fullPath, issues, rootDir));
+    } else if (entry.isFile()) {
+      entries.push(fullPath);
+    }
   }
-  return entries.sort((left, right) => posixify(path.relative(baseDir, left)).localeCompare(posixify(path.relative(baseDir, right))));
+  return entries.sort((left, right) => posixify(path.relative(rootDir, left)).localeCompare(posixify(path.relative(rootDir, right))));
 }
 
 function readSha256Sums(bundleDir, issues) {
@@ -399,15 +482,28 @@ function readSha256Sums(bundleDir, issues) {
       issues.push(`SHA256SUMS:${index + 1} is malformed`);
       continue;
     }
-    sums.set(match[2], match[1]);
+    const relativePath = match[2];
+    if (sums.has(relativePath)) issues.push(`SHA256SUMS:${index + 1} duplicates ${relativePath}`);
+    const segments = posixify(relativePath).split("/");
+    if (
+      relativePath.length === 0
+      || relativePath.includes("\0")
+      || path.isAbsolute(relativePath)
+      || segments.includes("")
+      || segments.includes(".")
+      || segments.includes("..")
+      || relativePath === "SHA256SUMS"
+    ) {
+      issues.push(`SHA256SUMS:${index + 1} has unsafe path ${relativePath}`);
+    }
+    sums.set(relativePath, match[1]);
   }
   return sums;
 }
 
 function validateSha256Sums(bundleDir, issues) {
   const expected = readSha256Sums(bundleDir, issues);
-  if (expected.size === 0) return;
-  const actualFiles = listFilesRecursive(bundleDir)
+  const actualFiles = listFilesRecursive(bundleDir, issues)
     .filter((filePath) => path.basename(filePath) !== "SHA256SUMS")
     .map((filePath) => posixify(path.relative(bundleDir, filePath)))
     .sort();
@@ -668,15 +764,15 @@ function validatePrecisionEligibility(findings, corpus, issues) {
   }
 }
 
-function manifestCopiesBySubject(study, bundleDir) {
+function manifestCopiesBySubject(study, bundleDir, issues) {
   const copies = new Map();
   for (const copy of study.manifestCopies || []) {
     if (!copy?.subjectId || !copy?.path) continue;
-    const absolutePath = path.join(bundleDir, copy.path);
+    const absolutePath = resolveBundleRelativePath(bundleDir, copy.path, issues, `manifest copy path ${copy.path}`);
     copies.set(copy.subjectId, {
       ...copy,
       absolutePath,
-      actualSha256: fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
+      actualSha256: absolutePath && fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
     });
   }
   return copies;
@@ -685,7 +781,7 @@ function manifestCopiesBySubject(study, bundleDir) {
 function validateManifestReviewProvenance(corpus, study, bundleDir, protocol, issues) {
   if (!protocol.requireExternalManifestReview) return;
   const allowedReviewerTypes = new Set(protocol.allowedManifestReviewerTypes);
-  const manifestCopies = manifestCopiesBySubject(study, bundleDir);
+  const manifestCopies = manifestCopiesBySubject(study, bundleDir, issues);
   for (const subject of corpus.subjects || []) {
     const id = subject?.id || "subject";
     const manifest = subject?.manifest || {};
@@ -745,6 +841,7 @@ function validateBundleHashes(bundleDir, protocol, warnings, issues) {
 
 function evaluateClaim(options) {
   const issues = [];
+  const gateFailures = [];
   const warnings = [];
   const protocolRaw = readJson(options.protocolPath);
   const protocol = normalizeProtocol(protocolRaw, issues);
@@ -760,6 +857,7 @@ function evaluateClaim(options) {
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
   const knownFindingIds = new Set(findings.map((finding) => finding.findingId));
   const artifactSetSha256 = validateBundleHashes(options.bundleDir, protocol, warnings, issues);
+  let worklistVerification = null;
 
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") issues.push("study.json has unexpected schemaVersion");
   if (sampling.schemaVersion !== "cellfence.corpus-sampling.v1") issues.push("sampling.json has unexpected schemaVersion");
@@ -770,8 +868,17 @@ function evaluateClaim(options) {
   if (protocol.preLabelArtifactSetSha256 && study.preregistration?.preLabelArtifactSetSha256 !== protocol.preLabelArtifactSetSha256) {
     issues.push("protocol preLabelArtifactSetSha256 does not match bundle preregistration.preLabelArtifactSetSha256");
   }
-  if (protocol.toolCommit && study.environment?.harnessCommit && protocol.toolCommit !== study.environment.harnessCommit) {
+  if (!study.environment?.harnessCommit) {
+    issues.push("bundle study.environment.harnessCommit is required");
+  } else if (!/^[a-f0-9]{40}$/.test(String(study.environment.harnessCommit))) {
+    issues.push("bundle study.environment.harnessCommit must be a lowercase 40-hex commit");
+  } else if (protocol.toolCommit && protocol.toolCommit !== study.environment.harnessCommit) {
     issues.push("protocol toolCommit does not match bundle environment.harnessCommit");
+  }
+  if (study.environment?.harnessDirty === true) {
+    gateFailures.push("bundle was produced from a dirty CellFence worktree");
+  } else if (study.environment?.harnessDirty !== false) {
+    gateFailures.push("bundle must declare study.environment.harnessDirty=false");
   }
   if (study.summary?.normalizedFindings !== undefined && study.summary.normalizedFindings !== findings.length) {
     issues.push("study.summary.normalizedFindings does not match findings.normalized.jsonl");
@@ -781,6 +888,27 @@ function evaluateClaim(options) {
   }
   validateLabelRows(labels, knownFindingIds, protocol.studyId, issues);
   validateLabelRaterProvenance(labels, protocol, issues);
+  if (options.worklistDir || protocol.worklistArtifactSetSha256) {
+    if (!options.worklistDir) {
+      issues.push("protocol claim.worklistArtifactSetSha256 requires --worklist");
+    } else if (!protocol.worklistArtifactSetSha256) {
+      issues.push("--worklist requires protocol claim.worklistArtifactSetSha256");
+    } else {
+      worklistVerification = verifyWorklistLabels(options.worklistDir, labels, {
+        bundleDir: options.bundleDir,
+        findings,
+        studyId: protocol.studyId,
+        expectedArtifactSetSha256: protocol.worklistArtifactSetSha256,
+        preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
+      });
+      issues.push(...worklistVerification.issues.map((issue) => `worklist: ${issue}`));
+    }
+  }
+  if (!worklistVerification) {
+    gateFailures.push("sealed worklist binding is required for pass-eligible precision claims");
+  } else if (labels.some(isAdjudication)) {
+    issues.push("worklist-bound precision claims require sealed adjudication provenance; worklist v1 supports independent labels only");
+  }
   validatePrecisionEligibility(findings, corpus, issues);
   validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
@@ -797,7 +925,6 @@ function evaluateClaim(options) {
   const repositories = repositoryMetrics(finalLabels, protocol.confidence);
   const loo = leaveOneRepositoryOut(finalLabels, protocol.confidence);
   const requiredZeroFp = requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
-  const gateFailures = [];
 
   if (includedFindings.length === 0) {
     issues.push("no sampled precision-eligible findings match the included rules and blocking severities");
@@ -864,6 +991,7 @@ function evaluateClaim(options) {
       allowedRaterTypes: protocol.allowedRaterTypes,
       allowNonHumanRaters: protocol.allowNonHumanRaters,
       requireKnownRaterType: protocol.requireKnownRaterType,
+      worklistArtifactSetSha256: protocol.worklistArtifactSetSha256,
       requireExternalManifestReview: protocol.requireExternalManifestReview,
       allowedManifestReviewerTypes: protocol.allowedManifestReviewerTypes,
       maxRepositoryContribution: protocol.maxRepositoryContribution,
@@ -881,6 +1009,12 @@ function evaluateClaim(options) {
     labelQuality: {
       labels: labels.length,
       finalLabels: finalLabels.length,
+      worklist: worklistVerification ? {
+        path: posixify(options.worklistDir),
+        artifactSetSha256: worklistVerification.artifactSetSha256,
+        assignments: worklistVerification.assignments,
+        issues: worklistVerification.issues.length,
+      } : null,
       issues,
       warnings,
     },

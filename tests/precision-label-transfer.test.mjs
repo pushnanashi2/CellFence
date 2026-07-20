@@ -81,7 +81,12 @@ test("precision label transfer rewrites study ids and drops disappeared findings
     const kept = finding("sha256:111111");
     const stale = finding("sha256:222222");
     const sourceBundle = createBundle(tempDir, "source-study", [kept, stale], [
-      label(kept.findingId, "reviewer-a", "blind_first"),
+      {
+        ...label(kept.findingId, "reviewer-a", "blind_first"),
+        confidence: 0.9,
+        method: "historical note",
+        transferredFrom: { studyId: "older-study" },
+      },
       label(kept.findingId, "reviewer-b", "blind_second"),
       label(stale.findingId, "reviewer-a", "blind_first"),
     ]);
@@ -104,9 +109,12 @@ test("precision label transfer rewrites study ids and drops disappeared findings
     const labels = readJsonl(labelsPath);
     assert.equal(labels.length, 2);
     assert.equal(labels[0].studyId, "target-study");
-    assert.equal(labels[0].transferredFrom.studyId, "source-study");
+    assert.equal(labels[0].transferredFrom, undefined);
+    assert.equal(labels[0].confidence, undefined);
+    assert.equal(labels[0].method, undefined);
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     assert.equal(report.ok, true);
+    assert.equal(report.transferredLabelSources[0].sourceStudyId, "source-study");
     assert.equal(report.summary.staleSourceFindings, 1);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });

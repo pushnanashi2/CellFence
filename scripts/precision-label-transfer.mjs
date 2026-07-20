@@ -120,6 +120,30 @@ function groupBy(values, keyFn) {
   return groups;
 }
 
+const labelAllowedKeys = new Set([
+  "schemaVersion",
+  "studyId",
+  "findingId",
+  "rater",
+  "raterType",
+  "raterClass",
+  "role",
+  "round",
+  "assignmentId",
+  "evidencePackageId",
+  "sawPeerLabels",
+  "sourceBundleContainsLabels",
+  "claimUse",
+  "label",
+  "rationale",
+  "adjudication",
+  "adjudicated",
+]);
+
+function sanitizeLabel(label) {
+  return Object.fromEntries(Object.entries(label).filter(([key]) => labelAllowedKeys.has(key)));
+}
+
 function increment(counts, key) {
   counts[key] = (counts[key] || 0) + 1;
 }
@@ -150,6 +174,7 @@ function transferLabels(options) {
   const targetIds = new Set(targetFindings.map((finding) => finding.findingId));
   const sourceLabelsByFinding = groupBy(source.labels, (label) => label.findingId);
   const transferredLabels = [];
+  const transferredLabelSources = [];
   const transferredKeys = new Set();
   const transferredFindingIds = new Set();
   const missingTargetFindings = [];
@@ -163,14 +188,18 @@ function transferLabels(options) {
     transferredFindingIds.add(finding.findingId);
     for (const label of labels) {
       const nextLabel = {
-        ...withDefaultRaterType(label, options.defaultRaterType),
+        ...sanitizeLabel(withDefaultRaterType(label, options.defaultRaterType)),
         studyId: target.study.studyId,
-        transferredFrom: {
-          studyId: source.study.studyId,
-          bundle: options.sourceBundle,
-        },
       };
       transferredLabels.push(nextLabel);
+      transferredLabelSources.push({
+        findingId: nextLabel.findingId,
+        rater: nextLabel.rater,
+        round: nextLabel.round,
+        source: "transfer",
+        sourceStudyId: source.study.studyId,
+        sourceBundle: options.sourceBundle,
+      });
       transferredKeys.add(labelKey(nextLabel));
     }
   }
@@ -184,15 +213,21 @@ function transferLabels(options) {
         continue;
       }
       const nextLabel = {
-        ...withDefaultRaterType(label, options.defaultRaterType),
+        ...sanitizeLabel(withDefaultRaterType(label, options.defaultRaterType)),
         studyId: target.study.studyId,
-        supplementalFrom: supplementalPath,
       };
       const key = labelKey(nextLabel);
       if (transferredKeys.has(key)) {
         throw new Error(`supplemental label duplicates transferred label for ${nextLabel.findingId}/${nextLabel.rater}`);
       }
       supplementalLabels.push(nextLabel);
+      transferredLabelSources.push({
+        findingId: nextLabel.findingId,
+        rater: nextLabel.rater,
+        round: nextLabel.round,
+        source: "supplemental",
+        sourcePath: supplementalPath,
+      });
       transferredKeys.add(key);
       transferredFindingIds.add(nextLabel.findingId);
     }
@@ -240,6 +275,7 @@ function transferLabels(options) {
       staleSourceFindings: staleSourceFindingIds.size,
     },
     transferredByRule,
+    transferredLabelSources,
     missingByRule,
     droppedSupplementalLabels,
     missingTargetFindings: stillMissingTargetFindings.map((finding) => ({

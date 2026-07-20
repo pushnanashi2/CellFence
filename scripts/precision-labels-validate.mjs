@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const allowedLabels = new Set([
   "true_positive",
@@ -11,9 +12,28 @@ const allowedLabels = new Set([
   "out_of_scope",
 ]);
 const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
+const labelAllowedKeys = new Set([
+  "schemaVersion",
+  "studyId",
+  "findingId",
+  "rater",
+  "raterType",
+  "raterClass",
+  "role",
+  "round",
+  "assignmentId",
+  "evidencePackageId",
+  "sawPeerLabels",
+  "sourceBundleContainsLabels",
+  "claimUse",
+  "label",
+  "rationale",
+  "adjudication",
+  "adjudicated",
+]);
 
 function usage() {
-  console.error(`Usage: node scripts/precision-labels-validate.mjs --bundle reports/corpus/id-bundle [--min-raters 2] [--out report.json]
+  console.error(`Usage: node scripts/precision-labels-validate.mjs --bundle reports/corpus/id-bundle [--worklist reports/corpus/id-worklist] [--min-raters 2] [--out report.json]
 
 Validates labeling readiness before a precision claim: every sampled,
 precision-eligible finding needs independent labels, disagreements need a
@@ -23,6 +43,7 @@ separate adjudicator, and label rows must be schema-valid.`);
 function parseArgs(argv) {
   const parsed = {
     bundleDir: "",
+    worklistDir: "",
     outPath: "",
     minRaters: 2,
     allowedRaterTypes: [],
@@ -36,6 +57,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--bundle=")) {
       parsed.bundleDir = path.resolve(requireInlineValue(argument, "--bundle=", "--bundle"));
+    } else if (argument === "--worklist") {
+      parsed.worklistDir = path.resolve(requireValue(argv, index, "--worklist"));
+      index += 1;
+    } else if (argument.startsWith("--worklist=")) {
+      parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -106,16 +132,23 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function isAdjudication(label) {
-  return label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true;
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateLabelShape(label, line, issues) {
+  if (!isRecord(label)) {
+    issues.push(`labels.jsonl:${line} must be an object`);
+    return false;
+  }
+  for (const key of Object.keys(label)) {
+    if (!labelAllowedKeys.has(key)) issues.push(`labels.jsonl:${line} has unexpected field ${key}`);
+  }
+  return true;
 }
 
 function increment(counts, key) {
   counts[key] = (counts[key] || 0) + 1;
-}
-
-function labelRaterType(label) {
-  return label.raterType || label.raterClass || "";
 }
 
 function validateLabelRows(labels, studyId, knownFindingIds, issues, options) {
@@ -123,6 +156,8 @@ function validateLabelRows(labels, studyId, knownFindingIds, issues, options) {
   const allowedRaterTypes = new Set(options.allowedRaterTypes);
   for (const [index, label] of labels.entries()) {
     const line = index + 1;
+    if (!validateLabelShape(label, line, issues)) continue;
+    validateClaimLabelMetadata(label, line, issues);
     const raterType = labelRaterType(label);
     if (label.schemaVersion !== "cellfence.corpus-label.v1") issues.push(`labels.jsonl:${line} has unexpected schemaVersion`);
     if (label.studyId !== studyId) issues.push(`labels.jsonl:${line} has unexpected studyId`);
@@ -150,6 +185,12 @@ function validateLabelRows(labels, studyId, knownFindingIds, issues, options) {
     if (isAdjudication(label)) {
       if (label.round && label.round !== "adjudication") issues.push(`labels.jsonl:${line} adjudication label must use round=adjudication`);
     } else {
+      if (label.claimUse && label.claimUse !== "blind_labeling") {
+        issues.push(`labels.jsonl:${line} is marked ${label.claimUse} and cannot support a claim`);
+      }
+      if (label.sourceBundleContainsLabels === true) {
+        issues.push(`labels.jsonl:${line} came from a diagnostic label-bearing source bundle`);
+      }
       if (label.round !== "blind_first" && label.round !== "blind_second") {
         issues.push(`labels.jsonl:${line} independent label must use round=blind_first or round=blind_second`);
       }
@@ -224,6 +265,19 @@ function validateBundle(options) {
   const studyId = study.studyId;
   const knownFindingIds = new Set(findings.map((finding) => finding.findingId));
   validateLabelRows(labels, studyId, knownFindingIds, issues, options);
+  let worklist = null;
+  if (options.worklistDir) {
+    worklist = verifyWorklistLabels(options.worklistDir, labels, {
+      bundleDir: options.bundleDir,
+      findings,
+      studyId,
+      preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
+    });
+    issues.push(...worklist.issues.map((issue) => `worklist: ${issue}`));
+    if (labels.some(isAdjudication)) {
+      issues.push("worklist-bound label readiness requires sealed adjudication provenance; worklist v1 supports independent labels only");
+    }
+  }
 
   const sampledIds = new Set(Array.isArray(sampling.sampledFindingIds) ? sampling.sampledFindingIds : []);
   const selectedFindings = findings.filter((finding) => sampledIds.has(finding.findingId) && finding.precisionEligible === true);
@@ -245,6 +299,12 @@ function validateBundle(options) {
     bundleDir: options.bundleDir,
     studyId,
     minRaters: options.minRaters,
+    worklist: worklist ? {
+      path: options.worklistDir,
+      artifactSetSha256: worklist.artifactSetSha256,
+      assignments: worklist.assignments,
+      issues: worklist.issues.length,
+    } : null,
     allowedRaterTypes: options.allowedRaterTypes,
     requireKnownRaterType: options.requireKnownRaterType,
     allowNonHumanRaters: options.allowNonHumanRaters,
