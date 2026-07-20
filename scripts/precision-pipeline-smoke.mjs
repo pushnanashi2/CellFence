@@ -278,6 +278,10 @@ function writeLabels(labelsPath, findings) {
       studyId,
       findingId: finding.findingId,
       rater: "reviewer-a",
+      round: "blind_first",
+      assignmentId: `blind-first-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
+      evidencePackageId: `fixture-evidence-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
+      sawPeerLabels: false,
       label: "true_positive",
       rationale: "fixture finding matches the reviewed manifest violation",
     },
@@ -286,6 +290,10 @@ function writeLabels(labelsPath, findings) {
       studyId,
       findingId: finding.findingId,
       rater: "reviewer-b",
+      round: "blind_second",
+      assignmentId: `blind-second-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
+      evidencePackageId: `fixture-evidence-${finding.findingId.slice("sha256:".length, "sha256:".length + 12)}`,
+      sawPeerLabels: false,
       label: "true_positive",
       rationale: "independent fixture label agrees with the manifest violation",
     },
@@ -293,13 +301,14 @@ function writeLabels(labelsPath, findings) {
   writeJsonl(labelsPath, labels);
 }
 
-function writeProtocol(protocolPath, artifactSetSha256) {
+function writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256) {
   writeJson(protocolPath, {
     schemaVersion: "cellfence.precision-claim-protocol.v1",
     studyId,
     claim: {
       toolCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       artifactSetSha256,
+      preLabelArtifactSetSha256,
       targetPopulation: "local reviewed-manifest precision pipeline smoke fixture",
       supportedSyntaxProfile: "ts-js-supported-v1",
       includedRules: [
@@ -311,7 +320,7 @@ function writeProtocol(protocolPath, artifactSetSha256) {
       confidence: 0.95,
     },
     samplingPlan: {
-      maxRepositoryContribution: 1,
+      maxRepositoryContribution: 0.1,
     },
     labelingPlan: {
       minimumIndependentRaters: 2,
@@ -366,6 +375,7 @@ function main() {
     if (!findings.every((finding) => finding.precisionEligible === true)) {
       throw new Error("expected all smoke findings to be precision eligible");
     }
+    const preLabelArtifactSetSha256 = readJson(path.join(firstBundleDir, "study.json")).preregistration.preLabelArtifactSetSha256;
 
     writeLabels(labelsPath, findings);
     requireStatus(run(process.execPath, [
@@ -378,6 +388,8 @@ function main() {
       reportPath,
       "--labels",
       labelsPath,
+      "--prelabel-artifact-set-sha256",
+      preLabelArtifactSetSha256,
       "--out-dir",
       labeledBundleDir,
     ]), 0, "labeled bundle build");
@@ -395,7 +407,7 @@ function main() {
       labelReadinessPath,
     ]), 0, "label readiness validate");
     const artifactSetSha256 = hashFile(path.join(labeledBundleDir, "SHA256SUMS"));
-    writeProtocol(protocolPath, artifactSetSha256);
+    writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha256);
 
     const claim = run(process.execPath, [
       path.join(repoRoot, "scripts", "corpus-precision-claim.mjs"),
@@ -431,6 +443,7 @@ function main() {
       precisionEligibleSampledFindings: claimReport.bundle.precisionEligibleSampledFindings,
       decision: claimReport.decision,
       artifactSetSha256: claimReport.bundle.artifactSetSha256,
+      preLabelArtifactSetSha256,
     });
     console.log(`precision pipeline smoke passed: ${findings.length} labeled findings; claim=${claimReport.decision.status}`);
     return 0;

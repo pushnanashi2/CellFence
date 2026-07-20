@@ -105,6 +105,22 @@ function validateLabelRows(labels, studyId, knownFindingIds, issues) {
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
       issues.push(`labels.jsonl:${line} is missing rationale`);
     }
+    if (!label.assignmentId || typeof label.assignmentId !== "string") {
+      issues.push(`labels.jsonl:${line} is missing assignmentId`);
+    }
+    if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") {
+      issues.push(`labels.jsonl:${line} is missing evidencePackageId`);
+    }
+    if (isAdjudication(label)) {
+      if (label.round && label.round !== "adjudication") issues.push(`labels.jsonl:${line} adjudication label must use round=adjudication`);
+    } else {
+      if (label.round !== "blind_first" && label.round !== "blind_second") {
+        issues.push(`labels.jsonl:${line} independent label must use round=blind_first or round=blind_second`);
+      }
+      if (label.sawPeerLabels !== false) {
+        issues.push(`labels.jsonl:${line} independent label must declare sawPeerLabels=false`);
+      }
+    }
     const duplicateKey = `${label.findingId}\0${label.rater}\0${isAdjudication(label) ? "adjudication" : "independent"}`;
     if (seen.has(duplicateKey)) issues.push(`labels.jsonl:${line} duplicates finding/rater/role label`);
     seen.add(duplicateKey);
@@ -116,11 +132,19 @@ function validateFindingLabels(finding, labels, options) {
   const independent = labels.filter((label) => !isAdjudication(label));
   const adjudications = labels.filter(isAdjudication);
   const independentRaters = new Set(independent.map((label) => label.rater));
+  const blindFirstRaters = new Set(independent.filter((label) => label.round === "blind_first").map((label) => label.rater));
+  const blindSecondRaters = new Set(independent.filter((label) => label.round === "blind_second").map((label) => label.rater));
   if (independentRaters.size < options.minRaters) {
     issues.push(`${finding.findingId} has ${independentRaters.size} independent labels; ${options.minRaters} required`);
   }
   if (independent.length !== independentRaters.size) {
     issues.push(`${finding.findingId} has duplicate independent labels from the same rater`);
+  }
+  if (blindFirstRaters.size !== 1 || blindSecondRaters.size !== 1) {
+    issues.push(`${finding.findingId} must have exactly one blind_first and one blind_second independent label`);
+  }
+  for (const rater of blindFirstRaters) {
+    if (blindSecondRaters.has(rater)) issues.push(`${finding.findingId} has the same rater in blind_first and blind_second`);
   }
   const independentLabels = new Set(independent.map((label) => label.label));
   let finalLabel = independentLabels.size === 1 ? independent[0]?.label : null;
@@ -138,6 +162,8 @@ function validateFindingLabels(finding, labels, options) {
       finalLabel = adjudications.at(-1)?.label || null;
       adjudicated = true;
     }
+  } else if (independentLabels.size === 1 && adjudications.length > 0) {
+    issues.push(`${finding.findingId} has adjudication despite unanimous independent labels`);
   }
   return {
     findingId: finding.findingId,

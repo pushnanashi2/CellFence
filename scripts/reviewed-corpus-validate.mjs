@@ -103,11 +103,13 @@ function validateSubject(subject, index, seenIds, corpusDir) {
   const strategy = manifest.strategy || "existing";
   let precisionEligible = false;
   if (strategy === "existing") {
-    precisionEligible = manifest.reviewStatus === undefined
-      || manifest.reviewStatus === "existing"
-      || manifest.reviewStatus === "reviewed";
-    if (!precisionEligible) issues.push(`${subject.id || prefix} existing manifest reviewStatus must not be ${manifest.reviewStatus}`);
-    if (manifest.reviewStatus === undefined) warnings.push(`${subject.id || prefix} uses existing upstream manifest without explicit reviewStatus`);
+    precisionEligible = manifest.reviewStatus === "reviewed";
+    if (!precisionEligible) issues.push(`${subject.id || prefix} existing manifest must set reviewStatus=reviewed`);
+    const reviewers = reviewReaders(manifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
+    if (reviewers.length === 0) issues.push(`${subject.id || prefix} reviewed existing manifest requires reviewedBy or review.reviewers`);
+    if (!Array.isArray(manifest.review?.boundaryEvidence) && !Array.isArray(manifest.boundaryEvidence)) {
+      warnings.push(`${subject.id || prefix} reviewed existing manifest should cite boundaryEvidence`);
+    }
   } else if (strategy === "copy") {
     precisionEligible = manifest.reviewStatus === "reviewed";
     if (!precisionEligible) issues.push(`${subject.id || prefix} copy manifest must set reviewStatus=reviewed`);
@@ -132,7 +134,7 @@ function validateSubject(subject, index, seenIds, corpusDir) {
     repository: subject.repository || null,
     commit: subject.commit || null,
     manifestStrategy: strategy,
-    manifestReviewStatus: manifest.reviewStatus || (strategy === "existing" ? "existing" : "unknown"),
+    manifestReviewStatus: manifest.reviewStatus || "unknown",
     precisionEligible,
     issues,
     warnings,

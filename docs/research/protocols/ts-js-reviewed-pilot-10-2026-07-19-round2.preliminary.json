@@ -24,7 +24,7 @@
   "samplingPlan": {
     "unit": "finding",
     "method": "deterministic per-rule sampling with perRuleCap=5 and minPerRepository=1 for round2 pilot diagnosis",
-    "maxRepositoryContribution": 0.5
+    "maxRepositoryContribution": 0.1
   },
   "labelingPlan": {
     "minimumIndependentRaters": 2,

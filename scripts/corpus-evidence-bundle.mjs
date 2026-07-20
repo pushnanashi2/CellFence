@@ -20,7 +20,7 @@ const defaultMinPerRepository = 3;
 
 function usage() {
   console.error(`Usage:
-  node scripts/corpus-evidence-bundle.mjs --study-id id --corpus corpus.json --report report.json --out-dir reports/corpus/id-bundle [--labels labels.jsonl] [--force]
+  node scripts/corpus-evidence-bundle.mjs --study-id id --corpus corpus.json --report report.json --out-dir reports/corpus/id-bundle [--labels labels.jsonl] [--prelabel-artifact-set-sha256 sha256] [--force]
   node scripts/corpus-evidence-bundle.mjs --validate --bundle reports/corpus/id-bundle
 
 Creates and validates a reproducible evidence bundle for corpus findings. The
@@ -45,6 +45,7 @@ function parseArgs(argv) {
     confidence: defaultConfidence,
     perRuleCap: null,
     minPerRepository: defaultMinPerRepository,
+    preLabelArtifactSetSha256: "",
     force: false,
     validate: false,
   };
@@ -100,6 +101,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--min-per-repository=")) {
       parsed.minPerRepository = parsePositiveInteger(requireInlineValue(argument, "--min-per-repository=", "--min-per-repository"), "--min-per-repository");
+    } else if (argument === "--prelabel-artifact-set-sha256") {
+      parsed.preLabelArtifactSetSha256 = requireSha256(requireValue(argv, index, "--prelabel-artifact-set-sha256"), "--prelabel-artifact-set-sha256");
+      index += 1;
+    } else if (argument.startsWith("--prelabel-artifact-set-sha256=")) {
+      parsed.preLabelArtifactSetSha256 = requireSha256(requireInlineValue(argument, "--prelabel-artifact-set-sha256=", "--prelabel-artifact-set-sha256"), "--prelabel-artifact-set-sha256");
     } else if (argument === "--force") {
       parsed.force = true;
     } else if (argument === "--validate") {
@@ -138,6 +144,11 @@ function parsePositiveInteger(value, optionName) {
     throw new Error(`${optionName} must be a positive integer`);
   }
   return parsed;
+}
+
+function requireSha256(value, optionName) {
+  if (!/^[a-f0-9]{64}$/.test(String(value))) throw new Error(`${optionName} must be a lowercase 64-hex SHA-256 digest`);
+  return value;
 }
 
 function requireValue(argv, index, optionName) {
@@ -244,7 +255,7 @@ function manifestReviewStatus(subject) {
 function precisionEligible(subject) {
   const strategy = subject.manifest?.strategy || "existing";
   const reviewStatus = manifestReviewStatus(subject);
-  return strategy === "existing" || (strategy === "copy" && reviewStatus === "reviewed");
+  return (strategy === "existing" || strategy === "copy") && reviewStatus === "reviewed";
 }
 
 function fallbackFingerprint(event) {
@@ -322,13 +333,53 @@ function sortFindings(findings) {
   return [...findings].sort((left, right) => findingSortKey(left).localeCompare(findingSortKey(right)));
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
+function canonicalJson(value) {
+  return JSON.stringify(canonicalize(value));
+}
+
+function preLabelArtifactSetSha256(bundleDir) {
+  const excluded = new Set(["SHA256SUMS", "labels.jsonl", "study.json"]);
+  const artifacts = listFilesRecursive(bundleDir)
+    .map((filePath) => posixify(path.relative(bundleDir, filePath)))
+    .filter((relativePath) => !excluded.has(relativePath))
+    .sort()
+    .map((relativePath) => ({
+      path: relativePath,
+      sha256: hashFile(path.join(bundleDir, relativePath)),
+    }));
+  return hashText(canonicalJson(artifacts));
+}
+
 function collectRawFindings(report, studyId) {
   const rawFindings = [];
   for (const subject of report.subjects || []) {
     const auditLogPath = subject.check?.auditLogPath;
-    if (!auditLogPath || !fs.existsSync(auditLogPath)) continue;
+    const expectedFindings = Number.isInteger(subject.check?.findings) ? subject.check.findings : null;
+    if (!auditLogPath || !fs.existsSync(auditLogPath)) {
+      if ((expectedFindings ?? 0) > 0) {
+        throw new Error(`audit log is missing for ${subject.id}; report claims ${expectedFindings} findings`);
+      }
+      continue;
+    }
+    if (!subject.check?.auditLogSha256) {
+      throw new Error(`audit log SHA-256 is missing for ${subject.id}`);
+    }
+    if (hashFile(auditLogPath) !== subject.check.auditLogSha256) {
+      throw new Error(`audit log hash mismatch for ${subject.id}`);
+    }
+    let subjectFindings = 0;
     for (const [eventIndex, event] of readJsonl(auditLogPath).entries()) {
       if (event.event !== "finding.detected") continue;
+      if (event.outcome !== "rejected") continue;
+      subjectFindings += 1;
       rawFindings.push({
         schemaVersion: "cellfence.corpus-raw-finding.v1",
         studyId,
@@ -346,6 +397,12 @@ function collectRawFindings(report, studyId) {
         },
       });
     }
+    if (expectedFindings !== null && subjectFindings !== expectedFindings) {
+      throw new Error(`audit log finding count mismatch for ${subject.id}: report=${expectedFindings} audit=${subjectFindings}`);
+    }
+  }
+  if (Number.isInteger(report.summary?.totalFindings) && rawFindings.length !== report.summary.totalFindings) {
+    throw new Error(`report.summary.totalFindings mismatch: report=${report.summary.totalFindings} audit=${rawFindings.length}`);
   }
   return rawFindings;
 }
@@ -477,16 +534,29 @@ function validateLabels(bundleDir, normalizedFindings, sampling, findings) {
     findings.push("labels.jsonl is missing");
     return;
   }
+  const study = readJson(path.join(bundleDir, "study.json"));
   const findingIds = new Set(normalizedFindings.map((finding) => finding.findingId));
   const seenRaterFinding = new Set();
   for (const [index, label] of readJsonl(labelsPath).entries()) {
     const lineNumber = index + 1;
+    if (label.schemaVersion !== "cellfence.corpus-label.v1") findings.push(`labels.jsonl:${lineNumber} has unexpected schemaVersion`);
+    if (label.studyId !== study.studyId) findings.push(`labels.jsonl:${lineNumber} has unexpected studyId`);
     if (!findingIds.has(label.findingId)) findings.push(`labels.jsonl:${lineNumber} references unknown findingId ${label.findingId}`);
     if (!allowedLabels.has(label.label)) findings.push(`labels.jsonl:${lineNumber} has unknown label '${label.label}'`);
     if (!label.rater || typeof label.rater !== "string") findings.push(`labels.jsonl:${lineNumber} is missing rater`);
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
       findings.push(`labels.jsonl:${lineNumber} is missing rationale`);
     }
+    if (label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true) {
+      if (label.round && label.round !== "adjudication") findings.push(`labels.jsonl:${lineNumber} adjudication label must use round=adjudication`);
+    } else {
+      if (label.round !== "blind_first" && label.round !== "blind_second") {
+        findings.push(`labels.jsonl:${lineNumber} independent label must use round=blind_first or round=blind_second`);
+      }
+      if (label.sawPeerLabels !== false) findings.push(`labels.jsonl:${lineNumber} independent label must declare sawPeerLabels=false`);
+    }
+    if (!label.assignmentId || typeof label.assignmentId !== "string") findings.push(`labels.jsonl:${lineNumber} is missing assignmentId`);
+    if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") findings.push(`labels.jsonl:${lineNumber} is missing evidencePackageId`);
     const duplicateKey = `${label.rater}\0${label.findingId}`;
     if (seenRaterFinding.has(duplicateKey)) findings.push(`labels.jsonl:${lineNumber} duplicates rater/finding label ${label.rater}/${label.findingId}`);
     seenRaterFinding.add(duplicateKey);
@@ -510,18 +580,131 @@ function validateManifestHashes(bundleDir, report, findings) {
   }
 }
 
+function validateStudyCopies(bundleDir, study, findings) {
+  if (!Array.isArray(study.manifestCopies)) {
+    findings.push("study.json is missing manifestCopies");
+  } else {
+    for (const copy of study.manifestCopies) {
+      if (!copy?.path || !fs.existsSync(path.join(bundleDir, copy.path))) findings.push(`manifest copy is missing: ${copy?.path || "<unknown>"}`);
+      else if (copy.sha256 && hashFile(path.join(bundleDir, copy.path)) !== copy.sha256) findings.push(`manifest copy hash mismatch: ${copy.path}`);
+    }
+  }
+  if (!Array.isArray(study.logCopies)) {
+    findings.push("study.json is missing logCopies");
+  } else {
+    for (const copy of study.logCopies) {
+      if (!copy?.path || !fs.existsSync(path.join(bundleDir, copy.path))) findings.push(`log copy is missing: ${copy?.path || "<unknown>"}`);
+    }
+  }
+}
+
+function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings) {
+  const logCopies = Array.isArray(study.logCopies) ? study.logCopies : [];
+  const rawBySubject = new Map();
+  const logEvents = new Map();
+  const eventsFor = (copy) => {
+    if (!copy?.path) return [];
+    if (!logEvents.has(copy.path)) {
+      const logPath = path.join(bundleDir, copy.path);
+      logEvents.set(copy.path, fs.existsSync(logPath) ? readJsonl(logPath) : []);
+    }
+    return logEvents.get(copy.path) || [];
+  };
+  const reportLogs = new Map();
+  for (const rawFinding of rawFindings) {
+    const subjectFindings = rawBySubject.get(rawFinding.subjectId) || [];
+    subjectFindings.push(rawFinding);
+    rawBySubject.set(rawFinding.subjectId, subjectFindings);
+  }
+
+  for (const subject of report.subjects || []) {
+    if (!subject.check?.auditLogSha256) continue;
+    const basename = path.basename(subject.check.auditLogPath || "check.audit.jsonl");
+    const candidates = logCopies.filter((copy) => copy?.subjectId === subject.id && path.basename(copy.path || "") === basename);
+    if (candidates.length === 0) {
+      findings.push(`report audit log copy is missing for ${subject.id}`);
+      continue;
+    }
+    const matchingCopies = candidates.filter((copy) => hashFile(path.join(bundleDir, copy.path)) === subject.check.auditLogSha256);
+    if (matchingCopies.length === 0) {
+      findings.push(`report audit log hash does not match copied log for ${subject.id}`);
+      continue;
+    }
+    if (matchingCopies.length > 1) {
+      findings.push(`report audit log hash is ambiguous for ${subject.id}`);
+      continue;
+    }
+    reportLogs.set(subject.id, matchingCopies[0]);
+
+    const rejectedEvents = eventsFor(matchingCopies[0])
+      .map((event, eventIndex) => ({ event, eventIndex }))
+      .filter(({ event }) => event?.event === "finding.detected" && event.outcome === "rejected");
+    const subjectRawFindings = rawBySubject.get(subject.id) || [];
+    if (Number.isInteger(subject.check?.findings) && subject.check.findings !== rejectedEvents.length) {
+      findings.push(`report finding count does not match copied audit log for ${subject.id}`);
+    }
+    if (subjectRawFindings.length !== rejectedEvents.length) {
+      findings.push(`raw finding count does not match copied audit log for ${subject.id}`);
+    }
+    const expectedIndexes = rejectedEvents.map(({ eventIndex }) => eventIndex).sort((left, right) => left - right);
+    const rawIndexes = subjectRawFindings.map((finding) => finding.eventIndex).sort((left, right) => left - right);
+    if (rawIndexes.some((eventIndex) => !Number.isInteger(eventIndex) || eventIndex < 0)) {
+      findings.push(`raw findings include invalid eventIndex for ${subject.id}`);
+    } else if (new Set(rawIndexes).size !== rawIndexes.length) {
+      findings.push(`raw findings repeat an audit eventIndex for ${subject.id}`);
+    } else if (canonicalJson(rawIndexes) !== canonicalJson(expectedIndexes)) {
+      findings.push(`raw finding eventIndex set does not match copied audit log for ${subject.id}`);
+    }
+  }
+
+  for (const rawFinding of rawFindings) {
+    const reportLog = reportLogs.get(rawFinding.subjectId);
+    if (!reportLog) {
+      findings.push(`raw finding ${rawFinding.subjectId}:${rawFinding.eventIndex} has no verified report audit log`);
+      continue;
+    }
+    const events = eventsFor(reportLog);
+    if (canonicalJson(events[rawFinding.eventIndex]) !== canonicalJson(rawFinding.event)) {
+      findings.push(`raw finding ${rawFinding.subjectId}:${rawFinding.eventIndex} does not match copied report audit log event`);
+    }
+  }
+}
+
 function validateBundle(bundleDir) {
   const findings = [];
   if (!fs.existsSync(bundleDir)) throw new Error(`bundle not found: ${bundleDir}`);
   const study = readJson(path.join(bundleDir, "study.json"));
   const corpus = readJson(path.join(bundleDir, "corpus.json"));
   const report = readJson(path.join(bundleDir, "report.json"));
+  const rawFindings = readJsonl(path.join(bundleDir, "findings.raw.jsonl"));
   const normalizedFindings = readJsonl(path.join(bundleDir, "findings.normalized.jsonl"));
   const sampling = readJson(path.join(bundleDir, "sampling.json"));
 
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") findings.push("study.json has unexpected schemaVersion");
   if (corpus.schemaVersion !== "cellfence.corpus.v1") findings.push("corpus.json has unexpected schemaVersion");
   if (report.schemaVersion !== "cellfence.corpus-study.v1") findings.push("report.json has unexpected schemaVersion");
+  if (Number.isInteger(study.summary?.rawFindings) && study.summary.rawFindings !== rawFindings.length) {
+    findings.push("study.summary.rawFindings does not match findings.raw.jsonl");
+  }
+  if (Number.isInteger(study.summary?.normalizedFindings) && study.summary.normalizedFindings !== normalizedFindings.length) {
+    findings.push("study.summary.normalizedFindings does not match findings.normalized.jsonl");
+  }
+  if (Number.isInteger(report.summary?.totalFindings) && report.summary.totalFindings !== rawFindings.length) {
+    findings.push("report.summary.totalFindings does not match findings.raw.jsonl");
+  }
+  if (rawFindings.length > 0 && Array.isArray(study.logCopies) && study.logCopies.length === 0) {
+    findings.push("study.logCopies is empty despite raw findings");
+  }
+  const expectedPreLabelArtifactSetSha256 = preLabelArtifactSetSha256(bundleDir);
+  if (!study.preregistration?.preLabelArtifactSetSha256) {
+    findings.push("study.preregistration.preLabelArtifactSetSha256 is missing");
+  } else if (study.preregistration.preLabelArtifactSetSha256 !== expectedPreLabelArtifactSetSha256) {
+    findings.push("study.preregistration.preLabelArtifactSetSha256 does not match bundle artifacts");
+  }
+  const recomputedFindings = sortFindings(normalizeFindings(study.studyId, rawFindings));
+  if (canonicalJson(recomputedFindings) !== canonicalJson(normalizedFindings)) {
+    findings.push("findings.normalized.jsonl does not match findings.raw.jsonl");
+  }
 
   const sortedFindingIds = sortFindings(normalizedFindings).map((finding) => finding.findingId);
   if (JSON.stringify(sortedFindingIds) !== JSON.stringify(normalizedFindings.map((finding) => finding.findingId))) {
@@ -538,6 +721,8 @@ function validateBundle(bundleDir) {
   }
 
   validateLabels(bundleDir, normalizedFindings, sampling, findings);
+  validateStudyCopies(bundleDir, study, findings);
+  validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings);
   validateManifestHashes(bundleDir, report, findings);
   validateSha256Sums(bundleDir, findings);
 
@@ -609,6 +794,11 @@ function buildBundle(options) {
     writeJsonl(path.join(tempDir, "findings.normalized.jsonl"), normalizedFindings);
     writeJsonl(path.join(tempDir, "findings.sampled.jsonl"), sampledFindings);
     writeJson(path.join(tempDir, "sampling.json"), sampling);
+    const computedPreLabelArtifactSetSha256 = preLabelArtifactSetSha256(tempDir);
+    if (options.preLabelArtifactSetSha256 && options.preLabelArtifactSetSha256 !== computedPreLabelArtifactSetSha256) {
+      throw new Error("--prelabel-artifact-set-sha256 does not match the computed pre-label artifact set");
+    }
+
     writeJson(path.join(tempDir, "study.json"), {
       schemaVersion: "cellfence.corpus-evidence-bundle.v1",
       studyId: options.studyId,
@@ -627,6 +817,9 @@ function buildBundle(options) {
         reportSha256: hashFile(options.reportPath),
       },
       environment: report.environment || {},
+      preregistration: {
+        preLabelArtifactSetSha256: computedPreLabelArtifactSetSha256,
+      },
       summary: {
         subjects: (report.subjects || []).length,
         rawFindings: rawFindings.length,
@@ -638,7 +831,7 @@ function buildBundle(options) {
       labels: {
         path: "labels.jsonl",
         allowedLabels: [...allowedLabels].sort(),
-        requiredFields: ["findingId", "rater", "label", "rationale"],
+        requiredFields: ["findingId", "rater", "round", "assignmentId", "evidencePackageId", "sawPeerLabels", "label", "rationale"],
       },
     });
     writeSha256Sums(tempDir);
@@ -670,4 +863,8 @@ function main() {
   }
 }
 
-process.exitCode = main();
+export { validateBundle };
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  process.exitCode = main();
+}

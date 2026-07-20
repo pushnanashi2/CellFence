@@ -30,6 +30,41 @@ function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
+function listFiles(baseDir) {
+  const files = [];
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    const fullPath = path.join(baseDir, entry.name);
+    if (entry.isDirectory()) files.push(...listFiles(fullPath));
+    else if (entry.isFile()) files.push(fullPath);
+  }
+  return files;
+}
+
+function writeSha256Sums(bundleDir) {
+  const lines = listFiles(bundleDir)
+    .filter((filePath) => path.basename(filePath) !== "SHA256SUMS")
+    .map((filePath) => path.relative(bundleDir, filePath).replace(/\\/g, "/"))
+    .sort()
+    .map((relativePath) => `${hashFile(path.join(bundleDir, relativePath))}  ${relativePath}`);
+  fs.writeFileSync(path.join(bundleDir, "SHA256SUMS"), `${lines.join("\n")}\n`);
+}
+
+function label(findingId, patch = {}) {
+  return {
+    schemaVersion: "cellfence.corpus-label.v1",
+    studyId: "fixture-study",
+    findingId,
+    rater: "reviewer-a",
+    round: "blind_first",
+    assignmentId: `blind-first-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
+    evidencePackageId: `evidence-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
+    sawPeerLabels: false,
+    label: "true_positive",
+    rationale: "fixture label",
+    ...patch,
+  };
+}
+
 function createFixture(tempDir) {
   const subjectDir = path.join(tempDir, "subjects", "demo");
   const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
@@ -113,6 +148,11 @@ function createFixture(tempDir) {
         manifest: {
           strategy: "existing",
           path: "cellfence.manifest.json",
+          reviewStatus: "reviewed",
+          review: {
+            reviewers: ["reviewer-a"],
+            boundaryEvidence: ["fixture existing manifest"],
+          },
         },
       },
     ],
@@ -142,6 +182,7 @@ function createFixture(tempDir) {
         manifest: {
           strategy: "existing",
           path: "cellfence.manifest.json",
+          reviewStatus: "reviewed",
           effectivePath: manifestPath,
           sha256: hashFile(manifestPath),
           status: "completed",
@@ -164,7 +205,7 @@ function createFixture(tempDir) {
       totalFindings: 3,
     },
   });
-  return { corpusPath, reportPath };
+  return { auditLogPath, corpusPath, reportPath };
 }
 
 test("corpus evidence bundle generates normalized findings, sample, and checksums", () => {
@@ -237,19 +278,259 @@ test("corpus evidence bundle validator rejects labels for unknown findings", () 
     assert.equal(result.status, 0, result.stderr || result.stdout);
 
     writeJsonl(path.join(bundleDir, "labels.jsonl"), [
-      {
-        schemaVersion: "cellfence.corpus-label.v1",
-        studyId: "fixture-study",
-        findingId: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-        rater: "reviewer-a",
-        label: "true_positive",
+      label("sha256:0000000000000000000000000000000000000000000000000000000000000000", {
         rationale: "not present in normalized findings",
-      },
+      }),
     ]);
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
 
     assert.equal(validate.status, 1);
     assert.match(validate.stderr, /unknown findingId/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator rejects labels with bad schema or study id", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-label-schema-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const findingId = fs.readFileSync(path.join(bundleDir, "findings.normalized.jsonl"), "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line))[0].findingId;
+
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), [
+      label(findingId, {
+        schemaVersion: "wrong",
+        studyId: "other-study",
+      }),
+    ]);
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /unexpected schemaVersion/);
+    assert.match(validate.stderr, /unexpected studyId/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator binds raw findings to the report audit hash", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-audit-binding-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const rawFindingsPath = path.join(bundleDir, "findings.raw.jsonl");
+    const rawFindings = fs.readFileSync(rawFindingsPath, "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    rawFindings[0].event.message = "forged private import";
+    writeJsonl(rawFindingsPath, rawFindings);
+
+    const forgedAuditPath = path.join(bundleDir, "logs", "demo-spoof", "check.audit.jsonl");
+    writeJsonl(forgedAuditPath, rawFindings.map((finding) => finding.event));
+    const study = JSON.parse(fs.readFileSync(path.join(bundleDir, "study.json"), "utf8"));
+    study.logCopies.push({
+      subjectId: "demo",
+      path: "logs/demo-spoof/check.audit.jsonl",
+      sourcePath: "spoof/check.audit.jsonl",
+      sha256: hashFile(forgedAuditPath),
+    });
+    writeJson(path.join(bundleDir, "study.json"), study);
+    writeSha256Sums(bundleDir);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /does not match copied report audit log event/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator rejects omitted copied audit findings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-audit-omission-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const rawFindingsPath = path.join(bundleDir, "findings.raw.jsonl");
+    const rawFindings = fs.readFileSync(rawFindingsPath, "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line))
+      .slice(0, 2);
+    writeJsonl(rawFindingsPath, rawFindings);
+
+    const report = JSON.parse(fs.readFileSync(path.join(bundleDir, "report.json"), "utf8"));
+    report.summary.totalFindings = 2;
+    writeJson(path.join(bundleDir, "report.json"), report);
+    const study = JSON.parse(fs.readFileSync(path.join(bundleDir, "study.json"), "utf8"));
+    study.summary.rawFindings = 2;
+    writeJson(path.join(bundleDir, "study.json"), study);
+    writeSha256Sums(bundleDir);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /raw finding count does not match copied audit log/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle validator rejects duplicated raw audit event indexes", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-audit-duplicate-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const rawFindingsPath = path.join(bundleDir, "findings.raw.jsonl");
+    const rawFindings = fs.readFileSync(rawFindingsPath, "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    rawFindings[2] = {
+      ...rawFindings[2],
+      eventIndex: rawFindings[1].eventIndex,
+      event: rawFindings[1].event,
+    };
+    writeJsonl(rawFindingsPath, rawFindings);
+    writeSha256Sums(bundleDir);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+
+    assert.equal(validate.status, 1);
+    assert.match(validate.stderr, /raw findings repeat an audit eventIndex/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle generation rejects missing audit logs with claimed findings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-missing-audit-"));
+  try {
+    const { auditLogPath, corpusPath, reportPath } = createFixture(tempDir);
+    fs.rmSync(auditLogPath);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /audit log is missing/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle generation rejects audit count mismatches", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-audit-count-"));
+  try {
+    const { auditLogPath, corpusPath, reportPath } = createFixture(tempDir);
+    const events = fs.readFileSync(auditLogPath, "utf8").trim().split(/\r?\n/).slice(0, 2);
+    fs.writeFileSync(auditLogPath, `${events.join("\n")}\n`);
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    report.subjects[0].check.auditLogSha256 = hashFile(auditLogPath);
+    writeJson(reportPath, report);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /audit log finding count mismatch/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle generation rejects missing audit log hash", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-missing-audit-hash-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    delete report.subjects[0].check.auditLogSha256;
+    writeJson(reportPath, report);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /audit log SHA-256 is missing/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

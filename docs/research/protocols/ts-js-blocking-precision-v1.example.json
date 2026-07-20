@@ -3,6 +3,7 @@
   "studyId": "ts-js-blocking-precision-v1",
   "claim": {
     "toolCommit": "0123456789abcdef0123456789abcdef01234567",
+    "preLabelArtifactSetSha256": "replace-with-study-preregistration-preLabelArtifactSetSha256",
     "artifactSetSha256": "replace-with-sha256-of-bundle-SHA256SUMS",
     "targetPopulation": "reviewed TS/JS workspace repositories",
     "supportedSyntaxProfile": "ts-js-supported-v1",

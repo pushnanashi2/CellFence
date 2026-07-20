@@ -40,11 +40,17 @@ function finding(id, patch = {}) {
 }
 
 function label(findingId, rater, value, patch = {}) {
+  const isAdjudication = patch.role === "adjudicator" || patch.adjudication === true || patch.adjudicated === true;
+  const round = patch.round || (isAdjudication ? "adjudication" : rater.endsWith("-b") ? "blind_second" : "blind_first");
   return {
     schemaVersion: "cellfence.corpus-label.v1",
     studyId: "label-fixture",
     findingId,
     rater,
+    round,
+    assignmentId: `${round}-${rater}-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
+    evidencePackageId: `evidence-${findingId.slice("sha256:".length, "sha256:".length + 8)}`,
+    sawPeerLabels: isAdjudication ? true : false,
     label: value,
     rationale: `${rater} fixture rationale`,
     ...patch,
@@ -87,6 +93,73 @@ test("precision labels validator accepts independent labels plus separate adjudi
     assert.equal(report.summary.adjudicatedFindings, 1);
     assert.equal(report.summary.finalLabelCounts.true_positive, 1);
     assert.equal(report.summary.finalLabelCounts.needs_policy, 1);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision labels validator rejects independent labels without blind metadata", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-blind-missing-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      {
+        schemaVersion: "cellfence.corpus-label.v1",
+        studyId: "label-fixture",
+        findingId: findings[0].findingId,
+        rater: "reviewer-a",
+        label: "true_positive",
+        rationale: "missing blind fields",
+      },
+      label(findings[0].findingId, "reviewer-b", "true_positive"),
+      label(findings[1].findingId, "reviewer-a", "true_positive"),
+      label(findings[1].findingId, "reviewer-b", "true_positive"),
+    ]);
+
+    const result = runValidator(["--bundle", bundleDir]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /missing assignmentId|independent label must use round/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision labels validator rejects two first-round labels for the same finding", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-two-first-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      label(findings[0].findingId, "reviewer-a", "true_positive", { round: "blind_first" }),
+      label(findings[0].findingId, "reviewer-b", "true_positive", { round: "blind_first" }),
+      label(findings[1].findingId, "reviewer-a", "true_positive"),
+      label(findings[1].findingId, "reviewer-b", "true_positive"),
+    ]);
+
+    const result = runValidator(["--bundle", bundleDir]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /exactly one blind_first and one blind_second/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision labels validator rejects second-round labels that saw peer labels", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-peer-visible-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      label(findings[0].findingId, "reviewer-a", "true_positive"),
+      label(findings[0].findingId, "reviewer-b", "true_positive", { sawPeerLabels: true }),
+      label(findings[1].findingId, "reviewer-a", "true_positive"),
+      label(findings[1].findingId, "reviewer-b", "true_positive"),
+    ]);
+
+    const result = runValidator(["--bundle", bundleDir]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /sawPeerLabels=false/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

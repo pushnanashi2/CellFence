@@ -2,6 +2,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { validateBundle as validateEvidenceBundle } from "./corpus-evidence-bundle.mjs";
 
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
 const reportSchemaVersion = "cellfence.precision-claim-report.v1";
@@ -166,10 +167,14 @@ function normalizeProtocol(protocol, issues) {
     "samplingPlan.maxRepositoryContribution",
     issues,
   );
+  if (maxRepositoryContribution !== null && maxRepositoryContribution > defaultMaxRepositoryContribution) {
+    issues.push(`samplingPlan.maxRepositoryContribution must be less than or equal to ${defaultMaxRepositoryContribution} for external precision claims`);
+  }
   return {
     studyId: protocol.studyId,
     toolCommit: claim.toolCommit || protocol.toolCommit || null,
     artifactSetSha256: claim.artifactSetSha256 || protocol.artifactSetSha256 || null,
+    preLabelArtifactSetSha256: claim.preLabelArtifactSetSha256 || protocol.preLabelArtifactSetSha256 || null,
     targetPopulation: claim.targetPopulation || protocol.targetPopulation || null,
     supportedSyntaxProfile: claim.supportedSyntaxProfile || protocol.supportedSyntaxProfile || null,
     includedRules: Array.isArray(includedRules) ? includedRules : [],
@@ -229,6 +234,22 @@ function validateLabelRows(labels, knownFindingIds, studyId, issues) {
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
       issues.push(`labels.jsonl:${lineNumber} is missing rationale`);
     }
+    if (!label.assignmentId || typeof label.assignmentId !== "string") {
+      issues.push(`labels.jsonl:${lineNumber} is missing assignmentId`);
+    }
+    if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") {
+      issues.push(`labels.jsonl:${lineNumber} is missing evidencePackageId`);
+    }
+    if (isAdjudication(label)) {
+      if (label.round && label.round !== "adjudication") issues.push(`labels.jsonl:${lineNumber} adjudication label must use round=adjudication`);
+    } else {
+      if (label.round !== "blind_first" && label.round !== "blind_second") {
+        issues.push(`labels.jsonl:${lineNumber} independent label must use round=blind_first or round=blind_second`);
+      }
+      if (label.sawPeerLabels !== false) {
+        issues.push(`labels.jsonl:${lineNumber} independent label must declare sawPeerLabels=false`);
+      }
+    }
     const duplicateKey = `${label.findingId}\0${label.rater}\0${isAdjudication(label) ? "adjudication" : "independent"}`;
     if (seen.has(duplicateKey)) {
       issues.push(`labels.jsonl:${lineNumber} duplicates finding/rater/role label`);
@@ -242,6 +263,8 @@ function finalLabelForFinding(finding, labels, protocol, issues) {
   const independentLabels = findingLabels.filter((label) => !isAdjudication(label));
   const adjudicationLabels = findingLabels.filter(isAdjudication);
   const independentRaters = new Set(independentLabels.map((label) => label.rater));
+  const blindFirstRaters = new Set(independentLabels.filter((label) => label.round === "blind_first").map((label) => label.rater));
+  const blindSecondRaters = new Set(independentLabels.filter((label) => label.round === "blind_second").map((label) => label.rater));
   if (independentRaters.size < protocol.minimumIndependentRaters) {
     issues.push(`${finding.findingId} has ${independentRaters.size} independent labels; ${protocol.minimumIndependentRaters} required`);
     return null;
@@ -249,6 +272,16 @@ function finalLabelForFinding(finding, labels, protocol, issues) {
   if (independentLabels.length !== independentRaters.size) {
     issues.push(`${finding.findingId} has duplicate independent labels from the same rater`);
     return null;
+  }
+  if (blindFirstRaters.size !== 1 || blindSecondRaters.size !== 1) {
+    issues.push(`${finding.findingId} must have exactly one blind_first and one blind_second independent label`);
+    return null;
+  }
+  for (const rater of blindFirstRaters) {
+    if (blindSecondRaters.has(rater)) {
+      issues.push(`${finding.findingId} has the same rater in blind_first and blind_second`);
+      return null;
+    }
   }
   const distinctIndependentLabels = new Set(independentLabels.map((label) => label.label));
   if (distinctIndependentLabels.size === 1 && adjudicationLabels.length === 0) {
@@ -259,8 +292,12 @@ function finalLabelForFinding(finding, labels, protocol, issues) {
       adjudicated: false,
     };
   }
-  if (distinctIndependentLabels.size > 1 && protocol.requireAdjudicationForDisagreements && adjudicationLabels.length === 0) {
+  if (distinctIndependentLabels.size > 1 && adjudicationLabels.length === 0) {
     issues.push(`${finding.findingId} has conflicting labels and no adjudication`);
+    return null;
+  }
+  if (distinctIndependentLabels.size === 1 && adjudicationLabels.length > 0) {
+    issues.push(`${finding.findingId} has adjudication despite unanimous independent labels`);
     return null;
   }
   if (adjudicationLabels.length === 0) {
@@ -288,6 +325,53 @@ function finalLabelForFinding(finding, labels, protocol, issues) {
     independentRaters: independentRaters.size,
     adjudicated: true,
   };
+}
+
+function listFilesRecursive(baseDir) {
+  const entries = [];
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    const fullPath = path.join(baseDir, entry.name);
+    if (entry.isDirectory()) entries.push(...listFilesRecursive(fullPath));
+    else if (entry.isFile()) entries.push(fullPath);
+  }
+  return entries.sort((left, right) => posixify(path.relative(baseDir, left)).localeCompare(posixify(path.relative(baseDir, right))));
+}
+
+function readSha256Sums(bundleDir, issues) {
+  const sumsPath = path.join(bundleDir, "SHA256SUMS");
+  if (!fs.existsSync(sumsPath)) {
+    issues.push("SHA256SUMS is missing");
+    return new Map();
+  }
+  const sums = new Map();
+  for (const [index, line] of fs.readFileSync(sumsPath, "utf8").split(/\r?\n/).entries()) {
+    if (!line.trim()) continue;
+    const match = /^([a-f0-9]{64}) {2}(.+)$/.exec(line);
+    if (!match) {
+      issues.push(`SHA256SUMS:${index + 1} is malformed`);
+      continue;
+    }
+    sums.set(match[2], match[1]);
+  }
+  return sums;
+}
+
+function validateSha256Sums(bundleDir, issues) {
+  const expected = readSha256Sums(bundleDir, issues);
+  if (expected.size === 0) return;
+  const actualFiles = listFilesRecursive(bundleDir)
+    .filter((filePath) => path.basename(filePath) !== "SHA256SUMS")
+    .map((filePath) => posixify(path.relative(bundleDir, filePath)))
+    .sort();
+  const expectedFiles = [...expected.keys()].sort();
+  if (JSON.stringify(actualFiles) !== JSON.stringify(expectedFiles)) {
+    issues.push("SHA256SUMS file list does not match bundle contents");
+    return;
+  }
+  for (const relativePath of actualFiles) {
+    const actualHash = hashFile(path.join(bundleDir, relativePath));
+    if (actualHash !== expected.get(relativePath)) issues.push(`SHA256 mismatch for ${relativePath}`);
+  }
 }
 
 function logFactorials(n) {
@@ -484,7 +568,48 @@ function selectedFindings(findings, sampling, protocol) {
   });
 }
 
+function corpusSubjectMap(corpus) {
+  const subjects = new Map();
+  for (const subject of corpus.subjects || []) {
+    if (subject?.id) subjects.set(subject.id, subject);
+  }
+  return subjects;
+}
+
+function reviewReaders(manifest) {
+  if (Array.isArray(manifest?.reviewedBy)) return manifest.reviewedBy;
+  if (Array.isArray(manifest?.review?.reviewers)) return manifest.review.reviewers;
+  return [];
+}
+
+function subjectIsReviewed(subject) {
+  const strategy = subject?.manifest?.strategy || "existing";
+  const reviewers = reviewReaders(subject?.manifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
+  return (strategy === "existing" || strategy === "copy")
+    && subject?.manifest?.reviewStatus === "reviewed"
+    && reviewers.length > 0;
+}
+
+function validatePrecisionEligibility(findings, corpus, issues) {
+  const subjects = corpusSubjectMap(corpus);
+  for (const finding of findings) {
+    const subject = subjects.get(finding.subjectId);
+    if (!subject) {
+      issues.push(`finding ${finding.findingId} references subject ${finding.subjectId} missing from corpus.json`);
+      continue;
+    }
+    const expectedEligible = subjectIsReviewed(subject);
+    if (finding.precisionEligible !== expectedEligible) {
+      issues.push(`finding ${finding.findingId} precisionEligible does not match reviewed corpus eligibility`);
+    }
+    if (finding.precisionEligible === true && !expectedEligible) {
+      issues.push(`finding ${finding.findingId} is precision-eligible without a reviewed manifest`);
+    }
+  }
+}
+
 function validateBundleHashes(bundleDir, protocol, warnings, issues) {
+  validateSha256Sums(bundleDir, issues);
   const sumsPath = path.join(bundleDir, "SHA256SUMS");
   if (!fs.existsSync(sumsPath)) {
     warnings.push("SHA256SUMS is missing; artifactSetSha256 cannot be verified");
@@ -502,18 +627,39 @@ function evaluateClaim(options) {
   const warnings = [];
   const protocolRaw = readJson(options.protocolPath);
   const protocol = normalizeProtocol(protocolRaw, issues);
+  try {
+    validateEvidenceBundle(options.bundleDir);
+  } catch (error) {
+    issues.push(`bundle validation failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
   const study = readJson(path.join(options.bundleDir, "study.json"));
+  const corpus = readJson(path.join(options.bundleDir, "corpus.json"));
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
   const knownFindingIds = new Set(findings.map((finding) => finding.findingId));
   const artifactSetSha256 = validateBundleHashes(options.bundleDir, protocol, warnings, issues);
 
+  if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") issues.push("study.json has unexpected schemaVersion");
+  if (sampling.schemaVersion !== "cellfence.corpus-sampling.v1") issues.push("sampling.json has unexpected schemaVersion");
   if (study.studyId !== protocol.studyId) issues.push(`bundle studyId ${study.studyId} does not match protocol studyId ${protocol.studyId}`);
+  if (!protocol.toolCommit) issues.push("protocol claim.toolCommit is required");
+  if (!protocol.artifactSetSha256) issues.push("protocol claim.artifactSetSha256 is required");
+  if (!protocol.preLabelArtifactSetSha256) issues.push("protocol claim.preLabelArtifactSetSha256 is required");
+  if (protocol.preLabelArtifactSetSha256 && study.preregistration?.preLabelArtifactSetSha256 !== protocol.preLabelArtifactSetSha256) {
+    issues.push("protocol preLabelArtifactSetSha256 does not match bundle preregistration.preLabelArtifactSetSha256");
+  }
   if (protocol.toolCommit && study.environment?.harnessCommit && protocol.toolCommit !== study.environment.harnessCommit) {
     issues.push("protocol toolCommit does not match bundle environment.harnessCommit");
   }
+  if (study.summary?.normalizedFindings !== undefined && study.summary.normalizedFindings !== findings.length) {
+    issues.push("study.summary.normalizedFindings does not match findings.normalized.jsonl");
+  }
+  if (Array.isArray(sampling.sampledFindingIds) && study.summary?.sampledFindings !== undefined && study.summary.sampledFindings !== sampling.sampledFindingIds.length) {
+    issues.push("study.summary.sampledFindings does not match sampling.json");
+  }
   validateLabelRows(labels, knownFindingIds, protocol.studyId, issues);
+  validatePrecisionEligibility(findings, corpus, issues);
 
   const includedFindings = selectedFindings(findings, sampling, protocol);
   const finalLabels = [];
@@ -528,6 +674,7 @@ function evaluateClaim(options) {
   const repositories = repositoryMetrics(finalLabels, protocol.confidence);
   const loo = leaveOneRepositoryOut(finalLabels, protocol.confidence);
   const requiredZeroFp = requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
+  const gateFailures = [];
 
   if (includedFindings.length === 0) {
     issues.push("no sampled precision-eligible findings match the included rules and blocking severities");
@@ -543,15 +690,36 @@ function evaluateClaim(options) {
   }
 
   const lowerBound = occurrence.blocking.oneSidedLowerBound;
+  if (lowerBound === null || lowerBound < protocol.minimumPrecision) gateFailures.push("pooled occurrence lower bound is below target");
+  if (uniqueFingerprint.blocking.oneSidedLowerBound === null || uniqueFingerprint.blocking.oneSidedLowerBound < protocol.minimumPrecision) {
+    gateFailures.push("unique-fingerprint lower bound is below target");
+  }
+  for (const ruleId of protocol.includedRules) {
+    const metric = byRule[ruleId];
+    if (!metric || metric.blocking.trials === 0) {
+      gateFailures.push(`${ruleId} has no labeled blocking trials`);
+    } else if (metric.blocking.oneSidedLowerBound === null || metric.blocking.oneSidedLowerBound < protocol.minimumPrecision) {
+      gateFailures.push(`${ruleId} rule-level lower bound is below target`);
+    }
+  }
+  if (repositories.repositoryMacroPrecision === null || repositories.repositoryMacroPrecision < protocol.minimumPrecision) {
+    gateFailures.push("repository macro precision is below target");
+  }
+  for (const repository of repositories.repositories) {
+    if (repository.trials > 0 && repository.observedBlockingPrecision !== null && repository.observedBlockingPrecision < protocol.minimumPrecision) {
+      gateFailures.push(`${repository.repository} observed blocking precision is below target`);
+    }
+  }
+
   let status = "insufficient_evidence";
-  let reason = "one-sided lower bound is below the requested minimum precision";
+  let reason = gateFailures[0] || "one-sided lower bound is below the requested minimum precision";
   if (issues.length > 0) {
     status = "invalid";
     reason = "protocol, bundle, or labeling requirements failed";
-  } else if (lowerBound !== null && lowerBound >= protocol.minimumPrecision && warnings.length === 0) {
+  } else if (gateFailures.length === 0 && warnings.length === 0) {
     status = "pass";
-    reason = "one-sided lower bound meets the pre-registered threshold";
-  } else if (lowerBound !== null && lowerBound >= protocol.minimumPrecision) {
+    reason = "all pre-registered occurrence, rule, fingerprint, and repository gates meet the threshold";
+  } else if (gateFailures.length === 0) {
     reason = "precision threshold is met, but design warnings prevent an external claim";
   }
 
@@ -572,6 +740,7 @@ function evaluateClaim(options) {
       minimumIndependentRaters: protocol.minimumIndependentRaters,
       maxRepositoryContribution: protocol.maxRepositoryContribution,
       exclusionRules: protocol.exclusionRules,
+      preLabelArtifactSetSha256: protocol.preLabelArtifactSetSha256,
     },
     bundle: {
       path: posixify(options.bundleDir),
@@ -597,6 +766,12 @@ function evaluateClaim(options) {
         zeroFalsePositiveRequiredTrials: requiredZeroFp,
         observedTrials: occurrence.blocking.trials,
       },
+    },
+    claimGates: {
+      failures: gateFailures,
+      occurrenceLowerBound: lowerBound,
+      uniqueFingerprintLowerBound: uniqueFingerprint.blocking.oneSidedLowerBound,
+      repositoryMacroPrecision: repositories.repositoryMacroPrecision,
     },
     decision: {
       status,

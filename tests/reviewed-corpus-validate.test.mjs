@@ -95,3 +95,33 @@ test("reviewed corpus validator rejects infer and unreviewed copy manifests", ()
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test("reviewed corpus validator requires explicit review metadata for existing manifests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-corpus-existing-"));
+  try {
+    const corpusPath = path.join(tempDir, "corpus.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "existing-unreviewed",
+          repository: "https://github.com/example/existing.git",
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          manifest: {
+            strategy: "existing",
+            path: "cellfence.manifest.json",
+          },
+        },
+      ],
+    });
+
+    const result = runValidator(["--corpus", corpusPath]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, false);
+    assert.match(report.issues.join("\n"), /existing manifest must set reviewStatus=reviewed/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});

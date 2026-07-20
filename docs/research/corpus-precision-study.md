@@ -180,6 +180,11 @@ The round8 diagnostic rerun is documented in
 [ts-js-reviewed-pilot-10-2026-07-19-round8.md](ts-js-reviewed-pilot-10-2026-07-19-round8.md):
 it adds inline fs require support while preserving the round4-round7 raw
 finding count.
+The round9 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-20-round9.md](ts-js-reviewed-pilot-10-2026-07-20-round9.md):
+it preserves the round8 finding count and hardens the evidence bundle, blind
+labeling, and claim gates so a small or malformed sample cannot be reported as a
+99% precision result.
 
 The script:
 
@@ -281,6 +286,28 @@ npm run research:bundle -- \
   --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle
 ```
 
+Record the pre-label artifact set before any labels are written. This digest is
+stored in `study.preregistration.preLabelArtifactSetSha256`; it is recomputed
+from corpus, report, findings, sampling, manifests, and logs, excluding
+`labels.jsonl`, `study.json`, and `SHA256SUMS`:
+
+```bash
+node -e 'const fs=require("fs"); const s=JSON.parse(fs.readFileSync("reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle/study.json","utf8")); console.log(s.preregistration.preLabelArtifactSetSha256)'
+```
+
+When rebuilding the labeled bundle, pass that digest back into the bundle so the
+final artifact records the pre-label registration boundary:
+
+```bash
+npm run research:bundle -- \
+  --study-id ts-js-workspace-pilot-2026-07-18 \
+  --corpus docs/research/corpora/ts-js-workspace-pilot-10.json \
+  --report reports/corpus/ts-js-workspace-pilot-10.nondestructive.json \
+  --labels docs/research/labels/ts-js-workspace-pilot.labels.jsonl \
+  --prelabel-artifact-set-sha256 <pre-label-artifact-set-sha256> \
+  --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-labeled-bundle
+```
+
 Validate an existing bundle with:
 
 ```bash
@@ -296,10 +323,15 @@ npm run precision:labels:validate -- \
 ```
 
 The label readiness gate requires the sampled precision-eligible findings to
-have independent labels from separate raters. If independent labels disagree, a
-separate adjudicator must resolve the final label. This gate only checks the
-labeling process; `corpus-precision-claim` still decides whether the labeled
-sample supports a pre-registered precision claim.
+have exactly one `blind_first` and one `blind_second` independent label from
+separate raters. Independent label rows must declare `assignmentId`,
+`evidencePackageId`, and `sawPeerLabels: false`. If independent labels
+disagree, a separate adjudicator must resolve the final label with
+`round: "adjudication"`; adjudication by an independent rater, missing
+adjudication for a disagreement, or adjudication after unanimous independent
+labels is rejected. This gate only checks the labeling process;
+`corpus-precision-claim` still decides whether the labeled sample supports a
+pre-registered precision claim.
 
 The bundle contains:
 
@@ -314,7 +346,11 @@ The bundle contains:
 
 The validator rejects unknown `findingId` references, duplicate
 `rater/findingId` labels, unknown label values, missing rationales, unsorted
-normalized findings, manifest hash mismatches, and SHA-256 mismatches.
+normalized findings, manifest hash mismatches, missing audit logs for claimed
+findings, audit-log/report finding count mismatches, and SHA-256 mismatches.
+`findings.raw.jsonl` is derived from rejected CellFence audit findings; warnings
+remain in the subject logs and evidence graphs, but they are not part of the
+blocking-precision denominator.
 
 Sampling is deterministic. The default per-rule cap is power-based rather than
 a fixed "50 findings per rule" shortcut: it uses the zero-false-positive sample
@@ -322,6 +358,35 @@ size required for a one-sided 95% lower bound of 99% precision. That is 299
 labeled findings per rule when enough findings exist. If a different threshold
 is desired, pre-register it and pass matching `--minimum-precision`,
 `--confidence`, or `--per-rule-cap` values when building the bundle.
+
+## Claim Evaluation Gates
+
+`corpus-precision-claim` is deliberately harder to pass than a pooled
+occurrence precision calculation. A claim protocol must pre-register
+`claim.toolCommit`, `claim.preLabelArtifactSetSha256`,
+`claim.artifactSetSha256`, included rules, target precision, confidence,
+blocking severities, and repository contribution limit. The pre-label digest
+binds the corpus, report, findings, sampling, manifests, and logs before
+labeling, excluding mutable labeling and bundle metadata files; the final
+artifact digest binds the labeled bundle. The claim
+evaluator recomputes every bundle file listed in `SHA256SUMS`; changing
+`labels.jsonl`, `study.json`, sampled findings, manifests, or logs after sealing
+makes the claim invalid even if `SHA256SUMS` itself is unchanged.
+
+A `pass` decision requires all of these to meet the requested threshold:
+
+- pooled blocking occurrence lower bound;
+- unique-fingerprint lower bound, with duplicated occurrences collapsed by
+  subject, rule, and CellFence fingerprint;
+- every included rule's lower bound;
+- repository macro observed precision;
+- every repository's observed blocking precision;
+- no design warnings, including excessive single-repository contribution.
+
+If any gate fails, the result is `insufficient_evidence` when the evidence is
+well-formed, or `invalid` when the protocol, bundle, hashing, or label process
+is malformed. This is intentional: a small or skewed perfect sample must not be
+reported as 99% precision.
 
 For example, the default bundle sampling plan is equivalent to:
 
