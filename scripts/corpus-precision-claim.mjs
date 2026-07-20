@@ -11,6 +11,7 @@ const defaultMinimumPrecision = 0.99;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
 const defaultMinimumIndependentRaters = 2;
+const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 const allowedLabels = new Set([
   "true_positive",
   "false_positive",
@@ -118,6 +119,10 @@ function posixify(value) {
   return String(value).replace(/\\/g, "/").split(path.sep).join("/");
 }
 
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function parseUnitInterval(value, label, issues) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0 || value >= 1) {
     issues.push(`${label} must be a number greater than 0 and less than 1`);
@@ -161,6 +166,23 @@ function normalizeProtocol(protocol, issues) {
   if (!Number.isInteger(minimumIndependentRaters) || minimumIndependentRaters < 1) {
     issues.push("labelingPlan.minimumIndependentRaters must be a positive integer");
   }
+  const allowedRaterTypes = labelingPlan.allowedRaterTypes || labelingPlan.allowedRaterClasses || [];
+  if (!Array.isArray(allowedRaterTypes) || allowedRaterTypes.some((raterType) => typeof raterType !== "string" || raterType.length === 0)) {
+    issues.push("labelingPlan.allowedRaterTypes must be a string array when present");
+  }
+  const allowNonHumanRaters = labelingPlan.allowNonHumanRaters ?? true;
+  if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
+  const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
+  if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const manifestReviewPlan = protocol.manifestReviewPlan || {};
+  const requireExternalManifestReview = manifestReviewPlan.requireExternalAttestations ?? false;
+  if (typeof requireExternalManifestReview !== "boolean") {
+    issues.push("manifestReviewPlan.requireExternalAttestations must be a boolean when present");
+  }
+  const allowedManifestReviewerTypes = manifestReviewPlan.allowedReviewerTypes || manifestReviewPlan.allowedReviewerClasses || ["human", "organization"];
+  if (!Array.isArray(allowedManifestReviewerTypes) || allowedManifestReviewerTypes.some((reviewerType) => typeof reviewerType !== "string" || reviewerType.length === 0)) {
+    issues.push("manifestReviewPlan.allowedReviewerTypes must be a string array when present");
+  }
   const samplingPlan = protocol.samplingPlan || {};
   const maxRepositoryContribution = parsePositiveUnitInterval(
     samplingPlan.maxRepositoryContribution ?? defaultMaxRepositoryContribution,
@@ -184,6 +206,11 @@ function normalizeProtocol(protocol, issues) {
     blockingSeverities: Array.isArray(blockingSeverities) ? blockingSeverities : defaultBlockingSeverities,
     minimumIndependentRaters: Number.isInteger(minimumIndependentRaters) ? minimumIndependentRaters : defaultMinimumIndependentRaters,
     requireAdjudicationForDisagreements: labelingPlan.requireAdjudicationForDisagreements !== false,
+    allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
+    allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
+    requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
+    allowedManifestReviewerTypes: Array.isArray(allowedManifestReviewerTypes) ? allowedManifestReviewerTypes : ["human", "organization"],
     maxRepositoryContribution: maxRepositoryContribution ?? defaultMaxRepositoryContribution,
     exclusionRules: Array.isArray(protocol.exclusionRules) ? protocol.exclusionRules : [],
   };
@@ -255,6 +282,27 @@ function validateLabelRows(labels, knownFindingIds, studyId, issues) {
       issues.push(`labels.jsonl:${lineNumber} duplicates finding/rater/role label`);
     }
     seen.add(duplicateKey);
+  }
+}
+
+function labelRaterType(label) {
+  return label.raterType || label.raterClass || "";
+}
+
+function validateLabelRaterProvenance(labels, protocol, issues) {
+  const allowed = new Set(protocol.allowedRaterTypes);
+  for (const [index, label] of labels.entries()) {
+    const lineNumber = index + 1;
+    const type = labelRaterType(label);
+    if ((protocol.requireKnownRaterType || allowed.size > 0) && !type) {
+      issues.push(`labels.jsonl:${lineNumber} is missing raterType/raterClass required by protocol`);
+    }
+    if (type && allowed.size > 0 && !allowed.has(type)) {
+      issues.push(`labels.jsonl:${lineNumber} raterType/raterClass ${type} is not allowed by protocol`);
+    }
+    if (!protocol.allowNonHumanRaters && (nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(type))) {
+      issues.push(`labels.jsonl:${lineNumber} appears non-human but protocol disallows non-human raters`);
+    }
   }
 }
 
@@ -577,8 +625,20 @@ function corpusSubjectMap(corpus) {
 }
 
 function reviewReaders(manifest) {
+  const attestations = reviewAttestations(manifest)
+    .map((attestation) => attestation.id)
+    .filter((id) => typeof id === "string" && id.length > 0);
+  if (attestations.length > 0) return attestations;
   if (Array.isArray(manifest?.reviewedBy)) return manifest.reviewedBy;
   if (Array.isArray(manifest?.review?.reviewers)) return manifest.review.reviewers;
+  return [];
+}
+
+function reviewAttestations(manifest) {
+  if (Array.isArray(manifest?.review?.reviewerAttestations)) return manifest.review.reviewerAttestations;
+  if (Array.isArray(manifest?.review?.reviewers) && manifest.review.reviewers.every((reviewer) => isRecord(reviewer))) {
+    return manifest.review.reviewers;
+  }
   return [];
 }
 
@@ -604,6 +664,67 @@ function validatePrecisionEligibility(findings, corpus, issues) {
     }
     if (finding.precisionEligible === true && !expectedEligible) {
       issues.push(`finding ${finding.findingId} is precision-eligible without a reviewed manifest`);
+    }
+  }
+}
+
+function manifestCopiesBySubject(study, bundleDir) {
+  const copies = new Map();
+  for (const copy of study.manifestCopies || []) {
+    if (!copy?.subjectId || !copy?.path) continue;
+    const absolutePath = path.join(bundleDir, copy.path);
+    copies.set(copy.subjectId, {
+      ...copy,
+      absolutePath,
+      actualSha256: fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
+    });
+  }
+  return copies;
+}
+
+function validateManifestReviewProvenance(corpus, study, bundleDir, protocol, issues) {
+  if (!protocol.requireExternalManifestReview) return;
+  const allowedReviewerTypes = new Set(protocol.allowedManifestReviewerTypes);
+  const manifestCopies = manifestCopiesBySubject(study, bundleDir);
+  for (const subject of corpus.subjects || []) {
+    const id = subject?.id || "subject";
+    const manifest = subject?.manifest || {};
+    const strategy = manifest.strategy || "existing";
+    const review = manifest.review || {};
+    if (strategy !== "copy") {
+      issues.push(`${id} external manifest review requires manifest.strategy=copy`);
+    }
+    if (manifest.reviewStatus !== "reviewed") {
+      issues.push(`${id} external manifest review requires reviewStatus=reviewed`);
+    }
+    const attestations = reviewAttestations(manifest);
+    if (attestations.length === 0) {
+      issues.push(`${id} external manifest review requires review.reviewerAttestations`);
+    }
+    for (const [index, attestation] of attestations.entries()) {
+      const label = `${id} review.reviewerAttestations[${index}]`;
+      const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
+      if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
+      if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {
+        issues.push(`${label}.reviewerType must be one of ${[...allowedReviewerTypes].join(", ")}`);
+      }
+      if (attestation.independent !== true) issues.push(`${label}.independent must be true`);
+    }
+    if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) {
+      issues.push(`${id} external manifest review requires review.reviewedAt`);
+    }
+    if (typeof review.scope !== "string" || review.scope.length === 0) {
+      issues.push(`${id} external manifest review requires review.scope`);
+    }
+    if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) {
+      issues.push(`${id} external manifest review requires review.reviewedManifestSha256`);
+      continue;
+    }
+    const copy = manifestCopies.get(id);
+    if (!copy || !copy.actualSha256) {
+      issues.push(`${id} external manifest review requires a sealed manifest copy`);
+    } else if (review.reviewedManifestSha256 !== copy.actualSha256) {
+      issues.push(`${id} review.reviewedManifestSha256 does not match sealed manifest copy`);
     }
   }
 }
@@ -659,7 +780,9 @@ function evaluateClaim(options) {
     issues.push("study.summary.sampledFindings does not match sampling.json");
   }
   validateLabelRows(labels, knownFindingIds, protocol.studyId, issues);
+  validateLabelRaterProvenance(labels, protocol, issues);
   validatePrecisionEligibility(findings, corpus, issues);
+  validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
   const includedFindings = selectedFindings(findings, sampling, protocol);
   const finalLabels = [];
@@ -738,6 +861,11 @@ function evaluateClaim(options) {
       confidence: protocol.confidence,
       blockingSeverities: protocol.blockingSeverities,
       minimumIndependentRaters: protocol.minimumIndependentRaters,
+      allowedRaterTypes: protocol.allowedRaterTypes,
+      allowNonHumanRaters: protocol.allowNonHumanRaters,
+      requireKnownRaterType: protocol.requireKnownRaterType,
+      requireExternalManifestReview: protocol.requireExternalManifestReview,
+      allowedManifestReviewerTypes: protocol.allowedManifestReviewerTypes,
       maxRepositoryContribution: protocol.maxRepositoryContribution,
       exclusionRules: protocol.exclusionRules,
       preLabelArtifactSetSha256: protocol.preLabelArtifactSetSha256,

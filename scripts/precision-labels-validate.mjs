@@ -10,6 +10,7 @@ const allowedLabels = new Set([
   "invalid_setup",
   "out_of_scope",
 ]);
+const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 
 function usage() {
   console.error(`Usage: node scripts/precision-labels-validate.mjs --bundle reports/corpus/id-bundle [--min-raters 2] [--out report.json]
@@ -20,7 +21,14 @@ separate adjudicator, and label rows must be schema-valid.`);
 }
 
 function parseArgs(argv) {
-  const parsed = { bundleDir: "", outPath: "", minRaters: 2 };
+  const parsed = {
+    bundleDir: "",
+    outPath: "",
+    minRaters: 2,
+    allowedRaterTypes: [],
+    requireKnownRaterType: false,
+    allowNonHumanRaters: true,
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--bundle") {
@@ -38,6 +46,15 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--min-raters=")) {
       parsed.minRaters = Number(requireInlineValue(argument, "--min-raters=", "--min-raters"));
+    } else if (argument === "--allowed-rater-types") {
+      parsed.allowedRaterTypes = parseList(requireValue(argv, index, "--allowed-rater-types"));
+      index += 1;
+    } else if (argument.startsWith("--allowed-rater-types=")) {
+      parsed.allowedRaterTypes = parseList(requireInlineValue(argument, "--allowed-rater-types=", "--allowed-rater-types"));
+    } else if (argument === "--require-known-rater-type") {
+      parsed.requireKnownRaterType = true;
+    } else if (argument === "--disallow-non-human-raters") {
+      parsed.allowNonHumanRaters = false;
     } else if (argument === "--help" || argument === "-h") {
       usage();
       process.exit(0);
@@ -60,6 +77,10 @@ function requireInlineValue(argument, prefix, optionName) {
   const value = argument.slice(prefix.length);
   if (!value) throw new Error(`${optionName} requires a value`);
   return value;
+}
+
+function parseList(value) {
+  return String(value).split(",").map((entry) => entry.trim()).filter(Boolean);
 }
 
 function readJson(filePath) {
@@ -93,15 +114,30 @@ function increment(counts, key) {
   counts[key] = (counts[key] || 0) + 1;
 }
 
-function validateLabelRows(labels, studyId, knownFindingIds, issues) {
+function labelRaterType(label) {
+  return label.raterType || label.raterClass || "";
+}
+
+function validateLabelRows(labels, studyId, knownFindingIds, issues, options) {
   const seen = new Set();
+  const allowedRaterTypes = new Set(options.allowedRaterTypes);
   for (const [index, label] of labels.entries()) {
     const line = index + 1;
+    const raterType = labelRaterType(label);
     if (label.schemaVersion !== "cellfence.corpus-label.v1") issues.push(`labels.jsonl:${line} has unexpected schemaVersion`);
     if (label.studyId !== studyId) issues.push(`labels.jsonl:${line} has unexpected studyId`);
     if (!knownFindingIds.has(label.findingId)) issues.push(`labels.jsonl:${line} references unknown findingId ${label.findingId}`);
     if (!allowedLabels.has(label.label)) issues.push(`labels.jsonl:${line} has unknown label ${label.label}`);
     if (!label.rater || typeof label.rater !== "string") issues.push(`labels.jsonl:${line} is missing rater`);
+    if ((options.requireKnownRaterType || allowedRaterTypes.size > 0) && !raterType) {
+      issues.push(`labels.jsonl:${line} is missing raterType/raterClass`);
+    }
+    if (raterType && allowedRaterTypes.size > 0 && !allowedRaterTypes.has(raterType)) {
+      issues.push(`labels.jsonl:${line} raterType/raterClass ${raterType} is not allowed`);
+    }
+    if (!options.allowNonHumanRaters && (nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(raterType))) {
+      issues.push(`labels.jsonl:${line} appears non-human but non-human raters are disallowed`);
+    }
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
       issues.push(`labels.jsonl:${line} is missing rationale`);
     }
@@ -187,7 +223,7 @@ function validateBundle(options) {
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") issues.push("study.json has unexpected schemaVersion");
   const studyId = study.studyId;
   const knownFindingIds = new Set(findings.map((finding) => finding.findingId));
-  validateLabelRows(labels, studyId, knownFindingIds, issues);
+  validateLabelRows(labels, studyId, knownFindingIds, issues, options);
 
   const sampledIds = new Set(Array.isArray(sampling.sampledFindingIds) ? sampling.sampledFindingIds : []);
   const selectedFindings = findings.filter((finding) => sampledIds.has(finding.findingId) && finding.precisionEligible === true);
@@ -209,6 +245,9 @@ function validateBundle(options) {
     bundleDir: options.bundleDir,
     studyId,
     minRaters: options.minRaters,
+    allowedRaterTypes: options.allowedRaterTypes,
+    requireKnownRaterType: options.requireKnownRaterType,
+    allowNonHumanRaters: options.allowNonHumanRaters,
     summary: {
       sampledFindings: sampledIds.size,
       sampledPrecisionEligibleFindings: selectedFindings.length,

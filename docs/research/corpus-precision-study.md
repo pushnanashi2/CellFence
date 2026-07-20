@@ -53,6 +53,25 @@ npm run research:reviewed-corpus -- \
   --out reports/corpus/ts-js-blocking-reviewed.corpus-validation.json
 ```
 
+For an external public claim, require review attestations that bind independent
+human or organization reviewers to the exact copied manifest hash:
+
+```bash
+npm run research:reviewed-corpus -- \
+  --corpus docs/research/corpora/ts-js-blocking-reviewed.json \
+  --external-claim \
+  --out reports/corpus/ts-js-blocking-reviewed.external-validation.json
+```
+
+Each precision-eligible copied manifest should include `review.reviewedAt`,
+`review.scope`, `review.reviewedManifestSha256`, and
+`review.reviewerAttestations` entries with `id`, `reviewerType`, and
+`independent: true`. Agent-reviewed manifests remain useful for diagnostics,
+but do not satisfy the default external-claim bar. The final claim protocol
+should also set `manifestReviewPlan.requireExternalAttestations: true`, so the
+claim evaluator independently checks the sealed bundle's copied manifest hash
+against the review attestation.
+
 This intentionally rejects `manifest.strategy: infer` corpora. Infer runs are
 still valuable for onboarding, robustness, and tuning, but their findings are
 not treated as evidence of real repository defects until the manifest is
@@ -185,6 +204,11 @@ The round9 diagnostic rerun is documented in
 it preserves the round8 finding count and hardens the evidence bundle, blind
 labeling, and claim gates so a small or malformed sample cannot be reported as a
 99% precision result.
+The round14 diagnostic rerun is documented in
+[ts-js-reviewed-pilot-10-2026-07-20-round14.md](ts-js-reviewed-pilot-10-2026-07-20-round14.md):
+it carries labels forward by stable finding ID, records agent rater provenance,
+adds supplemental blind labels for newly surfaced Remix resource findings, and
+keeps the 99% claim blocked as `insufficient_evidence` rather than `invalid`.
 
 The script:
 
@@ -333,6 +357,37 @@ labels is rejected. This gate only checks the labeling process;
 `corpus-precision-claim` still decides whether the labeled sample supports a
 pre-registered precision claim.
 
+When rerunning a fixed corpus, transfer existing labels by stable finding ID and
+record any newly sampled findings for supplemental labeling:
+
+```bash
+npm run precision:labels:transfer -- \
+  --source-bundle reports/corpus/ts-js-confirmation-v1-labeled-bundle \
+  --target-bundle reports/corpus/ts-js-confirmation-v2-bundle \
+  --out docs/research/labels/ts-js-confirmation-v2.labels.jsonl \
+  --report reports/corpus/ts-js-confirmation-v2-label-transfer.json
+```
+
+Use `--allow-partial` only for an intermediate worklist. A claim-eligible label
+file should transfer or supplement every sampled precision-eligible finding.
+If the source labels predate rater-provenance metadata, add a declared default
+with `--default-rater-type agent` or backfill the actual human or organization
+types before running the claim protocol.
+
+Rater provenance can also be enforced at validation time:
+
+```bash
+npm run precision:labels:validate -- \
+  --bundle reports/corpus/ts-js-confirmation-v2-labeled-bundle \
+  --allowed-rater-types human,organization \
+  --require-known-rater-type \
+  --disallow-non-human-raters
+```
+
+Agent-only labels may be pre-registered for diagnostic studies by allowing
+`agent` in the protocol. They should not be described as human-reviewed
+external confirmation evidence.
+
 Run the claim preflight before spending reviewer time or before invoking the
 final claim evaluator:
 
@@ -348,10 +403,11 @@ findings, per-rule sample deficits, repository concentration, dirty harness
 state, missing independent labels, and whether any labels appear to be
 agent-only. Exit code `0` means the bundle is ready to attempt the claim. Exit
 code `1` means the bundle is well-formed but underpowered, unbalanced, or
-incompletely labeled. Exit code `2` means the protocol and bundle do not match
-or the inputs are malformed. A preflight failure is not a detector failure; it
-is the guardrail that prevents a small tuning corpus from being presented as a
-99% precision result.
+incompletely labeled. Exit code `2` means the protocol and bundle do not match,
+the labeling provenance violates protocol, manifest review provenance is not
+hash-bound, or the inputs are malformed. A preflight failure is not a detector
+failure; it is the guardrail that prevents a small tuning corpus from being
+presented as a 99% precision result.
 
 The bundle contains:
 
@@ -511,6 +567,10 @@ Before looking at confirmation results, write a protocol file:
   "labelingPlan": {
     "minimumIndependentRaters": 2,
     "requireAdjudicationForDisagreements": true
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": true,
+    "allowedReviewerTypes": ["human", "organization"]
   },
   "exclusionRules": []
 }

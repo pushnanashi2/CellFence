@@ -184,3 +184,30 @@ test("precision labels validator rejects incomplete independent labeling", () =>
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test("precision labels validator enforces optional rater provenance constraints", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-rater-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      label(findings[0].findingId, "agent-blind-first", "true_positive", { raterType: "agent" }),
+      label(findings[0].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+      label(findings[1].findingId, "reviewer-a", "true_positive", { raterType: "human" }),
+      label(findings[1].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+    ]);
+
+    const result = runValidator([
+      "--bundle",
+      bundleDir,
+      "--allowed-rater-types",
+      "human",
+      "--disallow-non-human-raters",
+    ]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /raterType\/raterClass agent is not allowed/);
+    assert.match(report.issues.join("\n"), /appears non-human/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});

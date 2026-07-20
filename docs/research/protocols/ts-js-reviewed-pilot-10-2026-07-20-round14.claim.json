@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-10-2026-07-20-round14",
+  "claim": {
+    "toolCommit": "cc608cdc524101e9693f5d196c5139d8f425dbd7",
+    "preLabelArtifactSetSha256": "6ba35bd9ade352ccdfa9e82cb408e379aaf94c4d85ee1b9eac8c34ff5db2cb6b",
+    "artifactSetSha256": "164892ac0b1278163259c0b34c6bb9db63f0a87727f190a414a8ba5ff4953e55",
+    "targetPopulation": "reviewed TS/JS workspace repositories, round14 diagnostic corpus",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": ["error"]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "deterministic per-rule sampling from sealed bundle using corpus SHA-256 seed",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": ["agent"],
+    "allowNonHumanRaters": true,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": false
+  },
+  "exclusionRules": []
+}

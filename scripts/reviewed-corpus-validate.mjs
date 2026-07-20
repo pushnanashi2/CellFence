@@ -4,15 +4,17 @@ import fs from "node:fs";
 import path from "node:path";
 
 function usage() {
-  console.error(`Usage: node scripts/reviewed-corpus-validate.mjs --corpus corpus.json [--out report.json]
+  console.error(`Usage: node scripts/reviewed-corpus-validate.mjs --corpus corpus.json [--out report.json] [--external-claim]
 
 Validates that a corpus is eligible for a reviewed-manifest precision study.
 Infer-manifest onboarding corpora are intentionally rejected: they can measure
-robustness and onboarding friction, but not blocking precision.`);
+robustness and onboarding friction, but not blocking precision. With
+--external-claim, manifest review attestations must identify independent
+human/organization reviewers and bind the reviewed manifest SHA-256.`);
 }
 
 function parseArgs(argv) {
-  const parsed = { corpusPath: "", outPath: "" };
+  const parsed = { corpusPath: "", outPath: "", externalClaim: false };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--corpus") {
@@ -25,6 +27,8 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--out=")) {
       parsed.outPath = path.resolve(requireInlineValue(argument, "--out=", "--out"));
+    } else if (argument === "--external-claim") {
+      parsed.externalClaim = true;
     } else if (argument === "--help" || argument === "-h") {
       usage();
       process.exit(0);
@@ -70,9 +74,50 @@ function isRecord(value) {
 }
 
 function reviewReaders(manifest) {
+  const attestations = reviewAttestations(manifest)
+    .map((attestation) => attestation.id)
+    .filter((id) => typeof id === "string" && id.length > 0);
+  if (attestations.length > 0) return attestations;
   if (Array.isArray(manifest?.reviewedBy)) return manifest.reviewedBy;
   if (Array.isArray(manifest?.review?.reviewers)) return manifest.review.reviewers;
   return [];
+}
+
+function reviewAttestations(manifest) {
+  if (Array.isArray(manifest?.review?.reviewerAttestations)) return manifest.review.reviewerAttestations;
+  if (Array.isArray(manifest?.review?.reviewers) && manifest.review.reviewers.every((reviewer) => isRecord(reviewer))) {
+    return manifest.review.reviewers;
+  }
+  return [];
+}
+
+function validateExternalReviewAttestation(subject, manifest, manifestSourceSha256, issues) {
+  const prefix = subject.id || "subject";
+  const review = manifest.review || {};
+  const attestations = reviewAttestations(manifest);
+  if (attestations.length === 0) {
+    issues.push(`${prefix} external claim review requires review.reviewerAttestations with independent human/organization reviewers`);
+  }
+  for (const [index, attestation] of attestations.entries()) {
+    const label = `${prefix} review.reviewerAttestations[${index}]`;
+    const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
+    if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
+    if (reviewerType !== "human" && reviewerType !== "organization") {
+      issues.push(`${label}.reviewerType must be human or organization`);
+    }
+    if (attestation.independent !== true) issues.push(`${label}.independent must be true`);
+  }
+  if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) {
+    issues.push(`${prefix} external claim review requires review.reviewedAt`);
+  }
+  if (typeof review.scope !== "string" || review.scope.length === 0) {
+    issues.push(`${prefix} external claim review requires review.scope`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) {
+    issues.push(`${prefix} external claim review requires review.reviewedManifestSha256`);
+  } else if (manifestSourceSha256 && review.reviewedManifestSha256 !== manifestSourceSha256) {
+    issues.push(`${prefix} review.reviewedManifestSha256 does not match manifest.source`);
+  }
 }
 
 function isPathWithin(baseDir, candidatePath) {
@@ -80,7 +125,7 @@ function isPathWithin(baseDir, candidatePath) {
   return relative !== "" && relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
 }
 
-function validateSubject(subject, index, seenIds, corpusDir) {
+function validateSubject(subject, index, seenIds, corpusDir, options = {}) {
   const issues = [];
   const warnings = [];
   const prefix = `subjects[${index}]`;
@@ -101,8 +146,10 @@ function validateSubject(subject, index, seenIds, corpusDir) {
 
   const manifest = subject.manifest || {};
   const strategy = manifest.strategy || "existing";
+  let manifestSourceSha256 = "";
   let precisionEligible = false;
   if (strategy === "existing") {
+    if (options.externalClaim) issues.push(`${subject.id || prefix} external claim requires a copy manifest with a hashable manifest.source`);
     precisionEligible = manifest.reviewStatus === "reviewed";
     if (!precisionEligible) issues.push(`${subject.id || prefix} existing manifest must set reviewStatus=reviewed`);
     const reviewers = reviewReaders(manifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
@@ -119,6 +166,7 @@ function validateSubject(subject, index, seenIds, corpusDir) {
       const sourcePath = path.resolve(corpusDir, manifest.source);
       if (!isPathWithin(corpusDir, sourcePath)) issues.push(`${subject.id || prefix} manifest.source escapes the corpus directory`);
       else if (!fs.existsSync(sourcePath)) issues.push(`${subject.id || prefix} manifest.source not found: ${manifest.source}`);
+      else manifestSourceSha256 = sha256File(sourcePath);
     }
     const reviewers = reviewReaders(manifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
     if (reviewers.length === 0) issues.push(`${subject.id || prefix} reviewed copy manifest requires reviewedBy or review.reviewers`);
@@ -128,6 +176,9 @@ function validateSubject(subject, index, seenIds, corpusDir) {
   } else {
     issues.push(`${subject.id || prefix} manifest.strategy=${strategy} is not precision-eligible; use existing or reviewed copy`);
   }
+  if (options.externalClaim && precisionEligible) {
+    validateExternalReviewAttestation(subject, manifest, manifestSourceSha256, issues);
+  }
 
   return {
     id: subject.id || null,
@@ -135,13 +186,14 @@ function validateSubject(subject, index, seenIds, corpusDir) {
     commit: subject.commit || null,
     manifestStrategy: strategy,
     manifestReviewStatus: manifest.reviewStatus || "unknown",
+    manifestSourceSha256: manifestSourceSha256 || null,
     precisionEligible,
     issues,
     warnings,
   };
 }
 
-function validateCorpus(corpusPath) {
+function validateCorpus(corpusPath, options = {}) {
   const corpus = readJson(corpusPath);
   const corpusDir = path.dirname(corpusPath);
   const issues = [];
@@ -151,7 +203,7 @@ function validateCorpus(corpusPath) {
   if (!isRecord(corpus.selectionPolicy)) warnings.push("reviewed precision corpus should include selectionPolicy");
   const seenIds = new Set();
   const subjects = Array.isArray(corpus.subjects)
-    ? corpus.subjects.map((subject, index) => validateSubject(subject, index, seenIds, corpusDir))
+    ? corpus.subjects.map((subject, index) => validateSubject(subject, index, seenIds, corpusDir, options))
     : [];
   for (const subject of subjects) {
     issues.push(...subject.issues);
@@ -162,6 +214,7 @@ function validateCorpus(corpusPath) {
     generatedAt: new Date().toISOString(),
     corpusPath,
     corpusSha256: sha256File(corpusPath),
+    externalClaim: options.externalClaim === true,
     summary: {
       subjects: subjects.length,
       precisionEligibleSubjects: subjects.filter((subject) => subject.precisionEligible && subject.issues.length === 0).length,
@@ -186,7 +239,7 @@ function main() {
     return 2;
   }
   try {
-    const report = validateCorpus(options.corpusPath);
+    const report = validateCorpus(options.corpusPath, options);
     if (options.outPath) writeJson(options.outPath, report);
     console.log(JSON.stringify(report, null, 2));
     return report.ok ? 0 : 1;

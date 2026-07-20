@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -90,6 +91,14 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function hashFile(filePath) {
+  return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function parseUnitInterval(value, label, issues) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0 || value >= 1) {
     issues.push(`${label} must be a number greater than 0 and less than 1`);
@@ -131,6 +140,24 @@ function normalizeProtocol(protocol, issues) {
     "samplingPlan.maxRepositoryContribution",
     issues,
   );
+  const labelingPlan = protocol.labelingPlan || {};
+  const allowedRaterTypes = labelingPlan.allowedRaterTypes || labelingPlan.allowedRaterClasses || [];
+  if (!Array.isArray(allowedRaterTypes) || allowedRaterTypes.some((raterType) => typeof raterType !== "string" || raterType.length === 0)) {
+    issues.push("labelingPlan.allowedRaterTypes must be a string array when present");
+  }
+  const allowNonHumanRaters = labelingPlan.allowNonHumanRaters ?? true;
+  if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
+  const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
+  if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const manifestReviewPlan = protocol.manifestReviewPlan || {};
+  const requireExternalManifestReview = manifestReviewPlan.requireExternalAttestations ?? false;
+  if (typeof requireExternalManifestReview !== "boolean") {
+    issues.push("manifestReviewPlan.requireExternalAttestations must be a boolean when present");
+  }
+  const allowedManifestReviewerTypes = manifestReviewPlan.allowedReviewerTypes || manifestReviewPlan.allowedReviewerClasses || ["human", "organization"];
+  if (!Array.isArray(allowedManifestReviewerTypes) || allowedManifestReviewerTypes.some((reviewerType) => typeof reviewerType !== "string" || reviewerType.length === 0)) {
+    issues.push("manifestReviewPlan.allowedReviewerTypes must be a string array when present");
+  }
   return {
     studyId: protocol.studyId,
     includedRules: Array.isArray(includedRules) ? includedRules : [],
@@ -139,6 +166,11 @@ function normalizeProtocol(protocol, issues) {
     confidence: confidence ?? defaultConfidence,
     blockingSeverities: Array.isArray(blockingSeverities) ? blockingSeverities : defaultBlockingSeverities,
     maxRepositoryContribution: maxRepositoryContribution ?? defaultMaxRepositoryContribution,
+    allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
+    allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
+    requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
+    allowedManifestReviewerTypes: Array.isArray(allowedManifestReviewerTypes) ? allowedManifestReviewerTypes : ["human", "organization"],
   };
 }
 
@@ -279,6 +311,102 @@ function raterSummary(labels) {
   };
 }
 
+function raterType(label) {
+  return label.raterType || label.raterClass || "";
+}
+
+function validateLabelRaterProvenance(labels, protocol, issues) {
+  const allowed = new Set(protocol.allowedRaterTypes);
+  const missingType = labels.filter((label) => !raterType(label)).length;
+  if ((protocol.requireKnownRaterType || allowed.size > 0) && missingType > 0) {
+    issues.push(`${missingType} labels are missing raterType/raterClass required by the protocol`);
+  }
+  if (allowed.size > 0) {
+    const disallowed = labels.filter((label) => {
+      const type = raterType(label);
+      return type && !allowed.has(type);
+    });
+    if (disallowed.length > 0) {
+      issues.push(`${disallowed.length} labels use raterType/raterClass outside the protocol allow-list`);
+    }
+  }
+  if (!protocol.allowNonHumanRaters) {
+    const nonHumanLabels = labels.filter((label) => {
+      const type = raterType(label);
+      return nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(type);
+    });
+    if (nonHumanLabels.length > 0) issues.push(`${nonHumanLabels.length} labels appear to be non-human but protocol disallows non-human raters`);
+  }
+}
+
+function reviewAttestations(manifest) {
+  if (Array.isArray(manifest?.review?.reviewerAttestations)) return manifest.review.reviewerAttestations;
+  if (Array.isArray(manifest?.review?.reviewers) && manifest.review.reviewers.every((reviewer) => isRecord(reviewer))) {
+    return manifest.review.reviewers;
+  }
+  return [];
+}
+
+function manifestCopiesBySubject(study, bundleDir) {
+  const copies = new Map();
+  for (const copy of study.manifestCopies || []) {
+    if (!copy?.subjectId || !copy?.path) continue;
+    const absolutePath = path.join(bundleDir, copy.path);
+    copies.set(copy.subjectId, {
+      ...copy,
+      actualSha256: fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
+    });
+  }
+  return copies;
+}
+
+function validateManifestReviewProvenance(corpus, study, bundleDir, protocol, issues) {
+  if (!protocol.requireExternalManifestReview) return;
+  const allowedReviewerTypes = new Set(protocol.allowedManifestReviewerTypes);
+  const manifestCopies = manifestCopiesBySubject(study, bundleDir);
+  for (const subject of corpus.subjects || []) {
+    const id = subject?.id || "subject";
+    const manifest = subject?.manifest || {};
+    const strategy = manifest.strategy || "existing";
+    const review = manifest.review || {};
+    if (strategy !== "copy") {
+      issues.push(`${id} external manifest review requires manifest.strategy=copy`);
+    }
+    if (manifest.reviewStatus !== "reviewed") {
+      issues.push(`${id} external manifest review requires reviewStatus=reviewed`);
+    }
+    const attestations = reviewAttestations(manifest);
+    if (attestations.length === 0) {
+      issues.push(`${id} external manifest review requires review.reviewerAttestations`);
+    }
+    for (const [index, attestation] of attestations.entries()) {
+      const label = `${id} review.reviewerAttestations[${index}]`;
+      const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
+      if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
+      if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {
+        issues.push(`${label}.reviewerType must be one of ${[...allowedReviewerTypes].join(", ")}`);
+      }
+      if (attestation.independent !== true) issues.push(`${label}.independent must be true`);
+    }
+    if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) {
+      issues.push(`${id} external manifest review requires review.reviewedAt`);
+    }
+    if (typeof review.scope !== "string" || review.scope.length === 0) {
+      issues.push(`${id} external manifest review requires review.scope`);
+    }
+    if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) {
+      issues.push(`${id} external manifest review requires review.reviewedManifestSha256`);
+      continue;
+    }
+    const copy = manifestCopies.get(id);
+    if (!copy || !copy.actualSha256) {
+      issues.push(`${id} external manifest review requires a sealed manifest copy`);
+    } else if (review.reviewedManifestSha256 !== copy.actualSha256) {
+      issues.push(`${id} review.reviewedManifestSha256 does not match sealed manifest copy`);
+    }
+  }
+}
+
 function metricFor(findings, labelsByFinding, protocol) {
   const counts = {
     true_positive: 0,
@@ -317,11 +445,17 @@ function repositoryContribution(selected, protocol) {
       selectedFindings: findings.length,
       contribution: denominator === 0 ? null : findings.length / denominator,
       overLimit: denominator > 0 && findings.length / denominator > protocol.maxRepositoryContribution,
+      additionalOtherFindingsNeeded: denominator === 0
+        ? 0
+        : Math.max(0, Math.ceil(findings.length / protocol.maxRepositoryContribution) - denominator),
     }))
     .sort((left, right) => (right.contribution ?? 0) - (left.contribution ?? 0) || left.repository.localeCompare(right.repository));
   return {
     maxRepositoryContribution: repositories[0]?.contribution ?? null,
     limit: protocol.maxRepositoryContribution,
+    repositoriesWithSelectedFindings: repositories.length,
+    minimumRepositoriesWithSelectedFindings: Math.ceil(1 / protocol.maxRepositoryContribution),
+    feasibleWithCurrentRepositoryCount: repositories.length >= Math.ceil(1 / protocol.maxRepositoryContribution),
     repositories,
   };
 }
@@ -333,6 +467,7 @@ function evaluatePreflight(options) {
   const protocolRaw = readJson(options.protocolPath);
   const protocol = normalizeProtocol(protocolRaw, issues);
   const study = readJson(path.join(options.bundleDir, "study.json"));
+  const corpus = readJson(path.join(options.bundleDir, "corpus.json"));
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
@@ -342,6 +477,8 @@ function evaluatePreflight(options) {
   if (study.studyId !== protocol.studyId) issues.push(`bundle studyId ${study.studyId} does not match protocol studyId ${protocol.studyId}`);
   if (study.environment?.harnessDirty === true) gateFailures.push("bundle was produced from a dirty CellFence worktree");
   if (study.environment && study.environment.harnessDirty !== false) warnings.push("study.environment.harnessDirty is not explicitly false");
+  validateLabelRaterProvenance(labels, protocol, issues);
+  validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
   const selected = selectedFindings(findings, sampling, protocol);
   if (selected.length === 0) gateFailures.push("no sampled precision-eligible findings match protocol rules and blocking severities");
@@ -369,9 +506,12 @@ function evaluatePreflight(options) {
   }
 
   const contribution = repositoryContribution(selected, protocol);
+  if (selected.length > 0 && !contribution.feasibleWithCurrentRepositoryCount) {
+    gateFailures.push(`selected findings span ${contribution.repositoriesWithSelectedFindings} repositories; at least ${contribution.minimumRepositoriesWithSelectedFindings} are required for a ${(protocol.maxRepositoryContribution * 100).toFixed(1)}% repository contribution limit`);
+  }
   for (const repository of contribution.repositories) {
     if (repository.overLimit) {
-      gateFailures.push(`${repository.repository} contributes ${(repository.contribution * 100).toFixed(1)}% of selected findings; limit is ${(protocol.maxRepositoryContribution * 100).toFixed(1)}%`);
+      gateFailures.push(`${repository.repository} contributes ${(repository.contribution * 100).toFixed(1)}% of selected findings; limit is ${(protocol.maxRepositoryContribution * 100).toFixed(1)}%; add at least ${repository.additionalOtherFindingsNeeded} sampled findings from other repositories or reduce this repository's sampled findings`);
     }
   }
 
@@ -392,6 +532,11 @@ function evaluatePreflight(options) {
       blockingSeverities: protocol.blockingSeverities,
       maxRepositoryContribution: protocol.maxRepositoryContribution,
       requiredZeroFalsePositiveFindingsPerRule: requiredZeroFp,
+      allowedRaterTypes: protocol.allowedRaterTypes,
+      allowNonHumanRaters: protocol.allowNonHumanRaters,
+      requireKnownRaterType: protocol.requireKnownRaterType,
+      requireExternalManifestReview: protocol.requireExternalManifestReview,
+      allowedManifestReviewerTypes: protocol.allowedManifestReviewerTypes,
     },
     summary: {
       totalFindings: findings.length,

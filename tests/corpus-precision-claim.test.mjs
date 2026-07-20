@@ -406,6 +406,31 @@ function createProtocol(tempDir, bundleDir, patch = {}) {
   return protocolPath;
 }
 
+function sealBundleAfterCorpusEdit(bundleDir) {
+  const studyPath = path.join(bundleDir, "study.json");
+  const study = readJson(studyPath);
+  study.preregistration = {
+    ...(study.preregistration || {}),
+    preLabelArtifactSetSha256: preLabelArtifactSetSha256(bundleDir),
+  };
+  writeJson(studyPath, study);
+  writeSha256Sums(bundleDir);
+}
+
+function replaceCorpusManifestReviews(bundleDir, reviewFactory) {
+  const corpusPath = path.join(bundleDir, "corpus.json");
+  const corpus = readJson(corpusPath);
+  corpus.subjects = corpus.subjects.map((subject) => ({
+    ...subject,
+    manifest: {
+      ...subject.manifest,
+      review: reviewFactory(subject),
+    },
+  }));
+  writeJson(corpusPath, corpus);
+  sealBundleAfterCorpusEdit(bundleDir);
+}
+
 test("corpus precision claim passes only when the lower confidence bound clears the protocol threshold", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-pass-"));
   try {
@@ -543,6 +568,39 @@ test("corpus precision claim requires independent labels and adjudicates disagre
   }
 });
 
+test("corpus precision claim rejects labels that violate rater provenance policy", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-rater-"));
+  try {
+    const findings = Array.from({ length: 2 }, (_, index) => createFinding(index));
+    const labels = labelsFor(findings).map((entry, index) => {
+      if (index === 0) return { ...entry, rater: "agent-blind-first", raterType: "agent" };
+      return { ...entry, raterType: "human" };
+    });
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+        allowNonHumanRaters: false,
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /raterType\/raterClass agent is not allowed/);
+    assert.match(report.labelQuality.issues.join("\n"), /disallows non-human/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision claim counts needs_policy as semantic success but blocking failure", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-needs-policy-"));
   try {
@@ -659,6 +717,80 @@ test("corpus precision claim recomputes reviewed eligibility from the sealed cor
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision.status, "invalid");
     assert.match(report.labelQuality.issues.join("\n"), /precision-eligible without a reviewed manifest|precisionEligible does not match/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim accepts attestation-only reviewed copy manifests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-attestation-"));
+  try {
+    const findings = Array.from({ length: 598 }, (_, index) => createFinding(index));
+    const bundleDir = createBundle(tempDir, findings, labelsFor(findings));
+    replaceCorpusManifestReviews(bundleDir, () => ({
+      reviewerAttestations: [
+        {
+          id: "reviewer-a",
+          reviewerType: "human",
+          independent: true,
+        },
+      ],
+      reviewedAt: "2026-07-20",
+      reviewedManifestSha256: fixtureManifestSha256,
+      scope: "package/workspace boundary manifest review",
+      boundaryEvidence: ["fixture package boundary"],
+    }));
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "pass");
+    assert.equal(report.protocol.requireExternalManifestReview, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim hash-binds external manifest review attestations", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-attestation-hash-"));
+  try {
+    const findings = [createFinding(0), createFinding(1)];
+    const bundleDir = createBundle(tempDir, findings, labelsFor(findings));
+    replaceCorpusManifestReviews(bundleDir, () => ({
+      reviewerAttestations: [
+        {
+          id: "reviewer-a",
+          reviewerType: "human",
+          independent: true,
+        },
+      ],
+      reviewedAt: "2026-07-20",
+      reviewedManifestSha256: "0".repeat(64),
+      scope: "package/workspace boundary manifest review",
+      boundaryEvidence: ["fixture package boundary"],
+    }));
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+      },
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /reviewedManifestSha256 does not match sealed manifest copy/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

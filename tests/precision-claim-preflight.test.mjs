@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -7,6 +8,11 @@ import test from "node:test";
 
 const root = process.cwd();
 const scriptPath = path.join(root, "scripts", "precision-claim-preflight.mjs");
+const fixtureManifest = {
+  schemaVersion: "cellfence.manifest.v1",
+  cells: [],
+};
+const fixtureManifestSha256 = crypto.createHash("sha256").update(`${JSON.stringify(fixtureManifest, null, 2)}\n`).digest("hex");
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -77,13 +83,43 @@ function protocol(patch = {}) {
 
 function createBundle(tempDir, findings, labels, patch = {}) {
   const bundleDir = path.join(tempDir, "bundle");
+  const subjects = [...new Map(findings.map((entry) => [entry.subjectId, entry])).values()];
+  const manifestCopies = [];
+  for (const subject of subjects) {
+    const relativePath = `manifests/${subject.subjectId}.json`;
+    writeJson(path.join(bundleDir, relativePath), fixtureManifest);
+    manifestCopies.push({
+      subjectId: subject.subjectId,
+      path: relativePath,
+      sha256: fixtureManifestSha256,
+    });
+  }
   writeJson(path.join(bundleDir, "study.json"), {
     schemaVersion: "cellfence.corpus-evidence-bundle.v1",
     studyId: "preflight-fixture",
     environment: {
       harnessDirty: false,
     },
+    manifestCopies,
     ...patch.study,
+  });
+  writeJson(path.join(bundleDir, "corpus.json"), {
+    schemaVersion: "cellfence.corpus.v1",
+    subjects: subjects.map((subject) => ({
+      id: subject.subjectId,
+      repository: subject.repository,
+      commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      manifest: {
+        strategy: "copy",
+        source: `manifests/${subject.subjectId}.json`,
+        reviewStatus: "reviewed",
+        review: {
+          reviewers: ["reviewer-a"],
+          boundaryEvidence: ["fixture boundary"],
+        },
+      },
+    })),
+    ...patch.corpus,
   });
   writeJson(path.join(bundleDir, "sampling.json"), {
     schemaVersion: "cellfence.corpus-sampling.v1",
@@ -177,6 +213,90 @@ test("precision claim preflight rejects repository concentration before claim ev
     const report = JSON.parse(result.stdout);
     assert.equal(report.repositoryContribution.maxRepositoryContribution, 1);
     assert.match(report.gateFailures.join("\n"), /contributes 100.0%/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight gates rater provenance when protocol requires it", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-rater-"));
+  try {
+    const findings = [finding(1)];
+    const labels = [
+      label(findings[0].findingId, "agent-blind-first", "blind_first"),
+      label(findings[0].findingId, "reviewer-b", "blind_second"),
+    ];
+    labels[1].raterType = "human";
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+        allowNonHumanRaters: false,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /missing raterType\/raterClass/);
+    assert.match(report.issues.join("\n"), /non-human/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight gates external manifest review provenance", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-manifest-review-"));
+  try {
+    const findings = [finding(1)];
+    const labels = [
+      label(findings[0].findingId, "reviewer-a", "blind_first"),
+      label(findings[0].findingId, "reviewer-b", "blind_second"),
+    ];
+    const bundleDir = createBundle(tempDir, findings, labels, {
+      corpus: {
+        subjects: [
+          {
+            id: "subject-1",
+            repository: "https://github.com/example/subject-1.git",
+            commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            manifest: {
+              strategy: "copy",
+              source: "manifests/subject-1.json",
+              reviewStatus: "reviewed",
+              review: {
+                reviewerAttestations: [
+                  {
+                    id: "reviewer-a",
+                    reviewerType: "human",
+                    independent: true,
+                  },
+                ],
+                reviewedAt: "2026-07-20",
+                reviewedManifestSha256: "0".repeat(64),
+                scope: "package/workspace boundary manifest review",
+                boundaryEvidence: ["fixture boundary"],
+              },
+            },
+          },
+        ],
+      },
+    });
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /reviewedManifestSha256 does not match sealed manifest copy/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

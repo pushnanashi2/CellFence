@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -121,6 +122,122 @@ test("reviewed corpus validator requires explicit review metadata for existing m
     const report = JSON.parse(result.stdout);
     assert.equal(report.ok, false);
     assert.match(report.issues.join("\n"), /existing manifest must set reviewStatus=reviewed/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reviewed corpus validator rejects existing manifests for external claims", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-corpus-existing-external-"));
+  try {
+    const corpusPath = path.join(tempDir, "corpus.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "existing-reviewed",
+          repository: "https://github.com/example/existing.git",
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          manifest: {
+            strategy: "existing",
+            path: "cellfence.manifest.json",
+            reviewStatus: "reviewed",
+            review: {
+              reviewers: [
+                {
+                  id: "reviewer-a",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+              reviewedAt: "2026-07-20",
+              reviewedManifestSha256: "0".repeat(64),
+              scope: "package/workspace boundary manifest review",
+              boundaryEvidence: ["package exports"],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = runValidator(["--corpus", corpusPath, "--external-claim"]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /external claim requires a copy manifest/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reviewed corpus validator requires attested review metadata for external claims", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-corpus-external-"));
+  try {
+    const corpusPath = path.join(tempDir, "corpus.json");
+    const manifestPath = path.join(tempDir, "manifests", "demo.json");
+    writeJson(manifestPath, { schemaVersion: "cellfence.manifest.v1", cells: [] });
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "demo",
+          repository: "https://github.com/example/demo.git",
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          manifest: {
+            strategy: "copy",
+            source: "manifests/demo.json",
+            reviewStatus: "reviewed",
+            review: {
+              reviewers: ["codex-agent-reviewer"],
+              boundaryEvidence: ["package exports"],
+            },
+          },
+        },
+      ],
+    });
+
+    const rejected = runValidator(["--corpus", corpusPath, "--external-claim"]);
+
+    assert.equal(rejected.status, 1);
+    let report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /reviewerAttestations/);
+    assert.match(report.issues.join("\n"), /reviewedManifestSha256/);
+
+    const manifestSha256 = crypto.createHash("sha256").update(fs.readFileSync(manifestPath)).digest("hex");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "demo",
+          repository: "https://github.com/example/demo.git",
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          manifest: {
+            strategy: "copy",
+            source: "manifests/demo.json",
+            reviewStatus: "reviewed",
+            review: {
+              reviewerAttestations: [
+                {
+                  id: "reviewer-a",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+              reviewedAt: "2026-07-20",
+              reviewedManifestSha256: manifestSha256,
+              scope: "package/workspace boundary manifest review",
+              boundaryEvidence: ["package exports"],
+            },
+          },
+        },
+      ],
+    });
+
+    const accepted = runValidator(["--corpus", corpusPath, "--external-claim"]);
+
+    assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+    report = JSON.parse(accepted.stdout);
+    assert.equal(report.ok, true);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
