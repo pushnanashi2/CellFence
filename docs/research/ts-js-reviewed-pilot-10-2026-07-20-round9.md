@@ -68,25 +68,56 @@ CELLFENCE_UNDECLARED_RESOURCE_ACCESS: 2
 
 ## Claim Status
 
-The round9 bundle is intentionally claim-ineligible today. The label readiness
-gate reports:
+The round9 bundle was subsequently blind-labeled by two independent Codex
+agents and adjudicated by a third agent where the two labels disagreed. This is
+still not a public precision claim because the raters are agents, not external
+human or organizational reviewers, and the sample is underpowered for a 99%
+claim.
+
+The final label-readiness gate reports:
 
 ```text
 sampled findings: 75
 sampled precision-eligible findings: 75
-labels: 0
-fully labeled findings: 0
-issues: 150
-ok: false
+labels: 161
+fully labeled findings: 75
+adjudicated findings: 11
+issues: 0
+ok: true
 ```
 
-This is the desired failure mode. The current evidence supports pipeline
-robustness and regression diagnosis, not an external 99% precision claim.
+The final labels were:
+
+```text
+true_positive: 49
+false_positive: 5
+needs_policy: 10
+out_of_scope: 8
+invalid_setup: 3
+```
+
+The claim evaluator correctly rejects a 99% precision claim:
+
+```text
+observed blocking precision: 49 / 64 = 76.6%
+one-sided 95% lower bound: 66.2%
+decision: insufficient_evidence
+```
 
 Even if all 75 findings were labeled true positive, the sample would remain far
 below the default power target for a one-sided 95% lower bound of 99% precision:
 299 zero-false-positive labeled findings per included rule, plus rule-level,
 unique-fingerprint, repository-macro, and per-repository gates.
+
+## Post-Label Hardening Candidates
+
+The false positives split into safe detector fixes and one unsafe shortcut:
+
+- safe: `const name = "specifier"; import(name)` and `require(name)` should be
+  resolved statically;
+- safe: `require(require.resolve("specifier"))` should be resolved statically;
+- unsafe without flow analysis: `if (singletonSet.has(name)) require(name)`,
+  because `Set` contents and the tested variable are mutable.
 
 ## Remaining Judgment Required
 
