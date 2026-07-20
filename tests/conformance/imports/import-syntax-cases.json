@@ -569,7 +569,7 @@
       "syntaxFamily": "dynamic-import",
       "sourceFile": "src/consumer/use.ts",
       "source": [
-        "const target = \"../producer/internal\";",
+        "let target = \"../producer/internal\";",
         "export async function value() { return import(target); }"
       ],
       "expected": {
@@ -583,7 +583,7 @@
       "syntaxFamily": "commonjs-require",
       "sourceFile": "src/consumer/use.ts",
       "source": [
-        "const target = \"../producer/internal\";",
+        "let target = \"../producer/internal\";",
         "const producer = require(target);",
         "export const value = producer;"
       ],

@@ -72,6 +72,7 @@ type ImportBindingKind = "require" | "createRequire" | "moduleNamespace" | "node
 
 type ImportScope = {
   bindings: Map<string, ImportBindingKind>;
+  stringConstants: Map<string, string>;
   parent?: ImportScope;
   varScope: ImportScope;
 };
@@ -623,7 +624,12 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   }
 
   function createImportScope(parent?: ImportScope, isVarScope = false): ImportScope {
-    const scope = { bindings: new Map<string, ImportBindingKind>(), parent, varScope: undefined as unknown as ImportScope };
+    const scope = {
+      bindings: new Map<string, ImportBindingKind>(),
+      stringConstants: new Map<string, string>(),
+      parent,
+      varScope: undefined as unknown as ImportScope,
+    };
     scope.varScope = isVarScope || !parent ? scope : parent.varScope;
     return scope;
   }
@@ -641,6 +647,23 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function bindName(scope: ImportScope, name: string, kind: ImportBindingKind, varScoped = false): void {
     const targetScope = varScoped ? scope.varScope : scope;
     targetScope.bindings.set(name, kind);
+    targetScope.stringConstants.delete(name);
+  }
+
+  function bindStringConstant(scope: ImportScope, name: string, value: string, varScoped = false): void {
+    const targetScope = varScoped ? scope.varScope : scope;
+    targetScope.bindings.set(name, "shadow");
+    targetScope.stringConstants.set(name, value);
+  }
+
+  function stringConstantFor(scope: ImportScope, name: string): string | undefined {
+    let current: ImportScope | undefined = scope;
+    while (current) {
+      if (current.stringConstants.has(name)) return current.stringConstants.get(name);
+      if (current.bindings.has(name)) return undefined;
+      current = current.parent;
+    }
+    return undefined;
   }
 
   function bindPattern(scope: ImportScope, name: ts.BindingName, kind: ImportBindingKind, varScoped = false): void {
@@ -655,6 +678,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 
   function isVarScopedDeclarationList(node: ts.VariableDeclarationList): boolean {
     return (node.flags & (ts.NodeFlags.Let | ts.NodeFlags.Const)) === 0;
+  }
+
+  function isConstDeclarationList(node: ts.VariableDeclarationList): boolean {
+    return Boolean(node.flags & ts.NodeFlags.Const);
   }
 
   function isBuiltinModuleIdentifier(scope: ImportScope, name: string): boolean {
@@ -690,6 +717,24 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function staticPropertyReceiver(expression: ts.Expression): ts.Expression | undefined {
     const unwrapped = unwrapExpression(expression);
     if (ts.isPropertyAccessExpression(unwrapped) || ts.isElementAccessExpression(unwrapped)) return unwrapped.expression;
+    return undefined;
+  }
+
+  function staticModuleSpecifier(scope: ImportScope, node: ts.Node | undefined): string | undefined {
+    if (!node || !ts.isExpression(node)) return undefined;
+    const unwrapped = unwrapExpression(node);
+    const literal = literalText(unwrapped);
+    if (literal !== undefined) return literal;
+    if (ts.isIdentifier(unwrapped)) return stringConstantFor(scope, unwrapped.text);
+    if (
+      ts.isCallExpression(unwrapped)
+      && staticPropertyName(unwrapped.expression) === "resolve"
+      && Boolean(staticPropertyReceiver(unwrapped.expression))
+      && isRequireLikeExpression(scope, staticPropertyReceiver(unwrapped.expression)!)
+      && unwrapped.arguments.length >= 1
+    ) {
+      return staticModuleSpecifier(scope, unwrapped.arguments[0]);
+    }
     return undefined;
   }
 
@@ -749,7 +794,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 
   function literalRequireLikeSpecifier(scope: ImportScope, node: ts.Node | undefined): string | undefined {
     if (!node || !ts.isCallExpression(node) || !isRequireLikeExpression(scope, node.expression) || node.arguments.length < 1) return undefined;
-    return literalText(node.arguments[0]);
+    return staticModuleSpecifier(scope, node.arguments[0]);
   }
 
   function isModuleNamespaceExpression(scope: ImportScope, expression: ts.Expression): boolean {
@@ -804,28 +849,29 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     return undefined;
   }
 
-  function literalFromApplyArray(node: ts.Expression | undefined): string | undefined {
+  function literalFromApplyArray(scope: ImportScope, node: ts.Expression | undefined): string | undefined {
     if (!node) return undefined;
     const unwrapped = unwrapExpression(node);
     if (!ts.isArrayLiteralExpression(unwrapped) || unwrapped.elements.length < 1) return undefined;
-    return literalText(unwrapped.elements[0]);
+    return staticModuleSpecifier(scope, unwrapped.elements[0]);
   }
 
   function requireCallArgument(scope: ImportScope, node: ts.CallExpression): { sourceName: string; specifier?: string; dynamic: boolean } | undefined {
     const directName = requireLikeName(scope, node.expression);
     if (directName) {
       if (node.arguments.length < 1) return undefined;
-      return { sourceName: directName, specifier: literalText(node.arguments[0]), dynamic: !literalText(node.arguments[0]) };
+      const specifier = staticModuleSpecifier(scope, node.arguments[0]);
+      return { sourceName: directName, specifier, dynamic: !specifier };
     }
 
     const propertyName = staticPropertyName(node.expression);
     const receiver = staticPropertyReceiver(node.expression);
     if ((propertyName === "call" || propertyName === "apply") && receiver && isRequireLikeExpression(scope, receiver)) {
       if (propertyName === "call") {
-        const specifier = node.arguments.length >= 2 ? literalText(node.arguments[1]) : undefined;
+        const specifier = node.arguments.length >= 2 ? staticModuleSpecifier(scope, node.arguments[1]) : undefined;
         return { sourceName: `${requireLikeName(scope, receiver) || "require"}.call`, specifier, dynamic: !specifier };
       }
-      const specifier = node.arguments.length >= 2 ? literalFromApplyArray(node.arguments[1]) : undefined;
+      const specifier = node.arguments.length >= 2 ? literalFromApplyArray(scope, node.arguments[1]) : undefined;
       return { sourceName: `${requireLikeName(scope, receiver) || "require"}.apply`, specifier, dynamic: !specifier };
     }
 
@@ -838,7 +884,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       && node.arguments.length >= 3
       && isRequireLikeExpression(scope, node.arguments[0])
     ) {
-      const specifier = literalFromApplyArray(node.arguments[2]);
+      const specifier = literalFromApplyArray(scope, node.arguments[2]);
       return { sourceName: "Reflect.apply(require)", specifier, dynamic: !specifier };
     }
     return undefined;
@@ -948,9 +994,13 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function visitVariableDeclaration(scope: ImportScope, node: ts.VariableDeclaration): void {
     if (node.initializer) visit(scope, node.initializer);
     const varScoped = node.parent && ts.isVariableDeclarationList(node.parent) ? isVarScopedDeclarationList(node.parent) : false;
+    const constScoped = node.parent && ts.isVariableDeclarationList(node.parent) ? isConstDeclarationList(node.parent) : false;
     if (node.initializer && ts.isIdentifier(node.name)) {
       const kind = bindingKindFromInitializer(scope, node.initializer);
-      bindName(scope, node.name.text, kind || "shadow", varScoped);
+      const stringValue = constScoped ? staticModuleSpecifier(scope, node.initializer) : undefined;
+      if (kind) bindName(scope, node.name.text, kind, varScoped);
+      else if (stringValue !== undefined) bindStringConstant(scope, node.name.text, stringValue, varScoped);
+      else bindName(scope, node.name.text, "shadow", varScoped);
     } else if (node.initializer && ts.isObjectBindingPattern(node.name)) {
       const moduleSpecifier = literalRequireLikeSpecifier(scope, node.initializer);
       if (moduleSpecifier && isModulePackageSpecifier(moduleSpecifier)) {
@@ -1016,7 +1066,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     } else if (ts.isCallExpression(node)) {
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         const [specifierNode] = node.arguments;
-        const specifier = literalText(specifierNode);
+        const specifier = staticModuleSpecifier(scope, specifierNode);
         if (specifier !== undefined) {
           addReference(specifier, "dynamic-import", node, false);
         } else {
@@ -1033,6 +1083,37 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         if (requireCall) addRequireCallReference(node, requireCall.sourceName, requireCall.specifier, requireCall.dynamic);
         addDynamicExecutionRequireReferences(scope, node);
       }
+    } else if (ts.isForStatement(node)) {
+      const loopScope = createImportScope(scope);
+      if (node.initializer) visit(loopScope, node.initializer);
+      if (node.condition) visit(loopScope, node.condition);
+      if (node.incrementor) visit(loopScope, node.incrementor);
+      visit(loopScope, node.statement);
+      return;
+    } else if (ts.isForInStatement(node) || ts.isForOfStatement(node)) {
+      const loopScope = createImportScope(scope);
+      visit(loopScope, node.initializer);
+      visit(loopScope, node.expression);
+      visit(loopScope, node.statement);
+      return;
+    } else if (ts.isSwitchStatement(node)) {
+      visit(scope, node.expression);
+      const switchScope = createImportScope(scope);
+      for (const clause of node.caseBlock.clauses) {
+        if (ts.isCaseClause(clause)) visit(scope, clause.expression);
+      }
+      for (const clause of node.caseBlock.clauses) {
+        for (const statement of clause.statements) predeclareStatement(switchScope, statement);
+      }
+      for (const clause of node.caseBlock.clauses) {
+        for (const statement of clause.statements) visit(switchScope, statement);
+      }
+      return;
+    } else if (ts.isCatchClause(node)) {
+      const catchScope = createImportScope(scope);
+      if (node.variableDeclaration) bindPattern(catchScope, node.variableDeclaration.name, "shadow");
+      visit(catchScope, node.block);
+      return;
     } else if (ts.isSourceFile(node)) {
       visitStatementList(scope, node.statements);
       return;

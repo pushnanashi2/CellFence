@@ -1,4 +1,4 @@
-const target = "../optional/plugin";
+let target = "../optional/plugin";
 
 export function run() {
   return require(target);

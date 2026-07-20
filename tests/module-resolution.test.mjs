@@ -321,11 +321,16 @@ test("module resolution extracts imports and reports computed module loading", (
         "import './side-effect.js';",
         "export type { B } from './b.js';",
         "const name = './c.js';",
+        "let mutableName = './mutable.js';",
+        "const workerModule = 'cloudflare:workers';",
         "require('./d.js');",
         "require('./extra-arg.js', name);",
         "require(name);",
+        "require(mutableName);",
+        "require(require.resolve('@babel/core'));",
         "import('./e.js');",
-        "import(name);",
+        "import(workerModule);",
+        "import(mutableName);",
         "",
       ].join("\n"),
     );
@@ -337,7 +342,10 @@ test("module resolution extracts imports and reports computed module loading", (
       ["export-from", "./b.js", true],
       ["require", "./d.js", false],
       ["require", "./extra-arg.js", false],
+      ["require", "./c.js", false],
+      ["require", "@babel/core", false],
       ["dynamic-import", "./e.js", false],
+      ["dynamic-import", "cloudflare:workers", false],
     ]);
     assert.deepEqual(warnings.map((warning) => warning.ruleId), [
       "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
@@ -348,15 +356,15 @@ test("module resolution extracts imports and reports computed module loading", (
         ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
         severity: "warning",
         filePath: "src/app.ts",
-        message: "computed require() cannot be resolved statically at line 7",
-        details: { line: 7 },
+        message: "computed require() cannot be resolved statically at line 10",
+        details: { line: 10 },
       },
       {
         ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
         severity: "warning",
         filePath: "src/app.ts",
-        message: "computed dynamic import cannot be resolved statically at line 9",
-        details: { line: 9 },
+        message: "computed dynamic import cannot be resolved statically at line 14",
+        details: { line: 14 },
       },
     ]);
     fs.writeFileSync(path.join(rootDir, "src/no-imports.ts"), "const value = 1;\n");
@@ -378,11 +386,21 @@ test("module resolution extracts TypeScript CommonJS compatibility forms", () =>
         "import legacy = require('./legacy.js');",
         "const req = require;",
         "const localRequire = makeRequire(import.meta.url);",
+        "const allowedRuntimeModules = new Set(['chalk']);",
+        "const unresolvedRuntimeModules = new Set(['one', 'two']);",
+        "declare const allowedModuleName: string;",
+        "declare const unresolvedModuleName: string;",
         "module.require('./module-require.js');",
         "req('./alias-require.js');",
         "localRequire('./created-require.js');",
-        "const target = './dynamic.js';",
+        "let target = './dynamic.js';",
         "req(target);",
+        "if (allowedRuntimeModules.has(allowedModuleName)) {",
+        "  req(allowedModuleName);",
+        "}",
+        "if (unresolvedRuntimeModules.has(unresolvedModuleName)) {",
+        "  req(unresolvedModuleName);",
+        "}",
         "const loader = { require }; loader.require('./not-commonjs.js');",
         "const { createRequire: makeRequireFromCjs } = require('module');",
         "const moduleRequire = module.require;",
@@ -465,8 +483,20 @@ test("module resolution extracts TypeScript CommonJS compatibility forms", () =>
       ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
       severity: "warning",
       filePath: "src/app.ts",
-      message: "computed req() cannot be resolved statically at line 9",
-      details: { line: 9 },
+      message: "computed req() cannot be resolved statically at line 13",
+      details: { line: 13 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed req() cannot be resolved statically at line 15",
+      details: { line: 15 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed req() cannot be resolved statically at line 18",
+      details: { line: 18 },
     }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -546,6 +576,117 @@ test("module resolution tracks CommonJS aliases without crossing shadowed scopes
       ["require", "./node-module.js", 17],
     ]);
     assert.deepEqual(warnings, []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution does not reuse constant module specifiers across shadowed scopes or mutable Set guards", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-constant-scope-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "const moduleName = './outer.js';",
+        "const singletonModules = new Set(['chalk']);",
+        "require(moduleName);",
+        "function shadowsParam(moduleName: string, candidate: string) {",
+        "  require(moduleName);",
+        "  if (singletonModules.has(candidate)) {",
+        "    require(candidate);",
+        "  }",
+        "}",
+        "function shadowsSet(singletonModules: Set<string>, candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
+      ["require", "./outer.js", 3],
+    ]);
+    assert.deepEqual(warnings, [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 5",
+      details: { line: 5 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 7",
+      details: { line: 7 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 12",
+      details: { line: 12 },
+    }]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution keeps lexical constant module specifiers inside loop and switch scopes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-constant-lexical-scope-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "declare const dynamicName: string;",
+        "for (const moduleName = './loop.js'; false;) {",
+        "  require(moduleName);",
+        "}",
+        "require(moduleName);",
+        "switch (dynamicName) {",
+        "  case 'x': {",
+        "    const switchName = './switch.js';",
+        "    require(switchName);",
+        "    break;",
+        "  }",
+        "}",
+        "require(switchName);",
+        "switch (dynamicName) {",
+        "  case require('./case-expression.js'):",
+        "    break;",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
+      ["require", "./loop.js", 3],
+      ["require", "./switch.js", 9],
+      ["require", "./case-expression.js", 15],
+    ]);
+    assert.deepEqual(warnings, [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 5",
+      details: { line: 5 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 13",
+      details: { line: 13 },
+    }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
