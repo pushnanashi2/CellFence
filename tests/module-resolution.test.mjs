@@ -637,6 +637,148 @@ test("module resolution does not reuse constant module specifiers across shadowe
   }
 });
 
+test("module resolution resolves a readonly singleton Set guard for direct return require only", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-singleton-set-guard-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const filePath = path.join(rootDir, "src/app.ts");
+    fs.writeFileSync(
+      filePath,
+      [
+        "const singletonModules = new Set(['chalk']);",
+        "const mutatedModules = new Set(['left-pad']);",
+        "const multiModules = new Set(['alpha', 'beta']);",
+        "mutatedModules.add('escape');",
+        "export function safe(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "  return undefined;",
+        "}",
+        "export function unsafeMutation(candidate: string) {",
+        "  if (mutatedModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "export function unsafeMulti(candidate: string) {",
+        "  if (multiModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "export function unsafeNonReturn(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    const warnings = [];
+    const references = extractImports(context(rootDir), filePath, warnings);
+
+    assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
+      ["require", "chalk", 7],
+    ]);
+    assert.deepEqual(warnings, [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 13",
+      details: { line: 13 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 18",
+      details: { line: 18 },
+    }, {
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "warning",
+      filePath: "src/app.ts",
+      message: "computed require() cannot be resolved statically at line 23",
+      details: { line: 23 },
+    }]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution refuses singleton Set guards when Set or has escapes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-singleton-set-unsafe-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const aliasPath = path.join(rootDir, "src/alias.ts");
+    fs.writeFileSync(
+      aliasPath,
+      [
+        "const singletonModules = new Set(['chalk']);",
+        "const has = singletonModules.has;",
+        "export function run(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    const shadowPath = path.join(rootDir, "src/shadow.ts");
+    fs.writeFileSync(
+      shadowPath,
+      [
+        "class Set<T> {",
+        "  constructor(values: T[]) {}",
+        "  has(value: T): boolean { return true; }",
+        "}",
+        "const singletonModules = new Set(['chalk']);",
+        "export function run(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    const prototypePath = path.join(rootDir, "src/prototype.ts");
+    fs.writeFileSync(
+      prototypePath,
+      [
+        "Set.prototype.has = () => true;",
+        "const singletonModules = new Set(['chalk']);",
+        "export function run(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    const prototypeElementPath = path.join(rootDir, "src/prototype-element.ts");
+    fs.writeFileSync(
+      prototypeElementPath,
+      [
+        "Set.prototype['has'] = () => true;",
+        "const singletonModules = new Set(['chalk']);",
+        "export function run(candidate: string) {",
+        "  if (singletonModules.has(candidate)) {",
+        "    return require(candidate);",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    for (const filePath of [aliasPath, shadowPath, prototypePath, prototypeElementPath]) {
+      const warnings = [];
+      assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
+      assert.equal(warnings.length, 1);
+      assert.equal(warnings[0].ruleId, "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE");
+    }
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution keeps lexical constant module specifiers inside loop and switch scopes", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-constant-lexical-scope-"));
   try {

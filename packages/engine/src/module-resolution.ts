@@ -73,6 +73,7 @@ type ImportBindingKind = "require" | "createRequire" | "moduleNamespace" | "node
 type ImportScope = {
   bindings: Map<string, ImportBindingKind>;
   stringConstants: Map<string, string>;
+  singletonStringSets: Map<string, string>;
   parent?: ImportScope;
   varScope: ImportScope;
 };
@@ -627,6 +628,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     const scope = {
       bindings: new Map<string, ImportBindingKind>(),
       stringConstants: new Map<string, string>(),
+      singletonStringSets: new Map<string, string>(),
       parent,
       varScope: undefined as unknown as ImportScope,
     };
@@ -648,12 +650,21 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     const targetScope = varScoped ? scope.varScope : scope;
     targetScope.bindings.set(name, kind);
     targetScope.stringConstants.delete(name);
+    targetScope.singletonStringSets.delete(name);
   }
 
   function bindStringConstant(scope: ImportScope, name: string, value: string, varScoped = false): void {
     const targetScope = varScoped ? scope.varScope : scope;
     targetScope.bindings.set(name, "shadow");
     targetScope.stringConstants.set(name, value);
+    targetScope.singletonStringSets.delete(name);
+  }
+
+  function bindSingletonStringSet(scope: ImportScope, name: string, value: string, varScoped = false): void {
+    const targetScope = varScoped ? scope.varScope : scope;
+    targetScope.bindings.set(name, "shadow");
+    targetScope.stringConstants.delete(name);
+    targetScope.singletonStringSets.set(name, value);
   }
 
   function stringConstantFor(scope: ImportScope, name: string): string | undefined {
@@ -665,6 +676,178 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     }
     return undefined;
   }
+
+  function singletonStringSetFor(scope: ImportScope, name: string): string | undefined {
+    let current: ImportScope | undefined = scope;
+    while (current) {
+      if (current.singletonStringSets.has(name)) return current.singletonStringSets.get(name);
+      if (current.bindings.has(name)) return undefined;
+      current = current.parent;
+    }
+    return undefined;
+  }
+
+  function singletonStringSetInitializer(node: ts.Expression | undefined): string | undefined {
+    if (!node) return undefined;
+    const unwrapped = unwrapExpression(node);
+    if (!ts.isNewExpression(unwrapped)) return undefined;
+    const constructorExpression = unwrapExpression(unwrapped.expression);
+    if (!ts.isIdentifier(constructorExpression) || constructorExpression.text !== "Set") return undefined;
+    const [argument] = unwrapped.arguments || [];
+    if (!argument) return undefined;
+    const setElements = unwrapExpression(argument);
+    if (!ts.isArrayLiteralExpression(setElements)) return undefined;
+    const elements = setElements.elements;
+    if (elements.length !== 1) return undefined;
+    return literalText(elements[0]);
+  }
+
+  function isDeclarationIdentifier(node: ts.Identifier): boolean {
+    return ts.isVariableDeclaration(node.parent) && node.parent.name === node;
+  }
+
+  function isAllowedSingletonSetReference(node: ts.Identifier): boolean {
+    if (!ts.isPropertyAccessExpression(node.parent) || node.parent.expression !== node || node.parent.name.text !== "has") return false;
+    const callExpression = node.parent.parent;
+    if (!ts.isCallExpression(callExpression) || callExpression.expression !== node.parent) return false;
+    const guardExpression = unwrapExpression(callExpression);
+    const ifStatement = callExpression.parent;
+    return ts.isIfStatement(ifStatement) && unwrapExpression(ifStatement.expression) === guardExpression;
+  }
+
+  function isAssignmentOperatorKind(kind: ts.SyntaxKind): boolean {
+    return kind === ts.SyntaxKind.EqualsToken
+      || kind === ts.SyntaxKind.PlusEqualsToken
+      || kind === ts.SyntaxKind.MinusEqualsToken
+      || kind === ts.SyntaxKind.AsteriskEqualsToken
+      || kind === ts.SyntaxKind.AsteriskAsteriskEqualsToken
+      || kind === ts.SyntaxKind.SlashEqualsToken
+      || kind === ts.SyntaxKind.PercentEqualsToken
+      || kind === ts.SyntaxKind.LessThanLessThanEqualsToken
+      || kind === ts.SyntaxKind.GreaterThanGreaterThanEqualsToken
+      || kind === ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken
+      || kind === ts.SyntaxKind.AmpersandEqualsToken
+      || kind === ts.SyntaxKind.BarEqualsToken
+      || kind === ts.SyntaxKind.CaretEqualsToken
+      || kind === ts.SyntaxKind.AmpersandAmpersandEqualsToken
+      || kind === ts.SyntaxKind.BarBarEqualsToken
+      || kind === ts.SyntaxKind.QuestionQuestionEqualsToken;
+  }
+
+  function staticMemberAccess(expression: ts.Expression): { receiver: ts.Expression; name: string } | undefined {
+    const unwrapped = unwrapExpression(expression);
+    if (ts.isPropertyAccessExpression(unwrapped)) return { receiver: unwrapped.expression, name: unwrapped.name.text };
+    if (ts.isElementAccessExpression(unwrapped)) {
+      const name = literalText(unwrapped.argumentExpression);
+      return name ? { receiver: unwrapped.expression, name } : undefined;
+    }
+    return undefined;
+  }
+
+  function isSetPrototypeHasExpression(expression: ts.Expression): boolean {
+    const access = staticMemberAccess(expression);
+    return access?.name === "has" && isSetPrototypeExpression(access.receiver);
+  }
+
+  function isSetPrototypeExpression(expression: ts.Expression): boolean {
+    const access = staticMemberAccess(expression);
+    if (access?.name !== "prototype") return false;
+    const receiver = unwrapExpression(access.receiver);
+    return ts.isIdentifier(receiver) && receiver.text === "Set";
+  }
+
+  function mutatesSetPrototypeHas(): boolean {
+    let mutated = false;
+    function visit(node: ts.Node): void {
+      if (mutated) return;
+      if (
+        ts.isBinaryExpression(node)
+        && isAssignmentOperatorKind(node.operatorToken.kind)
+        && isSetPrototypeHasExpression(node.left)
+      ) {
+        mutated = true;
+        return;
+      }
+      if (ts.isCallExpression(node)) {
+        const callee = unwrapExpression(node.expression);
+        const calleeReceiver = ts.isPropertyAccessExpression(callee) ? unwrapExpression(callee.expression) : undefined;
+        if (
+          ts.isPropertyAccessExpression(callee)
+          && calleeReceiver
+          && ts.isIdentifier(calleeReceiver)
+          && calleeReceiver.text === "Object"
+          && callee.name.text === "defineProperty"
+          && node.arguments.length >= 2
+          && isSetPrototypeExpression(node.arguments[0])
+          && literalText(node.arguments[1]) === "has"
+        ) {
+          mutated = true;
+          return;
+        }
+      }
+      ts.forEachChild(node, visit);
+    }
+    visit(sourceFile);
+    return mutated;
+  }
+
+  function collectSafeSingletonStringSets(): Map<number, { name: string; value: string }> {
+    const candidates = new Map<string, { declarationStart: number; value: string }>();
+    const declarationCounts = new Map<string, number>();
+    const unsafeNames = new Set<string>();
+    function countDeclaration(name: string): void {
+      declarationCounts.set(name, (declarationCounts.get(name) || 0) + 1);
+    }
+    function countBindingName(name: ts.BindingName): void {
+      if (ts.isIdentifier(name)) {
+        countDeclaration(name.text);
+        return;
+      }
+      for (const element of name.elements) {
+        if (!ts.isOmittedExpression(element)) countBindingName(element.name);
+      }
+    }
+    function countDeclaredNames(node: ts.Node): void {
+      if (ts.isVariableDeclaration(node)) countBindingName(node.name);
+      else if (ts.isParameter(node)) countBindingName(node.name);
+      else if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) && node.name) countDeclaration(node.name.text);
+      else if (ts.isImportClause(node) && node.name) countDeclaration(node.name.text);
+      else if (ts.isNamespaceImport(node)) countDeclaration(node.name.text);
+      else if (ts.isImportSpecifier(node)) countDeclaration(node.name.text);
+      else if (ts.isImportEqualsDeclaration(node)) countDeclaration(node.name.text);
+      else if (ts.isCatchClause(node) && node.variableDeclaration) countBindingName(node.variableDeclaration.name);
+      ts.forEachChild(node, countDeclaredNames);
+    }
+    countDeclaredNames(sourceFile);
+    if ((declarationCounts.get("Set") || 0) > 0) return new Map();
+    if (mutatesSetPrototypeHas()) return new Map();
+    for (const statement of sourceFile.statements) {
+      if (!ts.isVariableStatement(statement) || !isConstDeclarationList(statement.declarationList)) continue;
+      for (const declaration of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name)) continue;
+        const value = singletonStringSetInitializer(declaration.initializer);
+        if (value === undefined) continue;
+        candidates.set(declaration.name.text, { declarationStart: declaration.name.getStart(sourceFile), value });
+      }
+    }
+    if (candidates.size === 0) return new Map();
+    function visitCandidateUse(node: ts.Node): void {
+      if (ts.isIdentifier(node) && candidates.has(node.text)) {
+        if (!isDeclarationIdentifier(node) && !isAllowedSingletonSetReference(node)) unsafeNames.add(node.text);
+      }
+      ts.forEachChild(node, visitCandidateUse);
+    }
+    visitCandidateUse(sourceFile);
+    const safe = new Map<number, { name: string; value: string }>();
+    for (const [name, candidate] of candidates.entries()) {
+      if (!unsafeNames.has(name) && (declarationCounts.get(name) || 0) === 1) {
+        safe.set(candidate.declarationStart, { name, value: candidate.value });
+      }
+    }
+    return safe;
+  }
+
+  const safeSingletonStringSets = collectSafeSingletonStringSets();
 
   function bindPattern(scope: ImportScope, name: ts.BindingName, kind: ImportBindingKind, varScoped = false): void {
     if (ts.isIdentifier(name)) {
@@ -890,6 +1073,48 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     return undefined;
   }
 
+  function readonlySetHasGuard(scope: ImportScope, node: ts.Expression): { identifier: string; specifier: string } | undefined {
+    const unwrapped = unwrapExpression(node);
+    if (!ts.isCallExpression(unwrapped)) return undefined;
+    if (staticPropertyName(unwrapped.expression) !== "has") return undefined;
+    const receiver = staticPropertyReceiver(unwrapped.expression);
+    if (!receiver) return undefined;
+    const receiverName = unwrapExpression(receiver);
+    if (!ts.isIdentifier(receiverName)) return undefined;
+    const specifier = singletonStringSetFor(scope, receiverName.text);
+    if (specifier === undefined) return undefined;
+    const [argument] = unwrapped.arguments;
+    if (!argument) return undefined;
+    const argumentName = unwrapExpression(argument);
+    if (!ts.isIdentifier(argumentName)) return undefined;
+    return { identifier: argumentName.text, specifier };
+  }
+
+  function requireCallUsesIdentifier(scope: ImportScope, node: ts.Expression | undefined, identifier: string): ts.CallExpression | undefined {
+    if (!node) return undefined;
+    const unwrapped = unwrapExpression(node);
+    if (!ts.isCallExpression(unwrapped) || !requireLikeName(scope, unwrapped.expression) || unwrapped.arguments.length < 1) return undefined;
+    const argument = unwrapExpression(unwrapped.arguments[0]);
+    return ts.isIdentifier(argument) && argument.text === identifier ? unwrapped : undefined;
+  }
+
+  function singleReturnRequireCall(scope: ImportScope, node: ts.Statement, identifier: string): ts.CallExpression | undefined {
+    if (ts.isReturnStatement(node)) return requireCallUsesIdentifier(scope, node.expression, identifier);
+    if (!ts.isBlock(node) || node.statements.length !== 1) return undefined;
+    const [statement] = node.statements;
+    return ts.isReturnStatement(statement) ? requireCallUsesIdentifier(scope, statement.expression, identifier) : undefined;
+  }
+
+  function addReadonlySetGuardedRequireIfSafe(scope: ImportScope, node: ts.IfStatement): boolean {
+    const guard = readonlySetHasGuard(scope, node.expression);
+    if (!guard) return false;
+    const guardedRequireCall = singleReturnRequireCall(scope, node.thenStatement, guard.identifier);
+    if (!guardedRequireCall) return false;
+    addReference(guard.specifier, "require", guardedRequireCall, false);
+    if (node.elseStatement) visit(scope, node.elseStatement);
+    return true;
+  }
+
   function addRequireCallReference(node: ts.CallExpression, sourceName: string, specifier: string | undefined, dynamic: boolean): void {
     if (specifier) {
       addReference(specifier, "require", node, false);
@@ -998,8 +1223,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     if (node.initializer && ts.isIdentifier(node.name)) {
       const kind = bindingKindFromInitializer(scope, node.initializer);
       const stringValue = constScoped ? staticModuleSpecifier(scope, node.initializer) : undefined;
+      const singletonSet = constScoped ? safeSingletonStringSets.get(node.name.getStart(sourceFile)) : undefined;
       if (kind) bindName(scope, node.name.text, kind, varScoped);
       else if (stringValue !== undefined) bindStringConstant(scope, node.name.text, stringValue, varScoped);
+      else if (singletonSet) bindSingletonStringSet(scope, singletonSet.name, singletonSet.value, varScoped);
       else bindName(scope, node.name.text, "shadow", varScoped);
     } else if (node.initializer && ts.isObjectBindingPattern(node.name)) {
       const moduleSpecifier = literalRequireLikeSpecifier(scope, node.initializer);
@@ -1083,6 +1310,8 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         if (requireCall) addRequireCallReference(node, requireCall.sourceName, requireCall.specifier, requireCall.dynamic);
         addDynamicExecutionRequireReferences(scope, node);
       }
+    } else if (ts.isIfStatement(node)) {
+      if (addReadonlySetGuardedRequireIfSafe(scope, node)) return;
     } else if (ts.isForStatement(node)) {
       const loopScope = createImportScope(scope);
       if (node.initializer) visit(loopScope, node.initializer);

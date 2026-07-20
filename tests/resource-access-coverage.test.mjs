@@ -873,6 +873,11 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "  sqlClient.query('insert into audit_logs values (1)');",
       "  sqlClient.query('update app_users set id = id');",
       "  sqlClient.query('this is not sql');",
+      "  const metadataTableSql = tableName ? 'select * from information_schema.tables' : 'select * from information_schema.columns';",
+      "  sqlClient.query(metadataTableSql);",
+      "  const literalPrefix = 'select * from ';",
+      "  const staticConcatSql = literalPrefix + 'information_schema.columns';",
+      "  sqlClient.query(staticConcatSql);",
       "  const dynamicSql = 'select * from ' + tableName;",
       "  const notSql = 'hello ' + tableName;",
       "  sqlClient.query(dynamicSql);",
@@ -904,6 +909,9 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
     assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.detectedBy}:${access.reason}`), [
       "database:read:app_users:sql-literal:",
       "database:read:audit_logs:sql-literal:",
+      "database:read:information_schema.columns:sql-literal:",
+      "database:read:information_schema.columns:sql-literal:",
+      "database:read:information_schema.tables:sql-literal:",
       "database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically",
       "database:write:app_users:sql-literal:",
       "database:write:audit_logs:sql-literal:",
@@ -913,6 +921,59 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "queue:subscribe:kafka:orders.created:kafkajs-adapter:",
     ]);
     assert.equal(accesses.find((access) => access.selector === "GET /status")?.line, lineOf(lines, "server.route({ 'wrong': '/wrong'"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses keeps SQL string resolution lexical and fail-closed for reassignment", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-sql-lexical-"));
+  try {
+    const lines = [
+      "declare const sqlClient: { query(input: unknown): void };",
+      "declare const flag: boolean;",
+      "const topLevelSql = 'select * from top_level_users';",
+      "const topLevelPrefix = 'select * from ';",
+      "export function topLevel(): void {",
+      "  sqlClient.query(topLevelSql);",
+      "}",
+      "export function parameter(sql: string): void {",
+      "  sqlClient.query(sql); // parameter",
+      "}",
+      "export function unrelated(): void {",
+      "  const sql = 'select * from unrelated_users';",
+      "}",
+      "export function outerBlock(): void {",
+      "  const sql = 'select * from outer_block_users';",
+      "  if (flag) {",
+      "    sqlClient.query(sql); // outer block",
+      "  }",
+      "}",
+      "export function shadowedDependency(topLevelPrefix: string): void {",
+      "  const sql = topLevelPrefix + 'shadowed_users';",
+      "  sqlClient.query(sql); // shadowed dependency",
+      "}",
+      "export function reassigned(): void {",
+      "  let sqlText = 'select * from app_users';",
+      "  if (flag) sqlText = 'delete from audit_logs';",
+      "  sqlClient.query(sqlText);",
+      "}",
+      "export function notSql(tableName: string): void {",
+      "  const notSql = 'hello ' + tableName;",
+      "  sqlClient.query(notSql);",
+      "}",
+    ];
+    const filePath = writeRuntimeSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+    const expected = [
+      `database:read:outer_block_users:sql-literal::${lineOf(lines, "outer block")}`,
+      `database:read:top_level_users:sql-literal::${lineOf(lines, "sqlClient.query(topLevelSql)")}`,
+      `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "// parameter")}`,
+      `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "shadowed dependency")}`,
+      `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "sqlClient.query(sqlText)")}`,
+    ].sort();
+
+    assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.detectedBy}:${access.reason}:${access.line}`).sort(), expected);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

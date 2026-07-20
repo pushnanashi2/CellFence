@@ -901,7 +901,8 @@ function jsTsTemplates() {
       const producer = `producer${index}`;
       const consumerSource = [
         "const req = require;",
-        `const target = "../${producer}/internal";`,
+        "declare const segment: string;",
+        `const target = "../${producer}/" + segment;`,
         "const secret = req(target);",
         `export const ${symbolName(`consumer${index}`, 0)} = Boolean(secret);`,
         "",
@@ -915,7 +916,8 @@ function jsTsTemplates() {
     setup(rootDir, index) {
       const producer = `producer${index}`;
       const consumerSource = [
-        `const target = "../${producer}/internal";`,
+        "declare const segment: string;",
+        `const target = "../${producer}/" + segment;`,
         `export async function ${symbolName(`consumer${index}`, 0)}() {`,
         "  return import(target);",
         "}",

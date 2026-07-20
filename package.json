@@ -30,6 +30,7 @@
     "history:replay:smoke": "npm run build && node scripts/history-replay-smoke.mjs",
     "precision:pipeline:smoke": "npm run build && node scripts/precision-pipeline-smoke.mjs",
     "precision:labels:validate": "node scripts/precision-labels-validate.mjs",
+    "precision:claim:preflight": "node scripts/precision-claim-preflight.mjs",
     "evidence:graph:verify": "node scripts/evidence-graph-verify.mjs",
     "evidence:graph:smoke": "npm run build && node scripts/evidence-graph-smoke.mjs",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",

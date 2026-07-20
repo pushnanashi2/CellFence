@@ -333,6 +333,26 @@ labels is rejected. This gate only checks the labeling process;
 `corpus-precision-claim` still decides whether the labeled sample supports a
 pre-registered precision claim.
 
+Run the claim preflight before spending reviewer time or before invoking the
+final claim evaluator:
+
+```bash
+npm run precision:claim:preflight -- \
+  --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
+  --protocol docs/research/protocols/ts-js-confirmation-v1.json \
+  --out reports/corpus/ts-js-confirmation-v1-preflight.json
+```
+
+The preflight can run before labeling. It reports the protocol-selected
+findings, per-rule sample deficits, repository concentration, dirty harness
+state, missing independent labels, and whether any labels appear to be
+agent-only. Exit code `0` means the bundle is ready to attempt the claim. Exit
+code `1` means the bundle is well-formed but underpowered, unbalanced, or
+incompletely labeled. Exit code `2` means the protocol and bundle do not match
+or the inputs are malformed. A preflight failure is not a detector failure; it
+is the guardrail that prevents a small tuning corpus from being presented as a
+99% precision result.
+
 The bundle contains:
 
 - `study.json`, `corpus.json`, and `report.json`;

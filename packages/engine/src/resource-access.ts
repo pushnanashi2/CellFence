@@ -52,6 +52,25 @@ function literalText(node: ts.Node | undefined): string | undefined {
   return undefined;
 }
 
+function unwrapExpression(expression: ts.Expression): ts.Expression {
+  let current = expression;
+  for (;;) {
+    if (ts.isParenthesizedExpression(current)) {
+      current = current.expression;
+      continue;
+    }
+    if (ts.isAsExpression(current) || ts.isTypeAssertionExpression(current) || ts.isNonNullExpression(current)) {
+      current = current.expression;
+      continue;
+    }
+    if (ts.isBinaryExpression(current) && current.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+      current = current.right;
+      continue;
+    }
+    return current;
+  }
+}
+
 function lowerFirst(text: string): string {
   return `${text.charAt(0).toLowerCase()}${text.slice(1)}`;
 }
@@ -140,7 +159,7 @@ function expressionContainsSqlLiteral(node: ts.Node | undefined): boolean {
     // Stryker disable next-line ConditionalExpression: once a SQL literal is found, continuing the traversal cannot change the final true result.
     if (found) return;
     const text = literalText(candidate);
-    if (text && /\b(select|insert|update|delete|from|join|into)\b/i.test(text)) {
+    if (text && textLooksSql(text)) {
       found = true;
       return;
     }
@@ -148,6 +167,316 @@ function expressionContainsSqlLiteral(node: ts.Node | undefined): boolean {
   }
   visit(node);
   return found;
+}
+
+function bindingIdentifiers(name: ts.BindingName): string[] {
+  if (ts.isIdentifier(name)) return [name.text];
+  return name.elements.flatMap((element) => ts.isOmittedExpression(element) ? [] : bindingIdentifiers(element.name));
+}
+
+function assignedIdentifier(expression: ts.Expression): string | undefined {
+  const unwrapped = unwrapExpression(expression);
+  return ts.isIdentifier(unwrapped) ? unwrapped.text : undefined;
+}
+
+function isAssignmentOperatorKind(kind: ts.SyntaxKind): boolean {
+  return kind === ts.SyntaxKind.EqualsToken
+    || kind === ts.SyntaxKind.PlusEqualsToken
+    || kind === ts.SyntaxKind.MinusEqualsToken
+    || kind === ts.SyntaxKind.AsteriskEqualsToken
+    || kind === ts.SyntaxKind.AsteriskAsteriskEqualsToken
+    || kind === ts.SyntaxKind.SlashEqualsToken
+    || kind === ts.SyntaxKind.PercentEqualsToken
+    || kind === ts.SyntaxKind.LessThanLessThanEqualsToken
+    || kind === ts.SyntaxKind.GreaterThanGreaterThanEqualsToken
+    || kind === ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken
+    || kind === ts.SyntaxKind.AmpersandEqualsToken
+    || kind === ts.SyntaxKind.BarEqualsToken
+    || kind === ts.SyntaxKind.CaretEqualsToken
+    || kind === ts.SyntaxKind.AmpersandAmpersandEqualsToken
+    || kind === ts.SyntaxKind.BarBarEqualsToken
+    || kind === ts.SyntaxKind.QuestionQuestionEqualsToken;
+}
+
+type StaticStringResolution = {
+  values: string[];
+  dynamicSql: boolean;
+  localBinding: boolean;
+};
+
+function emptyStaticStringResolution(): StaticStringResolution {
+  return { values: [], dynamicSql: false, localBinding: false };
+}
+
+function sqlIdentifierName(name: string): boolean {
+  return /^(sql|sqlText|query|queryText|queryString)$/i.test(name);
+}
+
+function textLooksSql(text: string): boolean {
+  return /\b(select|insert|update|delete|from|join|into)\b/i.test(text);
+}
+
+function collectStaticStringConstants(sourceFile: ts.SourceFile): Map<string, string[]> {
+  const candidateInitializers = new Map<string, ts.Expression>();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement) || !(statement.declarationList.flags & ts.NodeFlags.Const)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.initializer) {
+        candidateInitializers.set(declaration.name.text, declaration.initializer);
+      }
+    }
+  }
+
+  const constants = new Map<string, string[]>();
+  function valuesFor(expression: ts.Expression, seen: Set<string>): string[] | undefined {
+    const unwrapped = unwrapExpression(expression);
+    const literal = literalText(unwrapped);
+    if (literal !== undefined) return [literal];
+    if (ts.isIdentifier(unwrapped)) {
+      if (seen.has(unwrapped.text)) return undefined;
+      const resolved = constants.get(unwrapped.text);
+      if (resolved) return resolved;
+      const initializer = candidateInitializers.get(unwrapped.text);
+      return initializer ? valuesFor(initializer, new Set([...seen, unwrapped.text])) : undefined;
+    }
+    if (ts.isConditionalExpression(unwrapped)) {
+      const whenTrue = valuesFor(unwrapped.whenTrue, seen);
+      const whenFalse = valuesFor(unwrapped.whenFalse, seen);
+      if (!whenTrue || !whenFalse) return undefined;
+      return [...new Set([...whenTrue, ...whenFalse])].slice(0, 16);
+    }
+    if (ts.isBinaryExpression(unwrapped) && unwrapped.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const left = valuesFor(unwrapped.left, seen);
+      const right = valuesFor(unwrapped.right, seen);
+      if (!left || !right) return undefined;
+      const combined = [];
+      for (const leftValue of left) {
+        for (const rightValue of right) combined.push(`${leftValue}${rightValue}`);
+      }
+      return [...new Set(combined)].slice(0, 16);
+    }
+    return undefined;
+  }
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [name, initializer] of candidateInitializers.entries()) {
+      if (constants.has(name)) continue;
+      const values = valuesFor(initializer, new Set([name]));
+      if (values && values.length > 0) {
+        constants.set(name, values);
+        changed = true;
+      }
+    }
+  }
+  return constants;
+}
+
+function staticStringValues(expression: ts.Expression | undefined, constants: Map<string, string[]>): string[] {
+  if (!expression) return [];
+  const unwrapped = unwrapExpression(expression);
+  const literal = literalText(unwrapped);
+  if (literal !== undefined) return [literal];
+  if (ts.isIdentifier(unwrapped)) return constants.get(unwrapped.text) || [];
+  return [];
+}
+
+function isStatementContainer(node: ts.Node): node is ts.SourceFile | ts.Block | ts.ModuleBlock | ts.CaseClause | ts.DefaultClause {
+  return ts.isSourceFile(node)
+    || ts.isBlock(node)
+    || ts.isModuleBlock(node)
+    || ts.isCaseClause(node)
+    || ts.isDefaultClause(node);
+}
+
+function statementsForContainer(node: ts.SourceFile | ts.Block | ts.ModuleBlock | ts.CaseClause | ts.DefaultClause): ts.NodeArray<ts.Statement> {
+  return ts.isSourceFile(node) || ts.isBlock(node) || ts.isModuleBlock(node) ? node.statements : node.statements;
+}
+
+function nearestStatementContainer(node: ts.Node): ts.SourceFile | ts.Block | ts.ModuleBlock | ts.CaseClause | ts.DefaultClause {
+  let current: ts.Node | undefined = node;
+  while (current) {
+    if (isStatementContainer(current)) return current;
+    current = current.parent;
+  }
+  return node.getSourceFile();
+}
+
+function collectLocalStaticStringResolution(
+  sourceFile: ts.SourceFile,
+  usageNode: ts.Node,
+  targetName: string,
+  constants: Map<string, string[]>,
+): StaticStringResolution {
+  const usageStart = usageNode.getStart(sourceFile);
+  const values = new Map<string, string[]>();
+  const unsafe = new Set<string>();
+  const dynamicSqlNames = new Set<string>();
+  const declaredInLocalScope = new Set<string>();
+  const parameterNames = new Set<string>();
+
+  function markDynamicSql(name: string): void {
+    dynamicSqlNames.add(name);
+  }
+
+  function expressionValues(expression: ts.Expression, seen: Set<string>): string[] | undefined {
+    const unwrapped = unwrapExpression(expression);
+    const literal = literalText(unwrapped);
+    if (literal !== undefined) return [literal];
+    if (ts.isIdentifier(unwrapped)) {
+      if (seen.has(unwrapped.text)) return undefined;
+      const localValues = values.get(unwrapped.text);
+      if (localValues) return localValues;
+      if (unsafe.has(unwrapped.text) || dynamicSqlNames.has(unwrapped.text) || declaredInLocalScope.has(unwrapped.text) || parameterNames.has(unwrapped.text)) {
+        return undefined;
+      }
+      return constants.get(unwrapped.text);
+    }
+    if (ts.isConditionalExpression(unwrapped)) {
+      const whenTrue = expressionValues(unwrapped.whenTrue, seen);
+      const whenFalse = expressionValues(unwrapped.whenFalse, seen);
+      if (!whenTrue || !whenFalse) return undefined;
+      return [...new Set([...whenTrue, ...whenFalse])].slice(0, 16);
+    }
+    if (ts.isBinaryExpression(unwrapped) && unwrapped.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const left = expressionValues(unwrapped.left, seen);
+      const right = expressionValues(unwrapped.right, seen);
+      if (!left || !right) return undefined;
+      const combined = [];
+      for (const leftValue of left) {
+        for (const rightValue of right) combined.push(`${leftValue}${rightValue}`);
+      }
+      return [...new Set(combined)].slice(0, 16);
+    }
+    return undefined;
+  }
+
+  function markUnsafe(name: string): void {
+    if ((values.get(name) || []).some(textLooksSql) || sqlIdentifierName(name)) {
+      markDynamicSql(name);
+    }
+    values.delete(name);
+    unsafe.add(name);
+  }
+
+  function processDeclaration(node: ts.VariableDeclaration): void {
+    if (!ts.isIdentifier(node.name)) {
+      for (const name of bindingIdentifiers(node.name)) markUnsafe(name);
+      return;
+    }
+    const name = node.name.text;
+    declaredInLocalScope.add(name);
+    if (!node.initializer || !ts.isVariableDeclarationList(node.parent) || (node.parent.flags & (ts.NodeFlags.Let | ts.NodeFlags.Const)) === 0) {
+      markUnsafe(name);
+      return;
+    }
+    if (unsafe.has(name)) return;
+    const resolved = expressionValues(node.initializer, new Set([name]));
+    if (resolved && resolved.length > 0) values.set(name, resolved);
+    else {
+      if (expressionContainsSqlLiteral(node.initializer)) markDynamicSql(name);
+      markUnsafe(name);
+    }
+  }
+
+  function directStatementContainerFrames(): Array<{ container: ts.Block | ts.ModuleBlock | ts.CaseClause | ts.DefaultClause; boundaryStart: number }> {
+    const frames: Array<{ container: ts.Block | ts.ModuleBlock | ts.CaseClause | ts.DefaultClause; boundaryStart: number }> = [];
+    let child: ts.Node = usageNode;
+    let container = nearestStatementContainer(usageNode);
+    while (!ts.isSourceFile(container)) {
+      let boundaryNode = child;
+      while (boundaryNode.parent && boundaryNode.parent !== container) boundaryNode = boundaryNode.parent;
+      frames.push({ container, boundaryStart: boundaryNode.getStart(sourceFile) });
+      child = container;
+      if (!container.parent) break;
+      container = nearestStatementContainer(container.parent);
+    }
+    return frames.reverse();
+  }
+
+  function markAssignments(node: ts.Node, root: ts.Node): void {
+    if (node !== root && ts.isFunctionLike(node)) return;
+    if (ts.isBinaryExpression(node) && isAssignmentOperatorKind(node.operatorToken.kind)) {
+      const name = assignedIdentifier(node.left);
+      if (name) {
+        if (expressionContainsSqlLiteral(node.right)) markDynamicSql(name);
+        markUnsafe(name);
+      }
+    } else if (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) {
+      const name = assignedIdentifier(node.operand);
+      if (name) markUnsafe(name);
+    }
+    ts.forEachChild(node, (child) => markAssignments(child, root));
+  }
+
+  function recordContainerDeclarations(statement: ts.Statement): void {
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        for (const name of bindingIdentifiers(declaration.name)) declaredInLocalScope.add(name);
+      }
+    } else if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) && statement.name) {
+      declaredInLocalScope.add(statement.name.text);
+    }
+  }
+
+  const frames = directStatementContainerFrames();
+  for (const { container } of frames) {
+    for (const statement of statementsForContainer(container)) recordContainerDeclarations(statement);
+  }
+
+  let ancestor: ts.Node | undefined = usageNode.parent;
+  while (ancestor) {
+    if (ts.isFunctionLike(ancestor)) {
+      for (const parameter of ancestor.parameters) {
+        for (const name of bindingIdentifiers(parameter.name)) parameterNames.add(name);
+      }
+    }
+    if (ts.isCatchClause(ancestor) && ancestor.variableDeclaration && bindingIdentifiers(ancestor.variableDeclaration.name).includes(targetName)) {
+      parameterNames.add(targetName);
+    }
+    ancestor = ancestor.parent;
+  }
+
+  for (const { container, boundaryStart } of frames) {
+    for (const statement of statementsForContainer(container)) {
+      if (statement.getStart(sourceFile) >= boundaryStart) break;
+      if (statement.getEnd() <= boundaryStart) {
+        if (ts.isVariableStatement(statement)) {
+          for (const declaration of statement.declarationList.declarations) processDeclaration(declaration);
+        }
+        markAssignments(statement, statement);
+        continue;
+      }
+      break;
+    }
+  }
+  if (unsafe.has(targetName)) {
+    return { values: [], dynamicSql: dynamicSqlNames.has(targetName), localBinding: true };
+  }
+  const resolved = values.get(targetName);
+  if (resolved) return { values: resolved, dynamicSql: false, localBinding: true };
+  if (parameterNames.has(targetName)) return { values: [], dynamicSql: sqlIdentifierName(targetName), localBinding: true };
+  return { values: [], dynamicSql: false, localBinding: declaredInLocalScope.has(targetName) };
+}
+
+function staticStringResolutionAt(
+  sourceFile: ts.SourceFile,
+  usageNode: ts.Node,
+  expression: ts.Expression | undefined,
+  constants: Map<string, string[]>,
+): StaticStringResolution {
+  if (!expression) return emptyStaticStringResolution();
+  const unwrapped = unwrapExpression(expression);
+  const literal = literalText(unwrapped);
+  if (literal !== undefined) return { values: [literal], dynamicSql: false, localBinding: false };
+  if (!ts.isIdentifier(unwrapped)) {
+    return { values: staticStringValues(unwrapped, constants), dynamicSql: expressionContainsSqlLiteral(unwrapped), localBinding: false };
+  }
+  const local = collectLocalStaticStringResolution(sourceFile, usageNode, unwrapped.text, constants);
+  if (local.localBinding) return local;
+  const globalValues = constants.get(unwrapped.text) || [];
+  return { values: globalValues, dynamicSql: false, localBinding: false };
 }
 
 const PRISMA_READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "count", "aggregate", "groupBy"]);
@@ -351,24 +680,6 @@ function collectBullQueueVariables(sourceFile: ts.SourceFile): Map<string, strin
   }
   visit(sourceFile);
   return queueVariables;
-}
-
-function collectDynamicSqlVariables(sourceFile: ts.SourceFile): Set<string> {
-  const dynamicSqlVariables = new Set<string>();
-  function visit(node: ts.Node): void {
-    if (
-      ts.isVariableDeclaration(node)
-      && ts.isIdentifier(node.name)
-      && node.initializer
-      && !literalText(node.initializer)
-      && expressionContainsSqlLiteral(node.initializer)
-    ) {
-      dynamicSqlVariables.add(node.name.text);
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  return dynamicSqlVariables;
 }
 
 type FsBindings = {
@@ -835,7 +1146,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
   const typeOrmRepositories = typeOrmEnabled ? collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors) : new Map<string, string>();
   const drizzleTableSelectors = drizzleEnabled ? collectDrizzleTableSelectors(sourceFile) : new Map<string, string>();
   const bullQueuesByVariable = bullmqEnabled ? collectBullQueueVariables(sourceFile) : new Map<string, string>();
-  const dynamicSqlVariables = sqlLiteralEnabled ? collectDynamicSqlVariables(sourceFile) : new Set<string>();
+  const staticSqlStrings = sqlLiteralEnabled || prismaEnabled ? collectStaticStringConstants(sourceFile) : new Map<string, string[]>();
   const fsBindings = fileEnabled ? collectFsBindings(sourceFile) : { namespaces: new Map<string, FsBindingDeclaration[]>(), callees: new Map<string, FsCalleeBinding[]>() };
   if (nestjsEnabled) {
     for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
@@ -879,6 +1190,8 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
     if (ts.isCallExpression(node)) {
       const name = expressionName(node.expression);
       const firstArgumentText = literalText(node.arguments[0]);
+      const firstArgumentSql = staticStringResolutionAt(sourceFile, node, node.arguments[0], staticSqlStrings);
+      const firstArgumentSqlTexts = firstArgumentSql.values;
       const methodName = propertyName(node.expression);
       const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
 
@@ -1028,16 +1341,18 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               reason: "unsafe raw SQL call",
               ...resourceAccessSource(methodName, "prisma-adapter", "low"),
             });
-          } else if (firstArgumentText) {
-            for (const sqlAccess of sqlTableAccesses(firstArgumentText)) {
-              addResourceAccess(accesses, {
-                kind: "database",
-                access: sqlAccess.access,
-                selector: sqlAccess.selector,
-                filePath: relativeFilePath,
-                line: getLineNumber(sourceFile, node),
-                ...resourceAccessSource(methodName, "prisma-adapter", "medium"),
-              });
+          } else if (firstArgumentSqlTexts.length > 0) {
+            for (const sqlText of firstArgumentSqlTexts) {
+              for (const sqlAccess of sqlTableAccesses(sqlText)) {
+                addResourceAccess(accesses, {
+                  kind: "database",
+                  access: sqlAccess.access,
+                  selector: sqlAccess.selector,
+                  filePath: relativeFilePath,
+                  line: getLineNumber(sourceFile, node),
+                  ...resourceAccessSource(methodName, "prisma-adapter", "medium"),
+                });
+              }
             }
           } else {
             addResourceAccess(accesses, {
@@ -1052,21 +1367,23 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             });
           }
         } else if (sqlLiteralEnabled && methodName === "query") {
-          if (firstArgumentText) {
-            for (const sqlAccess of sqlTableAccesses(firstArgumentText)) {
-              addResourceAccess(accesses, {
-                kind: "database",
-                access: sqlAccess.access,
-                selector: sqlAccess.selector,
-                filePath: relativeFilePath,
-                line: getLineNumber(sourceFile, node),
-                // Stryker disable next-line StringLiteral: static SQL literal confidence is asserted by raw SQL detail tests.
-                ...resourceAccessSource(methodName, "sql-literal", "medium"),
-              });
+          if (firstArgumentSqlTexts.length > 0) {
+            for (const sqlText of firstArgumentSqlTexts) {
+              for (const sqlAccess of sqlTableAccesses(sqlText)) {
+                addResourceAccess(accesses, {
+                  kind: "database",
+                  access: sqlAccess.access,
+                  selector: sqlAccess.selector,
+                  filePath: relativeFilePath,
+                  line: getLineNumber(sourceFile, node),
+                  // Stryker disable next-line StringLiteral: static SQL literal confidence is asserted by raw SQL detail tests.
+                  ...resourceAccessSource(methodName, "sql-literal", "medium"),
+                });
+              }
             }
           } else {
             const firstArgument = node.arguments[0];
-            if (firstArgument && (expressionContainsSqlLiteral(firstArgument) || (ts.isIdentifier(firstArgument) && dynamicSqlVariables.has(firstArgument.text)))) {
+            if (firstArgument && (firstArgumentSql.dynamicSql || expressionContainsSqlLiteral(firstArgument))) {
               addResourceAccess(accesses, {
                 kind: "database",
                 access: "read",
