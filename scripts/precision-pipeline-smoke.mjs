@@ -316,6 +316,37 @@ function writeProtocol(protocolPath, artifactSetSha256, preLabelArtifactSetSha25
   });
 }
 
+function writeWorklistProtocol(protocolPath, preLabelArtifactSetSha256) {
+  writeJson(protocolPath, {
+    schemaVersion: "cellfence.precision-claim-protocol.v1",
+    studyId,
+    claim: {
+      toolCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      preLabelArtifactSetSha256,
+      targetPopulation: "local reviewed-manifest precision pipeline smoke fixture",
+      supportedSyntaxProfile: "ts-js-supported-v1",
+      includedRules: [
+        "CELLFENCE_PRIVATE_IMPORT",
+        "CELLFENCE_UNDECLARED_CONSUMER",
+      ],
+      primaryMetric: "blocking_precision",
+      minimumPrecision: 0.99,
+      confidence: 0.95,
+      blockingSeverities: [
+        "error",
+      ],
+    },
+    samplingPlan: {
+      maxRepositoryContribution: 0.1,
+    },
+    labelingPlan: {
+      minimumIndependentRaters: 2,
+      requireAdjudicationForDisagreements: true,
+    },
+    exclusionRules: [],
+  });
+}
+
 function main() {
   let options;
   try {
@@ -364,6 +395,7 @@ function main() {
       throw new Error("expected all smoke findings to be precision eligible");
     }
     const preLabelArtifactSetSha256 = readJson(path.join(firstBundleDir, "study.json")).preregistration.preLabelArtifactSetSha256;
+    writeWorklistProtocol(protocolPath, preLabelArtifactSetSha256);
 
     requireStatus(run(process.execPath, [
       path.join(repoRoot, "scripts", "precision-label-worklist.mjs"),
@@ -371,6 +403,8 @@ function main() {
       firstBundleDir,
       "--out-dir",
       worklistDir,
+      "--protocol",
+      protocolPath,
       "--raters",
       "reviewer-a,reviewer-b",
       "--rater-types",

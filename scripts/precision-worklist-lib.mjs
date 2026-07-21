@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { normalizeExclusionRules, protocolFilterSha256 } from "./precision-policy-filters.mjs";
 
 const worklistSchemaVersions = new Set(["cellfence.precision-label-worklist.v1", "cellfence.precision-label-worklist.v2"]);
 const assignmentSchemaVersion = "cellfence.precision-label-assignment.v1";
@@ -170,6 +171,38 @@ function validateWorklistEntryShape(issues, value, label) {
   rejectUnknownKeys(issues, value, ["path", "assignmentId", "evidencePackageId", "findingId", "subjectId", "ruleId", "round", "rater", "raterType"], label);
 }
 
+function validateExclusionRulesShape(issues, value, label) {
+  return normalizeExclusionRules(value, issues, { label });
+}
+
+function validateProtocolBindingShape(issues, value, label) {
+  if (value === undefined) return;
+  rejectUnknownKeys(issues, value, [
+    "pathHint",
+    "sha256",
+    "studyId",
+    "sourceBundleArtifactSetSha256",
+    "preLabelArtifactSetSha256",
+    "includedRules",
+    "blockingSeverities",
+    "exclusionRules",
+    "filterSha256",
+  ], label);
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    issues.push(`${label} must be an object when present`);
+    return;
+  }
+  rejectLabelLeak(issues, value.pathHint, `${label}.pathHint`);
+  validateSha256(issues, value.sha256, `${label}.sha256`);
+  if (value.studyId !== null && typeof value.studyId !== "string") issues.push(`${label}.studyId must be a string or null`);
+  validateSha256(issues, value.sourceBundleArtifactSetSha256, `${label}.sourceBundleArtifactSetSha256`, { required: false });
+  validateSha256(issues, value.preLabelArtifactSetSha256, `${label}.preLabelArtifactSetSha256`, { required: false });
+  validateStringArray(issues, value.includedRules, `${label}.includedRules`);
+  validateStringArray(issues, value.blockingSeverities, `${label}.blockingSeverities`);
+  validateExclusionRulesShape(issues, value.exclusionRules, `${label}.exclusionRules`);
+  validateSha256(issues, value.filterSha256, `${label}.filterSha256`);
+}
+
 function validateSourceLabelShape(issues, value, label) {
   rejectUnknownKeys(issues, value, ["schemaVersion", "studyId", "findingId", "rater", "raterType", "role", "round", "assignmentId", "evidencePackageId", "sawPeerLabels", "sourceBundleContainsLabels", "claimUse", "label", "rationale"], label);
 }
@@ -180,12 +213,12 @@ function worklistMode(worklist) {
 }
 
 function validateWorklistShape(worklist, issues) {
-  rejectUnknownKeys(issues, worklist, ["schemaVersion", "mode", "createdBy", "studyId", "bundle", "filters", "raters", "summary", "assignments"], "worklist.json");
+  rejectUnknownKeys(issues, worklist, ["schemaVersion", "mode", "createdBy", "studyId", "bundle", "filters", "protocol", "raters", "summary", "assignments"], "worklist.json");
   if (worklist.mode !== undefined && worklist.mode !== "blind_labeling" && worklist.mode !== "adjudication") {
     issues.push("worklist.mode must be blind_labeling or adjudication");
   }
   rejectUnknownKeys(issues, worklist.bundle, ["pathHint", "artifactSetSha256", "preLabelArtifactSetSha256", "createdAt"], "worklist.bundle");
-  rejectUnknownKeys(issues, worklist.filters, ["includedRules", "blockingSeverities", "allowExistingLabels"], "worklist.filters");
+  rejectUnknownKeys(issues, worklist.filters, ["includedRules", "blockingSeverities", "exclusionRules", "filterSha256", "allowExistingLabels"], "worklist.filters");
   rejectUnknownKeys(issues, worklist.summary, ["selectedFindings", "assignments", "existingLabelsInBundle", "disagreements"], "worklist.summary");
   rejectLabelLeak(issues, worklist.createdBy, "worklist.createdBy");
   rejectLabelLeak(issues, worklist.bundle?.pathHint, "worklist.bundle.pathHint");
@@ -194,9 +227,12 @@ function validateWorklistShape(worklist, issues) {
   validateCreatedAt(issues, worklist.bundle?.createdAt, "worklist.bundle.createdAt");
   validateStringArray(issues, worklist.filters?.includedRules, "worklist.filters.includedRules");
   validateStringArray(issues, worklist.filters?.blockingSeverities, "worklist.filters.blockingSeverities");
+  validateExclusionRulesShape(issues, worklist.filters?.exclusionRules, "worklist.filters.exclusionRules");
+  validateSha256(issues, worklist.filters?.filterSha256, "worklist.filters.filterSha256", { required: false });
   if (typeof worklist.filters?.allowExistingLabels !== "boolean") {
     issues.push("worklist.filters.allowExistingLabels must be a boolean");
   }
+  validateProtocolBindingShape(issues, worklist.protocol, "worklist.protocol");
   if (Array.isArray(worklist.raters)) {
     worklist.raters.forEach((rater, index) => {
       validateRaterShape(issues, rater, `worklist.raters[${index}]`);
@@ -660,6 +696,72 @@ function validateWorklistManifestConsistency(worklist, assignments, issues) {
   }
 }
 
+function filtersFromProtocol(protocol) {
+  if (!protocol) return null;
+  return {
+    studyId: protocol.studyId || null,
+    preLabelArtifactSetSha256: protocol.preLabelArtifactSetSha256 || null,
+    includedRules: protocol.includedRules || [],
+    blockingSeverities: protocol.blockingSeverities || ["error"],
+    exclusionRules: protocol.exclusionRules || [],
+  };
+}
+
+function compareJson(issues, actual, expected, label) {
+  if (canonicalJson(actual) !== canonicalJson(expected)) {
+    issues.push(`${label} does not match the active claim protocol`);
+  }
+}
+
+function validateWorklistProtocolBinding(worklist, expectedProtocol, issues) {
+  const expected = filtersFromProtocol(expectedProtocol);
+  const protocolBinding = worklist.protocol;
+  const actualFilters = {
+    includedRules: worklist.filters?.includedRules || [],
+    blockingSeverities: worklist.filters?.blockingSeverities || [],
+    exclusionRules: worklist.filters?.exclusionRules || [],
+  };
+  if (!protocolBinding) {
+    if (expectedProtocol && worklist.filters?.filterSha256) {
+      const expectedFilterSha256 = protocolFilterSha256(expected);
+      compareJson(issues, actualFilters.includedRules, expected.includedRules, "worklist.filters.includedRules");
+      compareJson(issues, actualFilters.blockingSeverities, expected.blockingSeverities, "worklist.filters.blockingSeverities");
+      compareJson(issues, actualFilters.exclusionRules, expected.exclusionRules, "worklist.filters.exclusionRules");
+      if (worklist.filters.filterSha256 !== expectedFilterSha256) {
+        issues.push("worklist.filters.filterSha256 does not match the active claim protocol");
+      }
+    }
+    return;
+  }
+  if (!expected) {
+    return;
+  }
+  if (protocolBinding.studyId !== expected.studyId) {
+    issues.push("worklist.protocol.studyId does not match the active claim protocol");
+  }
+  if ((protocolBinding.sourceBundleArtifactSetSha256 || null) !== (worklist.bundle?.artifactSetSha256 || null)) {
+    issues.push("worklist.protocol.sourceBundleArtifactSetSha256 does not match worklist.bundle.artifactSetSha256");
+  }
+  if ((protocolBinding.preLabelArtifactSetSha256 || null) !== expected.preLabelArtifactSetSha256) {
+    issues.push("worklist.protocol.preLabelArtifactSetSha256 does not match the active claim protocol");
+  }
+  compareJson(issues, protocolBinding.includedRules || [], expected.includedRules, "worklist.protocol.includedRules");
+  compareJson(issues, protocolBinding.blockingSeverities || [], expected.blockingSeverities, "worklist.protocol.blockingSeverities");
+  compareJson(issues, protocolBinding.exclusionRules || [], expected.exclusionRules, "worklist.protocol.exclusionRules");
+  compareJson(issues, actualFilters.includedRules, expected.includedRules, "worklist.filters.includedRules");
+  compareJson(issues, actualFilters.blockingSeverities, expected.blockingSeverities, "worklist.filters.blockingSeverities");
+  compareJson(issues, actualFilters.exclusionRules, expected.exclusionRules, "worklist.filters.exclusionRules");
+  const expectedFilterSha256 = protocolFilterSha256(expected);
+  if (protocolBinding.filterSha256 !== expectedFilterSha256) {
+    issues.push("worklist.protocol.filterSha256 does not match the active claim protocol");
+  }
+  if (!worklist.filters?.filterSha256) {
+    issues.push("protocol-bound worklist.filters.filterSha256 is required");
+  } else if (worklist.filters.filterSha256 !== expectedFilterSha256) {
+    issues.push("worklist.filters.filterSha256 does not match the active claim protocol");
+  }
+}
+
 function validateAssignment(worklistDir, entry, worklist, hashedFiles, context, issues) {
   const assignmentPath = safeJoin(worklistDir, entry?.path, issues, "assignment path");
   if (!assignmentPath || !fs.existsSync(assignmentPath)) {
@@ -802,6 +904,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   if (options.preLabelArtifactSetSha256 && worklist.bundle?.preLabelArtifactSetSha256 !== options.preLabelArtifactSetSha256) {
     issues.push("worklist bundle.preLabelArtifactSetSha256 does not match the evidence bundle");
   }
+  validateWorklistProtocolBinding(worklist, options.protocol || null, issues);
 
   const assignments = Array.isArray(worklist.assignments) ? worklist.assignments : [];
   const coveredRounds = new Set(assignments.map((entry) => entry?.round).filter(Boolean));

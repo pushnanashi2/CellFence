@@ -332,6 +332,7 @@ Generate blind labeling worklists from the unlabeled sealed bundle:
 npm run precision:labels:worklist -- \
   --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-bundle \
   --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-worklist \
+  --protocol docs/research/protocols/ts-js-confirmation-v1.json \
   --raters reviewer-a,reviewer-b \
   --rater-types human,human
 ```
@@ -359,6 +360,24 @@ generator-derived values for the sealed finding, study, round, and rater; rater
 IDs and structural identifiers must not contain label- or answer-suggestive
 tokens.
 
+Use `--protocol` for claim-bound worklists. The generator then derives the
+selection denominator from the protocol's `claim.includedRules`,
+`claim.blockingSeverities`, and top-level structured `exclusionRules`, applies
+those filters before writing assignments, and records the normalized filter
+set plus a `filterSha256` in `worklist.json`. If explicit
+`--include-rules` or `--blocking-severities` are also passed, they must exactly
+match the protocol. The claim and preflight commands verify this sealed
+protocol-filter binding, so a later protocol edit cannot silently narrow the
+denominator while reusing an older worklist.
+
+The protocol file used at worklist-generation time may leave
+`claim.artifactSetSha256` and `claim.worklistArtifactSetSha256s` unset because
+the final labeled bundle and worklist artifact digests do not exist yet. The
+worklist binds to the source bundle via `sourceBundleArtifactSetSha256` and to
+the preregistered pre-label boundary via `preLabelArtifactSetSha256`; fill the
+final claim artifact and worklist digests only after those artifacts are
+sealed.
+
 Record the worklist artifact set for the claim protocol:
 
 ```bash
@@ -382,6 +401,7 @@ npm run precision:labels:worklist -- \
   --mode adjudication \
   --bundle reports/corpus/ts-js-workspace-pilot-2026-07-18-independent-labeled-bundle \
   --out-dir reports/corpus/ts-js-workspace-pilot-2026-07-18-adjudication-worklist \
+  --protocol docs/research/protocols/ts-js-confirmation-v1.json \
   --adjudicator reviewer-c \
   --adjudicator-type human
 ```
@@ -547,7 +567,9 @@ For pass-eligible sealed claims, the protocol-selected finding set must match
 the sealed `blind_first` and `blind_second` worklist assignment sets exactly.
 Changing `includedRules`, `blockingSeverities`, or `exclusionRules` after a
 blind worklist has been generated makes the claim invalid instead of silently
-shrinking the denominator.
+shrinking the denominator. Protocol-bound worklists also record a canonical
+filter digest, which catches no-op-looking protocol drift even when the current
+sample's selected finding IDs happen to remain unchanged.
 
 The bundle contains:
 

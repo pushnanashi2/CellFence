@@ -275,6 +275,103 @@ test("precision label worklist creates blind assignment packages", () => {
   }
 });
 
+test("precision label worklist uses protocol filters and records protocol binding", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-label-worklist-protocol-"));
+  try {
+    const bundleDir = buildBundle(tempDir);
+    const study = readJson(path.join(bundleDir, "study.json"));
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, {
+      schemaVersion: "cellfence.precision-claim-protocol.v1",
+      studyId: "fixture-study",
+      claim: {
+        includedRules: ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"],
+        blockingSeverities: ["error"],
+        artifactSetSha256: hashFile(path.join(bundleDir, "SHA256SUMS")),
+        preLabelArtifactSetSha256: study.preregistration.preLabelArtifactSetSha256,
+      },
+      exclusionRules: [
+        {
+          field: "filePath",
+          equals: "src/demo/public.ts",
+          reason: "fixture removes one selected finding before blind labeling",
+        },
+      ],
+    });
+    const outDir = path.join(tempDir, "worklist");
+
+    const result = runNode(worklistScriptPath, [
+      "--bundle",
+      bundleDir,
+      "--out-dir",
+      outDir,
+      "--protocol",
+      protocolPath,
+      "--raters",
+      "reviewer-a,reviewer-b",
+      "--rater-types",
+      "human,human",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const output = JSON.parse(result.stdout);
+    const manifest = readJson(path.join(outDir, "worklist.json"));
+    assert.equal(manifest.summary.selectedFindings, 1);
+    assert.equal(manifest.summary.assignments, 2);
+    assert.deepEqual(manifest.filters.includedRules, ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"]);
+    assert.deepEqual(manifest.filters.blockingSeverities, ["error"]);
+    assert.deepEqual(manifest.filters.exclusionRules.map((rule) => rule.field), ["filePath"]);
+    assert.match(manifest.filters.filterSha256, /^[a-f0-9]{64}$/);
+    assert.equal(manifest.protocol.sha256, hashFile(protocolPath));
+    assert.equal(manifest.protocol.filterSha256, manifest.filters.filterSha256);
+    assert.equal(output.protocol.filterSha256, manifest.filters.filterSha256);
+    assert.equal(new Set(manifest.assignments.map((entry) => entry.ruleId)).size, 1);
+    assert.equal(manifest.assignments[0].ruleId, "CELLFENCE_PRIVATE_IMPORT");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision label worklist rejects protocol and CLI filter mismatch", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-label-worklist-protocol-mismatch-"));
+  try {
+    const bundleDir = buildBundle(tempDir);
+    const study = readJson(path.join(bundleDir, "study.json"));
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, {
+      schemaVersion: "cellfence.precision-claim-protocol.v1",
+      studyId: "fixture-study",
+      claim: {
+        includedRules: ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"],
+        blockingSeverities: ["error"],
+        artifactSetSha256: hashFile(path.join(bundleDir, "SHA256SUMS")),
+        preLabelArtifactSetSha256: study.preregistration.preLabelArtifactSetSha256,
+      },
+      exclusionRules: [],
+    });
+
+    const result = runNode(worklistScriptPath, [
+      "--bundle",
+      bundleDir,
+      "--out-dir",
+      path.join(tempDir, "worklist"),
+      "--protocol",
+      protocolPath,
+      "--include-rules",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "--raters",
+      "reviewer-a,reviewer-b",
+      "--rater-types",
+      "human,human",
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /--include-rules must match --protocol claim\.includedRules/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision label worklist creates sealed adjudication packages for disagreements only", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-adjudication-worklist-"));
   try {

@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
 import { isAdjudication, labelRaterType, posixify, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const reportSchemaVersion = "cellfence.precision-claim-preflight.v1";
@@ -11,7 +12,6 @@ const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
-const exclusionRuleFields = new Set(["findingId", "subjectId", "repository", "ruleId", "severity", "filePath", "cellId", "producerCellId"]);
 const allowedLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review", "invalid_setup", "out_of_scope"]);
 const blockingDenominatorLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review"]);
 const blockingSuccessLabels = new Set(["true_positive"]);
@@ -318,52 +318,6 @@ function rejectUnknownKeys(issues, value, allowedKeys, label) {
   }
 }
 
-function normalizeExclusionRules(rawRules, issues) {
-  if (rawRules === undefined) return [];
-  if (!Array.isArray(rawRules)) {
-    issues.push("protocol.exclusionRules must be an array when present");
-    return [];
-  }
-  const rules = [];
-  for (const [index, rule] of rawRules.entries()) {
-    const label = `protocol.exclusionRules[${index}]`;
-    if (!isRecord(rule)) {
-      issues.push(`${label} must be an object with field and equals or pattern; descriptive strings are not applied`);
-      continue;
-    }
-    rejectUnknownKeys(issues, rule, ["field", "equals", "pattern", "reason"], label);
-    if (typeof rule.field !== "string" || !exclusionRuleFields.has(rule.field)) {
-      issues.push(`${label}.field must be one of ${[...exclusionRuleFields].sort().join(", ")}`);
-      continue;
-    }
-    const hasEquals = Object.hasOwn(rule, "equals");
-    const hasPattern = Object.hasOwn(rule, "pattern");
-    if (hasEquals === hasPattern) {
-      issues.push(`${label} must declare exactly one of equals or pattern`);
-      continue;
-    }
-    if (hasEquals && typeof rule.equals !== "string") {
-      issues.push(`${label}.equals must be a string`);
-      continue;
-    }
-    if (hasPattern && typeof rule.pattern !== "string") {
-      issues.push(`${label}.pattern must be a string`);
-      continue;
-    }
-    if (Object.hasOwn(rule, "reason") && typeof rule.reason !== "string") {
-      issues.push(`${label}.reason must be a string when present`);
-      continue;
-    }
-    rules.push({
-      field: rule.field,
-      equals: hasEquals ? rule.equals : undefined,
-      pattern: hasPattern ? rule.pattern : undefined,
-      reason: rule.reason || null,
-    });
-  }
-  return rules;
-}
-
 function normalizeProtocol(protocol, issues) {
   if (protocol.schemaVersion !== protocolSchemaVersion) issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
   const claim = protocolClaim(protocol);
@@ -552,36 +506,6 @@ function finalLabelForFinding(finding, labels) {
   if (independentValues.size === 1 && adjudications.length === 0) return independent[0]?.label || null;
   if (independentValues.size > 1 && adjudications.length > 0) return adjudications.at(-1)?.label || null;
   return null;
-}
-
-function globPatternToRegExp(pattern) {
-  let source = "^";
-  for (let index = 0; index < pattern.length; index += 1) {
-    const character = pattern[index];
-    if (character === "*") {
-      if (pattern[index + 1] === "*") {
-        source += ".*";
-        index += 1;
-      } else {
-        source += "[^/]*";
-      }
-    } else if (character === "?") {
-      source += "[^/]";
-    } else {
-      source += character.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
-    }
-  }
-  source += "$";
-  return new RegExp(source);
-}
-
-function findingMatchesExclusionRule(finding, exclusionRules = []) {
-  for (const rule of exclusionRules) {
-    const value = String(finding?.[rule.field] ?? "");
-    if (rule.equals !== undefined && value === rule.equals) return true;
-    if (rule.pattern !== undefined && globPatternToRegExp(rule.pattern).test(value)) return true;
-  }
-  return false;
 }
 
 function eligibleBlockingFindings(findings, sampling, protocol) {
@@ -917,6 +841,7 @@ function evaluatePreflight(options) {
       const worklistVerification = verifyWorklistLabels(options.worklistDirs[index], labels, {
         bundleDir: options.bundleDir,
         findings,
+        protocol,
         studyId: protocol.studyId,
         expectedArtifactSetSha256: protocol.worklistArtifactSetSha256s[index],
         preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,

@@ -4,6 +4,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateBundle } from "./corpus-evidence-bundle.mjs";
+import {
+  defaultBlockingSeverities,
+  findingMatchesExclusionRule,
+  normalizeExclusionRules,
+  protocolClaim,
+  protocolFilterSha256,
+} from "./precision-policy-filters.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const allowedLabels = [
@@ -15,12 +22,12 @@ const allowedLabels = [
   "out_of_scope",
 ];
 const allowedRaterTypes = new Set(["human", "organization", "agent"]);
-const defaultBlockingSeverities = ["error"];
+const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-label-worklist.mjs --bundle reports/corpus/id-bundle --out-dir reports/corpus/id-worklist --raters reviewer-a,reviewer-b --rater-types human,human [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force] [--allow-existing-labels]
-  node scripts/precision-label-worklist.mjs --mode adjudication --bundle reports/corpus/id-independent-labeled-bundle --out-dir reports/corpus/id-adjudication-worklist --adjudicator reviewer-c --adjudicator-type human [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force]
+  node scripts/precision-label-worklist.mjs --bundle reports/corpus/id-bundle --out-dir reports/corpus/id-worklist --raters reviewer-a,reviewer-b --rater-types human,human [--protocol protocol.json] [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force] [--allow-existing-labels]
+  node scripts/precision-label-worklist.mjs --mode adjudication --bundle reports/corpus/id-independent-labeled-bundle --out-dir reports/corpus/id-adjudication-worklist --adjudicator reviewer-c --adjudicator-type human [--protocol protocol.json] [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force]
 
 Creates blind_first and blind_second assignment packages from a sealed evidence
 bundle. The generated files contain evidence and label templates only; they do
@@ -35,6 +42,7 @@ function parseArgs(argv) {
   const parsed = {
     bundleDir: "",
     outDir: "",
+    protocolPath: "",
     raters: [],
     raterTypes: [],
     mode: "blind",
@@ -42,6 +50,8 @@ function parseArgs(argv) {
     adjudicatorType: "",
     includeRules: [],
     blockingSeverities: defaultBlockingSeverities,
+    includeRulesProvided: false,
+    blockingSeveritiesProvided: false,
     force: false,
     allowExistingLabels: false,
   };
@@ -57,6 +67,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--out-dir=")) {
       parsed.outDir = path.resolve(requireInlineValue(argument, "--out-dir=", "--out-dir"));
+    } else if (argument === "--protocol") {
+      parsed.protocolPath = path.resolve(requireValue(argv, index, "--protocol"));
+      index += 1;
+    } else if (argument.startsWith("--protocol=")) {
+      parsed.protocolPath = path.resolve(requireInlineValue(argument, "--protocol=", "--protocol"));
     } else if (argument === "--raters") {
       parsed.raters = parseList(requireValue(argv, index, "--raters"));
       index += 1;
@@ -84,14 +99,18 @@ function parseArgs(argv) {
       parsed.adjudicatorType = requireInlineValue(argument, "--adjudicator-type=", "--adjudicator-type");
     } else if (argument === "--include-rules") {
       parsed.includeRules = parseList(requireValue(argv, index, "--include-rules"));
+      parsed.includeRulesProvided = true;
       index += 1;
     } else if (argument.startsWith("--include-rules=")) {
       parsed.includeRules = parseList(requireInlineValue(argument, "--include-rules=", "--include-rules"));
+      parsed.includeRulesProvided = true;
     } else if (argument === "--blocking-severities") {
       parsed.blockingSeverities = parseList(requireValue(argv, index, "--blocking-severities"));
+      parsed.blockingSeveritiesProvided = true;
       index += 1;
     } else if (argument.startsWith("--blocking-severities=")) {
       parsed.blockingSeverities = parseList(requireInlineValue(argument, "--blocking-severities=", "--blocking-severities"));
+      parsed.blockingSeveritiesProvided = true;
     } else if (argument === "--force") {
       parsed.force = true;
     } else if (argument === "--allow-existing-labels") {
@@ -232,6 +251,72 @@ function artifactSetSha256(bundleDir) {
   return hashFile(sumsPath);
 }
 
+function arraysEqual(left, right) {
+  return JSON.stringify(left || []) === JSON.stringify(right || []);
+}
+
+function readProtocolBinding(options, study, bundleSha256) {
+  if (!options.protocolPath) {
+    return {
+      includeRules: options.includeRules,
+      blockingSeverities: options.blockingSeverities,
+      exclusionRules: [],
+      binding: null,
+    };
+  }
+
+  const issues = [];
+  const protocol = readJson(options.protocolPath);
+  if (protocol.schemaVersion !== protocolSchemaVersion) {
+    issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
+  }
+  const claim = protocolClaim(protocol);
+  const includedRules = claim.includedRules || protocol.includedRules;
+  if (!Array.isArray(includedRules) || includedRules.length === 0 || includedRules.some((ruleId) => typeof ruleId !== "string" || ruleId.length === 0)) {
+    issues.push("protocol claim.includedRules must be a non-empty string array");
+  }
+  const blockingSeverities = claim.blockingSeverities || protocol.blockingSeverities || defaultBlockingSeverities;
+  if (!Array.isArray(blockingSeverities) || blockingSeverities.length === 0 || blockingSeverities.some((severity) => typeof severity !== "string" || severity.length === 0)) {
+    issues.push("protocol claim.blockingSeverities must be a non-empty string array");
+  }
+  const exclusionRules = normalizeExclusionRules(protocol.exclusionRules, issues);
+  if (options.includeRulesProvided && !arraysEqual(options.includeRules, includedRules)) {
+    issues.push("--include-rules must match --protocol claim.includedRules");
+  }
+  if (options.blockingSeveritiesProvided && !arraysEqual(options.blockingSeverities, blockingSeverities)) {
+    issues.push("--blocking-severities must match --protocol claim.blockingSeverities");
+  }
+  if (protocol.studyId && protocol.studyId !== study.studyId) {
+    issues.push(`protocol studyId ${protocol.studyId} does not match bundle studyId ${study.studyId}`);
+  }
+  const preLabelArtifactSetSha256 = claim.preLabelArtifactSetSha256 || protocol.preLabelArtifactSetSha256 || null;
+  if (preLabelArtifactSetSha256 && preLabelArtifactSetSha256 !== study.preregistration?.preLabelArtifactSetSha256) {
+    issues.push("protocol claim.preLabelArtifactSetSha256 does not match bundle preregistration.preLabelArtifactSetSha256");
+  }
+  if (issues.length > 0) {
+    throw new Error(`protocol-bound worklist is invalid:\n- ${issues.join("\n- ")}`);
+  }
+
+  const filters = {
+    includedRules,
+    blockingSeverities,
+    exclusionRules,
+  };
+  return {
+    includeRules: includedRules,
+    ...filters,
+    binding: {
+      pathHint: portablePathHint(options.protocolPath),
+      sha256: hashFile(options.protocolPath),
+      studyId: protocol.studyId || null,
+      sourceBundleArtifactSetSha256: bundleSha256,
+      preLabelArtifactSetSha256,
+      ...filters,
+      filterSha256: protocolFilterSha256(filters),
+    },
+  };
+}
+
 function raterTypeFor(options, index) {
   if (options.raterTypes.length === 1) return options.raterTypes[0];
   return options.raterTypes[index];
@@ -282,7 +367,8 @@ function selectedFindings(findings, sampling, options) {
     return sampledIds.has(finding.findingId)
       && finding.precisionEligible === true
       && (includedRules.size === 0 || includedRules.has(finding.ruleId))
-      && severities.has(finding.severity || "error");
+      && severities.has(finding.severity || "error")
+      && !findingMatchesExclusionRule(finding, options.exclusionRules);
   });
 }
 
@@ -427,7 +513,26 @@ function createWorklist(options) {
   if (options.mode === "adjudication" && labels.some(isAdjudicationLabel)) {
     throw new Error("adjudication mode requires a pre-adjudication bundle without adjudication labels");
   }
-  const sampled = selectedFindings(findings, sampling, options);
+  const bundleSha256 = artifactSetSha256(options.bundleDir);
+  const protocolFilters = readProtocolBinding(options, study, bundleSha256);
+  const selectionOptions = {
+    includeRules: protocolFilters.includeRules,
+    blockingSeverities: protocolFilters.blockingSeverities,
+    exclusionRules: protocolFilters.exclusionRules,
+  };
+  const worklistFilters = {
+    includedRules: selectionOptions.includeRules,
+    blockingSeverities: selectionOptions.blockingSeverities,
+    exclusionRules: selectionOptions.exclusionRules,
+  };
+  const sealedFilters = {
+    ...worklistFilters,
+    allowExistingLabels: options.allowExistingLabels,
+  };
+  if (protocolFilters.binding) {
+    sealedFilters.filterSha256 = protocolFilterSha256(worklistFilters);
+  }
+  const sampled = selectedFindings(findings, sampling, selectionOptions);
   const adjudicationEntries = options.mode === "adjudication" ? disagreementFindings(sampled, labels) : [];
   const selected = options.mode === "adjudication" ? adjudicationEntries.map((entry) => entry.finding) : sampled;
   if (selected.length === 0) throw new Error("no sampled precision-eligible findings match the worklist filters");
@@ -437,7 +542,6 @@ function createWorklist(options) {
   }
   fs.mkdirSync(options.outDir, { recursive: true });
 
-  const bundleSha256 = artifactSetSha256(options.bundleDir);
   const assignmentEntries = [];
   const outputPaths = new Set();
   const context = {
@@ -485,11 +589,7 @@ function createWorklist(options) {
       preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256 || null,
       createdAt: study.createdAt || null,
     },
-    filters: {
-      includedRules: options.includeRules,
-      blockingSeverities: options.blockingSeverities,
-      allowExistingLabels: options.allowExistingLabels,
-    },
+    filters: sealedFilters,
     raters: options.raters.map((rater, index) => ({
       rater,
       raterType: raterTypeFor(options, index),
@@ -503,6 +603,7 @@ function createWorklist(options) {
     },
     assignments: assignmentEntries,
   };
+  if (protocolFilters.binding) manifest.protocol = protocolFilters.binding;
   writeJson(path.join(options.outDir, "worklist.json"), manifest);
   writeSha256Sums(options.outDir);
   return manifest;
@@ -526,6 +627,11 @@ function main() {
       outDir: posixify(options.outDir),
       artifactSetSha256: worklistArtifactSetSha256,
       mode: manifest.mode,
+      protocol: manifest.protocol ? {
+        pathHint: manifest.protocol.pathHint,
+        sha256: manifest.protocol.sha256,
+        filterSha256: manifest.protocol.filterSha256,
+      } : null,
       raters: manifest.raters,
       summary: manifest.summary,
     }, null, 2));

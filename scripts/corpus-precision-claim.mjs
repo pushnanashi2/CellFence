@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { validateBundle as validateEvidenceBundle } from "./corpus-evidence-bundle.mjs";
+import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
 import { isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
@@ -13,7 +14,6 @@ const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
 const defaultMinimumIndependentRaters = 2;
 const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
-const exclusionRuleFields = new Set(["findingId", "subjectId", "repository", "ruleId", "severity", "filePath", "cellId", "producerCellId"]);
 const allowedLabels = new Set([
   "true_positive",
   "false_positive",
@@ -242,52 +242,6 @@ function rejectUnknownKeys(issues, value, allowedKeys, label) {
   for (const key of Object.keys(value)) {
     if (!allowed.has(key)) issues.push(`${label} has unexpected field ${key}`);
   }
-}
-
-function normalizeExclusionRules(rawRules, issues) {
-  if (rawRules === undefined) return [];
-  if (!Array.isArray(rawRules)) {
-    issues.push("protocol.exclusionRules must be an array when present");
-    return [];
-  }
-  const rules = [];
-  for (const [index, rule] of rawRules.entries()) {
-    const label = `protocol.exclusionRules[${index}]`;
-    if (!isRecord(rule)) {
-      issues.push(`${label} must be an object with field and equals or pattern; descriptive strings are not applied`);
-      continue;
-    }
-    rejectUnknownKeys(issues, rule, ["field", "equals", "pattern", "reason"], label);
-    if (typeof rule.field !== "string" || !exclusionRuleFields.has(rule.field)) {
-      issues.push(`${label}.field must be one of ${[...exclusionRuleFields].sort().join(", ")}`);
-      continue;
-    }
-    const hasEquals = Object.hasOwn(rule, "equals");
-    const hasPattern = Object.hasOwn(rule, "pattern");
-    if (hasEquals === hasPattern) {
-      issues.push(`${label} must declare exactly one of equals or pattern`);
-      continue;
-    }
-    if (hasEquals && typeof rule.equals !== "string") {
-      issues.push(`${label}.equals must be a string`);
-      continue;
-    }
-    if (hasPattern && typeof rule.pattern !== "string") {
-      issues.push(`${label}.pattern must be a string`);
-      continue;
-    }
-    if (Object.hasOwn(rule, "reason") && typeof rule.reason !== "string") {
-      issues.push(`${label}.reason must be a string when present`);
-      continue;
-    }
-    rules.push({
-      field: rule.field,
-      equals: hasEquals ? rule.equals : undefined,
-      pattern: hasPattern ? rule.pattern : undefined,
-      reason: rule.reason || null,
-    });
-  }
-  return rules;
 }
 
 function normalizeProtocol(protocol, issues) {
@@ -774,36 +728,6 @@ function leaveOneRepositoryOut(finalLabels, confidence) {
   };
 }
 
-function globPatternToRegExp(pattern) {
-  let source = "^";
-  for (let index = 0; index < pattern.length; index += 1) {
-    const character = pattern[index];
-    if (character === "*") {
-      if (pattern[index + 1] === "*") {
-        source += ".*";
-        index += 1;
-      } else {
-        source += "[^/]*";
-      }
-    } else if (character === "?") {
-      source += "[^/]";
-    } else {
-      source += character.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
-    }
-  }
-  source += "$";
-  return new RegExp(source);
-}
-
-function findingMatchesExclusionRule(finding, exclusionRules = []) {
-  for (const rule of exclusionRules) {
-    const value = String(finding?.[rule.field] ?? "");
-    if (rule.equals !== undefined && value === rule.equals) return true;
-    if (rule.pattern !== undefined && globPatternToRegExp(rule.pattern).test(value)) return true;
-  }
-  return false;
-}
-
 function eligibleBlockingFindings(findings, sampling, protocol) {
   const sampledFindingIds = new Set(sampling.sampledFindingIds || findings.map((finding) => finding.findingId));
   const includedRules = new Set(protocol.includedRules);
@@ -1052,6 +976,7 @@ function evaluateClaim(options) {
       const worklistVerification = verifyWorklistLabels(options.worklistDirs[index], labels, {
         bundleDir: options.bundleDir,
         findings,
+        protocol,
         studyId: protocol.studyId,
         expectedArtifactSetSha256: protocol.worklistArtifactSetSha256s[index],
         preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
