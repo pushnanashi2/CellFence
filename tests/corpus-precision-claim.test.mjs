@@ -511,6 +511,149 @@ function createWorklist(tempDir, bundleDir, findings, labels) {
   return worklistDir;
 }
 
+function sourceLabelSnapshot(label) {
+  return {
+    schemaVersion: label.schemaVersion,
+    studyId: label.studyId,
+    findingId: label.findingId,
+    rater: label.rater,
+    raterType: label.raterType,
+    role: label.role,
+    round: label.round,
+    assignmentId: label.assignmentId,
+    evidencePackageId: label.evidencePackageId,
+    sawPeerLabels: label.sawPeerLabels,
+    sourceBundleContainsLabels: label.sourceBundleContainsLabels,
+    claimUse: label.claimUse,
+    label: label.label,
+    rationale: label.rationale,
+  };
+}
+
+function adjudicationLabelFor(findingId, value = "true_positive") {
+  const rater = "reviewer-c";
+  const round = "adjudication";
+  return {
+    schemaVersion: "cellfence.corpus-label.v1",
+    studyId: "fixture-claim",
+    findingId,
+    rater,
+    raterType: "human",
+    role: "adjudicator",
+    round,
+    assignmentId: `assignment-${hashText(["fixture-claim", findingId, round, rater].join("\0")).slice(0, 16)}`,
+    evidencePackageId: `evidence-${findingId.slice("sha256:".length, "sha256:".length + 16)}`,
+    sawPeerLabels: true,
+    sourceBundleContainsLabels: true,
+    claimUse: "sealed_adjudication",
+    label: value,
+    rationale: "sealed adjudication fixture label",
+  };
+}
+
+function createAdjudicationWorklist(tempDir, bundleDir, findings, labels) {
+  const worklistDir = path.join(tempDir, "adjudication-worklist");
+  const study = readJson(path.join(bundleDir, "study.json"));
+  const bundleSha256 = hashFile(path.join(bundleDir, "SHA256SUMS"));
+  const disagreementFindings = findings.filter((finding) => {
+    const independent = labels.filter((label) => label.findingId === finding.findingId && label.round !== "adjudication");
+    return independent.length === 2 && new Set(independent.map((label) => label.label)).size > 1;
+  });
+  const assignments = disagreementFindings.map((finding) => {
+    const label = adjudicationLabelFor(finding.findingId);
+    const sourceLabels = labels.filter((entry) => entry.findingId === finding.findingId && entry.round !== "adjudication").map(sourceLabelSnapshot);
+    const assignment = {
+      schemaVersion: "cellfence.precision-label-assignment.v1",
+      studyId: "fixture-claim",
+      bundle: {
+        pathHint: path.basename(bundleDir),
+        artifactSetSha256: bundleSha256,
+        preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256 || null,
+      },
+      assignment: {
+        assignmentId: label.assignmentId,
+        evidencePackageId: label.evidencePackageId,
+        round: "adjudication",
+        rater: label.rater,
+        raterType: label.raterType,
+        sawPeerLabels: true,
+        peerLabelsIncluded: true,
+        sourceBundleContainsLabels: true,
+        claimUse: "sealed_adjudication",
+      },
+      evidenceArtifacts: evidenceArtifacts(bundleDir, study, finding),
+      finding: {
+        findingId: finding.findingId,
+        subjectId: finding?.subjectId || null,
+        ruleId: finding?.ruleId || null,
+      },
+      sourceLabels,
+      allowedLabels: ["true_positive", "false_positive", "needs_policy", "needs_review", "invalid_setup", "out_of_scope"],
+      labelTemplate: {
+        schemaVersion: "cellfence.corpus-label.v1",
+        studyId: "fixture-claim",
+        findingId: finding.findingId,
+        rater: label.rater,
+        raterType: label.raterType,
+        role: "adjudicator",
+        round: "adjudication",
+        assignmentId: label.assignmentId,
+        evidencePackageId: label.evidencePackageId,
+        sawPeerLabels: true,
+        sourceBundleContainsLabels: true,
+        claimUse: "sealed_adjudication",
+        label: "",
+        rationale: "",
+      },
+    };
+    const relativePath = path.join(
+      "assignments",
+      "adjudication",
+      `${safeName(finding?.subjectId || "subject")}-${safeName(finding?.ruleId || "rule")}-${label.assignmentId.replace(/^assignment-/, "")}.json`,
+    );
+    writeJson(path.join(worklistDir, relativePath), assignment);
+    return {
+      path: relativePath.replace(/\\/g, "/"),
+      assignmentId: label.assignmentId,
+      evidencePackageId: label.evidencePackageId,
+      findingId: finding.findingId,
+      subjectId: finding?.subjectId || null,
+      ruleId: finding?.ruleId || null,
+      round: "adjudication",
+      rater: label.rater,
+      raterType: label.raterType,
+    };
+  });
+  writeJson(path.join(worklistDir, "worklist.json"), {
+    schemaVersion: "cellfence.precision-label-worklist.v2",
+    mode: "adjudication",
+    createdBy: "test",
+    studyId: "fixture-claim",
+    bundle: {
+      pathHint: path.basename(bundleDir),
+      artifactSetSha256: bundleSha256,
+      preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256 || null,
+    },
+    filters: {
+      includedRules: [],
+      blockingSeverities: ["error"],
+      allowExistingLabels: true,
+    },
+    raters: [
+      { rater: "reviewer-c", raterType: "human", round: "adjudication" },
+    ],
+    summary: {
+      selectedFindings: disagreementFindings.length,
+      assignments: assignments.length,
+      existingLabelsInBundle: labels.length,
+      disagreements: disagreementFindings.length,
+    },
+    assignments,
+  });
+  writeSha256Sums(worklistDir);
+  return worklistDir;
+}
+
 function mergeClaimPatch(baseClaim, patch) {
   return {
     ...baseClaim,
@@ -880,6 +1023,112 @@ test("corpus precision claim rejects labels that violate rater provenance policy
   }
 });
 
+test("corpus precision claim accepts disagreements resolved by a sealed adjudication worklist", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-sealed-adjudication-"));
+  try {
+    const findings = Array.from({ length: 20 }, (_, index) => createFinding(index));
+    const independentLabels = labelsFor(findings);
+    independentLabels[1].label = "false_positive";
+    independentLabels[1].rationale = "independent fixture disagreement";
+    const independentBundleDir = createBundle(tempDir, findings, independentLabels);
+    const blindWorklistDir = createWorklist(tempDir, independentBundleDir, findings, independentLabels);
+    const adjudicationWorklistDir = createAdjudicationWorklist(tempDir, independentBundleDir, findings, independentLabels);
+    const finalLabels = [
+      ...independentLabels,
+      adjudicationLabelFor(findings[0].findingId, "true_positive"),
+    ];
+    writeJsonl(path.join(independentBundleDir, "labels.jsonl"), finalLabels);
+    writeSha256Sums(independentBundleDir);
+    const protocolPath = createProtocol(tempDir, independentBundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        worklistArtifactSetSha256s: [
+          hashFile(path.join(blindWorklistDir, "SHA256SUMS")),
+          hashFile(path.join(adjudicationWorklistDir, "SHA256SUMS")),
+        ],
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    });
+
+    const result = runClaim([
+      "--bundle",
+      independentBundleDir,
+      "--protocol",
+      protocolPath,
+      "--worklist",
+      blindWorklistDir,
+      "--worklist",
+      adjudicationWorklistDir,
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "pass");
+    assert.deepEqual(report.labelQuality.worklist.rounds, ["adjudication", "blind_first", "blind_second"]);
+    assert.equal(report.labelQuality.worklist.assignments, 41);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim rejects adjudication labels that omit the sealed round", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-adjudication-round-"));
+  try {
+    const findings = Array.from({ length: 20 }, (_, index) => createFinding(index));
+    const independentLabels = labelsFor(findings);
+    independentLabels[1].label = "false_positive";
+    independentLabels[1].rationale = "independent fixture disagreement";
+    const bundleDir = createBundle(tempDir, findings, independentLabels);
+    const blindWorklistDir = createWorklist(tempDir, bundleDir, findings, independentLabels);
+    const adjudicationWorklistDir = createAdjudicationWorklist(tempDir, bundleDir, findings, independentLabels);
+    const unboundAdjudication = adjudicationLabelFor(findings[0].findingId, "true_positive");
+    delete unboundAdjudication.round;
+    unboundAdjudication.assignmentId = "assignment-unbound-adjudication";
+    const finalLabels = [
+      ...independentLabels,
+      unboundAdjudication,
+    ];
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), finalLabels);
+    writeSha256Sums(bundleDir);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        worklistArtifactSetSha256s: [
+          hashFile(path.join(blindWorklistDir, "SHA256SUMS")),
+          hashFile(path.join(adjudicationWorklistDir, "SHA256SUMS")),
+        ],
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    });
+
+    const result = runClaim([
+      "--bundle",
+      bundleDir,
+      "--protocol",
+      protocolPath,
+      "--worklist",
+      blindWorklistDir,
+      "--worklist",
+      adjudicationWorklistDir,
+    ]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /adjudication label must use round=adjudication/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision claim rejects answer-bearing or loosely typed sealed label metadata", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-label-metadata-"));
   try {
@@ -987,7 +1236,7 @@ test("corpus precision claim rejects worklist-bound adjudication without sealed 
     assert.equal(result.status, 2, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision.status, "invalid");
-    assert.match(report.labelQuality.issues.join("\n"), /sealed adjudication provenance/);
+    assert.match(report.labelQuality.issues.join("\n"), /sealed adjudication worklist/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

@@ -5,7 +5,10 @@
     "toolCommit": "0123456789abcdef0123456789abcdef01234567",
     "preLabelArtifactSetSha256": "replace-with-study-preregistration-preLabelArtifactSetSha256",
     "artifactSetSha256": "replace-with-sha256-of-bundle-SHA256SUMS",
-    "worklistArtifactSetSha256": "replace-with-sha256-of-worklist-SHA256SUMS",
+    "worklistArtifactSetSha256s": [
+      "replace-with-sha256-of-blind-worklist-SHA256SUMS",
+      "replace-with-sha256-of-adjudication-worklist-SHA256SUMS-if-needed"
+    ],
     "targetPopulation": "reviewed TS/JS workspace repositories",
     "supportedSyntaxProfile": "ts-js-supported-v1",
     "includedRules": [

@@ -427,6 +427,49 @@ test("precision claim preflight is not claim-ready without sealed worklist bindi
   }
 });
 
+test("precision claim preflight rejects duplicate sealed worklist rounds", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-duplicate-worklist-rounds-"));
+  try {
+    const findings = [finding(1), finding(2)];
+    const labels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const worklistSha256 = hashFile(path.join(worklistDir, "SHA256SUMS"));
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        worklistArtifactSetSha256s: [worklistSha256, worklistSha256],
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    }));
+
+    const result = runPreflight([
+      "--bundle",
+      bundleDir,
+      "--protocol",
+      protocolPath,
+      "--worklist",
+      worklistDir,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /duplicate sealed worklist round blind_first/);
+    assert.match(report.issues.join("\n"), /duplicate sealed worklist round blind_second/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight rejects missing sealed claim binding fields", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-binding-"));
   try {

@@ -20,10 +20,15 @@ const defaultBlockingSeverities = ["error"];
 function usage() {
   console.error(`Usage:
   node scripts/precision-label-worklist.mjs --bundle reports/corpus/id-bundle --out-dir reports/corpus/id-worklist --raters reviewer-a,reviewer-b --rater-types human,human [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force] [--allow-existing-labels]
+  node scripts/precision-label-worklist.mjs --mode adjudication --bundle reports/corpus/id-independent-labeled-bundle --out-dir reports/corpus/id-adjudication-worklist --adjudicator reviewer-c --adjudicator-type human [--include-rules RULE_A,RULE_B] [--blocking-severities error] [--force]
 
 Creates blind_first and blind_second assignment packages from a sealed evidence
 bundle. The generated files contain evidence and label templates only; they do
-not include peer labels or adjudication outcomes.`);
+not include peer labels or adjudication outcomes.
+
+Adjudication mode creates one sealed adjudication package for each sampled
+finding whose two independent blind labels disagree. It includes the independent
+labels as peer evidence, but no prior adjudication outcome.`);
 }
 
 function parseArgs(argv) {
@@ -32,6 +37,9 @@ function parseArgs(argv) {
     outDir: "",
     raters: [],
     raterTypes: [],
+    mode: "blind",
+    adjudicator: "",
+    adjudicatorType: "",
     includeRules: [],
     blockingSeverities: defaultBlockingSeverities,
     force: false,
@@ -59,6 +67,21 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--rater-types=")) {
       parsed.raterTypes = parseList(requireInlineValue(argument, "--rater-types=", "--rater-types"));
+    } else if (argument === "--mode") {
+      parsed.mode = requireValue(argv, index, "--mode");
+      index += 1;
+    } else if (argument.startsWith("--mode=")) {
+      parsed.mode = requireInlineValue(argument, "--mode=", "--mode");
+    } else if (argument === "--adjudicator") {
+      parsed.adjudicator = requireValue(argv, index, "--adjudicator");
+      index += 1;
+    } else if (argument.startsWith("--adjudicator=")) {
+      parsed.adjudicator = requireInlineValue(argument, "--adjudicator=", "--adjudicator");
+    } else if (argument === "--adjudicator-type") {
+      parsed.adjudicatorType = requireValue(argv, index, "--adjudicator-type");
+      index += 1;
+    } else if (argument.startsWith("--adjudicator-type=")) {
+      parsed.adjudicatorType = requireInlineValue(argument, "--adjudicator-type=", "--adjudicator-type");
     } else if (argument === "--include-rules") {
       parsed.includeRules = parseList(requireValue(argv, index, "--include-rules"));
       index += 1;
@@ -82,14 +105,25 @@ function parseArgs(argv) {
   }
   if (!parsed.bundleDir) throw new Error("--bundle is required");
   if (!parsed.outDir) throw new Error("--out-dir is required");
-  if (parsed.raters.length !== 2) throw new Error("--raters must name exactly two independent raters");
-  if (new Set(parsed.raters).size !== parsed.raters.length) throw new Error("--raters must be distinct");
-  if (parsed.raterTypes.length === 0) throw new Error("--rater-types is required; declare human, organization, or agent explicitly");
-  if (parsed.raterTypes.length !== 0 && parsed.raterTypes.length !== 1 && parsed.raterTypes.length !== parsed.raters.length) {
-    throw new Error("--rater-types must be one value or one value per rater");
-  }
-  for (const raterType of parsed.raterTypes) {
-    if (!allowedRaterTypes.has(raterType)) throw new Error(`unknown --rater-types value: ${raterType}`);
+  if (parsed.mode !== "blind" && parsed.mode !== "adjudication") throw new Error("--mode must be blind or adjudication");
+  if (parsed.mode === "blind") {
+    if (parsed.raters.length !== 2) throw new Error("--raters must name exactly two independent raters");
+    if (new Set(parsed.raters).size !== parsed.raters.length) throw new Error("--raters must be distinct");
+    if (parsed.raterTypes.length === 0) throw new Error("--rater-types is required; declare human, organization, or agent explicitly");
+    if (parsed.raterTypes.length !== 0 && parsed.raterTypes.length !== 1 && parsed.raterTypes.length !== parsed.raters.length) {
+      throw new Error("--rater-types must be one value or one value per rater");
+    }
+    for (const raterType of parsed.raterTypes) {
+      if (!allowedRaterTypes.has(raterType)) throw new Error(`unknown --rater-types value: ${raterType}`);
+    }
+  } else {
+    if (parsed.raters.length > 0 || parsed.raterTypes.length > 0) throw new Error("adjudication mode uses --adjudicator and --adjudicator-type, not --raters");
+    if (!parsed.adjudicator) throw new Error("--adjudicator is required in adjudication mode");
+    if (!parsed.adjudicatorType) throw new Error("--adjudicator-type is required in adjudication mode");
+    if (!allowedRaterTypes.has(parsed.adjudicatorType)) throw new Error(`unknown --adjudicator-type value: ${parsed.adjudicatorType}`);
+    parsed.raters = [parsed.adjudicator];
+    parsed.raterTypes = [parsed.adjudicatorType];
+    parsed.allowExistingLabels = true;
   }
   if (parsed.blockingSeverities.length === 0) throw new Error("--blocking-severities cannot be empty");
   return parsed;
@@ -252,6 +286,49 @@ function selectedFindings(findings, sampling, options) {
   });
 }
 
+function isAdjudicationLabel(label) {
+  return label?.role === "adjudicator" || label?.round === "adjudication" || label?.adjudication === true || label?.adjudicated === true;
+}
+
+function independentLabelsForFinding(labels, findingId) {
+  return labels.filter((label) => label?.findingId === findingId && !isAdjudicationLabel(label));
+}
+
+function sourceLabelSnapshot(label) {
+  return {
+    schemaVersion: label.schemaVersion || "cellfence.corpus-label.v1",
+    studyId: label.studyId,
+    findingId: label.findingId,
+    rater: label.rater,
+    raterType: label.raterType || label.raterClass || null,
+    role: label.role || "independent",
+    round: label.round,
+    assignmentId: label.assignmentId,
+    evidencePackageId: label.evidencePackageId,
+    sawPeerLabels: label.sawPeerLabels,
+    sourceBundleContainsLabels: label.sourceBundleContainsLabels,
+    claimUse: label.claimUse,
+    label: label.label,
+    rationale: label.rationale || "",
+  };
+}
+
+function disagreementFindings(selected, labels) {
+  return selected.map((finding) => {
+    const independent = independentLabelsForFinding(labels, finding.findingId);
+    const blindFirst = independent.filter((label) => label.round === "blind_first");
+    const blindSecond = independent.filter((label) => label.round === "blind_second");
+    const labelsByValue = new Set(independent.map((label) => label.label));
+    return {
+      finding,
+      independent,
+      blindFirst,
+      blindSecond,
+      disagrees: blindFirst.length === 1 && blindSecond.length === 1 && labelsByValue.size > 1,
+    };
+  }).filter((entry) => entry.disagrees);
+}
+
 function findingEvidence(finding) {
   return {
     findingId: finding.findingId,
@@ -275,28 +352,30 @@ function findingEvidence(finding) {
 }
 
 function labelTemplate(studyId, finding, assignment, context) {
+  const adjudication = assignment.round === "adjudication";
   return {
     schemaVersion: "cellfence.corpus-label.v1",
     studyId,
     findingId: finding.findingId,
     rater: assignment.rater,
     raterType: assignment.raterType,
-    role: "independent",
+    role: adjudication ? "adjudicator" : "independent",
     round: assignment.round,
     assignmentId: assignment.assignmentId,
     evidencePackageId: assignment.evidencePackageId,
-    sawPeerLabels: false,
+    sawPeerLabels: adjudication ? true : false,
     sourceBundleContainsLabels: context.sourceBundleContainsLabels,
-    claimUse: context.sourceBundleContainsLabels ? "diagnostic_only_existing_labels" : "blind_labeling",
+    claimUse: adjudication ? "sealed_adjudication" : context.sourceBundleContainsLabels ? "diagnostic_only_existing_labels" : "blind_labeling",
     label: "",
     rationale: "",
   };
 }
 
-function buildAssignment(study, bundleDir, bundleSha256, finding, options, index, context) {
-  const round = index === 0 ? "blind_first" : "blind_second";
-  const rater = options.raters[index];
-  const raterType = raterTypeFor(options, index);
+function buildAssignment(study, bundleDir, bundleSha256, finding, options, index, context, sourceLabels = []) {
+  const adjudication = options.mode === "adjudication";
+  const round = adjudication ? "adjudication" : index === 0 ? "blind_first" : "blind_second";
+  const rater = adjudication ? options.adjudicator : options.raters[index];
+  const raterType = adjudication ? options.adjudicatorType : raterTypeFor(options, index);
   const evidencePackageId = `evidence-${finding.findingId.replace(/^sha256:/, "").slice(0, 16)}`;
   const assignmentId = `assignment-${hashText([study.studyId, finding.findingId, round, rater].join("\0")).slice(0, 16)}`;
   return {
@@ -313,13 +392,14 @@ function buildAssignment(study, bundleDir, bundleSha256, finding, options, index
       round,
       rater,
       raterType,
-      sawPeerLabels: false,
-      peerLabelsIncluded: false,
+      sawPeerLabels: adjudication ? true : false,
+      peerLabelsIncluded: adjudication ? true : false,
       sourceBundleContainsLabels: context.sourceBundleContainsLabels,
-      claimUse: context.sourceBundleContainsLabels ? "diagnostic_only_existing_labels" : "blind_labeling",
+      claimUse: adjudication ? "sealed_adjudication" : context.sourceBundleContainsLabels ? "diagnostic_only_existing_labels" : "blind_labeling",
     },
     evidenceArtifacts: evidenceArtifacts(study, bundleDir, finding),
     finding: findingEvidence(finding),
+    sourceLabels,
     allowedLabels,
     labelTemplate: labelTemplate(study.studyId, finding, {
       assignmentId,
@@ -338,10 +418,18 @@ function createWorklist(options) {
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
-  if (labels.length > 0 && !options.allowExistingLabels) {
+  if (options.mode === "blind" && labels.length > 0 && !options.allowExistingLabels) {
     throw new Error("bundle already contains labels; pass --allow-existing-labels only for diagnostic carry-forward worklists");
   }
-  const selected = selectedFindings(findings, sampling, options);
+  if (options.mode === "adjudication" && labels.length === 0) {
+    throw new Error("adjudication mode requires an independently labeled bundle");
+  }
+  if (options.mode === "adjudication" && labels.some(isAdjudicationLabel)) {
+    throw new Error("adjudication mode requires a pre-adjudication bundle without adjudication labels");
+  }
+  const sampled = selectedFindings(findings, sampling, options);
+  const adjudicationEntries = options.mode === "adjudication" ? disagreementFindings(sampled, labels) : [];
+  const selected = options.mode === "adjudication" ? adjudicationEntries.map((entry) => entry.finding) : sampled;
   if (selected.length === 0) throw new Error("no sampled precision-eligible findings match the worklist filters");
   if (fs.existsSync(options.outDir)) {
     if (!options.force) throw new Error(`output directory already exists: ${options.outDir}`);
@@ -356,8 +444,12 @@ function createWorklist(options) {
     sourceBundleContainsLabels: labels.length > 0,
   };
   for (const finding of selected) {
-    for (let index = 0; index < options.raters.length; index += 1) {
-      const assignment = buildAssignment(study, options.bundleDir, bundleSha256, finding, options, index, context);
+    const rounds = options.mode === "adjudication" ? [0] : options.raters.map((_, index) => index);
+    for (const index of rounds) {
+      const sourceLabels = options.mode === "adjudication"
+        ? (adjudicationEntries.find((entry) => entry.finding.findingId === finding.findingId)?.independent || []).map(sourceLabelSnapshot)
+        : [];
+      const assignment = buildAssignment(study, options.bundleDir, bundleSha256, finding, options, index, context, sourceLabels);
       const relativePath = path.join(
         "assignments",
         assignment.assignment.round,
@@ -383,7 +475,8 @@ function createWorklist(options) {
 
   assignmentEntries.sort((left, right) => left.path.localeCompare(right.path));
   const manifest = {
-    schemaVersion: "cellfence.precision-label-worklist.v1",
+    schemaVersion: options.mode === "adjudication" ? "cellfence.precision-label-worklist.v2" : "cellfence.precision-label-worklist.v1",
+    mode: options.mode === "adjudication" ? "adjudication" : "blind_labeling",
     createdBy: "scripts/precision-label-worklist.mjs",
     studyId: study.studyId,
     bundle: {
@@ -400,12 +493,13 @@ function createWorklist(options) {
     raters: options.raters.map((rater, index) => ({
       rater,
       raterType: raterTypeFor(options, index),
-      round: index === 0 ? "blind_first" : "blind_second",
+      round: options.mode === "adjudication" ? "adjudication" : index === 0 ? "blind_first" : "blind_second",
     })),
     summary: {
       selectedFindings: selected.length,
       assignments: assignmentEntries.length,
       existingLabelsInBundle: labels.length,
+      disagreements: adjudicationEntries.length,
     },
     assignments: assignmentEntries,
   };

@@ -209,6 +209,25 @@ function buildBundle(tempDir) {
   return bundleDir;
 }
 
+function labelForFinding(studyId, findingId, rater, round, value) {
+  return {
+    schemaVersion: "cellfence.corpus-label.v1",
+    studyId,
+    findingId,
+    rater,
+    raterType: "human",
+    role: "independent",
+    round,
+    assignmentId: `assignment-${crypto.createHash("sha256").update([studyId, findingId, round, rater].join("\0")).digest("hex").slice(0, 16)}`,
+    evidencePackageId: `evidence-${findingId.slice("sha256:".length, "sha256:".length + 16)}`,
+    sawPeerLabels: false,
+    sourceBundleContainsLabels: false,
+    claimUse: "blind_labeling",
+    label: value,
+    rationale: `${rater} ${value}`,
+  };
+}
+
 test("precision label worklist creates blind assignment packages", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-label-worklist-"));
   try {
@@ -247,6 +266,92 @@ test("precision label worklist creates blind assignment packages", () => {
     assert.equal(firstAssignment.labelTemplate.label, "");
     assert.equal(firstAssignment.labelTemplate.rationale, "");
     assert.ok(fs.existsSync(path.join(outDir, "SHA256SUMS")));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision label worklist creates sealed adjudication packages for disagreements only", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-adjudication-worklist-"));
+  try {
+    const bundleDir = buildBundle(tempDir);
+    const findings = readJsonl(path.join(bundleDir, "findings.normalized.jsonl"));
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), [
+      labelForFinding("fixture-study", findings[0].findingId, "reviewer-a", "blind_first", "true_positive"),
+      labelForFinding("fixture-study", findings[0].findingId, "reviewer-b", "blind_second", "false_positive"),
+      labelForFinding("fixture-study", findings[1].findingId, "reviewer-a", "blind_first", "true_positive"),
+      labelForFinding("fixture-study", findings[1].findingId, "reviewer-b", "blind_second", "true_positive"),
+    ]);
+    writeSha256Sums(bundleDir);
+    const outDir = path.join(tempDir, "adjudication-worklist");
+
+    const result = runNode(worklistScriptPath, [
+      "--mode",
+      "adjudication",
+      "--bundle",
+      bundleDir,
+      "--out-dir",
+      outDir,
+      "--adjudicator",
+      "reviewer-c",
+      "--adjudicator-type",
+      "human",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const manifest = readJson(path.join(outDir, "worklist.json"));
+    assert.equal(manifest.schemaVersion, "cellfence.precision-label-worklist.v2");
+    assert.equal(manifest.mode, "adjudication");
+    assert.equal(manifest.summary.selectedFindings, 1);
+    assert.equal(manifest.summary.assignments, 1);
+    assert.equal(manifest.summary.disagreements, 1);
+    assert.equal(manifest.raters[0].round, "adjudication");
+    const assignment = readJson(path.join(outDir, manifest.assignments[0].path));
+    assert.equal(assignment.assignment.peerLabelsIncluded, true);
+    assert.equal(assignment.assignment.sawPeerLabels, true);
+    assert.equal(assignment.assignment.sourceBundleContainsLabels, true);
+    assert.equal(assignment.assignment.claimUse, "sealed_adjudication");
+    assert.equal(assignment.labelTemplate.role, "adjudicator");
+    assert.equal(assignment.labelTemplate.claimUse, "sealed_adjudication");
+    assert.equal(assignment.sourceLabels.length, 2);
+    assert.deepEqual(new Set(assignment.sourceLabels.map((label) => label.label)), new Set(["true_positive", "false_positive"]));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision label worklist rejects already adjudicated source bundles", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-adjudication-worklist-final-bundle-"));
+  try {
+    const bundleDir = buildBundle(tempDir);
+    const findings = readJsonl(path.join(bundleDir, "findings.normalized.jsonl"));
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), [
+      labelForFinding("fixture-study", findings[0].findingId, "reviewer-a", "blind_first", "true_positive"),
+      labelForFinding("fixture-study", findings[0].findingId, "reviewer-b", "blind_second", "false_positive"),
+      {
+        ...labelForFinding("fixture-study", findings[0].findingId, "reviewer-c", "adjudication", "true_positive"),
+        role: "adjudicator",
+        sawPeerLabels: true,
+        sourceBundleContainsLabels: true,
+        claimUse: "sealed_adjudication",
+      },
+    ]);
+    writeSha256Sums(bundleDir);
+    const result = runNode(worklistScriptPath, [
+      "--mode",
+      "adjudication",
+      "--bundle",
+      bundleDir,
+      "--out-dir",
+      path.join(tempDir, "adjudication-worklist"),
+      "--adjudicator",
+      "reviewer-d",
+      "--adjudicator-type",
+      "human",
+    ]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, /pre-adjudication bundle/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

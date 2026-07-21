@@ -671,7 +671,7 @@ test("precision labels validator rejects per-finding rater identity drift in wor
 
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
-    assert.match(report.issues.join("\n"), /exactly two global blind raters/);
+    assert.match(report.issues.join("\n"), /exactly 2 global blind rater/);
     assert.match(report.issues.join("\n"), /rater does not match the global blind_first rater/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -872,7 +872,7 @@ test("precision labels validator rejects adjudication in worklist-bound v1 readi
 
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
-    assert.match(report.issues.join("\n"), /sealed adjudication provenance/);
+    assert.match(report.issues.join("\n"), /sealed adjudication worklist/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

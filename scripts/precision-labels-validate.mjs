@@ -33,7 +33,7 @@ const labelAllowedKeys = new Set([
 ]);
 
 function usage() {
-  console.error(`Usage: node scripts/precision-labels-validate.mjs --bundle reports/corpus/id-bundle [--worklist reports/corpus/id-worklist] [--min-raters 2] [--out report.json]
+  console.error(`Usage: node scripts/precision-labels-validate.mjs --bundle reports/corpus/id-bundle [--worklist reports/corpus/id-worklist ...] [--min-raters 2] [--out report.json]
 
 Validates labeling readiness before a precision claim: every sampled,
 precision-eligible finding needs independent labels, disagreements need a
@@ -43,7 +43,7 @@ separate adjudicator, and label rows must be schema-valid.`);
 function parseArgs(argv) {
   const parsed = {
     bundleDir: "",
-    worklistDir: "",
+    worklistDirs: [],
     outPath: "",
     minRaters: 2,
     allowedRaterTypes: [],
@@ -58,10 +58,10 @@ function parseArgs(argv) {
     } else if (argument.startsWith("--bundle=")) {
       parsed.bundleDir = path.resolve(requireInlineValue(argument, "--bundle=", "--bundle"));
     } else if (argument === "--worklist") {
-      parsed.worklistDir = path.resolve(requireValue(argv, index, "--worklist"));
+      parsed.worklistDirs.push(path.resolve(requireValue(argv, index, "--worklist")));
       index += 1;
     } else if (argument.startsWith("--worklist=")) {
-      parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
+      parsed.worklistDirs.push(path.resolve(requireInlineValue(argument, "--worklist=", "--worklist")));
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -265,18 +265,24 @@ function validateBundle(options) {
   const studyId = study.studyId;
   const knownFindingIds = new Set(findings.map((finding) => finding.findingId));
   validateLabelRows(labels, studyId, knownFindingIds, issues, options);
-  let worklist = null;
-  if (options.worklistDir) {
-    worklist = verifyWorklistLabels(options.worklistDir, labels, {
+  const worklists = [];
+  const sealedRounds = new Set();
+  for (const worklistDir of options.worklistDirs) {
+    const worklist = verifyWorklistLabels(worklistDir, labels, {
       bundleDir: options.bundleDir,
       findings,
       studyId,
       preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
     });
+    worklists.push({ path: worklistDir, ...worklist });
+    worklist.rounds.forEach((round) => {
+      if (sealedRounds.has(round)) issues.push(`duplicate sealed worklist round ${round}`);
+      sealedRounds.add(round);
+    });
     issues.push(...worklist.issues.map((issue) => `worklist: ${issue}`));
-    if (labels.some(isAdjudication)) {
-      issues.push("worklist-bound label readiness requires sealed adjudication provenance; worklist v1 supports independent labels only");
-    }
+  }
+  if (options.worklistDirs.length > 0 && labels.some(isAdjudication) && !sealedRounds.has("adjudication")) {
+    issues.push("worklist-bound adjudication labels require a sealed adjudication worklist");
   }
 
   const sampledIds = new Set(Array.isArray(sampling.sampledFindingIds) ? sampling.sampledFindingIds : []);
@@ -299,11 +305,13 @@ function validateBundle(options) {
     bundleDir: options.bundleDir,
     studyId,
     minRaters: options.minRaters,
-    worklist: worklist ? {
-      path: options.worklistDir,
-      artifactSetSha256: worklist.artifactSetSha256,
-      assignments: worklist.assignments,
-      issues: worklist.issues.length,
+    worklist: worklists.length > 0 ? {
+      paths: worklists.map((worklist) => worklist.path),
+      artifactSetSha256: worklists.length === 1 ? worklists[0].artifactSetSha256 : null,
+      artifactSetSha256s: worklists.map((worklist) => worklist.artifactSetSha256),
+      assignments: worklists.reduce((total, worklist) => total + worklist.assignments, 0),
+      rounds: [...sealedRounds].sort(),
+      issues: worklists.reduce((total, worklist) => total + worklist.issues.length, 0),
     } : null,
     allowedRaterTypes: options.allowedRaterTypes,
     requireKnownRaterType: options.requireKnownRaterType,

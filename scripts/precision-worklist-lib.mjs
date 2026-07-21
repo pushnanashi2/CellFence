@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-const worklistSchemaVersion = "cellfence.precision-label-worklist.v1";
+const worklistSchemaVersions = new Set(["cellfence.precision-label-worklist.v1", "cellfence.precision-label-worklist.v2"]);
 const assignmentSchemaVersion = "cellfence.precision-label-assignment.v1";
 const canonicalAllowedLabels = [
   "true_positive",
@@ -37,7 +37,7 @@ export function posixify(value) {
 }
 
 export function isAdjudication(label) {
-  return label.role === "adjudicator" || label.adjudication === true || label.adjudicated === true;
+  return label?.role === "adjudicator" || label?.round === "adjudication" || label?.adjudication === true || label?.adjudicated === true;
 }
 
 export function labelRaterType(label) {
@@ -82,6 +82,12 @@ export function validateClaimLabelMetadata(label, line, issues, options = {}) {
   const adjudication = isAdjudication(label);
   if (adjudication) {
     if (label.role !== "adjudicator") issues.push(`${location} adjudication label must declare role=adjudicator`);
+    if (label.round !== "adjudication") issues.push(`${location} adjudication label must use round=adjudication`);
+    if (sealedWorklist) {
+      if (label.sawPeerLabels !== true) issues.push(`${location} adjudication label must declare sawPeerLabels=true`);
+      if (label.sourceBundleContainsLabels !== true) issues.push(`${location} adjudication label must declare sourceBundleContainsLabels=true`);
+      if (label.claimUse !== "sealed_adjudication") issues.push(`${location} adjudication label must declare claimUse=sealed_adjudication`);
+    }
   } else {
     if (label.role !== "independent") issues.push(`${location} independent label must declare role=independent`);
     if (label.sourceBundleContainsLabels !== false) issues.push(`${location} independent label must declare sourceBundleContainsLabels=false`);
@@ -164,11 +170,23 @@ function validateWorklistEntryShape(issues, value, label) {
   rejectUnknownKeys(issues, value, ["path", "assignmentId", "evidencePackageId", "findingId", "subjectId", "ruleId", "round", "rater", "raterType"], label);
 }
 
+function validateSourceLabelShape(issues, value, label) {
+  rejectUnknownKeys(issues, value, ["schemaVersion", "studyId", "findingId", "rater", "raterType", "role", "round", "assignmentId", "evidencePackageId", "sawPeerLabels", "sourceBundleContainsLabels", "claimUse", "label", "rationale"], label);
+}
+
+function worklistMode(worklist) {
+  if (worklist.mode === "adjudication") return "adjudication";
+  return "blind_labeling";
+}
+
 function validateWorklistShape(worklist, issues) {
-  rejectUnknownKeys(issues, worklist, ["schemaVersion", "createdBy", "studyId", "bundle", "filters", "raters", "summary", "assignments"], "worklist.json");
+  rejectUnknownKeys(issues, worklist, ["schemaVersion", "mode", "createdBy", "studyId", "bundle", "filters", "raters", "summary", "assignments"], "worklist.json");
+  if (worklist.mode !== undefined && worklist.mode !== "blind_labeling" && worklist.mode !== "adjudication") {
+    issues.push("worklist.mode must be blind_labeling or adjudication");
+  }
   rejectUnknownKeys(issues, worklist.bundle, ["pathHint", "artifactSetSha256", "preLabelArtifactSetSha256", "createdAt"], "worklist.bundle");
   rejectUnknownKeys(issues, worklist.filters, ["includedRules", "blockingSeverities", "allowExistingLabels"], "worklist.filters");
-  rejectUnknownKeys(issues, worklist.summary, ["selectedFindings", "assignments", "existingLabelsInBundle"], "worklist.summary");
+  rejectUnknownKeys(issues, worklist.summary, ["selectedFindings", "assignments", "existingLabelsInBundle", "disagreements"], "worklist.summary");
   rejectLabelLeak(issues, worklist.createdBy, "worklist.createdBy");
   rejectLabelLeak(issues, worklist.bundle?.pathHint, "worklist.bundle.pathHint");
   validateSha256(issues, worklist.bundle?.artifactSetSha256, "worklist.bundle.artifactSetSha256");
@@ -194,7 +212,7 @@ function validateWorklistShape(worklist, issues) {
 }
 
 function validateAssignmentShape(assignment, label, issues) {
-  rejectUnknownKeys(issues, assignment, ["schemaVersion", "studyId", "bundle", "assignment", "evidenceArtifacts", "finding", "allowedLabels", "labelTemplate"], label);
+  rejectUnknownKeys(issues, assignment, ["schemaVersion", "studyId", "bundle", "assignment", "evidenceArtifacts", "finding", "sourceLabels", "allowedLabels", "labelTemplate"], label);
   rejectUnknownKeys(issues, assignment.bundle, ["pathHint", "artifactSetSha256", "preLabelArtifactSetSha256"], `${label}.bundle`);
   rejectUnknownKeys(issues, assignment.assignment, ["assignmentId", "evidencePackageId", "round", "rater", "raterType", "sawPeerLabels", "peerLabelsIncluded", "sourceBundleContainsLabels", "claimUse"], `${label}.assignment`);
   rejectUnknownKeys(issues, assignment.evidenceArtifacts, ["bundleFiles", "subject"], `${label}.evidenceArtifacts`);
@@ -204,6 +222,11 @@ function validateAssignmentShape(assignment, label, issues) {
   }
   rejectUnknownKeys(issues, assignment.finding, ["findingId", "subjectId", "repository", "commit", "gitTree", "manifestSha256", "manifestStrategy", "manifestReviewStatus", "ruleId", "severity", "filePath", "line", "message", "cellId", "producerCellId", "cellfenceFingerprint", "occurrenceIndex"], `${label}.finding`);
   rejectUnknownKeys(issues, assignment.labelTemplate, ["schemaVersion", "studyId", "findingId", "rater", "raterType", "role", "round", "assignmentId", "evidencePackageId", "sawPeerLabels", "sourceBundleContainsLabels", "claimUse", "label", "rationale"], `${label}.labelTemplate`);
+  if (Array.isArray(assignment.sourceLabels)) {
+    assignment.sourceLabels.forEach((sourceLabel, index) => validateSourceLabelShape(issues, sourceLabel, `${label}.sourceLabels[${index}]`));
+  } else if (assignment.sourceLabels !== undefined) {
+    issues.push(`${label}.sourceLabels must be an array when present`);
+  }
 }
 
 function listFilesRecursive(baseDir, issues = [], rootDir = baseDir) {
@@ -489,6 +512,49 @@ function validateAssignmentEvidenceBinding(assignment, entry, context, issues) {
   rejectLabelLeak(issues, entry.rater, `${entry.path} rater`);
 }
 
+function sourceLabelSnapshot(label) {
+  return {
+    schemaVersion: label.schemaVersion || "cellfence.corpus-label.v1",
+    studyId: label.studyId,
+    findingId: label.findingId,
+    rater: label.rater,
+    raterType: label.raterType || "",
+    role: label.role || "independent",
+    round: label.round,
+    assignmentId: label.assignmentId,
+    evidencePackageId: label.evidencePackageId,
+    sawPeerLabels: label.sawPeerLabels,
+    sourceBundleContainsLabels: label.sourceBundleContainsLabels,
+    claimUse: label.claimUse,
+    label: label.label,
+    rationale: label.rationale || "",
+  };
+}
+
+function validateAssignmentSourceLabels(assignment, entry, context, issues) {
+  const sourceLabels = Array.isArray(assignment.sourceLabels) ? assignment.sourceLabels : [];
+  if (entry.round !== "adjudication") {
+    if (sourceLabels.length !== 0) issues.push(`${entry.path} blind assignments must not include sourceLabels`);
+    return;
+  }
+  const independent = (context.labelsByFindingId.get(entry.findingId) || []).filter((label) => !isAdjudication(label));
+  const blindFirst = independent.filter((label) => label.round === "blind_first");
+  const blindSecond = independent.filter((label) => label.round === "blind_second");
+  const distinctLabels = new Set(independent.map((label) => label.label));
+  if (blindFirst.length !== 1 || blindSecond.length !== 1 || distinctLabels.size <= 1) {
+    issues.push(`${entry.path} adjudication assignment must be backed by exactly two disagreeing independent labels`);
+  }
+  const expected = independent
+    .map(sourceLabelSnapshot)
+    .sort((left, right) => `${left.round}\0${left.rater}`.localeCompare(`${right.round}\0${right.rater}`));
+  const actual = sourceLabels
+    .map(sourceLabelSnapshot)
+    .sort((left, right) => `${left.round}\0${left.rater}`.localeCompare(`${right.round}\0${right.rater}`));
+  if (canonicalJson(actual) !== canonicalJson(expected)) {
+    issues.push(`${entry.path} sourceLabels do not match sealed independent labels`);
+  }
+}
+
 function validateDeclaredWorklistFiles(hashedFiles, assignments, issues) {
   const declaredFiles = new Set(["worklist.json"]);
   for (const entry of assignments) {
@@ -507,11 +573,24 @@ function validateDeclaredWorklistFiles(hashedFiles, assignments, issues) {
 }
 
 function validateWorklistManifestConsistency(worklist, assignments, issues) {
-  if (worklist.filters?.allowExistingLabels !== false) {
-    issues.push("worklist.filters.allowExistingLabels must be false for claim-bound blind labeling");
-  }
-  if (worklist.summary?.existingLabelsInBundle !== 0) {
-    issues.push("worklist.summary.existingLabelsInBundle must be 0 for claim-bound blind labeling");
+  const mode = worklistMode(worklist);
+  if (mode === "blind_labeling") {
+    if (worklist.filters?.allowExistingLabels !== false) {
+      issues.push("worklist.filters.allowExistingLabels must be false for claim-bound blind labeling");
+    }
+    if (worklist.summary?.existingLabelsInBundle !== 0) {
+      issues.push("worklist.summary.existingLabelsInBundle must be 0 for claim-bound blind labeling");
+    }
+  } else {
+    if (worklist.schemaVersion !== "cellfence.precision-label-worklist.v2") {
+      issues.push("adjudication worklists must use schemaVersion cellfence.precision-label-worklist.v2");
+    }
+    if (worklist.filters?.allowExistingLabels !== true) {
+      issues.push("worklist.filters.allowExistingLabels must be true for sealed adjudication");
+    }
+    if (!Number.isInteger(worklist.summary?.existingLabelsInBundle) || worklist.summary.existingLabelsInBundle <= 0) {
+      issues.push("worklist.summary.existingLabelsInBundle must be positive for sealed adjudication");
+    }
   }
   if (worklist.summary?.assignments !== assignments.length) {
     issues.push(`worklist.summary.assignments does not match assignment count: expected ${assignments.length}, got ${worklist.summary?.assignments}`);
@@ -522,14 +601,14 @@ function validateWorklistManifestConsistency(worklist, assignments, issues) {
   }
   const raterKeys = new Set();
   const raters = Array.isArray(worklist.raters) ? worklist.raters : [];
-  if (raters.length !== 2) {
-    issues.push(`worklist.raters must declare exactly two global blind raters; got ${raters.length}`);
+  const requiredRounds = mode === "adjudication" ? new Set(["adjudication"]) : new Set(["blind_first", "blind_second"]);
+  if (raters.length !== requiredRounds.size) {
+    issues.push(`worklist.raters must declare exactly ${requiredRounds.size} ${mode === "adjudication" ? "adjudication" : "global blind"} rater(s); got ${raters.length}`);
   }
   const raterNames = new Set(raters.map((rater) => rater?.rater).filter(Boolean));
   if (raterNames.size !== raters.length) {
     issues.push("worklist.raters must use distinct global rater IDs");
   }
-  const requiredRounds = new Set(["blind_first", "blind_second"]);
   const rounds = new Set(raters.map((rater) => rater?.round));
   for (const round of requiredRounds) {
     if (!rounds.has(round)) issues.push(`worklist.raters must declare ${round}`);
@@ -569,8 +648,8 @@ function validateWorklistManifestConsistency(worklist, assignments, issues) {
     }
   }
   for (const [findingId, findingAssignments] of assignmentsByFinding.entries()) {
-    if (findingAssignments.length !== 2) {
-      issues.push(`worklist finding ${findingId} must have exactly two blind assignments; got ${findingAssignments.length}`);
+    if (findingAssignments.length !== requiredRounds.size) {
+      issues.push(`worklist finding ${findingId} must have exactly ${requiredRounds.size} ${mode === "adjudication" ? "adjudication" : "blind"} assignment(s); got ${findingAssignments.length}`);
     }
     for (const round of requiredRounds) {
       const roundAssignments = findingAssignments.filter((entry) => entry?.round === round);
@@ -631,14 +710,20 @@ function validateAssignment(worklistDir, entry, worklist, hashedFiles, context, 
   assertEqual(issues, assignment.finding?.findingId, entry.findingId, `${entry.path} findingId`);
   assertEqual(issues, assignment.finding?.subjectId, entry.subjectId, `${entry.path} subjectId`);
   assertEqual(issues, assignment.finding?.ruleId, entry.ruleId, `${entry.path} ruleId`);
-  if (assignment.assignment?.peerLabelsIncluded !== false) issues.push(`${entry.path} must declare peerLabelsIncluded=false`);
-  if (assignment.assignment?.sawPeerLabels !== false) issues.push(`${entry.path} must declare sawPeerLabels=false`);
-  if (assignment.assignment?.sourceBundleContainsLabels !== false) {
-    issues.push(`${entry.path} comes from a label-bearing source bundle and is diagnostic-only`);
+  const adjudication = entry.round === "adjudication";
+  const expectedSawPeerLabels = adjudication ? true : false;
+  const expectedSourceBundleContainsLabels = adjudication ? true : false;
+  const expectedClaimUse = adjudication ? "sealed_adjudication" : "blind_labeling";
+  const expectedRole = adjudication ? "adjudicator" : "independent";
+  if (assignment.assignment?.peerLabelsIncluded !== expectedSawPeerLabels) issues.push(`${entry.path} must declare peerLabelsIncluded=${expectedSawPeerLabels}`);
+  if (assignment.assignment?.sawPeerLabels !== expectedSawPeerLabels) issues.push(`${entry.path} must declare sawPeerLabels=${expectedSawPeerLabels}`);
+  if (assignment.assignment?.sourceBundleContainsLabels !== expectedSourceBundleContainsLabels) {
+    issues.push(`${entry.path} must declare sourceBundleContainsLabels=${expectedSourceBundleContainsLabels}`);
   }
-  if (assignment.assignment?.claimUse !== "blind_labeling") {
-    issues.push(`${entry.path} is not claim-eligible blind_labeling assignment`);
+  if (assignment.assignment?.claimUse !== expectedClaimUse) {
+    issues.push(`${entry.path} must declare claimUse=${expectedClaimUse}`);
   }
+  validateAssignmentSourceLabels(assignment, entry, context, issues);
   const template = assignment.labelTemplate || {};
   validateClaimLabelMetadata(template, "labelTemplate", issues, { sealedWorklist: true, location: entry.path });
   rejectLabelLeak(issues, template.rater, `${entry.path} labelTemplate.rater`);
@@ -650,13 +735,13 @@ function validateAssignment(worklistDir, entry, worklist, hashedFiles, context, 
   assertEqual(issues, template.findingId, entry.findingId, `${entry.path} labelTemplate.findingId`);
   assertEqual(issues, template.rater, entry.rater, `${entry.path} labelTemplate.rater`);
   assertEqual(issues, template.raterType, entry.raterType, `${entry.path} labelTemplate.raterType`);
-  assertEqual(issues, template.role, "independent", `${entry.path} labelTemplate.role`);
+  assertEqual(issues, template.role, expectedRole, `${entry.path} labelTemplate.role`);
   assertEqual(issues, template.round, entry.round, `${entry.path} labelTemplate.round`);
   assertEqual(issues, template.assignmentId, entry.assignmentId, `${entry.path} labelTemplate.assignmentId`);
   assertEqual(issues, template.evidencePackageId, entry.evidencePackageId, `${entry.path} labelTemplate.evidencePackageId`);
-  if (template.sawPeerLabels !== false) issues.push(`${entry.path} labelTemplate must declare sawPeerLabels=false`);
-  if (template.sourceBundleContainsLabels !== false) issues.push(`${entry.path} labelTemplate must declare sourceBundleContainsLabels=false`);
-  if (template.claimUse !== "blind_labeling") issues.push(`${entry.path} labelTemplate must declare claimUse=blind_labeling`);
+  if (template.sawPeerLabels !== expectedSawPeerLabels) issues.push(`${entry.path} labelTemplate must declare sawPeerLabels=${expectedSawPeerLabels}`);
+  if (template.sourceBundleContainsLabels !== expectedSourceBundleContainsLabels) issues.push(`${entry.path} labelTemplate must declare sourceBundleContainsLabels=${expectedSourceBundleContainsLabels}`);
+  if (template.claimUse !== expectedClaimUse) issues.push(`${entry.path} labelTemplate must declare claimUse=${expectedClaimUse}`);
   if (template.label !== "") issues.push(`${entry.path} labelTemplate.label must be empty`);
   if (template.rationale !== "") issues.push(`${entry.path} labelTemplate.rationale must be empty`);
   return assignment;
@@ -668,11 +753,18 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
     return {
       artifactSetSha256: null,
       assignments: 0,
+      rounds: [],
       issues: [`worklist not found: ${worklistDir || "<missing>"}`],
     };
   }
   const bundleDir = options.bundleDir ? path.resolve(options.bundleDir) : null;
   const findingsById = new Map((options.findings || []).map((finding) => [finding.findingId, finding]));
+  const labelsByFindingId = new Map();
+  for (const label of labels || []) {
+    const existing = labelsByFindingId.get(label?.findingId) || [];
+    existing.push(label);
+    labelsByFindingId.set(label?.findingId, existing);
+  }
   if (!bundleDir || findingsById.size === 0) {
     issues.push("worklist verification requires sealed bundleDir and findings for claim-bound evidence binding");
   }
@@ -682,6 +774,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
     findingsById,
     study,
     studyId: options.studyId || study?.studyId || "",
+    labelsByFindingId,
     worklistBundle: null,
   };
   const hashValidation = validateSha256Sums(worklistDir, issues);
@@ -692,12 +785,14 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   const manifestPath = path.join(worklistDir, "worklist.json");
   if (!fs.existsSync(manifestPath)) {
     issues.push("worklist.json is missing");
-    return { artifactSetSha256, assignments: 0, issues };
+    return { artifactSetSha256, assignments: 0, rounds: [], issues };
   }
   const worklist = readJson(manifestPath);
   context.worklistBundle = worklist.bundle || {};
   validateWorklistShape(worklist, issues);
-  if (worklist.schemaVersion !== worklistSchemaVersion) issues.push(`worklist schemaVersion must be ${worklistSchemaVersion}`);
+  if (!worklistSchemaVersions.has(worklist.schemaVersion)) {
+    issues.push("worklist schemaVersion must be cellfence.precision-label-worklist.v1 or cellfence.precision-label-worklist.v2");
+  }
   if (options.studyId && worklist.studyId !== options.studyId) issues.push(`worklist studyId ${worklist.studyId} does not match ${options.studyId}`);
   if (options.bundleArtifactSetSha256 && worklist.bundle?.artifactSetSha256 !== options.bundleArtifactSetSha256) {
     issues.push("worklist bundle.artifactSetSha256 does not match the evidence bundle");
@@ -707,6 +802,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   }
 
   const assignments = Array.isArray(worklist.assignments) ? worklist.assignments : [];
+  const coveredRounds = new Set(assignments.map((entry) => entry?.round).filter(Boolean));
   if (!Array.isArray(worklist.assignments)) issues.push("worklist.assignments must be an array");
   validateWorklistManifestConsistency(worklist, assignments, issues);
   validateDeclaredWorklistFiles(hashValidation.hashedFiles, assignments, issues);
@@ -721,13 +817,14 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   }
 
   for (const [index, label] of labels.entries()) {
-    if (isAdjudication(label)) continue;
+    if (!coveredRounds.has(label?.round)) continue;
     const line = index + 1;
     validateClaimLabelMetadata(label, line, issues, { sealedWorklist: true });
-    if (label.claimUse && label.claimUse !== "blind_labeling") {
+    const adjudication = isAdjudication(label);
+    if (!adjudication && label.claimUse && label.claimUse !== "blind_labeling") {
       issues.push(`labels.jsonl:${line} is marked ${label.claimUse} and cannot support a claim`);
     }
-    if (label.sourceBundleContainsLabels === true) {
+    if (!adjudication && label.sourceBundleContainsLabels === true) {
       issues.push(`labels.jsonl:${line} came from a diagnostic label-bearing source bundle`);
     }
     const assignment = assignmentsById.get(label.assignmentId);
@@ -743,9 +840,9 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
       ["role", label.role, expected.role],
       ["round", label.round, expected.round],
       ["evidencePackageId", label.evidencePackageId, expected.evidencePackageId],
-      ["sawPeerLabels", label.sawPeerLabels, false],
-      ["sourceBundleContainsLabels", label.sourceBundleContainsLabels, false],
-      ["claimUse", label.claimUse, "blind_labeling"],
+      ["sawPeerLabels", label.sawPeerLabels, expected.sawPeerLabels],
+      ["sourceBundleContainsLabels", label.sourceBundleContainsLabels, expected.sourceBundleContainsLabels],
+      ["claimUse", label.claimUse, expected.claimUse],
     ];
     for (const [field, actual, expectedValue] of comparisons) {
       if (actual !== expectedValue) {
@@ -760,6 +857,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   return {
     artifactSetSha256,
     assignments: assignments.length,
+    rounds: [...coveredRounds].sort(),
     issues,
   };
 }

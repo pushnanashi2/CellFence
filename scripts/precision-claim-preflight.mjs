@@ -37,7 +37,7 @@ const labelAllowedKeys = new Set([
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-claim-preflight.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--worklist reports/corpus/id-worklist] [--out report.json]
+  node scripts/precision-claim-preflight.mjs --bundle reports/corpus/id-bundle --protocol protocol.json [--worklist reports/corpus/id-worklist ...] [--out report.json]
 
 Reports whether a sealed precision bundle has enough sampled, reviewed,
 balanced, independently labeled evidence to attempt the requested claim. This is
@@ -47,7 +47,7 @@ malformed.`);
 }
 
 function parseArgs(argv) {
-  const parsed = { bundleDir: "", protocolPath: "", worklistDir: "", outPath: "" };
+  const parsed = { bundleDir: "", protocolPath: "", worklistDirs: [], outPath: "" };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--bundle") {
@@ -61,10 +61,10 @@ function parseArgs(argv) {
     } else if (argument.startsWith("--protocol=")) {
       parsed.protocolPath = path.resolve(requireInlineValue(argument, "--protocol=", "--protocol"));
     } else if (argument === "--worklist") {
-      parsed.worklistDir = path.resolve(requireValue(argv, index, "--worklist"));
+      parsed.worklistDirs.push(path.resolve(requireValue(argv, index, "--worklist")));
       index += 1;
     } else if (argument.startsWith("--worklist=")) {
-      parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
+      parsed.worklistDirs.push(path.resolve(requireInlineValue(argument, "--worklist=", "--worklist")));
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -290,6 +290,25 @@ function protocolClaim(protocol) {
   return protocol.claim && typeof protocol.claim === "object" ? protocol.claim : protocol;
 }
 
+function normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issues) {
+  const plural = claim.worklistArtifactSetSha256s
+    ?? labelingPlan.worklistArtifactSetSha256s
+    ?? protocol.worklistArtifactSetSha256s
+    ?? null;
+  const singular = claim.worklistArtifactSetSha256 || labelingPlan.worklistArtifactSetSha256 || protocol.worklistArtifactSetSha256 || null;
+  const digests = plural !== null ? plural : singular !== null ? [singular] : [];
+  if (!Array.isArray(digests)) {
+    issues.push("claim.worklistArtifactSetSha256s must be a string array when present");
+    return [];
+  }
+  for (const [index, digest] of digests.entries()) {
+    if (!/^[a-f0-9]{64}$/.test(String(digest))) {
+      issues.push(`claim.worklistArtifactSetSha256s[${index}] must be a lowercase 64-hex SHA-256 digest`);
+    }
+  }
+  return digests.map(String);
+}
+
 function normalizeProtocol(protocol, issues) {
   if (protocol.schemaVersion !== protocolSchemaVersion) issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
   const claim = protocolClaim(protocol);
@@ -332,10 +351,8 @@ function normalizeProtocol(protocol, issues) {
   if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
   const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
   if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
-  const worklistArtifactSetSha256 = claim.worklistArtifactSetSha256 || labelingPlan.worklistArtifactSetSha256 || protocol.worklistArtifactSetSha256 || null;
-  if (worklistArtifactSetSha256 !== null && !/^[a-f0-9]{64}$/.test(String(worklistArtifactSetSha256))) {
-    issues.push("claim.worklistArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest when present");
-  }
+  const worklistArtifactSetSha256s = normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issues);
+  const worklistArtifactSetSha256 = worklistArtifactSetSha256s.length === 1 ? worklistArtifactSetSha256s[0] : null;
   const manifestReviewPlan = protocol.manifestReviewPlan || {};
   const requireExternalManifestReview = manifestReviewPlan.requireExternalAttestations ?? false;
   if (typeof requireExternalManifestReview !== "boolean") {
@@ -357,6 +374,7 @@ function normalizeProtocol(protocol, issues) {
     allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
     requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
     worklistArtifactSetSha256,
+    worklistArtifactSetSha256s,
     toolCommit,
     artifactSetSha256,
     preLabelArtifactSetSha256,
@@ -736,7 +754,8 @@ function evaluatePreflight(options) {
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));
-  let worklistVerification = null;
+  const worklistVerifications = [];
+  const sealedRounds = new Set();
 
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") issues.push("study.json has unexpected schemaVersion");
   if (sampling.schemaVersion !== "cellfence.corpus-sampling.v1") issues.push("sampling.json has unexpected schemaVersion");
@@ -752,26 +771,40 @@ function evaluatePreflight(options) {
   validateLabelRows(labels, protocol.studyId, new Set(findings.map((finding) => finding.findingId)), issues);
   validateLabelRaterProvenance(labels, protocol, issues);
   validateLabelClaimUse(labels, issues);
-  if (options.worklistDir || protocol.worklistArtifactSetSha256) {
-    if (!options.worklistDir) {
-      issues.push("protocol claim.worklistArtifactSetSha256 requires --worklist");
-    } else if (!protocol.worklistArtifactSetSha256) {
-      issues.push("--worklist requires protocol claim.worklistArtifactSetSha256");
-    } else {
-      worklistVerification = verifyWorklistLabels(options.worklistDir, labels, {
+  if (options.worklistDirs.length > 0 || protocol.worklistArtifactSetSha256s.length > 0) {
+    if (options.worklistDirs.length === 0) {
+      issues.push("protocol claim.worklistArtifactSetSha256s requires --worklist");
+    } else if (protocol.worklistArtifactSetSha256s.length === 0) {
+      issues.push("--worklist requires protocol claim.worklistArtifactSetSha256s");
+    } else if (options.worklistDirs.length !== protocol.worklistArtifactSetSha256s.length) {
+      issues.push("--worklist count must match claim.worklistArtifactSetSha256s count");
+    }
+    const count = Math.min(options.worklistDirs.length, protocol.worklistArtifactSetSha256s.length);
+    for (let index = 0; index < count; index += 1) {
+      const worklistVerification = verifyWorklistLabels(options.worklistDirs[index], labels, {
         bundleDir: options.bundleDir,
         findings,
         studyId: protocol.studyId,
-        expectedArtifactSetSha256: protocol.worklistArtifactSetSha256,
+        expectedArtifactSetSha256: protocol.worklistArtifactSetSha256s[index],
         preLabelArtifactSetSha256: study.preregistration?.preLabelArtifactSetSha256,
+      });
+      worklistVerifications.push(worklistVerification);
+      worklistVerification.rounds.forEach((round) => {
+        if (sealedRounds.has(round)) issues.push(`duplicate sealed worklist round ${round}`);
+        sealedRounds.add(round);
       });
       issues.push(...worklistVerification.issues.map((issue) => `worklist: ${issue}`));
     }
   }
-  if (!worklistVerification) {
+  if (worklistVerifications.length === 0) {
     gateFailures.push("sealed worklist binding is required for pass-eligible precision claims");
-  } else if (labels.some(isAdjudication)) {
-    issues.push("worklist-bound precision claims require sealed adjudication provenance; worklist v1 supports independent labels only");
+  } else {
+    for (const round of ["blind_first", "blind_second"]) {
+      if (!sealedRounds.has(round)) gateFailures.push(`sealed ${round} worklist binding is required for pass-eligible precision claims`);
+    }
+    if (labels.some(isAdjudication) && !sealedRounds.has("adjudication")) {
+      issues.push("worklist-bound adjudication labels require a sealed adjudication worklist");
+    }
   }
   validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
@@ -831,17 +864,20 @@ function evaluatePreflight(options) {
       allowNonHumanRaters: protocol.allowNonHumanRaters,
       requireKnownRaterType: protocol.requireKnownRaterType,
       worklistArtifactSetSha256: protocol.worklistArtifactSetSha256,
+      worklistArtifactSetSha256s: protocol.worklistArtifactSetSha256s,
       toolCommit: protocol.toolCommit,
       artifactSetSha256: protocol.artifactSetSha256,
       preLabelArtifactSetSha256: protocol.preLabelArtifactSetSha256,
       requireExternalManifestReview: protocol.requireExternalManifestReview,
       allowedManifestReviewerTypes: protocol.allowedManifestReviewerTypes,
     },
-    worklist: worklistVerification ? {
-      path: posixify(options.worklistDir),
-      artifactSetSha256: worklistVerification.artifactSetSha256,
-      assignments: worklistVerification.assignments,
-      issues: worklistVerification.issues.length,
+    worklist: worklistVerifications.length > 0 ? {
+      paths: options.worklistDirs.map(posixify),
+      artifactSetSha256: worklistVerifications.length === 1 ? worklistVerifications[0].artifactSetSha256 : null,
+      artifactSetSha256s: worklistVerifications.map((worklist) => worklist.artifactSetSha256),
+      assignments: worklistVerifications.reduce((total, worklist) => total + worklist.assignments, 0),
+      rounds: [...sealedRounds].sort(),
+      issues: worklistVerifications.reduce((total, worklist) => total + worklist.issues.length, 0),
     } : null,
     summary: {
       totalFindings: findings.length,
