@@ -371,7 +371,7 @@ function normalizeFinding(studyId, rawFinding, occurrenceIndex = 0) {
     ruleId,
     severity: event.severity || null,
     filePath: event.filePath ? posixify(event.filePath) : null,
-    line: typeof event.line === "number" ? event.line : null,
+    line: typeof event.line === "number" ? event.line : typeof event.details?.line === "number" ? event.details.line : null,
     message: event.message || "",
     cellfenceFingerprint: fingerprint,
     cellId: event.cellId || null,

@@ -108,6 +108,7 @@ function createFixture(tempDir) {
       cellId: "demo",
       filePath: "src/demo/internal.ts",
       message: "private import",
+      details: { line: 42 },
       fingerprint: "fingerprint-a",
       outcome: "rejected",
     },
@@ -239,6 +240,10 @@ test("corpus evidence bundle generates normalized findings, sample, and checksum
     assert.equal(findings.length, 3);
     assert.match(findings[0].findingId, /^sha256:[a-f0-9]{64}$/);
     assert.equal(new Set(findings.map((finding) => finding.findingId)).size, 3);
+    assert.equal(
+      findings.find((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT" && finding.occurrenceIndex === 0).line,
+      42,
+    );
     assert.deepEqual(
       findings
         .filter((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT")

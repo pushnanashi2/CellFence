@@ -402,6 +402,49 @@ test("precision claim preflight accepts a labeled, balanced bundle with enough p
   }
 });
 
+test("precision claim preflight rejects post-worklist exclusion denominator shrinkage", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-exclusion-worklist-"));
+  try {
+    const findings = [finding(1), finding(2)];
+    const labels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+      exclusionRules: [
+        {
+          field: "findingId",
+          equals: findings[1].findingId,
+          reason: "attempt to remove a sealed worklist finding",
+        },
+      ],
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.valid, false);
+    assert.equal(report.summary.excludedFindings, 1);
+    assert.equal(report.protocol.exclusionRules.length, 1);
+    assert.match(report.issues.join("\n"), /sealed blind_first worklist finding set does not match protocol-selected findings/);
+    assert.match(report.issues.join("\n"), /sealed blind_second worklist finding set does not match protocol-selected findings/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight is not claim-ready without sealed worklist binding", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-no-worklist-"));
   try {
@@ -792,6 +835,62 @@ test("precision claim preflight rejects repository concentration before claim ev
     const report = JSON.parse(result.stdout);
     assert.equal(report.repositoryContribution.maxRepositoryContribution, 1);
     assert.match(report.gateFailures.join("\n"), /contributes 100.0%/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight applies structured exclusion rules before label readiness", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-exclusion-"));
+  try {
+    const findings = [
+      finding(1, { filePath: "src/keep.ts" }),
+      finding(2, { filePath: "src/generated/out.ts" }),
+    ];
+    const labels = [
+      label(findings[0].findingId, "reviewer-a", "blind_first"),
+      label(findings[0].findingId, "reviewer-b", "blind_second"),
+    ];
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: claimBinding(bundleDir),
+      exclusionRules: [
+        {
+          field: "filePath",
+          pattern: "src/generated/**",
+          reason: "generated artifacts are outside this claim",
+        },
+      ],
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.selectedByRule.CELLFENCE_PRIVATE_IMPORT.selectedFindings, 1);
+    assert.doesNotMatch(report.gateFailures.join("\n"), /selected findings are not fully independently labeled/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight rejects descriptive exclusion strings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-exclusion-string-"));
+  try {
+    const findings = [finding(1)];
+    const bundleDir = createBundle(tempDir, findings, []);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: claimBinding(bundleDir),
+      exclusionRules: ["generated files are excluded"],
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /descriptive strings are not applied/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

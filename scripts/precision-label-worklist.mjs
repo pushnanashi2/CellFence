@@ -519,10 +519,14 @@ function main() {
   }
   try {
     const manifest = createWorklist(options);
+    const worklistArtifactSetSha256 = hashFile(path.join(options.outDir, "SHA256SUMS"));
     console.log(JSON.stringify({
       schemaVersion: manifest.schemaVersion,
       studyId: manifest.studyId,
       outDir: posixify(options.outDir),
+      artifactSetSha256: worklistArtifactSetSha256,
+      mode: manifest.mode,
+      raters: manifest.raters,
       summary: manifest.summary,
     }, null, 2));
     return 0;

@@ -33,6 +33,7 @@
     "precision:labels:worklist": "node scripts/precision-label-worklist.mjs",
     "precision:labels:transfer": "node scripts/precision-label-transfer.mjs",
     "precision:claim:preflight": "node scripts/precision-claim-preflight.mjs",
+    "precision:frontier": "node scripts/precision-frontier-report.mjs",
     "evidence:graph:verify": "node scripts/evidence-graph-verify.mjs",
     "evidence:graph:smoke": "npm run build && node scripts/evidence-graph-smoke.mjs",
     "cellfence:self-check": "npm run build && node packages/cli/dist/index.js baseline check --manifest cellfence.manifest.json --baseline cellfence.baseline.json",

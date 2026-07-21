@@ -246,9 +246,13 @@ test("precision label worklist creates blind assignment packages", () => {
     ]);
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
+    const output = JSON.parse(result.stdout);
     const manifest = readJson(path.join(outDir, "worklist.json"));
     assert.equal(manifest.summary.selectedFindings, 2);
     assert.equal(manifest.summary.assignments, 4);
+    assert.equal(output.artifactSetSha256, hashFile(path.join(outDir, "SHA256SUMS")));
+    assert.equal(output.mode, "blind_labeling");
+    assert.deepEqual(output.raters.map((rater) => rater.round), ["blind_first", "blind_second"]);
     assert.equal(manifest.raters[0].round, "blind_first");
     assert.equal(manifest.raters[1].round, "blind_second");
     const firstAssignment = readJson(path.join(outDir, manifest.assignments[0].path));

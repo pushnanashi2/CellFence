@@ -754,6 +754,8 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
       artifactSetSha256: null,
       assignments: 0,
       rounds: [],
+      findingIds: [],
+      findingIdsByRound: {},
       issues: [`worklist not found: ${worklistDir || "<missing>"}`],
     };
   }
@@ -785,7 +787,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   const manifestPath = path.join(worklistDir, "worklist.json");
   if (!fs.existsSync(manifestPath)) {
     issues.push("worklist.json is missing");
-    return { artifactSetSha256, assignments: 0, rounds: [], issues };
+    return { artifactSetSha256, assignments: 0, rounds: [], findingIds: [], findingIdsByRound: {}, issues };
   }
   const worklist = readJson(manifestPath);
   context.worklistBundle = worklist.bundle || {};
@@ -858,6 +860,11 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
     artifactSetSha256,
     assignments: assignments.length,
     rounds: [...coveredRounds].sort(),
+    findingIds: [...new Set(assignments.map((entry) => entry?.findingId).filter(Boolean))].sort(),
+    findingIdsByRound: Object.fromEntries([...coveredRounds].sort().map((round) => [
+      round,
+      [...new Set(assignments.filter((entry) => entry?.round === round).map((entry) => entry?.findingId).filter(Boolean))].sort(),
+    ])),
     issues,
   };
 }

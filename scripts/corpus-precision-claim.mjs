@@ -13,6 +13,7 @@ const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
 const defaultMinimumIndependentRaters = 2;
 const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
+const exclusionRuleFields = new Set(["findingId", "subjectId", "repository", "ruleId", "severity", "filePath", "cellId", "producerCellId"]);
 const allowedLabels = new Set([
   "true_positive",
   "false_positive",
@@ -235,6 +236,60 @@ function normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issu
   return digests.map(String);
 }
 
+function rejectUnknownKeys(issues, value, allowedKeys, label) {
+  if (!isRecord(value)) return;
+  const allowed = new Set(allowedKeys);
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) issues.push(`${label} has unexpected field ${key}`);
+  }
+}
+
+function normalizeExclusionRules(rawRules, issues) {
+  if (rawRules === undefined) return [];
+  if (!Array.isArray(rawRules)) {
+    issues.push("protocol.exclusionRules must be an array when present");
+    return [];
+  }
+  const rules = [];
+  for (const [index, rule] of rawRules.entries()) {
+    const label = `protocol.exclusionRules[${index}]`;
+    if (!isRecord(rule)) {
+      issues.push(`${label} must be an object with field and equals or pattern; descriptive strings are not applied`);
+      continue;
+    }
+    rejectUnknownKeys(issues, rule, ["field", "equals", "pattern", "reason"], label);
+    if (typeof rule.field !== "string" || !exclusionRuleFields.has(rule.field)) {
+      issues.push(`${label}.field must be one of ${[...exclusionRuleFields].sort().join(", ")}`);
+      continue;
+    }
+    const hasEquals = Object.hasOwn(rule, "equals");
+    const hasPattern = Object.hasOwn(rule, "pattern");
+    if (hasEquals === hasPattern) {
+      issues.push(`${label} must declare exactly one of equals or pattern`);
+      continue;
+    }
+    if (hasEquals && typeof rule.equals !== "string") {
+      issues.push(`${label}.equals must be a string`);
+      continue;
+    }
+    if (hasPattern && typeof rule.pattern !== "string") {
+      issues.push(`${label}.pattern must be a string`);
+      continue;
+    }
+    if (Object.hasOwn(rule, "reason") && typeof rule.reason !== "string") {
+      issues.push(`${label}.reason must be a string when present`);
+      continue;
+    }
+    rules.push({
+      field: rule.field,
+      equals: hasEquals ? rule.equals : undefined,
+      pattern: hasPattern ? rule.pattern : undefined,
+      reason: rule.reason || null,
+    });
+  }
+  return rules;
+}
+
 function normalizeProtocol(protocol, issues) {
   if (protocol.schemaVersion !== protocolSchemaVersion) {
     issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
@@ -277,6 +332,7 @@ function normalizeProtocol(protocol, issues) {
   if (!Array.isArray(allowedManifestReviewerTypes) || allowedManifestReviewerTypes.some((reviewerType) => typeof reviewerType !== "string" || reviewerType.length === 0)) {
     issues.push("manifestReviewPlan.allowedReviewerTypes must be a string array when present");
   }
+  const exclusionRules = normalizeExclusionRules(protocol.exclusionRules, issues);
   const samplingPlan = protocol.samplingPlan || {};
   const maxRepositoryContribution = parsePositiveUnitInterval(
     samplingPlan.maxRepositoryContribution ?? defaultMaxRepositoryContribution,
@@ -308,7 +364,7 @@ function normalizeProtocol(protocol, issues) {
     requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
     allowedManifestReviewerTypes: Array.isArray(allowedManifestReviewerTypes) ? allowedManifestReviewerTypes : ["human", "organization"],
     maxRepositoryContribution: maxRepositoryContribution ?? defaultMaxRepositoryContribution,
-    exclusionRules: Array.isArray(protocol.exclusionRules) ? protocol.exclusionRules : [],
+    exclusionRules,
   };
 }
 
@@ -718,7 +774,37 @@ function leaveOneRepositoryOut(finalLabels, confidence) {
   };
 }
 
-function selectedFindings(findings, sampling, protocol) {
+function globPatternToRegExp(pattern) {
+  let source = "^";
+  for (let index = 0; index < pattern.length; index += 1) {
+    const character = pattern[index];
+    if (character === "*") {
+      if (pattern[index + 1] === "*") {
+        source += ".*";
+        index += 1;
+      } else {
+        source += "[^/]*";
+      }
+    } else if (character === "?") {
+      source += "[^/]";
+    } else {
+      source += character.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
+    }
+  }
+  source += "$";
+  return new RegExp(source);
+}
+
+function findingMatchesExclusionRule(finding, exclusionRules = []) {
+  for (const rule of exclusionRules) {
+    const value = String(finding?.[rule.field] ?? "");
+    if (rule.equals !== undefined && value === rule.equals) return true;
+    if (rule.pattern !== undefined && globPatternToRegExp(rule.pattern).test(value)) return true;
+  }
+  return false;
+}
+
+function eligibleBlockingFindings(findings, sampling, protocol) {
   const sampledFindingIds = new Set(sampling.sampledFindingIds || findings.map((finding) => finding.findingId));
   const includedRules = new Set(protocol.includedRules);
   const blockingSeverities = new Set(protocol.blockingSeverities);
@@ -728,6 +814,52 @@ function selectedFindings(findings, sampling, protocol) {
       && includedRules.has(finding.ruleId)
       && blockingSeverities.has(finding.severity || "error");
   });
+}
+
+function selectedFindings(findings, sampling, protocol) {
+  return eligibleBlockingFindings(findings, sampling, protocol)
+    .filter((finding) => !findingMatchesExclusionRule(finding, protocol.exclusionRules));
+}
+
+function findingIdSet(findings) {
+  return new Set(findings.map((finding) => finding.findingId).filter(Boolean));
+}
+
+function selectedFindingIds(findings) {
+  return [...findingIdSet(findings)].sort();
+}
+
+function compareFindingIdSets(expected, actual) {
+  const expectedSet = new Set(expected);
+  const actualSet = new Set(actual);
+  return {
+    missing: expected.filter((findingId) => !actualSet.has(findingId)),
+    extra: actual.filter((findingId) => !expectedSet.has(findingId)),
+  };
+}
+
+function validateSealedBlindWorklistSelection(selected, worklistVerifications, issues) {
+  if (worklistVerifications.length === 0) return;
+  const expected = selectedFindingIds(selected);
+  for (const round of ["blind_first", "blind_second"]) {
+    const actual = [...new Set(worklistVerifications.flatMap((worklist) => worklist.findingIdsByRound?.[round] || []))].sort();
+    if (actual.length === 0) continue;
+    const diff = compareFindingIdSets(expected, actual);
+    if (diff.missing.length > 0 || diff.extra.length > 0) {
+      issues.push(`sealed ${round} worklist finding set does not match protocol-selected findings: missing ${diff.missing.length}, extra ${diff.extra.length}`);
+    }
+  }
+}
+
+function exclusionSummary(eligible, selected) {
+  const selectedIds = findingIdSet(selected);
+  const excluded = eligible.filter((finding) => !selectedIds.has(finding.findingId));
+  const byRule = {};
+  for (const finding of excluded) increment(byRule, finding.ruleId);
+  return {
+    excludedFindings: excluded.length,
+    excludedByRule: Object.fromEntries(Object.entries(byRule).sort()),
+  };
 }
 
 function corpusSubjectMap(corpus) {
@@ -945,7 +1077,10 @@ function evaluateClaim(options) {
   validatePrecisionEligibility(findings, corpus, issues);
   validateManifestReviewProvenance(corpus, study, options.bundleDir, protocol, issues);
 
+  const eligibleFindings = eligibleBlockingFindings(findings, sampling, protocol);
   const includedFindings = selectedFindings(findings, sampling, protocol);
+  const exclusions = exclusionSummary(eligibleFindings, includedFindings);
+  validateSealedBlindWorklistSelection(includedFindings, worklistVerifications, issues);
   const finalLabels = [];
   for (const finding of includedFindings) {
     const finalLabel = finalLabelForFinding(finding, labels, protocol, issues);
@@ -1038,7 +1173,9 @@ function evaluateClaim(options) {
       artifactSetSha256,
       totalFindings: findings.length,
       sampledFindings: Array.isArray(sampling.sampledFindingIds) ? sampling.sampledFindingIds.length : null,
+      precisionEligibleSampledFindingsBeforeExclusions: eligibleFindings.length,
       precisionEligibleSampledFindings: includedFindings.length,
+      ...exclusions,
     },
     labelQuality: {
       labels: labels.length,

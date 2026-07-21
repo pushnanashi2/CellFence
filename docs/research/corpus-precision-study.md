@@ -209,6 +209,12 @@ The round14 diagnostic rerun is documented in
 it carries labels forward by stable finding ID, records agent rater provenance,
 adds supplemental blind labels for newly surfaced Remix resource findings, and
 keeps the 99% claim blocked as `insufficient_evidence` rather than `invalid`.
+The round15 frontier note is documented in
+[ts-js-reviewed-pilot-10-2026-07-21-round15-frontier.md](ts-js-reviewed-pilot-10-2026-07-21-round15-frontier.md):
+it rechecks round14 under the current sealed worklist rules, treats old
+diagnostic labels as non-claim evidence, creates a fresh sealed blind worklist,
+and ranks 200-repository production-scope candidates as manifest-review work
+rather than claim-ready proof rows.
 
 The script:
 
@@ -504,6 +510,44 @@ labeling provenance violates protocol, manifest review provenance is not
 hash-bound, or the inputs are malformed. A preflight failure is not a detector
 failure; it is the guardrail that prevents a small tuning corpus from being
 presented as a 99% precision result.
+
+When a claim does not pass, generate a frontier report before adding more
+features or relabeling old data:
+
+```bash
+npm run precision:frontier -- \
+  --reviewed-claim-report reports/corpus/ts-js-confirmation-v1-claim-report.json \
+  --candidate-bundle reports/corpus/oss-ts-js-200-2026-07-18-production-scope-bundle \
+  --out reports/corpus/ts-js-confirmation-v1-frontier.json \
+  --markdown reports/corpus/ts-js-confirmation-v1-frontier.md
+```
+
+The frontier report computes rule-level additional zero-failure trials, current
+repository dilution requirements, and candidate subjects that still need
+manifest review. Candidate findings from `infer` manifests remain
+diagnostic-only even when they are high-signal; promote them only by freezing a
+new reviewed-copy holdout.
+
+Protocol `exclusionRules` are executable only when they are structured objects:
+
+```json
+{
+  "field": "filePath",
+  "pattern": "src/generated/**",
+  "reason": "generated artifacts are outside this claim"
+}
+```
+
+Allowed fields are `findingId`, `subjectId`, `repository`, `ruleId`,
+`severity`, `filePath`, `cellId`, and `producerCellId`. Use either `equals` or
+`pattern`. Descriptive strings are rejected because otherwise a protocol can
+look narrower than the actual claim denominator.
+
+For pass-eligible sealed claims, the protocol-selected finding set must match
+the sealed `blind_first` and `blind_second` worklist assignment sets exactly.
+Changing `includedRules`, `blockingSeverities`, or `exclusionRules` after a
+blind worklist has been generated makes the claim invalid instead of silently
+shrinking the denominator.
 
 The bundle contains:
 

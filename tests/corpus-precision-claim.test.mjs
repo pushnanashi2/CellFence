@@ -752,6 +752,51 @@ test("corpus precision claim passes only when the lower confidence bound clears 
   }
 });
 
+test("corpus precision claim rejects post-worklist exclusion denominator shrinkage", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-exclusion-worklist-"));
+  try {
+    const findings = [createFinding(1), createFinding(2)];
+    const labels = [
+      ...labelsFor([findings[0]], "true_positive"),
+      ...labelsFor([findings[1]], "false_positive"),
+    ].map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      samplingPlan: {
+        maxRepositoryContribution: 1,
+      },
+      labelingPlan: {
+        allowedRaterTypes: ["human"],
+        requireKnownRaterType: true,
+      },
+      exclusionRules: [
+        {
+          field: "findingId",
+          equals: findings[1].findingId,
+          reason: "attempt to remove a labeled failure after worklist sealing",
+        },
+      ],
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.equal(report.bundle.excludedFindings, 1);
+    assert.match(report.labelQuality.issues.join("\n"), /sealed blind_first worklist finding set does not match protocol-selected findings/);
+    assert.match(report.labelQuality.issues.join("\n"), /sealed blind_second worklist finding set does not match protocol-selected findings/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision claim cannot pass without sealed worklist binding", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-no-worklist-"));
   try {
@@ -912,6 +957,70 @@ test("corpus precision claim rejects relaxed repository contribution caps", () =
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision.status, "invalid");
     assert.match(report.labelQuality.issues.join("\n"), /maxRepositoryContribution/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim applies structured exclusion rules before final metrics", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-exclusion-"));
+  try {
+    const findings = [
+      createFinding(1, { filePath: "src/keep.ts" }),
+      createFinding(2, { filePath: "src/generated/out.ts" }),
+    ];
+    const labels = labelsFor([findings[0]]);
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        includedRules: ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"],
+        primaryMetric: "blocking_precision",
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        blockingSeverities: ["error"],
+      },
+      exclusionRules: [
+        {
+          field: "filePath",
+          pattern: "src/generated/**",
+          reason: "generated artifacts are outside this claim",
+        },
+      ],
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.metrics.occurrence.blocking.trials, 1);
+    assert.equal(report.bundle.precisionEligibleSampledFindings, 1);
+    assert.doesNotMatch(report.labelQuality.issues.join("\n"), /not every included finding/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim rejects descriptive exclusion strings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-exclusion-string-"));
+  try {
+    const findings = [createFinding(1)];
+    const bundleDir = createBundle(tempDir, findings, []);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        includedRules: ["CELLFENCE_PRIVATE_IMPORT"],
+        primaryMetric: "blocking_precision",
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        blockingSeverities: ["error"],
+      },
+      exclusionRules: ["generated files are excluded"],
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.labelQuality.issues.join("\n"), /descriptive strings are not applied/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
