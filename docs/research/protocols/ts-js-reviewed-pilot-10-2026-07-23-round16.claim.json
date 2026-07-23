@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-10-2026-07-20-round14",
+  "claim": {
+    "toolCommit": "cc608cdc524101e9693f5d196c5139d8f425dbd7",
+    "preLabelArtifactSetSha256": "ad717885d365c62012ccac1d0b566e06e5049396b9ef0fa904cdd1ee9c65c462",
+    "artifactSetSha256": "511172396e5d1fd7a876809894cd48f416a0bd733fee82ff339f19580f262fb4",
+    "worklistArtifactSetSha256s": [
+      "b757ed8db0c1cd68d3cfcd35829a1cd317d6b8305c0dda88cd6b15f1cfd17fa1",
+      "5b4a586ea529717d44797d4f425f3f90f9d0085a4380530eafd0c9b71fe5c752"
+    ],
+    "targetPopulation": "reviewed TS/JS workspace repositories, round16 sealed agent-label corpus",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": ["error"]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "deterministic per-rule sampling from sealed bundle using corpus SHA-256 seed",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": ["agent"],
+    "allowNonHumanRaters": true,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": false
+  },
+  "exclusionRules": []
+}
