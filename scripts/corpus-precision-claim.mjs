@@ -13,6 +13,8 @@ const defaultMinimumPrecision = 0.99;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
 const defaultMinimumIndependentRaters = 2;
+const defaultExternalRaterTypes = ["human", "organization"];
+const defaultMinimumExternalIndependentRaters = 1;
 const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 const allowedLabels = new Set([
   "true_positive",
@@ -275,6 +277,19 @@ function normalizeProtocol(protocol, issues) {
   if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
   const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
   if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const requireExternalIndependentRaters = labelingPlan.requireExternalIndependentRaters ?? ((minimumPrecision ?? defaultMinimumPrecision) >= defaultMinimumPrecision);
+  if (typeof requireExternalIndependentRaters !== "boolean") {
+    issues.push("labelingPlan.requireExternalIndependentRaters must be a boolean when present");
+  }
+  const externalRaterTypes = labelingPlan.externalRaterTypes || labelingPlan.externalRaterClasses || defaultExternalRaterTypes;
+  if (!Array.isArray(externalRaterTypes) || externalRaterTypes.some((raterType) => typeof raterType !== "string" || raterType.length === 0)) {
+    issues.push("labelingPlan.externalRaterTypes must be a string array when present");
+  }
+  const minimumExternalIndependentRaters = labelingPlan.minimumExternalIndependentRaters
+    ?? (requireExternalIndependentRaters ? defaultMinimumExternalIndependentRaters : 0);
+  if (!Number.isInteger(minimumExternalIndependentRaters) || minimumExternalIndependentRaters < 0) {
+    issues.push("labelingPlan.minimumExternalIndependentRaters must be a non-negative integer when present");
+  }
   const worklistArtifactSetSha256s = normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issues);
   const worklistArtifactSetSha256 = worklistArtifactSetSha256s.length === 1 ? worklistArtifactSetSha256s[0] : null;
   const manifestReviewPlan = protocol.manifestReviewPlan || {};
@@ -313,6 +328,13 @@ function normalizeProtocol(protocol, issues) {
     allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
     allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
     requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    requireExternalIndependentRaters: typeof requireExternalIndependentRaters === "boolean"
+      ? requireExternalIndependentRaters
+      : ((minimumPrecision ?? defaultMinimumPrecision) >= defaultMinimumPrecision),
+    externalRaterTypes: Array.isArray(externalRaterTypes) ? externalRaterTypes : defaultExternalRaterTypes,
+    minimumExternalIndependentRaters: Number.isInteger(minimumExternalIndependentRaters)
+      ? minimumExternalIndependentRaters
+      : defaultMinimumExternalIndependentRaters,
     worklistArtifactSetSha256,
     worklistArtifactSetSha256s,
     requireExternalManifestReview: typeof requireExternalManifestReview === "boolean" ? requireExternalManifestReview : false,
@@ -410,6 +432,49 @@ function validateLabelRaterProvenance(labels, protocol, issues) {
       issues.push(`labels.jsonl:${lineNumber} appears non-human but protocol disallows non-human raters`);
     }
   }
+}
+
+function labelAppearsNonHuman(label) {
+  return nonHumanRaterPattern.test(label?.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
+}
+
+function labelCountsAsExternal(label, protocol) {
+  const raterType = labelRaterType(label);
+  return protocol.externalRaterTypes.includes(raterType) && !labelAppearsNonHuman(label);
+}
+
+function externalRaterCoverage(selectedFindings, labelsByFinding, protocol) {
+  const required = protocol.requireExternalIndependentRaters
+    ? Math.max(1, protocol.minimumExternalIndependentRaters)
+    : protocol.minimumExternalIndependentRaters;
+  const findings = [];
+  let coveredFindings = 0;
+  let totalExternalIndependentLabels = 0;
+  for (const finding of selectedFindings) {
+    const independentLabels = (labelsByFinding.get(finding.findingId) || []).filter((label) => !isAdjudication(label));
+    const externalRaters = new Set(
+      independentLabels.filter((label) => labelCountsAsExternal(label, protocol)).map((label) => label.rater),
+    );
+    totalExternalIndependentLabels += externalRaters.size;
+    if (externalRaters.size >= required) coveredFindings += 1;
+    findings.push({
+      findingId: finding.findingId,
+      subjectId: finding.subjectId,
+      ruleId: finding.ruleId,
+      externalIndependentRaters: externalRaters.size,
+      requiredExternalIndependentRaters: required,
+      ok: externalRaters.size >= required,
+    });
+  }
+  return {
+    required,
+    externalRaterTypes: protocol.externalRaterTypes,
+    selectedFindings: selectedFindings.length,
+    coveredFindings,
+    findingsMissingExternalIndependentLabels: selectedFindings.length - coveredFindings,
+    totalExternalIndependentLabels,
+    findings: findings.filter((finding) => !finding.ok).slice(0, 50),
+  };
 }
 
 function finalLabelForFinding(finding, labels, protocol, issues) {
@@ -691,6 +756,29 @@ function repositoryMetrics(finalLabels, confidence) {
     repositories,
     repositoryMacroPrecision: macroPrecision,
     maxRepositoryContribution: maxContribution,
+  };
+}
+
+function repositoryContribution(findings, protocol) {
+  const denominator = findings.length;
+  const repositories = [...groupBy(findings, (finding) => finding.repository || finding.subjectId || "unknown").entries()]
+    .map(([repository, repositoryFindings]) => ({
+      repository,
+      selectedFindings: repositoryFindings.length,
+      contribution: denominator === 0 ? null : repositoryFindings.length / denominator,
+      overLimit: denominator > 0 && repositoryFindings.length / denominator > protocol.maxRepositoryContribution,
+      additionalOtherFindingsNeeded: denominator === 0
+        ? 0
+        : Math.max(0, Math.ceil(repositoryFindings.length / protocol.maxRepositoryContribution) - denominator),
+    }))
+    .sort((left, right) => (right.contribution ?? 0) - (left.contribution ?? 0) || left.repository.localeCompare(right.repository));
+  return {
+    maxRepositoryContribution: repositories[0]?.contribution ?? null,
+    limit: protocol.maxRepositoryContribution,
+    repositoriesWithSelectedFindings: repositories.length,
+    minimumRepositoriesWithSelectedFindings: Math.ceil(1 / protocol.maxRepositoryContribution),
+    feasibleWithCurrentRepositoryCount: repositories.length >= Math.ceil(1 / protocol.maxRepositoryContribution),
+    repositories,
   };
 }
 
@@ -1007,6 +1095,8 @@ function evaluateClaim(options) {
   const exclusions = exclusionSummary(eligibleFindings, includedFindings);
   validateSealedBlindWorklistSelection(includedFindings, worklistVerifications, issues);
   const finalLabels = [];
+  const labelsByFinding = groupBy(labels, (label) => label.findingId);
+  const externalCoverage = externalRaterCoverage(includedFindings, labelsByFinding, protocol);
   for (const finding of includedFindings) {
     const finalLabel = finalLabelForFinding(finding, labels, protocol, issues);
     if (finalLabel) finalLabels.push(finalLabel);
@@ -1016,6 +1106,7 @@ function evaluateClaim(options) {
   const uniqueFingerprint = uniqueFingerprintMetric(finalLabels, protocol.confidence);
   const byRule = perRuleMetrics(finalLabels, protocol.confidence);
   const repositories = repositoryMetrics(finalLabels, protocol.confidence);
+  const repositorySelection = repositoryContribution(includedFindings, protocol);
   const loo = leaveOneRepositoryOut(finalLabels, protocol.confidence);
   const requiredZeroFp = requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
 
@@ -1025,8 +1116,16 @@ function evaluateClaim(options) {
   if (finalLabels.length !== includedFindings.length) {
     issues.push("not every included finding has a usable final label");
   }
-  if (repositories.maxRepositoryContribution !== null && repositories.maxRepositoryContribution > protocol.maxRepositoryContribution) {
-    warnings.push(`largest repository contributes ${(repositories.maxRepositoryContribution * 100).toFixed(2)}% of labeled blocking trials; protocol maximum is ${(protocol.maxRepositoryContribution * 100).toFixed(2)}%`);
+  if (includedFindings.length > 0 && !repositorySelection.feasibleWithCurrentRepositoryCount) {
+    gateFailures.push(`selected findings span ${repositorySelection.repositoriesWithSelectedFindings} repositories; at least ${repositorySelection.minimumRepositoriesWithSelectedFindings} are required for a ${(protocol.maxRepositoryContribution * 100).toFixed(2)}% repository contribution limit`);
+  }
+  for (const repository of repositorySelection.repositories) {
+    if (repository.overLimit) {
+      gateFailures.push(`${repository.repository} contributes ${(repository.contribution * 100).toFixed(2)}% of selected findings; limit is ${(protocol.maxRepositoryContribution * 100).toFixed(2)}%; add at least ${repository.additionalOtherFindingsNeeded} sampled findings from other repositories or reduce this repository's sampled findings`);
+    }
+  }
+  if (protocol.requireExternalIndependentRaters && externalCoverage.findingsMissingExternalIndependentLabels > 0) {
+    gateFailures.push(`${externalCoverage.findingsMissingExternalIndependentLabels} selected findings lack ${externalCoverage.required} external human/organization independent label(s)`);
   }
   if (occurrence.blocking.trials < requiredZeroFp && occurrence.counts.false_positive === 0 && occurrence.counts.needs_policy === 0 && occurrence.counts.needs_review === 0) {
     warnings.push(`zero observed blocking failures still needs at least ${requiredZeroFp} labeled trials for the requested lower bound`);
@@ -1084,6 +1183,9 @@ function evaluateClaim(options) {
       allowedRaterTypes: protocol.allowedRaterTypes,
       allowNonHumanRaters: protocol.allowNonHumanRaters,
       requireKnownRaterType: protocol.requireKnownRaterType,
+      requireExternalIndependentRaters: protocol.requireExternalIndependentRaters,
+      externalRaterTypes: protocol.externalRaterTypes,
+      minimumExternalIndependentRaters: protocol.minimumExternalIndependentRaters,
       worklistArtifactSetSha256: protocol.worklistArtifactSetSha256,
       worklistArtifactSetSha256s: protocol.worklistArtifactSetSha256s,
       requireExternalManifestReview: protocol.requireExternalManifestReview,
@@ -1113,6 +1215,7 @@ function evaluateClaim(options) {
         rounds: [...sealedRounds].sort(),
         issues: worklistVerifications.reduce((total, worklist) => total + worklist.issues.length, 0),
       } : null,
+      externalRaterCoverage: externalCoverage,
       issues,
       warnings,
     },
@@ -1121,6 +1224,7 @@ function evaluateClaim(options) {
       uniqueFingerprint,
       byRule,
       repositories,
+      repositorySelection,
       leaveOneRepositoryOut: loo,
       powerAnalysis: {
         zeroFalsePositiveRequiredTrials: requiredZeroFp,

@@ -59,6 +59,12 @@ imports, `website -> react` undeclared consumers, and the `website` write to
 the raters are still declared as `agent`; this is not external human or
 organization evidence.
 
+The round17 protocol now requires at least one external `human` or
+`organization` independent label for each selected finding before the evidence
+can support a public 99% precision claim. Round17 has 0 / 97 selected findings
+covered by that requirement, so the external-label gap is a hard claim gate, not
+a narrative caveat.
+
 ## Claim Result
 
 The round17 claim report is valid but insufficient:
@@ -101,6 +107,11 @@ Repository balance is still weak. Four repositories exceed the 10% contribution
 limit: `floating-ui` (25.8%), `jest` (24.7%), `vue` (24.7%), and `remix`
 (12.4%). The next reviewed corpus round should add many small and medium
 repositories, not only more findings from already-heavy subjects.
+
+The final claim evaluator treats repository contribution over the protocol cap
+as a gate failure, matching the preflight behavior. A corpus cannot pass by
+meeting the pooled precision bound while leaning too heavily on one or two
+repositories.
 
 ## Interpretation
 

@@ -187,6 +187,18 @@ function label(findingId, rater, round) {
   };
 }
 
+function relabelIndependentRaters(labels, firstRater, secondRater, raterType) {
+  return labels.map((entry) => {
+    const rater = entry.round === "blind_first" ? firstRater : secondRater;
+    return {
+      ...entry,
+      rater,
+      raterType,
+      assignmentId: `assignment-${hashText(["preflight-fixture", entry.findingId, entry.round, rater].join("\0")).slice(0, 16)}`,
+    };
+  });
+}
+
 function protocol(patch = {}) {
   const { claim = {}, samplingPlan = {}, ...rest } = patch;
   return {
@@ -201,7 +213,7 @@ function protocol(patch = {}) {
       ...claim,
     },
     samplingPlan: {
-      maxRepositoryContribution: 1,
+      maxRepositoryContribution: 0.1,
       ...samplingPlan,
     },
     ...rest,
@@ -363,10 +375,10 @@ function createWorklist(tempDir, bundleDir, findings, labels, patch = {}) {
       allowExistingLabels: false,
     },
     protocol: patch.protocol,
-    raters: [
-      { rater: "reviewer-a", raterType: "human", round: "blind_first" },
-      { rater: "reviewer-b", raterType: "human", round: "blind_second" },
-    ],
+    raters: [...new Map(assignments.map((entry) => [
+      `${entry.round}\0${entry.rater}`,
+      { rater: entry.rater, raterType: entry.raterType, round: entry.round },
+    ])).values()].sort((left, right) => left.round.localeCompare(right.round)),
     summary: {
       selectedFindings: findings.length,
       assignments: assignments.length,
@@ -383,7 +395,7 @@ function createWorklist(tempDir, bundleDir, findings, labels, patch = {}) {
 test("precision claim preflight accepts a labeled, balanced bundle with enough power", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-ok-"));
   try {
-    const findings = [finding(1), finding(2)];
+    const findings = Array.from({ length: 10 }, (_, index) => finding(index + 1));
     const labels = findings.flatMap((entry) => [
       label(entry.findingId, "reviewer-a", "blind_first"),
       label(entry.findingId, "reviewer-b", "blind_second"),
@@ -409,6 +421,76 @@ test("precision claim preflight accepts a labeled, balanced bundle with enough p
     assert.equal(report.claimReady, true);
     assert.equal(report.protocol.requiredZeroFalsePositiveFindingsPerRule, 2);
     assert.equal(report.selectedByRule.CELLFENCE_PRIVATE_IMPORT.additionalTruePositiveTrialsNeeded, 0);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight rejects relaxed repository contribution caps", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-cap-"));
+  try {
+    const findings = Array.from({ length: 10 }, (_, index) => finding(index + 1));
+    const labels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]);
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: claimBinding(bundleDir),
+      samplingPlan: {
+        maxRepositoryContribution: 1,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.valid, false);
+    assert.match(report.issues.join("\n"), /maxRepositoryContribution/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight is not claim-ready with only agent labels for an external 99% claim", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-agent-only-"));
+  try {
+    const findings = Array.from({ length: 598 }, (_, index) => finding(index + 1, {
+      findingId: `sha256:${hashText(`agent-only-${index}`).slice(0, 64)}`,
+    }));
+    const labels = relabelIndependentRaters(findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]), "agent-blind-first", "agent-blind-second", "agent");
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        minimumPrecision: 0.99,
+        confidence: 0.95,
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["agent"],
+        allowNonHumanRaters: true,
+        requireExternalIndependentRaters: true,
+        externalRaterTypes: ["human", "organization"],
+        minimumExternalIndependentRaters: 1,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.claimReady, false);
+    assert.equal(report.externalRaterCoverage.findingsMissingExternalIndependentLabels, 598);
+    assert.match(report.gateFailures.join("\n"), /external human\/organization independent label/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -837,7 +919,7 @@ test("precision claim preflight rejects repository concentration before claim ev
     writeJson(protocolPath, protocol({
       claim: claimBinding(bundleDir),
       samplingPlan: {
-        maxRepositoryContribution: 0.5,
+        maxRepositoryContribution: 0.1,
       },
     }));
 

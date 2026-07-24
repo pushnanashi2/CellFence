@@ -250,6 +250,18 @@ function labelsFor(findings, label = "true_positive") {
   ]);
 }
 
+function relabelIndependentRaters(labels, firstRater, secondRater, raterType) {
+  return labels.map((label) => {
+    const rater = label.round === "blind_first" ? firstRater : secondRater;
+    return {
+      ...label,
+      rater,
+      raterType,
+      assignmentId: `assignment-${hashText(["fixture-claim", label.findingId, label.round, rater].join("\0")).slice(0, 16)}`,
+    };
+  });
+}
+
 function createBundle(tempDir, findings, labels) {
   const bundleDir = path.join(tempDir, "bundle");
   fs.mkdirSync(bundleDir, { recursive: true });
@@ -510,10 +522,10 @@ function createWorklist(tempDir, bundleDir, findings, labels, patch = {}) {
       allowExistingLabels: false,
     },
     protocol: patch.protocol,
-    raters: [
-      { rater: "reviewer-a", raterType: "human", round: "blind_first" },
-      { rater: "reviewer-b", raterType: "human", round: "blind_second" },
-    ],
+    raters: [...new Map(assignments.map((entry) => [
+      `${entry.round}\0${entry.rater}`,
+      { rater: entry.rater, raterType: entry.raterType, round: entry.round },
+    ])).values()].sort((left, right) => left.round.localeCompare(right.round)),
     summary: {
       selectedFindings: findings.length,
       assignments: assignments.length,
@@ -763,6 +775,112 @@ test("corpus precision claim passes only when the lower confidence bound clears 
     assert.ok(report.decision.oneSidedLowerBound >= 0.99);
     assert.equal(report.claimGates.failures.length, 0);
     assert.equal(report.metrics.repositories.maxRepositoryContribution <= 0.1, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim cannot pass a public 99% claim with agent-only labels", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-agent-only-"));
+  try {
+    const findings = Array.from({ length: 598 }, (_, index) => createFinding(index));
+    const labels = relabelIndependentRaters(labelsFor(findings), "agent-blind-first", "agent-blind-second", "agent");
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["agent"],
+        allowNonHumanRaters: true,
+        requireExternalIndependentRaters: true,
+        externalRaterTypes: ["human", "organization"],
+        minimumExternalIndependentRaters: 1,
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "insufficient_evidence");
+    assert.equal(report.labelQuality.externalRaterCoverage.findingsMissingExternalIndependentLabels, 598);
+    assert.match(report.claimGates.failures.join("\n"), /external human\/organization independent label/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim gates repository contribution concentration in the final claim evaluator", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-contribution-gate-"));
+  try {
+    const findings = Array.from({ length: 598 }, (_, index) => createFinding(index, {
+      repository: "https://github.com/example/concentrated.git",
+    }));
+    const labels = labelsFor(findings).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "insufficient_evidence");
+    assert.equal(report.metrics.repositorySelection.maxRepositoryContribution, 1);
+    assert.match(report.claimGates.failures.join("\n"), /contributes 100\.00% of selected findings/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim gates repository selection even when concentrated findings are out of scope", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-selection-contribution-gate-"));
+  try {
+    const findings = [
+      ...Array.from({ length: 538 }, (_, index) => createFinding(index, {
+        repository: "https://github.com/example/concentrated.git",
+      })),
+      ...Array.from({ length: 60 }, (_, index) => createFinding(index + 1000)),
+    ];
+    const labels = labelsFor(findings).map((entry) => {
+      const finding = findings.find((candidate) => candidate.findingId === entry.findingId);
+      return {
+        ...entry,
+        label: finding?.repository === "https://github.com/example/concentrated.git"
+          ? "out_of_scope"
+          : "true_positive",
+      };
+    });
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.metrics.repositories.maxRepositoryContribution, 0.05);
+    assert.ok(report.metrics.repositorySelection.maxRepositoryContribution > 0.89);
+    assert.match(report.claimGates.failures.join("\n"), /concentrated\.git contributes .* selected findings/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

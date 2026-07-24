@@ -35,8 +35,11 @@
     "minimumIndependentRaters": 2,
     "requireAdjudicationForDisagreements": true,
     "requireKnownRaterType": true,
-    "allowedRaterTypes": ["agent"],
+    "allowedRaterTypes": ["agent", "human", "organization"],
     "allowNonHumanRaters": true,
+    "requireExternalIndependentRaters": true,
+    "externalRaterTypes": ["human", "organization"],
+    "minimumExternalIndependentRaters": 1,
     "countNeedsPolicyAs": "blocking_failure_semantic_success",
     "countNeedsReviewAs": "blocking_failure"
   },

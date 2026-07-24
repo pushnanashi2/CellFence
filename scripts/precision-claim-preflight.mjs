@@ -12,6 +12,8 @@ const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultBlockingSeverities = ["error"];
+const defaultExternalRaterTypes = ["human", "organization"];
+const defaultMinimumExternalIndependentRaters = 1;
 const allowedLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review", "invalid_setup", "out_of_scope"]);
 const blockingDenominatorLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review"]);
 const blockingSuccessLabels = new Set(["true_positive"]);
@@ -351,6 +353,9 @@ function normalizeProtocol(protocol, issues) {
     "samplingPlan.maxRepositoryContribution",
     issues,
   );
+  if (maxRepositoryContribution !== null && maxRepositoryContribution > defaultMaxRepositoryContribution) {
+    issues.push(`samplingPlan.maxRepositoryContribution must be less than or equal to ${defaultMaxRepositoryContribution} for external precision claims`);
+  }
   const labelingPlan = protocol.labelingPlan || {};
   const allowedRaterTypes = labelingPlan.allowedRaterTypes || labelingPlan.allowedRaterClasses || [];
   if (!Array.isArray(allowedRaterTypes) || allowedRaterTypes.some((raterType) => typeof raterType !== "string" || raterType.length === 0)) {
@@ -360,6 +365,19 @@ function normalizeProtocol(protocol, issues) {
   if (typeof allowNonHumanRaters !== "boolean") issues.push("labelingPlan.allowNonHumanRaters must be a boolean when present");
   const requireKnownRaterType = labelingPlan.requireKnownRaterType ?? false;
   if (typeof requireKnownRaterType !== "boolean") issues.push("labelingPlan.requireKnownRaterType must be a boolean when present");
+  const requireExternalIndependentRaters = labelingPlan.requireExternalIndependentRaters ?? ((minimumPrecision ?? defaultMinimumPrecision) >= defaultMinimumPrecision);
+  if (typeof requireExternalIndependentRaters !== "boolean") {
+    issues.push("labelingPlan.requireExternalIndependentRaters must be a boolean when present");
+  }
+  const externalRaterTypes = labelingPlan.externalRaterTypes || labelingPlan.externalRaterClasses || defaultExternalRaterTypes;
+  if (!Array.isArray(externalRaterTypes) || externalRaterTypes.some((raterType) => typeof raterType !== "string" || raterType.length === 0)) {
+    issues.push("labelingPlan.externalRaterTypes must be a string array when present");
+  }
+  const minimumExternalIndependentRaters = labelingPlan.minimumExternalIndependentRaters
+    ?? (requireExternalIndependentRaters ? defaultMinimumExternalIndependentRaters : 0);
+  if (!Number.isInteger(minimumExternalIndependentRaters) || minimumExternalIndependentRaters < 0) {
+    issues.push("labelingPlan.minimumExternalIndependentRaters must be a non-negative integer when present");
+  }
   const worklistArtifactSetSha256s = normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issues);
   const worklistArtifactSetSha256 = worklistArtifactSetSha256s.length === 1 ? worklistArtifactSetSha256s[0] : null;
   const manifestReviewPlan = protocol.manifestReviewPlan || {};
@@ -383,6 +401,13 @@ function normalizeProtocol(protocol, issues) {
     allowedRaterTypes: Array.isArray(allowedRaterTypes) ? allowedRaterTypes : [],
     allowNonHumanRaters: typeof allowNonHumanRaters === "boolean" ? allowNonHumanRaters : true,
     requireKnownRaterType: typeof requireKnownRaterType === "boolean" ? requireKnownRaterType : false,
+    requireExternalIndependentRaters: typeof requireExternalIndependentRaters === "boolean"
+      ? requireExternalIndependentRaters
+      : ((minimumPrecision ?? defaultMinimumPrecision) >= defaultMinimumPrecision),
+    externalRaterTypes: Array.isArray(externalRaterTypes) ? externalRaterTypes : defaultExternalRaterTypes,
+    minimumExternalIndependentRaters: Number.isInteger(minimumExternalIndependentRaters)
+      ? minimumExternalIndependentRaters
+      : defaultMinimumExternalIndependentRaters,
     worklistArtifactSetSha256,
     worklistArtifactSetSha256s,
     toolCommit,
@@ -633,6 +658,49 @@ function validateLabelRaterProvenance(labels, protocol, issues) {
   }
 }
 
+function labelAppearsNonHuman(label) {
+  return nonHumanRaterPattern.test(label?.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
+}
+
+function labelCountsAsExternal(label, protocol) {
+  const raterType = labelRaterType(label);
+  return protocol.externalRaterTypes.includes(raterType) && !labelAppearsNonHuman(label);
+}
+
+function externalRaterCoverage(selectedFindings, labelsByFinding, protocol) {
+  const required = protocol.requireExternalIndependentRaters
+    ? Math.max(1, protocol.minimumExternalIndependentRaters)
+    : protocol.minimumExternalIndependentRaters;
+  const findings = [];
+  let coveredFindings = 0;
+  let totalExternalIndependentLabels = 0;
+  for (const finding of selectedFindings) {
+    const independentLabels = (labelsByFinding.get(finding.findingId) || []).filter((label) => !isAdjudication(label));
+    const externalRaters = new Set(
+      independentLabels.filter((label) => labelCountsAsExternal(label, protocol)).map((label) => label.rater),
+    );
+    totalExternalIndependentLabels += externalRaters.size;
+    if (externalRaters.size >= required) coveredFindings += 1;
+    findings.push({
+      findingId: finding.findingId,
+      subjectId: finding.subjectId,
+      ruleId: finding.ruleId,
+      externalIndependentRaters: externalRaters.size,
+      requiredExternalIndependentRaters: required,
+      ok: externalRaters.size >= required,
+    });
+  }
+  return {
+    required,
+    externalRaterTypes: protocol.externalRaterTypes,
+    selectedFindings: selectedFindings.length,
+    coveredFindings,
+    findingsMissingExternalIndependentLabels: selectedFindings.length - coveredFindings,
+    totalExternalIndependentLabels,
+    findings: findings.filter((finding) => !finding.ok).slice(0, 50),
+  };
+}
+
 function validateLabelClaimUse(labels, issues) {
   for (const [index, label] of labels.entries()) {
     if (isAdjudication(label)) continue;
@@ -873,7 +941,11 @@ function evaluatePreflight(options) {
   if (selected.length === 0) gateFailures.push("no sampled precision-eligible findings match protocol rules and blocking severities");
   const labelsByFinding = groupBy(labels, (label) => label.findingId);
   const readiness = labelReadiness(selected, labelsByFinding);
+  const externalCoverage = externalRaterCoverage(selected, labelsByFinding, protocol);
   if (readiness.fullyLabeled < selected.length) gateFailures.push(`${selected.length - readiness.fullyLabeled} selected findings are not fully independently labeled`);
+  if (protocol.requireExternalIndependentRaters && externalCoverage.findingsMissingExternalIndependentLabels > 0) {
+    gateFailures.push(`${externalCoverage.findingsMissingExternalIndependentLabels} selected findings lack ${externalCoverage.required} external human/organization independent label(s)`);
+  }
 
   const requiredZeroFp = requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
   const selectedByRule = {};
@@ -924,6 +996,9 @@ function evaluatePreflight(options) {
       allowedRaterTypes: protocol.allowedRaterTypes,
       allowNonHumanRaters: protocol.allowNonHumanRaters,
       requireKnownRaterType: protocol.requireKnownRaterType,
+      requireExternalIndependentRaters: protocol.requireExternalIndependentRaters,
+      externalRaterTypes: protocol.externalRaterTypes,
+      minimumExternalIndependentRaters: protocol.minimumExternalIndependentRaters,
       worklistArtifactSetSha256: protocol.worklistArtifactSetSha256,
       worklistArtifactSetSha256s: protocol.worklistArtifactSetSha256s,
       toolCommit: protocol.toolCommit,
@@ -953,6 +1028,7 @@ function evaluatePreflight(options) {
     },
     selectedByRule,
     repositoryContribution: contribution,
+    externalRaterCoverage: externalCoverage,
     raterSummary: raterSummary(labels),
     warnings,
     gateFailures: [...new Set(gateFailures)],
