@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "cellfence.precision-independent-agent-review.v1",
+  "studyId": "ts-js-reviewed-pilot-12-2026-07-23-clean",
+  "reviewDate": "2026-07-24",
+  "reviewer": {
+    "id": "019f949f-93ab-7343-a6cf-5ec3c1eee26d",
+    "name": "Jason",
+    "reviewerType": "agent",
+    "independentOfPrimaryLabelGeneration": true
+  },
+  "claimUse": "supplemental_independent_agent_review_not_external_human_claim",
+  "scope": {
+    "subjectId": "floating-ui",
+    "reason": "newly added 12-subject corpus finding cluster requiring an independent check before round17 interpretation",
+    "worklistArtifactSetSha256": "e670cba7e99d7efba79b20477939dff827a903968176cfa4b66af4b55c1284e9",
+    "sourceBundleArtifactSetSha256": "2332ecafa136454250fe7335a86480852de8946547832f5599b197eaa2c67b7a"
+  },
+  "reviewedInputs": [
+    "reports/corpus/ts-js-reviewed-pilot-12-2026-07-24-round17-blind-worklist",
+    "reports/corpus/ts-js-reviewed-pilot-12-2026-07-23-clean-bundle",
+    "docs/research/corpora/ts-js-reviewed-pilot-12-2026-07-23.json",
+    "docs/research/corpora/manifests/ts-js-reviewed-pilot-12-2026-07-23/floating-ui.cellfence.manifest.json"
+  ],
+  "recommendations": [
+    {
+      "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+      "findingCluster": "devtools imports extension internals instead of extension public entries",
+      "recommendedLabel": "true_positive",
+      "rationale": "The reviewed manifest allows devtools to consume extension, but the observed imports target extension-owned internal source paths rather than public entries."
+    },
+    {
+      "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+      "findingCluster": "website imports @floating-ui/react without a reviewed consumer edge to react",
+      "recommendedLabel": "true_positive",
+      "rationale": "The reviewed manifest leaves website consumes empty while the findings resolve @floating-ui/react to the react cell."
+    },
+    {
+      "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "findingCluster": "website writes images.json without a declared file resource or artifact allowance",
+      "recommendedLabel": "true_positive",
+      "rationale": "The evidence graph reports no policy defect and the reviewed manifest does not declare the observed file write selector."
+    }
+  ],
+  "limitations": [
+    "This is not an external human or organization label.",
+    "This supplemental review covers the floating-ui cluster, not every round17 finding.",
+    "The sealed claim labels remain raterType=agent and do not satisfy a public external precision claim."
+  ]
+}

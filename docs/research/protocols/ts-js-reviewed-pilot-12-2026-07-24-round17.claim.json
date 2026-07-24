@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-12-2026-07-23-clean",
+  "claim": {
+    "toolCommit": "55806073abaf6cd240efd4958aa83932c4892c53",
+    "preLabelArtifactSetSha256": "3bf98d3139148b198a6fd79b74e1cfbf7b38d231d3a7119e5a361223eb10d2fa",
+    "artifactSetSha256": "2fd66b15aaed26c4ff9ca3c853638c441d2197ee7c9b56d5a7ebe85b765b1853",
+    "worklistArtifactSetSha256s": [
+      "e670cba7e99d7efba79b20477939dff827a903968176cfa4b66af4b55c1284e9",
+      "65be2c94ee343136cfa8df0dd5cbf2caa3ca8ab03fb94c86d0cc6f14c7408e34"
+    ],
+    "targetPopulation": "reviewed TS/JS workspace repositories, 12-subject round17 sealed independent-agent corpus",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": ["error"]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "full sampled precision-eligible set from sealed 12-subject reviewed corpus bundle",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": ["agent"],
+    "allowNonHumanRaters": true,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": false
+  },
+  "exclusionRules": []
+}
