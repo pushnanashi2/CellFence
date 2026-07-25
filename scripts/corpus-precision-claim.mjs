@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { validateBundle as validateEvidenceBundle } from "./corpus-evidence-bundle.mjs";
 import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
-import { isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
 const reportSchemaVersion = "cellfence.precision-claim-report.v1";
@@ -15,7 +15,6 @@ const defaultBlockingSeverities = ["error"];
 const defaultMinimumIndependentRaters = 2;
 const defaultExternalRaterTypes = ["human", "organization"];
 const defaultMinimumExternalIndependentRaters = 1;
-const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 const allowedLabels = new Set([
   "true_positive",
   "false_positive",
@@ -428,14 +427,14 @@ function validateLabelRaterProvenance(labels, protocol, issues) {
     if (type && allowed.size > 0 && !allowed.has(type)) {
       issues.push(`labels.jsonl:${lineNumber} raterType/raterClass ${type} is not allowed by protocol`);
     }
-    if (!protocol.allowNonHumanRaters && (nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(type))) {
+    if (!protocol.allowNonHumanRaters && (appearsNonHumanRater(label.rater) || appearsNonHumanRater(type))) {
       issues.push(`labels.jsonl:${lineNumber} appears non-human but protocol disallows non-human raters`);
     }
   }
 }
 
 function labelAppearsNonHuman(label) {
-  return nonHumanRaterPattern.test(label?.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
+  return appearsNonHumanRater(label?.rater) || appearsNonHumanRater(labelRaterType(label));
 }
 
 function labelCountsAsExternal(label, protocol) {
@@ -982,7 +981,7 @@ function validateReviewedCopyManifest(id, manifest, copy, allowedReviewerTypes, 
     const label = `${id} review.reviewerAttestations[${index}]`;
     const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
     if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
-    if (typeof attestation.id === "string" && nonHumanRaterPattern.test(attestation.id)) {
+    if (typeof attestation.id === "string" && appearsNonHumanRater(attestation.id)) {
       issues.push(`${label}.id appears non-human but external manifest review requires a human/organization reviewer`);
     }
     if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {

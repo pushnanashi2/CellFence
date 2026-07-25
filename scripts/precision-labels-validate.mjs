@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const allowedLabels = new Set([
   "true_positive",
@@ -11,7 +11,6 @@ const allowedLabels = new Set([
   "invalid_setup",
   "out_of_scope",
 ]);
-const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 const labelAllowedKeys = new Set([
   "schemaVersion",
   "studyId",
@@ -170,7 +169,7 @@ function validateLabelRows(labels, studyId, knownFindingIds, issues, options) {
     if (raterType && allowedRaterTypes.size > 0 && !allowedRaterTypes.has(raterType)) {
       issues.push(`labels.jsonl:${line} raterType/raterClass ${raterType} is not allowed`);
     }
-    if (!options.allowNonHumanRaters && (nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(raterType))) {
+    if (!options.allowNonHumanRaters && (appearsNonHumanRater(label.rater) || appearsNonHumanRater(raterType))) {
       issues.push(`labels.jsonl:${line} appears non-human but non-human raters are disallowed`);
     }
     if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {

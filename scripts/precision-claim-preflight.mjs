@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
-import { isAdjudication, labelRaterType, posixify, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, posixify, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const reportSchemaVersion = "cellfence.precision-claim-preflight.v1";
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
@@ -17,7 +17,6 @@ const defaultMinimumExternalIndependentRaters = 1;
 const allowedLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review", "invalid_setup", "out_of_scope"]);
 const blockingDenominatorLabels = new Set(["true_positive", "false_positive", "needs_policy", "needs_review"]);
 const blockingSuccessLabels = new Set(["true_positive"]);
-const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 const labelAllowedKeys = new Set([
   "schemaVersion",
   "studyId",
@@ -623,7 +622,7 @@ function raterSummary(labels) {
   for (const label of labels) {
     const existing = raters.get(label.rater) || { labels: 0, nonHuman: false };
     existing.labels += 1;
-    existing.nonHuman = existing.nonHuman || nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
+    existing.nonHuman = existing.nonHuman || appearsNonHumanRater(label.rater) || appearsNonHumanRater(labelRaterType(label));
     raters.set(label.rater, existing);
   }
   return {
@@ -652,14 +651,14 @@ function validateLabelRaterProvenance(labels, protocol, issues) {
   if (!protocol.allowNonHumanRaters) {
     const nonHumanLabels = labels.filter((label) => {
       const type = labelRaterType(label);
-      return nonHumanRaterPattern.test(label.rater || "") || nonHumanRaterPattern.test(type);
+      return appearsNonHumanRater(label.rater) || appearsNonHumanRater(type);
     });
     if (nonHumanLabels.length > 0) issues.push(`${nonHumanLabels.length} labels appear to be non-human but protocol disallows non-human raters`);
   }
 }
 
 function labelAppearsNonHuman(label) {
-  return nonHumanRaterPattern.test(label?.rater || "") || nonHumanRaterPattern.test(labelRaterType(label));
+  return appearsNonHumanRater(label?.rater) || appearsNonHumanRater(labelRaterType(label));
 }
 
 function labelCountsAsExternal(label, protocol) {

@@ -995,7 +995,7 @@ test("precision claim preflight gates rater provenance when protocol requires it
   try {
     const findings = [finding(1)];
     const labels = [
-      label(findings[0].findingId, "agent-blind-first", "blind_first"),
+      label(findings[0].findingId, "llmReviewer", "blind_first"),
       label(findings[0].findingId, "reviewer-b", "blind_second"),
     ];
     labels[1].raterType = "human";

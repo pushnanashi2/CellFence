@@ -2133,7 +2133,7 @@ test("corpus precision claim rejects non-human external manifest attestation ids
     replaceCorpusManifestReviews(bundleDir, () => ({
       reviewerAttestations: [
         {
-          id: "codex-agent-reviewer",
+          id: "LLMReviewer",
           reviewerType: "human",
           independent: true,
         },

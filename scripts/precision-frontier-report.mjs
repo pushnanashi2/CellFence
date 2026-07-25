@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { appearsNonHumanRater } from "./precision-worklist-lib.mjs";
 
 const schemaVersion = "cellfence.precision-frontier-report.v1";
 const defaultMinimumPrecision = 0.99;
@@ -8,7 +9,6 @@ const defaultConfidence = 0.95;
 const defaultMaxRepositoryContribution = 0.1;
 const defaultExternalRaterTypes = ["human", "organization"];
 const defaultMinimumIndependentRaters = 2;
-const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 
 function usage() {
   console.error(`Usage:
@@ -442,7 +442,7 @@ function subjectHasExternalManifestAttestation(context, finding) {
     const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
     return typeof attestation.id === "string"
       && attestation.id.length > 0
-      && !nonHumanRaterPattern.test(attestation.id)
+      && !appearsNonHumanRater(attestation.id)
       && allowedTypes.has(reviewerType)
       && attestation.independent === true;
   });
@@ -471,7 +471,7 @@ function externalIndependentLabelsForFinding(context, findingId) {
   const allowedTypes = new Set(context.protocol.externalRaterTypes);
   return independentLabelsForFinding(context, findingId).filter((label) => {
     const rater = String(label.rater || "");
-    return allowedTypes.has(labelRaterType(label)) && !nonHumanRaterPattern.test(rater);
+    return allowedTypes.has(labelRaterType(label)) && !appearsNonHumanRater(rater);
   });
 }
 
@@ -543,12 +543,19 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
   const sampledByRule = {};
   const byRuleRequirement = {};
   const byRequirement = {};
+  let externalIndependentLabelRowsNeeded = 0;
   for (const finding of candidateFindings) {
     increment(byRule, finding.ruleId);
     const requirement = manifestRequirementFor(finding, requirementContext);
     increment(byRequirement, requirement);
     byRuleRequirement[finding.ruleId] ||= {};
     increment(byRuleRequirement[finding.ruleId], requirement);
+    if (requirement === "external_independent_label_required") {
+      externalIndependentLabelRowsNeeded += Math.max(
+        0,
+        (protocol.minimumExternalIndependentRaters || 1) - externalIndependentRaterCountForFinding(requirementContext, finding.findingId),
+      );
+    }
   }
   for (const finding of sampledCandidateFindings) increment(sampledByRule, finding.ruleId);
 
@@ -597,6 +604,7 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
     sampledByRule: Object.fromEntries(Object.entries(sampledByRule).sort()),
     byRequirement: Object.fromEntries(Object.entries(byRequirement).sort()),
     byRuleRequirement: Object.fromEntries(Object.entries(byRuleRequirement).sort()),
+    externalIndependentLabelRowsNeeded,
     topSubjects: subjectRows.slice(0, topSubjects),
   };
 }
@@ -700,18 +708,38 @@ function ruleWorkPlan(ruleGaps) {
   });
 }
 
+function externalIndependentLabelRowsNeededFromCoverage(coverage, protocol) {
+  if (!coverage) return null;
+  const missing = coverage.findingsMissingExternalIndependentLabels;
+  if (!Number.isInteger(missing) || missing < 0) return null;
+  if (missing === 0) return 0;
+  const defaultRequired = Math.max(1, coverage.required || protocol.minimumExternalIndependentRaters || 1);
+  const missingFindings = Array.isArray(coverage.findings)
+    ? coverage.findings.filter((finding) => finding?.ok !== true)
+    : [];
+  if (missingFindings.length === missing) {
+    return missingFindings.reduce((sum, finding) => {
+      const required = Math.max(1, finding.requiredExternalIndependentRaters || defaultRequired);
+      const present = Math.max(0, finding.externalIndependentRaters || 0);
+      return sum + Math.max(0, required - present);
+    }, 0);
+  }
+  return missing;
+}
+
 function buildWorkPlan({ ruleGaps, dilution, candidate, protocol, currentDecision, reviewedClaimReport }) {
   const ruleCoverage = ruleWorkPlan(ruleGaps);
   const repositoryAdditions = (dilution.repositoriesOverCap || [])
     .map((repository) => repository.additionalOutsideRepositoryForCap || 0);
   const candidateRequirements = candidate?.byRequirement || {};
-  const reviewedExternalCoverage = reviewedClaimReport.labelQuality?.externalRaterCoverage || null;
+  const reviewedExternalCoverage = reviewedClaimReport.labelQuality?.externalRaterCoverage || reviewedClaimReport.externalRaterCoverage || null;
   const reviewedFindingsMissingExternalIndependentLabels = reviewedExternalCoverage?.findingsMissingExternalIndependentLabels ?? null;
   const candidateFindingsNeedingExternalIndependentLabels = candidateRequirements.external_independent_label_required || 0;
-  const minimumExternalIndependentLabelRows = (
-    (reviewedFindingsMissingExternalIndependentLabels ?? 0)
-    + candidateFindingsNeedingExternalIndependentLabels
-  ) * Math.max(1, protocol.minimumExternalIndependentRaters || 1);
+  const reviewedExternalIndependentLabelRowsNeeded = externalIndependentLabelRowsNeededFromCoverage(reviewedExternalCoverage, protocol);
+  const candidateExternalIndependentLabelRowsNeeded = candidate?.externalIndependentLabelRowsNeeded || 0;
+  const minimumExternalIndependentLabelRows = reviewedExternalIndependentLabelRowsNeeded === null
+    ? (candidateExternalIndependentLabelRowsNeeded > 0 ? candidateExternalIndependentLabelRowsNeeded : null)
+    : reviewedExternalIndependentLabelRowsNeeded + candidateExternalIndependentLabelRowsNeeded;
   const blockers = [];
   if (currentDecision.status !== "pass" && currentDecision.status !== "preflight_ready") {
     blockers.push("reviewed_claim_not_ready");
@@ -740,7 +768,9 @@ function buildWorkPlan({ ruleGaps, dilution, candidate, protocol, currentDecisio
       requireExternalIndependentRaters: protocol.requireExternalIndependentRaters,
       minimumExternalIndependentRaters: protocol.minimumExternalIndependentRaters,
       reviewedFindingsMissingExternalIndependentLabels,
+      reviewedExternalIndependentLabelRowsNeeded,
       candidateFindingsNeedingExternalIndependentLabels,
+      candidateExternalIndependentLabelRowsNeeded,
       minimumExternalIndependentLabelRows,
       candidateFindingsNeedingExternalManifestAttestation: candidateRequirements.external_manifest_attestation_required || 0,
     },

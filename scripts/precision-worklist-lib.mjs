@@ -15,6 +15,7 @@ const canonicalAllowedLabels = [
 ];
 const allowedRaterTypes = new Set(["human", "organization", "agent"]);
 const labelLeakPattern = /(^|[^a-z0-9])(true_positive|false_positive|needs_policy|needs_review|invalid_setup|out_of_scope|answer|peer|adjudicat)([^a-z0-9]|$)/i;
+const nonHumanRaterTerms = new Set(["agent", "codex", "llm", "bot", "automated"]);
 
 function hashBuffer(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -43,6 +44,18 @@ export function isAdjudication(label) {
 
 export function labelRaterType(label) {
   return label?.raterType || label?.raterClass || "";
+}
+
+export function appearsNonHumanRater(value) {
+  const text = String(value || "").trim();
+  if (!text) return false;
+  const tokenized = text
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  return tokenized.some((token) => nonHumanRaterTerms.has(token));
 }
 
 export function validateClaimLabelMetadata(label, line, issues, options = {}) {

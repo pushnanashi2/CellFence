@@ -369,6 +369,7 @@ test("precision frontier reports repository balance from preflight inputs", () =
         confidence: 0.95,
         blockingSeverities: ["error"],
         maxRepositoryContribution: 0.1,
+        minimumExternalIndependentRaters: 2,
       },
       summary: {
         selectedFindings: 10,
@@ -392,6 +393,32 @@ test("precision frontier reports repository balance from preflight inputs", () =
             contribution: 0.7,
             overLimit: true,
             additionalOtherFindingsNeeded: 60,
+          },
+        ],
+      },
+      externalRaterCoverage: {
+        required: 2,
+        externalRaterTypes: ["human", "organization"],
+        selectedFindings: 3,
+        coveredFindings: 1,
+        findingsMissingExternalIndependentLabels: 2,
+        totalExternalIndependentLabels: 2,
+        findings: [
+          {
+            findingId: "sha256:a".padEnd(71, "a"),
+            subjectId: "large",
+            ruleId: "CELLFENCE_PRIVATE_IMPORT",
+            externalIndependentRaters: 0,
+            requiredExternalIndependentRaters: 2,
+            ok: false,
+          },
+          {
+            findingId: "sha256:b".padEnd(71, "b"),
+            subjectId: "large",
+            ruleId: "CELLFENCE_PRIVATE_IMPORT",
+            externalIndependentRaters: 1,
+            requiredExternalIndependentRaters: 2,
+            ok: false,
           },
         ],
       },
@@ -419,6 +446,9 @@ test("precision frontier reports repository balance from preflight inputs", () =
     assert.equal(Object.hasOwn(report.repositoryDilution.repositoriesOverCap[0], "trials"), false);
     assert.equal(report.repositoryDilution.repositoriesOverCap[0].additionalOutsideRepositoryForCap, 60);
     assert.equal(report.workPlan.repositoryBalance.minimumAdditionalOutsideFindings, 60);
+    assert.equal(report.workPlan.externalEvidence.reviewedFindingsMissingExternalIndependentLabels, 2);
+    assert.equal(report.workPlan.externalEvidence.reviewedExternalIndependentLabelRowsNeeded, 3);
+    assert.equal(report.workPlan.externalEvidence.minimumExternalIndependentLabelRows, 3);
     assert.match(report.decision.blockers.join("\n"), /add 60 outside-repository selected finding\(s\)/);
     const markdown = fs.readFileSync(markdownPath, "utf8");
     assert.match(markdown, /\| Repository \| Selected findings \| Contribution \| Additional outside selected findings \|/);
@@ -674,7 +704,99 @@ test("precision frontier counts distinct external raters instead of duplicate ex
     assert.deepEqual(report.candidatePool.byRequirement, {
       external_independent_label_required: 1,
     });
-    assert.equal(report.workPlan.externalEvidence.minimumExternalIndependentLabelRows, 2);
+    assert.equal(report.candidatePool.externalIndependentLabelRowsNeeded, 1);
+    assert.equal(report.workPlan.externalEvidence.candidateExternalIndependentLabelRowsNeeded, 1);
+    assert.equal(report.workPlan.externalEvidence.minimumExternalIndependentLabelRows, 1);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision frontier ignores agent-like external manifest attestation ids", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-frontier-agent-attestation-"));
+  try {
+    const claimReport = createClaimReport(tempDir);
+    const bundleDir = path.join(tempDir, "candidate-bundle");
+    const findingId = "sha256:7".padEnd(71, "7");
+    const manifestSha256 = "7".repeat(64);
+    writeJson(path.join(bundleDir, "study.json"), {
+      schemaVersion: "cellfence.corpus-evidence-bundle.v1",
+      studyId: "agent-attestation-candidate",
+      environment: {
+        harnessCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        harnessDirty: false,
+      },
+      manifestCopies: [
+        {
+          subjectId: "candidate-a",
+          path: "manifests/candidate-a.json",
+          sha256: manifestSha256,
+        },
+      ],
+    });
+    writeJson(path.join(bundleDir, "corpus.json"), {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "candidate-a",
+          repository: "https://github.com/example/candidate-a.git",
+          commit: "c".repeat(40),
+          manifest: {
+            strategy: "copy",
+            reviewStatus: "reviewed",
+            review: {
+              reviewedAt: "2026-07-25",
+              scope: "agent-like attestation fixture",
+              reviewedManifestSha256: manifestSha256,
+              reviewerAttestations: [
+                {
+                  id: "codexAgentReviewer",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+    writeJson(path.join(bundleDir, "sampling.json"), {
+      schemaVersion: "cellfence.corpus-sampling.v1",
+      sampledFindingIds: [findingId],
+    });
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), []);
+    writeJsonl(path.join(bundleDir, "findings.normalized.jsonl"), [
+      {
+        schemaVersion: "cellfence.corpus-finding.v1",
+        studyId: "agent-attestation-candidate",
+        findingId,
+        subjectId: "candidate-a",
+        repository: "https://github.com/example/candidate-a.git",
+        commit: "c".repeat(40),
+        manifestStrategy: "copy",
+        manifestReviewStatus: "reviewed",
+        precisionEligible: true,
+        ruleId: "CELLFENCE_PRIVATE_IMPORT",
+        severity: "error",
+        filePath: "src/a.ts",
+        message: "private import",
+      },
+    ]);
+
+    const result = runFrontier([
+      "--reviewed-claim-report",
+      claimReport,
+      "--candidate-bundle",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.deepEqual(report.candidatePool.byRequirement, {
+      external_manifest_attestation_required: 1,
+    });
+    assert.equal(report.candidatePool.topSubjects[0].nextAction, "collect_external_manifest_attestation");
+    assert.equal(report.workPlan.externalEvidence.candidateFindingsNeedingExternalManifestAttestation, 1);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
