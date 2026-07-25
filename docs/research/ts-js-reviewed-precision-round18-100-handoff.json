@@ -1,0 +1,3372 @@
+{
+  "schemaVersion": "cellfence.precision-round-handoff.v1",
+  "generatedAt": "2026-07-25T02:14:52.504Z",
+  "handoffOnly": true,
+  "evidenceProgress": false,
+  "decision": {
+    "status": "planning_only",
+    "reason": "This handoff ledger schedules residual evidence tasks from the source reports; it is not itself precision evidence."
+  },
+  "sourceDecision": {
+    "status": "insufficient_evidence",
+    "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+  },
+  "sourceGateFailures": [
+    "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit",
+    "https://github.com/floating-ui/floating-ui.git contributes 25.77% of selected findings; limit is 10.00%; add at least 153 sampled findings from other repositories or reduce this repository's sampled findings",
+    "https://github.com/jestjs/jest.git contributes 24.74% of selected findings; limit is 10.00%; add at least 143 sampled findings from other repositories or reduce this repository's sampled findings",
+    "https://github.com/vuejs/core.git contributes 24.74% of selected findings; limit is 10.00%; add at least 143 sampled findings from other repositories or reduce this repository's sampled findings",
+    "https://github.com/remix-run/remix.git contributes 12.37% of selected findings; limit is 10.00%; add at least 23 sampled findings from other repositories or reduce this repository's sampled findings",
+    "97 selected findings lack 1 external human/organization independent label(s)",
+    "pooled occurrence lower bound is below target",
+    "unique-fingerprint lower bound is below target",
+    "CELLFENCE_PRIVATE_IMPORT rule-level lower bound is below target",
+    "CELLFENCE_UNDECLARED_CONSUMER rule-level lower bound is below target",
+    "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT rule-level lower bound is below target",
+    "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE rule-level lower bound is below target",
+    "CELLFENCE_UNRESOLVED_IMPORT has no labeled blocking trials",
+    "CELLFENCE_UNDECLARED_RESOURCE_ACCESS rule-level lower bound is below target",
+    "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS rule-level lower bound is below target",
+    "CELLFENCE_PUBLIC_SYMBOL_MISMATCH rule-level lower bound is below target",
+    "repository macro precision is below target",
+    "https://github.com/jestjs/jest.git observed blocking precision is below target",
+    "https://github.com/remix-run/remix.git observed blocking precision is below target",
+    "https://github.com/vuejs/core.git observed blocking precision is below target"
+  ],
+  "source": {
+    "claimReportPath": "reports/corpus/ts-js-reviewed-pilot-12-2026-07-24-round17-claim-report.json",
+    "claimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+    "preflightPath": "reports/corpus/ts-js-reviewed-pilot-12-2026-07-24-round17-claim-preflight.json",
+    "preflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd"
+  },
+  "range": {
+    "fromRound": 18,
+    "toRound": 100,
+    "rounds": 83
+  },
+  "invariant": "No round in this ledger fabricates labels, external review, reviewed repositories, or claim progress. New evidence must be supplied by separate sealed artifacts.",
+  "currentSnapshot": {
+    "decision": {
+      "status": "insufficient_evidence",
+      "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+    },
+    "target": {
+      "minimumPrecision": 0.99,
+      "confidence": 0.95,
+      "maxRepositoryContribution": 0.1
+    },
+    "counts": {
+      "true_positive": 75,
+      "false_positive": 0,
+      "needs_policy": 11,
+      "needs_review": 0,
+      "invalid_setup": 3,
+      "out_of_scope": 8
+    },
+    "blocking": {
+      "successes": 75,
+      "trials": 86,
+      "observedPrecision": 0.872093023255814,
+      "oneSidedLowerBound": 0.7971747360429831,
+      "additionalTruePositiveTrialsNeeded": 1732
+    },
+    "semanticCorrectness": {
+      "successes": 86,
+      "trials": 86,
+      "observedPrecision": 1,
+      "oneSidedLowerBound": 0.9657656271508799
+    },
+    "externalRaterCoverage": {
+      "required": 1,
+      "externalRaterTypes": [
+        "human",
+        "organization"
+      ],
+      "selectedFindings": 97,
+      "coveredFindings": 0,
+      "findingsMissingExternalIndependentLabels": 97,
+      "totalExternalIndependentLabels": 0
+    },
+    "repositorySelection": {
+      "maxRepositoryContribution": 0.25773195876288657,
+      "limit": 0.1,
+      "repositoriesWithSelectedFindings": 9,
+      "minimumRepositoriesWithSelectedFindings": 10,
+      "feasibleWithCurrentRepositoryCount": false,
+      "overLimitRepositories": [
+        {
+          "repository": "https://github.com/floating-ui/floating-ui.git",
+          "selectedFindings": 25,
+          "contribution": 0.25773195876288657,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 153
+        },
+        {
+          "repository": "https://github.com/jestjs/jest.git",
+          "selectedFindings": 24,
+          "contribution": 0.24742268041237114,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 143
+        },
+        {
+          "repository": "https://github.com/vuejs/core.git",
+          "selectedFindings": 24,
+          "contribution": 0.24742268041237114,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 143
+        },
+        {
+          "repository": "https://github.com/remix-run/remix.git",
+          "selectedFindings": 12,
+          "contribution": 0.12371134020618557,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 23
+        }
+      ]
+    },
+    "ruleDeficits": [
+      {
+        "ruleId": "CELLFENCE_UNRESOLVED_IMPORT",
+        "selectedFindings": 3,
+        "blockingTrials": 0,
+        "truePositives": 0,
+        "oneSidedLowerBound": null,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "selectedFindings": 1,
+        "blockingTrials": 1,
+        "truePositives": 1,
+        "oneSidedLowerBound": 0.050000000000000044,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+        "selectedFindings": 2,
+        "blockingTrials": 2,
+        "truePositives": 0,
+        "oneSidedLowerBound": 0,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+        "selectedFindings": 5,
+        "blockingTrials": 5,
+        "truePositives": 1,
+        "oneSidedLowerBound": 0.010206218313011509,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+        "selectedFindings": 10,
+        "blockingTrials": 9,
+        "truePositives": 9,
+        "oneSidedLowerBound": 0.7168711644368866,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+        "selectedFindings": 11,
+        "blockingTrials": 11,
+        "truePositives": 11,
+        "oneSidedLowerBound": 0.7615958096191474,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+        "selectedFindings": 25,
+        "blockingTrials": 25,
+        "truePositives": 24,
+        "oneSidedLowerBound": 0.8238792893954822,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+        "selectedFindings": 40,
+        "blockingTrials": 33,
+        "truePositives": 29,
+        "oneSidedLowerBound": 0.7437473081738819,
+        "belowTarget": true
+      }
+    ],
+    "powerAnalysis": {
+      "zeroFalsePositiveRequiredTrials": 299
+    },
+    "gateFailures": [
+      "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit",
+      "https://github.com/floating-ui/floating-ui.git contributes 25.77% of selected findings; limit is 10.00%; add at least 153 sampled findings from other repositories or reduce this repository's sampled findings",
+      "https://github.com/jestjs/jest.git contributes 24.74% of selected findings; limit is 10.00%; add at least 143 sampled findings from other repositories or reduce this repository's sampled findings",
+      "https://github.com/vuejs/core.git contributes 24.74% of selected findings; limit is 10.00%; add at least 143 sampled findings from other repositories or reduce this repository's sampled findings",
+      "https://github.com/remix-run/remix.git contributes 12.37% of selected findings; limit is 10.00%; add at least 23 sampled findings from other repositories or reduce this repository's sampled findings",
+      "97 selected findings lack 1 external human/organization independent label(s)",
+      "pooled occurrence lower bound is below target",
+      "unique-fingerprint lower bound is below target",
+      "CELLFENCE_PRIVATE_IMPORT rule-level lower bound is below target",
+      "CELLFENCE_UNDECLARED_CONSUMER rule-level lower bound is below target",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT rule-level lower bound is below target",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE rule-level lower bound is below target",
+      "CELLFENCE_UNRESOLVED_IMPORT has no labeled blocking trials",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS rule-level lower bound is below target",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS rule-level lower bound is below target",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH rule-level lower bound is below target",
+      "repository macro precision is below target",
+      "https://github.com/jestjs/jest.git observed blocking precision is below target",
+      "https://github.com/remix-run/remix.git observed blocking precision is below target",
+      "https://github.com/vuejs/core.git observed blocking precision is below target"
+    ]
+  },
+  "residuals": {
+    "externalRaterCoverage": {
+      "required": 1,
+      "externalRaterTypes": [
+        "human",
+        "organization"
+      ],
+      "selectedFindings": 97,
+      "coveredFindings": 0,
+      "findingsMissingExternalIndependentLabels": 97,
+      "totalExternalIndependentLabels": 0
+    },
+    "repositoryBalance": {
+      "maxRepositoryContribution": 0.25773195876288657,
+      "limit": 0.1,
+      "repositoriesWithSelectedFindings": 9,
+      "minimumRepositoriesWithSelectedFindings": 10,
+      "feasibleWithCurrentRepositoryCount": false,
+      "overLimitRepositories": [
+        {
+          "repository": "https://github.com/floating-ui/floating-ui.git",
+          "selectedFindings": 25,
+          "contribution": 0.25773195876288657,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 153
+        },
+        {
+          "repository": "https://github.com/jestjs/jest.git",
+          "selectedFindings": 24,
+          "contribution": 0.24742268041237114,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 143
+        },
+        {
+          "repository": "https://github.com/vuejs/core.git",
+          "selectedFindings": 24,
+          "contribution": 0.24742268041237114,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 143
+        },
+        {
+          "repository": "https://github.com/remix-run/remix.git",
+          "selectedFindings": 12,
+          "contribution": 0.12371134020618557,
+          "overLimit": true,
+          "additionalOtherFindingsNeeded": 23
+        }
+      ]
+    },
+    "sampleSize": {
+      "successes": 75,
+      "trials": 86,
+      "additionalTruePositiveTrialsNeeded": 1732,
+      "zeroFalsePositiveRequiredTrials": 299
+    },
+    "byRule": [
+      {
+        "ruleId": "CELLFENCE_UNRESOLVED_IMPORT",
+        "selectedFindings": 3,
+        "blockingTrials": 0,
+        "truePositives": 0,
+        "oneSidedLowerBound": null,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+        "selectedFindings": 1,
+        "blockingTrials": 1,
+        "truePositives": 1,
+        "oneSidedLowerBound": 0.050000000000000044,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+        "selectedFindings": 2,
+        "blockingTrials": 2,
+        "truePositives": 0,
+        "oneSidedLowerBound": 0,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+        "selectedFindings": 5,
+        "blockingTrials": 5,
+        "truePositives": 1,
+        "oneSidedLowerBound": 0.010206218313011509,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+        "selectedFindings": 10,
+        "blockingTrials": 9,
+        "truePositives": 9,
+        "oneSidedLowerBound": 0.7168711644368866,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+        "selectedFindings": 11,
+        "blockingTrials": 11,
+        "truePositives": 11,
+        "oneSidedLowerBound": 0.7615958096191474,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+        "selectedFindings": 25,
+        "blockingTrials": 25,
+        "truePositives": 24,
+        "oneSidedLowerBound": 0.8238792893954822,
+        "belowTarget": true
+      },
+      {
+        "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+        "selectedFindings": 40,
+        "blockingTrials": 33,
+        "truePositives": 29,
+        "oneSidedLowerBound": 0.7437473081738819,
+        "belowTarget": true
+      }
+    ],
+    "carryForwardTasks": [
+      {
+        "id": "external-labels",
+        "status": "blocked",
+        "required": "97 selected findings need 1 external human/organization independent label(s)",
+        "next": "Generate a sealed external worklist and collect labels from non-agent human or organization raters; do not relabel them as agent output."
+      },
+      {
+        "id": "repo-balance",
+        "status": "open",
+        "required": "9 repositories represented; max contribution 25.8% with limit 10.0%",
+        "next": "Add reviewed repositories with small/medium finding counts before sampling more from already-heavy subjects.",
+        "overLimitRepositories": [
+          {
+            "repository": "https://github.com/floating-ui/floating-ui.git",
+            "selectedFindings": 25,
+            "contribution": 0.25773195876288657,
+            "additionalOtherFindingsNeeded": 153
+          },
+          {
+            "repository": "https://github.com/jestjs/jest.git",
+            "selectedFindings": 24,
+            "contribution": 0.24742268041237114,
+            "additionalOtherFindingsNeeded": 143
+          },
+          {
+            "repository": "https://github.com/vuejs/core.git",
+            "selectedFindings": 24,
+            "contribution": 0.24742268041237114,
+            "additionalOtherFindingsNeeded": 143
+          },
+          {
+            "repository": "https://github.com/remix-run/remix.git",
+            "selectedFindings": 12,
+            "contribution": 0.12371134020618557,
+            "additionalOtherFindingsNeeded": 23
+          }
+        ]
+      },
+      {
+        "id": "sample-size",
+        "status": "open",
+        "required": "1732 additional true-positive blocking trials are needed if no new failures occur",
+        "next": "Increase balanced reviewed corpus coverage; keep failures in the denominator instead of reclassifying them away."
+      },
+      {
+        "id": "policy-decisions",
+        "status": "open",
+        "required": "11 needs_policy findings block the strict precision denominator",
+        "next": "Resolve each as explicit policy, waiver, manifest correction, or retained blocking failure before making a public claim."
+      },
+      {
+        "id": "rule-coverage",
+        "status": "open",
+        "required": "8 included rules are below the registered lower-bound target or have no blocking trials",
+        "next": "Balance sampling by rule, especially rules with zero or tiny blocking denominators.",
+        "rules": [
+          {
+            "ruleId": "CELLFENCE_UNRESOLVED_IMPORT",
+            "selectedFindings": 3,
+            "blockingTrials": 0,
+            "truePositives": 0,
+            "oneSidedLowerBound": null,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+            "selectedFindings": 1,
+            "blockingTrials": 1,
+            "truePositives": 1,
+            "oneSidedLowerBound": 0.050000000000000044,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+            "selectedFindings": 2,
+            "blockingTrials": 2,
+            "truePositives": 0,
+            "oneSidedLowerBound": 0,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+            "selectedFindings": 5,
+            "blockingTrials": 5,
+            "truePositives": 1,
+            "oneSidedLowerBound": 0.010206218313011509,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+            "selectedFindings": 10,
+            "blockingTrials": 9,
+            "truePositives": 9,
+            "oneSidedLowerBound": 0.7168711644368866,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+            "selectedFindings": 11,
+            "blockingTrials": 11,
+            "truePositives": 11,
+            "oneSidedLowerBound": 0.7615958096191474,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+            "selectedFindings": 25,
+            "blockingTrials": 25,
+            "truePositives": 24,
+            "oneSidedLowerBound": 0.8238792893954822,
+            "belowTarget": true
+          },
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+            "selectedFindings": 40,
+            "blockingTrials": 33,
+            "truePositives": 29,
+            "oneSidedLowerBound": 0.7437473081738819,
+            "belowTarget": true
+          }
+        ]
+      }
+    ]
+  },
+  "rounds": [
+    {
+      "round": 18,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 19
+    },
+    {
+      "round": 19,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 20
+    },
+    {
+      "round": 20,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 21
+    },
+    {
+      "round": 21,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 22
+    },
+    {
+      "round": 22,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 23
+    },
+    {
+      "round": 23,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 24
+    },
+    {
+      "round": 24,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 25
+    },
+    {
+      "round": 25,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 26
+    },
+    {
+      "round": 26,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 27
+    },
+    {
+      "round": 27,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 28
+    },
+    {
+      "round": 28,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 29
+    },
+    {
+      "round": 29,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 30
+    },
+    {
+      "round": 30,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 31
+    },
+    {
+      "round": 31,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 32
+    },
+    {
+      "round": 32,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 33
+    },
+    {
+      "round": 33,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 34
+    },
+    {
+      "round": 34,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 35
+    },
+    {
+      "round": 35,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 36
+    },
+    {
+      "round": 36,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 37
+    },
+    {
+      "round": 37,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 38
+    },
+    {
+      "round": 38,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 39
+    },
+    {
+      "round": 39,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 40
+    },
+    {
+      "round": 40,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 41
+    },
+    {
+      "round": 41,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 42
+    },
+    {
+      "round": 42,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 43
+    },
+    {
+      "round": 43,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 44
+    },
+    {
+      "round": 44,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 45
+    },
+    {
+      "round": 45,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 46
+    },
+    {
+      "round": 46,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 47
+    },
+    {
+      "round": 47,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 48
+    },
+    {
+      "round": 48,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 49
+    },
+    {
+      "round": 49,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 50
+    },
+    {
+      "round": 50,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 51
+    },
+    {
+      "round": 51,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 52
+    },
+    {
+      "round": 52,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 53
+    },
+    {
+      "round": 53,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 54
+    },
+    {
+      "round": 54,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 55
+    },
+    {
+      "round": 55,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 56
+    },
+    {
+      "round": 56,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 57
+    },
+    {
+      "round": 57,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 58
+    },
+    {
+      "round": 58,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 59
+    },
+    {
+      "round": 59,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 60
+    },
+    {
+      "round": 60,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 61
+    },
+    {
+      "round": 61,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 62
+    },
+    {
+      "round": 62,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 63
+    },
+    {
+      "round": 63,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 64
+    },
+    {
+      "round": 64,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 65
+    },
+    {
+      "round": 65,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 66
+    },
+    {
+      "round": 66,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 67
+    },
+    {
+      "round": 67,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 68
+    },
+    {
+      "round": 68,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 69
+    },
+    {
+      "round": 69,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 70
+    },
+    {
+      "round": 70,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 71
+    },
+    {
+      "round": 71,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 72
+    },
+    {
+      "round": 72,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 73
+    },
+    {
+      "round": 73,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 74
+    },
+    {
+      "round": 74,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 75
+    },
+    {
+      "round": 75,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 76
+    },
+    {
+      "round": 76,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 77
+    },
+    {
+      "round": 77,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 78
+    },
+    {
+      "round": 78,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 79
+    },
+    {
+      "round": 79,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 80
+    },
+    {
+      "round": 80,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 81
+    },
+    {
+      "round": 81,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 82
+    },
+    {
+      "round": 82,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 83
+    },
+    {
+      "round": 83,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 84
+    },
+    {
+      "round": 84,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 85
+    },
+    {
+      "round": 85,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 86
+    },
+    {
+      "round": 86,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 87
+    },
+    {
+      "round": 87,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 88
+    },
+    {
+      "round": 88,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 89
+    },
+    {
+      "round": 89,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 90
+    },
+    {
+      "round": 90,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 91
+    },
+    {
+      "round": 91,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 92
+    },
+    {
+      "round": 92,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 93
+    },
+    {
+      "round": 93,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 94
+    },
+    {
+      "round": 94,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 95
+    },
+    {
+      "round": 95,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 96
+    },
+    {
+      "round": 96,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 97
+    },
+    {
+      "round": 97,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 98
+    },
+    {
+      "round": 98,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 99
+    },
+    {
+      "round": 99,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": 100
+    },
+    {
+      "round": 100,
+      "status": "insufficient-evidence",
+      "handoffOnly": true,
+      "evidenceProgress": false,
+      "doesNotSatisfyEvidenceGate": true,
+      "sourceEvidenceChanged": false,
+      "noSyntheticEvidence": true,
+      "inputClaimReportSha256": "c3995be7e74a448ffff423027dd7ad86ab2f30b5628f9b1ac73ac2fc6a99537f",
+      "inputPreflightSha256": "1598fa5e398dfcb55404d7dc4f18ec91c8bef86929b5adcaca055e001c6f9dcd",
+      "decision": {
+        "status": "insufficient_evidence",
+        "reason": "selected findings span 9 repositories; at least 10 are required for a 10.00% repository contribution limit"
+      },
+      "metrics": {
+        "blockingPrecision": 0.872,
+        "blockingLowerBound": 0.797,
+        "semanticCorrectness": 1,
+        "semanticLowerBound": 0.966,
+        "truePositive": 75,
+        "falsePositive": 0,
+        "needsPolicy": 11,
+        "invalidSetup": 3,
+        "outOfScope": 8
+      },
+      "carryForwardTaskIds": [
+        "external-labels",
+        "repo-balance",
+        "sample-size",
+        "policy-decisions",
+        "rule-coverage"
+      ],
+      "carryForwardTaskRef": "#/residuals/carryForwardTasks",
+      "handoffToRound": null
+    }
+  ]
+}
