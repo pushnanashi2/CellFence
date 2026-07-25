@@ -1,0 +1,498 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "agent",
+      "ownedPaths": [
+        "src/agent/**"
+      ],
+      "publicEntry": "src/agent/index.ts",
+      "publicSymbols": [
+        "Agent",
+        "AgentConfig",
+        "AgentEvent",
+        "ApprovalDecision",
+        "buildSystemPrompt",
+        "ContextClearedEvent",
+        "DEFAULT_SYSTEM_PROMPT",
+        "DoneEvent",
+        "getCurrentDate",
+        "MemoryFlushEvent",
+        "MemoryRecalledEvent",
+        "Message",
+        "Scratchpad",
+        "ScratchpadEntry",
+        "ThinkingEvent",
+        "ToolApprovalEvent",
+        "ToolCallRecord",
+        "ToolDeniedEvent",
+        "ToolEndEvent",
+        "ToolErrorEvent",
+        "ToolLimitConfig",
+        "ToolLimitEvent",
+        "ToolProgressEvent",
+        "ToolStartEvent",
+        "ToolUsageStatus"
+      ],
+      "consumes": [
+        {
+          "cell": "memory"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "permissions"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commands",
+      "ownedPaths": [
+        "src/commands/**"
+      ],
+      "publicEntry": "src/commands/index.ts",
+      "publicSymbols": [
+        "matchCommands",
+        "SLASH_COMMANDS",
+        "SlashCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/index.ts",
+      "publicSymbols": [
+        "AnswerBoxComponent",
+        "ApiKeyInputComponent",
+        "ApprovalPromptComponent",
+        "ChatLogComponent",
+        "createApiKeyConfirmSelector",
+        "createApprovalSelector",
+        "createModelSelector",
+        "createProviderSelector",
+        "createSearchProviderSelector",
+        "CustomEditor",
+        "DebugPanelComponent",
+        "HintBarComponent",
+        "IntroComponent",
+        "QuestionPromptComponent",
+        "ToolEventComponent",
+        "UserQueryComponent",
+        "WorkingIndicatorComponent"
+      ],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "controllers",
+      "ownedPaths": [
+        "src/controllers/**"
+      ],
+      "publicEntry": "src/controllers/index.ts",
+      "publicSymbols": [
+        "AgentRunnerController",
+        "AppState",
+        "InputHistoryController",
+        "ModelSelectionController",
+        "ModelSelectionState",
+        "RunQueryResult",
+        "SearchSelectionAppState",
+        "SearchSelectionController",
+        "SearchSelectionState",
+        "SelectionState"
+      ],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "permissions"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cron",
+      "ownedPaths": [
+        "src/cron/**"
+      ],
+      "publicEntry": "src/cron/executor.ts",
+      "publicSymbols": [
+        "executeCronJob"
+      ],
+      "consumes": [
+        {
+          "cell": "gateway"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "evals",
+      "ownedPaths": [
+        "src/evals/**"
+      ],
+      "publicEntry": "src/evals/components/eval-app.ts",
+      "publicSymbols": [
+        "EvalApp",
+        "EvalProgressEvent"
+      ],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gateway",
+      "ownedPaths": [
+        "src/gateway/**"
+      ],
+      "publicEntry": "src/gateway/index.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "cron"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "memory",
+      "ownedPaths": [
+        "src/memory/**"
+      ],
+      "publicEntry": "src/memory/index.ts",
+      "publicSymbols": [
+        "MemoryManager"
+      ],
+      "consumes": [
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "model",
+      "ownedPaths": [
+        "src/model/**"
+      ],
+      "publicEntry": "src/model/llm.ts",
+      "publicSymbols": [
+        "callLlm",
+        "callLlmWithMessages",
+        "DEFAULT_MODEL",
+        "DEFAULT_PROVIDER",
+        "getChatModel",
+        "getFastModel",
+        "LlmResult",
+        "streamLlmWithMessages"
+      ],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "permissions",
+      "ownedPaths": [
+        "src/permissions/**"
+      ],
+      "publicEntry": "src/permissions/command-parser.ts",
+      "publicSymbols": [
+        "parseCommand",
+        "ParsedCommand",
+        "ParsedSegment"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "skills",
+      "ownedPaths": [
+        "src/skills/**"
+      ],
+      "publicEntry": "src/skills/index.ts",
+      "publicSymbols": [
+        "buildSkillMetadataSection",
+        "clearSkillCache",
+        "discoverSkills",
+        "extractSkillMetadata",
+        "getSkill",
+        "loadSkillFromPath",
+        "parseSkillFile",
+        "Skill",
+        "SkillMetadata",
+        "SkillSource"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.tsx",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "controllers"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tools",
+      "ownedPaths": [
+        "src/tools/**"
+      ],
+      "publicEntry": "src/tools/index.ts",
+      "publicSymbols": [
+        "buildCompactToolDescriptions",
+        "createGetFinancials",
+        "GET_FINANCIALS_DESCRIPTION",
+        "getToolRegistry",
+        "getTools",
+        "RegisteredTool",
+        "tavilySearch",
+        "WEB_SEARCH_DESCRIPTION"
+      ],
+      "consumes": [
+        {
+          "cell": "agent"
+        },
+        {
+          "cell": "cron"
+        },
+        {
+          "cell": "gateway"
+        },
+        {
+          "cell": "memory"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/index.ts",
+      "publicSymbols": [
+        "checkApiKeyExistsForProvider",
+        "classifyError",
+        "ConversationEntry",
+        "CursorContext",
+        "cursorHandlers",
+        "estimateTokens",
+        "extractTextContent",
+        "findNextWordEnd",
+        "findPrevWordStart",
+        "formatResponse",
+        "formatUserFacingError",
+        "getApiKeyNameForProvider",
+        "getProviderDisplayName",
+        "getSetting",
+        "getToolDescription",
+        "hasToolCalls",
+        "InMemoryChatHistory",
+        "isContextOverflowError",
+        "isNonRetryableError",
+        "loadConfig",
+        "LogEntry",
+        "logger",
+        "LogLevel",
+        "LongTermChatHistory",
+        "parseApiErrorInfo",
+        "saveApiKeyForProvider",
+        "saveConfig",
+        "setSetting",
+        "transformMarkdownTables"
+      ],
+      "consumes": [
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

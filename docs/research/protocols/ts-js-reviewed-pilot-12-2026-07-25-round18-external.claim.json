@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-12-2026-07-23-clean",
+  "claim": {
+    "toolCommit": "55806073abaf6cd240efd4958aa83932c4892c53",
+    "preLabelArtifactSetSha256": "3bf98d3139148b198a6fd79b74e1cfbf7b38d231d3a7119e5a361223eb10d2fa",
+    "artifactSetSha256": "2332ecafa136454250fe7335a86480852de8946547832f5599b197eaa2c67b7a",
+    "worklistArtifactSetSha256s": [
+      "e0759d26d8d36556b9308006d33d913ee7063a6300b36d28952e26ed6f91bf56"
+    ],
+    "targetPopulation": "reviewed TS/JS workspace repositories, 12-subject round18 sealed external-human/org labeling worklist",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": [
+      "error"
+    ]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "full sampled precision-eligible set from sealed 12-subject reviewed corpus bundle; external worklist prepared before non-agent labels",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": [
+      "agent",
+      "human",
+      "organization"
+    ],
+    "allowNonHumanRaters": true,
+    "requireExternalIndependentRaters": true,
+    "externalRaterTypes": [
+      "human",
+      "organization"
+    ],
+    "minimumExternalIndependentRaters": 1,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": false
+  },
+  "exclusionRules": []
+}

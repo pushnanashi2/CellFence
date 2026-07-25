@@ -215,6 +215,16 @@ it rechecks round14 under the current sealed worklist rules, treats old
 diagnostic labels as non-claim evidence, creates a fresh sealed blind worklist,
 and ranks 200-repository production-scope candidates as manifest-review work
 rather than claim-ready proof rows.
+The round17 12-subject handoff is documented in
+[ts-js-reviewed-pilot-12-2026-07-24-round17.md](ts-js-reviewed-pilot-12-2026-07-24-round17.md):
+it binds the agent labels to sealed blind and adjudication worklists and keeps
+the public 99% claim blocked on external labels, repository balance, rule-level
+sample size, and 11 explicit `needs_policy` findings.
+The round18 handoff is documented in
+[ts-js-reviewed-pilot-12-2026-07-25-round18.md](ts-js-reviewed-pilot-12-2026-07-25-round18.md):
+it classifies those 11 findings as manifest-policy requirements without
+retroactively relabeling round17, prepares a sealed external human/org worklist,
+and expands the next agent-reviewed TS/JS corpus queue from 12 to 52 subjects.
 
 The script:
 

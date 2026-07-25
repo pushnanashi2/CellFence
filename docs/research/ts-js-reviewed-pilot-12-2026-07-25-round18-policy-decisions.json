@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "cellfence.precision-policy-decisions.v1",
+  "studyId": "ts-js-reviewed-pilot-12-2026-07-23-clean",
+  "createdAt": "2026-07-25",
+  "sourceClaimReport": "reports/corpus/ts-js-reviewed-pilot-12-2026-07-24-round17-claim-report.json",
+  "sourceProtocol": "docs/research/protocols/ts-js-reviewed-pilot-12-2026-07-24-round17.claim.json",
+  "decisionScope": "Resolve the 11 round17 needs_policy findings into explicit policy classes without mutating the sealed round17 labels.",
+  "principles": [
+    "Round17 sealed labels remain unchanged; policy resolution is a new handoff artifact, not a retroactive label edit.",
+    "Accurately observed edges that require an explicit manifest contract are classified as manifest_policy, not out_of_scope.",
+    "A finding becomes a detected violation only in a future claim whose pre-registered policy says the observed edge class must be declared or explicitly waived.",
+    "Expected framework or tool wiring is not a detector bug merely because it is intentional; intentional wiring still needs a manifest edge, resource contract, or waiver when it crosses the claimed boundary.",
+    "No round17 needs_policy finding is excluded from the claim denominator by this artifact."
+  ],
+  "summary": {
+    "round17NeedsPolicyFindings": 11,
+    "manifestPolicy": 11,
+    "detectedViolationInRound17": 0,
+    "outOfScope": 0,
+    "detectorSuppression": 0,
+    "round17LabelsChanged": 0,
+    "projectedIfFuturePolicyAdopted": {
+      "blockingSuccesses": 86,
+      "blockingTrials": 86,
+      "observedBlockingPrecision": 1,
+      "oneSided95LowerBound": 0.9657656271508799,
+      "claimStatus": "still_insufficient_evidence",
+      "reason": "Even if all 11 policy-sensitive findings become true positives under a future pre-registered policy, the pooled lower bound remains below 99%, repository balance still fails, rule-level sample sizes remain too small, and external human/organization labels are still absent."
+    }
+  },
+  "policyClasses": {
+    "type_only_consumer_edge": {
+      "decision": "Type-only TypeScript imports across cell boundaries are source-level consumer edges for this claim family. They must be declared in consumes or explicitly waived before they can be treated as approved wiring.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    },
+    "build_time_erased_import": {
+      "decision": "An import that is erased by a custom build transform is still a build-time dependency edge. The transform must be represented as policy or the edge must be declared.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    },
+    "runtime_codegen_dynamic_loader": {
+      "decision": "Function/eval-style runtime code generation and constrained fake require maps are intentional dynamic loader behavior, but they require an explicit dynamic-loader waiver or manifest policy. Fail-closed findings remain correct when no waiver exists.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    },
+    "tooling_manifest_file_resource": {
+      "decision": "Tooling reads of workspace/package metadata files are real file-resource accesses. They need resource policy when resource rules are included in the claim.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    },
+    "database_catalog_introspection": {
+      "decision": "Database catalog introspection is real database access even when it is expected adapter behavior. The accessed catalog resource or an adapter-level resource capability must be declared.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    },
+    "dynamic_sql_resource": {
+      "decision": "Caller-provided or assembled SQL sent to a database client is unresolved database resource access. It needs an explicit capability or waiver; it is not out of scope merely because the adapter intentionally accepts SQL.",
+      "futureDispositionIfUndeclared": "detected_violation"
+    }
+  },
+  "decisions": [
+    {
+      "findingId": "sha256:81df7cf642d329d08e574df45644fc1baf2de028bf5613cd1258b9ec7b719d38",
+      "subjectId": "jest",
+      "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+      "filePath": "packages/jest-test-sequencer/src/index.ts",
+      "line": 13,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "type_only_consumer_edge",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:d64eb7085ef3520758416b6a6eb8adda032b651e30420ff5983d6424633279f3",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "filePath": "packages/data-table-mysql/src/lib/adapter.ts",
+      "line": 138,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "database_catalog_introspection",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:a3df72586424f7ad05a1390639f27505c9e19d4c69a5252519588bea0c73ea78",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "filePath": "packages/data-table-mysql/src/lib/adapter.ts",
+      "line": 165,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "database_catalog_introspection",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:2b1c4062235917e8fc221a39fdfdce8afdf341fb15cb241a2583e47284dc5402",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "filePath": "packages/data-table-postgres/src/lib/adapter.ts",
+      "line": 138,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "database_catalog_introspection",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:441519668b1ad6d862b3997b856d9a838578a113e37a115001766c537ef0bc0f",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "filePath": "scripts/validate-package-meta.ts",
+      "line": 120,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "tooling_manifest_file_resource",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:bc411c873cdbc272d93fe949fd630454ec449ec38f0b58443062523d77b010ba",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+      "filePath": "packages/data-table-mysql/src/lib/adapter.ts",
+      "line": 122,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "dynamic_sql_resource",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_unwaived",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:573398f3c7d8664191d8162478924c6919affcd05fed901919e857a447bd8867",
+      "subjectId": "remix",
+      "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+      "filePath": "packages/data-table-postgres/src/lib/adapter.ts",
+      "line": 107,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "dynamic_sql_resource",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_unwaived",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:0e3dcc2b98997415a3079912dc761c23d1ac3a24e6ae450770e83fa8e63753e1",
+      "subjectId": "vue-core",
+      "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+      "filePath": "packages/runtime-core/src/component.ts",
+      "line": 76,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "type_only_consumer_edge",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:0701c97074c54b13181f98c99c98abf1c15a51ee00cfe5f88ac9cb9b3f167445",
+      "subjectId": "vue-core",
+      "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+      "filePath": "packages/server-renderer/src/helpers/ssrCompile.ts",
+      "line": 8,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "type_only_consumer_edge",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:57787debe89c3795ff04d8dc00cc5275c5c676ccc11a3920f2b810f09c639ea2",
+      "subjectId": "vue-core",
+      "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+      "filePath": "packages/shared/src/toDisplayString.ts",
+      "line": 2,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "build_time_erased_import",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_undeclared_or_unwaived",
+      "outOfScope": false
+    },
+    {
+      "findingId": "sha256:7139e1c988db2938c0f1088a412ca47d5cbe1379620b576c6910a15f7fc7bd95",
+      "subjectId": "vue-core",
+      "ruleId": "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "filePath": "packages/server-renderer/src/helpers/ssrCompile.ts",
+      "line": 92,
+      "round17FinalLabel": "needs_policy",
+      "policyClass": "runtime_codegen_dynamic_loader",
+      "round18Decision": "manifest_policy",
+      "futureDispositionIfPolicyAdopted": "detected_violation_when_unwaived",
+      "outOfScope": false
+    }
+  ]
+}

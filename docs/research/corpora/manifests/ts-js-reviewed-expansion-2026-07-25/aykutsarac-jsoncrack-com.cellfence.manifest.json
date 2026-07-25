@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/chrome-extension/src/**",
+      "apps/vscode/src/**",
+      "apps/www/src/**",
+      "packages/jsoncrack-react/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "chrome-extension",
+      "ownedPaths": [
+        "apps/chrome-extension/src/**"
+      ],
+      "publicEntry": "apps/chrome-extension/src/content-script.tsx",
+      "publicSymbols": [],
+      "packageName": "chrome-extension",
+      "consumes": [
+        {
+          "cell": "jsoncrack-react"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jsoncrack-react",
+      "ownedPaths": [
+        "packages/jsoncrack-react/src/**"
+      ],
+      "publicEntry": "packages/jsoncrack-react/src/index.ts",
+      "publicSymbols": [
+        "CanvasThemeMode",
+        "EdgeData",
+        "GraphData",
+        "JSONCrack",
+        "JSONCrackProps",
+        "JSONCrackRef",
+        "LayoutDirection",
+        "NodeData",
+        "NodeRow",
+        "parseGraph",
+        "ParseGraphResult"
+      ],
+      "packageName": "jsoncrack-react",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jsoncrack-vscode",
+      "ownedPaths": [
+        "apps/vscode/src/**"
+      ],
+      "publicEntry": "apps/vscode/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "jsoncrack-vscode",
+      "consumes": [
+        {
+          "cell": "jsoncrack-react"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "www",
+      "ownedPaths": [
+        "apps/www/src/**"
+      ],
+      "publicEntry": "apps/www/src/constants/globalStyle.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "www",
+      "consumes": [
+        {
+          "cell": "jsoncrack-react"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

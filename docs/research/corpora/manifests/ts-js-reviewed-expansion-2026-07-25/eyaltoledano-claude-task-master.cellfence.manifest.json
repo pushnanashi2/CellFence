@@ -1,0 +1,807 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/cli/src/**",
+      "apps/extension/src/**",
+      "apps/mcp/src/**",
+      "packages/ai-sdk-provider-grok-cli/src/**",
+      "packages/build-config/src/**",
+      "packages/tm-bridge/src/**",
+      "packages/tm-core/src/**",
+      "packages/tm-profiles/src/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "ai-providers",
+      "ownedPaths": [
+        "src/ai-providers/**"
+      ],
+      "publicEntry": "src/ai-providers/index.js",
+      "publicSymbols": [
+        "AnthropicAIProvider",
+        "AzureProvider",
+        "BedrockAIProvider",
+        "ClaudeCodeProvider",
+        "CodexCliProvider",
+        "GeminiCliProvider",
+        "GoogleAIProvider",
+        "GrokCliProvider",
+        "GroqProvider",
+        "LMStudioProvider",
+        "OllamaAIProvider",
+        "OpenAICompatibleProvider",
+        "OpenAIProvider",
+        "OpenRouterAIProvider",
+        "PerplexityAIProvider",
+        "VertexAIProvider",
+        "XAIProvider",
+        "ZAICodingProvider",
+        "ZAIProvider"
+      ],
+      "consumes": [
+        {
+          "cell": "ai-sdk-provider-grok-cli"
+        },
+        {
+          "cell": "telemetry"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ai-sdk-provider-grok-cli",
+      "ownedPaths": [
+        "packages/ai-sdk-provider-grok-cli/src/**"
+      ],
+      "publicEntry": "packages/ai-sdk-provider-grok-cli/src/index.ts",
+      "publicSymbols": [
+        "convertFromGrokCliResponse",
+        "convertToGrokCliMessages",
+        "createAPICallError",
+        "createAuthenticationError",
+        "createGrokCli",
+        "createInstallationError",
+        "createPromptFromMessages",
+        "createTimeoutError",
+        "escapeShellArg",
+        "extractJson",
+        "getErrorMetadata",
+        "grokCli",
+        "GrokCliErrorMetadata",
+        "GrokCliLanguageModel",
+        "GrokCliLanguageModelOptions",
+        "GrokCliMessage",
+        "GrokCliModelId",
+        "GrokCliProvider",
+        "GrokCliProviderSettings",
+        "GrokCliResponse",
+        "GrokCliSettings",
+        "isAuthenticationError",
+        "isInstallationError",
+        "isTimeoutError"
+      ],
+      "packageName": "@tm/ai-sdk-provider-grok-cli",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bridge",
+      "ownedPaths": [
+        "packages/tm-bridge/src/**"
+      ],
+      "publicEntry": "packages/tm-bridge/src/index.ts",
+      "publicSymbols": [
+        "AddTagBridgeParams",
+        "BaseBridgeParams",
+        "checkStorageType",
+        "ExpandBridgeParams",
+        "LogLevel",
+        "OutputFormat",
+        "RemoteAddTagResult",
+        "RemoteExpandResult",
+        "RemoteTagsResult",
+        "RemoteUpdateResult",
+        "RemoteUseTagResult",
+        "ReportFunction",
+        "StorageCheckResult",
+        "TagInfo",
+        "TagsBridgeParams",
+        "tryAddTagViaRemote",
+        "tryExpandViaRemote",
+        "tryListTagsViaRemote",
+        "tryUpdateViaRemote",
+        "tryUseTagViaRemote",
+        "UpdateBridgeParams",
+        "UseTagBridgeParams"
+      ],
+      "packageName": "@tm/bridge",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "build-config",
+      "ownedPaths": [
+        "packages/build-config/src/**"
+      ],
+      "publicEntry": "packages/build-config/src/tsdown.base.ts",
+      "publicSymbols": [
+        "baseConfig",
+        "env",
+        "mergeConfig"
+      ],
+      "packageName": "@tm/build-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "apps/cli/src/**"
+      ],
+      "publicEntry": "apps/cli/src/index.ts",
+      "publicSymbols": [
+        "AuthCommand",
+        "authenticateWithBrowserMFA",
+        "AuthGuardOptions",
+        "AuthGuardResult",
+        "BriefsCommand",
+        "checkAndBlockDependencyCommand",
+        "checkAndBlockIfAuthenticated",
+        "checkAuthentication",
+        "CheckAuthOptions",
+        "checkForUpdate",
+        "CommandMetadata",
+        "CommandRegistry",
+        "compareVersions",
+        "ContextCommand",
+        "displayCommandHeader",
+        "displayError",
+        "displayUpgradeNotification",
+        "ensureAuthenticated",
+        "ensureOrgSelected",
+        "ExportCommand",
+        "isDebugMode",
+        "ListTasksCommand",
+        "LoopCommand",
+        "NextCommand",
+        "OrgSelectionResult",
+        "performAutoUpdate",
+        "registerAllCommands",
+        "registerCommandsByCategory",
+        "renderContent",
+        "restartWithNewVersion",
+        "runInteractiveSetup",
+        "SetStatusCommand",
+        "ShowCommand",
+        "StartCommand",
+        "TagsCommand",
+        "Task",
+        "TaskPriority",
+        "TaskStatus",
+        "TmCore",
+        "ui",
+        "withAuth"
+      ],
+      "packageName": "@tm/cli",
+      "consumes": [
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "constants",
+      "ownedPaths": [
+        "src/constants/**"
+      ],
+      "publicEntry": "src/constants/commands.js",
+      "publicSymbols": [
+        "AI_COMMAND_NAMES"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/tm-core/src/**"
+      ],
+      "publicEntry": "packages/tm-core/src/index.ts",
+      "publicSymbols": [
+        "ACTIONABLE_STATUSES",
+        "AIModel",
+        "AIOptions",
+        "AIProviderConfig",
+        "AIResponse",
+        "ALL_PROVIDERS",
+        "AUTH_ERROR_MESSAGES",
+        "AUTH_TIMEOUT_MS",
+        "AuthCredentials",
+        "AuthDomain",
+        "AuthenticationError",
+        "AuthManager",
+        "BaseAIProvider",
+        "BaseStorage",
+        "Brief",
+        "BriefGenerationProgress",
+        "BriefsDomain",
+        "BriefService",
+        "BriefStatusResponse",
+        "BriefStatusResult",
+        "buildBlocksMap",
+        "BuildBlocksMapResult",
+        "CheckResult",
+        "CommitMessageGenerator",
+        "CommitMessageOptions",
+        "CommitType",
+        "compareRunIds",
+        "Complexity",
+        "COMPLEXITY_REPORT_FILE",
+        "ComplexityAnalysis",
+        "ComplexityReport",
+        "ComplexityReportMetadata",
+        "ConfigProperty",
+        "ConfigSchema",
+        "ConfigValidationResult",
+        "ConflictCheckResult",
+        "createSubtask",
+        "createTask",
+        "CreateTask",
+        "createTasksFile",
+        "createTmCore",
+        "CUSTOM_PROVIDERS",
+        "CUSTOM_PROVIDERS_ARRAY",
+        "CustomProvider",
+        "deepClone",
+        "DEFAULT_CONFIG_VALUES",
+        "DEFAULT_PROMPT_CONFIG",
+        "DEFAULT_TRIGGER_CONDITIONS",
+        "denormalizeProjectPath",
+        "ENV_EXAMPLE_FILE",
+        "EnvironmentConfig",
+        "ERROR_CODES",
+        "ErrorCode",
+        "ErrorContext",
+        "EXAMPLE_PRD_FILE",
+        "ExistingInfrastructure",
+        "ExportResult",
+        "ExportService",
+        "ExportTasksOptions",
+        "extractParentId",
+        "FileOperations",
+        "FileStorage",
+        "filterBlockingTasks",
+        "filterReadyTasks",
+        "findProjectRoot",
+        "formatDate",
+        "formatRelativeTime",
+        "formatTime",
+        "GenerateBriefFromPrdOptions",
+        "GenerateBriefFromPrdResult",
+        "GenerateBriefOptions",
+        "GenerateBriefResult",
+        "generateId",
+        "generateRunId",
+        "generateSubtaskId",
+        "GenerateTaskFilesOptions",
+        "GenerateTaskFilesResult",
+        "generateTaskId",
+        "getCurrentBranch",
+        "getCurrentBranchSync",
+        "getDefaultBranch",
+        "getGitHubRepoInfo",
+        "getGitRepositoryRoot",
+        "getLocalBranches",
+        "getParentTaskId",
+        "getProjectPaths",
+        "getRemoteBranches",
+        "GetTaskListOptions",
+        "GitAdapter",
+        "GitHubRepoInfo",
+        "GITIGNORE_FILE",
+        "IAIProvider",
+        "IConfiguration",
+        "IConfigurationFactory",
+        "IConfigurationManager",
+        "ImportTask",
+        "insideGitWorkTree",
+        "InvalidDependency",
+        "InvitationResult",
+        "isGhCliAvailable",
+        "isGitRepository",
+        "isGitRepositorySync",
+        "isOnDefaultBranch",
+        "isRecoverableStaleSessionError",
+        "isSubtask",
+        "isSubtaskId",
+        "isSupabaseAuthError",
+        "isTask",
+        "isTaskComplete",
+        "isTaskComplexity",
+        "isTaskPriority",
+        "isTaskStatus",
+        "IStorage",
+        "isValidBranchForTag",
+        "isValidNormalizedPath",
+        "isValidRunId",
+        "isValidSubtaskId",
+        "isValidTaskId",
+        "isValidTaskIdFormat",
+        "LEGACY_COMPLEXITY_REPORT_FILE",
+        "LEGACY_CONFIG_FILE",
+        "LEGACY_EXAMPLE_PRD_FILE",
+        "LEGACY_PRD_FILE",
+        "LEGACY_TASKS_FILE",
+        "LoadTasksOptions",
+        "LOCAL_ONLY_COMMANDS",
+        "LocalOnlyCommand",
+        "LoggingSettings",
+        "LoopConfig",
+        "LoopDomain",
+        "LoopIteration",
+        "LoopOutputCallbacks",
+        "LoopPreset",
+        "LoopResult",
+        "MainTaskId",
+        "MainTaskIdSchema",
+        "MainTaskIdSchemaForMcp",
+        "MFA_MAX_ATTEMPTS",
+        "ModelConfig",
+        "NextAction",
+        "normalizeDisplayId",
+        "normalizeProjectPath",
+        "normalizeProjectRoot",
+        "OAuthFlowOptions",
+        "OTHER_PROJECT_MARKERS",
+        "OUTPUT_FORMATS",
+        "OutputFormat",
+        "PACKAGE_NAME",
+        "parseRunId",
+        "parseTaskIds",
+        "PartialConfiguration",
+        "PlaceholderTask",
+        "PRD_FILE",
+        "PreflightChecker",
+        "PreflightResult",
+        "PRESET_NAMES",
+        "Priority",
+        "PROJECT_BOUNDARY_MARKERS",
+        "PROJECT_MARKERS",
+        "PROMPT_STATE_KEY",
+        "PROMPT_STATE_VERSION",
+        "PromptAction",
+        "PromptDisplayOptions",
+        "PromptDisplayResult",
+        "PromptMetrics",
+        "PromptService",
+        "PromptState",
+        "PromptStateManager",
+        "PromptStateStore",
+        "PromptType",
+        "ProviderConfig",
+        "ProviderInfo",
+        "ProviderUsageStats",
+        "RelevantFile",
+        "RetrySettings",
+        "RuntimeStorageConfig",
+        "sanitizeBranchNameForTag",
+        "ScopeBoundaries",
+        "SecuritySettings",
+        "SendTeamInvitationsResult",
+        "SerializableError",
+        "StartTaskOptions",
+        "StartTaskResult",
+        "StartWorkflowOptions",
+        "Status",
+        "STATUS_COLORS",
+        "STATUS_ICONS",
+        "StorageConfig",
+        "StorageError",
+        "StorageSettings",
+        "StorageStats",
+        "StorageType",
+        "Subtask",
+        "SubtaskInfo",
+        "TagInfo",
+        "TagSettings",
+        "TagsWithStatsResult",
+        "TagWithStats",
+        "Task",
+        "TASK_COMPLEXITIES",
+        "TASK_FILE_EXTENSION",
+        "TASK_FILE_PREFIX",
+        "TASK_ID_PATTERN",
+        "TASK_PRIORITIES",
+        "TASK_STATUSES",
+        "TaskCategory",
+        "TaskCollection",
+        "TaskComplexity",
+        "TaskComplexityData",
+        "TaskFileGeneratorService",
+        "TaskFilter",
+        "TaskId",
+        "taskIdSchema",
+        "TaskIdSchema",
+        "TaskIdSchemaForMcp",
+        "taskIdsSchema",
+        "TaskImplementationMetadata",
+        "TaskListResult",
+        "TaskLoaderService",
+        "TASKMASTER_CONFIG_FILE",
+        "TASKMASTER_DIR",
+        "TASKMASTER_DOCS_DIR",
+        "TASKMASTER_PROJECT_MARKERS",
+        "TASKMASTER_REPORTS_DIR",
+        "TASKMASTER_STATE_FILE",
+        "TASKMASTER_TASKS_DIR",
+        "TASKMASTER_TASKS_FILE",
+        "TASKMASTER_TEMPLATES_DIR",
+        "TASKMASTER_VERSION",
+        "TaskMasterError",
+        "TaskMetadata",
+        "TaskNotFoundError",
+        "TaskPriority",
+        "TaskScenarios",
+        "TaskSettings",
+        "TasksFile",
+        "TaskSortOptions",
+        "TaskStatus",
+        "TaskStatusUpdater",
+        "TaskTag",
+        "TaskWithBlocks",
+        "TaskWithSubtaskResult",
+        "TDDPhase",
+        "TERMINAL_COMPLETE_STATUSES",
+        "TestResult",
+        "TmCore",
+        "TmCoreError",
+        "TmCoreOptions",
+        "TriggerCondition",
+        "TriggerContext",
+        "TriggerEvaluationResult",
+        "TriggerEvaluator",
+        "TriggerType",
+        "UpdateStatusResult",
+        "UpdateTask",
+        "UpgradePromptConfig",
+        "UserContext",
+        "VALIDATED_PROVIDERS",
+        "ValidatedProvider",
+        "ValidationError",
+        "WatchEvent",
+        "WatchEventType",
+        "WatchOptions",
+        "WatchSubscription",
+        "WorkflowContext",
+        "WorkflowOrchestrator",
+        "WorkflowPhase",
+        "WorkflowService",
+        "WorkflowServiceOptions",
+        "WorkflowSettings",
+        "WorkflowState",
+        "WorkflowStateManager",
+        "WorkflowStatus"
+      ],
+      "packageName": "@tm/core",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "extension",
+      "ownedPaths": [
+        "apps/extension/src/**"
+      ],
+      "publicEntry": "apps/extension/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "extension",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp",
+      "ownedPaths": [
+        "apps/mcp/src/**"
+      ],
+      "publicEntry": "apps/mcp/src/index.ts",
+      "publicSymbols": [
+        "checkProgressCapability",
+        "createContentResponse",
+        "createErrorResponse",
+        "getCurrentTag",
+        "getVersionInfo",
+        "handleApiResult",
+        "MCPContext",
+        "MCPResponse",
+        "normalizeProjectRoot",
+        "registerAutopilotAbortTool",
+        "registerAutopilotCommitTool",
+        "registerAutopilotCompleteTool",
+        "registerAutopilotFinalizeTool",
+        "registerAutopilotNextTool",
+        "registerAutopilotResumeTool",
+        "registerAutopilotStartTool",
+        "registerAutopilotStatusTool",
+        "registerGenerateTool",
+        "registerGetTasksTool",
+        "registerGetTaskTool",
+        "registerSetTaskStatusTool",
+        "ReportProgressFn",
+        "ToolContext",
+        "ToolExecuteFn",
+        "validateMcpMetadata",
+        "withNormalizedProjectRoot",
+        "WithProjectRoot",
+        "withToolContext"
+      ],
+      "packageName": "@tm/mcp",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "profiles",
+      "ownedPaths": [
+        "packages/tm-profiles/src/**"
+      ],
+      "publicEntry": "packages/tm-profiles/src/index.ts",
+      "publicSymbols": [
+        "addShellExport",
+        "allCommands",
+        "BaseSlashCommandProfile",
+        "ClaudeProfile",
+        "CodexProfile",
+        "CursorProfile",
+        "detectInstalledIDEs",
+        "DetectionOptions",
+        "DetectionResult",
+        "detectProfile",
+        "dynamicCommand",
+        "DynamicSlashCommand",
+        "enableDeferredMcpLoading",
+        "FormattedSlashCommand",
+        "GeminiProfile",
+        "getAllProfiles",
+        "getIDEMarker",
+        "getPreSelectedProfiles",
+        "getProfile",
+        "getProfileNames",
+        "getShellConfigPath",
+        "goham",
+        "IDE_MARKERS",
+        "IDEMarker",
+        "isDetectableProfile",
+        "OpenCodeProfile",
+        "resolveProjectRoot",
+        "RooProfile",
+        "ShellConfigResult",
+        "SlashCommand",
+        "SlashCommandMetadata",
+        "SlashCommandResult",
+        "staticCommand",
+        "StaticCommandOptions",
+        "StaticSlashCommand"
+      ],
+      "packageName": "@tm/profiles",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "profiles-2",
+      "ownedPaths": [
+        "src/profiles/**"
+      ],
+      "publicEntry": "src/profiles/index.js",
+      "publicSymbols": [
+        "ampProfile",
+        "claudeProfile",
+        "clineProfile",
+        "codexProfile",
+        "cursorProfile",
+        "geminiProfile",
+        "kiloProfile",
+        "kiroProfile",
+        "opencodeProfile",
+        "rooProfile",
+        "traeProfile",
+        "vscodeProfile",
+        "windsurfProfile",
+        "zedProfile"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "progress",
+      "ownedPaths": [
+        "src/progress/**"
+      ],
+      "publicEntry": "src/progress/base-progress-tracker.js",
+      "publicSymbols": [
+        "BaseProgressTracker"
+      ],
+      "consumes": [
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "provider-registry",
+      "ownedPaths": [
+        "src/provider-registry/**"
+      ],
+      "publicEntry": "src/provider-registry/index.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "schemas",
+      "ownedPaths": [
+        "src/schemas/**"
+      ],
+      "publicEntry": "src/schemas/add-task.js",
+      "publicSymbols": [
+        "AddTaskResponseSchema"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "telemetry",
+      "ownedPaths": [
+        "src/telemetry/**"
+      ],
+      "publicEntry": "src/telemetry/sentry.js",
+      "publicSymbols": [
+        "_resetSentry",
+        "captureException",
+        "captureMessage",
+        "flushSentry",
+        "getAITelemetryConfig",
+        "hashProjectRoot",
+        "initializeSentry",
+        "isSentryInitialized",
+        "setTags",
+        "setUser"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "src/ui/**"
+      ],
+      "publicEntry": "src/ui/confirm.js",
+      "publicSymbols": [
+        "confirmProfilesRemove",
+        "confirmRemoveAllRemainingProfiles"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/asset-resolver.js",
+      "publicSymbols": [
+        "assetExists",
+        "getAssetPath",
+        "getAssetsDir",
+        "readAsset"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "profiles-2"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

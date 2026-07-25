@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/AccessibilityContext.ts",
+      "publicSymbols": [
+        "accessibilityContext"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "src/hooks/**"
+      ],
+      "publicEntry": "src/hooks/use-animation.ts",
+      "publicSymbols": [
+        "AnimationResult",
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "AnimationResult",
+        "AppProps",
+        "Box",
+        "BoxMetrics",
+        "BoxProps",
+        "CursorPosition",
+        "DOMElement",
+        "ElementMetrics",
+        "Instance",
+        "Key",
+        "KittyFlagName",
+        "kittyFlags",
+        "KittyKeyboardOptions",
+        "kittyModifiers",
+        "measureElement",
+        "Newline",
+        "NewlineProps",
+        "render",
+        "RenderOptions",
+        "renderToString",
+        "RenderToStringOptions",
+        "Spacer",
+        "Static",
+        "StaticProps",
+        "StderrProps",
+        "StdinProps",
+        "StdoutProps",
+        "SuspendTerminal",
+        "TerminalSuspension",
+        "Text",
+        "TextProps",
+        "Transform",
+        "TransformProps",
+        "useAnimation",
+        "useApp",
+        "useBoxMetrics",
+        "UseBoxMetricsResult",
+        "useCursor",
+        "useFocus",
+        "useFocusManager",
+        "useInput",
+        "useIsScreenReaderEnabled",
+        "usePaste",
+        "useStderr",
+        "useStdin",
+        "useStdout",
+        "useWindowSize",
+        "WindowSize"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "hooks"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

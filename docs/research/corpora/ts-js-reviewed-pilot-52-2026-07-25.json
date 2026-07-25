@@ -1,0 +1,1862 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Round18 expanded TS/JS reviewed-corpus work queue. It appends 40 light/medium fixed-commit public OSS subjects to the round17 12-subject corpus to dilute single-repository contribution in the next run. This is agent-reviewed only and not a public 99% precision claim.",
+  "selectionPolicy": {
+    "date": "2026-07-25",
+    "source": "Round17 12-subject reviewed corpus plus frontier-ranked subjects from the 200-repository production-scope candidate bundle.",
+    "constraints": [
+      "exact 40-hex commit pins",
+      "static CellFence checks only",
+      "no dependency install and no target package scripts",
+      "candidate sampled included findings between 2 and 12",
+      "candidate total included findings no more than 200",
+      "exclude repositories already present in the round17 corpus",
+      "add enough other-repository sampled findings to reduce the previous 25-finding max repository contribution below 10% in the next sampled run, assuming similar sampling behavior"
+    ],
+    "projectedBalance": {
+      "round17SelectedFindings": 97,
+      "additionalCandidateSampledFindings": 154,
+      "projectedSelectedFindings": 251,
+      "previousMaxRepositoryFindings": 25,
+      "projectedMaxRepositoryContribution": 0.099601593625498,
+      "targetMaxRepositoryContribution": 0.1
+    },
+    "manifestReview": "New subjects are copied from production-scope inferred control manifests into docs and marked as single-agent reviewed for the next diagnostic run. They are not external-claim-ready until independent human/organization manifest review attestations bind each reviewedManifestSha256.",
+    "limitation": "This corpus expands the next agent-reviewed work queue. It does not add non-agent labels, does not rerun the corpus study by itself, and must not be described as a passed 99% precision claim."
+  },
+  "subjects": [
+    {
+      "id": "changesets",
+      "repository": "https://github.com/changesets/changesets.git",
+      "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/changesets.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "redux-toolkit",
+      "repository": "https://github.com/reduxjs/redux-toolkit.git",
+      "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/redux-toolkit.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "typescript-eslint",
+      "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+      "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/typescript-eslint.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "jest",
+      "repository": "https://github.com/jestjs/jest.git",
+      "commit": "f49721c78e195558b40913977c9230f5b7f559d8",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/jest.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "lerna",
+      "repository": "https://github.com/lerna/lerna.git",
+      "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+      "metadata": {
+        "oracleArtifactRoot": "reports/upstream-policy-oracle-v1",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/lerna.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "vue-core",
+      "repository": "https://github.com/vuejs/core.git",
+      "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/vue-core.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "tanstack-query",
+      "repository": "https://github.com/TanStack/query.git",
+      "commit": "b955f60d7965cc521df6ee8b1ce91b3d0e8c046d",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/tanstack-query.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "tanstack-router",
+      "repository": "https://github.com/TanStack/router.git",
+      "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/tanstack-router.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "remix",
+      "repository": "https://github.com/remix-run/remix.git",
+      "commit": "2c0ef67220714e1005162be4acdb91fbf355c664",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/remix-oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-oracle-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/remix.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "hono",
+      "repository": "https://github.com/honojs/hono.git",
+      "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d",
+      "metadata": {
+        "oracleArtifactRoot": "tmp/reviewed-precision-pilot/hono-oracle",
+        "languageScope": "TypeScript/JavaScript",
+        "reviewedManifestSource": "resolved-reference-policy-manifest"
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-10-2026-07-19/hono.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations"
+          ],
+          "limitation": "Single-agent reviewed manifest; suitable for preliminary pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "floating-ui",
+      "repository": "https://github.com/floating-ui/floating-ui.git",
+      "commit": "12d94738472e922e1b3fa31b02b2b61b9ed77e6a",
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-12-2026-07-23/floating-ui.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations",
+            "production-scope corpus control manifest copied before round16 labeling"
+          ],
+          "limitation": "Single-agent reviewed manifest promoted from a production-scope inferred control manifest; suitable for corpus expansion and pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "tanstack-table",
+      "repository": "https://github.com/TanStack/table.git",
+      "commit": "209699ff77b581d2b544d10c3d0d8b46c2398c0a",
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-pilot-12-2026-07-23/tanstack-table.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "workspace package roots",
+            "package names",
+            "package entry fields and exports",
+            "workspace dependency declarations",
+            "production-scope corpus control manifest copied before round16 labeling"
+          ],
+          "limitation": "Single-agent reviewed manifest promoted from a production-scope inferred control manifest; suitable for corpus expansion and pipeline exercise, not final external precision marketing."
+        }
+      }
+    },
+    {
+      "id": "react-create-react-app",
+      "repository": "https://github.com/react/create-react-app.git",
+      "commit": "6254386531d263688ccfa542d0e628fbc0de0b28",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/react-create-react-app-28271472cf03.json",
+        "sampledIncludedFindings": 12,
+        "totalIncludedFindings": 62,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 39,
+          "CELLFENCE_UNRESOLVED_IMPORT": 3,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 20
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/react-create-react-app.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "unitech-pm2",
+      "repository": "https://github.com/Unitech/pm2.git",
+      "commit": "31adee8048dbbc1ee36a7df7cdbcaca2559708df",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/unitech-pm2-39e82f59ca83.json",
+        "sampledIncludedFindings": 11,
+        "totalIncludedFindings": 23,
+        "countsByRule": {
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 9,
+          "CELLFENCE_UNRESOLVED_IMPORT": 2,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT": 2,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 10
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/unitech-pm2.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "vercel-hyper",
+      "repository": "https://github.com/vercel/hyper.git",
+      "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/vercel-hyper-a623432381ff.json",
+        "sampledIncludedFindings": 9,
+        "totalIncludedFindings": 74,
+        "countsByRule": {
+          "CELLFENCE_UNRESOLVED_IMPORT": 71,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 3
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/vercel-hyper.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "jackwener-opencli",
+      "repository": "https://github.com/jackwener/OpenCLI.git",
+      "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/jackwener-opencli-0b492e9efa49.json",
+        "sampledIncludedFindings": 6,
+        "totalIncludedFindings": 109,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 102,
+          "CELLFENCE_UNRESOLVED_IMPORT": 1,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT": 6
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/jackwener-opencli.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "codex-team-editor-js",
+      "repository": "https://github.com/codex-team/editor.js.git",
+      "commit": "4ea9eb389847181ceb757735f8bd45cc8c2f1673",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/codex-team-editor-js-23d3455420d8.json",
+        "sampledIncludedFindings": 6,
+        "totalIncludedFindings": 101,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 5,
+          "CELLFENCE_UNRESOLVED_IMPORT": 96
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/codex-team-editor-js.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "songquanpeng-one-api",
+      "repository": "https://github.com/songquanpeng/one-api.git",
+      "commit": "8df4a2670b98266bd287c698243fff327d9748cf",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/songquanpeng-one-api-cb682d51ea88.json",
+        "sampledIncludedFindings": 5,
+        "totalIncludedFindings": 29,
+        "countsByRule": {
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 21,
+          "CELLFENCE_UNRESOLVED_IMPORT": 8
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/songquanpeng-one-api.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "virattt-dexter",
+      "repository": "https://github.com/virattt/dexter.git",
+      "commit": "823052ed687a6f3ef0e48b5e7025c73e86d95775",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/virattt-dexter-6c82688c46fc.json",
+        "sampledIncludedFindings": 4,
+        "totalIncludedFindings": 200,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 146,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 54
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/virattt-dexter.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "reactivex-rxjs",
+      "repository": "https://github.com/ReactiveX/rxjs.git",
+      "commit": "c15b37f81ba5f5abea8c872b0189a70b150df4cb",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/reactivex-rxjs-283260ff337f.json",
+        "sampledIncludedFindings": 4,
+        "totalIncludedFindings": 83,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 21,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 2,
+          "CELLFENCE_UNRESOLVED_IMPORT": 59,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/reactivex-rxjs.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "carbon-app-carbon",
+      "repository": "https://github.com/carbon-app/carbon.git",
+      "commit": "1334429ae63f9a3d052d59ec8c6b158fa5db0943",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/carbon-app-carbon-ddb3b6cc6227.json",
+        "sampledIncludedFindings": 4,
+        "totalIncludedFindings": 79,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 75,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 3
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/carbon-app-carbon.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "dayuanjiang-next-ai-draw-io",
+      "repository": "https://github.com/DayuanJiang/next-ai-draw-io.git",
+      "commit": "4b072283202d3fe4869acd847ee897ad1165d73d",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/dayuanjiang-next-ai-draw-io-e11182f04294.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 178,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 177,
+          "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/dayuanjiang-next-ai-draw-io.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "louislam-uptime-kuma",
+      "repository": "https://github.com/louislam/uptime-kuma.git",
+      "commit": "d3463870af879906f26466bad171fcbeba56c9e8",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/louislam-uptime-kuma-af634fde6534.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 163,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 132,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 31
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/louislam-uptime-kuma.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "drawdb-io-drawdb",
+      "repository": "https://github.com/drawdb-io/drawdb.git",
+      "commit": "a85458c6392a160b4aedaa5f5152b9ebcda26bde",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/drawdb-io-drawdb-1a7f5b994945.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 150,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 149,
+          "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/drawdb-io-drawdb.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "chartjs-chart-js",
+      "repository": "https://github.com/chartjs/Chart.js.git",
+      "commit": "cb02e1d207bd4c4c40b20c259017f85f26f1e30a",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/chartjs-chart-js-87de6f4b0783.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 148,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 122,
+          "CELLFENCE_UNRESOLVED_IMPORT": 26
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/chartjs-chart-js.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "mckaywrigley-chatbot-ui",
+      "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+      "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/mckaywrigley-chatbot-ui-f262c2427758.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 144,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 142,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/mckaywrigley-chatbot-ui.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "react-hook-form-react-hook-form",
+      "repository": "https://github.com/react-hook-form/react-hook-form.git",
+      "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/react-hook-form-react-hook-form-242d7fb0f8bf.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 140,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 140
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/react-hook-form-react-hook-form.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "lfnovo-open-notebook",
+      "repository": "https://github.com/lfnovo/open-notebook.git",
+      "commit": "df106fabe6d722618bafd0d08209a2bb5648792d",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/lfnovo-open-notebook-5621f1cae53c.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 126,
+        "countsByRule": {
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 125,
+          "CELLFENCE_UNRESOLVED_IMPORT": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/lfnovo-open-notebook.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "anuraghazra-github-readme-stats",
+      "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+      "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/anuraghazra-github-readme-stats-5b3490bfa969.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 106,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 106
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/anuraghazra-github-readme-stats.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "layui-layui",
+      "repository": "https://github.com/layui/layui.git",
+      "commit": "2cfbc45b70ab66cb96f7f51dc4f03dae0b409b2c",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/layui-layui-a806faeabb2a.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 97,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 97
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/layui-layui.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "chromedevtools-chrome-devtools-mcp",
+      "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp.git",
+      "commit": "76fd2424984827802867672fcc8d0e0036f4a3af",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/chromedevtools-chrome-devtools-mcp-83716124b914.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 94,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 92,
+          "CELLFENCE_UNRESOLVED_IMPORT": 2
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/chromedevtools-chrome-devtools-mcp.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "nextai-translator-nextai-translator",
+      "repository": "https://github.com/nextai-translator/nextai-translator.git",
+      "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/nextai-translator-nextai-translator-e7ecaaa85f0f.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 90,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 87,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1,
+          "CELLFENCE_UNRESOLVED_IMPORT": 2
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/nextai-translator-nextai-translator.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "ant-design-ant-design-pro",
+      "repository": "https://github.com/ant-design/ant-design-pro.git",
+      "commit": "bb40867ae3ef943e06e48da6911ccc5900e638a1",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/ant-design-ant-design-pro-bd3783d37957.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 82,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 9,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1,
+          "CELLFENCE_UNRESOLVED_IMPORT": 72
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/ant-design-ant-design-pro.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "styled-components-styled-components",
+      "repository": "https://github.com/styled-components/styled-components.git",
+      "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/styled-components-styled-components-1af612ee3988.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 74,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 68,
+          "CELLFENCE_UNRESOLVED_IMPORT": 6
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/styled-components-styled-components.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "jquense-yup",
+      "repository": "https://github.com/jquense/yup.git",
+      "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/jquense-yup-fb81d8a9ee0c.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 60,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 60
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/jquense-yup.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "vadimdemedes-ink",
+      "repository": "https://github.com/vadimdemedes/ink.git",
+      "commit": "70af033dbd2b126a16f144164685612b2c1fd554",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/vadimdemedes-ink-1b21f516c8a1.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 55,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 55
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/vadimdemedes-ink.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "alan2207-bulletproof-react",
+      "repository": "https://github.com/alan2207/bulletproof-react.git",
+      "commit": "9506629ed003a561c6627735480cce4994244bb4",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/alan2207-bulletproof-react-9a2fcc122e23.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 48,
+        "countsByRule": {
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 33,
+          "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": 15
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/alan2207-bulletproof-react.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "rahuldkjain-github-profile-readme-generator",
+      "repository": "https://github.com/rahuldkjain/github-profile-readme-generator.git",
+      "commit": "5ae90bfcbd7ab2f69809b094601f7975c32ae077",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/rahuldkjain-github-profile-readme-generator-d9bb86d1dded.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 45,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 44,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/rahuldkjain-github-profile-readme-generator.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "fingerprintjs-fingerprintjs",
+      "repository": "https://github.com/fingerprintjs/fingerprintjs.git",
+      "commit": "feab7913fbb536466bab72b1795d27ec68423003",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/fingerprintjs-fingerprintjs-8b12c418b25d.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 40,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 40
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/fingerprintjs-fingerprintjs.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "localforage-localforage",
+      "repository": "https://github.com/localForage/localForage.git",
+      "commit": "fb78c77ee583fb727a558c439b5174aca38c5924",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/localforage-localforage-4373a0503c44.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 27,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 27
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/localforage-localforage.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "nginxproxymanager-nginx-proxy-manager",
+      "repository": "https://github.com/NginxProxyManager/nginx-proxy-manager.git",
+      "commit": "a62c2a6dc3ab51e6fedc34d3ea3506bc9373953f",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/nginxproxymanager-nginx-proxy-manager-368e59c54ff3.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 25,
+        "countsByRule": {
+          "CELLFENCE_UNRESOLVED_IMPORT": 23,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 2
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/nginxproxymanager-nginx-proxy-manager.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "philc-vimium",
+      "repository": "https://github.com/philc/vimium.git",
+      "commit": "7067bc768fc1c7ef9310e295c5782149fab73980",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/philc-vimium-a731e9a778a2.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 24,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 24
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/philc-vimium.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "cheeriojs-cheerio",
+      "repository": "https://github.com/cheeriojs/cheerio.git",
+      "commit": "d3cf80ca323f2923fba572e12425da0a4f233281",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/cheeriojs-cheerio-4a0403b4d998.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 23,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 23
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/cheeriojs-cheerio.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "immerjs-immer",
+      "repository": "https://github.com/immerjs/immer.git",
+      "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/immerjs-immer-fffa18661f11.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 23,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 23
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/immerjs-immer.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "reduxjs-redux",
+      "repository": "https://github.com/reduxjs/redux.git",
+      "commit": "5d65348e26635b6ec627b1030732ed38797e88e9",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/reduxjs-redux-69df417695fe.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 19,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 19
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/reduxjs-redux.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "solidjs-solid",
+      "repository": "https://github.com/solidjs/solid.git",
+      "commit": "d2f81d546d5dff37aa25e4fa224e2192efec8c1a",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/solidjs-solid-c9d95b873fcb.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 18,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 9,
+          "CELLFENCE_UNRESOLVED_IMPORT": 7,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT": 1,
+          "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE": 1
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/solidjs-solid.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "trekhleb-javascript-algorithms",
+      "repository": "https://github.com/trekhleb/javascript-algorithms.git",
+      "commit": "0f52fbaced5d33041a5a834f72f880a9262bcb82",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/trekhleb-javascript-algorithms-4923d7e14ea9.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 17,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 17
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/trekhleb-javascript-algorithms.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "preactjs-preact",
+      "repository": "https://github.com/preactjs/preact.git",
+      "commit": "7051a371282f728da7533eab27ebbd949274374d",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/preactjs-preact-7971ce073966.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 16,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 16
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/preactjs-preact.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "yangshun-tech-interview-handbook",
+      "repository": "https://github.com/yangshun/tech-interview-handbook.git",
+      "commit": "8ee2acb54a05c4add123a824d15e7dfc4e703b2f",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/yangshun-tech-interview-handbook-b67a6823109b.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 16,
+        "countsByRule": {
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 6,
+          "CELLFENCE_UNRESOLVED_IMPORT": 10
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/yangshun-tech-interview-handbook.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "wg-easy-wg-easy",
+      "repository": "https://github.com/wg-easy/wg-easy.git",
+      "commit": "78b283849895b35ad45c6f83fa01228c0f1a6774",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/wg-easy-wg-easy-8e37ed8c1f13.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 14,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 1,
+          "CELLFENCE_UNRESOLVED_IMPORT": 1,
+          "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS": 12
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/wg-easy-wg-easy.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "eyaltoledano-claude-task-master",
+      "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+      "commit": "c0c98d367c55296bfe69e65680625b6db437af02",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/eyaltoledano-claude-task-master-a70853e1b7e5.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 13,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 10,
+          "CELLFENCE_UNDECLARED_CONSUMER": 3
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/eyaltoledano-claude-task-master.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    },
+    {
+      "id": "aykutsarac-jsoncrack-com",
+      "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+      "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059",
+      "metadata": {
+        "languageScope": "TypeScript/JavaScript",
+        "expansionRound": "round18",
+        "frontierSource": "oss-ts-js-200-2026-07-18-production-scope-bundle",
+        "frontierManifestCopy": "manifests/aykutsarac-jsoncrack-com-cee069e79c87.json",
+        "sampledIncludedFindings": 3,
+        "totalIncludedFindings": 12,
+        "countsByRule": {
+          "CELLFENCE_PRIVATE_IMPORT": 3,
+          "CELLFENCE_UNDECLARED_RESOURCE_ACCESS": 1,
+          "CELLFENCE_UNRESOLVED_IMPORT": 8
+        }
+      },
+      "manifest": {
+        "strategy": "copy",
+        "source": "manifests/ts-js-reviewed-expansion-2026-07-25/aykutsarac-jsoncrack-com.cellfence.manifest.json",
+        "reviewStatus": "reviewed",
+        "reviewedBy": [
+          "codex-agent-reviewer"
+        ],
+        "review": {
+          "reviewers": [
+            "codex-agent-reviewer"
+          ],
+          "boundaryEvidence": [
+            "production-scope inferred control manifest from fixed 200-repo candidate bundle",
+            "workspace/package roots and inferred package names",
+            "package entry fields and exports where present",
+            "workspace dependency declarations where present"
+          ],
+          "limitation": "Agent-promoted review queue entry copied from an infer manifest; usable for the next agent-reviewed diagnostic run only. It still needs independent human/organization manifest review before a public external precision claim."
+        }
+      }
+    }
+  ]
+}

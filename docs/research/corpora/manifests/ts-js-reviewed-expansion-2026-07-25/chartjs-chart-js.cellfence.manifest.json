@@ -1,0 +1,458 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "controllers",
+      "ownedPaths": [
+        "src/controllers/**"
+      ],
+      "publicEntry": "src/controllers/index.js",
+      "publicSymbols": [
+        "BarController",
+        "BubbleController",
+        "DoughnutController",
+        "LineController",
+        "PieController",
+        "PolarAreaController",
+        "RadarController",
+        "ScatterController"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "helpers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/**"
+      ],
+      "publicEntry": "src/core/index.ts",
+      "publicSymbols": [
+        "_adapters",
+        "Animation",
+        "Animations",
+        "animator",
+        "Chart",
+        "DatasetController",
+        "DateAdapter",
+        "defaults",
+        "Element",
+        "Interaction",
+        "layouts",
+        "plugins",
+        "registry",
+        "Scale",
+        "Ticks",
+        "TimeUnit"
+      ],
+      "consumes": [
+        {
+          "cell": "helpers"
+        },
+        {
+          "cell": "platform"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "elements",
+      "ownedPaths": [
+        "src/elements/**"
+      ],
+      "publicEntry": "src/elements/index.js",
+      "publicSymbols": [
+        "ArcElement",
+        "BarElement",
+        "LineElement",
+        "PointElement"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "helpers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "helpers",
+      "ownedPaths": [
+        "src/helpers/**"
+      ],
+      "publicEntry": "src/helpers/index.ts",
+      "publicSymbols": [
+        "_addGrace",
+        "_alignPixel",
+        "_alignStartEnd",
+        "_angleBetween",
+        "_angleDiff",
+        "_arrayUnique",
+        "_attachContext",
+        "_bezierCurveTo",
+        "_bezierInterpolation",
+        "_boundSegment",
+        "_boundSegments",
+        "_capitalize",
+        "_computeSegments",
+        "_createResolver",
+        "_decimalPlaces",
+        "_deprecated",
+        "_descriptors",
+        "_elementsEqual",
+        "_factorize",
+        "_filterBetween",
+        "_getParentNode",
+        "_getStartAndCountOfVisiblePoints",
+        "_int16Range",
+        "_isBetween",
+        "_isClickEvent",
+        "_isDomSupported",
+        "_isPointInArea",
+        "_limitValue",
+        "_longestText",
+        "_lookup",
+        "_lookupByKey",
+        "_measureText",
+        "_merger",
+        "_mergerIf",
+        "_normalizeAngle",
+        "_parseObjectDataRadialScale",
+        "_pointInLine",
+        "_readValueToProps",
+        "_rlookupByKey",
+        "_scaleRangesChanged",
+        "_setMinAndMaxByKey",
+        "_splitKey",
+        "_steppedInterpolation",
+        "_steppedLineTo",
+        "_textX",
+        "_toLeftRightCenter",
+        "_updateBezierControlPoints",
+        "addRoundedRectPath",
+        "almostEquals",
+        "almostWhole",
+        "ArrayListener",
+        "callback",
+        "clearCanvas",
+        "clipArea",
+        "clone",
+        "color",
+        "ContextCache",
+        "ContextProxy",
+        "createContext",
+        "debounce",
+        "defined",
+        "Descriptor",
+        "DescriptorDefaults",
+        "distanceBetweenPoints",
+        "drawPoint",
+        "drawPointLegend",
+        "DrawPointOptions",
+        "each",
+        "easingEffects",
+        "finiteOrDefault",
+        "fontString",
+        "formatNumber",
+        "getAngleFromPoint",
+        "getDatasetClipArea",
+        "getHoverColor",
+        "getMaximumSize",
+        "getRelativePosition",
+        "getRtlAdapter",
+        "getStyle",
+        "HALF_PI",
+        "INFINITY",
+        "isArray",
+        "isFinite",
+        "isFunction",
+        "isNullOrUndef",
+        "isNumber",
+        "isObject",
+        "isPatternOrGradient",
+        "listenArrayEvents",
+        "log10",
+        "merge",
+        "mergeIf",
+        "MergeOptions",
+        "niceNum",
+        "noop",
+        "overrideTextDirection",
+        "PI",
+        "PITAU",
+        "QUARTER_PI",
+        "RAD_PER_DEG",
+        "readUsedSize",
+        "renderText",
+        "requestAnimFrame",
+        "resolve",
+        "resolveObjectKey",
+        "ResolverCache",
+        "ResolverObjectKey",
+        "ResolverProxy",
+        "restoreTextDirection",
+        "retinaScale",
+        "RTLAdapter",
+        "setsEqual",
+        "sign",
+        "splineCurve",
+        "splineCurveMonotone",
+        "supportsEventListenerOptions",
+        "TAU",
+        "throttled",
+        "toDegrees",
+        "toDimension",
+        "toFont",
+        "toFontString",
+        "toLineHeight",
+        "toPadding",
+        "toPercentage",
+        "toRadians",
+        "toTRBL",
+        "toTRBLCorners",
+        "TWO_THIRDS_PI",
+        "uid",
+        "unclipArea",
+        "unlistenArrayEvents",
+        "valueOrDefault"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "platform",
+      "ownedPaths": [
+        "src/platform/**"
+      ],
+      "publicEntry": "src/platform/index.js",
+      "publicSymbols": [
+        "_detectPlatform",
+        "BasePlatform",
+        "BasicPlatform",
+        "DomPlatform"
+      ],
+      "consumes": [
+        {
+          "cell": "helpers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugins",
+      "ownedPaths": [
+        "src/plugins/**"
+      ],
+      "publicEntry": "src/plugins/index.js",
+      "publicSymbols": [
+        "Colors",
+        "Decimation",
+        "Filler",
+        "Legend",
+        "SubTitle",
+        "Title",
+        "Tooltip"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "elements"
+        },
+        {
+          "cell": "helpers"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scales",
+      "ownedPaths": [
+        "src/scales/**"
+      ],
+      "publicEntry": "src/scales/index.js",
+      "publicSymbols": [
+        "CategoryScale",
+        "LinearScale",
+        "LogarithmicScale",
+        "RadialLinearScale",
+        "TimeScale",
+        "TimeSeriesScale"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "helpers"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "_adapters",
+        "_detectPlatform",
+        "Animation",
+        "Animations",
+        "animator",
+        "ArcElement",
+        "BarController",
+        "BarElement",
+        "BasePlatform",
+        "BasicPlatform",
+        "BubbleController",
+        "CategoryScale",
+        "Chart",
+        "Colors",
+        "controllers",
+        "DatasetController",
+        "DateAdapter",
+        "Decimation",
+        "defaults",
+        "DomPlatform",
+        "DoughnutController",
+        "Element",
+        "elements",
+        "Filler",
+        "Interaction",
+        "layouts",
+        "Legend",
+        "LinearScale",
+        "LineController",
+        "LineElement",
+        "LogarithmicScale",
+        "PieController",
+        "plugins",
+        "PointElement",
+        "PolarAreaController",
+        "RadarController",
+        "RadialLinearScale",
+        "registerables",
+        "registry",
+        "Scale",
+        "scales",
+        "ScatterController",
+        "SubTitle",
+        "Ticks",
+        "TimeScale",
+        "TimeSeriesScale",
+        "TimeUnit",
+        "Title",
+        "Tooltip"
+      ],
+      "consumes": [
+        {
+          "cell": "controllers"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "elements"
+        },
+        {
+          "cell": "helpers"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "scales"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

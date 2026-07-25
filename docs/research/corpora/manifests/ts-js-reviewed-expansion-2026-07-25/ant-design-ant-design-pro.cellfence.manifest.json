@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/index.ts",
+      "publicSymbols": [
+        "ArticleListContent",
+        "AvatarDropdown",
+        "AvatarList",
+        "DocLink",
+        "ErrorBoundary",
+        "Footer",
+        "LangDropdown",
+        "OfflineBanner",
+        "StandardFormRow",
+        "TagSelect",
+        "VersionDropdown"
+      ],
+      "consumes": [
+        {
+          "cell": "services"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "locales",
+      "ownedPaths": [
+        "src/locales/**"
+      ],
+      "publicEntry": "src/locales/bn-BD.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pages",
+      "ownedPaths": [
+        "src/pages/**"
+      ],
+      "publicEntry": "src/pages/account/center/_mock.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "services",
+      "ownedPaths": [
+        "src/services/**"
+      ],
+      "publicEntry": "src/services/ant-design-pro/api.ts",
+      "publicSymbols": [
+        "addRule",
+        "currentUser",
+        "getNotices",
+        "login",
+        "outLogin",
+        "removeRule",
+        "rule",
+        "updateRule"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/access.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "services"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/chinaDivision.ts",
+      "publicSymbols": [
+        "GeographicOption",
+        "getCityOptions",
+        "provinceOptions"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}
