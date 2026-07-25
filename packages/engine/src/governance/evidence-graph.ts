@@ -70,6 +70,22 @@ function subjectFileNode(file: SubjectFile): EvidenceGraphNode {
   };
 }
 
+function subjectFileAnchorNode(filePath: string): EvidenceGraphNode {
+  return {
+    id: fileNodeId(filePath),
+    kind: "subject-file",
+    label: filePath,
+    filePath,
+  };
+}
+
+function ensureSubjectFileAnchor(nodes: Map<string, EvidenceGraphNode>, filePath: string | undefined): void {
+  if (!filePath) return;
+  const id = fileNodeId(filePath);
+  if (nodes.has(id)) return;
+  addNode(nodes, subjectFileAnchorNode(filePath));
+}
+
 function observationNode(observation: FileObservation): EvidenceGraphNode {
   return {
     id: observationNodeId(observation),
@@ -131,6 +147,12 @@ function sortedWitnessSubjects(subjects: readonly FindingWitnessSubject[]): Find
   return [...subjects].sort(compareWitnessSubjects);
 }
 
+function witnessFileSubjectPaths(witness: FindingWitness): string[] {
+  return witness.subjects
+    .filter((subject) => subject.kind === "file" && subject.key === "filePath")
+    .map((subject) => subject.value);
+}
+
 function normalizedSuppliedWitness(finding: GovernanceFinding, witness: FindingWitness): FindingWitness {
   return {
     ruleId: finding.ruleId,
@@ -169,21 +191,19 @@ function witnessSortKey(witness: FindingWitness): string {
 export function createEvidenceGraph<TFinding extends GovernanceFinding>(input: EvidenceGraphInput<TFinding>): EvidenceGraph {
   const nodes = new Map<string, EvidenceGraphNode>();
   const edges = new Map<string, EvidenceGraphEdge>();
-  const snapshotFiles = new Set(input.snapshot.files.map((file) => file.path));
 
   for (const file of input.snapshot.files) addNode(nodes, subjectFileNode(file));
 
   for (const observation of input.report.statuses) {
     const node = observationNode(observation);
+    ensureSubjectFileAnchor(nodes, observation.filePath);
     addNode(nodes, node);
-    if (snapshotFiles.has(observation.filePath)) {
-      addEdge(edges, {
-        from: fileNodeId(observation.filePath),
-        to: node.id,
-        kind: "observed-as",
-        label: observation.family,
-      });
-    }
+    addEdge(edges, {
+      from: fileNodeId(observation.filePath),
+      to: node.id,
+      kind: "observed-as",
+      label: observation.family,
+    });
   }
 
   const findingEntries = [...input.findings, ...input.warnings].map((finding) => ({
@@ -193,9 +213,11 @@ export function createEvidenceGraph<TFinding extends GovernanceFinding>(input: E
   const findingWitnesses = findingEntries.map((entry) => entry.witness);
   for (const { finding, witness } of findingEntries) {
     const node = findingNode(finding, witness);
+    ensureSubjectFileAnchor(nodes, witness.filePath);
+    for (const filePath of witnessFileSubjectPaths(witness)) ensureSubjectFileAnchor(nodes, filePath);
     addNode(nodes, node);
     const filePath = witness.filePath;
-    if (filePath && snapshotFiles.has(filePath)) {
+    if (filePath) {
       addEdge(edges, {
         from: fileNodeId(filePath),
         to: node.id,
@@ -213,8 +235,9 @@ export function createEvidenceGraph<TFinding extends GovernanceFinding>(input: E
 
   for (const defect of input.assessment.defects) {
     const node = defectNode(defect);
+    ensureSubjectFileAnchor(nodes, defect.filePath);
     addNode(nodes, node);
-    if (defect.filePath && snapshotFiles.has(defect.filePath)) {
+    if (defect.filePath) {
       addEdge(edges, {
         from: fileNodeId(defect.filePath),
         to: node.id,

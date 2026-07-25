@@ -1,0 +1,1437 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/codemod/src/**",
+      "packages/legacy-naming-strategies/src/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "cache",
+      "ownedPaths": [
+        "src/cache/**"
+      ],
+      "publicEntry": "src/cache/DbQueryResultCache.ts",
+      "publicSymbols": [
+        "DbQueryResultCache"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "codemod",
+      "ownedPaths": [
+        "packages/codemod/src/**"
+      ],
+      "publicEntry": "packages/codemod/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@typeorm/codemod",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commands",
+      "ownedPaths": [
+        "src/commands/**"
+      ],
+      "publicEntry": "src/commands/CacheClearCommand.ts",
+      "publicSymbols": [
+        "CacheClearCommand"
+      ],
+      "consumes": [
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common",
+      "ownedPaths": [
+        "src/common/**"
+      ],
+      "publicEntry": "src/common/DeepPartial.ts",
+      "publicSymbols": [
+        "DeepPartial"
+      ],
+      "consumes": [
+        {
+          "cell": "entity-schema"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "connection",
+      "ownedPaths": [
+        "src/connection/**"
+      ],
+      "publicEntry": "src/connection/ConnectionMetadataBuilder.ts",
+      "publicSymbols": [
+        "ConnectionMetadataBuilder"
+      ],
+      "consumes": [
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "entity-schema"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-builder"
+        },
+        {
+          "cell": "migration"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-source",
+      "ownedPaths": [
+        "src/data-source/**"
+      ],
+      "publicEntry": "src/data-source/index.ts",
+      "publicSymbols": [
+        "DataSource",
+        "DataSourceOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "cache"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "connection"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "entity-schema"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-builder"
+        },
+        {
+          "cell": "migration"
+        },
+        {
+          "cell": "naming-strategy"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "repository"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "decorator",
+      "ownedPaths": [
+        "src/decorator/**"
+      ],
+      "publicEntry": "src/decorator/Check.ts",
+      "publicSymbols": [
+        "Check"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-args"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "driver",
+      "ownedPaths": [
+        "src/driver/**"
+      ],
+      "publicEntry": "src/driver/aurora-mysql/AuroraMysqlConnectionCredentialsOptions.ts",
+      "publicSymbols": [
+        "AuroraMysqlConnectionCredentialsOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "entity-manager",
+      "ownedPaths": [
+        "src/entity-manager/**"
+      ],
+      "publicEntry": "src/entity-manager/EntityManager.ts",
+      "publicSymbols": [
+        "EntityManager"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "persistence"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "repository"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "entity-schema",
+      "ownedPaths": [
+        "src/entity-schema/**"
+      ],
+      "publicEntry": "src/entity-schema/EntitySchema.ts",
+      "publicSymbols": [
+        "EntitySchema"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-args"
+        },
+        {
+          "cell": "query-builder"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "error",
+      "ownedPaths": [
+        "src/error/**"
+      ],
+      "publicEntry": "src/error/index.ts",
+      "publicSymbols": [
+        "AlreadyHasActiveConnectionError",
+        "CannotAttachTreeChildrenEntityError",
+        "CannotConnectAlreadyConnectedError",
+        "CannotCreateEntityIdMapError",
+        "CannotDetermineEntityError",
+        "CannotExecuteNotConnectedError",
+        "CannotGetEntityManagerNotConnectedError",
+        "CannotReflectMethodParameterTypeError",
+        "CircularRelationsError",
+        "ColumnTypeUndefinedError",
+        "ConnectionIsNotSetError",
+        "ConnectionNotFoundError",
+        "DataTypeNotSupportedError",
+        "DriverOptionNotSetError",
+        "DriverPackageNotInstalledError",
+        "EntityMetadataNotFoundError",
+        "EntityNotFoundError",
+        "EntityPropertyNotFoundError",
+        "FindRelationsNotFoundError",
+        "ForbiddenTransactionModeOverrideError",
+        "InitializedRelationError",
+        "InsertValuesMissingError",
+        "LimitOnUpdateNotSupportedError",
+        "LockNotSupportedOnGivenDriverError",
+        "MetadataAlreadyExistsError",
+        "MetadataWithSuchNameAlreadyExistsError",
+        "MissingDeleteDateColumnError",
+        "MissingDriverError",
+        "MissingJoinColumnError",
+        "MissingJoinTableError",
+        "MissingPrimaryColumnError",
+        "MustBeEntityError",
+        "NamedPlaceholdersNotSupportedError",
+        "NoConnectionForRepositoryError",
+        "NoConnectionOptionError",
+        "NoNeedToReleaseEntityManagerError",
+        "NoVersionOrUpdateDateColumnError",
+        "OffsetWithoutLimitNotSupportedError",
+        "OptimisticLockCanNotBeUsedError",
+        "OptimisticLockVersionMismatchError",
+        "PersistedEntityNotFoundError",
+        "PessimisticLockTransactionRequiredError",
+        "PrimaryColumnCannotBeNullableError",
+        "QueryFailedError",
+        "QueryRunnerAlreadyReleasedError",
+        "QueryRunnerProviderAlreadyReleasedError",
+        "RepositoryNotTreeError",
+        "ReturningStatementNotSupportedError",
+        "SubjectRemovedAndUpdatedError",
+        "SubjectWithoutIdentifierError",
+        "TransactionAlreadyStartedError",
+        "TransactionNotStartedError",
+        "TreeRepositoryNotSupportedError",
+        "TypeORMError",
+        "UpdateValuesMissingError",
+        "UsingJoinColumnIsNotAllowedError",
+        "UsingJoinColumnOnlyOnOneSideAllowedError",
+        "UsingJoinTableIsNotAllowedError",
+        "UsingJoinTableOnlyOnOneSideAllowedError"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "migration"
+        },
+        {
+          "cell": "persistence"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "find-options",
+      "ownedPaths": [
+        "src/find-options/**"
+      ],
+      "publicEntry": "src/find-options/EqualOperator.ts",
+      "publicSymbols": [
+        "EqualOperator"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "legacy-naming-strategies",
+      "ownedPaths": [
+        "packages/legacy-naming-strategies/src/**"
+      ],
+      "publicEntry": "packages/legacy-naming-strategies/src/index.ts",
+      "publicSymbols": [
+        "LegacyOracleNamingStrategy",
+        "NamingStrategyV03"
+      ],
+      "packageName": "@typeorm/legacy-naming-strategies",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger",
+      "ownedPaths": [
+        "src/logger/**"
+      ],
+      "publicEntry": "src/logger/AbstractLogger.ts",
+      "publicSymbols": [
+        "AbstractLogger"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "metadata",
+      "ownedPaths": [
+        "src/metadata/**"
+      ],
+      "publicEntry": "src/metadata/CheckMetadata.ts",
+      "publicSymbols": [
+        "CheckMetadata"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata-args"
+        },
+        {
+          "cell": "naming-strategy"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "metadata-args",
+      "ownedPaths": [
+        "src/metadata-args/**"
+      ],
+      "publicEntry": "src/metadata-args/CheckMetadataArgs.ts",
+      "publicSymbols": [
+        "CheckMetadataArgs"
+      ],
+      "consumes": [
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-builder"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "schema-builder"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "metadata-builder",
+      "ownedPaths": [
+        "src/metadata-builder/**"
+      ],
+      "publicEntry": "src/metadata-builder/ClosureJunctionEntityMetadataBuilder.ts",
+      "publicSymbols": [
+        "ClosureJunctionEntityMetadataBuilder"
+      ],
+      "consumes": [
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-args"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "migration",
+      "ownedPaths": [
+        "src/migration/**"
+      ],
+      "publicEntry": "src/migration/Migration.ts",
+      "publicSymbols": [
+        "Migration"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "naming-strategy",
+      "ownedPaths": [
+        "src/naming-strategy/**"
+      ],
+      "publicEntry": "src/naming-strategy/DefaultNamingStrategy.ts",
+      "publicSymbols": [
+        "DefaultNamingStrategy"
+      ],
+      "consumes": [
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "persistence",
+      "ownedPaths": [
+        "src/persistence/**"
+      ],
+      "publicEntry": "src/persistence/EntityPersistExecutor.ts",
+      "publicSymbols": [
+        "EntityPersistExecutor"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "repository"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "platform",
+      "ownedPaths": [
+        "src/platform/**"
+      ],
+      "publicEntry": "src/platform/PlatformTools.ts",
+      "publicSymbols": [
+        "EventEmitter",
+        "PlatformTools",
+        "Readable",
+        "ReadStream",
+        "Writable"
+      ],
+      "consumes": [
+        {
+          "cell": "driver"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-builder",
+      "ownedPaths": [
+        "src/query-builder/**"
+      ],
+      "publicEntry": "src/query-builder/index.ts",
+      "publicSymbols": [
+        "registerQueryBuilders"
+      ],
+      "consumes": [
+        {
+          "cell": "cache"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query-runner",
+      "ownedPaths": [
+        "src/query-runner/**"
+      ],
+      "publicEntry": "src/query-runner/BaseQueryRunner.ts",
+      "publicSymbols": [
+        "BaseQueryRunner"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "repository",
+      "ownedPaths": [
+        "src/repository/**"
+      ],
+      "publicEntry": "src/repository/BaseEntity.ts",
+      "publicSymbols": [
+        "BaseEntity"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "schema-builder",
+      "ownedPaths": [
+        "src/schema-builder/**"
+      ],
+      "publicEntry": "src/schema-builder/MongoSchemaBuilder.ts",
+      "publicSymbols": [
+        "MongoSchemaBuilder"
+      ],
+      "consumes": [
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "AbstractLogger",
+        "AdvancedConsoleLogger",
+        "AfterInsert",
+        "AfterLoad",
+        "AfterQueryEvent",
+        "AfterRecover",
+        "AfterRemove",
+        "AfterSoftRemove",
+        "AfterUpdate",
+        "AlreadyHasActiveConnectionError",
+        "And",
+        "Any",
+        "ArrayContainedBy",
+        "ArrayContains",
+        "ArrayOverlap",
+        "BaseEntity",
+        "BeforeInsert",
+        "BeforeQueryEvent",
+        "BeforeRecover",
+        "BeforeRemove",
+        "BeforeSoftRemove",
+        "BeforeUpdate",
+        "Between",
+        "Brackets",
+        "CannotAttachTreeChildrenEntityError",
+        "CannotConnectAlreadyConnectedError",
+        "CannotCreateEntityIdMapError",
+        "CannotDetermineEntityError",
+        "CannotExecuteNotConnectedError",
+        "CannotGetEntityManagerNotConnectedError",
+        "CannotReflectMethodParameterTypeError",
+        "Check",
+        "ChildEntity",
+        "CircularRelationsError",
+        "Column",
+        "ColumnOptions",
+        "ColumnType",
+        "ColumnTypeUndefinedError",
+        "ConnectionIsNotSetError",
+        "ConnectionNotFoundError",
+        "ConnectionOptionsReader",
+        "CreateDateColumn",
+        "DatabaseType",
+        "DataSource",
+        "DataSourceOptions",
+        "DataTypeNotSupportedError",
+        "DeepPartial",
+        "DefaultNamingStrategy",
+        "DeleteDateColumn",
+        "DeleteQueryBuilder",
+        "DeleteResult",
+        "Driver",
+        "DriverOptionNotSetError",
+        "DriverPackageNotInstalledError",
+        "Entity",
+        "EntityManager",
+        "EntityMetadata",
+        "EntityMetadataNotFoundError",
+        "EntityNotFoundError",
+        "EntityOptions",
+        "EntityPropertyNotFoundError",
+        "EntitySchema",
+        "EntitySchemaColumnOptions",
+        "EntitySchemaEmbeddedColumnOptions",
+        "EntitySchemaIndexOptions",
+        "EntitySchemaOptions",
+        "EntitySchemaRelationOptions",
+        "EntitySubscriberInterface",
+        "EntityTarget",
+        "Equal",
+        "EqualOperator",
+        "EventSubscriber",
+        "Exclusion",
+        "Feature",
+        "FeatureCollection",
+        "FileLogger",
+        "FileLoggerOptions",
+        "FindManyOptions",
+        "FindOneOptions",
+        "FindOperator",
+        "FindOperatorType",
+        "FindOptionsOrder",
+        "FindOptionsOrderProperty",
+        "FindOptionsOrderValue",
+        "FindOptionsRelations",
+        "FindOptionsRelationsProperty",
+        "FindOptionsSelect",
+        "FindOptionsSelectProperty",
+        "FindOptionsUtils",
+        "FindOptionsWhere",
+        "FindOptionsWhereProperty",
+        "FindRelationsNotFoundError",
+        "FindTreeOptions",
+        "ForbiddenTransactionModeOverrideError",
+        "ForeignKey",
+        "FormattedConsoleLogger",
+        "Generated",
+        "Geography",
+        "GeoJSON",
+        "Geometry",
+        "GeometryCollection",
+        "getMetadataArgsStorage",
+        "ILike",
+        "In",
+        "Index",
+        "IndexOptions",
+        "InitializedRelationError",
+        "InsertEvent",
+        "InsertQueryBuilder",
+        "InsertResult",
+        "InsertValuesMissingError",
+        "InstanceChecker",
+        "IsNull",
+        "JoinColumn",
+        "JoinColumnOptions",
+        "JoinTable",
+        "JoinTableOptions",
+        "JsonContains",
+        "LessThan",
+        "LessThanOrEqual",
+        "Like",
+        "LimitOnUpdateNotSupportedError",
+        "LineString",
+        "LoadEvent",
+        "LockNotSupportedOnGivenDriverError",
+        "Logger",
+        "LoggerOptions",
+        "LogLevel",
+        "LogMessage",
+        "LogMessageFormat",
+        "LogMessageType",
+        "ManyToMany",
+        "ManyToOne",
+        "MetadataAlreadyExistsError",
+        "MetadataWithSuchNameAlreadyExistsError",
+        "Migration",
+        "MigrationExecutor",
+        "MigrationInterface",
+        "MissingDeleteDateColumnError",
+        "MissingDriverError",
+        "MissingJoinColumnError",
+        "MissingJoinTableError",
+        "MissingPrimaryColumnError",
+        "MixedList",
+        "MongoEntityManager",
+        "MongoRepository",
+        "MoreThan",
+        "MoreThanOrEqual",
+        "MssqlParameter",
+        "MultiLineString",
+        "MultiPoint",
+        "MultiPolygon",
+        "MustBeEntityError",
+        "NamedPlaceholdersNotSupportedError",
+        "NamingStrategyInterface",
+        "NoConnectionForRepositoryError",
+        "NoConnectionOptionError",
+        "NoNeedToReleaseEntityManagerError",
+        "Not",
+        "NotBrackets",
+        "NoVersionOrUpdateDateColumnError",
+        "ObjectIdColumn",
+        "ObjectLiteral",
+        "ObjectType",
+        "OffsetWithoutLimitNotSupportedError",
+        "OneToMany",
+        "OneToOne",
+        "OptimisticLockCanNotBeUsedError",
+        "OptimisticLockVersionMismatchError",
+        "Or",
+        "OrderByCondition",
+        "PersistedEntityNotFoundError",
+        "PessimisticLockTransactionRequiredError",
+        "Point",
+        "Polygon",
+        "Position",
+        "PrepareLogMessagesOptions",
+        "PrimaryColumn",
+        "PrimaryColumnCannotBeNullableError",
+        "PrimaryColumnOptions",
+        "PrimaryGeneratedColumn",
+        "QueryBuilder",
+        "QueryDeepPartialEntity",
+        "QueryEvent",
+        "QueryFailedError",
+        "QueryPartialEntity",
+        "QueryResult",
+        "QueryRunner",
+        "QueryRunnerAlreadyReleasedError",
+        "QueryRunnerProviderAlreadyReleasedError",
+        "Raw",
+        "RecoverEvent",
+        "Relation",
+        "RelationId",
+        "RelationOptions",
+        "RelationQueryBuilder",
+        "RemoveEvent",
+        "RemoveOptions",
+        "ReplicationMode",
+        "Repository",
+        "RepositoryNotTreeError",
+        "ReturningOption",
+        "ReturningStatementNotSupportedError",
+        "SaveOptions",
+        "SelectQueryBuilder",
+        "SimpleConsoleLogger",
+        "SoftRemoveEvent",
+        "SubjectRemovedAndUpdatedError",
+        "SubjectWithoutIdentifierError",
+        "Table",
+        "TableCheck",
+        "TableCheckOptions",
+        "TableColumn",
+        "TableColumnOptions",
+        "TableExclusion",
+        "TableExclusionOptions",
+        "TableForeignKey",
+        "TableForeignKeyOptions",
+        "TableIndex",
+        "TableIndexOptions",
+        "TableInheritance",
+        "TableOptions",
+        "TableUnique",
+        "TableUniqueOptions",
+        "TransactionAlreadyStartedError",
+        "TransactionCommitEvent",
+        "TransactionNotStartedError",
+        "TransactionRollbackEvent",
+        "TransactionStartEvent",
+        "Tree",
+        "TreeChildren",
+        "TreeLevelColumn",
+        "TreeParent",
+        "TreeRepository",
+        "TreeRepositoryNotSupportedError",
+        "TreeRepositoryUtils",
+        "TypeORMError",
+        "Unique",
+        "UpdateDateColumn",
+        "UpdateEvent",
+        "UpdateOptions",
+        "UpdateQueryBuilder",
+        "UpdateResult",
+        "UpdateValuesMissingError",
+        "UpsertOptions",
+        "UsingJoinColumnIsNotAllowedError",
+        "UsingJoinColumnOnlyOnOneSideAllowedError",
+        "UsingJoinTableIsNotAllowedError",
+        "UsingJoinTableOnlyOnOneSideAllowedError",
+        "ValueTransformer",
+        "VersionColumn",
+        "View",
+        "ViewColumn",
+        "ViewEntity",
+        "ViewOptions",
+        "VirtualColumn",
+        "WhereExpressionBuilder"
+      ],
+      "consumes": [
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "connection"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "entity-schema"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "metadata-args"
+        },
+        {
+          "cell": "migration"
+        },
+        {
+          "cell": "naming-strategy"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "repository"
+        },
+        {
+          "cell": "schema-builder"
+        },
+        {
+          "cell": "subscriber"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "subscriber",
+      "ownedPaths": [
+        "src/subscriber/**"
+      ],
+      "publicEntry": "src/subscriber/Broadcaster.ts",
+      "publicSymbols": [
+        "Broadcaster"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "query-runner"
+        },
+        {
+          "cell": "util"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "util",
+      "ownedPaths": [
+        "src/util/**"
+      ],
+      "publicEntry": "src/util/ApplyValueTransformers.ts",
+      "publicSymbols": [
+        "ApplyValueTransformers"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "data-source"
+        },
+        {
+          "cell": "decorator"
+        },
+        {
+          "cell": "driver"
+        },
+        {
+          "cell": "entity-manager"
+        },
+        {
+          "cell": "entity-schema"
+        },
+        {
+          "cell": "error"
+        },
+        {
+          "cell": "find-options"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "metadata"
+        },
+        {
+          "cell": "persistence"
+        },
+        {
+          "cell": "platform"
+        },
+        {
+          "cell": "query-builder"
+        },
+        {
+          "cell": "repository"
+        },
+        {
+          "cell": "schema-builder"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

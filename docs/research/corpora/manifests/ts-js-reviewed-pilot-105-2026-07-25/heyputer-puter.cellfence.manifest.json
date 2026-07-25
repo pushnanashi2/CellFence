@@ -1,0 +1,253 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "backend",
+      "ownedPaths": [
+        "src/backend/**"
+      ],
+      "publicEntry": "src/backend/exports.ts",
+      "publicSymbols": [
+        "clientsContainers",
+        "configContainer",
+        "controllersContainers",
+        "driversContainers",
+        "servicesContainers",
+        "storesContainers"
+      ],
+      "packageName": "@heyputer/backend",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "src/cli/src/**"
+      ],
+      "publicEntry": "src/cli/src/commands/app.js",
+      "publicSymbols": [
+        "appGet",
+        "appList"
+      ],
+      "packageName": "@heyputer/cli",
+      "consumes": [
+        {
+          "cell": "puter-js"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-2",
+      "ownedPaths": [
+        "src/cli/bin/**"
+      ],
+      "publicEntry": "src/cli/bin/puter.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dev-center",
+      "ownedPaths": [
+        "src/dev-center/**"
+      ],
+      "publicEntry": "src/dev-center/js/apps.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs",
+      "ownedPaths": [
+        "src/docs/src/**"
+      ],
+      "publicEntry": "src/docs/src/assets/js/context-menu.js",
+      "publicSymbols": [],
+      "packageName": "docs",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs-2",
+      "ownedPaths": [
+        "src/docs/*"
+      ],
+      "publicEntry": "src/docs/build.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "docs"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gui",
+      "ownedPaths": [
+        "src/gui/src/**"
+      ],
+      "publicEntry": "src/gui/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@heyputer/gui",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gui-2",
+      "ownedPaths": [
+        "src/gui/*",
+        "src/gui/webpack/**"
+      ],
+      "publicEntry": "src/gui/build.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "gui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp-connector",
+      "ownedPaths": [
+        "src/mcp-connector/*",
+        "src/mcp-connector/mcpb/**",
+        "src/mcp-connector/scripts/**"
+      ],
+      "publicEntry": "src/mcp-connector/mcpb/server/index.cjs",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "puter-js",
+      "ownedPaths": [
+        "src/puter-js/src/**"
+      ],
+      "publicEntry": "src/puter-js/src/index.js",
+      "publicSymbols": [
+        "default",
+        "puter"
+      ],
+      "packageName": "@heyputer/puter.js",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "puter-js-2",
+      "ownedPaths": [
+        "src/puter-js/*"
+      ],
+      "publicEntry": "src/puter-js/playwright.config.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "puter-mcp-connector",
+      "ownedPaths": [
+        "src/mcp-connector/src/**"
+      ],
+      "publicEntry": "src/mcp-connector/src/index.js",
+      "publicSymbols": [],
+      "packageName": "puter-mcp-connector",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "worker",
+      "ownedPaths": [
+        "src/worker/src/**"
+      ],
+      "publicEntry": "src/worker/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@heyputer/worker",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "worker-2",
+      "ownedPaths": [
+        "src/worker/*",
+        "src/worker/scripts/**"
+      ],
+      "publicEntry": "src/worker/scripts/buildPreamble.mjs",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

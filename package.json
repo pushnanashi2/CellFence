@@ -35,6 +35,7 @@
     "precision:claim:preflight": "node scripts/precision-claim-preflight.mjs",
     "precision:next-cycle": "node scripts/precision-next-cycle.mjs",
     "precision:corpus:expand-plan": "node scripts/precision-corpus-expansion-plan.mjs",
+    "precision:corpus:promote": "node scripts/precision-corpus-promote-candidates.mjs",
     "precision:claim:gaps": "node scripts/precision-evidence-gap-worklist.mjs",
     "precision:frontier": "node scripts/precision-frontier-report.mjs",
     "precision:rounds": "node scripts/precision-round-handoff.mjs",

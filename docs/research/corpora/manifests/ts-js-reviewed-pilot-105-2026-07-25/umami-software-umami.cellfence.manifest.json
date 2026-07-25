@@ -1,0 +1,292 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "src/app/**"
+      ],
+      "publicEntry": "src/app/(collect)/p/[slug]/route.ts",
+      "publicSymbols": [
+        "dynamic",
+        "GET"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "permissions"
+        },
+        {
+          "cell": "queries"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "store"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/charts/BarChart.tsx",
+      "publicSymbols": [
+        "BarChart",
+        "BarChartProps"
+      ],
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "store"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "i18n",
+      "ownedPaths": [
+        "src/i18n/**"
+      ],
+      "publicEntry": "src/i18n/request.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib",
+      "ownedPaths": [
+        "src/lib/**"
+      ],
+      "publicEntry": "src/lib/api-url.ts",
+      "publicSymbols": [
+        "getApiUrl"
+      ],
+      "consumes": [
+        {
+          "cell": "queries"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "permissions",
+      "ownedPaths": [
+        "src/permissions/**"
+      ],
+      "publicEntry": "src/permissions/index.ts",
+      "publicSymbols": [
+        "canCreateTeam",
+        "canCreateTeamWebsite",
+        "canCreateUser",
+        "canCreateWebsite",
+        "canDeleteBoard",
+        "canDeleteEntity",
+        "canDeleteLink",
+        "canDeletePixel",
+        "canDeleteReport",
+        "canDeleteTeam",
+        "canDeleteTeamUser",
+        "canDeleteUser",
+        "canDeleteWebsite",
+        "canTransferWebsiteToTeam",
+        "canTransferWebsiteToUser",
+        "canUpdateBoard",
+        "canUpdateEntity",
+        "canUpdateLink",
+        "canUpdatePixel",
+        "canUpdateReport",
+        "canUpdateTeam",
+        "canUpdateUser",
+        "canUpdateWebsite",
+        "canViewAllTeams",
+        "canViewAllWebsites",
+        "canViewAuthenticatedWebsite",
+        "canViewBoard",
+        "canViewBoardEntities",
+        "canViewEntity",
+        "canViewLink",
+        "canViewPixel",
+        "canViewReport",
+        "canViewSharedWebsite",
+        "canViewSharedWebsiteFilters",
+        "canViewTeam",
+        "canViewUser",
+        "canViewUsers",
+        "canViewWebsite",
+        "canViewWebsiteSection",
+        "ShareSection"
+      ],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "queries"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "queries",
+      "ownedPaths": [
+        "src/queries/**"
+      ],
+      "publicEntry": "src/queries/prisma/board.ts",
+      "publicSymbols": [
+        "createBoard",
+        "deleteBoard",
+        "findBoard",
+        "getBoard",
+        "getBoards",
+        "getTeamBoards",
+        "getUserBoards",
+        "updateBoard"
+      ],
+      "consumes": [
+        {
+          "cell": "lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "recorder",
+      "ownedPaths": [
+        "src/recorder/**"
+      ],
+      "publicEntry": "src/recorder/index.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "store",
+      "ownedPaths": [
+        "src/store/**"
+      ],
+      "publicEntry": "src/store/app.ts",
+      "publicSymbols": [
+        "setConfig",
+        "setDateRangeValue",
+        "setLocale",
+        "setShareData",
+        "setTimezone",
+        "setUser",
+        "useApp"
+      ],
+      "consumes": [
+        {
+          "cell": "lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tracker",
+      "ownedPaths": [
+        "src/tracker/**"
+      ],
+      "publicEntry": "src/tracker/index.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

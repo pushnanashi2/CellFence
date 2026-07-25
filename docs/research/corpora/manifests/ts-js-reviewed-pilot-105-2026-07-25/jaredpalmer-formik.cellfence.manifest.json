@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "app/**",
+      "packages/formik-native/src/**",
+      "packages/formik/src/**",
+      "website/*",
+      "website/scripts/**",
+      "website/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "app/**"
+      ],
+      "publicEntry": "app/pages/_app.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fdocs3",
+      "ownedPaths": [
+        "website/src/**"
+      ],
+      "publicEntry": "website/src/components/addRouterEvents.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "fdocs3",
+      "consumes": [
+        {
+          "cell": "formik"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "formik",
+      "ownedPaths": [
+        "packages/formik/src/**"
+      ],
+      "publicEntry": "packages/formik/src/index.tsx",
+      "publicSymbols": [
+        "ArrayHelpers",
+        "ComponentDecorator",
+        "CompositeComponent",
+        "connect",
+        "ErrorMessage",
+        "ErrorMessageProps",
+        "FastField",
+        "FastFieldAttributes",
+        "FastFieldConfig",
+        "FastFieldProps",
+        "Field",
+        "FieldArray",
+        "FieldArrayConfig",
+        "FieldArrayRenderProps",
+        "FieldAttributes",
+        "FieldConfig",
+        "FieldHelperProps",
+        "FieldHookConfig",
+        "FieldInputProps",
+        "FieldMetaProps",
+        "FieldProps",
+        "FieldValidator",
+        "Form",
+        "Formik",
+        "FormikBag",
+        "FormikComputedProps",
+        "FormikConfig",
+        "FormikConsumer",
+        "FormikContext",
+        "FormikContextType",
+        "FormikErrors",
+        "FormikFormProps",
+        "FormikHandlers",
+        "FormikHelpers",
+        "FormikProps",
+        "FormikProvider",
+        "FormikRegistration",
+        "FormikSharedConfig",
+        "FormikState",
+        "FormikTouched",
+        "FormikValues",
+        "GenericFieldHTMLAttributes",
+        "getActiveElement",
+        "getIn",
+        "InferableComponentDecorator",
+        "InjectedFormikProps",
+        "insert",
+        "isEmptyArray",
+        "isEmptyChildren",
+        "isFunction",
+        "isInputEvent",
+        "isInteger",
+        "isNaN",
+        "isObject",
+        "isPromise",
+        "isString",
+        "move",
+        "prepareDataForValidation",
+        "replace",
+        "setIn",
+        "setNestedObjectValues",
+        "SharedRenderProps",
+        "swap",
+        "useField",
+        "useFormik",
+        "useFormikContext",
+        "validateYupSchema",
+        "withFormik",
+        "WithFormikConfig",
+        "yupToFormErrors"
+      ],
+      "packageName": "formik",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "formik-native",
+      "ownedPaths": [
+        "packages/formik-native/src/**"
+      ],
+      "publicEntry": "packages/formik-native/src/index.ts",
+      "publicSymbols": [
+        "useSubmitButton"
+      ],
+      "packageName": "formik-native",
+      "consumes": [
+        {
+          "cell": "formik"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "website/*",
+        "website/scripts/**"
+      ],
+      "publicEntry": "website/next.config.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "fdocs3"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

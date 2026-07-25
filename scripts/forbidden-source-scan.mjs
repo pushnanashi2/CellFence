@@ -28,6 +28,18 @@ const ignoredFiles = new Set([selfPath.split(path.sep).join("/")]);
 const scannedExtensions = new Set([".ts", ".js", ".mjs", ".json", ".md", ".yml", ".yaml"]);
 const findings = [];
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function containsForbiddenTerm(text, term) {
+  const normalizedTerm = term.toLowerCase();
+  if (normalizedTerm === "advisor") {
+    return new RegExp(`(^|[^a-z0-9])${escapeRegExp(normalizedTerm)}([^a-z0-9]|$)`).test(text);
+  }
+  return text.includes(normalizedTerm);
+}
+
 function visit(directoryPath) {
   for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
     if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
@@ -44,7 +56,7 @@ function visit(directoryPath) {
       text = text.split(allowedPhrase).join("");
     }
     for (const term of forbiddenTerms) {
-      if (text.includes(term.toLowerCase())) {
+      if (containsForbiddenTerm(text, term)) {
         findings.push(`${relativePath}: forbidden term '${term}'`);
       }
     }

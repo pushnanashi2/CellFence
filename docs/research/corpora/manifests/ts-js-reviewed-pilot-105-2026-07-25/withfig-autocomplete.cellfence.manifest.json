@@ -1,0 +1,339 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "aws",
+      "ownedPaths": [
+        "src/aws/**"
+      ],
+      "publicEntry": "src/aws/accessanalyzer.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "az",
+      "ownedPaths": [
+        "src/az/**"
+      ],
+      "publicEntry": "src/az/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "capgo",
+      "ownedPaths": [
+        "src/@capgo/**"
+      ],
+      "publicEntry": "src/@capgo/cli.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "deno",
+      "ownedPaths": [
+        "src/deno/**"
+      ],
+      "publicEntry": "src/deno/generators.ts",
+      "publicSymbols": [
+        "generateDocs",
+        "generateInstalledDenoScripts",
+        "generateLintRules",
+        "generatePreferredFilepaths",
+        "generateRunnableFiles",
+        "generateTasks",
+        "generateUrlScript",
+        "generateVersions"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dotnet",
+      "ownedPaths": [
+        "src/dotnet/**"
+      ],
+      "publicEntry": "src/dotnet/dotnet-add.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fig",
+      "ownedPaths": [
+        "src/@fig/**"
+      ],
+      "publicEntry": "src/@fig/publish-spec.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fig-2",
+      "ownedPaths": [
+        "src/fig/**"
+      ],
+      "publicEntry": "src/fig/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gcloud",
+      "ownedPaths": [
+        "src/gcloud/**"
+      ],
+      "publicEntry": "src/gcloud/access-context-manager.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "heroku",
+      "ownedPaths": [
+        "src/heroku/**"
+      ],
+      "publicEntry": "src/heroku/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "infracost",
+      "ownedPaths": [
+        "src/infracost/**"
+      ],
+      "publicEntry": "src/infracost/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "magnolia",
+      "ownedPaths": [
+        "src/@magnolia/**"
+      ],
+      "publicEntry": "src/@magnolia/cli.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "php",
+      "ownedPaths": [
+        "src/php/**"
+      ],
+      "publicEntry": "src/php/artisan.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preset",
+      "ownedPaths": [
+        "src/@preset/**"
+      ],
+      "publicEntry": "src/@preset/cli.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "python",
+      "ownedPaths": [
+        "src/python/**"
+      ],
+      "publicEntry": "src/python/http.server.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shopify",
+      "ownedPaths": [
+        "src/shopify/**"
+      ],
+      "publicEntry": "src/shopify/index.ts",
+      "publicSymbols": [
+        "default",
+        "getVersionCommand"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/-.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "deno"
+        },
+        {
+          "cell": "fig-2"
+        },
+        {
+          "cell": "preset"
+        },
+        {
+          "cell": "task"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "task",
+      "ownedPaths": [
+        "src/task/**"
+      ],
+      "publicEntry": "src/task/go-task.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "usermn",
+      "ownedPaths": [
+        "src/@usermn/**"
+      ],
+      "publicEntry": "src/@usermn/sdc/0.0.0.ts",
+      "publicSymbols": [
+        "default",
+        "versions"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "withfig",
+      "ownedPaths": [
+        "src/@withfig/**"
+      ],
+      "publicEntry": "src/@withfig/autocomplete-tools.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "wordpress",
+      "ownedPaths": [
+        "src/@wordpress/**"
+      ],
+      "publicEntry": "src/@wordpress/create-block.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

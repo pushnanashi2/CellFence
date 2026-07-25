@@ -11,6 +11,20 @@ checks that the graph contains the required observation family and witness facts
 needed to make the finding auditable. Unsupported rules are reported as
 unsupported rather than silently treated as verified.
 
+## File Anchors
+
+`subject-file` nodes with a `digest` are members of the canonical subject
+snapshot and are covered by `snapshotDigest`. `subject-file` nodes without a
+`digest` are graph anchors only. The engine emits these digestless anchors when
+a finding, witness, observation, or evidence defect needs to name a path that is
+not part of the snapshot, for example an excluded generated file, a markdown
+file carrying an unsupported dynamic require witness, or a symlink path.
+
+Digestless anchors make the graph auditable; they do not make the evidence
+complete. If an observation references a file outside the snapshot, the
+assessment must still include `UNKNOWN_OBSERVED_FILE`, and the verifier can then
+check that both the observation and the defect point at an explicit file anchor.
+
 ## Running
 
 Verify a graph file:

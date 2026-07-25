@@ -1,0 +1,362 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "lib/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "autocomplete",
+      "ownedPaths": [
+        "src/autocomplete/**"
+      ],
+      "publicEntry": "src/autocomplete/inline_screenreader.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commands",
+      "ownedPaths": [
+        "src/commands/**"
+      ],
+      "publicEntry": "src/commands/command_manager_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "keyboard"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "css",
+      "ownedPaths": [
+        "src/css/**"
+      ],
+      "publicEntry": "src/css/editor-css.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "edit-session",
+      "ownedPaths": [
+        "src/edit_session/**"
+      ],
+      "publicEntry": "src/edit_session/bracket_match.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "mouse"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ext",
+      "ownedPaths": [
+        "src/ext/**"
+      ],
+      "publicEntry": "src/ext/beautify_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "autocomplete"
+        },
+        {
+          "cell": "keyboard"
+        },
+        {
+          "cell": "layer"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "mode"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "theme"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "keyboard",
+      "ownedPaths": [
+        "src/keyboard/**"
+      ],
+      "publicEntry": "src/keyboard/emacs_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "ext"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "mode"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "theme"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "layer",
+      "ownedPaths": [
+        "src/layer/**"
+      ],
+      "publicEntry": "src/layer/cursor.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "mode"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "theme"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib",
+      "ownedPaths": [
+        "src/lib/**"
+      ],
+      "publicEntry": "src/lib/app_config.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib-2",
+      "ownedPaths": [
+        "lib/**"
+      ],
+      "publicEntry": "lib/ace/loader_build.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mode",
+      "ownedPaths": [
+        "src/mode/**"
+      ],
+      "publicEntry": "src/mode/_test/highlight_rules_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "worker"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mouse",
+      "ownedPaths": [
+        "src/mouse/**"
+      ],
+      "publicEntry": "src/mouse/default_gutter_handler_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "mode"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "theme"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "snippets",
+      "ownedPaths": [
+        "src/snippets/**"
+      ],
+      "publicEntry": "src/snippets/abc.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/ace_test.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "autocomplete"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "css"
+        },
+        {
+          "cell": "edit-session"
+        },
+        {
+          "cell": "ext"
+        },
+        {
+          "cell": "keyboard"
+        },
+        {
+          "cell": "layer"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "mode"
+        },
+        {
+          "cell": "mouse"
+        },
+        {
+          "cell": "theme"
+        },
+        {
+          "cell": "worker"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "theme",
+      "ownedPaths": [
+        "src/theme/**"
+      ],
+      "publicEntry": "src/theme/ambiance-css.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "worker",
+      "ownedPaths": [
+        "src/worker/**"
+      ],
+      "publicEntry": "src/worker/worker_client.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

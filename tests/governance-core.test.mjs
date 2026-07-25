@@ -382,6 +382,92 @@ test("finding witnesses preserve supplied subjects and deterministic tie orderin
   assert.equal(witnessForward.nodes.filter((node) => node.kind === "finding").length, 2);
 });
 
+test("evidence graph anchors finding paths that are outside the source snapshot", () => {
+  const snapshot = createSubjectSnapshotFromFiles([
+    { path: "cellfence.manifest.json", role: "manifest", content: "{\"schemaVersion\":\"cellfence.manifest.v1\"}\n" },
+  ]);
+  const report = createRawObservationReport({ observer: "unit-test", snapshot, statuses: [] });
+  const assessment = assessEvidence(snapshot, report, { requiredFamilies: [] });
+  const graph = createEvidenceGraph({
+    snapshot,
+    report,
+    assessment,
+    findings: [{
+      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      severity: "error",
+      filePath: "docs/README.md",
+      message: "dynamic require cannot be resolved safely",
+      details: { expression: "require(name)" },
+    }],
+    warnings: [],
+  });
+
+  const anchor = graph.nodes.find((node) =>
+    node.kind === "subject-file"
+    && node.filePath === "docs/README.md"
+    && node.digest === undefined);
+  assert.ok(anchor);
+  const finding = graph.nodes.find((node) =>
+    node.kind === "finding"
+    && node.ruleId === "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+    && node.filePath === "docs/README.md");
+  assert.ok(finding);
+  assert.ok(graph.edges.some((edge) =>
+    edge.from === anchor.id
+    && edge.to === finding.id
+    && edge.kind === "reported-finding"));
+  assert.ok(graph.edges.some((edge) =>
+    edge.from === finding.id
+    && edge.to === anchor.id
+    && edge.kind === "witnesses"));
+  assert.ok(graph.findingWitnesses[0].subjects.some((subject) =>
+    subject.kind === "file"
+    && subject.key === "filePath"
+    && subject.value === "docs/README.md"));
+});
+
+test("evidence graph anchors unknown observed files without hiding assessment defects", () => {
+  const snapshot = createSubjectSnapshotFromFiles([
+    { path: "cellfence.manifest.json", role: "manifest", content: "{\"schemaVersion\":\"cellfence.manifest.v1\"}\n" },
+  ]);
+  const report = createRawObservationReport({
+    observer: "unit-test",
+    snapshot,
+    statuses: [
+      { filePath: "generated/routes.generated.ts", family: "imports", status: "processed" },
+    ],
+  });
+  const assessment = assessEvidence(snapshot, report, { requiredFamilies: [] });
+  assert.ok(assessment.defects.some((defect) =>
+    defect.code === "UNKNOWN_OBSERVED_FILE"
+    && defect.filePath === "generated/routes.generated.ts"));
+
+  const graph = createEvidenceGraph({ snapshot, report, assessment, findings: [], warnings: [] });
+  const anchor = graph.nodes.find((node) =>
+    node.kind === "subject-file"
+    && node.filePath === "generated/routes.generated.ts"
+    && node.digest === undefined);
+  assert.ok(anchor);
+  const observation = graph.nodes.find((node) =>
+    node.kind === "observation"
+    && node.filePath === "generated/routes.generated.ts"
+    && node.family === "imports");
+  assert.ok(observation);
+  const defect = graph.nodes.find((node) =>
+    node.kind === "evidence-defect"
+    && node.filePath === "generated/routes.generated.ts"
+    && node.label === "UNKNOWN_OBSERVED_FILE");
+  assert.ok(defect);
+  assert.ok(graph.edges.some((edge) =>
+    edge.from === anchor.id
+    && edge.to === observation.id
+    && edge.kind === "observed-as"));
+  assert.ok(graph.edges.some((edge) =>
+    edge.from === anchor.id
+    && edge.to === defect.id
+    && edge.kind === "has-defect"));
+});
+
 test("control state digest changes when governance controls change", () => {
   const base = createGovernanceControlState({
     declared: {

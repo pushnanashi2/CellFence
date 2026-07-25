@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const markerFileName = ".cellfence-precision-next-cycle";
+const defaultStepTimeoutMs = 120_000;
+const largeArtifactStepTimeoutMs = 1_800_000;
 const defaultIncludedRules = [
   "CELLFENCE_PRIVATE_IMPORT",
   "CELLFENCE_UNDECLARED_CONSUMER",
@@ -184,7 +186,7 @@ function runStep(label, command, args, options = {}) {
       TZ: "UTC",
     },
     maxBuffer: 100 * 1024 * 1024,
-    timeout: options.timeoutMs || 120_000,
+    timeout: options.timeoutMs || defaultStepTimeoutMs,
   });
   const stdoutPath = options.stdoutPath || null;
   const stderrPath = options.stderrPath || null;
@@ -513,6 +515,7 @@ function main() {
     step = runStep("unlabeled bundle build", process.execPath, bundleArgs, {
       stdoutPath: path.join(logsDir, "bundle-unlabeled.stdout.log"),
       stderrPath: path.join(logsDir, "bundle-unlabeled.stderr.log"),
+      timeoutMs: largeArtifactStepTimeoutMs,
     });
     steps.push(step);
     assertExit(step, 0);
@@ -525,6 +528,7 @@ function main() {
     ], {
       stdoutPath: path.join(logsDir, "bundle-unlabeled-validate.stdout.log"),
       stderrPath: path.join(logsDir, "bundle-unlabeled-validate.stderr.log"),
+      timeoutMs: largeArtifactStepTimeoutMs,
     });
     steps.push(step);
     assertExit(step, 0);
@@ -553,6 +557,7 @@ function main() {
     ], {
       stdoutPath: path.join(logsDir, "blind-worklist.stdout.log"),
       stderrPath: path.join(logsDir, "blind-worklist.stderr.log"),
+      timeoutMs: largeArtifactStepTimeoutMs,
     });
     steps.push(step);
     assertExit(step, 0);
@@ -573,6 +578,7 @@ function main() {
     ], {
       stdoutPath: path.join(logsDir, "claim-preflight.prelabel.stdout.log"),
       stderrPath: path.join(logsDir, "claim-preflight.prelabel.stderr.log"),
+      timeoutMs: largeArtifactStepTimeoutMs,
     });
     steps.push(step);
     assertExit(step, [0, 1, 2]);

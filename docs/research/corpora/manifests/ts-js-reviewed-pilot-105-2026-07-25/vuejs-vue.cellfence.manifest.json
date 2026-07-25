@@ -1,0 +1,407 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/compiler-sfc/src/**",
+      "packages/server-renderer/src/**",
+      "packages/template-compiler/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "compiler",
+      "ownedPaths": [
+        "src/compiler/**"
+      ],
+      "publicEntry": "src/compiler/index.ts",
+      "publicSymbols": [
+        "createCompiler"
+      ],
+      "consumes": [
+        {
+          "cell": "compiler-sfc"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "platforms"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "compiler-sfc",
+      "ownedPaths": [
+        "packages/compiler-sfc/src/**"
+      ],
+      "publicEntry": "packages/compiler-sfc/src/index.ts",
+      "publicSymbols": [
+        "CompilerOptions",
+        "compileScript",
+        "compileStyle",
+        "compileStyleAsync",
+        "compileTemplate",
+        "generateCodeFrame",
+        "parse",
+        "parseComponent",
+        "rewriteDefault",
+        "SFCBlock",
+        "SFCCustomBlock",
+        "SFCDescriptor",
+        "SFCParseOptions",
+        "SFCScriptBlock",
+        "SFCScriptCompileOptions",
+        "SFCStyleCompileOptions",
+        "SFCStyleCompileResults",
+        "SFCTemplateCompileOptions",
+        "SFCTemplateCompileResults",
+        "TemplateCompiler",
+        "WarningMessage"
+      ],
+      "packageName": "@vue/compiler-sfc",
+      "consumes": [
+        {
+          "cell": "compiler"
+        },
+        {
+          "cell": "platforms"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/**"
+      ],
+      "publicEntry": "src/core/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "platforms"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "v3"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "platforms",
+      "ownedPaths": [
+        "src/platforms/**"
+      ],
+      "publicEntry": "src/platforms/web/compiler/directives/html.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "compiler"
+        },
+        {
+          "cell": "compiler-sfc"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "v3"
+        },
+        {
+          "cell": "vue-server-renderer"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/constants.ts",
+      "publicSymbols": [
+        "ASSET_TYPES",
+        "LIFECYCLE_HOOKS",
+        "SSR_ATTR"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/compiler.ts",
+      "publicSymbols": [
+        "ASTAttr",
+        "ASTDirective",
+        "ASTElement",
+        "ASTElementHandler",
+        "ASTElementHandlers",
+        "ASTExpression",
+        "ASTIfCondition",
+        "ASTIfConditions",
+        "ASTModifiers",
+        "ASTNode",
+        "ASTText",
+        "CompiledResult",
+        "CompilerOptions",
+        "ModuleOptions",
+        "WarningMessage"
+      ],
+      "consumes": [
+        {
+          "cell": "compiler-sfc"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "v3"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "v3",
+      "ownedPaths": [
+        "src/v3/**"
+      ],
+      "publicEntry": "src/v3/index.ts",
+      "publicSymbols": [
+        "computed",
+        "ComputedGetter",
+        "ComputedRef",
+        "ComputedSetter",
+        "customRef",
+        "CustomRefFactory",
+        "DebuggerEvent",
+        "DebuggerEventExtraInfo",
+        "DebuggerOptions",
+        "DeepReadonly",
+        "defineAsyncComponent",
+        "defineComponent",
+        "del",
+        "effectScope",
+        "EffectScope",
+        "ErrorCapturedHook",
+        "getCurrentInstance",
+        "getCurrentScope",
+        "h",
+        "inject",
+        "InjectionKey",
+        "isProxy",
+        "isReactive",
+        "isReadonly",
+        "isRef",
+        "isShallow",
+        "markRaw",
+        "mergeDefaults",
+        "nextTick",
+        "onActivated",
+        "onBeforeMount",
+        "onBeforeUnmount",
+        "onBeforeUpdate",
+        "onDeactivated",
+        "onErrorCaptured",
+        "onMounted",
+        "onRenderTracked",
+        "onRenderTriggered",
+        "onScopeDispose",
+        "onServerPrefetch",
+        "onUnmounted",
+        "onUpdated",
+        "provide",
+        "proxyRefs",
+        "reactive",
+        "ReactiveFlags",
+        "readonly",
+        "ref",
+        "Ref",
+        "RefUnwrapBailTypes",
+        "set",
+        "shallowReactive",
+        "ShallowReactive",
+        "shallowReadonly",
+        "shallowRef",
+        "ShallowRef",
+        "ShallowUnwrapRef",
+        "toRaw",
+        "toRef",
+        "ToRef",
+        "toRefs",
+        "ToRefs",
+        "TrackOpTypes",
+        "TriggerOpTypes",
+        "triggerRef",
+        "unref",
+        "UnwrapNestedRefs",
+        "UnwrapRef",
+        "useAttrs",
+        "useCssModule",
+        "useCssVars",
+        "useListeners",
+        "useSlots",
+        "version",
+        "watch",
+        "WatchCallback",
+        "watchEffect",
+        "WatchEffect",
+        "WatchOptions",
+        "WatchOptionsBase",
+        "watchPostEffect",
+        "WatchSource",
+        "WatchStopHandle",
+        "watchSyncEffect",
+        "WritableComputedOptions",
+        "WritableComputedRef"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-server-renderer",
+      "ownedPaths": [
+        "packages/server-renderer/src/**"
+      ],
+      "publicEntry": "packages/server-renderer/src/index.ts",
+      "publicSymbols": [
+        "createBundleRenderer",
+        "createRenderer"
+      ],
+      "packageName": "vue-server-renderer",
+      "consumes": [
+        {
+          "cell": "compiler"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "platforms"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-template-compiler",
+      "ownedPaths": [
+        "packages/template-compiler/**"
+      ],
+      "publicEntry": "packages/template-compiler/index.js",
+      "publicSymbols": [],
+      "packageName": "vue-template-compiler",
+      "consumes": [
+        {
+          "cell": "platforms"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

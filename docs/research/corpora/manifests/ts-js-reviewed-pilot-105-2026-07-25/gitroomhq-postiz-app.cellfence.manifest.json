@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/backend/src/**",
+      "apps/commands/src/**",
+      "apps/extension/src/**",
+      "apps/frontend/src/**",
+      "apps/orchestrator/src/**",
+      "apps/sdk/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "node",
+      "ownedPaths": [
+        "apps/sdk/src/**"
+      ],
+      "publicEntry": "apps/sdk/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@postiz/node",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postiz-backend",
+      "ownedPaths": [
+        "apps/backend/src/**"
+      ],
+      "publicEntry": "apps/backend/src/api/api.module.ts",
+      "publicSymbols": [
+        "ApiModule"
+      ],
+      "packageName": "postiz-backend",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postiz-command",
+      "ownedPaths": [
+        "apps/commands/src/**"
+      ],
+      "publicEntry": "apps/commands/src/command.module.ts",
+      "publicSymbols": [
+        "CommandModule"
+      ],
+      "packageName": "postiz-command",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postiz-extension",
+      "ownedPaths": [
+        "apps/extension/src/**"
+      ],
+      "publicEntry": "apps/extension/src/background.ts",
+      "publicSymbols": [],
+      "packageName": "postiz-extension",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postiz-frontend",
+      "ownedPaths": [
+        "apps/frontend/src/**"
+      ],
+      "publicEntry": "apps/frontend/src/app/(app)/(preview)/p/[id]/layout.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "postiz-frontend",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postiz-orchestrator",
+      "ownedPaths": [
+        "apps/orchestrator/src/**"
+      ],
+      "publicEntry": "apps/orchestrator/src/activities/autopost.activity.ts",
+      "publicSymbols": [
+        "AutopostActivity"
+      ],
+      "packageName": "postiz-orchestrator",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}
