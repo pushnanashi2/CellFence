@@ -718,6 +718,7 @@ test("precision frontier ignores agent-like external manifest attestation ids", 
     const claimReport = createClaimReport(tempDir);
     const bundleDir = path.join(tempDir, "candidate-bundle");
     const findingId = "sha256:7".padEnd(71, "7");
+    const secondFindingId = "sha256:8".padEnd(71, "8");
     const manifestSha256 = "7".repeat(64);
     writeJson(path.join(bundleDir, "study.json"), {
       schemaVersion: "cellfence.corpus-evidence-bundle.v1",
@@ -762,14 +763,13 @@ test("precision frontier ignores agent-like external manifest attestation ids", 
     });
     writeJson(path.join(bundleDir, "sampling.json"), {
       schemaVersion: "cellfence.corpus-sampling.v1",
-      sampledFindingIds: [findingId],
+      sampledFindingIds: [findingId, secondFindingId],
     });
     writeJsonl(path.join(bundleDir, "labels.jsonl"), []);
-    writeJsonl(path.join(bundleDir, "findings.normalized.jsonl"), [
-      {
+    writeJsonl(path.join(bundleDir, "findings.normalized.jsonl"), [findingId, secondFindingId].map((id, index) => ({
         schemaVersion: "cellfence.corpus-finding.v1",
         studyId: "agent-attestation-candidate",
-        findingId,
+        findingId: id,
         subjectId: "candidate-a",
         repository: "https://github.com/example/candidate-a.git",
         commit: "c".repeat(40),
@@ -778,10 +778,9 @@ test("precision frontier ignores agent-like external manifest attestation ids", 
         precisionEligible: true,
         ruleId: "CELLFENCE_PRIVATE_IMPORT",
         severity: "error",
-        filePath: "src/a.ts",
+        filePath: `src/${index}.ts`,
         message: "private import",
-      },
-    ]);
+      })));
 
     const result = runFrontier([
       "--reviewed-claim-report",
@@ -793,10 +792,16 @@ test("precision frontier ignores agent-like external manifest attestation ids", 
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.deepEqual(report.candidatePool.byRequirement, {
+      external_manifest_attestation_required: 2,
+    });
+    assert.deepEqual(report.candidatePool.subjectsByRequirement, {
       external_manifest_attestation_required: 1,
     });
     assert.equal(report.candidatePool.topSubjects[0].nextAction, "collect_external_manifest_attestation");
-    assert.equal(report.workPlan.externalEvidence.candidateFindingsNeedingExternalManifestAttestation, 1);
+    assert.equal(report.workPlan.externalEvidence.candidateFindingsNeedingExternalManifestAttestation, 2);
+    assert.equal(report.workPlan.externalEvidence.candidateSubjectsNeedingExternalManifestAttestation, 1);
+    assert.equal(report.workPlan.candidatePromotion.findingsNeedingExternalManifestAttestation, 2);
+    assert.equal(report.workPlan.candidatePromotion.subjectsNeedingExternalManifestAttestation, 1);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

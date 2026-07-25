@@ -940,6 +940,29 @@ human/organization labels, and external manifest attestations remain before a
 new preflight can be attempted. Duplicate label rows from the same external
 rater do not count as multiple external raters.
 
+After generating a sealed label worklist, bind its `SHA256SUMS` digest into the
+claim protocol with `precision:protocol:bind-worklists` before running
+preflight:
+
+```bash
+npm run precision:protocol:bind-worklists -- \
+  --protocol reports/corpus/ts-js-confirmation-v1.claim.json \
+  --worklist reports/corpus/ts-js-confirmation-v1-blind-worklist \
+  --in-place
+```
+
+Worklists bind the selected rules, severities, exclusion rules, source bundle
+digest, and pre-label digest. The claim protocol binds the worklist artifact
+digest after generation; adding that digest does not invalidate the sealed
+assignment packages.
+
+Round33 is documented in
+[ts-js-reviewed-pilot-105-2026-07-25-round33-valid-frontier.md](ts-js-reviewed-pilot-105-2026-07-25-round33-valid-frontier.md).
+It reran the 105-subject reviewed work queue, sealed a 1,260-finding external
+label worklist, and produced a valid-but-not-ready preflight with zero input
+issues. It remains blocked on external human/organization labels, external
+manifest attestations, and rule-level sample gaps.
+
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299
 independent labeled trials with zero blocking failures, and more if there are

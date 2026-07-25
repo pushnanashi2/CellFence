@@ -1241,6 +1241,38 @@ test("precision claim preflight gates external manifest review provenance", () =
   }
 });
 
+test("precision claim preflight treats missing external manifest review as evidence gap", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-manifest-gap-"));
+  try {
+    const findings = [finding(1)];
+    const labels = [
+      label(findings[0].findingId, "reviewer-a", "blind_first"),
+      label(findings[0].findingId, "reviewer-b", "blind_second"),
+    ];
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: claimBinding(bundleDir),
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.valid, true);
+    assert.doesNotMatch(report.issues.join("\n"), /external manifest review/);
+    assert.match(report.gateFailures.join("\n"), /external manifest review requires review\.reviewerAttestations/);
+    assert.match(report.gateFailures.join("\n"), /external manifest review requires review\.reviewedAt/);
+    assert.match(report.gateFailures.join("\n"), /external manifest review requires review\.scope/);
+    assert.match(report.gateFailures.join("\n"), /external manifest review requires review\.reviewedManifestSha256/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight accepts reviewed history replay manifest provenance", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-history-review-"));
   try {

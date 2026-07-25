@@ -543,11 +543,14 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
   const sampledByRule = {};
   const byRuleRequirement = {};
   const byRequirement = {};
+  const subjectIdsByRequirement = {};
   let externalIndependentLabelRowsNeeded = 0;
   for (const finding of candidateFindings) {
     increment(byRule, finding.ruleId);
     const requirement = manifestRequirementFor(finding, requirementContext);
     increment(byRequirement, requirement);
+    subjectIdsByRequirement[requirement] ||= new Set();
+    subjectIdsByRequirement[requirement].add(finding.subjectId || "unknown");
     byRuleRequirement[finding.ruleId] ||= {};
     increment(byRuleRequirement[finding.ruleId], requirement);
     if (requirement === "external_independent_label_required") {
@@ -603,6 +606,11 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
     byRule: Object.fromEntries(Object.entries(byRule).sort()),
     sampledByRule: Object.fromEntries(Object.entries(sampledByRule).sort()),
     byRequirement: Object.fromEntries(Object.entries(byRequirement).sort()),
+    subjectsByRequirement: Object.fromEntries(
+      Object.entries(subjectIdsByRequirement)
+        .sort()
+        .map(([requirement, subjectIds]) => [requirement, subjectIds.size]),
+    ),
     byRuleRequirement: Object.fromEntries(Object.entries(byRuleRequirement).sort()),
     externalIndependentLabelRowsNeeded,
     topSubjects: subjectRows.slice(0, topSubjects),
@@ -732,6 +740,7 @@ function buildWorkPlan({ ruleGaps, dilution, candidate, protocol, currentDecisio
   const repositoryAdditions = (dilution.repositoriesOverCap || [])
     .map((repository) => repository.additionalOutsideRepositoryForCap || 0);
   const candidateRequirements = candidate?.byRequirement || {};
+  const candidateSubjectRequirements = candidate?.subjectsByRequirement || {};
   const reviewedExternalCoverage = reviewedClaimReport.labelQuality?.externalRaterCoverage || reviewedClaimReport.externalRaterCoverage || null;
   const reviewedFindingsMissingExternalIndependentLabels = reviewedExternalCoverage?.findingsMissingExternalIndependentLabels ?? null;
   const candidateFindingsNeedingExternalIndependentLabels = candidateRequirements.external_independent_label_required || 0;
@@ -773,14 +782,17 @@ function buildWorkPlan({ ruleGaps, dilution, candidate, protocol, currentDecisio
       candidateExternalIndependentLabelRowsNeeded,
       minimumExternalIndependentLabelRows,
       candidateFindingsNeedingExternalManifestAttestation: candidateRequirements.external_manifest_attestation_required || 0,
+      candidateSubjectsNeedingExternalManifestAttestation: candidateSubjectRequirements.external_manifest_attestation_required || 0,
     },
     candidatePromotion: candidate ? {
       includedFindings: candidate.includedFindings,
       claimPreflightRequiredIncludedFindings: candidate.claimPreflightRequiredIncludedFindings,
       findingsNeedingReviewedManifest: (candidateRequirements.reviewed_manifest_required || 0) + (candidateRequirements.manifest_review_required || 0),
+      subjectsNeedingReviewedManifest: (candidateSubjectRequirements.reviewed_manifest_required || 0) + (candidateSubjectRequirements.manifest_review_required || 0),
       findingsNeedingBlindLabels: candidateRequirements.blind_label_required || 0,
       findingsNeedingExternalIndependentLabels: candidateFindingsNeedingExternalIndependentLabels,
       findingsNeedingExternalManifestAttestation: candidateRequirements.external_manifest_attestation_required || 0,
+      subjectsNeedingExternalManifestAttestation: candidateSubjectRequirements.external_manifest_attestation_required || 0,
     } : null,
   };
 }
@@ -851,6 +863,8 @@ function renderMarkdown(report) {
   lines.push(`- Status: \`${report.workPlan.status}\``);
   lines.push(`- Minimum outside findings for repository balance: ${report.workPlan.repositoryBalance.minimumAdditionalOutsideFindings}`);
   lines.push(`- Minimum external independent label rows still needed: ${report.workPlan.externalEvidence.minimumExternalIndependentLabelRows}`);
+  lines.push(`- Candidate subjects needing external manifest attestation: ${report.workPlan.externalEvidence.candidateSubjectsNeedingExternalManifestAttestation ?? 0}`);
+  lines.push(`- Candidate findings blocked on external manifest attestation: ${report.workPlan.externalEvidence.candidateFindingsNeedingExternalManifestAttestation ?? 0}`);
   lines.push("");
   lines.push(`| Rule | Status | Need selected | Need labels | Need zero-failure trials |`);
   lines.push(`| --- | --- | ---: | ---: | ---: |`);

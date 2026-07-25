@@ -32,6 +32,7 @@
     "precision:pipeline:smoke": "npm run build && node scripts/precision-pipeline-smoke.mjs",
     "precision:labels:validate": "node scripts/precision-labels-validate.mjs",
     "precision:labels:worklist": "node scripts/precision-label-worklist.mjs",
+    "precision:protocol:bind-worklists": "node scripts/precision-bind-worklists.mjs",
     "precision:labels:transfer": "node scripts/precision-label-transfer.mjs",
     "precision:claim:preflight": "node scripts/precision-claim-preflight.mjs",
     "precision:next-cycle": "node scripts/precision-next-cycle.mjs",
