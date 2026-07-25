@@ -22,6 +22,10 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function posixify(value) {
+  return String(value).replace(/\\/g, "/").split(path.sep).join("/");
+}
+
 function finding(overrides) {
   return {
     findingId: overrides.findingId,
@@ -247,7 +251,7 @@ test("precision corpus expansion plan infers current corpus from the current bun
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
-    assert.equal(report.inputs.currentCorpus, path.join(currentBundle, "corpus.json"));
+    assert.equal(report.inputs.currentCorpus, posixify(path.join(currentBundle, "corpus.json")));
     assert.equal(report.inputs.currentCorpusSource, "current-bundle");
     assert.equal(report.candidatePool.topCandidates.some((candidate) => candidate.subjectId === "public-surface"), false);
     assert.equal(report.candidatePool.topCandidates[0].subjectId, "dynamic-heavy");
@@ -275,7 +279,7 @@ test("precision corpus expansion plan can exclude every current corpus subject b
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
-    assert.equal(report.inputs.currentCorpus, currentCorpus);
+    assert.equal(report.inputs.currentCorpus, posixify(currentCorpus));
     assert.equal(report.candidatePool.topCandidates.some((candidate) => candidate.subjectId === "public-surface"), false);
     assert.equal(report.candidatePool.topCandidates[0].subjectId, "dynamic-heavy");
     assert.equal(report.candidatePool.topCandidates[0].projectedSelectedFindings, 3);
