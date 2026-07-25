@@ -194,11 +194,51 @@ test("precision corpus promotion copies manifests and produces a reviewed-corpus
 
     const report = readJson(reportPath);
     assert.equal(report.summary.externalClaimReady, false);
+    assert.equal(report.summary.selectedDeficitCoverage.sampledDeficitCoverageScore, 2);
     assert.equal(report.promotedSubjects[0].subjectId, "candidate-a");
     assert.match(fs.readFileSync(markdownPath, "utf8"), /Precision Corpus Promotion/);
 
     const validation = run(validateScript, ["--corpus", outCorpus]);
     assert.equal(validation.status, 0, validation.stderr || validation.stdout);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("precision corpus promotion rejects zero-deficit candidates before copying manifests", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-promote-zero-gap-"));
+  try {
+    const { currentCorpus, candidateCorpus, candidateBundle, expansionPlan } = createFixture(rootDir);
+    const plan = readJson(expansionPlan);
+    plan.candidatePool.topCandidates[0].sampledDeficitCoverageScore = 0;
+    plan.candidatePool.topCandidates[0].sampledCountsByRule = {
+      CELLFENCE_PRIVATE_IMPORT: 7,
+    };
+    plan.candidatePool.topCandidates[0].totalCountsByRule = {
+      CELLFENCE_PRIVATE_IMPORT: 19,
+    };
+    writeJson(expansionPlan, plan);
+    const outCorpus = path.join(rootDir, "next.json");
+
+    const result = run(promoteScript, [
+      "--current-corpus",
+      currentCorpus,
+      "--candidate-corpus",
+      candidateCorpus,
+      "--candidate-bundle",
+      candidateBundle,
+      "--expansion-plan",
+      expansionPlan,
+      "--out-corpus",
+      outCorpus,
+      "--top",
+      "1",
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /do not cover any current sampled rule deficit/);
+    assert.equal(fs.existsSync(outCorpus), false);
+    assert.equal(fs.existsSync(path.join(rootDir, "manifests", "next")), false);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

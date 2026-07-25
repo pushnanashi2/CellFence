@@ -5,7 +5,7 @@ import path from "node:path";
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-corpus-promote-candidates.mjs --current-corpus docs/research/corpora/current.json --candidate-corpus docs/research/corpora/candidates.json --candidate-bundle reports/corpus/candidate-bundle --expansion-plan reports/corpus/plan.json --out-corpus docs/research/corpora/next.json (--top 10 | --subjects subject-a,subject-b) [--report report.json] [--markdown report.md] [--force]
+  node scripts/precision-corpus-promote-candidates.mjs --current-corpus docs/research/corpora/current.json --candidate-corpus docs/research/corpora/candidates.json --candidate-bundle reports/corpus/candidate-bundle --expansion-plan reports/corpus/plan.json --out-corpus docs/research/corpora/next.json (--top 10 | --subjects subject-a,subject-b) [--report report.json] [--markdown report.md] [--allow-zero-deficit-coverage] [--force]
 
 Copies diagnostic candidate manifests into a frozen reviewed-corpus work queue.
 This records an agent review and candidate provenance, but it does not create
@@ -27,6 +27,7 @@ function parseArgs(argv) {
     top: null,
     reviewer: "codex-agent-reviewer",
     reviewedAt: new Date().toISOString().slice(0, 10),
+    allowZeroDeficitCoverage: false,
     force: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -91,6 +92,8 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--reviewed-at=")) {
       parsed.reviewedAt = requireInlineValue(argument, "--reviewed-at=", "--reviewed-at");
+    } else if (argument === "--allow-zero-deficit-coverage") {
+      parsed.allowZeroDeficitCoverage = true;
     } else if (argument === "--force") {
       parsed.force = true;
     } else if (argument === "--help" || argument === "-h") {
@@ -327,6 +330,42 @@ function selectedCandidateRow(candidates, subjectId) {
   return candidate;
 }
 
+function sampledDeficitCoverage(candidateRow) {
+  if (Number.isFinite(candidateRow?.sampledDeficitCoverageScore)) return candidateRow.sampledDeficitCoverageScore;
+  return Object.values(candidateRow?.sampledCountsByRule || {}).reduce((sum, count) => sum + Number(count || 0), 0);
+}
+
+function selectedDeficitCoverage(promoted) {
+  const byRule = {};
+  let sampledDeficitCoverageScore = 0;
+  for (const entry of promoted) {
+    sampledDeficitCoverageScore += sampledDeficitCoverage(entry.candidateRow);
+    for (const [ruleId, count] of Object.entries(entry.candidateRow?.sampledCountsByRule || {})) {
+      byRule[ruleId] = (byRule[ruleId] || 0) + count;
+    }
+  }
+  return {
+    sampledDeficitCoverageScore,
+    sampledCountsByRule: Object.fromEntries(Object.entries(byRule).sort()),
+  };
+}
+
+function assertPromotionCoversCurrentGap(options, plan, promoted) {
+  if (options.allowZeroDeficitCoverage) return;
+  const dilutionSubjects = new Set(plan.candidatePool?.dilutionTranche?.selectedSubjects || []);
+  const zeroCoverageSubjects = promoted
+    .filter((entry) => sampledDeficitCoverage(entry.candidateRow) <= 0 && !dilutionSubjects.has(entry.subject.id))
+    .map((entry) => entry.subject.id);
+  if (zeroCoverageSubjects.length === 0) return;
+  throw new Error(
+    [
+      "selected candidates do not cover any current sampled rule deficit and are not in the expansion plan dilutionTranche",
+      `zero-coverage subjects: ${zeroCoverageSubjects.join(", ")}`,
+      "rerun a gap-directed expansion plan or pass --allow-zero-deficit-coverage only for a documented exploratory corpus that must not be treated as claim-progress evidence",
+    ].join("; "),
+  );
+}
+
 function buildPromotedCorpus(options) {
   const currentCorpus = readJson(options.currentCorpusPath);
   const candidateSubjects = readCandidateSubjects(options.candidateCorpusPath);
@@ -343,9 +382,14 @@ function buildPromotedCorpus(options) {
   });
   assertNoDuplicatePromotion(currentCorpus, selectedSubjects);
 
+  const selectedEntries = selectedSubjects.map((subject) => ({
+    subject,
+    candidateRow: selectedCandidateRow(candidates, subject.id),
+  }));
+  assertPromotionCoversCurrentGap(options, plan, selectedEntries);
+
   const promoted = [];
-  for (const subject of selectedSubjects) {
-    const candidateRow = selectedCandidateRow(candidates, subject.id);
+  for (const { subject, candidateRow } of selectedEntries) {
     const copyResult = copyCandidateManifest(options, manifestCopies.get(subject.id), subject.id);
     promoted.push({
       subject,
@@ -368,6 +412,7 @@ function buildPromotedCorpus(options) {
       "no dependency install and no target package scripts",
       "exclude repositories already present in the source corpus",
       "candidate subjects must be present in expansionPlan.candidatePool.topCandidates",
+      "selected candidates must cover a current sampled rule deficit unless explicitly marked as repository-dilution work",
       "candidate manifests are copied into docs before the promoted corpus is rerun",
       "diagnostic candidate sampled counts must be recomputed after promotion and repository-cap pruning",
     ],
@@ -380,6 +425,7 @@ function buildPromotedCorpus(options) {
       candidateCorpus: relativePosix(path.dirname(options.outCorpusPath), options.candidateCorpusPath),
       candidateBundle: relativePosix(path.dirname(options.outCorpusPath), options.candidateBundleDir),
       promotedSubjects: promoted.map((entry) => entry.subject.id),
+      selectedDeficitCoverage: selectedDeficitCoverage(promoted),
       reviewer: options.reviewer,
       limitation: "Agent-reviewed promotion only; external human/organization labels and manifest attestations remain required for public claim use.",
       sourceCorpusSelectionPolicy: currentCorpus.selectionPolicy
@@ -421,6 +467,7 @@ function reportFor(options, result) {
       promotedSubjects: result.promoted.length,
       outputSubjects: (result.corpus.subjects || []).length,
       outputCorpusSha256: corpusSha256,
+      selectedDeficitCoverage: selectedDeficitCoverage(result.promoted),
       externalClaimReady: false,
     },
     promotedSubjects: result.promoted.map((entry) => ({
