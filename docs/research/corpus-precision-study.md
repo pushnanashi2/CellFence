@@ -638,9 +638,14 @@ npm run precision:frontier -- \
 
 The frontier report computes rule-level additional zero-failure trials, current
 repository dilution requirements, and candidate subjects that still need
-manifest review. Candidate findings from `infer` manifests remain
-diagnostic-only even when they are high-signal; promote them only by freezing a
-new reviewed-copy holdout.
+manifest review, external manifest attestation, blind labels, or claim
+preflight. Candidate findings from `infer` manifests remain diagnostic-only
+even when they are high-signal; promote them only by freezing a new
+reviewed-copy holdout. `precisionEligible: true` is reported as raw candidate
+material, not as claim-ready evidence. After the frontier can see the required
+manifest attestation and independent labels, it reports
+`claim_preflight_required`; the claim evaluator still makes the final pass/fail
+decision.
 
 Protocol `exclusionRules` are executable only when they are structured objects:
 

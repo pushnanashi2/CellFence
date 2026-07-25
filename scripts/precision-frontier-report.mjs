@@ -6,6 +6,9 @@ const schemaVersion = "cellfence.precision-frontier-report.v1";
 const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
 const defaultMaxRepositoryContribution = 0.1;
+const defaultExternalRaterTypes = ["human", "organization"];
+const defaultMinimumIndependentRaters = 2;
+const nonHumanRaterPattern = /\b(agent|codex|llm|bot|automated)\b/i;
 
 function usage() {
   console.error(`Usage:
@@ -13,8 +16,9 @@ function usage() {
 
 Summarizes why a reviewed precision claim has or has not reached its registered
 threshold, then ranks candidate corpus subjects for the next reviewed holdout.
-Candidate bundles may contain infer-generated manifests, but those findings are
-reported only as review work; they are never counted as claim-ready evidence.`);
+Candidate bundles may contain infer-generated manifests or agent-only labels,
+but those findings are reported only as review work; they are never counted as
+claim evidence.`);
 }
 
 function parseArgs(argv) {
@@ -203,13 +207,26 @@ function claimProtocol(report) {
     ? protocol.blockingSeverities
     : ["error"];
   return {
-    studyId: protocol.studyId || null,
+    studyId: protocol.studyId || report.studyId || null,
     includedRules: Array.isArray(protocol.includedRules) ? protocol.includedRules : [],
     minimumPrecision: protocol.minimumPrecision || report.decision?.target || defaultMinimumPrecision,
     confidence: protocol.confidence || report.decision?.confidence || defaultConfidence,
     blockingSeverities,
     maxRepositoryContribution: protocol.maxRepositoryContribution || defaultMaxRepositoryContribution,
     requireExternalManifestReview: protocol.requireExternalManifestReview === true,
+    allowedManifestReviewerTypes: Array.isArray(protocol.allowedManifestReviewerTypes) && protocol.allowedManifestReviewerTypes.length > 0
+      ? protocol.allowedManifestReviewerTypes
+      : defaultExternalRaterTypes,
+    minimumIndependentRaters: Number.isInteger(protocol.minimumIndependentRaters) && protocol.minimumIndependentRaters > 0
+      ? protocol.minimumIndependentRaters
+      : defaultMinimumIndependentRaters,
+    requireExternalIndependentRaters: protocol.requireExternalIndependentRaters ?? protocol.requireExternalIndependentLabels ?? true,
+    externalRaterTypes: Array.isArray(protocol.externalRaterTypes) && protocol.externalRaterTypes.length > 0
+      ? protocol.externalRaterTypes
+      : defaultExternalRaterTypes,
+    minimumExternalIndependentRaters: Number.isInteger(protocol.minimumExternalIndependentRaters) && protocol.minimumExternalIndependentRaters > 0
+      ? protocol.minimumExternalIndependentRaters
+      : 1,
     targetPopulation: protocol.targetPopulation || null,
   };
 }
@@ -221,6 +238,7 @@ function ruleGap(ruleId, metric, protocol) {
   const lowerBound = blocking.oneSidedLowerBound ?? null;
   const observedPrecision = blocking.observedPrecision ?? null;
   const failures = Math.max(0, trials - successes);
+  const requiredZeroFalsePositiveFindings = metric?.requiredZeroFalsePositiveFindings ?? requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
   const additionalTrialsForLowerBound = additionalSuccessesNeeded(
     successes,
     trials,
@@ -235,11 +253,86 @@ function ruleGap(ruleId, metric, protocol) {
     observedPrecision,
     oneSidedLowerBound: lowerBound,
     additionalZeroFailureTrialsForLowerBound: additionalTrialsForLowerBound,
+    requiredZeroFalsePositiveFindings,
+    selectedFindings: metric?.selectedFindings ?? null,
+    unlabeled: metric?.counts?.unlabeled ?? null,
+    sampleDeficitBeforeLabeling: metric?.sampleDeficitBeforeLabeling ?? null,
     status: lowerBound !== null && lowerBound >= protocol.minimumPrecision ? "satisfied" : "insufficient_evidence",
   };
 }
 
+function ruleGapBlocker(gap) {
+  if ((gap.sampleDeficitBeforeLabeling || 0) > 0) {
+    return `${gap.ruleId} has ${gap.selectedFindings ?? 0} selected finding(s) and needs ${gap.sampleDeficitBeforeLabeling} more selected finding(s) before labeling can meet the per-rule zero-failure requirement`;
+  }
+  if ((gap.unlabeled || 0) > 0) {
+    return `${gap.ruleId} has ${gap.selectedFindings ?? 0} selected finding(s), but ${gap.unlabeled} remain unlabeled; label at least ${gap.requiredZeroFalsePositiveFindings} zero-failure finding(s) for the requested bound`;
+  }
+  return `${gap.ruleId} needs ${gap.additionalZeroFailureTrialsForLowerBound ?? "more than 1000000"} additional zero-failure labeled trial(s)`;
+}
+
+function metricByRule(report, ruleId) {
+  return report.metrics?.byRule?.[ruleId] || report.selectedByRule?.[ruleId] || null;
+}
+
+function reportDecision(report) {
+  if (report.schemaVersion === "cellfence.precision-claim-preflight.v1") {
+    return {
+      status: report.claimReady === true ? "preflight_ready" : "preflight_not_ready",
+      reason: (report.gateFailures || [])[0] || (report.issues || [])[0] || null,
+      observedBlockingPrecision: report.summary?.observedPrecision ?? null,
+      oneSidedLowerBound: report.summary?.oneSidedLowerBound ?? null,
+    };
+  }
+  return {
+    status: report.decision?.status || null,
+    reason: report.decision?.reason || null,
+    observedBlockingPrecision: report.decision?.observedBlockingPrecision ?? null,
+    oneSidedLowerBound: report.decision?.oneSidedLowerBound ?? null,
+  };
+}
+
 function repositoryDilution(report, protocol) {
+  if (report.repositoryContribution) {
+    const contribution = report.repositoryContribution;
+    const repositorySelectedFindings = (contribution.repositories || []).reduce((sum, repository) => {
+      return sum + (repository.selectedFindings || repository.trials || 0);
+    }, 0);
+    const totalSelectedFindings = contribution.totalSelectedFindings
+      ?? report.summary?.selectedFindings
+      ?? repositorySelectedFindings;
+    const rows = (contribution.repositories || [])
+      .filter((repository) => (repository.selectedFindings || repository.trials || 0) > 0)
+      .map((repository) => {
+        const selectedFindings = repository.selectedFindings || repository.trials || 0;
+        const rowContribution = repository.contribution ?? (totalSelectedFindings === 0 ? null : selectedFindings / totalSelectedFindings);
+        const additionalOutsideRepositoryForCap = repository.additionalOtherFindingsNeeded
+          ?? (rowContribution !== null && rowContribution > protocol.maxRepositoryContribution
+            ? Math.ceil((selectedFindings / protocol.maxRepositoryContribution) - totalSelectedFindings)
+            : 0);
+        return {
+          repository: repository.repository,
+          selectedFindings,
+          contribution: rowContribution,
+          observedBlockingPrecision: repository.observedBlockingPrecision ?? null,
+          oneSidedLowerBound: repository.oneSidedLowerBound ?? null,
+          additionalOutsideRepositoryForCap,
+          overLimit: repository.overLimit === true || additionalOutsideRepositoryForCap > 0,
+        };
+      });
+    rows.sort((left, right) => {
+      return (right.additionalOutsideRepositoryForCap - left.additionalOutsideRepositoryForCap)
+        || (right.selectedFindings - left.selectedFindings)
+        || String(left.repository).localeCompare(String(right.repository));
+    });
+    return {
+      countKind: "selected_findings",
+      totalSelectedFindings,
+      maxRepositoryContribution: contribution.maxRepositoryContribution ?? null,
+      maxAllowedRepositoryContribution: contribution.limit ?? protocol.maxRepositoryContribution,
+      repositoriesOverCap: rows.filter((row) => row.overLimit),
+    };
+  }
   const repositories = report.metrics?.repositories?.repositories || [];
   const totalTrials = repositories.reduce((sum, repository) => sum + (repository.trials || 0), 0);
   const rows = repositories
@@ -265,6 +358,7 @@ function repositoryDilution(report, protocol) {
       || String(left.repository).localeCompare(String(right.repository));
   });
   return {
+    countKind: "labeled_trials",
     totalTrials,
     maxRepositoryContribution: report.metrics?.repositories?.maxRepositoryContribution ?? null,
     maxAllowedRepositoryContribution: protocol.maxRepositoryContribution,
@@ -272,23 +366,169 @@ function repositoryDilution(report, protocol) {
   };
 }
 
-function manifestRequirementFor(finding) {
+function repositoryCountFor(row, countKind) {
+  if (countKind === "selected_findings") return row.selectedFindings ?? 0;
+  return row.trials ?? 0;
+}
+
+function repositoryCountLabel(countKind) {
+  return countKind === "selected_findings" ? "Selected findings" : "Trials";
+}
+
+function repositoryAdditionalLabel(countKind) {
+  return countKind === "selected_findings" ? "Additional outside selected findings" : "Additional outside trials";
+}
+
+function repositoryBlockerUnit(countKind) {
+  return countKind === "selected_findings" ? "outside-repository selected finding(s)" : "outside-repository trial(s)";
+}
+
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function reviewAttestations(manifest) {
+  if (Array.isArray(manifest?.review?.reviewerAttestations)) return manifest.review.reviewerAttestations;
+  if (Array.isArray(manifest?.review?.reviewers) && manifest.review.reviewers.every((reviewer) => isRecord(reviewer))) {
+    return manifest.review.reviewers;
+  }
+  return [];
+}
+
+function manifestReviewStatus(manifest) {
+  if (manifest?.reviewStatus) return manifest.reviewStatus;
+  if (manifest?.reviewed === true) return "reviewed";
+  return "unreviewed";
+}
+
+function subjectManifestForFinding(corpus, subject) {
+  if (corpus?.schemaVersion === "cellfence.history-replay.v1") return subject?.before?.manifest || {};
+  return subject?.manifest || {};
+}
+
+function manifestCopyKeyFor(corpus, subjectId) {
+  return corpus?.schemaVersion === "cellfence.history-replay.v1" ? `${subjectId}\0before` : subjectId;
+}
+
+function historyReplayHasCandidateProvenance(context, finding) {
+  if (context.corpus?.schemaVersion !== "cellfence.history-replay.v1") return true;
+  const subject = context.subjects.get(finding.subjectId);
+  const beforeManifest = subject?.before?.manifest || {};
+  const afterManifest = subject?.after?.manifest || {};
+  return beforeManifest.strategy === "copy"
+    && afterManifest.strategy === "reuse-before"
+    && finding.manifestStrategy === "reuse-before"
+    && finding.manifestReviewStatus === "reviewed"
+    && finding.replay?.proofEligibility === "counterfactual_candidate_requires_manual_label"
+    && finding.replay?.replayKind === "single_commit_intro"
+    && finding.replay?.introducedChangedFile === true;
+}
+
+function subjectHasExternalManifestAttestation(context, finding) {
+  const subject = context.subjects.get(finding.subjectId);
+  if (!subject) return false;
+  const manifest = subjectManifestForFinding(context.corpus, subject);
+  if ((manifest.strategy || "existing") !== "copy") return false;
+  if (manifestReviewStatus(manifest) !== "reviewed") return false;
+  const review = manifest.review || {};
+  if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) return false;
+  if (typeof review.scope !== "string" || review.scope.length === 0) return false;
+  if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) return false;
+  const copy = context.manifestCopies.get(manifestCopyKeyFor(context.corpus, finding.subjectId));
+  const copySha256 = copy?.sha256 || copy?.actualSha256 || null;
+  if (copySha256 && review.reviewedManifestSha256 !== copySha256) return false;
+  const allowedTypes = new Set(context.protocol.allowedManifestReviewerTypes);
+  return reviewAttestations(manifest).some((attestation) => {
+    const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
+    return typeof attestation.id === "string"
+      && attestation.id.length > 0
+      && allowedTypes.has(reviewerType)
+      && attestation.independent === true;
+  });
+}
+
+function isAdjudicationLabel(label) {
+  return label?.role === "adjudication"
+    || label?.round === "adjudication"
+    || label?.adjudication === true
+    || label?.adjudicated === true;
+}
+
+function labelRaterType(label) {
+  if (typeof label?.raterType === "string") return label.raterType;
+  if (typeof label?.raterClass === "string") return label.raterClass;
+  return "";
+}
+
+function independentLabelsForFinding(context, findingId) {
+  return (context.labelsByFinding.get(findingId) || []).filter((label) => {
+    return !isAdjudicationLabel(label) && label.sawPeerLabels === false;
+  });
+}
+
+function externalIndependentLabelsForFinding(context, findingId) {
+  const allowedTypes = new Set(context.protocol.externalRaterTypes);
+  return independentLabelsForFinding(context, findingId).filter((label) => {
+    const rater = String(label.rater || "");
+    return allowedTypes.has(labelRaterType(label)) && !nonHumanRaterPattern.test(rater);
+  });
+}
+
+function independentRaterCountForFinding(context, findingId) {
+  return new Set(independentLabelsForFinding(context, findingId).map((label) => label.rater).filter(Boolean)).size;
+}
+
+function manifestRequirementFor(finding, context = null) {
   const strategy = finding.manifestStrategy || "existing";
   const reviewStatus = finding.manifestReviewStatus || "unknown";
   if (strategy === "infer") return "reviewed_manifest_required";
   if (strategy === "copy" && reviewStatus !== "reviewed") return "manifest_review_required";
-  if (finding.precisionEligible === true) return "claim_ready";
-  return "precision_eligibility_required";
+  if (finding.precisionEligible !== true) return "precision_eligibility_required";
+  if (context && !historyReplayHasCandidateProvenance(context, finding)) return "history_replay_provenance_required";
+  if (context?.protocol?.requireExternalManifestReview === true && !subjectHasExternalManifestAttestation(context, finding)) {
+    return "external_manifest_attestation_required";
+  }
+  if (!context || independentRaterCountForFinding(context, finding.findingId) < context.protocol.minimumIndependentRaters) return "blind_label_required";
+  if (
+    context.protocol.requireExternalIndependentRaters === true
+    && externalIndependentLabelsForFinding(context, finding.findingId).length < context.protocol.minimumExternalIndependentRaters
+  ) {
+    return "external_independent_label_required";
+  }
+  return "claim_preflight_required";
 }
 
-function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, topSubjects) {
+function nextActionForRequirements(countsByRequirement) {
+  if (countsByRequirement.reviewed_manifest_required || countsByRequirement.manifest_review_required) return "review_manifest_before_claim";
+  if (countsByRequirement.external_manifest_attestation_required) return "collect_external_manifest_attestation";
+  if (countsByRequirement.history_replay_provenance_required) return "fix_history_replay_provenance";
+  if (countsByRequirement.blind_label_required) return "complete_blind_labels";
+  if (countsByRequirement.external_independent_label_required) return "collect_external_independent_label";
+  if (countsByRequirement.precision_eligibility_required) return "fix_precision_eligibility";
+  if (countsByRequirement.claim_preflight_required) return "run_claim_preflight";
+  return "inspect_candidate";
+}
+
+function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, topSubjects, protocol) {
   if (!bundleDir) return null;
   const study = readJson(path.join(bundleDir, "study.json"));
+  const corpus = readJson(path.join(bundleDir, "corpus.json"));
   const sampling = readJson(path.join(bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(bundleDir, "findings.normalized.jsonl"));
+  const labels = readJsonl(path.join(bundleDir, "labels.jsonl"));
+  const labelsByFinding = groupBy(labels, (label) => label.findingId || "");
   const sampledIds = new Set(sampling.sampledFindingIds || []);
   const included = includeRules.length > 0 ? new Set(includeRules) : null;
   const includedSeverities = new Set(blockingSeverities);
+  const subjects = new Map((corpus.subjects || []).map((subject) => [subject.id, subject]));
+  const manifestCopies = new Map((study.manifestCopies || []).map((copy) => [copy.phase ? `${copy.subjectId}\0${copy.phase}` : copy.subjectId, copy]));
+  const requirementContext = {
+    corpus,
+    labelsByFinding,
+    manifestCopies,
+    protocol,
+    subjects,
+  };
   const candidateFindings = findings.filter((finding) => {
     return (!included || included.has(finding.ruleId))
       && includedSeverities.has(finding.severity || "error");
@@ -300,14 +540,13 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
   const byRequirement = {};
   for (const finding of candidateFindings) {
     increment(byRule, finding.ruleId);
-    const requirement = manifestRequirementFor(finding);
+    const requirement = manifestRequirementFor(finding, requirementContext);
     increment(byRequirement, requirement);
     byRuleRequirement[finding.ruleId] ||= {};
     increment(byRuleRequirement[finding.ruleId], requirement);
   }
   for (const finding of sampledCandidateFindings) increment(sampledByRule, finding.ruleId);
 
-  const manifestCopies = new Map((study.manifestCopies || []).map((copy) => [copy.subjectId, copy]));
   const subjectRows = [];
   for (const [subjectId, subjectFindings] of groupBy(candidateFindings, (finding) => finding.subjectId || "unknown")) {
     const representative = subjectFindings[0] || {};
@@ -315,7 +554,7 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
     const countsByRequirement = {};
     for (const finding of subjectFindings) {
       increment(countsByRule, finding.ruleId);
-      increment(countsByRequirement, manifestRequirementFor(finding));
+      increment(countsByRequirement, manifestRequirementFor(finding, requirementContext));
     }
     subjectRows.push({
       subjectId,
@@ -323,12 +562,12 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
       commit: representative.commit || null,
       manifestStrategy: representative.manifestStrategy || null,
       manifestReviewStatus: representative.manifestReviewStatus || null,
-      manifestCopy: manifestCopies.get(subjectId)?.path || null,
+      manifestCopy: manifestCopies.get(manifestCopyKeyFor(corpus, subjectId))?.path || null,
       totalIncludedFindings: subjectFindings.length,
       sampledIncludedFindings: subjectFindings.filter((finding) => sampledIds.has(finding.findingId)).length,
       countsByRule,
       countsByRequirement,
-      nextAction: countsByRequirement.claim_ready > 0 ? "label_or_adjudicate" : "review_manifest_before_claim",
+      nextAction: nextActionForRequirements(countsByRequirement),
     });
   }
   subjectRows.sort((left, right) => {
@@ -347,7 +586,7 @@ function summarizeCandidateBundle(bundleDir, includeRules, blockingSeverities, t
     includedSeverities: [...includedSeverities].sort(),
     includedFindings: candidateFindings.length,
     sampledIncludedFindings: sampledCandidateFindings.length,
-    claimReadyIncludedFindings: candidateFindings.filter((finding) => manifestRequirementFor(finding) === "claim_ready").length,
+    claimPreflightRequiredIncludedFindings: candidateFindings.filter((finding) => manifestRequirementFor(finding, requirementContext) === "claim_preflight_required").length,
     rawPrecisionEligibleIncludedFindings: candidateFindings.filter((finding) => finding.precisionEligible === true).length,
     byRule: Object.fromEntries(Object.entries(byRule).sort()),
     sampledByRule: Object.fromEntries(Object.entries(sampledByRule).sort()),
@@ -362,19 +601,20 @@ function buildReport(options) {
   const protocol = claimProtocol(reviewedClaimReport);
   const includeRules = options.includeRules.length > 0 ? options.includeRules : protocol.includedRules;
   const zeroFalsePositiveRequiredTrials = requiredZeroFalsePositiveSampleSize(protocol.minimumPrecision, protocol.confidence);
-  const ruleGaps = includeRules.map((ruleId) => ruleGap(ruleId, reviewedClaimReport.metrics?.byRule?.[ruleId], protocol));
-  const candidate = summarizeCandidateBundle(options.candidateBundleDir, includeRules, protocol.blockingSeverities, options.topSubjects);
+  const ruleGaps = includeRules.map((ruleId) => ruleGap(ruleId, metricByRule(reviewedClaimReport, ruleId), protocol));
+  const candidate = summarizeCandidateBundle(options.candidateBundleDir, includeRules, protocol.blockingSeverities, options.topSubjects, protocol);
   const blockers = [];
-  if (reviewedClaimReport.decision?.status !== "pass") blockers.push(`reviewed claim status is ${reviewedClaimReport.decision?.status || "unknown"}`);
+  const currentDecision = reportDecision(reviewedClaimReport);
+  if (currentDecision.status !== "pass" && currentDecision.status !== "preflight_ready") blockers.push(`reviewed claim status is ${currentDecision.status || "unknown"}`);
   for (const gap of ruleGaps) {
-    if (gap.status !== "satisfied") blockers.push(`${gap.ruleId} needs ${gap.additionalZeroFailureTrialsForLowerBound ?? "more than 1000000"} additional zero-failure labeled trial(s)`);
+    if (gap.status !== "satisfied") blockers.push(ruleGapBlocker(gap));
   }
   const dilution = repositoryDilution(reviewedClaimReport, protocol);
   for (const repository of dilution.repositoriesOverCap) {
-    blockers.push(`${repository.repository} exceeds repository contribution cap; add ${repository.additionalOutsideRepositoryForCap} outside-repository trial(s)`);
+    blockers.push(`${repository.repository} exceeds repository contribution cap; add ${repository.additionalOutsideRepositoryForCap} ${repositoryBlockerUnit(dilution.countKind)}`);
   }
-  if (candidate && candidate.claimReadyIncludedFindings === 0 && candidate.includedFindings > 0) {
-    blockers.push("candidate bundle has included findings but none are claim-ready; reviewed manifests are required before claim use");
+  if (candidate && candidate.claimPreflightRequiredIncludedFindings === 0 && candidate.includedFindings > 0) {
+    blockers.push("candidate bundle has included findings but none have reached the claim-preflight-required state; external manifest attestations, blind labels, and claim preflight are required before claim use");
   }
   return {
     schemaVersion,
@@ -389,16 +629,19 @@ function buildReport(options) {
       zeroFalsePositiveRequiredTrials,
     },
     currentReviewedClaim: {
-      status: reviewedClaimReport.decision?.status || null,
-      reason: reviewedClaimReport.decision?.reason || null,
-      observedBlockingPrecision: reviewedClaimReport.decision?.observedBlockingPrecision ?? null,
-      oneSidedLowerBound: reviewedClaimReport.decision?.oneSidedLowerBound ?? null,
+      status: currentDecision.status,
+      reason: currentDecision.reason,
+      observedBlockingPrecision: currentDecision.observedBlockingPrecision,
+      oneSidedLowerBound: currentDecision.oneSidedLowerBound,
       occurrenceTrials: reviewedClaimReport.metrics?.occurrence?.blocking?.trials ?? null,
       occurrenceSuccesses: reviewedClaimReport.metrics?.occurrence?.blocking?.successes ?? null,
       uniqueFingerprintTrials: reviewedClaimReport.metrics?.uniqueFingerprint?.blocking?.trials ?? null,
       uniqueFingerprintSuccesses: reviewedClaimReport.metrics?.uniqueFingerprint?.blocking?.successes ?? null,
       repositoryMacroPrecision: reviewedClaimReport.metrics?.repositories?.repositoryMacroPrecision ?? null,
       claimGateFailures: reviewedClaimReport.claimGates?.failures || [],
+      selectedFindings: reviewedClaimReport.summary?.selectedFindings ?? null,
+      missingLabels: reviewedClaimReport.summary?.missingLabels ?? null,
+      gateFailures: reviewedClaimReport.gateFailures || [],
     },
     ruleGaps,
     repositoryDilution: dilution,
@@ -435,13 +678,17 @@ function renderMarkdown(report) {
   lines.push(`- One-sided lower bound: ${percent(report.currentReviewedClaim.oneSidedLowerBound)}`);
   lines.push(`- Target: ${percent(report.protocol.minimumPrecision)} at ${percent(report.protocol.confidence)} confidence`);
   lines.push(`- Zero-failure trial requirement: ${report.protocol.zeroFalsePositiveRequiredTrials}`);
+  if (report.currentReviewedClaim.selectedFindings !== null || report.currentReviewedClaim.missingLabels !== null) {
+    lines.push(`- Selected findings: ${report.currentReviewedClaim.selectedFindings ?? "n/a"}`);
+    lines.push(`- Missing labels: ${report.currentReviewedClaim.missingLabels ?? "n/a"}`);
+  }
   lines.push("");
   lines.push(`## Rule Gaps`);
   lines.push("");
-  lines.push(`| Rule | Successes | Trials | Failures | Lower bound | Additional zero-failure trials |`);
-  lines.push(`| --- | ---: | ---: | ---: | ---: | ---: |`);
+  lines.push(`| Rule | Selected | Required | Sample deficit | Unlabeled | Successes | Trials | Failures | Lower bound | Additional zero-failure trials |`);
+  lines.push(`| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |`);
   for (const gap of report.ruleGaps) {
-    lines.push(`| \`${gap.ruleId}\` | ${gap.successes} | ${gap.trials} | ${gap.failures} | ${percent(gap.oneSidedLowerBound)} | ${gap.additionalZeroFailureTrialsForLowerBound ?? ">" + 1_000_000} |`);
+    lines.push(`| \`${gap.ruleId}\` | ${gap.selectedFindings ?? "n/a"} | ${gap.requiredZeroFalsePositiveFindings ?? "n/a"} | ${gap.sampleDeficitBeforeLabeling ?? "n/a"} | ${gap.unlabeled ?? "n/a"} | ${gap.successes} | ${gap.trials} | ${gap.failures} | ${percent(gap.oneSidedLowerBound)} | ${gap.additionalZeroFailureTrialsForLowerBound ?? ">" + 1_000_000} |`);
   }
   lines.push("");
   lines.push(`## Repository Balance`);
@@ -449,10 +696,10 @@ function renderMarkdown(report) {
   if (report.repositoryDilution.repositoriesOverCap.length === 0) {
     lines.push("No repository exceeds the configured contribution cap.");
   } else {
-    lines.push(`| Repository | Trials | Contribution | Additional outside trials |`);
+    lines.push(`| Repository | ${repositoryCountLabel(report.repositoryDilution.countKind)} | Contribution | ${repositoryAdditionalLabel(report.repositoryDilution.countKind)} |`);
     lines.push(`| --- | ---: | ---: | ---: |`);
     for (const repository of report.repositoryDilution.repositoriesOverCap) {
-      lines.push(`| ${repository.repository} | ${repository.trials} | ${percent(repository.contribution)} | ${repository.additionalOutsideRepositoryForCap} |`);
+      lines.push(`| ${repository.repository} | ${repositoryCountFor(repository, report.repositoryDilution.countKind)} | ${percent(repository.contribution)} | ${repository.additionalOutsideRepositoryForCap} |`);
     }
   }
   if (report.candidatePool) {
@@ -463,7 +710,7 @@ function renderMarkdown(report) {
     lines.push(`- Included severities: \`${JSON.stringify(report.candidatePool.includedSeverities)}\``);
     lines.push(`- Included findings: ${report.candidatePool.includedFindings}`);
     lines.push(`- Sampled included findings: ${report.candidatePool.sampledIncludedFindings}`);
-    lines.push(`- Claim-ready included findings: ${report.candidatePool.claimReadyIncludedFindings}`);
+    lines.push(`- Findings requiring claim preflight: ${report.candidatePool.claimPreflightRequiredIncludedFindings}`);
     lines.push(`- Raw precision-eligible included findings: ${report.candidatePool.rawPrecisionEligibleIncludedFindings}`);
     lines.push(`- Requirement counts: \`${JSON.stringify(report.candidatePool.byRequirement)}\``);
     lines.push("");
