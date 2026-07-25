@@ -270,7 +270,7 @@ function taskPacket(snapshot) {
   return tasks;
 }
 
-function buildRoundLedger(options, snapshot, claimReportPath, preflightPath) {
+function buildRoundLedger(options, snapshot, sourceHashes) {
   const rounds = [];
   const tasks = taskPacket(snapshot);
   const taskIds = tasks.map((task) => task.id);
@@ -286,8 +286,8 @@ function buildRoundLedger(options, snapshot, claimReportPath, preflightPath) {
       doesNotSatisfyEvidenceGate: true,
       sourceEvidenceChanged: false,
       noSyntheticEvidence: true,
-      inputClaimReportSha256: hashFile(claimReportPath),
-      inputPreflightSha256: preflightPath ? hashFile(preflightPath) : null,
+      inputClaimReportSha256: sourceHashes.claimReportSha256,
+      inputPreflightSha256: sourceHashes.preflightSha256,
       decision: snapshot.decision,
       metrics: {
         blockingPrecision: roundNumber(snapshot.blocking.observedPrecision),
@@ -311,7 +311,11 @@ function buildRoundLedger(options, snapshot, claimReportPath, preflightPath) {
 function buildReport(options, claimReport, preflight) {
   validateInputCompatibility(claimReport, preflight);
   const snapshot = extractClaimSnapshot(claimReport, preflight);
-  const rounds = buildRoundLedger(options, snapshot, options.claimReportPath, options.preflightPath);
+  const sourceHashes = {
+    claimReportSha256: hashFile(options.claimReportPath),
+    preflightSha256: options.preflightPath ? hashFile(options.preflightPath) : null,
+  };
+  const rounds = buildRoundLedger(options, snapshot, sourceHashes);
   return {
     schemaVersion,
     generatedAt: new Date().toISOString(),
@@ -325,9 +329,9 @@ function buildReport(options, claimReport, preflight) {
     sourceGateFailures: snapshot.gateFailures,
     source: {
       claimReportPath: portablePath(options.claimReportPath),
-      claimReportSha256: hashFile(options.claimReportPath),
+      claimReportSha256: sourceHashes.claimReportSha256,
       preflightPath: options.preflightPath ? portablePath(options.preflightPath) : null,
-      preflightSha256: options.preflightPath ? hashFile(options.preflightPath) : null,
+      preflightSha256: sourceHashes.preflightSha256,
     },
     range: {
       fromRound: options.fromRound,
@@ -375,7 +379,7 @@ function taskSummary(taskIds) {
 function renderMarkdown(report) {
   const snapshot = report.currentSnapshot;
   const lines = [
-    "# Precision Rounds 18-100 Handoff",
+    `# Precision Rounds ${report.range.fromRound}-${report.range.toRound} Handoff`,
     "",
     "This ledger carries the round17 precision deficits through the requested",
     "round range. It is not new evidence and it does not create external labels,",

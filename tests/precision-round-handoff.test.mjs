@@ -154,6 +154,7 @@ test("precision round handoff carries deficits through each requested round", ()
   assert.ok(report.residuals.carryForwardTasks.some((task) => task.id === "repo-balance"));
   assert.deepEqual(report.rounds[0].carryForwardTaskIds, report.residuals.carryForwardTasks.map((task) => task.id));
   assert.equal(report.rounds[0].carryForwardTaskRef, "#/residuals/carryForwardTasks");
+  assert.match(fs.readFileSync(outMd, "utf8"), /# Precision Rounds 18-20 Handoff/);
   assert.match(fs.readFileSync(outMd, "utf8"), /\| 20 \| insufficient-evidence /);
   assert.match(fs.readFileSync(outMd, "utf8"), /Evidence progress: false/);
 });
