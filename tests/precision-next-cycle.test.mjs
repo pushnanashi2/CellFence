@@ -27,7 +27,9 @@ function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-function createFixture(rootDir) {
+function createFixture(rootDir, options = {}) {
+  const ruleId = options.ruleId || "CELLFENCE_PRIVATE_IMPORT";
+  const ruleSlug = ruleId.toLowerCase().replace(/^cellfence_/, "").replace(/_/g, "-");
   const subjectDir = path.join(rootDir, "subjects", "next-cycle-demo");
   const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
   const reviewedManifestSourcePath = path.join(rootDir, "manifests", "next-cycle-demo.cellfence.manifest.json");
@@ -40,7 +42,7 @@ function createFixture(rootDir) {
       requireOwnership: true,
       include: ["src/**"],
       exclude: [],
-      requiredRules: ["CELLFENCE_PRIVATE_IMPORT"],
+      requiredRules: [ruleId],
     },
     cells: [
       {
@@ -71,14 +73,14 @@ function createFixture(rootDir) {
       commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       event: "finding.detected",
       command: "check",
-      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      ruleId,
       severity: "error",
       cellId: "app",
       producerCellId: "core",
-      filePath: "src/app/leak.ts",
+      filePath: ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH" ? "src/app/public.ts" : "src/app/leak.ts",
       line: 1,
-      message: "private import",
-      fingerprint: "precision-next-cycle-private-import",
+      message: ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH" ? "public symbol mismatch" : "private import",
+      fingerprint: `precision-next-cycle-${ruleSlug}`,
       outcome: "rejected",
     },
   ]);
@@ -338,6 +340,82 @@ test("precision next cycle freezes bundle, worklist, and unlabeled preflight", (
     assert.match(summary.blockers.join("\n"), /external human\/organization independent label/);
     const externalValidation = readJson(path.join(outDir, "reviewed-corpus-external-validation.json"));
     assert.equal(externalValidation.ok, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle can freeze a rule-scoped public-symbol supplemental cycle", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-public-symbol-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-public-symbol-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createFixture(rootDir, {
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    });
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-public-symbol-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "agent-a,agent-b",
+      "--rater-types",
+      "agent,agent",
+      "--include-rules",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.deepEqual(summary.includedRules, ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]);
+    assert.equal(summary.samplingOptions.includeRulesProvided, true);
+    assert.match(fs.readFileSync(path.join(outDir, "SUMMARY.md"), "utf8"), /included rules: `CELLFENCE_PUBLIC_SYMBOL_MISMATCH`/);
+    const protocol = readJson(path.join(outDir, "protocol.worklist.json"));
+    assert.deepEqual(protocol.claim.includedRules, ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]);
+    const worklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
+    assert.deepEqual(worklist.filters.includedRules, ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]);
+    assert.equal(worklist.summary.selectedFindings, 1);
+    const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
+    assert.equal(preflight.valid, true);
+    assert.equal(preflight.claimReady, false);
+    assert.match(preflight.gateFailures.join("\n"), /CELLFENCE_PUBLIC_SYMBOL_MISMATCH has 1 selected findings/);
+    assert.doesNotMatch(preflight.gateFailures.join("\n"), /CELLFENCE_PRIVATE_IMPORT has 0 selected findings/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle rejects reports bound to a different corpus hash", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-binding-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-binding-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createFixture(rootDir);
+    const corpus = readJson(corpusPath);
+    corpus.description = "stale report hash mismatch";
+    writeJson(corpusPath, corpus);
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-binding-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "agent-a,agent-b",
+      "--rater-types",
+      "agent,agent",
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /report\.environment\.corpusSha256 does not match --corpus/);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });

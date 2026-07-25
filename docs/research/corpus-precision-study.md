@@ -53,8 +53,8 @@ npm run research:reviewed-corpus -- \
   --out reports/corpus/ts-js-blocking-reviewed.corpus-validation.json
 ```
 
-For an external public claim, require review attestations that bind independent
-human or organization reviewers to the exact copied manifest hash:
+For an external public claim, require at least one review attestation that binds
+an independent human or organization reviewer to the exact copied manifest hash:
 
 ```bash
 npm run research:reviewed-corpus -- \
@@ -328,6 +328,38 @@ required for copied reviewed corpus manifests. This path is intended for
 `CELLFENCE_PUBLIC_SYMBOL_MISMATCH` stale-contract replay evidence; it is not a
 shortcut around blind labels, external human/org labels, repository balance, or
 sample-size gates.
+
+For a rule-scoped supplemental packet focused only on public-surface stale
+contract evidence, keep the full sealed bundle but narrow the protocol and
+worklist filters explicitly:
+
+```bash
+npm run history:public-surface:smoke
+```
+
+The smoke builds local exact-commit replay fixtures, seals an unlabeled bundle,
+and confirms that only `CELLFENCE_PUBLIC_SYMBOL_MISMATCH` is selected by the
+supplemental protocol. It is synthetic mechanism validation only. For a real
+corpus report, run the same scoping through the next-cycle helper:
+
+```bash
+npm run precision:next-cycle -- \
+  --study-id ts-js-public-symbol-replay-round31 \
+  --corpus docs/research/corpora/ts-js-public-symbol-replay-round31.json \
+  --report reports/corpus/ts-js-public-symbol-replay-round31.json \
+  --out-dir reports/corpus/ts-js-public-symbol-replay-round31-cycle \
+  --raters external-human-reviewer-1,external-org-reviewer-1 \
+  --rater-types human,organization \
+  --include-rules CELLFENCE_PUBLIC_SYMBOL_MISMATCH \
+  --external-claim \
+  --max-repository-contribution 0.1 \
+  --force
+```
+
+The `--include-rules` value is part of the sealed worklist protocol. Use it only
+when the cycle is deliberately scoped to that rule family; it does not satisfy
+the all-rule claim and must not be merged into a broader denominator without a
+new protocol, worklist, labels, and preflight.
 
 Turn those blockers into an explicit remaining-evidence worklist before starting
 the next round:

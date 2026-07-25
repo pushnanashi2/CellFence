@@ -22,13 +22,15 @@ const defaultIncludedRules = [
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-next-cycle.mjs --study-id id --corpus corpus.json --report corpus-report.json --out-dir reports/corpus/id-cycle --raters reviewer-a,reviewer-b --rater-types human,organization [--force]
+  node scripts/precision-next-cycle.mjs --study-id id --corpus corpus.json --report corpus-report.json --out-dir reports/corpus/id-cycle --raters reviewer-a,reviewer-b --rater-types human,organization [--include-rules rule-a,rule-b] [--force]
 
 Builds the next precision-study cycle from an already executed reviewed corpus
 report. It validates the reviewed corpus, freezes an unlabeled evidence bundle,
 creates a sealed blind-label worklist, runs claim preflight against the unlabeled
 bundle, and writes a summary with the remaining blockers. It never creates
-labels and therefore cannot satisfy the external human/org label gate by itself.`);
+labels and therefore cannot satisfy the external human/org label gate by itself.
+--include-rules narrows the claim protocol and worklist filters to a rule-scoped
+supplemental cycle while preserving the full sealed bundle.`);
 }
 
 function parseArgs(argv) {
@@ -41,6 +43,8 @@ function parseArgs(argv) {
     raterTypes: [],
     targetPopulation: "",
     maxRepositoryContribution: null,
+    includeRules: [...defaultIncludedRules],
+    includeRulesProvided: false,
     force: false,
     externalClaim: false,
   };
@@ -86,6 +90,13 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--max-repository-contribution=")) {
       parsed.maxRepositoryContribution = parseUnitInterval(requireInlineValue(argument, "--max-repository-contribution=", "--max-repository-contribution"), "--max-repository-contribution");
+    } else if (argument === "--include-rules") {
+      parsed.includeRules = parseIncludedRules(requireValue(argv, index, "--include-rules"));
+      parsed.includeRulesProvided = true;
+      index += 1;
+    } else if (argument.startsWith("--include-rules=")) {
+      parsed.includeRules = parseIncludedRules(requireInlineValue(argument, "--include-rules=", "--include-rules"));
+      parsed.includeRulesProvided = true;
     } else if (argument === "--external-claim") {
       parsed.externalClaim = true;
     } else if (argument === "--force") {
@@ -131,6 +142,16 @@ function parseList(value) {
   return String(value).split(",").map((entry) => entry.trim()).filter(Boolean);
 }
 
+function parseIncludedRules(value) {
+  const rules = parseList(value);
+  if (rules.length === 0) throw new Error("--include-rules must contain at least one rule");
+  const knownRules = new Set(defaultIncludedRules);
+  const unknownRules = rules.filter((ruleId) => !knownRules.has(ruleId));
+  if (unknownRules.length > 0) throw new Error(`unknown --include-rules value(s): ${unknownRules.join(", ")}`);
+  if (new Set(rules).size !== rules.length) throw new Error("--include-rules must not contain duplicate rules");
+  return rules;
+}
+
 function parseUnitInterval(value, optionName) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0 || parsed >= 1) throw new Error(`${optionName} must be greater than 0 and less than 1`);
@@ -159,6 +180,28 @@ function writeText(filePath, value) {
 
 function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function validateReportCorpusBinding(corpusPath, reportPath) {
+  const corpus = readJson(corpusPath);
+  const report = readJson(reportPath);
+  const actualCorpusSha256 = hashFile(corpusPath);
+  const reportCorpusSha256 = report.environment?.corpusSha256 || "";
+  if (!reportCorpusSha256) {
+    throw new Error("report.environment.corpusSha256 is required");
+  }
+  if (reportCorpusSha256 && reportCorpusSha256 !== actualCorpusSha256) {
+    throw new Error("report.environment.corpusSha256 does not match --corpus");
+  }
+  if (report.corpusPath && fs.existsSync(report.corpusPath) && hashFile(report.corpusPath) !== actualCorpusSha256) {
+    throw new Error("report.corpusPath points to a different corpus than --corpus");
+  }
+  if (corpus.schemaVersion === "cellfence.history-replay.v1" && report.schemaVersion !== "cellfence.history-replay-study.v1") {
+    throw new Error("history replay corpus requires a history replay report");
+  }
+  if (corpus.schemaVersion === "cellfence.corpus.v1" && report.schemaVersion !== "cellfence.corpus-study.v1") {
+    throw new Error("reviewed corpus requires a corpus study report");
+  }
 }
 
 function posixify(value) {
@@ -302,7 +345,7 @@ function writeWorklistProtocol(protocolPath, options, binding) {
       preLabelArtifactSetSha256: binding.preLabelArtifactSetSha256,
       targetPopulation: options.targetPopulation || `${options.studyId} reviewed TS/JS corpus precision cycle`,
       supportedSyntaxProfile: "ts-js-supported-v1",
-      includedRules: defaultIncludedRules,
+      includedRules: options.includeRules,
       primaryMetric: "blocking_precision",
       minimumPrecision: 0.99,
       confidence: 0.95,
@@ -425,6 +468,7 @@ function writeMarkdown(outPath, summary) {
     "",
     "## Sampling",
     "",
+    `- included rules: \`${summary.includedRules.join(",")}\``,
     `- sampled findings: ${summary.sampling?.sampledFindings ?? "n/a"}`,
     `- repository balance enabled: ${summary.sampling?.repositoryBalance?.enabled === true}`,
     `- repository balance feasible: ${summary.sampling?.repositoryBalance?.feasible ?? "n/a"}`,
@@ -496,6 +540,7 @@ function main() {
     });
     steps.push(step);
     assertExit(step, [0, 1]);
+    validateReportCorpusBinding(options.corpusPath, options.reportPath);
 
     const bundleArgs = [
       path.join(repoRoot, "scripts", "corpus-evidence-bundle.mjs"),
@@ -510,7 +555,7 @@ function main() {
     ];
     if (options.maxRepositoryContribution !== null) {
       bundleArgs.push("--max-repository-contribution", String(options.maxRepositoryContribution));
-      bundleArgs.push("--balance-rules", defaultIncludedRules.join(","));
+      bundleArgs.push("--balance-rules", options.includeRules.join(","));
     }
     step = runStep("unlabeled bundle build", process.execPath, bundleArgs, {
       stdoutPath: path.join(logsDir, "bundle-unlabeled.stdout.log"),
@@ -590,6 +635,7 @@ function main() {
       corpusPath: portablePath(options.corpusPath),
       reportPath: portablePath(options.reportPath),
       outDir: portablePath(options.outDir),
+      includedRules: options.includeRules,
       artifacts: {
         reviewedCorpusValidation: portablePath(reviewedCorpusValidationPath),
         externalCorpusValidation: portablePath(externalCorpusValidationPath),
@@ -611,6 +657,7 @@ function main() {
       },
       samplingOptions: {
         maxRepositoryContribution: options.maxRepositoryContribution,
+        includeRulesProvided: options.includeRulesProvided,
       },
       sampling: samplingSummaryFromBundle(unlabeledBundleDir),
       blockers: [...new Set([
@@ -629,6 +676,7 @@ function main() {
       outDir: summary.outDir,
       preLabelArtifactSetSha256: summary.digests.preLabelArtifactSetSha256,
       blindWorklistArtifactSetSha256,
+      includedRules: summary.includedRules,
       blockers: summary.blockers.length,
       summaryPath: portablePath(summaryJsonPath),
     }, null, 2));

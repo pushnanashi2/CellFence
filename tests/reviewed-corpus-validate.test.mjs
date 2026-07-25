@@ -242,3 +242,202 @@ test("reviewed corpus validator requires attested review metadata for external c
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test("reviewed corpus validator accepts reviewed reuse-before history replay corpora", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-history-ok-"));
+  try {
+    const corpusPath = path.join(tempDir, "history.json");
+    const manifestPath = path.join(tempDir, "manifests", "public-surface.json");
+    writeJson(manifestPath, { schemaVersion: "cellfence.manifest.v1", cells: [] });
+    const manifestSha256 = crypto.createHash("sha256").update(fs.readFileSync(manifestPath)).digest("hex");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.history-replay.v1",
+      selectionPolicy: {
+        date: "2026-07-25",
+        source: "fixture history replay",
+      },
+      subjects: [
+        {
+          id: "public-surface-replay",
+          repository: "https://github.com/example/public-surface.git",
+          beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+          afterCommit: "1111111111111111111111111111111111111111",
+          before: {
+            manifest: {
+              strategy: "copy",
+              source: "manifests/public-surface.json",
+              reviewed: true,
+              reviewStatus: "reviewed",
+              review: {
+                reviewerAttestations: [
+                  {
+                    id: "reviewer-a",
+                    reviewerType: "organization",
+                    independent: true,
+                  },
+                ],
+                reviewedAt: "2026-07-25",
+                reviewedManifestSha256: manifestSha256,
+                scope: "public surface stale-contract replay fixture",
+                boundaryEvidence: ["fixture before manifest"],
+              },
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "reuse-before",
+            },
+          },
+        },
+      ],
+    });
+
+    const result = runValidator(["--corpus", corpusPath, "--external-claim"]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.precisionEligibleSubjects, 1);
+    assert.equal(report.subjects[0].manifestStrategy, "copy->reuse-before");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reviewed corpus validator rejects history replay corpora without proof-eligible manifests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-history-reject-"));
+  try {
+    const corpusPath = path.join(tempDir, "history.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: "public-surface-replay",
+          repository: "https://github.com/example/public-surface.git",
+          beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+          afterCommit: "1111111111111111111111111111111111111111",
+          before: {
+            manifest: {
+              strategy: "existing",
+              reviewStatus: "reviewed",
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "copy",
+              source: "manifests/after.json",
+            },
+          },
+        },
+      ],
+    });
+
+    const result = runValidator(["--corpus", corpusPath]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, false);
+    assert.match(report.issues.join("\n"), /before\.manifest\.strategy=copy/);
+    assert.match(report.issues.join("\n"), /after\.manifest\.strategy=reuse-before/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reviewed corpus validator rejects history replay equal commits", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-history-equal-"));
+  try {
+    const corpusPath = path.join(tempDir, "history.json");
+    const manifestPath = path.join(tempDir, "manifests", "public-surface.json");
+    writeJson(manifestPath, { schemaVersion: "cellfence.manifest.v1", cells: [] });
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: "public-surface-replay",
+          repository: "https://github.com/example/public-surface.git",
+          beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+          afterCommit: "0123456789abcdef0123456789abcdef01234567",
+          before: {
+            manifest: {
+              strategy: "copy",
+              source: "manifests/public-surface.json",
+              reviewed: true,
+              reviewStatus: "reviewed",
+              review: {
+                reviewers: ["reviewer-a"],
+                boundaryEvidence: ["fixture before manifest"],
+              },
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "reuse-before",
+            },
+          },
+        },
+      ],
+    });
+
+    const result = runValidator(["--corpus", corpusPath]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /before and after commits must differ/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reviewed corpus validator rejects reuse-before manifest modifiers", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-reviewed-history-modifiers-"));
+  try {
+    const cases = [
+      ["source", { source: "manifests/after.json" }, /reuse-before cannot set manifest\.source/],
+      ["from", { from: ["cellfence.extra.json"] }, /reuse-before cannot set manifest\.from/],
+      ["preset", { preset: "node" }, /reuse-before cannot set manifest\.preset/],
+      ["path", { path: "custom.cellfence.manifest.json" }, /reuse-before only supports cellfence\.manifest\.json/],
+    ];
+    writeJson(path.join(tempDir, "manifests", "public-surface.json"), { schemaVersion: "cellfence.manifest.v1", cells: [] });
+    for (const [name, afterManifestPatch, expected] of cases) {
+      const corpusPath = path.join(tempDir, `${name}.json`);
+      writeJson(corpusPath, {
+        schemaVersion: "cellfence.history-replay.v1",
+        subjects: [
+          {
+            id: `public-surface-replay-${name}`,
+            repository: "https://github.com/example/public-surface.git",
+            beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+            afterCommit: "1111111111111111111111111111111111111111",
+            before: {
+              manifest: {
+                strategy: "copy",
+                source: "manifests/public-surface.json",
+                reviewed: true,
+                reviewStatus: "reviewed",
+                review: {
+                  reviewers: ["reviewer-a"],
+                  boundaryEvidence: ["fixture before manifest"],
+                },
+              },
+            },
+            after: {
+              manifest: {
+                strategy: "reuse-before",
+                ...afterManifestPatch,
+              },
+            },
+          },
+        ],
+      });
+
+      const result = runValidator(["--corpus", corpusPath]);
+
+      assert.equal(result.status, 1);
+      const report = JSON.parse(result.stdout);
+      assert.match(report.issues.join("\n"), expected);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});

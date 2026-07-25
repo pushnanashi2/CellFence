@@ -620,6 +620,33 @@ test("corpus evidence bundle seals history replay introduced findings", () => {
   }
 });
 
+test("corpus evidence bundle rejects reports bound to a different corpus hash", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-corpus-binding-"));
+  try {
+    const { corpusPath, reportPath } = createFixture(tempDir);
+    const corpus = readJson(corpusPath);
+    corpus.description = "same subject ids, stale report hash mismatch";
+    writeJson(corpusPath, corpus);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /report\.environment\.corpusSha256 does not match --corpus/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus evidence bundle does not mark unattested history replay manifests precision eligible", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-history-unattested-"));
   try {
@@ -627,6 +654,9 @@ test("corpus evidence bundle does not mark unattested history replay manifests p
     const corpus = readJson(corpusPath);
     delete corpus.subjects[0].before.manifest.review;
     writeJson(corpusPath, corpus);
+    const report = readJson(reportPath);
+    report.environment.corpusSha256 = hashFile(corpusPath);
+    writeJson(reportPath, report);
     const bundleDir = path.join(tempDir, "bundle");
 
     const result = runBundle([

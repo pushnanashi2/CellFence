@@ -3,14 +3,16 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
+const defaultManifestPath = "cellfence.manifest.json";
+
 function usage() {
   console.error(`Usage: node scripts/reviewed-corpus-validate.mjs --corpus corpus.json [--out report.json] [--external-claim]
 
 Validates that a corpus is eligible for a reviewed-manifest precision study.
 Infer-manifest onboarding corpora are intentionally rejected: they can measure
 robustness and onboarding friction, but not blocking precision. With
---external-claim, manifest review attestations must identify independent
-human/organization reviewers and bind the reviewed manifest SHA-256.`);
+--external-claim, manifest review attestations must identify at least one
+independent human/organization reviewer and bind the reviewed manifest SHA-256.`);
 }
 
 function parseArgs(argv) {
@@ -96,7 +98,7 @@ function validateExternalReviewAttestation(subject, manifest, manifestSourceSha2
   const review = manifest.review || {};
   const attestations = reviewAttestations(manifest);
   if (attestations.length === 0) {
-    issues.push(`${prefix} external claim review requires review.reviewerAttestations with independent human/organization reviewers`);
+    issues.push(`${prefix} external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer`);
   }
   for (const [index, attestation] of attestations.entries()) {
     const label = `${prefix} review.reviewerAttestations[${index}]`;
@@ -193,17 +195,113 @@ function validateSubject(subject, index, seenIds, corpusDir, options = {}) {
   };
 }
 
+function validateHistoryReplaySubject(subject, index, seenIds, corpusDir, options = {}) {
+  const issues = [];
+  const warnings = [];
+  const prefix = `subjects[${index}]`;
+  if (!isRecord(subject)) {
+    return {
+      id: null,
+      precisionEligible: false,
+      manifestStrategy: "unknown",
+      issues: [`${prefix} must be an object`],
+      warnings,
+    };
+  }
+  if (typeof subject.id !== "string" || subject.id.length === 0) issues.push(`${prefix}.id is required`);
+  if (subject.id && seenIds.has(subject.id)) issues.push(`duplicate subject id: ${subject.id}`);
+  if (subject.id) seenIds.add(subject.id);
+  if (typeof subject.repository !== "string" || subject.repository.length === 0) issues.push(`${prefix}.repository is required`);
+  if (!isExactCommit(subject.beforeCommit)) issues.push(`${subject.id || prefix} beforeCommit must be an exact 40-hex commit`);
+  if (!isExactCommit(subject.afterCommit)) issues.push(`${subject.id || prefix} afterCommit must be an exact 40-hex commit`);
+  if (subject.beforeCommit && subject.afterCommit && subject.beforeCommit === subject.afterCommit) {
+    issues.push(`${subject.id || prefix} before and after commits must differ`);
+  }
+
+  const beforeManifest = subject.before?.manifest || subject.manifest || {};
+  const afterManifest = subject.after?.manifest || subject.manifest || {};
+  const beforeStrategy = beforeManifest.strategy || "existing";
+  const afterStrategy = afterManifest.strategy || "existing";
+  let manifestSourceSha256 = "";
+  let beforeReviewed = false;
+
+  if (beforeStrategy !== "copy") {
+    issues.push(`${subject.id || prefix} history replay precision subjects require before.manifest.strategy=copy`);
+  } else {
+    beforeReviewed = beforeManifest.reviewStatus === "reviewed" && beforeManifest.reviewed === true;
+    if (beforeManifest.reviewStatus !== "reviewed") {
+      issues.push(`${subject.id || prefix} before copy manifest must set reviewStatus=reviewed`);
+    }
+    if (beforeManifest.reviewed !== true) {
+      issues.push(`${subject.id || prefix} before copy manifest must set reviewed=true for replay proof eligibility`);
+    }
+    if (typeof beforeManifest.source !== "string" || beforeManifest.source.length === 0) {
+      issues.push(`${subject.id || prefix} before copy manifest requires source`);
+    } else {
+      const sourcePath = path.resolve(corpusDir, beforeManifest.source);
+      if (!isPathWithin(corpusDir, sourcePath)) issues.push(`${subject.id || prefix} before manifest.source escapes the corpus directory`);
+      else if (!fs.existsSync(sourcePath)) issues.push(`${subject.id || prefix} before manifest.source not found: ${beforeManifest.source}`);
+      else manifestSourceSha256 = sha256File(sourcePath);
+    }
+    const reviewers = reviewReaders(beforeManifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
+    if (reviewers.length === 0) issues.push(`${subject.id || prefix} reviewed before copy manifest requires reviewedBy or review.reviewers`);
+    if (!Array.isArray(beforeManifest.review?.boundaryEvidence) && !Array.isArray(beforeManifest.boundaryEvidence)) {
+      warnings.push(`${subject.id || prefix} reviewed before copy manifest should cite boundaryEvidence`);
+    }
+  }
+  if (afterStrategy !== "reuse-before") {
+    issues.push(`${subject.id || prefix} history replay precision subjects require after.manifest.strategy=reuse-before`);
+  } else {
+    if (afterManifest.source !== undefined) {
+      issues.push(`${subject.id || prefix} after manifest.strategy=reuse-before cannot set manifest.source`);
+    }
+    if (afterManifest.from !== undefined) {
+      issues.push(`${subject.id || prefix} after manifest.strategy=reuse-before cannot set manifest.from`);
+    }
+    if (afterManifest.preset !== undefined) {
+      issues.push(`${subject.id || prefix} after manifest.strategy=reuse-before cannot set manifest.preset`);
+    }
+    if ((afterManifest.path || defaultManifestPath) !== defaultManifestPath) {
+      issues.push(`${subject.id || prefix} after manifest.strategy=reuse-before only supports ${defaultManifestPath}`);
+    }
+  }
+  if (options.externalClaim && beforeReviewed) {
+    validateExternalReviewAttestation(subject, beforeManifest, manifestSourceSha256, issues);
+  }
+
+  return {
+    id: subject.id || null,
+    repository: subject.repository || null,
+    beforeCommit: subject.beforeCommit || null,
+    afterCommit: subject.afterCommit || null,
+    manifestStrategy: `${beforeStrategy}->${afterStrategy}`,
+    beforeManifestStrategy: beforeStrategy,
+    beforeManifestReviewStatus: beforeManifest.reviewStatus || "unknown",
+    afterManifestStrategy: afterStrategy,
+    manifestSourceSha256: manifestSourceSha256 || null,
+    precisionEligible: beforeReviewed && afterStrategy === "reuse-before",
+    issues,
+    warnings,
+  };
+}
+
 function validateCorpus(corpusPath, options = {}) {
   const corpus = readJson(corpusPath);
   const corpusDir = path.dirname(corpusPath);
   const issues = [];
   const warnings = [];
-  if (corpus.schemaVersion !== "cellfence.corpus.v1") issues.push("corpus schemaVersion must be cellfence.corpus.v1");
+  if (!["cellfence.corpus.v1", "cellfence.history-replay.v1"].includes(corpus.schemaVersion)) {
+    issues.push("corpus schemaVersion must be cellfence.corpus.v1 or cellfence.history-replay.v1");
+  }
   if (!Array.isArray(corpus.subjects) || corpus.subjects.length === 0) issues.push("corpus subjects must be a non-empty array");
   if (!isRecord(corpus.selectionPolicy)) warnings.push("reviewed precision corpus should include selectionPolicy");
   const seenIds = new Set();
   const subjects = Array.isArray(corpus.subjects)
-    ? corpus.subjects.map((subject, index) => validateSubject(subject, index, seenIds, corpusDir, options))
+    ? corpus.subjects.map((subject, index) => (
+      corpus.schemaVersion === "cellfence.history-replay.v1"
+        ? validateHistoryReplaySubject(subject, index, seenIds, corpusDir, options)
+        : validateSubject(subject, index, seenIds, corpusDir, options)
+    ))
     : [];
   for (const subject of subjects) {
     issues.push(...subject.issues);

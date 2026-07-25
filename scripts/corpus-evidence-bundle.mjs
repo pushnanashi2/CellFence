@@ -257,6 +257,26 @@ function hashFile(filePath) {
   return hashBuffer(fs.readFileSync(filePath));
 }
 
+function validateReportCorpusBinding(corpusPath, corpus, report) {
+  const actualCorpusSha256 = hashFile(corpusPath);
+  const reportCorpusSha256 = report.environment?.corpusSha256 || "";
+  if (!reportCorpusSha256) {
+    throw new Error("report.environment.corpusSha256 is required");
+  }
+  if (reportCorpusSha256 && reportCorpusSha256 !== actualCorpusSha256) {
+    throw new Error("report.environment.corpusSha256 does not match --corpus");
+  }
+  if (report.corpusPath && fs.existsSync(report.corpusPath) && hashFile(report.corpusPath) !== actualCorpusSha256) {
+    throw new Error("report.corpusPath points to a different corpus than --corpus");
+  }
+  if (corpus.schemaVersion === "cellfence.history-replay.v1" && report.schemaVersion !== "cellfence.history-replay-study.v1") {
+    throw new Error("history replay corpus requires a history replay report");
+  }
+  if (corpus.schemaVersion === "cellfence.corpus.v1" && report.schemaVersion !== "cellfence.corpus-study.v1") {
+    throw new Error("reviewed corpus requires a corpus study report");
+  }
+}
+
 function posixify(value) {
   return String(value).replace(/\\/g, "/").split(path.sep).join("/");
 }
@@ -1207,6 +1227,15 @@ function validateBundle(bundleDir) {
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") findings.push("study.json has unexpected schemaVersion");
   if (!corpusSchemaVersions.has(corpus.schemaVersion)) findings.push("corpus.json has unexpected schemaVersion");
   if (!reportSchemaVersions.has(report.schemaVersion)) findings.push("report.json has unexpected schemaVersion");
+  if (report.environment?.corpusSha256 && report.environment.corpusSha256 !== hashFile(path.join(bundleDir, "corpus.json"))) {
+    findings.push("report.environment.corpusSha256 does not match sealed corpus.json");
+  }
+  if (corpus.schemaVersion === "cellfence.history-replay.v1" && report.schemaVersion !== "cellfence.history-replay-study.v1") {
+    findings.push("history replay corpus requires a history replay report");
+  }
+  if (corpus.schemaVersion === "cellfence.corpus.v1" && report.schemaVersion !== "cellfence.corpus-study.v1") {
+    findings.push("reviewed corpus requires a corpus study report");
+  }
   if (canonicalJson(study.environment || {}) !== canonicalJson(report.environment || {})) {
     findings.push("study.environment does not match sealed report.environment");
   }
@@ -1330,6 +1359,7 @@ function buildBundle(options) {
   try {
     const corpus = readJson(options.corpusPath);
     const report = readJson(options.reportPath);
+    validateReportCorpusBinding(options.corpusPath, corpus, report);
     const rawFindings = collectRawFindings(report, options.studyId, corpus);
     const normalizedFindings = sortFindings(normalizeFindings(options.studyId, rawFindings));
     const sampling = deterministicSample(normalizedFindings, report.environment?.corpusSha256 || hashFile(options.corpusPath), {
