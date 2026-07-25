@@ -1,0 +1,370 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Exploratory monorepo-focused TS/JS candidate corpus generated on 2026-07-25 from GitHub code search seeds for pnpm workspaces, workspace protocol, Turborepo, and Nx. This is diagnostic only, not reviewed precision evidence.",
+  "selectionPolicy": {
+    "date": "2026-07-25",
+    "source": "GitHub code search + exact default-branch git ls-remote",
+    "queries": [
+      "packages: filename:pnpm-workspace.yaml",
+      "workspace:* filename:package.json language:JSON",
+      "filename:turbo.json language:JSON",
+      "filename:nx.json language:JSON"
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "primary language TypeScript or JavaScript",
+      "stars >= 100",
+      "diskUsageKb <= 100000",
+      "not already present in the 105 reviewed corpus, 200 original diagnostic corpus, or gap-directed 40 corpus",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no dependency install, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer and production scope results are candidate-sourcing diagnostics only; they are excluded from precision denominators until manifests and labels are externally reviewed."
+  },
+  "subjects": [
+    {
+      "id": "deepnotesapp-deepnotes",
+      "repository": "https://github.com/DeepNotesApp/DeepNotes.git",
+      "commit": "70f6c7edb00159b7011d3ac5710795631432f219",
+      "metadata": {
+        "nameWithOwner": "DeepNotesApp/DeepNotes",
+        "url": "https://github.com/DeepNotesApp/DeepNotes",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 601,
+        "forks": 53,
+        "diskUsageKb": 25939,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lironer-bundlemon",
+      "repository": "https://github.com/LironEr/bundlemon.git",
+      "commit": "945185cb4b918fb9497b1f51cb17154638337f62",
+      "metadata": {
+        "nameWithOwner": "LironEr/bundlemon",
+        "url": "https://github.com/LironEr/bundlemon",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 174,
+        "forks": 11,
+        "diskUsageKb": 6949,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "voltagent-voltagent",
+      "repository": "https://github.com/VoltAgent/voltagent.git",
+      "commit": "3377f6d1fd05d86617f54628d785eef7c9c0a607",
+      "metadata": {
+        "nameWithOwner": "VoltAgent/voltagent",
+        "url": "https://github.com/VoltAgent/voltagent",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 10143,
+        "forks": 1056,
+        "diskUsageKb": 35250,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "graz-sh-graz",
+      "repository": "https://github.com/graz-sh/graz.git",
+      "commit": "5dd51c94537a71b994688cc7bc37e4d1979badc5",
+      "metadata": {
+        "nameWithOwner": "graz-sh/graz",
+        "url": "https://github.com/graz-sh/graz",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 123,
+        "forks": 36,
+        "diskUsageKb": 11250,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "infinitered-reactotron",
+      "repository": "https://github.com/infinitered/reactotron.git",
+      "commit": "763c1c8e0d4f33d6357c3ee95567ee595eb287e0",
+      "metadata": {
+        "nameWithOwner": "infinitered/reactotron",
+        "url": "https://github.com/infinitered/reactotron",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 15578,
+        "forks": 971,
+        "diskUsageKb": 60859,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lmk123-migpt-cli",
+      "repository": "https://github.com/lmk123/migpt-cli.git",
+      "commit": "7f97348076a244e48085206234fa00bf4ea3142f",
+      "metadata": {
+        "nameWithOwner": "lmk123/migpt-cli",
+        "url": "https://github.com/lmk123/migpt-cli",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 478,
+        "forks": 86,
+        "diskUsageKb": 350,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "n8tb1t-use-scroll-position",
+      "repository": "https://github.com/n8tb1t/use-scroll-position.git",
+      "commit": "a139200226e297a63afa5d84cafaff84454c876f",
+      "metadata": {
+        "nameWithOwner": "n8tb1t/use-scroll-position",
+        "url": "https://github.com/n8tb1t/use-scroll-position",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 629,
+        "forks": 62,
+        "diskUsageKb": 2767,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "rbadillap-pastecn",
+      "repository": "https://github.com/rbadillap/pastecn.git",
+      "commit": "2a23bb886acaf14012b667c3a4f52765ff58c016",
+      "metadata": {
+        "nameWithOwner": "rbadillap/pastecn",
+        "url": "https://github.com/rbadillap/pastecn",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 130,
+        "forks": 5,
+        "diskUsageKb": 8281,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "rionlabs-kanji-sh",
+      "repository": "https://github.com/rionlabs/kanji.sh.git",
+      "commit": "fe74ab9d3b30b01e9180bb24ff5b66a3bf8e285a",
+      "metadata": {
+        "nameWithOwner": "rionlabs/kanji.sh",
+        "url": "https://github.com/rionlabs/kanji.sh",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 135,
+        "forks": 21,
+        "diskUsageKb": 10757,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "rx-angular-rx-angular",
+      "repository": "https://github.com/rx-angular/rx-angular.git",
+      "commit": "bac373009c8be2013684b0565df9c8c90aed568c",
+      "metadata": {
+        "nameWithOwner": "rx-angular/rx-angular",
+        "url": "https://github.com/rx-angular/rx-angular",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1966,
+        "forks": 208,
+        "diskUsageKb": 65709,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "smapiot-piral",
+      "repository": "https://github.com/smapiot/piral.git",
+      "commit": "e99325cd748f4855286bd1e1436aa4b09e5bbad0",
+      "metadata": {
+        "nameWithOwner": "smapiot/piral",
+        "url": "https://github.com/smapiot/piral",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 1917,
+        "forks": 136,
+        "diskUsageKb": 26402,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tenngoxars-wemd",
+      "repository": "https://github.com/tenngoxars/WeMD.git",
+      "commit": "8885c39061bdaa6cfeb7490c0d96061bf91916db",
+      "metadata": {
+        "nameWithOwner": "tenngoxars/WeMD",
+        "url": "https://github.com/tenngoxars/WeMD",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 881,
+        "forks": 121,
+        "diskUsageKb": 6312,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "thecodacus-openwebcontainer",
+      "repository": "https://github.com/thecodacus/OpenWebContainer.git",
+      "commit": "9550cef61c0a793cf7bbfb829a978972c03775d2",
+      "metadata": {
+        "nameWithOwner": "thecodacus/OpenWebContainer",
+        "url": "https://github.com/thecodacus/OpenWebContainer",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 176,
+        "forks": 38,
+        "diskUsageKb": 691,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tjallingt-react-youtube",
+      "repository": "https://github.com/tjallingt/react-youtube.git",
+      "commit": "d2d147ac53ed9aa7ca2cde92bad425e9284b7298",
+      "metadata": {
+        "nameWithOwner": "tjallingt/react-youtube",
+        "url": "https://github.com/tjallingt/react-youtube",
+        "defaultBranch": "canary",
+        "primaryLanguage": "TypeScript",
+        "stars": 1902,
+        "forks": 223,
+        "diskUsageKb": 2468,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tsotimus-vite-plugin-csp-guard",
+      "repository": "https://github.com/tsotimus/vite-plugin-csp-guard.git",
+      "commit": "f159454b0ed7f561c41da2f1129bda8559dcc6b8",
+      "metadata": {
+        "nameWithOwner": "tsotimus/vite-plugin-csp-guard",
+        "url": "https://github.com/tsotimus/vite-plugin-csp-guard",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 103,
+        "forks": 2,
+        "diskUsageKb": 1528,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "usesend-usesend",
+      "repository": "https://github.com/usesend/useSend.git",
+      "commit": "bd83535599b53fbf0f5cc84bcdbcf63c8d35be99",
+      "metadata": {
+        "nameWithOwner": "usesend/useSend",
+        "url": "https://github.com/usesend/useSend",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 4526,
+        "forks": 401,
+        "diskUsageKb": 12954,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "voquill-voquill",
+      "repository": "https://github.com/voquill/voquill.git",
+      "commit": "6e5c3fbdd5ca67de7d7fa73b465cf5e167a4ccc3",
+      "metadata": {
+        "nameWithOwner": "voquill/voquill",
+        "url": "https://github.com/voquill/voquill",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 987,
+        "forks": 122,
+        "diskUsageKb": 85266,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "zoonk-zoonk",
+      "repository": "https://github.com/zoonk/zoonk.git",
+      "commit": "0c3099180a156e863b67dc9f5bc2d6fc09aafe84",
+      "metadata": {
+        "nameWithOwner": "zoonk/zoonk",
+        "url": "https://github.com/zoonk/zoonk",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 143,
+        "forks": 11,
+        "diskUsageKb": 43929,
+        "selectionQuery": "gap-directed-monorepo-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}
