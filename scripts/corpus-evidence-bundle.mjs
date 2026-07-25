@@ -50,7 +50,8 @@ sampling metadata, optional manual labels, copied manifests/logs, and SHA256SUMS
 Sampling defaults to the zero-false-positive sample size needed for a one-sided
 95% lower bound of 99% precision, capped per rule. Override with
 --minimum-precision, --confidence, or --per-rule-cap only when the study
-protocol pre-registers a different claim.`);
+protocol pre-registers a different claim. Use --max-repository-contribution for
+claim-bound bundles that need deterministic repository-balance sampling.`);
 }
 
 function parseArgs(argv) {
@@ -65,6 +66,8 @@ function parseArgs(argv) {
     confidence: defaultConfidence,
     perRuleCap: null,
     minPerRepository: defaultMinPerRepository,
+    maxRepositoryContribution: null,
+    balanceRules: [],
     preLabelArtifactSetSha256: "",
     force: false,
     validate: false,
@@ -121,6 +124,16 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--min-per-repository=")) {
       parsed.minPerRepository = parsePositiveInteger(requireInlineValue(argument, "--min-per-repository=", "--min-per-repository"), "--min-per-repository");
+    } else if (argument === "--max-repository-contribution") {
+      parsed.maxRepositoryContribution = parseUnitInterval(requireValue(argv, index, "--max-repository-contribution"), "--max-repository-contribution");
+      index += 1;
+    } else if (argument.startsWith("--max-repository-contribution=")) {
+      parsed.maxRepositoryContribution = parseUnitInterval(requireInlineValue(argument, "--max-repository-contribution=", "--max-repository-contribution"), "--max-repository-contribution");
+    } else if (argument === "--balance-rules") {
+      parsed.balanceRules = parseList(requireValue(argv, index, "--balance-rules"));
+      index += 1;
+    } else if (argument.startsWith("--balance-rules=")) {
+      parsed.balanceRules = parseList(requireInlineValue(argument, "--balance-rules=", "--balance-rules"));
     } else if (argument === "--prelabel-artifact-set-sha256") {
       parsed.preLabelArtifactSetSha256 = requireSha256(requireValue(argv, index, "--prelabel-artifact-set-sha256"), "--prelabel-artifact-set-sha256");
       index += 1;
@@ -164,6 +177,10 @@ function parsePositiveInteger(value, optionName) {
     throw new Error(`${optionName} must be a positive integer`);
   }
   return parsed;
+}
+
+function parseList(value) {
+  return String(value).split(",").map((entry) => entry.trim()).filter(Boolean);
 }
 
 function requireSha256(value, optionName) {
@@ -499,12 +516,18 @@ function groupedBy(values, keyFn) {
   return groups;
 }
 
+function increment(counts, key, amount = 1) {
+  counts[key] = (counts[key] || 0) + amount;
+}
+
 function deterministicSample(findings, corpusSha256, options = {}) {
   const minimumPrecision = options.minimumPrecision || defaultMinimumPrecision;
   const confidence = options.confidence || defaultConfidence;
   const powerBasedPerRuleCap = requiredZeroFalsePositiveSampleSize(minimumPrecision, confidence);
   const perRuleCap = options.perRuleCap || powerBasedPerRuleCap;
   const minPerRepository = options.minPerRepository || defaultMinPerRepository;
+  const maxRepositoryContribution = options.maxRepositoryContribution || null;
+  const balanceRules = new Set(options.balanceRules || []);
   const seed = `sha256:${corpusSha256}`;
   const selectedIds = new Set();
   const byRule = groupedBy(findings, (finding) => finding.ruleId);
@@ -532,12 +555,15 @@ function deterministicSample(findings, corpusSha256, options = {}) {
     }
   }
 
+  const repositoryBalance = maxRepositoryContribution === null
+    ? { enabled: false, maxRepositoryContribution: null, removedFindingIds: [] }
+    : enforceRepositoryContribution(findings, selectedIds, seed, maxRepositoryContribution, perRuleCap, balanceRules);
   const sampledFindings = sortFindings(findings.filter((finding) => selectedIds.has(finding.findingId)));
   const precisionEligibleFindings = findings.filter((finding) => finding.precisionEligible);
   return {
     schemaVersion: "cellfence.corpus-sampling.v1",
     seed,
-    method: "all findings when a rule has no more findings than the pre-registered per-rule cap; otherwise deterministic per-rule sampling, then ensure a minimum number of findings per repository when available",
+    method: "all findings when a rule has no more findings than the pre-registered per-rule cap; otherwise deterministic per-rule sampling, then ensure a minimum number of findings per repository when available; optionally remove deterministic over-cap repository findings when --max-repository-contribution is set",
     powerAnalysis: {
       metric: "one-sided exact binomial lower bound",
       zeroFalsePositiveMinimumPrecision: minimumPrecision,
@@ -546,6 +572,9 @@ function deterministicSample(findings, corpusSha256, options = {}) {
     },
     perRuleCap,
     minPerRepository,
+    maxRepositoryContribution,
+    balanceRules: [...balanceRules].sort(),
+    repositoryBalance,
     population: {
       totalFindings: findings.length,
       sampledFindings: sampledFindings.length,
@@ -558,6 +587,84 @@ function deterministicSample(findings, corpusSha256, options = {}) {
     sampledFindingIds: sampledFindings.map((finding) => finding.findingId),
     sampledByRule: Object.fromEntries([...groupedBy(sampledFindings, (finding) => finding.ruleId)].map(([ruleId, ruleFindings]) => [ruleId, ruleFindings.length]).sort()),
   };
+}
+
+function repositoryKeyForSampling(finding) {
+  return finding.repository || finding.subjectId || "unknown";
+}
+
+function repositoryContribution(selectedFindings) {
+  const byRepository = groupedBy(selectedFindings, repositoryKeyForSampling);
+  const rows = [...byRepository.entries()].map(([repository, repositoryFindings]) => ({
+    repository,
+    count: repositoryFindings.length,
+    contribution: selectedFindings.length === 0 ? 0 : repositoryFindings.length / selectedFindings.length,
+  })).sort((left, right) => {
+    return (right.contribution - left.contribution)
+      || (right.count - left.count)
+      || left.repository.localeCompare(right.repository);
+  });
+  return rows[0] || null;
+}
+
+function enforceRepositoryContribution(findings, selectedIds, seed, maxRepositoryContribution, perRuleCap, balanceRules) {
+  const findingsById = new Map(findings.map((finding) => [finding.findingId, finding]));
+  const removedFindingIds = [];
+  const selectedBalanceFindings = () => findings.filter((finding) => {
+    return selectedIds.has(finding.findingId)
+      && (balanceRules.size === 0 || balanceRules.has(finding.ruleId))
+      && (finding.severity || "error") === "error";
+  });
+  const initialRepositoryCount = groupedBy(
+    selectedBalanceFindings(),
+    repositoryKeyForSampling,
+  ).size;
+  const minimumRepositories = Math.ceil(1 / maxRepositoryContribution);
+  if (initialRepositoryCount < minimumRepositories) {
+    return {
+      enabled: true,
+      feasible: false,
+      maxRepositoryContribution,
+      minimumRepositories,
+      repositoriesWithSampledFindings: initialRepositoryCount,
+      removedFindingIds,
+    };
+  }
+  for (;;) {
+    const selectedFindings = selectedBalanceFindings();
+    const highest = repositoryContribution(selectedFindings);
+    if (!highest || highest.contribution <= maxRepositoryContribution) break;
+    const ruleCounts = {};
+    for (const finding of selectedFindings) increment(ruleCounts, finding.ruleId);
+    const repositoryFindings = selectedFindings
+      .filter((finding) => repositoryKeyForSampling(finding) === highest.repository)
+      .sort((left, right) => {
+        return removablePriority(right, ruleCounts, perRuleCap) - removablePriority(left, ruleCounts, perRuleCap)
+          || deterministicRank(seed, right.findingId).localeCompare(deterministicRank(seed, left.findingId));
+      });
+    const removable = repositoryFindings.find((finding) => findingsById.has(finding.findingId));
+    if (!removable) break;
+    selectedIds.delete(removable.findingId);
+    removedFindingIds.push(removable.findingId);
+  }
+  return {
+    enabled: true,
+    feasible: true,
+    maxRepositoryContribution,
+    minimumRepositories,
+    repositoriesWithSampledFindings: groupedBy(
+      selectedBalanceFindings(),
+      repositoryKeyForSampling,
+    ).size,
+    removedFindingIds,
+  };
+}
+
+function removablePriority(finding, ruleCounts, perRuleCap) {
+  const count = ruleCounts[finding.ruleId] || 0;
+  if (count > perRuleCap) return 3;
+  if (count > 1) return 2;
+  return 1;
 }
 
 function writeSha256Sums(bundleDir) {
@@ -857,6 +964,8 @@ function buildBundle(options) {
       confidence: options.confidence,
       perRuleCap: options.perRuleCap,
       minPerRepository: options.minPerRepository,
+      maxRepositoryContribution: options.maxRepositoryContribution,
+      balanceRules: options.balanceRules,
     });
     const sampledFindingSet = new Set(sampling.sampledFindingIds);
     const sampledFindings = normalizedFindings.filter((finding) => sampledFindingSet.has(finding.findingId));

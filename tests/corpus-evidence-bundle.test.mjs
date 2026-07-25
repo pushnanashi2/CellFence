@@ -213,6 +213,113 @@ function createFixture(tempDir) {
   return { auditLogPath, corpusPath, reportPath };
 }
 
+function createRepositoryCapFixture(tempDir) {
+  const corpusPath = path.join(tempDir, "corpus-cap.json");
+  const reportPath = path.join(tempDir, "report-cap.json");
+  const subjects = [];
+  const reportSubjects = [];
+  for (const [subjectId, findingCount] of [["repo-a", 10], ["repo-b", 2]]) {
+    const subjectDir = path.join(tempDir, "subjects", subjectId);
+    const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
+    const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
+    writeJson(manifestPath, {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: { requireOwnership: true, include: ["src/**"], exclude: [], requiredRules: [] },
+      cells: [
+        {
+          id: subjectId,
+          ownedPaths: [`src/${subjectId}/**`],
+          publicEntry: `src/${subjectId}/public.ts`,
+          publicSymbols: [subjectId],
+          consumes: [],
+          producesArtifacts: [],
+        },
+      ],
+    });
+    writeJsonl(auditLogPath, Array.from({ length: findingCount }, (_, index) => ({
+      schemaVersion: "cellfence.audit-event.v1",
+      runId: "run-cap",
+      timestamp: "2026-07-18T00:00:00.000Z",
+      commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      event: "finding.detected",
+      command: "check",
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      cellId: subjectId,
+      filePath: `src/${subjectId}/internal-${index}.ts`,
+      message: "private import",
+      fingerprint: `${subjectId}-fingerprint-${index}`,
+      outcome: "rejected",
+    })));
+    subjects.push({
+      id: subjectId,
+      repository: `https://github.com/example/${subjectId}.git`,
+      commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      manifest: {
+        strategy: "existing",
+        path: "cellfence.manifest.json",
+        reviewStatus: "reviewed",
+        review: {
+          reviewers: ["reviewer-a"],
+          boundaryEvidence: ["fixture existing manifest"],
+        },
+      },
+    });
+    reportSubjects.push({
+      id: subjectId,
+      repository: `https://github.com/example/${subjectId}.git`,
+      requestedCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      requestedRef: null,
+      status: "checked_findings",
+      commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      gitTree: "cccccccccccccccccccccccccccccccccccccccc",
+      subjectDir,
+      manifest: {
+        strategy: "existing",
+        path: "cellfence.manifest.json",
+        reviewStatus: "reviewed",
+        effectivePath: manifestPath,
+        sha256: hashFile(manifestPath),
+        status: "completed",
+      },
+      check: {
+        status: "checked_findings",
+        exitCode: 1,
+        ok: false,
+        findings: findingCount,
+        warnings: 0,
+        auditLogPath,
+        auditLogSha256: hashFile(auditLogPath),
+      },
+    });
+  }
+  writeJson(corpusPath, {
+    schemaVersion: "cellfence.corpus.v1",
+    subjects,
+  });
+  writeJson(reportPath, {
+    schemaVersion: "cellfence.corpus-study.v1",
+    generatedAt: "2026-07-18T00:00:01.000Z",
+    corpusPath,
+    dryRun: false,
+    allowFloatingRef: false,
+    environment: {
+      harnessCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      harnessDirty: false,
+      cellfenceVersion: "0.1.14",
+      corpusSha256: hashFile(corpusPath),
+    },
+    subjects: reportSubjects,
+    summary: {
+      total: 2,
+      completed: 2,
+      failed: 0,
+      totalFindings: 12,
+    },
+  });
+  return { corpusPath, reportPath };
+}
+
 test("corpus evidence bundle generates normalized findings, sample, and checksums", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-"));
   try {
@@ -264,6 +371,44 @@ test("corpus evidence bundle generates normalized findings, sample, and checksum
 
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
     assert.equal(validate.status, 0, validate.stderr || validate.stdout);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle can deterministically enforce repository contribution sampling", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-cap-"));
+  try {
+    const { corpusPath, reportPath } = createRepositoryCapFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+      "--max-repository-contribution",
+      "0.5",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const sampling = JSON.parse(fs.readFileSync(path.join(bundleDir, "sampling.json"), "utf8"));
+    assert.equal(sampling.maxRepositoryContribution, 0.5);
+    assert.equal(sampling.repositoryBalance.enabled, true);
+    assert.equal(sampling.repositoryBalance.feasible, true);
+    assert.equal(sampling.repositoryBalance.removedFindingIds.length, 8);
+    assert.equal(sampling.sampledFindingIds.length, 4);
+    const sampled = fs.readFileSync(path.join(bundleDir, "findings.sampled.jsonl"), "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    const byRepository = new Map();
+    for (const finding of sampled) byRepository.set(finding.repository, (byRepository.get(finding.repository) || 0) + 1);
+    assert.deepEqual([...byRepository.values()].sort(), [2, 2]);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

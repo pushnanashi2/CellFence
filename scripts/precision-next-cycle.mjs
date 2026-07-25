@@ -38,6 +38,7 @@ function parseArgs(argv) {
     raters: [],
     raterTypes: [],
     targetPopulation: "",
+    maxRepositoryContribution: null,
     force: false,
     externalClaim: false,
   };
@@ -78,6 +79,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--target-population=")) {
       parsed.targetPopulation = requireInlineValue(argument, "--target-population=", "--target-population");
+    } else if (argument === "--max-repository-contribution") {
+      parsed.maxRepositoryContribution = parseUnitInterval(requireValue(argv, index, "--max-repository-contribution"), "--max-repository-contribution");
+      index += 1;
+    } else if (argument.startsWith("--max-repository-contribution=")) {
+      parsed.maxRepositoryContribution = parseUnitInterval(requireInlineValue(argument, "--max-repository-contribution=", "--max-repository-contribution"), "--max-repository-contribution");
     } else if (argument === "--external-claim") {
       parsed.externalClaim = true;
     } else if (argument === "--force") {
@@ -123,8 +129,20 @@ function parseList(value) {
   return String(value).split(",").map((entry) => entry.trim()).filter(Boolean);
 }
 
+function parseUnitInterval(value, optionName) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed >= 1) throw new Error(`${optionName} must be greater than 0 and less than 1`);
+  return parsed;
+}
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readJsonl(filePath) {
+  if (!fs.existsSync(filePath)) return [];
+  const text = fs.readFileSync(filePath, "utf8").trim();
+  return text ? text.split(/\r?\n/).map((line) => JSON.parse(line)) : [];
 }
 
 function writeJson(filePath, value) {
@@ -149,6 +167,10 @@ function portablePath(filePath) {
   const relativePath = path.relative(repoRoot, filePath);
   if (relativePath && !relativePath.startsWith("..") && !path.isAbsolute(relativePath)) return posixify(relativePath);
   return posixify(filePath);
+}
+
+function increment(counts, key, amount = 1) {
+  counts[key] = (counts[key] || 0) + amount;
 }
 
 function runStep(label, command, args, options = {}) {
@@ -287,7 +309,7 @@ function writeWorklistProtocol(protocolPath, options, binding) {
     samplingPlan: {
       unit: "finding",
       method: "deterministic sampled precision-eligible set from a sealed reviewed corpus bundle",
-      maxRepositoryContribution: 0.1,
+      maxRepositoryContribution: options.maxRepositoryContribution || 0.1,
     },
     labelingPlan: {
       minimumIndependentRaters: 2,
@@ -346,6 +368,36 @@ function blockersFromExternalValidation(externalValidationPath) {
   return blockers;
 }
 
+function samplingSummaryFromBundle(bundleDir) {
+  const samplingPath = path.join(bundleDir, "sampling.json");
+  if (!fs.existsSync(samplingPath)) return null;
+  const sampling = readJson(samplingPath);
+  const findings = readJsonl(path.join(bundleDir, "findings.normalized.jsonl"));
+  const findingsById = new Map(findings.map((finding) => [finding.findingId, finding]));
+  const removedFindingIds = sampling.repositoryBalance?.removedFindingIds || [];
+  const removedByRule = {};
+  const removedByRepository = {};
+  for (const findingId of removedFindingIds) {
+    const finding = findingsById.get(findingId);
+    increment(removedByRule, finding?.ruleId || "unknown");
+    increment(removedByRepository, finding?.repository || finding?.subjectId || "unknown");
+  }
+  return {
+    sampledFindings: sampling.population?.sampledFindings ?? (sampling.sampledFindingIds || []).length,
+    sampledByRule: sampling.sampledByRule || {},
+    repositoryBalance: {
+      enabled: sampling.repositoryBalance?.enabled === true,
+      feasible: sampling.repositoryBalance?.feasible ?? null,
+      maxRepositoryContribution: sampling.repositoryBalance?.maxRepositoryContribution ?? sampling.maxRepositoryContribution ?? null,
+      minimumRepositories: sampling.repositoryBalance?.minimumRepositories ?? null,
+      repositoriesWithSampledFindings: sampling.repositoryBalance?.repositoriesWithSampledFindings ?? null,
+      removedFindingIds: removedFindingIds.length,
+      removedByRule: Object.fromEntries(Object.entries(removedByRule).sort()),
+      removedByRepository: Object.fromEntries(Object.entries(removedByRepository).sort((left, right) => (right[1] - left[1]) || left[0].localeCompare(right[0]))),
+    },
+  };
+}
+
 function writeMarkdown(outPath, summary) {
   const lines = [
     `# ${summary.studyId} Precision Next Cycle`,
@@ -368,6 +420,14 @@ function writeMarkdown(outPath, summary) {
     `- preLabelArtifactSetSha256: \`${summary.digests.preLabelArtifactSetSha256}\``,
     `- unlabeledBundleArtifactSetSha256: \`${summary.digests.unlabeledBundleArtifactSetSha256}\``,
     `- blindWorklistArtifactSetSha256: \`${summary.digests.blindWorklistArtifactSetSha256}\``,
+    "",
+    "## Sampling",
+    "",
+    `- sampled findings: ${summary.sampling?.sampledFindings ?? "n/a"}`,
+    `- repository balance enabled: ${summary.sampling?.repositoryBalance?.enabled === true}`,
+    `- repository balance feasible: ${summary.sampling?.repositoryBalance?.feasible ?? "n/a"}`,
+    `- cap-pruned sampled findings: ${summary.sampling?.repositoryBalance?.removedFindingIds ?? 0}`,
+    `- cap-pruned by rule: \`${JSON.stringify(summary.sampling?.repositoryBalance?.removedByRule || {})}\``,
     "",
     "## Current Blockers",
     "",
@@ -435,7 +495,7 @@ function main() {
     steps.push(step);
     assertExit(step, [0, 1]);
 
-    step = runStep("unlabeled bundle build", process.execPath, [
+    const bundleArgs = [
       path.join(repoRoot, "scripts", "corpus-evidence-bundle.mjs"),
       "--study-id",
       options.studyId,
@@ -445,7 +505,12 @@ function main() {
       options.reportPath,
       "--out-dir",
       unlabeledBundleDir,
-    ], {
+    ];
+    if (options.maxRepositoryContribution !== null) {
+      bundleArgs.push("--max-repository-contribution", String(options.maxRepositoryContribution));
+      bundleArgs.push("--balance-rules", defaultIncludedRules.join(","));
+    }
+    step = runStep("unlabeled bundle build", process.execPath, bundleArgs, {
       stdoutPath: path.join(logsDir, "bundle-unlabeled.stdout.log"),
       stderrPath: path.join(logsDir, "bundle-unlabeled.stderr.log"),
     });
@@ -538,6 +603,10 @@ function main() {
         raterTypes: expandedRaterTypes(options),
         externalClaim: isExternalClaimCycle(options),
       },
+      samplingOptions: {
+        maxRepositoryContribution: options.maxRepositoryContribution,
+      },
+      sampling: samplingSummaryFromBundle(unlabeledBundleDir),
       blockers: [...new Set([
         ...blockersFromPreflight(preflightPath),
         ...blockersFromExternalValidation(externalCorpusValidationPath),

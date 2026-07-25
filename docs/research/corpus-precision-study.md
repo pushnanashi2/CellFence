@@ -302,6 +302,7 @@ npm run precision:next-cycle -- \
   --raters external-human-reviewer-1,external-org-reviewer-1 \
   --rater-types human,organization \
   --external-claim \
+  --max-repository-contribution 0.1 \
   --force
 ```
 
@@ -312,6 +313,50 @@ does not create labels, infer external review, or turn agent labels into
 human/org labels. Its expected output before returned labels is a valid but
 not claim-ready packet whose blockers name the missing independent labels,
 repository balance, and per-rule sample deficits.
+
+Turn those blockers into an explicit remaining-evidence worklist before starting
+the next round:
+
+```bash
+npm run precision:claim:gaps -- \
+  --preflight reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round21-cycle-balanced/claim-preflight.prelabel.json \
+  --next-cycle reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round21-cycle-balanced/summary.json \
+  --expansion-plan reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round22-expansion-plan-balanced.json \
+  --out reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round22-gap-worklist.json \
+  --markdown reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round22-gap-worklist.md
+```
+
+`precision:claim:gaps` exits non-zero while evidence is missing. That is the
+expected state before labeling: it preserves unlabeled findings, external
+human/org label gaps, external manifest attestation gaps, repository balance
+failures, and rule-level sample deficits as separate tasks. It does not create
+labels or attestations, and it does not allow a Codex/agent label to satisfy an
+external human/organization requirement.
+
+When the next-cycle packet shows rule or repository-balance deficits, rank a
+separate diagnostic candidate bundle before promoting any subject into the
+reviewed corpus:
+
+```bash
+npm run precision:corpus:expand-plan -- \
+  --current-bundle reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round21-cycle-balanced/bundle-unlabeled \
+  --current-corpus docs/research/corpora/ts-js-reviewed-pilot-52-2026-07-25.json \
+  --candidate-corpus docs/research/corpora/oss-ts-js-200-2026-07-18.json \
+  --candidate-bundle reports/corpus/oss-ts-js-200-2026-07-18-production-scope-bundle \
+  --out reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round22-expansion-plan-balanced.json \
+  --markdown reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round22-expansion-plan-balanced.md
+```
+
+This report is a work-queue planner only. It may rank infer-generated candidate
+subjects, but those subjects remain diagnostic until their manifest copies are
+copied into `docs/research/corpora/manifests/`, reviewed, frozen in a new corpus
+JSON, checked again, and labeled through the sealed blind worklist process.
+The planner uses sampled candidate findings as a candidate-ranking signal and
+separately reports raw finding volume as review workload, so large infer runs do
+not masquerade as powered reviewed evidence. Those sampled counts are diagnostic
+only: after candidate promotion, the reviewed corpus must be frozen and sampled
+again because the combined corpus hash and repository-cap pruning can change the
+selected finding set.
 
 Run the evidence graph structural smoke before using graph artifacts as witness
 inputs:

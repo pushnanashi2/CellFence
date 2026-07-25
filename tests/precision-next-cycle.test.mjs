@@ -156,6 +156,139 @@ function createFixture(rootDir) {
   return { corpusPath, reportPath };
 }
 
+function createRepositoryCapFixture(rootDir) {
+  const corpusPath = path.join(rootDir, "corpus-cap.json");
+  const reportPath = path.join(rootDir, "corpus-cap-report.json");
+  const subjects = [];
+  const reportSubjects = [];
+  const manifest = {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+      requiredRules: ["CELLFENCE_PRIVATE_IMPORT"],
+    },
+    cells: [
+      {
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  };
+  const entries = [
+    { id: "cap-a", repository: "https://github.com/example/cap-a.git", findings: 20, commit: "a".repeat(40) },
+    { id: "cap-b", repository: "https://github.com/example/cap-b.git", findings: 3, commit: "b".repeat(40) },
+  ];
+  for (const entry of entries) {
+    const subjectDir = path.join(rootDir, "subjects", entry.id);
+    const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
+    const reviewedManifestSourcePath = path.join(rootDir, "manifests", `${entry.id}.cellfence.manifest.json`);
+    const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
+    writeJson(manifestPath, manifest);
+    writeJson(reviewedManifestSourcePath, manifest);
+    writeJsonl(auditLogPath, Array.from({ length: entry.findings }, (_, index) => ({
+      schemaVersion: "cellfence.audit-event.v1",
+      runId: "precision-next-cycle-cap-test",
+      timestamp: "2026-07-25T00:00:00.000Z",
+      commit: entry.commit,
+      event: "finding.detected",
+      command: "check",
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      cellId: "app",
+      producerCellId: "core",
+      filePath: `src/app/leak-${index}.ts`,
+      line: 1,
+      message: "private import",
+      fingerprint: `${entry.id}-private-import-${index}`,
+      outcome: "rejected",
+    })));
+    subjects.push({
+      id: entry.id,
+      repository: entry.repository,
+      commit: entry.commit,
+      manifest: {
+        strategy: "copy",
+        source: `manifests/${entry.id}.cellfence.manifest.json`,
+        reviewStatus: "reviewed",
+        review: {
+          reviewers: ["fixture-reviewer"],
+          boundaryEvidence: ["fixture manifest derived from declared test boundaries"],
+        },
+      },
+    });
+    reportSubjects.push({
+      id: entry.id,
+      repository: entry.repository,
+      requestedCommit: entry.commit,
+      requestedRef: null,
+      status: "checked_findings",
+      commit: entry.commit,
+      gitTree: "c".repeat(40),
+      subjectDir,
+      manifest: {
+        strategy: "copy",
+        reviewStatus: "reviewed",
+        path: "cellfence.manifest.json",
+        effectivePath: manifestPath,
+        sha256: hashFile(manifestPath),
+        status: "completed",
+      },
+      check: {
+        status: "checked_findings",
+        exitCode: 1,
+        ok: false,
+        findings: entry.findings,
+        warnings: 0,
+        auditLogPath,
+        auditLogSha256: hashFile(auditLogPath),
+      },
+    });
+  }
+  writeJson(corpusPath, {
+    schemaVersion: "cellfence.corpus.v1",
+    selectionPolicy: {
+      frozenAt: "2026-07-25T00:00:00.000Z",
+      method: "local precision-next-cycle repository cap test fixture",
+    },
+    subjects,
+  });
+  writeJson(reportPath, {
+    schemaVersion: "cellfence.corpus-study.v1",
+    generatedAt: "2026-07-25T00:00:01.000Z",
+    corpusPath,
+    dryRun: false,
+    allowFloatingRef: false,
+    environment: {
+      harnessCommit: "d".repeat(40),
+      harnessDirty: false,
+      cellfenceVersion: "0.1.14",
+      corpusSha256: hashFile(corpusPath),
+    },
+    subjects: reportSubjects,
+    summary: {
+      total: 2,
+      completed: 2,
+      failed: 0,
+      totalFindings: 23,
+    },
+  });
+  return { corpusPath, reportPath };
+}
+
 function runNextCycle(args) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: repoRoot,
@@ -190,6 +323,8 @@ test("precision next cycle freezes bundle, worklist, and unlabeled preflight", (
     assert.match(summary.digests.preLabelArtifactSetSha256, /^[a-f0-9]{64}$/);
     assert.match(summary.digests.unlabeledBundleArtifactSetSha256, /^[a-f0-9]{64}$/);
     assert.match(summary.digests.blindWorklistArtifactSetSha256, /^[a-f0-9]{64}$/);
+    assert.equal(summary.sampling.repositoryBalance.enabled, false);
+    assert.equal(summary.sampling.repositoryBalance.removedFindingIds, 0);
     assert.equal(fs.existsSync(path.join(outDir, "bundle-unlabeled", "SHA256SUMS")), true);
     assert.equal(fs.existsSync(path.join(outDir, "blind-worklist", "SHA256SUMS")), true);
     assert.equal(fs.existsSync(path.join(outDir, "claim-preflight.prelabel.json")), true);
@@ -203,6 +338,46 @@ test("precision next cycle freezes bundle, worklist, and unlabeled preflight", (
     assert.match(summary.blockers.join("\n"), /external human\/organization independent label/);
     const externalValidation = readJson(path.join(outDir, "reviewed-corpus-external-validation.json"));
     assert.equal(externalValidation.ok, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle surfaces repository-cap pruning in the summary", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-cap-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-cap-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createRepositoryCapFixture(rootDir);
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-cap-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "agent-a,agent-b",
+      "--rater-types",
+      "agent,agent",
+      "--max-repository-contribution",
+      "0.5",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.equal(summary.sampling.repositoryBalance.enabled, true);
+    assert.equal(summary.sampling.repositoryBalance.feasible, true);
+    assert.equal(summary.sampling.repositoryBalance.removedFindingIds, 17);
+    assert.deepEqual(summary.sampling.repositoryBalance.removedByRule, {
+      CELLFENCE_PRIVATE_IMPORT: 17,
+    });
+    assert.deepEqual(summary.sampling.repositoryBalance.removedByRepository, {
+      "https://github.com/example/cap-a.git": 17,
+    });
+    assert.match(fs.readFileSync(path.join(outDir, "SUMMARY.md"), "utf8"), /cap-pruned sampled findings: 17/);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });
