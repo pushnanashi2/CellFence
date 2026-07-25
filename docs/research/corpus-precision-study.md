@@ -289,6 +289,30 @@ each sampled finding from those packages, validates checksums, and runs
 bound. A passing smoke proves the bundle, labeling, and claim machinery is wired;
 it is not public-OSS precision evidence.
 
+For a reviewed corpus run that has already produced a report, use the
+next-cycle helper to freeze the pre-label evidence bundle and sealed blind
+worklist in one deterministic packet:
+
+```bash
+npm run precision:next-cycle -- \
+  --study-id ts-js-reviewed-pilot-52-2026-07-25-round19 \
+  --corpus docs/research/corpora/ts-js-reviewed-pilot-52-2026-07-25.json \
+  --report reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round19.json \
+  --out-dir reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round19-cycle \
+  --raters external-human-reviewer-1,external-org-reviewer-1 \
+  --rater-types human,organization \
+  --external-claim \
+  --force
+```
+
+The helper validates the reviewed corpus, builds an unlabeled evidence bundle,
+generates a protocol-bound blind worklist, records the pre-label and worklist
+digests, and runs claim preflight against the unlabeled bundle. It intentionally
+does not create labels, infer external review, or turn agent labels into
+human/org labels. Its expected output before returned labels is a valid but
+not claim-ready packet whose blockers name the missing independent labels,
+repository balance, and per-rule sample deficits.
+
 Run the evidence graph structural smoke before using graph artifacts as witness
 inputs:
 

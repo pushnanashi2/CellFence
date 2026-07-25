@@ -108,6 +108,10 @@ const EXACT_SPECIFIER_EXTENSIONS = new Set([
 ]);
 const DECLARATION_EXTENSIONS = [".d.ts", ".d.mts", ".d.cts"];
 
+function isDeclarationPath(filePath: string): boolean {
+  return DECLARATION_EXTENSIONS.some((extension) => filePath.endsWith(extension));
+}
+
 export function getLineNumber(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 }
@@ -1522,6 +1526,7 @@ function findNearestTsConfig(filePath: string): string | undefined {
   for (;;) {
     const tsconfigPath = path.join(directoryPath, "tsconfig.json");
     if (fs.existsSync(tsconfigPath)) return tsconfigPath;
+    if (fs.existsSync(path.join(directoryPath, ".git"))) return undefined;
     const parentDirectoryPath = path.dirname(directoryPath);
     if (parentDirectoryPath === directoryPath) return undefined;
     directoryPath = parentDirectoryPath;
@@ -1599,6 +1604,40 @@ function normalizeDeclarationText(text: string): string {
   return text.replace(/\r\n/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
 }
 
+function hasInternalTag(node: ts.Node): boolean {
+  return ts.getJSDocTags(node).some((tag) => tag.tagName.text === "internal");
+}
+
+function normalizedDeclarationSourceText(filePath: string): string {
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
+    const visit: ts.Visitor = (node) => {
+      if (hasInternalTag(node)) return undefined;
+      return ts.visitEachChild(node, visit, context);
+    };
+    return (root) => ts.visitNode(root, visit) as ts.SourceFile;
+  };
+  const result = ts.transform(sourceFile, [transformer]);
+  try {
+    return ts.createPrinter({ removeComments: true }).printFile(result.transformed[0] as ts.SourceFile);
+  } finally {
+    result.dispose();
+  }
+}
+
+function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): string | undefined {
+  if (isDeclarationPath(rootFile)) return normalizedDeclarationSourceText(rootFile);
+  try {
+    return ts.transpileDeclaration(fs.readFileSync(rootFile, "utf8"), {
+      compilerOptions: options,
+      fileName: rootFile,
+    }).outputText;
+  } catch {
+    return undefined;
+  }
+}
+
 function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
   if (!fs.existsSync(filePath) || isPythonPath(filePath)) return [];
   const rootFiles = collectPublicDeclarationRoots(filePath);
@@ -1606,12 +1645,9 @@ function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
   const options = declarationEmitCompilerOptions(filePath);
   const declarations: { orderKey: string; text: string }[] = [];
   for (const rootFile of [...new Set(rootFiles)].sort((left, right) => left.localeCompare(right))) {
-    const result = ts.transpileDeclaration(fs.readFileSync(rootFile, "utf8"), {
-      compilerOptions: options,
-      fileName: rootFile,
-    });
-    if (!result.outputText) continue;
-    const normalizedText = normalizeDeclarationText(result.outputText);
+    const outputText = declarationTextForRoot(rootFile, options);
+    if (!outputText) continue;
+    const normalizedText = normalizeDeclarationText(outputText);
     if (normalizedText.length === 0) continue;
     declarations.push({
       orderKey: normalizePath(path.relative(path.dirname(path.resolve(filePath)), rootFile)),

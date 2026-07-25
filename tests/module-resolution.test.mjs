@@ -1123,6 +1123,47 @@ test("module resolution public symbols and signature hashes react to exported co
   }
 });
 
+test("module resolution public surface hashes declaration re-exports without declaration emit", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-public-dts-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    const publicPath = path.join(rootDir, "src/core/public.ts");
+    const apiPath = path.join(rootDir, "src/core/api.d.ts");
+    fs.writeFileSync(publicPath, "export * from './api';\n");
+    fs.writeFileSync(
+      apiPath,
+      [
+        "/** public docs */",
+        "export interface Api { /** property docs */ readonly name: string }",
+        "/** @internal */",
+        "export interface Hidden { value: string }",
+        "",
+      ].join("\n"),
+    );
+
+    assert.equal(extractPublicSymbols(publicPath).has("Api"), true);
+    const firstHash = publicSurfaceHash(publicPath);
+    assert.match(firstHash, /^[a-f0-9]{64}$/);
+
+    fs.writeFileSync(
+      apiPath,
+      [
+        "/** changed public docs */",
+        "export interface Api { /** changed property docs */ readonly name: string }",
+        "/** @internal */",
+        "export interface Hidden { value: number }",
+        "",
+      ].join("\n"),
+    );
+    assert.equal(publicSurfaceHash(publicPath), firstHash);
+
+    fs.writeFileSync(apiPath, "export interface Api { readonly name: string; readonly version: string }\n");
+    assert.notEqual(publicSurfaceHash(publicPath), firstHash);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution extracts Python public symbols and surface hashes", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-public-"));
   try {

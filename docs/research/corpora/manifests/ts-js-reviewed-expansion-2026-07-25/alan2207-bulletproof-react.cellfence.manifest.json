@@ -76,7 +76,7 @@
       "publicSymbols": [
         "DashboardInfo"
       ],
-      "packageName": "bulletproof-react-nextjs-pages",
+      "packageName": "bulletproof-react-nextjs-app",
       "consumes": [],
       "producesArtifacts": []
     },
