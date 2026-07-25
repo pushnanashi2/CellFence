@@ -982,6 +982,9 @@ function validateReviewedCopyManifest(id, manifest, copy, allowedReviewerTypes, 
     const label = `${id} review.reviewerAttestations[${index}]`;
     const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
     if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
+    if (typeof attestation.id === "string" && nonHumanRaterPattern.test(attestation.id)) {
+      issues.push(`${label}.id appears non-human but external manifest review requires a human/organization reviewer`);
+    }
     if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {
       issues.push(`${label}.reviewerType must be one of ${[...allowedReviewerTypes].join(", ")}`);
     }

@@ -442,6 +442,7 @@ function subjectHasExternalManifestAttestation(context, finding) {
     const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
     return typeof attestation.id === "string"
       && attestation.id.length > 0
+      && !nonHumanRaterPattern.test(attestation.id)
       && allowedTypes.has(reviewerType)
       && attestation.independent === true;
   });
@@ -474,6 +475,10 @@ function externalIndependentLabelsForFinding(context, findingId) {
   });
 }
 
+function externalIndependentRaterCountForFinding(context, findingId) {
+  return new Set(externalIndependentLabelsForFinding(context, findingId).map((label) => label.rater).filter(Boolean)).size;
+}
+
 function independentRaterCountForFinding(context, findingId) {
   return new Set(independentLabelsForFinding(context, findingId).map((label) => label.rater).filter(Boolean)).size;
 }
@@ -491,7 +496,7 @@ function manifestRequirementFor(finding, context = null) {
   if (!context || independentRaterCountForFinding(context, finding.findingId) < context.protocol.minimumIndependentRaters) return "blind_label_required";
   if (
     context.protocol.requireExternalIndependentRaters === true
-    && externalIndependentLabelsForFinding(context, finding.findingId).length < context.protocol.minimumExternalIndependentRaters
+    && externalIndependentRaterCountForFinding(context, finding.findingId) < context.protocol.minimumExternalIndependentRaters
   ) {
     return "external_independent_label_required";
   }
@@ -616,6 +621,14 @@ function buildReport(options) {
   if (candidate && candidate.claimPreflightRequiredIncludedFindings === 0 && candidate.includedFindings > 0) {
     blockers.push("candidate bundle has included findings but none have reached the claim-preflight-required state; external manifest attestations, blind labels, and claim preflight are required before claim use");
   }
+  const workPlan = buildWorkPlan({
+    ruleGaps,
+    dilution,
+    candidate,
+    protocol,
+    currentDecision,
+    reviewedClaimReport,
+  });
   return {
     schemaVersion,
     generatedAt: new Date().toISOString(),
@@ -646,6 +659,7 @@ function buildReport(options) {
     ruleGaps,
     repositoryDilution: dilution,
     candidatePool: candidate,
+    workPlan,
     decision: {
       status: blockers.length === 0 ? "ready_for_claim_attempt" : "not_ready",
       blockers,
@@ -657,6 +671,87 @@ function buildReport(options) {
       "Generate a sealed adjudication worklist for disagreements before running claim preflight.",
       "Keep resource and generated-artifact policy questions out of a 99% blocking claim until their contracts are reviewed.",
     ],
+  };
+}
+
+function maxValue(values) {
+  return values.length === 0 ? 0 : Math.max(...values);
+}
+
+function ruleWorkPlan(ruleGaps) {
+  return ruleGaps.map((gap) => {
+    const sampleDeficit = Math.max(0, gap.sampleDeficitBeforeLabeling ?? 0);
+    const unlabeled = Math.max(0, gap.unlabeled ?? 0);
+    const lowerBoundDeficit = typeof gap.additionalZeroFailureTrialsForLowerBound === "number"
+      ? Math.max(0, gap.additionalZeroFailureTrialsForLowerBound)
+      : null;
+    return {
+      ruleId: gap.ruleId,
+      status: gap.status,
+      selectedFindings: gap.selectedFindings,
+      requiredZeroFalsePositiveFindings: gap.requiredZeroFalsePositiveFindings,
+      existingSelectedFindingsNeedingLabels: unlabeled,
+      additionalSelectedFindingsNeededBeforeLabeling: sampleDeficit,
+      additionalZeroFailureTrialsForLowerBound: lowerBoundDeficit,
+      minimumAdditionalZeroFailureFindings: lowerBoundDeficit === null
+        ? null
+        : Math.max(sampleDeficit, lowerBoundDeficit),
+    };
+  });
+}
+
+function buildWorkPlan({ ruleGaps, dilution, candidate, protocol, currentDecision, reviewedClaimReport }) {
+  const ruleCoverage = ruleWorkPlan(ruleGaps);
+  const repositoryAdditions = (dilution.repositoriesOverCap || [])
+    .map((repository) => repository.additionalOutsideRepositoryForCap || 0);
+  const candidateRequirements = candidate?.byRequirement || {};
+  const reviewedExternalCoverage = reviewedClaimReport.labelQuality?.externalRaterCoverage || null;
+  const reviewedFindingsMissingExternalIndependentLabels = reviewedExternalCoverage?.findingsMissingExternalIndependentLabels ?? null;
+  const candidateFindingsNeedingExternalIndependentLabels = candidateRequirements.external_independent_label_required || 0;
+  const minimumExternalIndependentLabelRows = (
+    (reviewedFindingsMissingExternalIndependentLabels ?? 0)
+    + candidateFindingsNeedingExternalIndependentLabels
+  ) * Math.max(1, protocol.minimumExternalIndependentRaters || 1);
+  const blockers = [];
+  if (currentDecision.status !== "pass" && currentDecision.status !== "preflight_ready") {
+    blockers.push("reviewed_claim_not_ready");
+  }
+  if (ruleCoverage.some((rule) => rule.status !== "satisfied")) blockers.push("rule_level_sample_or_lower_bound_gap");
+  if ((dilution.repositoriesOverCap || []).length > 0) blockers.push("repository_contribution_over_cap");
+  if ((reviewedFindingsMissingExternalIndependentLabels || 0) > 0 || candidateFindingsNeedingExternalIndependentLabels > 0) {
+    blockers.push("external_independent_labels_missing");
+  }
+  if ((candidateRequirements.external_manifest_attestation_required || 0) > 0) blockers.push("external_manifest_attestations_missing");
+  if ((candidateRequirements.reviewed_manifest_required || 0) > 0 || (candidateRequirements.manifest_review_required || 0) > 0) {
+    blockers.push("candidate_manifest_review_missing");
+  }
+  if ((candidateRequirements.blind_label_required || 0) > 0) blockers.push("blind_labels_missing");
+  return {
+    status: blockers.length === 0 ? "ready_for_claim_attempt" : "not_ready",
+    blockers,
+    ruleCoverage,
+    repositoryBalance: {
+      countKind: dilution.countKind,
+      maxAllowedRepositoryContribution: dilution.maxAllowedRepositoryContribution,
+      repositoriesOverCap: (dilution.repositoriesOverCap || []).length,
+      minimumAdditionalOutsideFindings: maxValue(repositoryAdditions),
+    },
+    externalEvidence: {
+      requireExternalIndependentRaters: protocol.requireExternalIndependentRaters,
+      minimumExternalIndependentRaters: protocol.minimumExternalIndependentRaters,
+      reviewedFindingsMissingExternalIndependentLabels,
+      candidateFindingsNeedingExternalIndependentLabels,
+      minimumExternalIndependentLabelRows,
+      candidateFindingsNeedingExternalManifestAttestation: candidateRequirements.external_manifest_attestation_required || 0,
+    },
+    candidatePromotion: candidate ? {
+      includedFindings: candidate.includedFindings,
+      claimPreflightRequiredIncludedFindings: candidate.claimPreflightRequiredIncludedFindings,
+      findingsNeedingReviewedManifest: (candidateRequirements.reviewed_manifest_required || 0) + (candidateRequirements.manifest_review_required || 0),
+      findingsNeedingBlindLabels: candidateRequirements.blind_label_required || 0,
+      findingsNeedingExternalIndependentLabels: candidateFindingsNeedingExternalIndependentLabels,
+      findingsNeedingExternalManifestAttestation: candidateRequirements.external_manifest_attestation_required || 0,
+    } : null,
   };
 }
 
@@ -719,6 +814,18 @@ function renderMarkdown(report) {
     for (const subject of report.candidatePool.topSubjects.slice(0, 15)) {
       lines.push(`| \`${subject.subjectId}\` | ${subject.sampledIncludedFindings} | ${subject.totalIncludedFindings} | ${subject.nextAction} | \`${JSON.stringify(subject.countsByRule)}\` |`);
     }
+  }
+  lines.push("");
+  lines.push(`## Work Plan`);
+  lines.push("");
+  lines.push(`- Status: \`${report.workPlan.status}\``);
+  lines.push(`- Minimum outside findings for repository balance: ${report.workPlan.repositoryBalance.minimumAdditionalOutsideFindings}`);
+  lines.push(`- Minimum external independent label rows still needed: ${report.workPlan.externalEvidence.minimumExternalIndependentLabelRows}`);
+  lines.push("");
+  lines.push(`| Rule | Status | Need selected | Need labels | Need zero-failure trials |`);
+  lines.push(`| --- | --- | ---: | ---: | ---: |`);
+  for (const rule of report.workPlan.ruleCoverage) {
+    lines.push(`| \`${rule.ruleId}\` | \`${rule.status}\` | ${rule.additionalSelectedFindingsNeededBeforeLabeling} | ${rule.existingSelectedFindingsNeedingLabels} | ${rule.minimumAdditionalZeroFailureFindings ?? ">" + 1_000_000} |`);
   }
   lines.push("");
   lines.push(`## Decision`);

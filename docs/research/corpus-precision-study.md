@@ -225,6 +225,11 @@ The round18 handoff is documented in
 it classifies those 11 findings as manifest-policy requirements without
 retroactively relabeling round17, prepares a sealed external human/org worklist,
 and expands the next agent-reviewed TS/JS corpus queue from 12 to 52 subjects.
+The round32 frontier hardening note is documented in
+[ts-js-reviewed-pilot-105-2026-07-25-round32-frontier-work-plan.md](ts-js-reviewed-pilot-105-2026-07-25-round32-frontier-work-plan.md):
+it adds a machine-readable work plan for failed claim/frontier attempts and
+keeps duplicate external label rows or agent-like manifest attestations from
+being counted as external evidence.
 
 The script:
 
@@ -917,6 +922,23 @@ leave-one-repository-out sensitivity. Exit code `0` means the pre-registered
 claim passes. Exit code `1` means the labels are usable but the evidence is
 underpowered or biased by repository concentration. Exit code `2` means the
 protocol, bundle, or labeling procedure is invalid.
+
+Use `precision-frontier-report` after each failed claim attempt to turn that
+status into a concrete work plan:
+
+```bash
+npm run precision:frontier -- \
+  --reviewed-claim-report reports/corpus/ts-js-confirmation-v1-claim.json \
+  --candidate-bundle reports/corpus/ts-js-confirmation-v1-candidate-bundle \
+  --out reports/corpus/ts-js-confirmation-v1-frontier.json \
+  --markdown reports/corpus/ts-js-confirmation-v1-frontier.md
+```
+
+The frontier work plan is not claim evidence. It reports how many rule-scoped
+zero-failure trials, outside-repository findings, blind labels, external
+human/organization labels, and external manifest attestations remain before a
+new preflight can be attempted. Duplicate label rows from the same external
+rater do not count as multiple external raters.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

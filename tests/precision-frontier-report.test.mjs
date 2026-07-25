@@ -234,9 +234,14 @@ test("precision frontier reports claim gaps and keeps infer candidates diagnosti
       reviewed_manifest_required: 2,
     });
     assert.equal(report.candidatePool.topSubjects[0].nextAction, "review_manifest_before_claim");
+    assert.equal(report.workPlan.status, "not_ready");
+    assert.equal(report.workPlan.repositoryBalance.minimumAdditionalOutsideFindings, 78);
+    assert.equal(report.workPlan.candidatePromotion.findingsNeedingReviewedManifest, 2);
+    assert.ok(report.workPlan.ruleCoverage.every((rule) => rule.minimumAdditionalZeroFailureFindings > 0));
     assert.match(report.decision.blockers.join("\n"), /candidate bundle has included findings but none have reached the claim-preflight-required state/);
     assert.match(fs.readFileSync(markdownPath, "utf8"), /Precision Claim Frontier/);
     assert.match(fs.readFileSync(markdownPath, "utf8"), /Findings requiring claim preflight/);
+    assert.match(fs.readFileSync(markdownPath, "utf8"), /Minimum outside findings for repository balance: 78/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -413,6 +418,7 @@ test("precision frontier reports repository balance from preflight inputs", () =
     assert.equal(report.repositoryDilution.repositoriesOverCap[0].selectedFindings, 7);
     assert.equal(Object.hasOwn(report.repositoryDilution.repositoriesOverCap[0], "trials"), false);
     assert.equal(report.repositoryDilution.repositoriesOverCap[0].additionalOutsideRepositoryForCap, 60);
+    assert.equal(report.workPlan.repositoryBalance.minimumAdditionalOutsideFindings, 60);
     assert.match(report.decision.blockers.join("\n"), /add 60 outside-repository selected finding\(s\)/);
     const markdown = fs.readFileSync(markdownPath, "utf8");
     assert.match(markdown, /\| Repository \| Selected findings \| Contribution \| Additional outside selected findings \|/);
@@ -533,7 +539,142 @@ test("precision frontier keeps agent-only labels out of claim preflight input", 
     assert.deepEqual(report.candidatePool.byRequirement, {
       external_independent_label_required: 1,
     });
+    assert.equal(report.workPlan.externalEvidence.candidateFindingsNeedingExternalIndependentLabels, 1);
+    assert.equal(report.workPlan.externalEvidence.minimumExternalIndependentLabelRows, 1);
     assert.equal(report.candidatePool.topSubjects[0].nextAction, "collect_external_independent_label");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision frontier counts distinct external raters instead of duplicate external label rows", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-frontier-distinct-external-"));
+  try {
+    const claimReport = createClaimReport(tempDir);
+    const claim = readJson(claimReport);
+    claim.protocol.minimumExternalIndependentRaters = 2;
+    writeJson(claimReport, claim);
+    const bundleDir = path.join(tempDir, "candidate-bundle");
+    const findingId = "sha256:6".padEnd(71, "6");
+    const manifestSha256 = "f".repeat(64);
+    writeJson(path.join(bundleDir, "study.json"), {
+      schemaVersion: "cellfence.corpus-evidence-bundle.v1",
+      studyId: "duplicate-external-candidate",
+      environment: {
+        harnessCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        harnessDirty: false,
+      },
+      manifestCopies: [
+        {
+          subjectId: "candidate-a",
+          path: "manifests/candidate-a.json",
+          sha256: manifestSha256,
+        },
+      ],
+    });
+    writeJson(path.join(bundleDir, "corpus.json"), {
+      schemaVersion: "cellfence.corpus.v1",
+      subjects: [
+        {
+          id: "candidate-a",
+          repository: "https://github.com/example/candidate-a.git",
+          commit: "c".repeat(40),
+          manifest: {
+            strategy: "copy",
+            reviewStatus: "reviewed",
+            review: {
+              reviewedAt: "2026-07-25",
+              scope: "duplicate external label fixture",
+              reviewedManifestSha256: manifestSha256,
+              reviewerAttestations: [
+                {
+                  id: "external-reviewer",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+    writeJson(path.join(bundleDir, "sampling.json"), {
+      schemaVersion: "cellfence.corpus-sampling.v1",
+      sampledFindingIds: [findingId],
+    });
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), [
+      {
+        schemaVersion: "cellfence.corpus-label.v1",
+        studyId: "duplicate-external-candidate",
+        findingId,
+        rater: "external-reviewer-a",
+        raterType: "human",
+        round: "blind_first",
+        assignmentId: "blind-a",
+        evidencePackageId: "pkg-a",
+        sawPeerLabels: false,
+        label: "true_positive",
+        rationale: "first external label",
+      },
+      {
+        schemaVersion: "cellfence.corpus-label.v1",
+        studyId: "duplicate-external-candidate",
+        findingId,
+        rater: "external-reviewer-a",
+        raterType: "human",
+        round: "blind_first",
+        assignmentId: "blind-a-duplicate",
+        evidencePackageId: "pkg-a-duplicate",
+        sawPeerLabels: false,
+        label: "true_positive",
+        rationale: "duplicate external label from the same rater",
+      },
+      {
+        schemaVersion: "cellfence.corpus-label.v1",
+        studyId: "duplicate-external-candidate",
+        findingId,
+        rater: "codex-agent-b",
+        raterType: "agent",
+        round: "blind_second",
+        assignmentId: "blind-b",
+        evidencePackageId: "pkg-b",
+        sawPeerLabels: false,
+        label: "true_positive",
+        rationale: "second independent diagnostic rater",
+      },
+    ]);
+    writeJsonl(path.join(bundleDir, "findings.normalized.jsonl"), [
+      {
+        schemaVersion: "cellfence.corpus-finding.v1",
+        studyId: "duplicate-external-candidate",
+        findingId,
+        subjectId: "candidate-a",
+        repository: "https://github.com/example/candidate-a.git",
+        commit: "c".repeat(40),
+        manifestStrategy: "copy",
+        manifestReviewStatus: "reviewed",
+        precisionEligible: true,
+        ruleId: "CELLFENCE_PRIVATE_IMPORT",
+        severity: "error",
+        filePath: "src/a.ts",
+        message: "private import",
+      },
+    ]);
+
+    const result = runFrontier([
+      "--reviewed-claim-report",
+      claimReport,
+      "--candidate-bundle",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.candidatePool.claimPreflightRequiredIncludedFindings, 0);
+    assert.deepEqual(report.candidatePool.byRequirement, {
+      external_independent_label_required: 1,
+    });
+    assert.equal(report.workPlan.externalEvidence.minimumExternalIndependentLabelRows, 2);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

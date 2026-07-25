@@ -2124,6 +2124,52 @@ test("corpus precision claim accepts attestation-only reviewed copy manifests", 
   }
 });
 
+test("corpus precision claim rejects non-human external manifest attestation ids", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-attestation-agent-"));
+  try {
+    const findings = [createFinding(0), createFinding(1)];
+    const labels = labelsFor(findings).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    replaceCorpusManifestReviews(bundleDir, () => ({
+      reviewerAttestations: [
+        {
+          id: "codex-agent-reviewer",
+          reviewerType: "human",
+          independent: true,
+        },
+      ],
+      reviewedAt: "2026-07-20",
+      reviewedManifestSha256: fixtureManifestSha256,
+      scope: "package/workspace boundary manifest review",
+      boundaryEvidence: ["fixture package boundary"],
+    }));
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        minimumPrecision: 0.5,
+        confidence: 0.75,
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /appears non-human but external manifest review requires/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision claim hash-binds external manifest review attestations", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-attestation-hash-"));
   try {
