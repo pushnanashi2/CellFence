@@ -1241,6 +1241,185 @@ test("precision claim preflight gates external manifest review provenance", () =
   }
 });
 
+test("precision claim preflight accepts reviewed history replay manifest provenance", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-history-review-"));
+  try {
+    const findings = [finding(1, {
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      precisionEligible: true,
+      manifestStrategy: "reuse-before",
+      manifestReviewStatus: "reviewed",
+      replay: {
+        proofEligibility: "counterfactual_candidate_requires_manual_label",
+        replayKind: "single_commit_intro",
+        introducedChangedFile: true,
+      },
+    })];
+    const labels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const subjectId = findings[0].subjectId;
+    const studyPath = path.join(bundleDir, "study.json");
+    const study = readJson(studyPath);
+    study.manifestCopies = [{
+      subjectId,
+      phase: "before",
+      path: `manifests/${subjectId}.json`,
+      sha256: fixtureManifestSha256,
+    }];
+    writeJson(studyPath, study);
+    writeJson(path.join(bundleDir, "corpus.json"), {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: subjectId,
+          repository: findings[0].repository,
+          beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          afterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          before: {
+            manifest: {
+              strategy: "copy",
+              source: `manifests/${subjectId}.json`,
+              reviewStatus: "reviewed",
+              review: {
+                reviewerAttestations: [
+                  {
+                    id: "external-reviewer-a",
+                    reviewerType: "human",
+                    independent: true,
+                  },
+                ],
+                reviewedAt: "2026-07-25",
+                scope: "accepted stale public surface manifest before replay",
+                reviewedManifestSha256: fixtureManifestSha256,
+              },
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "reuse-before",
+            },
+          },
+        },
+      ],
+    });
+    const report = readJson(path.join(bundleDir, "report.json"));
+    report.schemaVersion = "cellfence.history-replay-study.v1";
+    writeJson(path.join(bundleDir, "report.json"), report);
+    const resealedStudy = readJson(studyPath);
+    resealedStudy.preregistration = {
+      ...resealedStudy.preregistration,
+      preLabelArtifactSetSha256: preLabelArtifactSetSha256(bundleDir),
+    };
+    writeJson(studyPath, resealedStudy);
+    writeSha256Sums(bundleDir);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        includedRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+      },
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+        allowedReviewerTypes: ["human"],
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const reportJson = JSON.parse(result.stdout);
+    assert.equal(reportJson.valid, true);
+    assert.doesNotMatch(reportJson.issues.join("\n"), /report\.json has unexpected schemaVersion|external manifest review/);
+    assert.match(reportJson.gateFailures.join("\n"), /sealed worklist binding/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision claim preflight rejects unattested history replay manifest provenance", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-history-unattested-"));
+  try {
+    const findings = [finding(1, {
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      precisionEligible: true,
+      manifestStrategy: "reuse-before",
+      manifestReviewStatus: "reviewed",
+      replay: {
+        proofEligibility: "counterfactual_candidate_requires_manual_label",
+        replayKind: "single_commit_intro",
+        introducedChangedFile: true,
+      },
+    })];
+    const labels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const subjectId = findings[0].subjectId;
+    const studyPath = path.join(bundleDir, "study.json");
+    const study = readJson(studyPath);
+    study.manifestCopies = [{
+      subjectId,
+      phase: "before",
+      path: `manifests/${subjectId}.json`,
+      sha256: fixtureManifestSha256,
+    }];
+    writeJson(studyPath, study);
+    writeJson(path.join(bundleDir, "corpus.json"), {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: subjectId,
+          repository: findings[0].repository,
+          beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          afterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          before: {
+            manifest: {
+              strategy: "copy",
+              source: `manifests/${subjectId}.json`,
+              reviewStatus: "reviewed",
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "reuse-before",
+            },
+          },
+        },
+      ],
+    });
+    const report = readJson(path.join(bundleDir, "report.json"));
+    report.schemaVersion = "cellfence.history-replay-study.v1";
+    writeJson(path.join(bundleDir, "report.json"), report);
+    const resealedStudy = readJson(studyPath);
+    resealedStudy.preregistration = {
+      ...resealedStudy.preregistration,
+      preLabelArtifactSetSha256: preLabelArtifactSetSha256(bundleDir),
+    };
+    writeJson(studyPath, resealedStudy);
+    writeSha256Sums(bundleDir);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        includedRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const reportJson = JSON.parse(result.stdout);
+    assert.equal(reportJson.valid, false);
+    assert.match(reportJson.issues.join("\n"), /precisionEligible does not match|external manifest review/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight rejects escaped manifest copy paths", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-manifest-escape-"));
   try {

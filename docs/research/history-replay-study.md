@@ -149,6 +149,16 @@ The strongest replay rows have:
 - introduced findings whose files are changed by the replay diff;
 - manual labels tying the finding to the intended event.
 
+For precision-candidate bundles, use a reviewed copied before manifest and
+`after.manifest.strategy: "reuse-before"`. `scripts/corpus-evidence-bundle.mjs`
+imports only the introduced after-phase findings, checks their audit event
+indexes against the copied after audit log, and records replay provenance on the
+normalized finding. `scripts/precision-claim-preflight.mjs` and
+`scripts/corpus-precision-claim.mjs` still require external manifest review
+attestations, sealed blind worklists, independent labels, repository balance,
+and the requested sample size before the evidence can support a public precision
+claim.
+
 If `baseline.enabled` is true, baseline create/check failures are harness
 failures. A green replay with baseline enabled means the before-baseline was
 created, the after-baseline check ran, and any findings are recorded as replay

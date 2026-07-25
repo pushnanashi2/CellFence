@@ -900,12 +900,37 @@ function reviewAttestations(manifest) {
   return [];
 }
 
+function manifestReviewStatus(manifest) {
+  if (manifest?.reviewStatus) return manifest.reviewStatus;
+  if (manifest?.reviewed === true) return "reviewed";
+  return "unreviewed";
+}
+
 function subjectIsReviewed(subject) {
   const strategy = subject?.manifest?.strategy || "existing";
   const reviewers = reviewReaders(subject?.manifest).filter((reviewer) => typeof reviewer === "string" && reviewer.length > 0);
   return (strategy === "existing" || strategy === "copy")
-    && subject?.manifest?.reviewStatus === "reviewed"
+    && manifestReviewStatus(subject?.manifest) === "reviewed"
     && reviewers.length > 0;
+}
+
+function historyReplaySubjectIsReviewed(subject, finding) {
+  const beforeManifest = subject?.before?.manifest || {};
+  const afterManifest = subject?.after?.manifest || {};
+  return beforeManifest.strategy === "copy"
+    && manifestReviewStatus(beforeManifest) === "reviewed"
+    && reviewAttestations(beforeManifest).length > 0
+    && afterManifest.strategy === "reuse-before"
+    && finding.manifestStrategy === "reuse-before"
+    && finding.manifestReviewStatus === "reviewed"
+    && finding.replay?.proofEligibility === "counterfactual_candidate_requires_manual_label"
+    && finding.replay?.replayKind === "single_commit_intro"
+    && finding.replay?.introducedChangedFile === true;
+}
+
+function expectedPrecisionEligible(corpus, subject, finding) {
+  if (corpus.schemaVersion === "cellfence.history-replay.v1") return historyReplaySubjectIsReviewed(subject, finding);
+  return subjectIsReviewed(subject);
 }
 
 function validatePrecisionEligibility(findings, corpus, issues) {
@@ -916,7 +941,7 @@ function validatePrecisionEligibility(findings, corpus, issues) {
       issues.push(`finding ${finding.findingId} references subject ${finding.subjectId} missing from corpus.json`);
       continue;
     }
-    const expectedEligible = subjectIsReviewed(subject);
+    const expectedEligible = expectedPrecisionEligible(corpus, subject, finding);
     if (finding.precisionEligible !== expectedEligible) {
       issues.push(`finding ${finding.findingId} precisionEligible does not match reviewed corpus eligibility`);
     }
@@ -931,7 +956,7 @@ function manifestCopiesBySubject(study, bundleDir, issues) {
   for (const copy of study.manifestCopies || []) {
     if (!copy?.subjectId || !copy?.path) continue;
     const absolutePath = resolveBundleRelativePath(bundleDir, copy.path, issues, `manifest copy path ${copy.path}`);
-    copies.set(copy.subjectId, {
+    copies.set(copy.phase ? `${copy.subjectId}\0${copy.phase}` : copy.subjectId, {
       ...copy,
       absolutePath,
       actualSha256: absolutePath && fs.existsSync(absolutePath) ? hashFile(absolutePath) : null,
@@ -940,50 +965,61 @@ function manifestCopiesBySubject(study, bundleDir, issues) {
   return copies;
 }
 
+function validateReviewedCopyManifest(id, manifest, copy, allowedReviewerTypes, issues) {
+  const strategy = manifest.strategy || "existing";
+  const review = manifest.review || {};
+  if (strategy !== "copy") {
+    issues.push(`${id} external manifest review requires manifest.strategy=copy`);
+  }
+  if (manifestReviewStatus(manifest) !== "reviewed") {
+    issues.push(`${id} external manifest review requires reviewStatus=reviewed`);
+  }
+  const attestations = reviewAttestations(manifest);
+  if (attestations.length === 0) {
+    issues.push(`${id} external manifest review requires review.reviewerAttestations`);
+  }
+  for (const [index, attestation] of attestations.entries()) {
+    const label = `${id} review.reviewerAttestations[${index}]`;
+    const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
+    if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
+    if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {
+      issues.push(`${label}.reviewerType must be one of ${[...allowedReviewerTypes].join(", ")}`);
+    }
+    if (attestation.independent !== true) issues.push(`${label}.independent must be true`);
+  }
+  if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) {
+    issues.push(`${id} external manifest review requires review.reviewedAt`);
+  }
+  if (typeof review.scope !== "string" || review.scope.length === 0) {
+    issues.push(`${id} external manifest review requires review.scope`);
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) {
+    issues.push(`${id} external manifest review requires review.reviewedManifestSha256`);
+    return;
+  }
+  if (!copy || !copy.actualSha256) {
+    issues.push(`${id} external manifest review requires a sealed manifest copy`);
+  } else if (review.reviewedManifestSha256 !== copy.actualSha256) {
+    issues.push(`${id} review.reviewedManifestSha256 does not match sealed manifest copy`);
+  }
+}
+
 function validateManifestReviewProvenance(corpus, study, bundleDir, protocol, issues) {
-  if (!protocol.requireExternalManifestReview) return;
+  if (!protocol.requireExternalManifestReview && corpus.schemaVersion !== "cellfence.history-replay.v1") return;
   const allowedReviewerTypes = new Set(protocol.allowedManifestReviewerTypes);
   const manifestCopies = manifestCopiesBySubject(study, bundleDir, issues);
   for (const subject of corpus.subjects || []) {
     const id = subject?.id || "subject";
-    const manifest = subject?.manifest || {};
-    const strategy = manifest.strategy || "existing";
-    const review = manifest.review || {};
-    if (strategy !== "copy") {
-      issues.push(`${id} external manifest review requires manifest.strategy=copy`);
-    }
-    if (manifest.reviewStatus !== "reviewed") {
-      issues.push(`${id} external manifest review requires reviewStatus=reviewed`);
-    }
-    const attestations = reviewAttestations(manifest);
-    if (attestations.length === 0) {
-      issues.push(`${id} external manifest review requires review.reviewerAttestations`);
-    }
-    for (const [index, attestation] of attestations.entries()) {
-      const label = `${id} review.reviewerAttestations[${index}]`;
-      const reviewerType = attestation.reviewerType || attestation.raterType || attestation.reviewerClass;
-      if (typeof attestation.id !== "string" || attestation.id.length === 0) issues.push(`${label}.id is required`);
-      if (typeof reviewerType !== "string" || !allowedReviewerTypes.has(reviewerType)) {
-        issues.push(`${label}.reviewerType must be one of ${[...allowedReviewerTypes].join(", ")}`);
+    if (corpus.schemaVersion === "cellfence.history-replay.v1") {
+      const beforeManifest = subject?.before?.manifest || {};
+      const afterManifest = subject?.after?.manifest || {};
+      if (afterManifest.strategy !== "reuse-before") {
+        issues.push(`${id} history replay external manifest review requires after.manifest.strategy=reuse-before`);
       }
-      if (attestation.independent !== true) issues.push(`${label}.independent must be true`);
-    }
-    if (typeof review.reviewedAt !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(review.reviewedAt)) {
-      issues.push(`${id} external manifest review requires review.reviewedAt`);
-    }
-    if (typeof review.scope !== "string" || review.scope.length === 0) {
-      issues.push(`${id} external manifest review requires review.scope`);
-    }
-    if (!/^[a-f0-9]{64}$/.test(String(review.reviewedManifestSha256 || ""))) {
-      issues.push(`${id} external manifest review requires review.reviewedManifestSha256`);
+      validateReviewedCopyManifest(`${id} before`, beforeManifest, manifestCopies.get(`${id}\0before`), allowedReviewerTypes, issues);
       continue;
     }
-    const copy = manifestCopies.get(id);
-    if (!copy || !copy.actualSha256) {
-      issues.push(`${id} external manifest review requires a sealed manifest copy`);
-    } else if (review.reviewedManifestSha256 !== copy.actualSha256) {
-      issues.push(`${id} review.reviewedManifestSha256 does not match sealed manifest copy`);
-    }
+    validateReviewedCopyManifest(id, subject?.manifest || {}, manifestCopies.get(id), allowedReviewerTypes, issues);
   }
 }
 
@@ -1014,6 +1050,7 @@ function evaluateClaim(options) {
   }
   const study = readJson(path.join(options.bundleDir, "study.json"));
   const corpus = readJson(path.join(options.bundleDir, "corpus.json"));
+  if (corpus.schemaVersion === "cellfence.history-replay.v1") protocol.requireExternalManifestReview = true;
   const sampling = readJson(path.join(options.bundleDir, "sampling.json"));
   const findings = readJsonl(path.join(options.bundleDir, "findings.normalized.jsonl"));
   const labels = readJsonl(path.join(options.bundleDir, "labels.jsonl"));

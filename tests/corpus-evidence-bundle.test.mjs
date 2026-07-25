@@ -21,6 +21,10 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
 function writeJsonl(filePath, values) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${values.map((value) => JSON.stringify(value)).join("\n")}\n`);
@@ -213,6 +217,205 @@ function createFixture(tempDir) {
   return { auditLogPath, corpusPath, reportPath };
 }
 
+function createHistoryReplayFixture(tempDir) {
+  const subjectDir = path.join(tempDir, "subjects", "public-drift");
+  const beforeManifestPath = path.join(subjectDir, "before", "control", "cellfence.manifest.json");
+  const afterManifestPath = path.join(subjectDir, "after", "control", "cellfence.manifest.json");
+  const beforeAuditLogPath = path.join(subjectDir, "before", "logs", "check.audit.jsonl");
+  const afterAuditLogPath = path.join(subjectDir, "after", "logs", "check.audit.jsonl");
+  const corpusPath = path.join(tempDir, "history-corpus.json");
+  const reportPath = path.join(tempDir, "history-report.json");
+  const manifest = {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+      requiredRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+    },
+    cells: [
+      {
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  };
+  writeJson(beforeManifestPath, manifest);
+  writeJson(afterManifestPath, manifest);
+  writeJsonl(beforeAuditLogPath, []);
+  const finding = {
+    ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    severity: "error",
+    cellId: "app",
+    filePath: "src/app/public.ts",
+    message: "app publicEntry exports extra, but manifest does not declare it",
+    details: { exported: ["app", "extra"], declared: ["app"], line: 2 },
+    fingerprint: "public-symbol-fingerprint",
+  };
+  writeJsonl(afterAuditLogPath, [
+    {
+      schemaVersion: "cellfence.audit-event.v1",
+      runId: "run-history",
+      timestamp: "2026-07-25T00:00:00.000Z",
+      commit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      event: "finding.detected",
+      command: "check",
+      ...finding,
+      outcome: "rejected",
+    },
+  ]);
+  writeJson(corpusPath, {
+    schemaVersion: "cellfence.history-replay.v1",
+    subjects: [
+      {
+        id: "public-drift",
+        repository: "https://github.com/example/public-drift.git",
+        beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        afterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        before: {
+          manifest: {
+            strategy: "copy",
+            source: "manifests/public-drift.before.json",
+            reviewStatus: "reviewed",
+            review: {
+              reviewerAttestations: [
+                {
+                  id: "external-reviewer-a",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+              reviewedAt: "2026-07-25",
+              scope: "accepted stale public surface manifest before replay",
+              reviewedManifestSha256: hashFile(beforeManifestPath),
+            },
+          },
+        },
+        after: {
+          manifest: {
+            strategy: "reuse-before",
+          },
+        },
+      },
+    ],
+  });
+  writeJson(reportPath, {
+    schemaVersion: "cellfence.history-replay-study.v1",
+    generatedAt: "2026-07-25T00:00:01.000Z",
+    corpusPath,
+    dryRun: false,
+    allowFloatingRef: false,
+    evidenceSetSha256: "d".repeat(64),
+    environment: {
+      harnessCommit: "cccccccccccccccccccccccccccccccccccccccc",
+      harnessDirty: false,
+      cellfenceVersion: "0.1.14",
+      corpusSha256: hashFile(corpusPath),
+    },
+    subjects: [
+      {
+        id: "public-drift",
+        repository: "https://github.com/example/public-drift.git",
+        requestedBeforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        requestedAfterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        subjectDir,
+        status: "replayed_introduced_findings",
+        replayKind: "single_commit_intro",
+        proofEligibility: "counterfactual_candidate_requires_manual_label",
+        ancestry: {
+          status: "completed",
+          beforeIsAncestorOfAfter: true,
+          commitDistance: 1,
+          replayKind: "single_commit_intro",
+        },
+        diff: {
+          status: "completed",
+          changedFiles: ["src/app/public.ts"],
+          changedFileCount: 1,
+          nameStatus: ["M\tsrc/app/public.ts"],
+          shortStat: "1 file changed, 1 insertion(+)",
+        },
+        before: {
+          commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          gitTree: "1111111111111111111111111111111111111111",
+          manifest: {
+            strategy: "copy",
+            reviewed: true,
+            effectivePath: beforeManifestPath,
+            sha256: hashFile(beforeManifestPath),
+          },
+          check: {
+            status: "checked_clean",
+            exitCode: 0,
+            ok: true,
+            findingCount: 0,
+            findings: [],
+            auditLogPath: beforeAuditLogPath,
+            auditLogSha256: hashFile(beforeAuditLogPath),
+          },
+        },
+        after: {
+          commit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          gitTree: "2222222222222222222222222222222222222222",
+          manifest: {
+            strategy: "reuse-before",
+            reusedFromPhase: "before",
+            reusedFromStrategy: "copy",
+            reviewed: true,
+            effectivePath: afterManifestPath,
+            sha256: hashFile(afterManifestPath),
+            sourceManifestSha256: hashFile(beforeManifestPath),
+          },
+          check: {
+            status: "checked_findings",
+            exitCode: 1,
+            ok: false,
+            findingCount: 1,
+            findings: [finding],
+            auditLogPath: afterAuditLogPath,
+            auditLogSha256: hashFile(afterAuditLogPath),
+          },
+        },
+        introducedFindings: [
+          {
+            findingId: "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            phase: "after",
+            ruleId: finding.ruleId,
+            severity: finding.severity,
+            fingerprint: finding.fingerprint,
+            occurrence: 1,
+            comparisonKey: `${finding.fingerprint}#1`,
+            filePath: finding.filePath,
+            changedFile: true,
+            message: finding.message,
+            details: finding.details,
+          },
+        ],
+        introducedFindingCount: 1,
+        introducedFindingsByRule: {
+          CELLFENCE_PUBLIC_SYMBOL_MISMATCH: 1,
+        },
+      },
+    ],
+    summary: {
+      total: 1,
+      replayed: 1,
+      failed: 0,
+      totalBeforeFindings: 0,
+      totalAfterFindings: 1,
+      totalIntroducedFindings: 1,
+      introducedFindingsByRule: {
+        CELLFENCE_PUBLIC_SYMBOL_MISMATCH: 1,
+      },
+    },
+  });
+  return { corpusPath, reportPath };
+}
+
 function createRepositoryCapFixture(tempDir) {
   const corpusPath = path.join(tempDir, "corpus-cap.json");
   const reportPath = path.join(tempDir, "report-cap.json");
@@ -368,6 +571,85 @@ test("corpus evidence bundle generates normalized findings, sample, and checksum
       confidence: 0.95,
       zeroFalsePositiveSampleSize: 299,
     });
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+    assert.equal(validate.status, 0, validate.stderr || validate.stdout);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle seals history replay introduced findings", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-history-"));
+  try {
+    const { corpusPath, reportPath } = createHistoryReplayFixture(tempDir);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "history-fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const findings = fs.readFileSync(path.join(bundleDir, "findings.normalized.jsonl"), "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].ruleId, "CELLFENCE_PUBLIC_SYMBOL_MISMATCH");
+    assert.equal(findings[0].manifestStrategy, "reuse-before");
+    assert.equal(findings[0].manifestReviewStatus, "reviewed");
+    assert.equal(findings[0].precisionEligible, true);
+    assert.equal(findings[0].replay.proofEligibility, "counterfactual_candidate_requires_manual_label");
+    assert.equal(findings[0].replay.introducedChangedFile, true);
+
+    const study = JSON.parse(fs.readFileSync(path.join(bundleDir, "study.json"), "utf8"));
+    assert.deepEqual(study.manifestCopies.map((copy) => copy.phase).sort(), ["after", "before"]);
+    assert.equal(study.logCopies.some((copy) => copy.phase === "after" && copy.path.endsWith("check.audit.jsonl")), true);
+
+    const validate = runBundle(["--validate", "--bundle", bundleDir]);
+    assert.equal(validate.status, 0, validate.stderr || validate.stdout);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus evidence bundle does not mark unattested history replay manifests precision eligible", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-bundle-history-unattested-"));
+  try {
+    const { corpusPath, reportPath } = createHistoryReplayFixture(tempDir);
+    const corpus = readJson(corpusPath);
+    delete corpus.subjects[0].before.manifest.review;
+    writeJson(corpusPath, corpus);
+    const bundleDir = path.join(tempDir, "bundle");
+
+    const result = runBundle([
+      "--study-id",
+      "history-fixture-study",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const findings = fs.readFileSync(path.join(bundleDir, "findings.normalized.jsonl"), "utf8")
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].manifestStrategy, "reuse-before");
+    assert.equal(findings[0].manifestReviewStatus, "reviewed");
+    assert.equal(findings[0].precisionEligible, false);
+    assert.equal(findings[0].replay.beforeManifestHasExternalReviewAttestation, false);
 
     const validate = runBundle(["--validate", "--bundle", bundleDir]);
     assert.equal(validate.status, 0, validate.stderr || validate.stdout);

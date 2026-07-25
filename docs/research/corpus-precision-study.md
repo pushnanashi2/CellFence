@@ -314,6 +314,21 @@ human/org labels. Its expected output before returned labels is a valid but
 not claim-ready packet whose blockers name the missing independent labels,
 repository balance, and per-rule sample deficits.
 
+History replay reports can also be sealed into evidence bundles when the report
+uses `cellfence.history-replay-study.v1`. The bundle step only imports
+introduced after-phase findings, binds them back to the after audit log event
+indexes, and preserves replay provenance on each normalized finding. For
+claim-bound use, the frozen corpus must use `cellfence.history-replay.v1` with a
+reviewed `before.manifest.strategy: "copy"` manifest and
+`after.manifest.strategy: "reuse-before"`. The preflight and claim evaluator
+count such findings as precision-eligible only when the replay row is a
+single-commit counterfactual candidate, the introduced finding is on a changed
+file, and the reviewed before manifest has the same external attestation fields
+required for copied reviewed corpus manifests. This path is intended for
+`CELLFENCE_PUBLIC_SYMBOL_MISMATCH` stale-contract replay evidence; it is not a
+shortcut around blind labels, external human/org labels, repository balance, or
+sample-size gates.
+
 Turn those blockers into an explicit remaining-evidence worklist before starting
 the next round:
 

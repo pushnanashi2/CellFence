@@ -37,6 +37,8 @@ const labelAllowedKeys = new Set([
 const defaultMinimumPrecision = 0.99;
 const defaultConfidence = 0.95;
 const defaultMinPerRepository = 3;
+const corpusSchemaVersions = new Set(["cellfence.corpus.v1", "cellfence.history-replay.v1"]);
+const reportSchemaVersions = new Set(["cellfence.corpus-study.v1", "cellfence.history-replay-study.v1"]);
 
 function usage() {
   console.error(`Usage:
@@ -336,6 +338,8 @@ function copyDirectoryFiles(sourceDir, targetDir) {
 function manifestReviewStatus(subject) {
   const strategy = subject.manifest?.strategy || "existing";
   if (subject.manifest?.reviewStatus) return subject.manifest.reviewStatus;
+  if (subject.manifest?.reviewed === true) return "reviewed";
+  if (strategy === "reuse-before") return "unreviewed";
   if (strategy === "existing") return "existing";
   if (strategy === "copy") return "unreviewed";
   if (strategy === "infer") return "generated";
@@ -346,6 +350,34 @@ function precisionEligible(subject) {
   const strategy = subject.manifest?.strategy || "existing";
   const reviewStatus = manifestReviewStatus(subject);
   return (strategy === "existing" || strategy === "copy") && reviewStatus === "reviewed";
+}
+
+function reviewAttestations(manifest) {
+  if (Array.isArray(manifest?.review?.reviewerAttestations)) return manifest.review.reviewerAttestations;
+  if (Array.isArray(manifest?.review?.reviewers) && manifest.review.reviewers.every(isRecord)) return manifest.review.reviewers;
+  return [];
+}
+
+function manifestHasExternalReviewAttestation(manifest) {
+  return reviewAttestations(manifest).some((attestation) => {
+    const reviewerType = attestation?.reviewerType || attestation?.raterType || attestation?.reviewerClass;
+    return typeof attestation?.id === "string"
+      && attestation.id.length > 0
+      && typeof reviewerType === "string"
+      && reviewerType.length > 0
+      && attestation.independent === true;
+  });
+}
+
+function replayPrecisionEligible(rawFinding) {
+  const subject = rawFinding.subject || {};
+  const replay = subject.replay || {};
+  return subject.manifest?.strategy === "reuse-before"
+    && manifestReviewStatus(subject) === "reviewed"
+    && replay.beforeManifestHasExternalReviewAttestation === true
+    && replay.proofEligibility === "counterfactual_candidate_requires_manual_label"
+    && replay.replayKind === "single_commit_intro"
+    && replay.introducedChangedFile === true;
 }
 
 function fallbackFingerprint(event) {
@@ -384,7 +416,7 @@ function normalizeFinding(studyId, rawFinding, occurrenceIndex = 0) {
     manifestSha256,
     manifestStrategy: subject.manifest?.strategy || "existing",
     manifestReviewStatus: manifestReviewStatus(subject),
-    precisionEligible: precisionEligible(subject),
+    precisionEligible: precisionEligible(subject) || replayPrecisionEligible(rawFinding),
     ruleId,
     severity: event.severity || null,
     filePath: event.filePath ? posixify(event.filePath) : null,
@@ -394,6 +426,7 @@ function normalizeFinding(studyId, rawFinding, occurrenceIndex = 0) {
     cellId: event.cellId || null,
     producerCellId: event.producerCellId || null,
     outcome: event.outcome || null,
+    ...(subject.replay ? { replay: subject.replay } : {}),
   };
 }
 
@@ -448,7 +481,7 @@ function preLabelArtifactSetSha256(bundleDir) {
   return hashText(canonicalJson(artifacts));
 }
 
-function collectRawFindings(report, studyId) {
+function collectCorpusRawFindings(report, studyId) {
   const rawFindings = [];
   for (const subject of report.subjects || []) {
     const auditLogPath = subject.check?.auditLogPath;
@@ -495,6 +528,142 @@ function collectRawFindings(report, studyId) {
     throw new Error(`report.summary.totalFindings mismatch: report=${report.summary.totalFindings} audit=${rawFindings.length}`);
   }
   return rawFindings;
+}
+
+function historyFallbackFingerprint(finding) {
+  return `sha256:${hashText(JSON.stringify({
+    ruleId: finding.ruleId,
+    severity: finding.severity,
+    filePath: finding.filePath || null,
+    details: finding.details || null,
+    message: finding.message || null,
+  }))}`;
+}
+
+function rejectedAuditFindingEntries(auditLogPath) {
+  return readJsonl(auditLogPath)
+    .map((event, eventIndex) => ({ event, eventIndex }))
+    .filter(({ event }) => event?.event === "finding.detected" && event.outcome === "rejected");
+}
+
+function historyAuditIndexByComparisonKey(auditLogPath) {
+  const occurrences = new Map();
+  const indexes = new Map();
+  for (const { event, eventIndex } of rejectedAuditFindingEntries(auditLogPath)) {
+    const fingerprint = event.fingerprint || historyFallbackFingerprint(event);
+    const occurrence = (occurrences.get(fingerprint) || 0) + 1;
+    occurrences.set(fingerprint, occurrence);
+    const comparisonKey = `${fingerprint}#${occurrence}`;
+    if (!indexes.has(comparisonKey)) indexes.set(comparisonKey, eventIndex);
+  }
+  return indexes;
+}
+
+function historyManifestForBundle(manifest) {
+  if (!manifest) return null;
+  return {
+    ...manifest,
+    reviewStatus: manifest.reviewStatus || (manifest.reviewed === true ? "reviewed" : "unreviewed"),
+  };
+}
+
+function corpusSubjectMap(corpus) {
+  return new Map((corpus.subjects || []).map((subject) => [subject.id, subject]));
+}
+
+function historyReplayManifestForBundle(reportSubject, corpusSubject) {
+  const beforeManifest = corpusSubject?.before?.manifest || {};
+  const afterManifest = corpusSubject?.after?.manifest || {};
+  const reportAfterManifest = historyManifestForBundle(reportSubject.after?.manifest);
+  const beforeReviewStatus = beforeManifest.reviewStatus || (beforeManifest.reviewed === true ? "reviewed" : "unreviewed");
+  return {
+    ...reportAfterManifest,
+    reviewStatus: beforeReviewStatus === "reviewed" && afterManifest.strategy === "reuse-before"
+      ? "reviewed"
+      : "unreviewed",
+  };
+}
+
+function collectHistoryReplayRawFindings(report, studyId, corpus) {
+  const rawFindings = [];
+  const corpusSubjects = corpusSubjectMap(corpus || {});
+  for (const subject of report.subjects || []) {
+    const corpusSubject = corpusSubjects.get(subject.id) || {};
+    const beforeCorpusManifest = corpusSubject.before?.manifest || {};
+    const afterCorpusManifest = corpusSubject.after?.manifest || {};
+    const introducedFindings = Array.isArray(subject.introducedFindings) ? subject.introducedFindings : [];
+    if (Number.isInteger(subject.introducedFindingCount) && subject.introducedFindingCount !== introducedFindings.length) {
+      throw new Error(`introduced finding count mismatch for ${subject.id}: report=${subject.introducedFindingCount} list=${introducedFindings.length}`);
+    }
+    if (introducedFindings.length === 0) continue;
+    const auditLogPath = subject.after?.check?.auditLogPath;
+    if (!auditLogPath || !fs.existsSync(auditLogPath)) {
+      throw new Error(`after audit log is missing for ${subject.id}; report claims ${introducedFindings.length} introduced findings`);
+    }
+    if (!subject.after?.check?.auditLogSha256) {
+      throw new Error(`after audit log SHA-256 is missing for ${subject.id}`);
+    }
+    if (hashFile(auditLogPath) !== subject.after.check.auditLogSha256) {
+      throw new Error(`after audit log hash mismatch for ${subject.id}`);
+    }
+    const indexByComparisonKey = historyAuditIndexByComparisonKey(auditLogPath);
+    const auditEvents = readJsonl(auditLogPath);
+    for (const introducedFinding of introducedFindings) {
+      const fingerprint = introducedFinding.fingerprint || historyFallbackFingerprint(introducedFinding);
+      const comparisonKey = introducedFinding.comparisonKey || `${fingerprint}#${introducedFinding.occurrence || 1}`;
+      const eventIndex = indexByComparisonKey.get(comparisonKey);
+      if (!Number.isInteger(eventIndex)) {
+        throw new Error(`introduced finding ${subject.id}:${comparisonKey} is missing from the after audit log`);
+      }
+      rawFindings.push({
+        schemaVersion: "cellfence.corpus-raw-finding.v1",
+        studyId,
+        subjectId: subject.id,
+        auditLogPath,
+        eventIndex,
+        event: auditEvents[eventIndex],
+        subject: {
+          id: subject.id,
+          repository: subject.repository || null,
+          requestedCommit: subject.requestedAfterCommit || null,
+          commit: subject.after?.commit || null,
+          gitTree: subject.after?.gitTree || null,
+          manifest: historyReplayManifestForBundle(subject, corpusSubject),
+          replay: {
+            schemaVersion: "cellfence.history-replay-finding-provenance.v1",
+            beforeCommit: subject.before?.commit || subject.requestedBeforeCommit || null,
+            afterCommit: subject.after?.commit || subject.requestedAfterCommit || null,
+            beforeGitTree: subject.before?.gitTree || null,
+            afterGitTree: subject.after?.gitTree || null,
+            replayKind: subject.replayKind || null,
+            proofEligibility: subject.proofEligibility || null,
+            evidenceSetSha256: report.evidenceSetSha256 || null,
+            ancestry: subject.ancestry || null,
+            diff: subject.diff || null,
+            beforeManifestSha256: subject.before?.manifest?.sha256 || null,
+            afterManifestSha256: subject.after?.manifest?.sha256 || null,
+            sourceManifestSha256: subject.after?.manifest?.sourceManifestSha256 || null,
+            beforeManifestStrategy: beforeCorpusManifest.strategy || null,
+            beforeManifestReviewStatus: beforeCorpusManifest.reviewStatus || (beforeCorpusManifest.reviewed === true ? "reviewed" : null),
+            beforeManifestHasExternalReviewAttestation: manifestHasExternalReviewAttestation(beforeCorpusManifest),
+            afterManifestStrategy: afterCorpusManifest.strategy || null,
+            introducedFindingId: introducedFinding.findingId || null,
+            introducedOccurrence: introducedFinding.occurrence || null,
+            introducedChangedFile: introducedFinding.changedFile === true,
+          },
+        },
+      });
+    }
+  }
+  if (Number.isInteger(report.summary?.totalIntroducedFindings) && rawFindings.length !== report.summary.totalIntroducedFindings) {
+    throw new Error(`report.summary.totalIntroducedFindings mismatch: report=${report.summary.totalIntroducedFindings} audit=${rawFindings.length}`);
+  }
+  return rawFindings;
+}
+
+function collectRawFindings(report, studyId, corpus) {
+  if (report.schemaVersion === "cellfence.history-replay-study.v1") return collectHistoryReplayRawFindings(report, studyId, corpus);
+  return collectCorpusRawFindings(report, studyId);
 }
 
 function deterministicRank(seed, findingId) {
@@ -580,8 +749,8 @@ function deterministicSample(findings, corpusSha256, options = {}) {
       sampledFindings: sampledFindings.length,
       precisionEligibleFindings: precisionEligibleFindings.length,
       precisionDenominator: {
-        eligibleManifestStrategies: ["existing", "copy:reviewed"],
-        excludedManifestStrategies: ["infer", "copy:unreviewed"],
+        eligibleManifestStrategies: ["existing", "copy:reviewed", "reuse-before:reviewed-history-replay"],
+        excludedManifestStrategies: ["infer", "copy:unreviewed", "reuse-before:unattested-or-ineligible-history-replay"],
       },
     },
     sampledFindingIds: sampledFindings.map((finding) => finding.findingId),
@@ -766,18 +935,46 @@ function validateLabels(bundleDir, normalizedFindings, sampling, findings) {
   if (!sampling || !Array.isArray(sampling.sampledFindingIds)) findings.push("sampling.json is missing sampledFindingIds");
 }
 
-function validateManifestHashes(bundleDir, report, findings) {
-  const copiedManifests = new Map();
-  for (const filePath of listFilesRecursive(path.join(bundleDir, "manifests"))) {
-    copiedManifests.set(path.basename(filePath, ".json"), filePath);
-  }
+function expectedManifestEntries(report) {
+  const entries = [];
   for (const subject of report.subjects || []) {
-    if (!subject.manifest?.sha256) continue;
-    const filePath = copiedManifests.get(safeName(subject.id));
-    if (!filePath) {
-      findings.push(`manifest copy is missing for ${subject.id}`);
-    } else if (hashFile(filePath) !== subject.manifest.sha256) {
-      findings.push(`manifest hash mismatch for ${subject.id}`);
+    if (report.schemaVersion === "cellfence.history-replay-study.v1") {
+      for (const phase of ["before", "after"]) {
+        const manifest = subject[phase]?.manifest;
+        if (manifest?.sha256) entries.push({ subjectId: subject.id, phase, sha256: manifest.sha256 });
+      }
+    } else if (subject.manifest?.sha256) {
+      entries.push({ subjectId: subject.id, phase: null, sha256: subject.manifest.sha256 });
+    }
+  }
+  return entries;
+}
+
+function validateManifestHashes(bundleDir, study, report, findings) {
+  const manifestCopies = Array.isArray(study.manifestCopies) ? study.manifestCopies : [];
+  for (const expected of expectedManifestEntries(report)) {
+    const candidates = manifestCopies.filter((copy) => {
+      return copy?.subjectId === expected.subjectId
+        && ((expected.phase === null && copy.phase === undefined) || copy.phase === expected.phase);
+    });
+    if (candidates.length === 0) {
+      findings.push(expected.phase === null
+        ? `manifest copy is missing for ${expected.subjectId}`
+        : `${expected.phase} manifest copy is missing for ${expected.subjectId}`);
+      continue;
+    }
+    const matching = candidates.filter((copy) => copy.sha256 === expected.sha256).filter((copy) => {
+      const copyPath = resolveBundleRelativePath(bundleDir, copy.path, findings, `manifest copy path ${copy.path}`);
+      return copyPath && fs.existsSync(copyPath) && hashFile(copyPath) === expected.sha256;
+    });
+    if (matching.length === 0) {
+      findings.push(expected.phase === null
+        ? `manifest hash mismatch for ${expected.subjectId}`
+        : `${expected.phase} manifest hash mismatch for ${expected.subjectId}`);
+    } else if (matching.length > 1) {
+      findings.push(expected.phase === null
+        ? `manifest hash copy is ambiguous for ${expected.subjectId}`
+        : `${expected.phase} manifest hash copy is ambiguous for ${expected.subjectId}`);
     }
   }
 }
@@ -802,7 +999,7 @@ function validateStudyCopies(bundleDir, study, findings) {
   }
 }
 
-function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings) {
+function validateCorpusRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings) {
   const logCopies = Array.isArray(study.logCopies) ? study.logCopies : [];
   const rawBySubject = new Map();
   const logEvents = new Map();
@@ -877,6 +1074,126 @@ function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, f
   }
 }
 
+function expectedHistoryIntroducedIndexes(subject, auditLogPath, findings) {
+  const introducedFindings = Array.isArray(subject.introducedFindings) ? subject.introducedFindings : [];
+  const indexByComparisonKey = historyAuditIndexByComparisonKey(auditLogPath);
+  const indexes = [];
+  for (const introducedFinding of introducedFindings) {
+    const fingerprint = introducedFinding.fingerprint || historyFallbackFingerprint(introducedFinding);
+    const comparisonKey = introducedFinding.comparisonKey || `${fingerprint}#${introducedFinding.occurrence || 1}`;
+    const eventIndex = indexByComparisonKey.get(comparisonKey);
+    if (!Number.isInteger(eventIndex)) {
+      findings.push(`introduced finding ${subject.id}:${comparisonKey} is missing from copied after audit log`);
+    } else {
+      indexes.push(eventIndex);
+    }
+  }
+  return indexes.sort((left, right) => left - right);
+}
+
+function validateHistoryReplayRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings) {
+  const logCopies = Array.isArray(study.logCopies) ? study.logCopies : [];
+  const rawBySubject = new Map();
+  for (const rawFinding of rawFindings) {
+    const subjectFindings = rawBySubject.get(rawFinding.subjectId) || [];
+    subjectFindings.push(rawFinding);
+    rawBySubject.set(rawFinding.subjectId, subjectFindings);
+  }
+
+  for (const subject of report.subjects || []) {
+    if (!subject.after?.check?.auditLogSha256) continue;
+    const basename = path.basename(subject.after.check.auditLogPath || "check.audit.jsonl");
+    const candidates = logCopies.filter((copy) => {
+      return copy?.subjectId === subject.id
+        && copy.phase === "after"
+        && path.basename(copy.path || "") === basename;
+    });
+    if (candidates.length === 0) {
+      findings.push(`after audit log copy is missing for ${subject.id}`);
+      continue;
+    }
+    const matchingCopies = candidates.filter((copy) => {
+      const copyPath = resolveBundleRelativePath(bundleDir, copy.path, findings, `log copy path ${copy.path}`);
+      return copyPath && fs.existsSync(copyPath) && hashFile(copyPath) === subject.after.check.auditLogSha256;
+    });
+    if (matchingCopies.length === 0) {
+      findings.push(`after audit log hash does not match copied log for ${subject.id}`);
+      continue;
+    }
+    if (matchingCopies.length > 1) {
+      findings.push(`after audit log hash is ambiguous for ${subject.id}`);
+      continue;
+    }
+    const copyPath = resolveBundleRelativePath(bundleDir, matchingCopies[0].path, findings, `log copy path ${matchingCopies[0].path}`);
+    if (!copyPath || !fs.existsSync(copyPath)) continue;
+    const events = readJsonl(copyPath);
+    const expectedIndexes = expectedHistoryIntroducedIndexes(subject, copyPath, findings);
+    const subjectRawFindings = rawBySubject.get(subject.id) || [];
+    if (Number.isInteger(subject.introducedFindingCount) && subjectRawFindings.length !== subject.introducedFindingCount) {
+      findings.push(`raw finding count does not match introduced finding count for ${subject.id}`);
+    }
+    const rawIndexes = subjectRawFindings.map((finding) => finding.eventIndex).sort((left, right) => left - right);
+    if (rawIndexes.some((eventIndex) => !Number.isInteger(eventIndex) || eventIndex < 0)) {
+      findings.push(`raw findings include invalid eventIndex for ${subject.id}`);
+    } else if (new Set(rawIndexes).size !== rawIndexes.length) {
+      findings.push(`raw findings repeat an audit eventIndex for ${subject.id}`);
+    } else if (canonicalJson(rawIndexes) !== canonicalJson(expectedIndexes)) {
+      findings.push(`raw finding eventIndex set does not match introduced findings for ${subject.id}`);
+    }
+    for (const rawFinding of subjectRawFindings) {
+      if (canonicalJson(events[rawFinding.eventIndex]) !== canonicalJson(rawFinding.event)) {
+        findings.push(`raw finding ${rawFinding.subjectId}:${rawFinding.eventIndex} does not match copied after audit log event`);
+      }
+    }
+  }
+}
+
+function validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings) {
+  if (report.schemaVersion === "cellfence.history-replay-study.v1") {
+    validateHistoryReplayRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings);
+  } else {
+    validateCorpusRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings);
+  }
+}
+
+function normalCorpusSubjectIsPrecisionEligible(subject) {
+  const strategy = subject?.manifest?.strategy || "existing";
+  const reviewStatus = subject?.manifest?.reviewStatus || (subject?.manifest?.reviewed === true ? "reviewed" : "unreviewed");
+  return (strategy === "existing" || strategy === "copy") && reviewStatus === "reviewed";
+}
+
+function historyReplaySubjectIsPrecisionEligible(subject, finding) {
+  const beforeManifest = subject?.before?.manifest || {};
+  const afterManifest = subject?.after?.manifest || {};
+  const beforeReviewStatus = beforeManifest.reviewStatus || (beforeManifest.reviewed === true ? "reviewed" : "unreviewed");
+  return beforeManifest.strategy === "copy"
+    && beforeReviewStatus === "reviewed"
+    && manifestHasExternalReviewAttestation(beforeManifest)
+    && afterManifest.strategy === "reuse-before"
+    && finding.manifestStrategy === "reuse-before"
+    && finding.manifestReviewStatus === "reviewed"
+    && finding.replay?.proofEligibility === "counterfactual_candidate_requires_manual_label"
+    && finding.replay?.replayKind === "single_commit_intro"
+    && finding.replay?.introducedChangedFile === true;
+}
+
+function validatePrecisionEligibilityAgainstCorpus(corpus, normalizedFindings, findings) {
+  const subjects = corpusSubjectMap(corpus);
+  for (const finding of normalizedFindings) {
+    const subject = subjects.get(finding.subjectId);
+    if (!subject) {
+      findings.push(`finding ${finding.findingId} references subject ${finding.subjectId} missing from corpus.json`);
+      continue;
+    }
+    const expected = corpus.schemaVersion === "cellfence.history-replay.v1"
+      ? historyReplaySubjectIsPrecisionEligible(subject, finding)
+      : normalCorpusSubjectIsPrecisionEligible(subject);
+    if (finding.precisionEligible !== expected) {
+      findings.push(`finding ${finding.findingId} precisionEligible does not match sealed corpus eligibility`);
+    }
+  }
+}
+
 function validateBundle(bundleDir) {
   const findings = [];
   if (!fs.existsSync(bundleDir)) throw new Error(`bundle not found: ${bundleDir}`);
@@ -888,8 +1205,8 @@ function validateBundle(bundleDir) {
   const sampling = readJson(path.join(bundleDir, "sampling.json"));
 
   if (study.schemaVersion !== "cellfence.corpus-evidence-bundle.v1") findings.push("study.json has unexpected schemaVersion");
-  if (corpus.schemaVersion !== "cellfence.corpus.v1") findings.push("corpus.json has unexpected schemaVersion");
-  if (report.schemaVersion !== "cellfence.corpus-study.v1") findings.push("report.json has unexpected schemaVersion");
+  if (!corpusSchemaVersions.has(corpus.schemaVersion)) findings.push("corpus.json has unexpected schemaVersion");
+  if (!reportSchemaVersions.has(report.schemaVersion)) findings.push("report.json has unexpected schemaVersion");
   if (canonicalJson(study.environment || {}) !== canonicalJson(report.environment || {})) {
     findings.push("study.environment does not match sealed report.environment");
   }
@@ -901,6 +1218,9 @@ function validateBundle(bundleDir) {
   }
   if (Number.isInteger(report.summary?.totalFindings) && report.summary.totalFindings !== rawFindings.length) {
     findings.push("report.summary.totalFindings does not match findings.raw.jsonl");
+  }
+  if (Number.isInteger(report.summary?.totalIntroducedFindings) && report.summary.totalIntroducedFindings !== rawFindings.length) {
+    findings.push("report.summary.totalIntroducedFindings does not match findings.raw.jsonl");
   }
   if (rawFindings.length > 0 && Array.isArray(study.logCopies) && study.logCopies.length === 0) {
     findings.push("study.logCopies is empty despite raw findings");
@@ -933,7 +1253,8 @@ function validateBundle(bundleDir) {
   validateLabels(bundleDir, normalizedFindings, sampling, findings);
   validateStudyCopies(bundleDir, study, findings);
   validateRawFindingsAgainstLogs(bundleDir, study, report, rawFindings, findings);
-  validateManifestHashes(bundleDir, report, findings);
+  validatePrecisionEligibilityAgainstCorpus(corpus, normalizedFindings, findings);
+  validateManifestHashes(bundleDir, study, report, findings);
   validateSha256Sums(bundleDir, findings);
 
   if (findings.length > 0) {
@@ -944,6 +1265,58 @@ function validateBundle(bundleDir) {
     findings: normalizedFindings.length,
     sampledFindings: sampling.sampledFindingIds.length,
   };
+}
+
+function manifestAbsolutePath(subject, phase, manifest) {
+  if (!manifest?.effectivePath) return "";
+  if (path.isAbsolute(manifest.effectivePath)) return manifest.effectivePath;
+  if (phase && subject[phase]?.checkoutDir) return path.resolve(subject[phase].checkoutDir, manifest.effectivePath);
+  if (subject.checkoutDir) return path.resolve(subject.checkoutDir, manifest.effectivePath);
+  return path.resolve(manifest.effectivePath);
+}
+
+function subjectManifestCopyInputs(report, subject) {
+  if (report.schemaVersion === "cellfence.history-replay-study.v1") {
+    return ["before", "after"]
+      .map((phase) => ({ phase, manifest: subject[phase]?.manifest, sourcePath: manifestAbsolutePath(subject, phase, subject[phase]?.manifest) }))
+      .filter((entry) => entry.manifest?.effectivePath && entry.sourcePath && fs.existsSync(entry.sourcePath));
+  }
+  return [{
+    phase: null,
+    manifest: subject.manifest,
+    sourcePath: manifestAbsolutePath(subject, null, subject.manifest),
+  }].filter((entry) => entry.manifest?.effectivePath && entry.sourcePath && fs.existsSync(entry.sourcePath));
+}
+
+function copySubjectLogs(report, subject, tempDir, stem) {
+  const logCopies = [];
+  if (!subject.subjectDir) return logCopies;
+  if (report.schemaVersion === "cellfence.history-replay-study.v1") {
+    for (const phase of ["before", "after", "baseline"]) {
+      const sourceDir = path.join(subject.subjectDir, phase, "logs");
+      const copiedLogs = copyDirectoryFiles(sourceDir, path.join(tempDir, "logs", stem, phase));
+      for (const copiedLog of copiedLogs) {
+        const targetRelative = posixify(path.join("logs", stem, phase, copiedLog));
+        logCopies.push({
+          subjectId: subject.id,
+          phase,
+          path: targetRelative,
+          sha256: hashFile(path.join(tempDir, targetRelative)),
+        });
+      }
+    }
+    return logCopies;
+  }
+  const copiedLogs = copyDirectoryFiles(path.join(subject.subjectDir, "logs"), path.join(tempDir, "logs", stem));
+  for (const copiedLog of copiedLogs) {
+    const targetRelative = posixify(path.join("logs", stem, copiedLog));
+    logCopies.push({
+      subjectId: subject.id,
+      path: targetRelative,
+      sha256: hashFile(path.join(tempDir, targetRelative)),
+    });
+  }
+  return logCopies;
 }
 
 function buildBundle(options) {
@@ -957,7 +1330,7 @@ function buildBundle(options) {
   try {
     const corpus = readJson(options.corpusPath);
     const report = readJson(options.reportPath);
-    const rawFindings = collectRawFindings(report, options.studyId);
+    const rawFindings = collectRawFindings(report, options.studyId, corpus);
     const normalizedFindings = sortFindings(normalizeFindings(options.studyId, rawFindings));
     const sampling = deterministicSample(normalizedFindings, report.environment?.corpusSha256 || hashFile(options.corpusPath), {
       minimumPrecision: options.minimumPrecision,
@@ -982,24 +1355,18 @@ function buildBundle(options) {
     const logCopies = [];
     for (const subject of report.subjects || []) {
       const stem = safeName(subject.id);
-      if (subject.manifest?.effectivePath && fs.existsSync(subject.manifest.effectivePath)) {
-        const targetPath = path.join(tempDir, "manifests", `${stem}.json`);
-        copyFileEnsuringDirectory(subject.manifest.effectivePath, targetPath);
+      for (const entry of subjectManifestCopyInputs(report, subject)) {
+        const targetName = entry.phase ? `${stem}-${entry.phase}.json` : `${stem}.json`;
+        const targetPath = path.join(tempDir, "manifests", targetName);
+        copyFileEnsuringDirectory(entry.sourcePath, targetPath);
         manifestCopies.push({
           subjectId: subject.id,
+          ...(entry.phase ? { phase: entry.phase } : {}),
           path: posixify(path.relative(tempDir, targetPath)),
           sha256: hashFile(targetPath),
         });
       }
-      if (subject.subjectDir) {
-        const copiedLogs = copyDirectoryFiles(path.join(subject.subjectDir, "logs"), path.join(tempDir, "logs", stem));
-        for (const copiedLog of copiedLogs) {
-          logCopies.push({
-            subjectId: subject.id,
-            path: posixify(path.join("logs", stem, copiedLog)),
-          });
-        }
-      }
+      logCopies.push(...copySubjectLogs(report, subject, tempDir, stem));
     }
 
     writeJsonl(path.join(tempDir, "findings.raw.jsonl"), rawFindings);
@@ -1025,8 +1392,10 @@ function buildBundle(options) {
       source: {
         corpusPath: path.relative(repoRoot, options.corpusPath) || options.corpusPath,
         corpusSha256: hashFile(options.corpusPath),
+        corpusSchemaVersion: corpus.schemaVersion || null,
         reportPath: path.relative(repoRoot, options.reportPath) || options.reportPath,
         reportSha256: hashFile(options.reportPath),
+        reportSchemaVersion: report.schemaVersion || null,
       },
       environment: report.environment || {},
       preregistration: {

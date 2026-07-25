@@ -369,6 +369,7 @@ function createBundle(tempDir, findings, labels) {
           reviewStatus: finding.manifestReviewStatus,
           sha256: finding.manifestSha256,
         },
+        ...(finding.replay ? { replay: finding.replay } : {}),
       },
     };
   });
@@ -745,6 +746,166 @@ function replaceCorpusManifestReviews(bundleDir, reviewFactory) {
     },
   }));
   writeJson(corpusPath, corpus);
+  sealBundleAfterCorpusEdit(bundleDir);
+}
+
+function rewriteBundleAsHistoryReplay(bundleDir, finding) {
+  const subjectId = finding.subjectId;
+  const stem = safeName(subjectId);
+  const beforeManifestPath = `manifests/${stem}-before.json`;
+  const afterManifestPath = `manifests/${stem}-after.json`;
+  const afterLogPath = `logs/${stem}/after/check.audit.jsonl`;
+  writeJson(path.join(bundleDir, beforeManifestPath), fixtureManifest);
+  writeJson(path.join(bundleDir, afterManifestPath), fixtureManifest);
+
+  const rawFindings = fs.readFileSync(path.join(bundleDir, "findings.raw.jsonl"), "utf8")
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+  writeJsonl(path.join(bundleDir, afterLogPath), rawFindings.map((entry) => entry.event));
+
+  const studyPath = path.join(bundleDir, "study.json");
+  const study = readJson(studyPath);
+  study.manifestCopies = [
+    {
+      subjectId,
+      phase: "before",
+      path: beforeManifestPath,
+      sha256: fixtureManifestSha256,
+    },
+    {
+      subjectId,
+      phase: "after",
+      path: afterManifestPath,
+      sha256: fixtureManifestSha256,
+    },
+  ];
+  study.logCopies = [
+    {
+      subjectId,
+      phase: "after",
+      path: afterLogPath,
+      sha256: hashFile(path.join(bundleDir, afterLogPath)),
+    },
+  ];
+  writeJson(studyPath, study);
+
+  writeJson(path.join(bundleDir, "corpus.json"), {
+    schemaVersion: "cellfence.history-replay.v1",
+    subjects: [
+      {
+        id: subjectId,
+        repository: finding.repository,
+        beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        afterCommit: finding.commit,
+        before: {
+          manifest: {
+            strategy: "copy",
+            source: beforeManifestPath,
+            reviewStatus: "reviewed",
+            review: {
+              reviewerAttestations: [
+                {
+                  id: "external-reviewer-a",
+                  reviewerType: "human",
+                  independent: true,
+                },
+              ],
+              reviewedAt: "2026-07-25",
+              scope: "accepted stale public surface manifest before replay",
+              reviewedManifestSha256: fixtureManifestSha256,
+            },
+          },
+        },
+        after: {
+          manifest: {
+            strategy: "reuse-before",
+          },
+        },
+      },
+    ],
+  });
+  writeJson(path.join(bundleDir, "report.json"), {
+    schemaVersion: "cellfence.history-replay-study.v1",
+    environment: study.environment,
+    evidenceSetSha256: "f".repeat(64),
+    subjects: [
+      {
+        id: subjectId,
+        repository: finding.repository,
+        requestedBeforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        requestedAfterCommit: finding.commit,
+        status: "replayed_introduced_findings",
+        replayKind: "single_commit_intro",
+        proofEligibility: "counterfactual_candidate_requires_manual_label",
+        ancestry: {
+          status: "completed",
+          beforeIsAncestorOfAfter: true,
+          commitDistance: 1,
+          replayKind: "single_commit_intro",
+        },
+        diff: {
+          status: "completed",
+          changedFiles: [finding.filePath],
+          changedFileCount: 1,
+        },
+        before: {
+          commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          gitTree: "1111111111111111111111111111111111111111",
+          manifest: {
+            strategy: "copy",
+            reviewed: true,
+            sha256: fixtureManifestSha256,
+          },
+          check: {
+            status: "checked_clean",
+            exitCode: 0,
+            ok: true,
+            findingCount: 0,
+            findings: [],
+          },
+        },
+        after: {
+          commit: finding.commit,
+          gitTree: finding.gitTree,
+          manifest: {
+            strategy: "reuse-before",
+            reviewed: true,
+            reusedFromPhase: "before",
+            reusedFromStrategy: "copy",
+            sha256: fixtureManifestSha256,
+            sourceManifestSha256: fixtureManifestSha256,
+          },
+          check: {
+            status: "checked_findings",
+            exitCode: 1,
+            ok: false,
+            findingCount: 1,
+            auditLogPath: afterLogPath,
+            auditLogSha256: hashFile(path.join(bundleDir, afterLogPath)),
+          },
+        },
+        introducedFindings: [
+          {
+            findingId: "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            phase: "after",
+            ruleId: finding.ruleId,
+            severity: finding.severity,
+            fingerprint: finding.cellfenceFingerprint,
+            occurrence: 1,
+            comparisonKey: `${finding.cellfenceFingerprint}#1`,
+            filePath: finding.filePath,
+            changedFile: true,
+          },
+        ],
+        introducedFindingCount: 1,
+      },
+    ],
+    summary: {
+      totalIntroducedFindings: 1,
+    },
+  });
   sealBundleAfterCorpusEdit(bundleDir);
 }
 
@@ -1790,6 +1951,130 @@ test("corpus precision claim recomputes reviewed eligibility from the sealed cor
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision.status, "invalid");
     assert.match(report.labelQuality.issues.join("\n"), /precision-eligible without a reviewed manifest|precisionEligible does not match/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim accepts reviewed history replay eligibility", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-history-eligibility-"));
+  try {
+    const replay = {
+      schemaVersion: "cellfence.history-replay-finding-provenance.v1",
+      beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      afterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      replayKind: "single_commit_intro",
+      proofEligibility: "counterfactual_candidate_requires_manual_label",
+      introducedChangedFile: true,
+      beforeManifestHasExternalReviewAttestation: true,
+    };
+    const finding = createFinding(1, {
+      subjectId: "history-public-drift",
+      repository: "https://github.com/example/history-public-drift.git",
+      commit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      gitTree: "2222222222222222222222222222222222222222",
+      manifestStrategy: "reuse-before",
+      manifestReviewStatus: "reviewed",
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      filePath: "src/app/public.ts",
+      cellfenceFingerprint: "history-public-drift-fingerprint",
+      replay,
+    });
+    const labels = labelsFor([finding]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, [finding], labels);
+    rewriteBundleAsHistoryReplay(bundleDir, finding);
+    const corpusPath = path.join(bundleDir, "corpus.json");
+    const corpus = readJson(corpusPath);
+    delete corpus.subjects[0].before.manifest.reviewStatus;
+    corpus.subjects[0].before.manifest.reviewed = true;
+    writeJson(corpusPath, corpus);
+    sealBundleAfterCorpusEdit(bundleDir);
+    const worklistDir = createWorklist(tempDir, bundleDir, [finding], labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        includedRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+        minimumPrecision: 0.5,
+        confidence: 0.5,
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+        allowedReviewerTypes: ["human"],
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.bundle.precisionEligibleSampledFindings, 1);
+    assert.doesNotMatch(report.labelQuality.issues.join("\n"), /precisionEligible|external manifest review/);
+    assert.match(report.claimGates.failures.join("\n"), /repository contribution|repository/i);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("corpus precision claim rejects unattested history replay eligibility", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-history-unattested-"));
+  try {
+    const replay = {
+      schemaVersion: "cellfence.history-replay-finding-provenance.v1",
+      beforeCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      afterCommit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      replayKind: "single_commit_intro",
+      proofEligibility: "counterfactual_candidate_requires_manual_label",
+      introducedChangedFile: true,
+      beforeManifestHasExternalReviewAttestation: true,
+    };
+    const finding = createFinding(1, {
+      subjectId: "history-public-drift",
+      repository: "https://github.com/example/history-public-drift.git",
+      commit: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      gitTree: "2222222222222222222222222222222222222222",
+      manifestStrategy: "reuse-before",
+      manifestReviewStatus: "reviewed",
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      filePath: "src/app/public.ts",
+      cellfenceFingerprint: "history-public-drift-fingerprint",
+      replay,
+    });
+    const labels = labelsFor([finding]).map((entry) => ({ ...entry, raterType: "human" }));
+    const bundleDir = createBundle(tempDir, [finding], labels);
+    rewriteBundleAsHistoryReplay(bundleDir, finding);
+    const corpusPath = path.join(bundleDir, "corpus.json");
+    const corpus = readJson(corpusPath);
+    delete corpus.subjects[0].before.manifest.review;
+    writeJson(corpusPath, corpus);
+    sealBundleAfterCorpusEdit(bundleDir);
+    const worklistDir = createWorklist(tempDir, bundleDir, [finding], labels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        includedRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+        minimumPrecision: 0.5,
+        confidence: 0.5,
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+      manifestReviewPlan: {
+        requireExternalAttestations: true,
+        allowedReviewerTypes: ["human"],
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /precisionEligible does not match|external manifest review/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
