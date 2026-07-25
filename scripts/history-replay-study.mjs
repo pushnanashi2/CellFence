@@ -48,8 +48,10 @@ function usage() {
 Runs a frozen history-replay CellFence pass.
 The script clones each subject at exact before/after commits, prepares manifests,
 runs CellFence checks at both commits, compares introduced finding fingerprints,
-and writes a failure-inclusive report. It never installs target dependencies or
-runs target repository package scripts.`);
+and writes a failure-inclusive report. Use after.manifest.strategy="reuse-before"
+to apply the prepared before manifest to the after checkout for stale-manifest
+drift replay. It never installs target dependencies or runs target repository
+package scripts.`);
 }
 
 function parseArgs(argv) {
@@ -277,9 +279,15 @@ function validateTimeout(subjectId, timeoutMs, maximum, label) {
 function validateManifestDefinition(subjectId, manifest, corpusDir, phaseLabel) {
   const strategy = manifest?.strategy || "existing";
   const manifestPath = manifest?.path || defaultManifestPath;
-  if (!["existing", "copy", "infer"].includes(strategy)) throw new Error(`${subjectId} ${phaseLabel} manifest.strategy is unsupported: ${strategy}`);
+  if (!["existing", "copy", "infer", "reuse-before"].includes(strategy)) throw new Error(`${subjectId} ${phaseLabel} manifest.strategy is unsupported: ${strategy}`);
+  if (strategy === "reuse-before" && phaseLabel !== "after") {
+    throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=reuse-before is only supported for the after phase`);
+  }
   if (strategy === "infer" && manifestPath !== defaultManifestPath) {
     throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=infer only supports ${defaultManifestPath}`);
+  }
+  if (strategy === "reuse-before" && manifestPath !== defaultManifestPath) {
+    throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=reuse-before only supports ${defaultManifestPath}`);
   }
   validateContainedRelativePath(manifestPath, `${subjectId} ${phaseLabel} manifest.path`);
   if (manifest?.scope !== undefined) {
@@ -293,6 +301,15 @@ function validateManifestDefinition(subjectId, manifest, corpusDir, phaseLabel) 
     const sourcePath = resolveWithin(corpusDir, manifest.source, `${subjectId} ${phaseLabel} manifest.source`);
     if (!fs.existsSync(sourcePath)) throw new Error(`${subjectId} ${phaseLabel} manifest.source not found: ${manifest.source}`);
     assertRealPathWithin(corpusDir, sourcePath, `${subjectId} ${phaseLabel} manifest.source`);
+  }
+  if (strategy === "reuse-before" && manifest.source !== undefined) {
+    throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=reuse-before cannot set manifest.source`);
+  }
+  if (strategy === "reuse-before" && manifest.preset !== undefined) {
+    throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=reuse-before cannot set manifest.preset`);
+  }
+  if (strategy === "reuse-before" && manifest.from !== undefined) {
+    throw new Error(`${subjectId} ${phaseLabel} manifest.strategy=reuse-before cannot set manifest.from`);
   }
   for (const fromPath of manifest?.from || []) {
     validateContainedRelativePath(fromPath, `${subjectId} ${phaseLabel} manifest.from`);
@@ -481,6 +498,32 @@ function prepareManifest(subject, phase, checkoutDir, corpusDir, phaseDir, optio
     path: manifestPath,
     effectivePath,
     sha256: hashFile(manifestFilePath),
+    status: "completed",
+    durationMs: Math.round(performance.now() - startedAt),
+  };
+}
+
+function prepareReusedBeforeManifest(subject, phaseDir, beforePhase) {
+  const manifest = manifestForPhase(subject, "after");
+  const manifestPath = phaseManifestPath(subject, "after");
+  const startedAt = performance.now();
+  const controlDir = path.join(phaseDir, "control");
+  const targetPath = resolveWithin(controlDir, manifestPath, "after manifest.path");
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  const beforeManifest = beforePhase.manifest;
+  const sourcePath = path.isAbsolute(beforeManifest.effectivePath)
+    ? beforeManifest.effectivePath
+    : path.resolve(beforePhase.checkoutDir, beforeManifest.effectivePath);
+  fs.copyFileSync(sourcePath, targetPath);
+  return {
+    strategy: "reuse-before",
+    reusedFromPhase: "before",
+    reusedFromStrategy: beforeManifest.strategy,
+    reviewed: manifest?.reviewed === true || beforeManifest.reviewed === true,
+    path: manifestPath,
+    effectivePath: targetPath,
+    sha256: hashFile(targetPath),
+    sourceManifestSha256: beforeManifest.sha256,
     status: "completed",
     durationMs: Math.round(performance.now() - startedAt),
   };
@@ -983,7 +1026,9 @@ function runSubject(subject, corpusDir, options) {
     before.subjectWorktreeCleanBeforeManifest = gitWorktreeStatus(before.checkoutDir, before.logDir, "status-before-manifest").clean;
     after.subjectWorktreeCleanBeforeManifest = gitWorktreeStatus(after.checkoutDir, after.logDir, "status-before-manifest").clean;
     before.manifest = prepareManifest(subject, "before", before.checkoutDir, corpusDir, before.phaseDir, options);
-    after.manifest = prepareManifest(subject, "after", after.checkoutDir, corpusDir, after.phaseDir, options);
+    after.manifest = manifestForPhase(subject, "after")?.strategy === "reuse-before"
+      ? prepareReusedBeforeManifest(subject, after.phaseDir, before)
+      : prepareManifest(subject, "after", after.checkoutDir, corpusDir, after.phaseDir, options);
     const beforeWorktreeBeforeCheck = gitWorktreeStatus(before.checkoutDir, before.logDir, "status-before-check");
     const afterWorktreeBeforeCheck = gitWorktreeStatus(after.checkoutDir, after.logDir, "status-before-check");
     if (!beforeWorktreeBeforeCheck.clean) {
@@ -1215,6 +1260,9 @@ function evidenceSetForHash(report) {
         gitTree: subject.after?.gitTree,
         manifestSha256: subject.after?.manifest?.sha256,
         manifestStrategy: subject.after?.manifest?.strategy,
+        manifestReusedFromPhase: subject.after?.manifest?.reusedFromPhase,
+        manifestReusedFromStrategy: subject.after?.manifest?.reusedFromStrategy,
+        sourceManifestSha256: subject.after?.manifest?.sourceManifestSha256,
         manifestReviewed: subject.after?.manifest?.reviewed,
         checkStatus: subject.after?.check?.status,
         checkExitCode: subject.after?.check?.exitCode,

@@ -77,6 +77,63 @@ function createReplayRepository(rootDir, options = {}) {
   return { beforeCommit, afterCommit };
 }
 
+function createPublicSurfaceDriftRepository(rootDir) {
+  git(rootDir, ["init"]);
+  git(rootDir, ["config", "user.email", "cellfence@example.invalid"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  fs.mkdirSync(path.join(rootDir, "src/app"), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, "src/app/public.ts"), "export const app = true;\n");
+  writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      requiredRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+    },
+    cells: [
+      {
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  git(rootDir, ["add", "."]);
+  git(rootDir, ["commit", "--quiet", "-m", "initial public surface"]);
+  const beforeCommit = git(rootDir, ["rev-parse", "HEAD"]);
+
+  fs.writeFileSync(path.join(rootDir, "src/app/public.ts"), [
+    "export const app = true;",
+    "export const extra = true;",
+    "",
+  ].join("\n"));
+  writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      requiredRules: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+    },
+    cells: [
+      {
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app", "extra"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  });
+  git(rootDir, ["add", "."]);
+  git(rootDir, ["commit", "--quiet", "-m", "expand public surface"]);
+  const afterCommit = git(rootDir, ["rev-parse", "HEAD"]);
+  return { beforeCommit, afterCommit };
+}
+
 test("history replay detects introduced findings between exact commits", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-history-replay-"));
   try {
@@ -146,6 +203,66 @@ test("history replay detects introduced findings between exact commits", () => {
   }
 });
 
+test("history replay can apply the before manifest to after for public surface drift", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-history-public-drift-"));
+  try {
+    const sourceRepo = path.join(rootDir, "source");
+    fs.mkdirSync(sourceRepo, { recursive: true });
+    const { beforeCommit, afterCommit } = createPublicSurfaceDriftRepository(sourceRepo);
+    const corpusPath = path.join(rootDir, "history.json");
+    const outPath = path.join(rootDir, "report.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: "public-surface-drift",
+          repository: sourceRepo,
+          beforeCommit,
+          afterCommit,
+          before: {
+            manifest: {
+              strategy: "existing",
+              reviewed: true,
+            },
+          },
+          after: {
+            manifest: {
+              strategy: "reuse-before",
+            },
+          },
+          expected: {
+            beforeExitCode: 0,
+            afterExitCode: 1,
+            introducedRuleIds: ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"],
+          },
+        },
+      ],
+    });
+
+    const result = runHistoryReplay(["--corpus", corpusPath, "--workdir", path.join(rootDir, "work"), "--out", outPath]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(fs.readFileSync(outPath, "utf8"));
+    assert.equal(report.summary.replayed, 1);
+    assert.equal(report.summary.singleCommitIntroductions, 1);
+    assert.equal(report.summary.introducedFindingsByRule.CELLFENCE_PUBLIC_SYMBOL_MISMATCH, 1);
+    const subject = report.subjects[0];
+    assert.equal(subject.status, "replayed_introduced_findings");
+    assert.equal(subject.proofEligibility, "counterfactual_candidate_requires_manual_label");
+    assert.equal(subject.before.check.exitCode, 0);
+    assert.equal(subject.after.check.exitCode, 1);
+    assert.equal(subject.before.manifest.strategy, "existing");
+    assert.equal(subject.after.manifest.strategy, "reuse-before");
+    assert.equal(subject.after.manifest.reusedFromStrategy, "existing");
+    assert.equal(subject.after.manifest.sourceManifestSha256, subject.before.manifest.sha256);
+    assert.equal(subject.after.manifest.sha256, subject.before.manifest.sha256);
+    assert.equal(subject.introducedFindings[0].ruleId, "CELLFENCE_PUBLIC_SYMBOL_MISMATCH");
+    assert.equal(subject.introducedFindings[0].changedFile, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("history replay rejects floating refs by default", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-history-floating-"));
   try {
@@ -167,6 +284,85 @@ test("history replay rejects floating refs by default", () => {
 
     assert.equal(result.status, 2);
     assert.match(result.stderr, /requires exact 40-hex before commit/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("history replay rejects reuse-before outside the after phase", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-history-reuse-before-invalid-"));
+  try {
+    const corpusPath = path.join(rootDir, "history.json");
+    writeJson(corpusPath, {
+      schemaVersion: "cellfence.history-replay.v1",
+      subjects: [
+        {
+          id: "invalid-reuse-before",
+          repository: ".",
+          beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+          afterCommit: "fedcba9876543210fedcba9876543210fedcba98",
+          before: {
+            manifest: { strategy: "reuse-before" },
+          },
+          after: {
+            manifest: { strategy: "existing" },
+          },
+        },
+      ],
+    });
+
+    const result = runHistoryReplay(["--corpus", corpusPath, "--dry-run", "--out", path.join(rootDir, "report.json")]);
+
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /before manifest\.strategy=reuse-before is only supported for the after phase/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("history replay rejects reuse-before manifest modifiers", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-history-reuse-before-modifiers-"));
+  try {
+    const cases = [
+      ["source", { source: "" }, /after manifest\.strategy=reuse-before cannot set manifest\.source/],
+      ["from", { from: [] }, /after manifest\.strategy=reuse-before cannot set manifest\.from/],
+      ["preset", { preset: "node" }, /after manifest\.strategy=reuse-before cannot set manifest\.preset/],
+    ];
+
+    for (const [name, manifestPatch, errorPattern] of cases) {
+      const corpusPath = path.join(rootDir, `${name}.json`);
+      writeJson(corpusPath, {
+        schemaVersion: "cellfence.history-replay.v1",
+        subjects: [
+          {
+            id: `invalid-reuse-before-${name}`,
+            repository: ".",
+            beforeCommit: "0123456789abcdef0123456789abcdef01234567",
+            afterCommit: "fedcba9876543210fedcba9876543210fedcba98",
+            before: {
+              manifest: { strategy: "existing" },
+            },
+            after: {
+              manifest: {
+                strategy: "reuse-before",
+                ...manifestPatch,
+              },
+            },
+          },
+        ],
+      });
+
+      const result = runHistoryReplay([
+        "--corpus",
+        corpusPath,
+        "--dry-run",
+        "--out",
+        path.join(rootDir, `${name}-report.json`),
+      ]);
+
+      assert.equal(result.status, 2);
+      assert.match(result.stderr, errorPattern);
+    }
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

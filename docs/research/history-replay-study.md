@@ -45,6 +45,45 @@ package scripts, never opens pull requests, and never files issues.
 `beforeCommit` is an ancestor of `afterCommit`, and distinguishes
 `single_commit_intro` from wider `window_replay` windows.
 
+For public-surface drift studies, the `after` phase can reuse the prepared
+`before` manifest:
+
+```json
+{
+  "schemaVersion": "cellfence.history-replay.v1",
+  "subjects": [
+    {
+      "id": "example-public-surface-drift",
+      "repository": "https://github.com/example/project.git",
+      "beforeCommit": "0123456789abcdef0123456789abcdef01234567",
+      "afterCommit": "89abcdef0123456789abcdef0123456789abcdef",
+      "before": {
+        "manifest": {
+          "strategy": "copy",
+          "source": "manifests/example-project.before.reviewed.json",
+          "reviewed": true
+        }
+      },
+      "after": {
+        "manifest": {
+          "strategy": "reuse-before"
+        }
+      },
+      "expected": {
+        "introducedRuleIds": ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"]
+      }
+    }
+  ]
+}
+```
+
+`reuse-before` is after-phase only. It copies the prepared before manifest into
+the after control directory and runs the after checkout against that stale
+contract. This is useful for asking whether CellFence would have detected a
+public entry drift relative to a previously accepted manifest. It is still not
+claim-ready precision evidence unless the before manifest is reviewed and the
+introduced finding is manually labeled.
+
 ## Running
 
 Run the local mechanism smoke first:
@@ -89,6 +128,8 @@ The script:
 - clones separate before and after checkouts;
 - checks out and verifies the requested commits;
 - prepares manifests by `existing`, `copy`, or non-destructive `infer`;
+- can apply the prepared before manifest to the after checkout with
+  `after.manifest.strategy: "reuse-before"`;
 - verifies manifest preparation leaves each checkout clean;
 - runs `cellfence check --json` at both commits;
 - compares after finding fingerprints against before finding fingerprints,
