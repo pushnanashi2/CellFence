@@ -108,6 +108,19 @@ After the gap-worklist repair, this reports:
 - manifest attestation rows include repository, exact commit, manifest copy
   path, manifest copy SHA256, and an external review attestation template.
 
+## Round35 Manifest Attestation Return Gate
+
+`precision:manifest-attestations:validate` validates returned external
+manifest-review attestations before they can be merged into a reviewed corpus.
+The validator rejects agent/Codex-style reviewer identities, requires
+human/organization reviewer types, requires every 105-subject corpus row to be
+covered, and verifies that `review.reviewedManifestSha256` matches the sealed
+manifest copy hash in the evidence bundle.
+
+This closes the mechanical return path for manifest review attestations. It
+does not add external human/organization labels and does not make the Round33
+claim preflight pass by itself.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields

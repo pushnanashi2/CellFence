@@ -956,6 +956,24 @@ include the repository, exact commit, manifest copy path, manifest copy SHA256,
 and a review attestation template. This is still not claim evidence; it is the
 handoff packet for external reviewers.
 
+After external reviewers return manifest-review attestations, validate them
+against the sealed bundle before updating a claim corpus:
+
+```bash
+npm run precision:manifest-attestations:validate -- \
+  --bundle reports/corpus/ts-js-confirmation-v1-bundle \
+  --attestations reports/corpus/ts-js-confirmation-v1-manifest-attestations.json \
+  --out reports/corpus/ts-js-confirmation-v1-manifest-attestations-validation.json \
+  --out-corpus reports/corpus/ts-js-confirmation-v1-reviewed-corpus.json
+```
+
+This accepts only human/organization external reviewer attestations, requires
+the reviewed manifest SHA-256 to match the sealed manifest copy, rejects
+agent/Codex-style reviewer identities, and writes `--out-corpus` only when every
+required subject is covered. Passing this validator does not create an external
+review; it only checks that returned external review evidence is bound to the
+frozen bundle before the next preflight.
+
 After generating a sealed label worklist, bind its `SHA256SUMS` digest into the
 claim protocol with `precision:protocol:bind-worklists` before running
 preflight:
@@ -982,6 +1000,11 @@ Round34 repaired the gap-worklist projection for that preflight: the frontier
 candidate pool has 97 subjects blocked on manifest attestation, while the
 claim preflight requires external manifest review attestations for all 105
 corpus subjects before the corpus can be claim-ready.
+Round35 added an external manifest-attestation validator for the return path:
+it validates human/organization reviewer attestations against sealed manifest
+copy hashes and can emit an updated reviewed corpus only after all required
+subject attestations are valid. It still does not satisfy the missing external
+human/organization label rows.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299
