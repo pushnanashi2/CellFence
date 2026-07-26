@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-f47880dfdbd47977",
+    "evidencePackageId": "evidence-dbca09d2697822fb",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/jscad-openjscad-org-047164ce6440.json",
+        "sha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2"
+      },
+      "auditLog": {
+        "path": "logs/jscad-openjscad-org-047164ce6440/check.audit.jsonl",
+        "sha256": "27eb491d19f0c4e0fd970140d6f21f89aca56ab09fe27df5723eeaf076d4f7dc"
+      },
+      "evidenceGraph": {
+        "path": "logs/jscad-openjscad-org-047164ce6440/evidence-graph.json",
+        "sha256": "687104060b2b2257c010b91a1c8077845159193d6dca944125bb09f0cabb1c3c"
+      },
+      "checkStdout": {
+        "path": "logs/jscad-openjscad-org-047164ce6440/check.stdout.log",
+        "sha256": "2a448961910b68920818dd63a1bf099a92a9219e84bb45f5c0361cdf321cfe1c"
+      },
+      "checkStderr": {
+        "path": "logs/jscad-openjscad-org-047164ce6440/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:dbca09d2697822fb9daf56a192184698d0377d6cc7327ccbebccf00ce1031603",
+    "subjectId": "jscad-openjscad-org",
+    "repository": "https://github.com/jscad/OpenJSCAD.org.git",
+    "commit": "f245ea3a5072024b789f276c6fb9ce6c3eb3fd0d",
+    "gitTree": "bc0f59b8a6942c93a02f67fb762c716c40fd43ab",
+    "manifestSha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "packages/desktop/src/core/code-evaluation/rebuildSolidsWorker.js",
+    "line": 17,
+    "message": "desktop imports array-utils without declaring a consumer relationship",
+    "cellId": "desktop",
+    "producerCellId": "array-utils",
+    "cellfenceFingerprint": "cecc014504abb6c7e24e82ae5057067a86e39b28bfd59684cbfb39a53a341c3b",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:dbca09d2697822fb9daf56a192184698d0377d6cc7327ccbebccf00ce1031603",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-f47880dfdbd47977",
+    "evidencePackageId": "evidence-dbca09d2697822fb",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

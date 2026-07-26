@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-60212e6e0218c24e",
+    "evidencePackageId": "evidence-41bc9e57eb8a0f85",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/mckaywrigley-chatbot-ui-f262c2427758.json",
+        "sha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c"
+      },
+      "auditLog": {
+        "path": "logs/mckaywrigley-chatbot-ui-f262c2427758/check.audit.jsonl",
+        "sha256": "ef7866dfc9eec2320ea87b8af7652df9279911db81071526f0050bf96bc1cec7"
+      },
+      "evidenceGraph": {
+        "path": "logs/mckaywrigley-chatbot-ui-f262c2427758/evidence-graph.json",
+        "sha256": "30d992527964fd67ba60b6768f97bcfb7cd17eb3be713ad552bd10e2ab60c335"
+      },
+      "checkStdout": {
+        "path": "logs/mckaywrigley-chatbot-ui-f262c2427758/check.stdout.log",
+        "sha256": "13deda7be17ddb9de40bf02fe58edd9d4c56d1e3ebc51d36c75a19e90c874161"
+      },
+      "checkStderr": {
+        "path": "logs/mckaywrigley-chatbot-ui-f262c2427758/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:41bc9e57eb8a0f859f0feb8be75eb11b4bdf9fcea7e56a8b3315f71729a05914",
+    "subjectId": "mckaywrigley-chatbot-ui",
+    "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+    "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8",
+    "gitTree": "715a4a6645c68c9f7fc0a2eda0c1754ffe7d0a8e",
+    "manifestSha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "app/api/keys/route.ts",
+    "line": 1,
+    "message": "app imports private implementation from lib",
+    "cellId": "app",
+    "producerCellId": "lib",
+    "cellfenceFingerprint": "4522dd8d4d64e463506a79ac87c41c7f0f6d279c75c3532b9d1d6e37ade5998e",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:41bc9e57eb8a0f859f0feb8be75eb11b4bdf9fcea7e56a8b3315f71729a05914",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-60212e6e0218c24e",
+    "evidencePackageId": "evidence-41bc9e57eb8a0f85",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

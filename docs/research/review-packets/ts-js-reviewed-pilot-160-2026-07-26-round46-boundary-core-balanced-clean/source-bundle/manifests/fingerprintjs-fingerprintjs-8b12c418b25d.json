@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "sources",
+      "ownedPaths": [
+        "src/sources/**"
+      ],
+      "publicEntry": "src/sources/index.ts",
+      "publicSymbols": [
+        "BuiltinComponents",
+        "BuiltinSourceOptions",
+        "default",
+        "sources"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "Agent",
+        "BuiltinComponents",
+        "Component",
+        "componentsToDebugString",
+        "Confidence",
+        "default",
+        "getFullscreenElement",
+        "GetOptions",
+        "GetResult",
+        "getUnstableAudioFingerprint",
+        "getUnstableCanvasFingerprint",
+        "getUnstableHardwareConcurrency",
+        "getUnstableScreenFrame",
+        "getUnstableScreenResolution",
+        "getWebGLContext",
+        "hashComponents",
+        "isAndroid",
+        "isChromium",
+        "isDesktopWebKit",
+        "isEdgeHTML",
+        "isGecko",
+        "isSamsungInternet",
+        "isTrident",
+        "isWebKit",
+        "load",
+        "LoadOptions",
+        "loadSources",
+        "murmurX64Hash128",
+        "prepareForSources",
+        "Source",
+        "sources",
+        "SourcesToComponents",
+        "transformSource",
+        "UnknownComponents",
+        "UnknownSources",
+        "withIframe"
+      ],
+      "consumes": [
+        {
+          "cell": "sources"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/async.ts",
+      "publicSymbols": [
+        "awaitIfAsync",
+        "isPromise",
+        "mapWithBreaks",
+        "MaybePromise",
+        "requestIdleCallbackIfAvailable",
+        "suppressUnhandledRejectionWarning",
+        "wait"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b863716824ed7074",
+    "subjectId": "nteract-archived-desktop-app",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "nteract-archived-desktop-app",
+    "phase": null,
+    "repository": "https://github.com/nteract/archived-desktop-app.git",
+    "commit": "7516211c27bad1e5a415505b023e2221bc430d8a"
+  },
+  "manifestCopy": {
+    "path": "manifests/nteract-archived-desktop-app-19d3ec44d6c6.json",
+    "sha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005"
+  },
+  "attestationTemplate": {
+    "subjectId": "nteract-archived-desktop-app",
+    "repository": "https://github.com/nteract/archived-desktop-app.git",
+    "commit": "7516211c27bad1e5a415505b023e2221bc430d8a",
+    "manifestCopy": {
+      "path": "manifests/nteract-archived-desktop-app-19d3ec44d6c6.json",
+      "sha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

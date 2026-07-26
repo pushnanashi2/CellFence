@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**",
+      "website/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "src/cli/**"
+      ],
+      "publicEntry": "src/cli/actions/defaultAction.ts",
+      "publicSymbols": [
+        "buildCliConfig",
+        "buildMergedConfig",
+        "DefaultActionRunnerResult",
+        "runDefaultAction"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "config",
+      "ownedPaths": [
+        "src/config/**"
+      ],
+      "publicEntry": "src/config/configLoad.ts",
+      "publicSymbols": [
+        "loadFileConfig",
+        "mergeConfigs"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/**"
+      ],
+      "publicEntry": "src/core/file/fileCollect.ts",
+      "publicSymbols": [
+        "collectFiles",
+        "FileCollectResults",
+        "SkippedFileInfo"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp",
+      "ownedPaths": [
+        "src/mcp/**"
+      ],
+      "publicEntry": "src/mcp/mcpServer.ts",
+      "publicSymbols": [
+        "createMcpServer",
+        "runMcpServer"
+      ],
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/asyncMap.ts",
+      "publicSymbols": [
+        "mapWithConcurrency"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "buildCliConfig",
+        "cli",
+        "CliOptions",
+        "collectFiles",
+        "defaultIgnoreList",
+        "defineConfig",
+        "FileSearchResult",
+        "generateFileTree",
+        "generateTreeString",
+        "isExplicitRemoteUrl",
+        "isValidRemoteValue",
+        "isValidShorthand",
+        "loadFileConfig",
+        "mergeConfigs",
+        "pack",
+        "PackResult",
+        "parseFile",
+        "parseRemoteValue",
+        "processFiles",
+        "RepomixConfig",
+        "RepomixProgressCallback",
+        "runCli",
+        "runDefaultAction",
+        "runInitAction",
+        "runRemoteAction",
+        "runSecurityCheck",
+        "searchFiles",
+        "setLogLevel",
+        "setWasmBasePath",
+        "sortPaths",
+        "SuspiciousFileResult",
+        "TokenCounter",
+        "TreeNode",
+        "treeToString",
+        "unifiedWorkerHandler",
+        "unifiedWorkerTermination",
+        "WorkerType"
+      ],
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "website/**"
+      ],
+      "publicEntry": "website/client/.vitepress/config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

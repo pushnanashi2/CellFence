@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-d7db44cd663e61f6",
+    "evidencePackageId": "evidence-a412c35831c69a38",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/kirklin-celeris-web-91667fde376f.json",
+        "sha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7"
+      },
+      "auditLog": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.audit.jsonl",
+        "sha256": "1c1ad7122fa1dcbf2e64452c2a03ed93f631389a7d8050a9a8f8fc884c7da627"
+      },
+      "evidenceGraph": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/evidence-graph.json",
+        "sha256": "25b623e5a6bf37e890feae351b35ab3c2008a638b8bd7c928ea7ce56a75cff44"
+      },
+      "checkStdout": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.stdout.log",
+        "sha256": "154e94609e80dee1294dc39652e594f67ba4fbc0741dd690353942e9992517f6"
+      },
+      "checkStderr": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:a412c35831c69a3890d33379899fbd2010481ea05939a5473f0c0b492e19f075",
+    "subjectId": "kirklin-celeris-web",
+    "repository": "https://github.com/kirklin/celeris-web.git",
+    "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+    "gitTree": "266349523a228b92461aa04180924c4eca164fed",
+    "manifestSha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "packages/web/utils/src/menuHelper.ts",
+    "line": 6,
+    "message": "web imports private implementation from utils",
+    "cellId": "web",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "7445e9ada80700d398e92b3091f9fc1758c8ef861f41b8ac901933b49e67a39e",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:a412c35831c69a3890d33379899fbd2010481ea05939a5473f0c0b492e19f075",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-d7db44cd663e61f6",
+    "evidencePackageId": "evidence-a412c35831c69a38",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

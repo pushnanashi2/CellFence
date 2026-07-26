@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b42d2fba06c0a38d",
+    "subjectId": "anuraghazra-github-readme-stats",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "anuraghazra-github-readme-stats",
+    "phase": null,
+    "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+    "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2"
+  },
+  "manifestCopy": {
+    "path": "manifests/anuraghazra-github-readme-stats-5b3490bfa969.json",
+    "sha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089"
+  },
+  "attestationTemplate": {
+    "subjectId": "anuraghazra-github-readme-stats",
+    "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+    "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2",
+    "manifestCopy": {
+      "path": "manifests/anuraghazra-github-readme-stats-5b3490bfa969.json",
+      "sha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

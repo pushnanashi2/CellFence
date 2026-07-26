@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6284e2b88de5fb60",
+    "subjectId": "styled-components-styled-components",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "styled-components-styled-components",
+    "phase": null,
+    "repository": "https://github.com/styled-components/styled-components.git",
+    "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca"
+  },
+  "manifestCopy": {
+    "path": "manifests/styled-components-styled-components-1af612ee3988.json",
+    "sha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459"
+  },
+  "attestationTemplate": {
+    "subjectId": "styled-components-styled-components",
+    "repository": "https://github.com/styled-components/styled-components.git",
+    "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca",
+    "manifestCopy": {
+      "path": "manifests/styled-components-styled-components-1af612ee3988.json",
+      "sha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

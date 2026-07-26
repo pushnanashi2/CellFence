@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2f1fd6a81129a7cc",
+    "subjectId": "takram-design-engineering-three-geospatial",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "takram-design-engineering-three-geospatial",
+    "phase": null,
+    "repository": "https://github.com/takram-design-engineering/three-geospatial.git",
+    "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4"
+  },
+  "manifestCopy": {
+    "path": "manifests/takram-design-engineering-three-geospatial-f3ebbddf3150.json",
+    "sha256": "c0bdf4ad6da6eec79d9213317305e8bc08593c34681cca23bb7f774928f59546"
+  },
+  "attestationTemplate": {
+    "subjectId": "takram-design-engineering-three-geospatial",
+    "repository": "https://github.com/takram-design-engineering/three-geospatial.git",
+    "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4",
+    "manifestCopy": {
+      "path": "manifests/takram-design-engineering-three-geospatial-f3ebbddf3150.json",
+      "sha256": "c0bdf4ad6da6eec79d9213317305e8bc08593c34681cca23bb7f774928f59546"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "c0bdf4ad6da6eec79d9213317305e8bc08593c34681cca23bb7f774928f59546",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

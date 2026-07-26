@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-387f252180734be5",
+    "subjectId": "lodash-lodash",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lodash-lodash",
+    "phase": null,
+    "repository": "https://github.com/lodash/lodash.git",
+    "commit": "a666ba591064c8011988275790ad7d625279f09c"
+  },
+  "manifestCopy": {
+    "path": "manifests/lodash-lodash-0358ac2418fa.json",
+    "sha256": "30af6bbd559a3b66ff7ed947b66b28247e94ef4e68c864c9e38a8eaaf366a4e5"
+  },
+  "attestationTemplate": {
+    "subjectId": "lodash-lodash",
+    "repository": "https://github.com/lodash/lodash.git",
+    "commit": "a666ba591064c8011988275790ad7d625279f09c",
+    "manifestCopy": {
+      "path": "manifests/lodash-lodash-0358ac2418fa.json",
+      "sha256": "30af6bbd559a3b66ff7ed947b66b28247e94ef4e68c864c9e38a8eaaf366a4e5"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "30af6bbd559a3b66ff7ed947b66b28247e94ef4e68c864c9e38a8eaaf366a4e5",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

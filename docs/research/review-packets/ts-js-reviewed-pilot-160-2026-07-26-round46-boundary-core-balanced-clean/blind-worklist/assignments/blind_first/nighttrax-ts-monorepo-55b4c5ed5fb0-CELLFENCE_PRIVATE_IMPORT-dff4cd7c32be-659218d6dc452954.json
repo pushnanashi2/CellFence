@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-659218d6dc452954",
+    "evidencePackageId": "evidence-3232ea811a91dfa8",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/nighttrax-ts-monorepo-55b4c5ed5fb0.json",
+        "sha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69"
+      },
+      "auditLog": {
+        "path": "logs/nighttrax-ts-monorepo-55b4c5ed5fb0/check.audit.jsonl",
+        "sha256": "120c0b0a553ba7d47c4a4e9334af36e56b6b337a8b5d7373948746c83db6141b"
+      },
+      "evidenceGraph": {
+        "path": "logs/nighttrax-ts-monorepo-55b4c5ed5fb0/evidence-graph.json",
+        "sha256": "2b915414e796d02c8f27efa12f1a6ea3b440daea0a0301a3a8766d1faac0a5d7"
+      },
+      "checkStdout": {
+        "path": "logs/nighttrax-ts-monorepo-55b4c5ed5fb0/check.stdout.log",
+        "sha256": "95b13ed0a5ec6a1026599e800b65b8de76e792ad3d8ffa1b53d244d4439cd6fc"
+      },
+      "checkStderr": {
+        "path": "logs/nighttrax-ts-monorepo-55b4c5ed5fb0/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:3232ea811a91dfa8f1eb4bbdaeb3b96dd68fe7db6fc61e54aec82f77357d7b06",
+    "subjectId": "nighttrax-ts-monorepo",
+    "repository": "https://github.com/NiGhTTraX/ts-monorepo.git",
+    "commit": "949b99be84079e1fd3e101292173da839e8ffe1e",
+    "gitTree": "99df166ccec6d709e7ad8e836dc35620e35c2aff",
+    "manifestSha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/storybook/src/components/foo.tsx",
+    "line": 1,
+    "message": "storybook-example imports private implementation from components",
+    "cellId": "storybook-example",
+    "producerCellId": "components",
+    "cellfenceFingerprint": "70afb11e149b6e72a2b32b11c26b25d6802e988d533bc92a32f585cbcc955151",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:3232ea811a91dfa8f1eb4bbdaeb3b96dd68fe7db6fc61e54aec82f77357d7b06",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-659218d6dc452954",
+    "evidencePackageId": "evidence-3232ea811a91dfa8",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

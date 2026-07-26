@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ce596b90aa826de5",
+    "subjectId": "tobi-qmd",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "tobi-qmd",
+    "phase": null,
+    "repository": "https://github.com/tobi/qmd.git",
+    "commit": "e428df76bc0274d9e93eb7ca3e95673315c42e90"
+  },
+  "manifestCopy": {
+    "path": "manifests/tobi-qmd-41751617ccec.json",
+    "sha256": "5d2b7d4938a500e1a4a4aabfa3d1c592a78eb289ddca15b40bde22a38018ed03"
+  },
+  "attestationTemplate": {
+    "subjectId": "tobi-qmd",
+    "repository": "https://github.com/tobi/qmd.git",
+    "commit": "e428df76bc0274d9e93eb7ca3e95673315c42e90",
+    "manifestCopy": {
+      "path": "manifests/tobi-qmd-41751617ccec.json",
+      "sha256": "5d2b7d4938a500e1a4a4aabfa3d1c592a78eb289ddca15b40bde22a38018ed03"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5d2b7d4938a500e1a4a4aabfa3d1c592a78eb289ddca15b40bde22a38018ed03",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

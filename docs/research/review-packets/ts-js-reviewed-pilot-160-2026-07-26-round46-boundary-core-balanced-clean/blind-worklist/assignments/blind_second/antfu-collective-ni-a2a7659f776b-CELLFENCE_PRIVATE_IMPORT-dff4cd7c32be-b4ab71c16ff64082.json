@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-b4ab71c16ff64082",
+    "evidencePackageId": "evidence-cc8d81511ebac91e",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/antfu-collective-ni-a2a7659f776b.json",
+        "sha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1"
+      },
+      "auditLog": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.audit.jsonl",
+        "sha256": "ffa3b09bc2a2dc030532b4ae72d926105f3234986e50ebfe75685a695f120d80"
+      },
+      "evidenceGraph": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/evidence-graph.json",
+        "sha256": "fd35a8c93bde7e3a3c12778bc084e66e33eb638f9c6783cb535a3420d8cdae2c"
+      },
+      "checkStdout": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.stdout.log",
+        "sha256": "0224af6bd2da66e45c074d18d48d272cacfe59c22429e3100444a7b0da56cfae"
+      },
+      "checkStderr": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:cc8d81511ebac91e408b281014fd5dda820fed0137ea0010fd691a14a903a0eb",
+    "subjectId": "antfu-collective-ni",
+    "repository": "https://github.com/antfu-collective/ni.git",
+    "commit": "8b92b0624e9933113507857ee926a73a5ed285b3",
+    "gitTree": "3c78eca14e9c9347a5c17ea65b823c321b721096",
+    "manifestSha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/commands/nup.ts",
+    "line": 2,
+    "message": "commands imports private implementation from src-root",
+    "cellId": "commands",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "94d617ff87f103f54bce062bb9f28e31986c6ad6fea32287bdd1d1c9e9e9b757",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:cc8d81511ebac91e408b281014fd5dda820fed0137ea0010fd691a14a903a0eb",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-b4ab71c16ff64082",
+    "evidencePackageId": "evidence-cc8d81511ebac91e",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

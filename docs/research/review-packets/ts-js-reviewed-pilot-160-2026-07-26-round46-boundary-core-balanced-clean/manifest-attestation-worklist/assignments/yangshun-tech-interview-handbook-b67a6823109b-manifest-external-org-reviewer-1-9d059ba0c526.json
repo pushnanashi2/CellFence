@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9f3ecd86fd38747e",
+    "subjectId": "yangshun-tech-interview-handbook",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "yangshun-tech-interview-handbook",
+    "phase": null,
+    "repository": "https://github.com/yangshun/tech-interview-handbook.git",
+    "commit": "8ee2acb54a05c4add123a824d15e7dfc4e703b2f"
+  },
+  "manifestCopy": {
+    "path": "manifests/yangshun-tech-interview-handbook-b67a6823109b.json",
+    "sha256": "3a8a30b2d186f25028a3d916295ab84a06d3389772793e7f784ace4197ade9b3"
+  },
+  "attestationTemplate": {
+    "subjectId": "yangshun-tech-interview-handbook",
+    "repository": "https://github.com/yangshun/tech-interview-handbook.git",
+    "commit": "8ee2acb54a05c4add123a824d15e7dfc4e703b2f",
+    "manifestCopy": {
+      "path": "manifests/yangshun-tech-interview-handbook-b67a6823109b.json",
+      "sha256": "3a8a30b2d186f25028a3d916295ab84a06d3389772793e7f784ace4197ade9b3"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "3a8a30b2d186f25028a3d916295ab84a06d3389772793e7f784ace4197ade9b3",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

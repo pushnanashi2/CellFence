@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-013680e705cec35e",
+    "evidencePackageId": "evidence-33fe332466d705a5",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/jamiemason-shrinkpack-0ab97b7917eb.json",
+        "sha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9"
+      },
+      "auditLog": {
+        "path": "logs/jamiemason-shrinkpack-0ab97b7917eb/check.audit.jsonl",
+        "sha256": "501e76c9e2448e7ee5902593bcd3215980e7a81713bde1d9d04060c4f521e20c"
+      },
+      "evidenceGraph": {
+        "path": "logs/jamiemason-shrinkpack-0ab97b7917eb/evidence-graph.json",
+        "sha256": "1ed6bb8a8b1a34fcc30d97e79c0b286500d208bc5eb8b2b2c408e45db6dc0805"
+      },
+      "checkStdout": {
+        "path": "logs/jamiemason-shrinkpack-0ab97b7917eb/check.stdout.log",
+        "sha256": "7a31c0760d64f22eaf5d64c9b981b6cb209f81de29f33d693e8305897e821f10"
+      },
+      "checkStderr": {
+        "path": "logs/jamiemason-shrinkpack-0ab97b7917eb/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:33fe332466d705a58f0a4edf9693cbd721d430770e0a76c73d5307f91e10b483",
+    "subjectId": "jamiemason-shrinkpack",
+    "repository": "https://github.com/JamieMason/shrinkpack.git",
+    "commit": "ba19806467afe58a4507567898ea38d73aab9b41",
+    "gitTree": "5006396891277839f753c92c479bf09eebf8a32c",
+    "manifestSha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/index.ts",
+    "line": 8,
+    "message": "src-root imports private implementation from lib",
+    "cellId": "src-root",
+    "producerCellId": "lib",
+    "cellfenceFingerprint": "85a761e32e48e3a41cf5e2cc3a032c606c99e9d28ba16b5b92ec2a683b59a189",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:33fe332466d705a58f0a4edf9693cbd721d430770e0a76c73d5307f91e10b483",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-013680e705cec35e",
+    "evidencePackageId": "evidence-33fe332466d705a5",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

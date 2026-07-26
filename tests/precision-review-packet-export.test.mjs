@@ -44,6 +44,8 @@ function createFixture(tempDir) {
   const bundleDir = path.join(roundDir, "bundle-unlabeled");
   const blindWorklistDir = path.join(roundDir, "blind-worklist");
   const manifestWorklistDir = path.join(tempDir, "manifest-worklist");
+  const gapWorklistPath = path.join(tempDir, "gap-worklist.json");
+  const gapMarkdownPath = path.join(tempDir, "gap-worklist.md");
   const studyId = "packet-fixture";
 
   writeJson(path.join(roundDir, ".cellfence-precision-next-cycle"), {
@@ -78,7 +80,11 @@ function createFixture(tempDir) {
     },
     manifestCopies: [{ path: "manifests/example.json" }],
   });
-  writeJson(path.join(bundleDir, "report.json"), { schemaVersion: "cellfence.corpus-study.v1" });
+  writeJson(path.join(bundleDir, "report.json"), {
+    schemaVersion: "cellfence.corpus-study.v1",
+    subjectDir: path.join(root, "tmp", "subject"),
+    ordinaryRepoPath: "packages/website/src/pages/home/HeroSection.tsx",
+  });
   writeJson(path.join(bundleDir, "sampling.json"), { population: { sampledFindings: 1 } });
   writeText(path.join(bundleDir, "findings.sampled.jsonl"), `${JSON.stringify({
     schemaVersion: "cellfence.corpus-normalized-finding.v1",
@@ -130,20 +136,29 @@ function createFixture(tempDir) {
     schemaVersion: "cellfence.manifest-attestation-assignment.v1",
   });
   writeText(path.join(manifestWorklistDir, "SHA256SUMS"), "manifest sums\n");
+  writeJson(gapWorklistPath, {
+    schemaVersion: "cellfence.precision-evidence-gap-worklist.v1",
+    tasks: [{ type: "external_independent_label" }],
+  });
+  writeText(gapMarkdownPath, "# Gaps\n");
 
-  return { roundDir, manifestWorklistDir };
+  return { roundDir, manifestWorklistDir, gapWorklistPath, gapMarkdownPath };
 }
 
 test("precision review packet export writes a compact external review packet", () => {
   const tempDir = makeTempDir("cellfence-review-packet-");
   try {
-    const { roundDir, manifestWorklistDir } = createFixture(tempDir);
+    const { roundDir, manifestWorklistDir, gapWorklistPath, gapMarkdownPath } = createFixture(tempDir);
     const outDir = path.join(tempDir, "packet");
     const result = runExport([
       "--round-dir",
       roundDir,
       "--manifest-worklist-dir",
       manifestWorklistDir,
+      "--gap-worklist",
+      gapWorklistPath,
+      "--gap-markdown",
+      gapMarkdownPath,
       "--out-dir",
       outDir,
     ]);
@@ -154,15 +169,23 @@ test("precision review packet export writes a compact external review packet", (
     assert.equal(packet.selectedFindings, 1);
     assert.equal(packet.blindAssignments, 1);
     assert.equal(packet.manifestAttestation.subjects, 1);
+    assert.equal(packet.gapWorklist.json.path, "cycle/gap-worklist.json");
     assert.equal(packet.source.harnessDirty, false);
     assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "assignments", "blind_first", "example.json")));
     assert.ok(fs.existsSync(path.join(outDir, "manifest-attestation-worklist", "assignments", "example-human.json")));
     assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "manifests", "example.json")));
     assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "findings.sampled.jsonl")));
+    assert.ok(fs.existsSync(path.join(outDir, "cycle", "gap-worklist.json")));
+    assert.ok(fs.existsSync(path.join(outDir, "cycle", "gap-worklist.md")));
+    const exportedReport = fs.readFileSync(path.join(outDir, "source-bundle", "report.json"), "utf8");
+    assert.doesNotMatch(exportedReport, new RegExp(root.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(exportedReport, /<cellfence-repo>\/tmp\/subject/);
+    assert.match(exportedReport, /packages\/website\/src\/pages\/home\/HeroSection\.tsx/);
     assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "findings.raw.jsonl")));
     assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "findings.normalized.jsonl")));
     assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "logs")));
     assert.match(fs.readFileSync(path.join(outDir, "README.md"), "utf8"), /not a final precision claim/);
+    assert.match(fs.readFileSync(path.join(outDir, "EXTERNAL_REVIEW_REQUEST.md"), "utf8"), /Agent output is useful only for non-claim triage/);
     assert.match(fs.readFileSync(path.join(outDir, "SHA256SUMS"), "utf8"), /review-packet\.json/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ffe8c02750eb8dc7",
+    "subjectId": "slab-quill",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "slab-quill",
+    "phase": null,
+    "repository": "https://github.com/slab/quill.git",
+    "commit": "539cbffd0a13b18e9c65eb84dd35e6596e403158"
+  },
+  "manifestCopy": {
+    "path": "manifests/slab-quill-6d6457dfa608.json",
+    "sha256": "78d6eefae30a20c20948928d66f32448dee9c0c3fdd7b97a6e009dcd5484a00c"
+  },
+  "attestationTemplate": {
+    "subjectId": "slab-quill",
+    "repository": "https://github.com/slab/quill.git",
+    "commit": "539cbffd0a13b18e9c65eb84dd35e6596e403158",
+    "manifestCopy": {
+      "path": "manifests/slab-quill-6d6457dfa608.json",
+      "sha256": "78d6eefae30a20c20948928d66f32448dee9c0c3fdd7b97a6e009dcd5484a00c"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "78d6eefae30a20c20948928d66f32448dee9c0c3fdd7b97a6e009dcd5484a00c",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

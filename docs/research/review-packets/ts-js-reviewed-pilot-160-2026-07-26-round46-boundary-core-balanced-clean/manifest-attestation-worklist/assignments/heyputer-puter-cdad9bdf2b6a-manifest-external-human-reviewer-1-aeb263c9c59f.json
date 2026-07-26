@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-0600bc037fc6ef24",
+    "subjectId": "heyputer-puter",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "heyputer-puter",
+    "phase": null,
+    "repository": "https://github.com/HeyPuter/puter.git",
+    "commit": "70f343d6fe621f27525020e2da68e1389265f5fb"
+  },
+  "manifestCopy": {
+    "path": "manifests/heyputer-puter-cdad9bdf2b6a.json",
+    "sha256": "c894922f0ea4fcd12dc9dfa19bc1d29a040a7277e81de5bbd22664b2a9e9b07b"
+  },
+  "attestationTemplate": {
+    "subjectId": "heyputer-puter",
+    "repository": "https://github.com/HeyPuter/puter.git",
+    "commit": "70f343d6fe621f27525020e2da68e1389265f5fb",
+    "manifestCopy": {
+      "path": "manifests/heyputer-puter-cdad9bdf2b6a.json",
+      "sha256": "c894922f0ea4fcd12dc9dfa19bc1d29a040a7277e81de5bbd22664b2a9e9b07b"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "c894922f0ea4fcd12dc9dfa19bc1d29a040a7277e81de5bbd22664b2a9e9b07b",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

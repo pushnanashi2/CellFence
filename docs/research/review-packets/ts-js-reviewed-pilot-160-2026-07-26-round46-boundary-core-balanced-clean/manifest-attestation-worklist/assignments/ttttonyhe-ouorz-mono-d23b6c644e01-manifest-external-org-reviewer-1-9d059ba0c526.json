@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-8bf331a41797e288",
+    "subjectId": "ttttonyhe-ouorz-mono",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "ttttonyhe-ouorz-mono",
+    "phase": null,
+    "repository": "https://github.com/ttttonyhe/ouorz-mono.git",
+    "commit": "d9dad5d6891c91c7d87a77255a8207bb4e57743f"
+  },
+  "manifestCopy": {
+    "path": "manifests/ttttonyhe-ouorz-mono-d23b6c644e01.json",
+    "sha256": "51904b733e01135cefb78125cbfa7932b12e8adf8af4fd1c1065e2ebd6e1c16b"
+  },
+  "attestationTemplate": {
+    "subjectId": "ttttonyhe-ouorz-mono",
+    "repository": "https://github.com/ttttonyhe/ouorz-mono.git",
+    "commit": "d9dad5d6891c91c7d87a77255a8207bb4e57743f",
+    "manifestCopy": {
+      "path": "manifests/ttttonyhe-ouorz-mono-d23b6c644e01.json",
+      "sha256": "51904b733e01135cefb78125cbfa7932b12e8adf8af4fd1c1065e2ebd6e1c16b"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "51904b733e01135cefb78125cbfa7932b12e8adf8af4fd1c1065e2ebd6e1c16b",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

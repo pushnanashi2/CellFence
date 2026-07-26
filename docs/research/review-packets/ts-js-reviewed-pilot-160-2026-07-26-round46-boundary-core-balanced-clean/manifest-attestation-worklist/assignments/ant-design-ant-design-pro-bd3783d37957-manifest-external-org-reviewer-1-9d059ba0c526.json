@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-89ab9a6df21be531",
+    "subjectId": "ant-design-ant-design-pro",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "ant-design-ant-design-pro",
+    "phase": null,
+    "repository": "https://github.com/ant-design/ant-design-pro.git",
+    "commit": "bb40867ae3ef943e06e48da6911ccc5900e638a1"
+  },
+  "manifestCopy": {
+    "path": "manifests/ant-design-ant-design-pro-bd3783d37957.json",
+    "sha256": "69ddfefcacd2c0dd2f93b4d6742a02f7a6764ebc09d986316e8b6244cef243e1"
+  },
+  "attestationTemplate": {
+    "subjectId": "ant-design-ant-design-pro",
+    "repository": "https://github.com/ant-design/ant-design-pro.git",
+    "commit": "bb40867ae3ef943e06e48da6911ccc5900e638a1",
+    "manifestCopy": {
+      "path": "manifests/ant-design-ant-design-pro-bd3783d37957.json",
+      "sha256": "69ddfefcacd2c0dd2f93b4d6742a02f7a6764ebc09d986316e8b6244cef243e1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "69ddfefcacd2c0dd2f93b4d6742a02f7a6764ebc09d986316e8b6244cef243e1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

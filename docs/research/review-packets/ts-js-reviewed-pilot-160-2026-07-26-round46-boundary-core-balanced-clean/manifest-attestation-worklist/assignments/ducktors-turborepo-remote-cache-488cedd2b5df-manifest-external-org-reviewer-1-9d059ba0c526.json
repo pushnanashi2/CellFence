@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-f14fbfa4ab165367",
+    "subjectId": "ducktors-turborepo-remote-cache",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "ducktors-turborepo-remote-cache",
+    "phase": null,
+    "repository": "https://github.com/ducktors/turborepo-remote-cache.git",
+    "commit": "8f78fc645055b50a84470ff5ca580c848620368e"
+  },
+  "manifestCopy": {
+    "path": "manifests/ducktors-turborepo-remote-cache-488cedd2b5df.json",
+    "sha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f"
+  },
+  "attestationTemplate": {
+    "subjectId": "ducktors-turborepo-remote-cache",
+    "repository": "https://github.com/ducktors/turborepo-remote-cache.git",
+    "commit": "8f78fc645055b50a84470ff5ca580c848620368e",
+    "manifestCopy": {
+      "path": "manifests/ducktors-turborepo-remote-cache-488cedd2b5df.json",
+      "sha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

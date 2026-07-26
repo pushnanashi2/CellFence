@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-2df663c614102f6c",
+    "evidencePackageId": "evidence-fcd8d17bac4db353",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/nextai-translator-nextai-translator-e7ecaaa85f0f.json",
+        "sha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d"
+      },
+      "auditLog": {
+        "path": "logs/nextai-translator-nextai-translator-e7ecaaa85f0f/check.audit.jsonl",
+        "sha256": "d9ab4de673c4dd162ddbf81eefcf6cc438dd182945c443bee3a2b01c0a5c13c2"
+      },
+      "evidenceGraph": {
+        "path": "logs/nextai-translator-nextai-translator-e7ecaaa85f0f/evidence-graph.json",
+        "sha256": "a421bd007597d4135a5558f5bb00d87109332a80b0c9c2970451d34914b9893f"
+      },
+      "checkStdout": {
+        "path": "logs/nextai-translator-nextai-translator-e7ecaaa85f0f/check.stdout.log",
+        "sha256": "bf38e992075b17b81765d743ba8f3cc7b64d8dce1725da98d3383523cfb62f2b"
+      },
+      "checkStderr": {
+        "path": "logs/nextai-translator-nextai-translator-e7ecaaa85f0f/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:fcd8d17bac4db353489c448b783db559045738c3d66e27241b6572e9e6f7f6d6",
+    "subjectId": "nextai-translator-nextai-translator",
+    "repository": "https://github.com/nextai-translator/nextai-translator.git",
+    "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0",
+    "gitTree": "c2034ed2fb67c3cb4c6dcc5862d3d54bded02b98",
+    "manifestSha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/tauri/windows/HistoryWindow.tsx",
+    "line": 9,
+    "message": "tauri imports private implementation from common",
+    "cellId": "tauri",
+    "producerCellId": "common",
+    "cellfenceFingerprint": "1dd34358117fbdfbedc0d7e6279743927f2df4bd0895a8b69f76d6dee8b21904",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:fcd8d17bac4db353489c448b783db559045738c3d66e27241b6572e9e6f7f6d6",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-2df663c614102f6c",
+    "evidencePackageId": "evidence-fcd8d17bac4db353",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

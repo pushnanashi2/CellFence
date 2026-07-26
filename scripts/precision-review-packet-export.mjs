@@ -18,7 +18,6 @@ const copiedCycleFiles = [
   "claim-preflight.prelabel.json",
 ];
 const copiedBundleFiles = [
-  "SHA256SUMS",
   "corpus.json",
   "study.json",
   "report.json",
@@ -34,7 +33,7 @@ const excludedSourceBundleFiles = [
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-review-packet-export.mjs --round-dir reports/corpus/id-cycle --manifest-worklist-dir reports/corpus/id-manifest-attestation-worklist --out-dir docs/research/review-packets/id [--force]
+  node scripts/precision-review-packet-export.mjs --round-dir reports/corpus/id-cycle --manifest-worklist-dir reports/corpus/id-manifest-attestation-worklist --out-dir docs/research/review-packets/id [--gap-worklist reports/corpus/id-gap-worklist.json] [--gap-markdown reports/corpus/id-gap-worklist.md] [--force]
 
 Exports a compact, git-trackable review packet from a precision next-cycle
 directory. The packet includes sealed blind labeling assignments, selected
@@ -46,6 +45,8 @@ function parseArgs(argv) {
   const parsed = {
     roundDir: "",
     manifestWorklistDir: "",
+    gapWorklistPath: "",
+    gapMarkdownPath: "",
     outDir: "",
     force: false,
   };
@@ -61,6 +62,16 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--manifest-worklist-dir=")) {
       parsed.manifestWorklistDir = path.resolve(requireInlineValue(argument, "--manifest-worklist-dir=", "--manifest-worklist-dir"));
+    } else if (argument === "--gap-worklist") {
+      parsed.gapWorklistPath = path.resolve(requireValue(argv, index, "--gap-worklist"));
+      index += 1;
+    } else if (argument.startsWith("--gap-worklist=")) {
+      parsed.gapWorklistPath = path.resolve(requireInlineValue(argument, "--gap-worklist=", "--gap-worklist"));
+    } else if (argument === "--gap-markdown") {
+      parsed.gapMarkdownPath = path.resolve(requireValue(argv, index, "--gap-markdown"));
+      index += 1;
+    } else if (argument.startsWith("--gap-markdown=")) {
+      parsed.gapMarkdownPath = path.resolve(requireInlineValue(argument, "--gap-markdown=", "--gap-markdown"));
     } else if (argument === "--out-dir") {
       parsed.outDir = path.resolve(requireValue(argv, index, "--out-dir"));
       index += 1;
@@ -178,10 +189,26 @@ function copyFile(srcRoot, relativePath, destRoot) {
   fs.copyFileSync(sourcePath, destinationPath);
 }
 
+function copyAbsoluteFile(sourcePath, destinationPath) {
+  requireFile(sourcePath);
+  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
+  fs.copyFileSync(sourcePath, destinationPath);
+}
+
 function copyDirectory(srcDir, destDir) {
   requireDir(srcDir);
   fs.mkdirSync(destDir, { recursive: true });
   fs.cpSync(srcDir, destDir, { recursive: true, dereference: false, errorOnExist: false });
+}
+
+function redactLocalAbsolutePaths(baseDir) {
+  for (const filePath of listFilesRecursive(baseDir)) {
+    const extension = path.extname(filePath);
+    if (!new Set([".json", ".jsonl", ".md", ".txt"]).has(extension) && path.basename(filePath) !== markerFileName) continue;
+    const text = fs.readFileSync(filePath, "utf8");
+    const redacted = text.split(repoRoot).join("<cellfence-repo>");
+    if (redacted !== text) fs.writeFileSync(filePath, redacted);
+  }
 }
 
 function listFilesRecursive(baseDir) {
@@ -214,14 +241,32 @@ function countJsonl(filePath) {
   return text ? text.split(/\r?\n/).length : 0;
 }
 
-function repositoryBalanceTopSubjects(worklist) {
-  return Object.entries(worklist.summary?.selectedBySubject || {})
+function uniqueSelectedFindings(worklist) {
+  const findingsById = new Map();
+  for (const assignment of worklist.assignments || []) {
+    if (!assignment.findingId) continue;
+    if (!findingsById.has(assignment.findingId)) findingsById.set(assignment.findingId, assignment);
+  }
+  return [...findingsById.values()];
+}
+
+function countBy(items, keyFn) {
+  const counts = {};
+  for (const item of items) {
+    const key = keyFn(item) || "unknown";
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return Object.fromEntries(Object.entries(counts).sort());
+}
+
+function repositoryBalanceTopSubjects(selectedBySubject, selectedFindings) {
+  return Object.entries(selectedBySubject || {})
     .sort((left, right) => (right[1] - left[1]) || left[0].localeCompare(right[0]))
     .slice(0, 10)
     .map(([subjectId, findings]) => ({
       subjectId,
       findings,
-      contribution: worklist.summary?.selectedFindings ? findings / worklist.summary.selectedFindings : null,
+      contribution: selectedFindings ? findings / selectedFindings : null,
     }));
 }
 
@@ -255,6 +300,8 @@ function writeReadme(outDir, metadata) {
     "- `manifest-attestation-worklist/`: per-subject manifest review assignment templates.",
     "- `source-bundle/`: compact selected evidence and manifest copies from the unlabeled bundle.",
     "- `cycle/`: next-cycle summaries, protocols, preflight output, and validation reports.",
+    ...(metadata.gapWorklist?.json ? ["- `cycle/gap-worklist.json`: remaining evidence tasks for the clean preflight."] : []),
+    "- `EXTERNAL_REVIEW_REQUEST.md`: reviewer prompt for human/org review or non-claim agent triage.",
     "- `review-packet.json`: packet metadata.",
     "- `SHA256SUMS`: digest list for the exported packet.",
     "",
@@ -268,12 +315,54 @@ function writeReadme(outDir, metadata) {
     `- manifest assignments: ${metadata.manifestAssignments}`,
     `- source unlabeledBundleArtifactSetSha256: \`${metadata.sourceDigests.unlabeledBundleArtifactSetSha256 || "n/a"}\``,
     `- source blindWorklistArtifactSetSha256: \`${metadata.sourceDigests.blindWorklistArtifactSetSha256 || "n/a"}\``,
-    `- exported packet SHA256SUMS sha256: \`${metadata.packetSha256SumsSha256}\``,
+    "- exported packet digest: run `sha256sum SHA256SUMS` from this directory.",
     "",
     "Agent-only labels can be useful for non-claim triage, but they must remain",
     "outside the external human/org claim lane.",
   ];
   writeText(path.join(outDir, "README.md"), lines.join("\n"));
+}
+
+function writeExternalReviewRequest(outDir, metadata) {
+  const lines = [
+    `# External Review Request: ${metadata.studyId}`,
+    "",
+    "Please review the CellFence external review packet in this directory.",
+    "",
+    "Scope:",
+    "",
+    `- Claim profile: ${metadata.claimProfile || "custom"}`,
+    `- Included rules: ${metadata.includedRules.join(",")}`,
+    `- Selected findings: ${metadata.selectedFindings}`,
+    `- Blind assignments: ${metadata.blindAssignments}`,
+    `- Manifest attestation assignments: ${metadata.manifestAttestation.assignments}`,
+    `- Source bundle harness commit: ${metadata.source.harnessCommit}`,
+    `- Source bundle harness dirty: ${metadata.source.harnessDirty}`,
+    "",
+    "Finding labeling task:",
+    "",
+    "1. Open only your assigned files under `blind-worklist/assignments/`.",
+    "2. Do not inspect peer labels, adjudication output, or aggregate outcomes before labeling.",
+    "3. For each assignment, inspect the embedded `finding`, the copied manifest under `source-bundle/manifests/`, and the pinned upstream repository commit named in the assignment.",
+    "4. Return one JSONL label per assignment by filling the assignment's `labelTemplate`.",
+    "5. Allowed labels are `true_positive`, `false_positive`, `needs_policy`, `needs_review`, `invalid_setup`, and `out_of_scope`.",
+    "6. If the repository, commit, manifest, or code path cannot be inspected, do not guess; use `needs_review` or `invalid_setup` with a concrete rationale.",
+    "",
+    "Manifest attestation task:",
+    "",
+    "1. Open your assigned files under `manifest-attestation-worklist/assignments/`.",
+    "2. Compare the copied manifest against the pinned upstream repository's package/workspace boundaries, package names, exports/entry points, and declared workspace dependencies.",
+    "3. Return an attestation only when the reviewed manifest hash matches the assignment and the reviewer is willing to attest the stated review scope.",
+    "",
+    "Important claim-lane rules:",
+    "",
+    "- A language model or automated agent is not an external human/org reviewer.",
+    "- Agent output is useful only for non-claim triage unless a separate protocol explicitly accepts it.",
+    "- Do not mark `raterType` as `human` or `organization` unless that is literally true.",
+    "- Do not claim the 99% precision gate is satisfied from this packet alone; the packet currently has no returned external labels or manifest attestations.",
+    "- Do not open issues or pull requests against upstream repositories from this review.",
+  ];
+  writeText(path.join(outDir, "EXTERNAL_REVIEW_REQUEST.md"), lines.join("\n"));
 }
 
 function createReviewPacket(options) {
@@ -284,15 +373,21 @@ function createReviewPacket(options) {
   requireDir(blindWorklistDir);
   requireDir(options.manifestWorklistDir);
   for (const relativePath of copiedCycleFiles) copyFile(options.roundDir, relativePath, path.join(options.outDir, "cycle"));
+  if (options.gapWorklistPath) copyAbsoluteFile(options.gapWorklistPath, path.join(options.outDir, "cycle", "gap-worklist.json"));
+  if (options.gapMarkdownPath) copyAbsoluteFile(options.gapMarkdownPath, path.join(options.outDir, "cycle", "gap-worklist.md"));
   for (const relativePath of copiedBundleFiles) copyFile(bundleDir, relativePath, path.join(options.outDir, "source-bundle"));
   copyDirectory(path.join(bundleDir, "manifests"), path.join(options.outDir, "source-bundle", "manifests"));
   copyDirectory(blindWorklistDir, path.join(options.outDir, "blind-worklist"));
   copyDirectory(options.manifestWorklistDir, path.join(options.outDir, "manifest-attestation-worklist"));
+  redactLocalAbsolutePaths(options.outDir);
 
   const summary = readJson(path.join(options.roundDir, "summary.json"));
   const study = readJson(path.join(bundleDir, "study.json"));
   const blindWorklist = readJson(path.join(blindWorklistDir, "worklist.json"));
   const manifestWorklist = readJson(path.join(options.manifestWorklistDir, "worklist.json"));
+  const selectedFindings = uniqueSelectedFindings(blindWorklist);
+  const selectedByRule = countBy(selectedFindings, (finding) => finding.ruleId);
+  const selectedBySubject = countBy(selectedFindings, (finding) => finding.subjectId);
   const metadata = {
     schemaVersion,
     exportedAt: new Date().toISOString(),
@@ -309,10 +404,11 @@ function createReviewPacket(options) {
       corpusSha256: study.environment?.corpusSha256 || null,
     },
     sourceDigests: summary.digests || {},
-    selectedFindings: blindWorklist.summary?.selectedFindings || 0,
+    selectedFindings: blindWorklist.summary?.selectedFindings || selectedFindings.length,
     blindAssignments: (blindWorklist.assignments || []).length,
-    selectedByRule: blindWorklist.summary?.selectedByRule || {},
-    topSubjects: repositoryBalanceTopSubjects(blindWorklist),
+    selectedByRule,
+    selectedBySubject,
+    topSubjects: repositoryBalanceTopSubjects(selectedBySubject, blindWorklist.summary?.selectedFindings || selectedFindings.length),
     sourceBundle: {
       sampledFindingsJsonl: countJsonl(path.join(bundleDir, "findings.sampled.jsonl")),
       manifestCopies: Array.isArray(study.manifestCopies) ? study.manifestCopies.length : 0,
@@ -325,18 +421,27 @@ function createReviewPacket(options) {
         ? hashFile(path.join(options.manifestWorklistDir, "SHA256SUMS"))
         : null,
     },
+    gapWorklist: {
+      json: options.gapWorklistPath ? {
+        path: "cycle/gap-worklist.json",
+        sha256: hashFile(options.gapWorklistPath),
+      } : null,
+      markdown: options.gapMarkdownPath ? {
+        path: "cycle/gap-worklist.md",
+        sha256: hashFile(options.gapMarkdownPath),
+      } : null,
+    },
     blockers: summary.blockers || [],
   };
   writeJson(path.join(options.outDir, "review-packet.json"), metadata);
-  const packetSha256SumsSha256 = writeSha256Sums(options.outDir);
   writeReadme(options.outDir, {
     ...metadata,
     sourceBundleDirty: metadata.source.harnessDirty,
     manifestSubjects: metadata.manifestAttestation.subjects,
     manifestAssignments: metadata.manifestAttestation.assignments,
     excludedSourceBundleFiles,
-    packetSha256SumsSha256,
   });
+  writeExternalReviewRequest(options.outDir, metadata);
   const finalPacketSha256SumsSha256 = writeSha256Sums(options.outDir);
   return {
     ...metadata,

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b0e32956df50e0c6",
+    "subjectId": "react-workspaces-react-workspaces-playground",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "react-workspaces-react-workspaces-playground",
+    "phase": null,
+    "repository": "https://github.com/react-workspaces/react-workspaces-playground.git",
+    "commit": "59e2a8948a7f16579aa4776db5f09a1dcea46c7a"
+  },
+  "manifestCopy": {
+    "path": "manifests/react-workspaces-react-workspaces-playground-fd369e6f0bc8.json",
+    "sha256": "2deb7d373ddcb0259caa007f752c4f6e2aecf0c916a49fbc5a0eb88441608185"
+  },
+  "attestationTemplate": {
+    "subjectId": "react-workspaces-react-workspaces-playground",
+    "repository": "https://github.com/react-workspaces/react-workspaces-playground.git",
+    "commit": "59e2a8948a7f16579aa4776db5f09a1dcea46c7a",
+    "manifestCopy": {
+      "path": "manifests/react-workspaces-react-workspaces-playground-fd369e6f0bc8.json",
+      "sha256": "2deb7d373ddcb0259caa007f752c4f6e2aecf0c916a49fbc5a0eb88441608185"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2deb7d373ddcb0259caa007f752c4f6e2aecf0c916a49fbc5a0eb88441608185",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

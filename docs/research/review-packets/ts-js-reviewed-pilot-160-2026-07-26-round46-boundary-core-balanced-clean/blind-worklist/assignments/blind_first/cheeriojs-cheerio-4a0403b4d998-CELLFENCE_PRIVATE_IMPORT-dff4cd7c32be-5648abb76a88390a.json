@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-5648abb76a88390a",
+    "evidencePackageId": "evidence-b12cd7c66c8402e0",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/cheeriojs-cheerio-4a0403b4d998.json",
+        "sha256": "71186a9b359e8362abd63fe25f36c3abdec3ee7bd27157d2f3292d8044d120f7"
+      },
+      "auditLog": {
+        "path": "logs/cheeriojs-cheerio-4a0403b4d998/check.audit.jsonl",
+        "sha256": "ec881416f3529335fc068e301dfa952e76d4e25535c0607ecc479e5e7608100e"
+      },
+      "evidenceGraph": {
+        "path": "logs/cheeriojs-cheerio-4a0403b4d998/evidence-graph.json",
+        "sha256": "7feacce52f1219928aec7dfa7cc84b3309c25a470d631a0ba4fd09c5683bc11f"
+      },
+      "checkStdout": {
+        "path": "logs/cheeriojs-cheerio-4a0403b4d998/check.stdout.log",
+        "sha256": "5d0ead8e8d8dbf925f021b456f266b0e5b9b14d465f8f47cad9855668b94eb0c"
+      },
+      "checkStderr": {
+        "path": "logs/cheeriojs-cheerio-4a0403b4d998/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:b12cd7c66c8402e03ba5e6d697f9dcc854188b38c6becf9896e6e094a5131749",
+    "subjectId": "cheeriojs-cheerio",
+    "repository": "https://github.com/cheeriojs/cheerio.git",
+    "commit": "d3cf80ca323f2923fba572e12425da0a4f233281",
+    "gitTree": "9565d9d07833a9e525addde59d82379079465c3b",
+    "manifestSha256": "71186a9b359e8362abd63fe25f36c3abdec3ee7bd27157d2f3292d8044d120f7",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/api/attributes.ts",
+    "line": 10,
+    "message": "api imports private implementation from src-root",
+    "cellId": "api",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "84cb6e70264eb70d53b2aaa1c9a70193ad481ad7a0d4ceda1cb37ae5c76aff5c",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:b12cd7c66c8402e03ba5e6d697f9dcc854188b38c6becf9896e6e094a5131749",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-5648abb76a88390a",
+    "evidencePackageId": "evidence-b12cd7c66c8402e0",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

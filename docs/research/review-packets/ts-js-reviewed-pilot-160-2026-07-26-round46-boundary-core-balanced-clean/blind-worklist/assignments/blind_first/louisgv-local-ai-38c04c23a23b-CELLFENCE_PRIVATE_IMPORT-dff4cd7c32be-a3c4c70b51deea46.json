@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-a3c4c70b51deea46",
+    "evidencePackageId": "evidence-7d43aa191cf2c34e",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/louisgv-local-ai-38c04c23a23b.json",
+        "sha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767"
+      },
+      "auditLog": {
+        "path": "logs/louisgv-local-ai-38c04c23a23b/check.audit.jsonl",
+        "sha256": "95ea776e56572515f1e81f8a572e4b7b38d997cf31b363ad4c7e9c256a58868f"
+      },
+      "evidenceGraph": {
+        "path": "logs/louisgv-local-ai-38c04c23a23b/evidence-graph.json",
+        "sha256": "76fbbb6f135cf496e8b52e8479b22743b7e33295f9e2bc98ab4736a1810137fe"
+      },
+      "checkStdout": {
+        "path": "logs/louisgv-local-ai-38c04c23a23b/check.stdout.log",
+        "sha256": "ec1529435cccce16f7d77239785b29e14fd8fda4158a4572895c0cda0f50c092"
+      },
+      "checkStderr": {
+        "path": "logs/louisgv-local-ai-38c04c23a23b/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:7d43aa191cf2c34e559c021d726b374928ad06b591e383b45e0acb8e2fdc5ffb",
+    "subjectId": "louisgv-local-ai",
+    "repository": "https://github.com/louisgv/local.ai.git",
+    "commit": "ad9a9e63d8b0262fdf6734d10e2e9a0078c3977a",
+    "gitTree": "d028ad4347e280af402d8a0189a5b3ab6e921a27",
+    "manifestSha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/desktop/src/features/thread/thread-config-panel.tsx",
+    "line": 4,
+    "message": "desktop imports private implementation from ui",
+    "cellId": "desktop",
+    "producerCellId": "ui",
+    "cellfenceFingerprint": "fe9b3a37413c563e6353676e233cef8f1cc6225cd2b5b34dcb34c2f605c053ba",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:7d43aa191cf2c34e559c021d726b374928ad06b591e383b45e0acb8e2fdc5ffb",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-a3c4c70b51deea46",
+    "evidencePackageId": "evidence-7d43aa191cf2c34e",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

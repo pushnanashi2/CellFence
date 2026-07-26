@@ -1,0 +1,285 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "assets",
+      "ownedPaths": [
+        "src/assets/**"
+      ],
+      "publicEntry": "src/assets/assets/ffmpeg/ffmpeg-core.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "background",
+      "ownedPaths": [
+        "src/background/src/**"
+      ],
+      "publicEntry": "src/background/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@hls-downloader/background",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "background-2",
+      "ownedPaths": [
+        "src/background/*"
+      ],
+      "publicEntry": "src/background/vite.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/src/**"
+      ],
+      "publicEntry": "src/core/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@hls-downloader/core",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core-2",
+      "ownedPaths": [
+        "src/core/*"
+      ],
+      "publicEntry": "src/core/vitest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "design-system",
+      "ownedPaths": [
+        "src/design-system/src/**"
+      ],
+      "publicEntry": "src/design-system/src/index.ts",
+      "publicSymbols": [
+        "AspectRatio",
+        "Badge",
+        "BadgeProps",
+        "badgeVariants",
+        "Button",
+        "ButtonProps",
+        "buttonVariants",
+        "Card",
+        "CardProps",
+        "cn",
+        "HoverCard",
+        "HoverCardContent",
+        "HoverCardTrigger",
+        "Input",
+        "InputProps",
+        "Progress",
+        "ScrollArea",
+        "ScrollBar",
+        "Select",
+        "SelectContent",
+        "SelectGroup",
+        "SelectItem",
+        "SelectLabel",
+        "SelectScrollDownButton",
+        "SelectScrollUpButton",
+        "SelectSeparator",
+        "SelectTrigger",
+        "SelectValue",
+        "Separator",
+        "Slider",
+        "Switch",
+        "Tabs",
+        "TabsContent",
+        "TabsList",
+        "TabsTrigger",
+        "Theme",
+        "useLocalStorage",
+        "useTheme"
+      ],
+      "packageName": "@hls-downloader/design-system",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "design-system-2",
+      "ownedPaths": [
+        "src/design-system/*"
+      ],
+      "publicEntry": "src/design-system/tailwind.config.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "popup",
+      "ownedPaths": [
+        "src/popup/src/**"
+      ],
+      "publicEntry": "src/popup/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@hls-downloader/popup",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "design-system"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "popup-2",
+      "ownedPaths": [
+        "src/popup/.storybook/**",
+        "src/popup/*"
+      ],
+      "publicEntry": "src/popup/.storybook/main.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "popup"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

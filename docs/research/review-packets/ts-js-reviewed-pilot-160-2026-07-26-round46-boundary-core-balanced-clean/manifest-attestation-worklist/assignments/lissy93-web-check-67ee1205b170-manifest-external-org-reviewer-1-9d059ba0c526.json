@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-dfc2d081150d62f6",
+    "subjectId": "lissy93-web-check",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lissy93-web-check",
+    "phase": null,
+    "repository": "https://github.com/lissy93/web-check.git",
+    "commit": "9154bd43e8276c0310c29c86ac70648e1ed4eda5"
+  },
+  "manifestCopy": {
+    "path": "manifests/lissy93-web-check-67ee1205b170.json",
+    "sha256": "48fdcbfc41381cd01c6b017aa26f1adb0feddea12b00e991e146179dc6f302bb"
+  },
+  "attestationTemplate": {
+    "subjectId": "lissy93-web-check",
+    "repository": "https://github.com/lissy93/web-check.git",
+    "commit": "9154bd43e8276c0310c29c86ac70648e1ed4eda5",
+    "manifestCopy": {
+      "path": "manifests/lissy93-web-check-67ee1205b170.json",
+      "sha256": "48fdcbfc41381cd01c6b017aa26f1adb0feddea12b00e991e146179dc6f302bb"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "48fdcbfc41381cd01c6b017aa26f1adb0feddea12b00e991e146179dc6f302bb",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

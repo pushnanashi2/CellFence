@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-0b791c3016888109",
+    "evidencePackageId": "evidence-922a96f05f596c57",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/gitlawb-openclaude-e4fbd22f3f6b.json",
+        "sha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402"
+      },
+      "auditLog": {
+        "path": "logs/gitlawb-openclaude-e4fbd22f3f6b/check.audit.jsonl",
+        "sha256": "53074b4caf72d23a04ac5fae62ba8640e3d62b33d6c0521e70e0c4e402d25df4"
+      },
+      "evidenceGraph": {
+        "path": "logs/gitlawb-openclaude-e4fbd22f3f6b/evidence-graph.json",
+        "sha256": "fffa70d5ed6cbfb6d9337b54ca5f0696d2b1e5ce425b7bda350da7650b98cf3a"
+      },
+      "checkStdout": {
+        "path": "logs/gitlawb-openclaude-e4fbd22f3f6b/check.stdout.log",
+        "sha256": "73602cc10925a2037cacc81cb34fa41922994bfa1cdfb3b8a951be6a47ae3d05"
+      },
+      "checkStderr": {
+        "path": "logs/gitlawb-openclaude-e4fbd22f3f6b/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:922a96f05f596c5738ae0a265891bb0dbdd68bb4e07281e75fd68f0f7c519e9c",
+    "subjectId": "gitlawb-openclaude",
+    "repository": "https://github.com/Gitlawb/openclaude.git",
+    "commit": "0effa0f42b6dbc6a4800e19f4b2d8d588269906b",
+    "gitTree": "d9615538f74513c0943f9e0de2a194484748463b",
+    "manifestSha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/ink.ts",
+    "line": 75,
+    "message": "src-root imports private implementation from ink",
+    "cellId": "src-root",
+    "producerCellId": "ink",
+    "cellfenceFingerprint": "15ad2ad5b23ed9f23cbc316afe2c37973f5ddfbd83b0d34e284d24f0dfcd219a",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:922a96f05f596c5738ae0a265891bb0dbdd68bb4e07281e75fd68f0f7c519e9c",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-0b791c3016888109",
+    "evidencePackageId": "evidence-922a96f05f596c57",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

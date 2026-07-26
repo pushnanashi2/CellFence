@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-497f3d78ed2c8147",
+    "subjectId": "cumt-robin-fullstack-blog",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "cumt-robin-fullstack-blog",
+    "phase": null,
+    "repository": "https://github.com/cumt-robin/fullstack-blog.git",
+    "commit": "d3ce80d835976399ad27e3b596adcacdc983321e"
+  },
+  "manifestCopy": {
+    "path": "manifests/cumt-robin-fullstack-blog-42fb59ad29a9.json",
+    "sha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc"
+  },
+  "attestationTemplate": {
+    "subjectId": "cumt-robin-fullstack-blog",
+    "repository": "https://github.com/cumt-robin/fullstack-blog.git",
+    "commit": "d3ce80d835976399ad27e3b596adcacdc983321e",
+    "manifestCopy": {
+      "path": "manifests/cumt-robin-fullstack-blog-42fb59ad29a9.json",
+      "sha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-0868646f69eec4ab",
+    "subjectId": "dayuanjiang-next-ai-draw-io",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "dayuanjiang-next-ai-draw-io",
+    "phase": null,
+    "repository": "https://github.com/DayuanJiang/next-ai-draw-io.git",
+    "commit": "4b072283202d3fe4869acd847ee897ad1165d73d"
+  },
+  "manifestCopy": {
+    "path": "manifests/dayuanjiang-next-ai-draw-io-e11182f04294.json",
+    "sha256": "85ac0b13a490040766d2c3bc71060d06bc2d8f8c29079f7bc4b3fefb952e1228"
+  },
+  "attestationTemplate": {
+    "subjectId": "dayuanjiang-next-ai-draw-io",
+    "repository": "https://github.com/DayuanJiang/next-ai-draw-io.git",
+    "commit": "4b072283202d3fe4869acd847ee897ad1165d73d",
+    "manifestCopy": {
+      "path": "manifests/dayuanjiang-next-ai-draw-io-e11182f04294.json",
+      "sha256": "85ac0b13a490040766d2c3bc71060d06bc2d8f8c29079f7bc4b3fefb952e1228"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "85ac0b13a490040766d2c3bc71060d06bc2d8f8c29079f7bc4b3fefb952e1228",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

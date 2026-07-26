@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-ab5a2e50681555dd",
+    "evidencePackageId": "evidence-7f2ec55b80d510d4",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/ducktors-turborepo-remote-cache-488cedd2b5df.json",
+        "sha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f"
+      },
+      "auditLog": {
+        "path": "logs/ducktors-turborepo-remote-cache-488cedd2b5df/check.audit.jsonl",
+        "sha256": "8424a07ef16c4f7a19c8856e63d7625b9199de5e4990ed70a077c3926621158d"
+      },
+      "evidenceGraph": {
+        "path": "logs/ducktors-turborepo-remote-cache-488cedd2b5df/evidence-graph.json",
+        "sha256": "e03fe23ae85643846a2e344cfe685f15b6c28a27685108f8c78b7729188784b0"
+      },
+      "checkStdout": {
+        "path": "logs/ducktors-turborepo-remote-cache-488cedd2b5df/check.stdout.log",
+        "sha256": "e0fcff8258d77344ef14c6ebda0928c655b8c2b70b4b49a0477eee6c14dc6051"
+      },
+      "checkStderr": {
+        "path": "logs/ducktors-turborepo-remote-cache-488cedd2b5df/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:7f2ec55b80d510d45356b9a6c8a385d63a9a04c42c1fa3d0522f1719c9f1c619",
+    "subjectId": "ducktors-turborepo-remote-cache",
+    "repository": "https://github.com/ducktors/turborepo-remote-cache.git",
+    "commit": "8f78fc645055b50a84470ff5ca580c848620368e",
+    "gitTree": "bf0acbefe300a4fce3950afccb9c2b7a1c17df06",
+    "manifestSha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/plugins/config.ts",
+    "line": 2,
+    "message": "plugins imports private implementation from src-root",
+    "cellId": "plugins",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "2ff439050481f46a0efee9fbfe2f11427337e549c498357a0bc168b455a561e9",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:7f2ec55b80d510d45356b9a6c8a385d63a9a04c42c1fa3d0522f1719c9f1c619",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-ab5a2e50681555dd",
+    "evidencePackageId": "evidence-7f2ec55b80d510d4",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

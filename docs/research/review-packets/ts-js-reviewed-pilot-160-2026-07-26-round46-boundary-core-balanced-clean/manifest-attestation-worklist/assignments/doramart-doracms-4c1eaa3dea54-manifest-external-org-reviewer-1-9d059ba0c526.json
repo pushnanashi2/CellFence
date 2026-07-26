@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-3b60d26e68d35cc7",
+    "subjectId": "doramart-doracms",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "doramart-doracms",
+    "phase": null,
+    "repository": "https://github.com/doramart/DoraCMS.git",
+    "commit": "bdaded858ce655fccae0c01c18e36e420c5c48fe"
+  },
+  "manifestCopy": {
+    "path": "manifests/doramart-doracms-4c1eaa3dea54.json",
+    "sha256": "b0d40966d8fc3ab3f3c1968dd8d892d831d5d68ae57d0864b0e019c85c8fed91"
+  },
+  "attestationTemplate": {
+    "subjectId": "doramart-doracms",
+    "repository": "https://github.com/doramart/DoraCMS.git",
+    "commit": "bdaded858ce655fccae0c01c18e36e420c5c48fe",
+    "manifestCopy": {
+      "path": "manifests/doramart-doracms-4c1eaa3dea54.json",
+      "sha256": "b0d40966d8fc3ab3f3c1968dd8d892d831d5d68ae57d0864b0e019c85c8fed91"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b0d40966d8fc3ab3f3c1968dd8d892d831d5d68ae57d0864b0e019c85c8fed91",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

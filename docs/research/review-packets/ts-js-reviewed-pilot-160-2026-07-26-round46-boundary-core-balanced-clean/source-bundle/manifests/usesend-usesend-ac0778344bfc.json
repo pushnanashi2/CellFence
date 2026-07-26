@@ -1,0 +1,320 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/marketing/src/**",
+      "apps/smtp-server/src/**",
+      "apps/web/src/**",
+      "packages/email-editor/src/**",
+      "packages/eslint-config/**",
+      "packages/lib/src/**",
+      "packages/python-sdk/**",
+      "packages/sdk/src/**",
+      "packages/ui/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "email-editor",
+      "ownedPaths": [
+        "packages/email-editor/src/**"
+      ],
+      "publicEntry": "packages/email-editor/src/index.ts",
+      "publicSymbols": [
+        "Editor",
+        "EditorProps"
+      ],
+      "packageName": "@usesend/email-editor",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config",
+      "ownedPaths": [
+        "packages/eslint-config/**"
+      ],
+      "publicEntry": "packages/eslint-config/library.js",
+      "publicSymbols": [],
+      "packageName": "@usesend/eslint-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib",
+      "ownedPaths": [
+        "packages/lib/src/**"
+      ],
+      "publicEntry": "packages/lib/src/index.ts",
+      "publicSymbols": [
+        "assertUnreachable",
+        "BOUNCE_ERROR_MESSAGES",
+        "COMPLAINT_ERROR_MESSAGES",
+        "DELIVERY_DELAY_ERRORS",
+        "invariant",
+        "isDefined"
+      ],
+      "packageName": "@usesend/lib",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "marketing",
+      "ownedPaths": [
+        "apps/marketing/src/**"
+      ],
+      "publicEntry": "apps/marketing/src/app/layout.tsx",
+      "publicSymbols": [
+        "default",
+        "metadata"
+      ],
+      "packageName": "marketing",
+      "consumes": [
+        {
+          "cell": "email-editor"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "python-sdk",
+      "ownedPaths": [
+        "packages/python-sdk/**"
+      ],
+      "publicEntry": "packages/python-sdk/usesend/__init__.py",
+      "publicSymbols": [
+        "Campaigns",
+        "ContactBooks",
+        "Contacts",
+        "Domains",
+        "types",
+        "UseSend",
+        "UseSendHTTPError",
+        "WEBHOOK_CALL_HEADER",
+        "WEBHOOK_EVENT_HEADER",
+        "WEBHOOK_SIGNATURE_HEADER",
+        "WEBHOOK_TIMESTAMP_HEADER",
+        "Webhooks",
+        "WebhookVerificationError"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "smtp-server",
+      "ownedPaths": [
+        "apps/smtp-server/src/**"
+      ],
+      "publicEntry": "apps/smtp-server/src/email-headers.ts",
+      "publicSymbols": [
+        "extractForwardedHeaders"
+      ],
+      "packageName": "smtp-server",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/src/**"
+      ],
+      "publicEntry": "packages/ui/src/accordion.tsx",
+      "publicSymbols": [
+        "Accordion",
+        "AccordionContent",
+        "AccordionItem",
+        "AccordionTrigger"
+      ],
+      "packageName": "@usesend/ui",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "usesend-js",
+      "ownedPaths": [
+        "packages/sdk/src/**"
+      ],
+      "publicEntry": "packages/sdk/src/analytics.ts",
+      "publicSymbols": [
+        "Analytics"
+      ],
+      "packageName": "usesend-js",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "apps/web/src/**"
+      ],
+      "publicEntry": "apps/web/src/app/(dashboard)/admin/add-ses-configuration.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "web",
+      "consumes": [
+        {
+          "cell": "email-editor"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "usesend-js"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

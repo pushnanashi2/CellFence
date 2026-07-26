@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-831720fee7e266d2",
+    "subjectId": "immerjs-immer",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "immerjs-immer",
+    "phase": null,
+    "repository": "https://github.com/immerjs/immer.git",
+    "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468"
+  },
+  "manifestCopy": {
+    "path": "manifests/immerjs-immer-fffa18661f11.json",
+    "sha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9"
+  },
+  "attestationTemplate": {
+    "subjectId": "immerjs-immer",
+    "repository": "https://github.com/immerjs/immer.git",
+    "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468",
+    "manifestCopy": {
+      "path": "manifests/immerjs-immer-fffa18661f11.json",
+      "sha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

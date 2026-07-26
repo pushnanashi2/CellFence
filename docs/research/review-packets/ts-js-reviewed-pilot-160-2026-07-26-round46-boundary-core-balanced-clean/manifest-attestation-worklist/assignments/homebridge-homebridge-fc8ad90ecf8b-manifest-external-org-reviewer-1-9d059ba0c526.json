@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-302b9f70208ff220",
+    "subjectId": "homebridge-homebridge",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "homebridge-homebridge",
+    "phase": null,
+    "repository": "https://github.com/homebridge/homebridge.git",
+    "commit": "e40e64bab4decb4cee7d3bc3c0c9a6538f3714dc"
+  },
+  "manifestCopy": {
+    "path": "manifests/homebridge-homebridge-fc8ad90ecf8b.json",
+    "sha256": "2749e01d3a955f2a5098cee85c4eb97de26a8cad4ede3f789a0091f9b1446887"
+  },
+  "attestationTemplate": {
+    "subjectId": "homebridge-homebridge",
+    "repository": "https://github.com/homebridge/homebridge.git",
+    "commit": "e40e64bab4decb4cee7d3bc3c0c9a6538f3714dc",
+    "manifestCopy": {
+      "path": "manifests/homebridge-homebridge-fc8ad90ecf8b.json",
+      "sha256": "2749e01d3a955f2a5098cee85c4eb97de26a8cad4ede3f789a0091f9b1446887"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2749e01d3a955f2a5098cee85c4eb97de26a8cad4ede3f789a0091f9b1446887",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-00c84d44cd35ee6a",
+    "subjectId": "qishibo-anotherredisdesktopmanager",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "qishibo-anotherredisdesktopmanager",
+    "phase": null,
+    "repository": "https://github.com/qishibo/AnotherRedisDesktopManager.git",
+    "commit": "4c2b7a5f1074b619eb11ca19796d896c3a8e7098"
+  },
+  "manifestCopy": {
+    "path": "manifests/qishibo-anotherredisdesktopmanager-83fa83b0c2eb.json",
+    "sha256": "71895f3768536d5d4bc96c3a0334b9f643d02b1e71c99084175badc1e67cf7ea"
+  },
+  "attestationTemplate": {
+    "subjectId": "qishibo-anotherredisdesktopmanager",
+    "repository": "https://github.com/qishibo/AnotherRedisDesktopManager.git",
+    "commit": "4c2b7a5f1074b619eb11ca19796d896c3a8e7098",
+    "manifestCopy": {
+      "path": "manifests/qishibo-anotherredisdesktopmanager-83fa83b0c2eb.json",
+      "sha256": "71895f3768536d5d4bc96c3a0334b9f643d02b1e71c99084175badc1e67cf7ea"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "71895f3768536d5d4bc96c3a0334b9f643d02b1e71c99084175badc1e67cf7ea",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

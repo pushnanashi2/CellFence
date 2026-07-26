@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-00a498e1edfe17fe",
+    "subjectId": "digitalocean-nginxconfig-io",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "digitalocean-nginxconfig-io",
+    "phase": null,
+    "repository": "https://github.com/digitalocean/nginxconfig.io.git",
+    "commit": "dd290c0b706b8a8c2f86cfbffaae9c17715b431d"
+  },
+  "manifestCopy": {
+    "path": "manifests/digitalocean-nginxconfig-io-4f97aa6baafe.json",
+    "sha256": "914f3753c8af129848bc05c8ab33f8365be0b04f317b6d51c692acdbdd39717e"
+  },
+  "attestationTemplate": {
+    "subjectId": "digitalocean-nginxconfig-io",
+    "repository": "https://github.com/digitalocean/nginxconfig.io.git",
+    "commit": "dd290c0b706b8a8c2f86cfbffaae9c17715b431d",
+    "manifestCopy": {
+      "path": "manifests/digitalocean-nginxconfig-io-4f97aa6baafe.json",
+      "sha256": "914f3753c8af129848bc05c8ab33f8365be0b04f317b6d51c692acdbdd39717e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "914f3753c8af129848bc05c8ab33f8365be0b04f317b6d51c692acdbdd39717e",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

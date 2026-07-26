@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ac7cbb76869c4b8f",
+    "subjectId": "xyflow-xyflow",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "xyflow-xyflow",
+    "phase": null,
+    "repository": "https://github.com/xyflow/xyflow.git",
+    "commit": "dd308ab401d49518f73d1e91c43faf254ff5a4c9"
+  },
+  "manifestCopy": {
+    "path": "manifests/xyflow-xyflow-dd8877977705.json",
+    "sha256": "bf4855b8e3058d4b3bdd694caa2f35606b92a3e0ec5f90e7efada7d4b6362a2f"
+  },
+  "attestationTemplate": {
+    "subjectId": "xyflow-xyflow",
+    "repository": "https://github.com/xyflow/xyflow.git",
+    "commit": "dd308ab401d49518f73d1e91c43faf254ff5a4c9",
+    "manifestCopy": {
+      "path": "manifests/xyflow-xyflow-dd8877977705.json",
+      "sha256": "bf4855b8e3058d4b3bdd694caa2f35606b92a3e0ec5f90e7efada7d4b6362a2f"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "bf4855b8e3058d4b3bdd694caa2f35606b92a3e0ec5f90e7efada7d4b6362a2f",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6a60471c3ff4f868",
+    "subjectId": "usesend-usesend",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "usesend-usesend",
+    "phase": null,
+    "repository": "https://github.com/usesend/useSend.git",
+    "commit": "bd83535599b53fbf0f5cc84bcdbcf63c8d35be99"
+  },
+  "manifestCopy": {
+    "path": "manifests/usesend-usesend-ac0778344bfc.json",
+    "sha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d"
+  },
+  "attestationTemplate": {
+    "subjectId": "usesend-usesend",
+    "repository": "https://github.com/usesend/useSend.git",
+    "commit": "bd83535599b53fbf0f5cc84bcdbcf63c8d35be99",
+    "manifestCopy": {
+      "path": "manifests/usesend-usesend-ac0778344bfc.json",
+      "sha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

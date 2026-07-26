@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-124b024826c40afd",
+    "subjectId": "lecoupa-awesome-cheatsheets",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lecoupa-awesome-cheatsheets",
+    "phase": null,
+    "repository": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+    "commit": "38f406dc19f556d4633e36d3ae144895fcab138f"
+  },
+  "manifestCopy": {
+    "path": "manifests/lecoupa-awesome-cheatsheets-331c0af269f9.json",
+    "sha256": "1efe84e8c59323e4ea661ec8b3762d4b374845e47f851dd6e1e776ebb506e1c8"
+  },
+  "attestationTemplate": {
+    "subjectId": "lecoupa-awesome-cheatsheets",
+    "repository": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+    "commit": "38f406dc19f556d4633e36d3ae144895fcab138f",
+    "manifestCopy": {
+      "path": "manifests/lecoupa-awesome-cheatsheets-331c0af269f9.json",
+      "sha256": "1efe84e8c59323e4ea661ec8b3762d4b374845e47f851dd6e1e776ebb506e1c8"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "1efe84e8c59323e4ea661ec8b3762d4b374845e47f851dd6e1e776ebb506e1c8",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

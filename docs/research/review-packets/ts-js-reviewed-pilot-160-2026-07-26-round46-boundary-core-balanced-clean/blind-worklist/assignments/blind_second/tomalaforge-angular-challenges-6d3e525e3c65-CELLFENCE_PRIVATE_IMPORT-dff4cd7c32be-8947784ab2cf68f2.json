@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-8947784ab2cf68f2",
+    "evidencePackageId": "evidence-a56a3c7131704f6e",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/tomalaforge-angular-challenges-6d3e525e3c65.json",
+        "sha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771"
+      },
+      "auditLog": {
+        "path": "logs/tomalaforge-angular-challenges-6d3e525e3c65/check.audit.jsonl",
+        "sha256": "785ba2b70bd3e50247df8617cf8a69aa6f3a216f3f267f692571b7bf5f886c2b"
+      },
+      "evidenceGraph": {
+        "path": "logs/tomalaforge-angular-challenges-6d3e525e3c65/evidence-graph.json",
+        "sha256": "aac35a6c98e872f55dd5186302313fb2d88ea09b821f09358becacd7a20768eb"
+      },
+      "checkStdout": {
+        "path": "logs/tomalaforge-angular-challenges-6d3e525e3c65/check.stdout.log",
+        "sha256": "922b5aebd709ec28917108bd5471a1c536a54a2906c7bfccf7ad9b8293b5de67"
+      },
+      "checkStderr": {
+        "path": "logs/tomalaforge-angular-challenges-6d3e525e3c65/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:a56a3c7131704f6e9c53fb2d5ba3931e50acfceecfb5bb585cf70515b41c6087",
+    "subjectId": "tomalaforge-angular-challenges",
+    "repository": "https://github.com/tomalaforge/angular-challenges.git",
+    "commit": "543770b2fdf871b57cecfaffc8e4f0dd0da29549",
+    "gitTree": "c736350f4c012f5c1a9ef80f9eb598d1623604b8",
+    "manifestSha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/rxjs/11-high-order-operator-bug/src/app/localDB.service.ts",
+    "line": 2,
+    "message": "rxjs imports private implementation from shared",
+    "cellId": "rxjs",
+    "producerCellId": "shared",
+    "cellfenceFingerprint": "bccd6d0f82c932ba265655fd61772047c8cce94fe2240a6102ea3a4861764b12",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:a56a3c7131704f6e9c53fb2d5ba3931e50acfceecfb5bb585cf70515b41c6087",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-8947784ab2cf68f2",
+    "evidencePackageId": "evidence-a56a3c7131704f6e",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

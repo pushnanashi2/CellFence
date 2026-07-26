@@ -1,0 +1,259 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/babel-preset-solid/**",
+      "packages/solid-element/src/**",
+      "packages/solid-ssr/**",
+      "packages/solid/src/**",
+      "packages/test-integration/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "babel-preset-solid",
+      "ownedPaths": [
+        "packages/babel-preset-solid/**"
+      ],
+      "publicEntry": "packages/babel-preset-solid/index.js",
+      "publicSymbols": [],
+      "packageName": "babel-preset-solid",
+      "consumes": [
+        {
+          "cell": "solid-js"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-element",
+      "ownedPaths": [
+        "packages/solid-element/src/**"
+      ],
+      "publicEntry": "packages/solid-element/src/index.ts",
+      "publicSymbols": [
+        "ComponentType",
+        "customElement",
+        "getCurrentElement",
+        "hot",
+        "noShadowDOM",
+        "withSolid"
+      ],
+      "packageName": "solid-element",
+      "consumes": [
+        {
+          "cell": "solid-js"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-js",
+      "ownedPaths": [
+        "packages/solid/src/**"
+      ],
+      "publicEntry": "packages/solid/src/index.ts",
+      "publicSymbols": [
+        "$DEVCOMP",
+        "$PROXY",
+        "$TRACK",
+        "Accessor",
+        "AccessorArray",
+        "batch",
+        "cancelCallback",
+        "catchError",
+        "children",
+        "ChildrenReturn",
+        "Component",
+        "ComponentProps",
+        "Context",
+        "ContextProviderComponent",
+        "createComponent",
+        "createComputed",
+        "createContext",
+        "createDeferred",
+        "createEffect",
+        "createMemo",
+        "createReaction",
+        "createRenderEffect",
+        "createResource",
+        "createRoot",
+        "createSelector",
+        "createSignal",
+        "createUniqueId",
+        "DEV",
+        "EffectFunction",
+        "EffectOptions",
+        "enableExternalSource",
+        "enableHydration",
+        "enableScheduling",
+        "equalFn",
+        "ErrorBoundary",
+        "FlowComponent",
+        "FlowProps",
+        "For",
+        "from",
+        "getListener",
+        "getOwner",
+        "Index",
+        "indexArray",
+        "InitializedResource",
+        "InitializedResourceOptions",
+        "InitializedResourceReturn",
+        "JSX",
+        "JSXElement",
+        "lazy",
+        "mapArray",
+        "Match",
+        "MatchProps",
+        "MemoOptions",
+        "mergeProps",
+        "MergeProps",
+        "NoInfer",
+        "observable",
+        "ObservableObserver",
+        "on",
+        "onCleanup",
+        "OnEffectFunction",
+        "onError",
+        "onMount",
+        "OnOptions",
+        "Owner",
+        "ParentComponent",
+        "ParentProps",
+        "PropsWithChildren",
+        "Ref",
+        "requestCallback",
+        "resetErrorBoundaries",
+        "ResolvedChildren",
+        "ResolvedJSXElement",
+        "Resource",
+        "ResourceActions",
+        "ResourceFetcher",
+        "ResourceFetcherInfo",
+        "ResourceOptions",
+        "ResourceReturn",
+        "ResourceSource",
+        "ReturnTypes",
+        "runWithOwner",
+        "Setter",
+        "sharedConfig",
+        "Show",
+        "Signal",
+        "SignalOptions",
+        "splitProps",
+        "SplitProps",
+        "startTransition",
+        "Suspense",
+        "SuspenseList",
+        "Switch",
+        "Task",
+        "Transition",
+        "untrack",
+        "useContext",
+        "useTransition",
+        "ValidComponent",
+        "VoidComponent",
+        "VoidProps"
+      ],
+      "packageName": "solid-js",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-ssr",
+      "ownedPaths": [
+        "packages/solid-ssr/**"
+      ],
+      "publicEntry": "packages/solid-ssr/static/index.cjs",
+      "publicSymbols": [],
+      "packageName": "solid-ssr",
+      "consumes": [
+        {
+          "cell": "babel-preset-solid"
+        },
+        {
+          "cell": "solid-js"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-integration",
+      "ownedPaths": [
+        "packages/test-integration/**"
+      ],
+      "publicEntry": "packages/test-integration/babel.config.cjs",
+      "publicSymbols": [],
+      "packageName": "test-integration",
+      "consumes": [
+        {
+          "cell": "babel-preset-solid"
+        },
+        {
+          "cell": "solid-js"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

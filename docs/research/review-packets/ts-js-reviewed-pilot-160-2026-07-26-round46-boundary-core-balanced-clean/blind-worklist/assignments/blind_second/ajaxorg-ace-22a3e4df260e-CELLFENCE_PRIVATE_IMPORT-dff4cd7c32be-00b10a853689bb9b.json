@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-00b10a853689bb9b",
+    "evidencePackageId": "evidence-fc1ee6bdfdbc2408",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/ajaxorg-ace-22a3e4df260e.json",
+        "sha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025"
+      },
+      "auditLog": {
+        "path": "logs/ajaxorg-ace-22a3e4df260e/check.audit.jsonl",
+        "sha256": "202860a78c0c3f80e3b16d3bcc6ef43502413cffb31f7088feea3e352219760a"
+      },
+      "evidenceGraph": {
+        "path": "logs/ajaxorg-ace-22a3e4df260e/evidence-graph.json",
+        "sha256": "2d75e2fafff30d71b2daa2eee8e966f8e4a53a131dfd0981c7380aed6cae4958"
+      },
+      "checkStdout": {
+        "path": "logs/ajaxorg-ace-22a3e4df260e/check.stdout.log",
+        "sha256": "fbe76f36df4e2ee7943321707f48d285d99125dcd7b7c3732c650ce2788d32cb"
+      },
+      "checkStderr": {
+        "path": "logs/ajaxorg-ace-22a3e4df260e/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:fc1ee6bdfdbc24084db984700d78fca7a2e3dd9ca81796d75a69bfa400cfb17d",
+    "subjectId": "ajaxorg-ace",
+    "repository": "https://github.com/ajaxorg/ace.git",
+    "commit": "de5ca297d4383b2bda12a307ee764336ccf985f8",
+    "gitTree": "5d6704cfd4bc586746f7661ee8845f251faee02a",
+    "manifestSha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/keyboard/gutter_handler_test.js",
+    "line": 11,
+    "message": "keyboard imports private implementation from mode",
+    "cellId": "keyboard",
+    "producerCellId": "mode",
+    "cellfenceFingerprint": "9c1247c8a2f0f409045a685b35cb5694fd501c1e31e3dfd9a4fba0912676f3fe",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:fc1ee6bdfdbc24084db984700d78fca7a2e3dd9ca81796d75a69bfa400cfb17d",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-00b10a853689bb9b",
+    "evidencePackageId": "evidence-fc1ee6bdfdbc2408",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

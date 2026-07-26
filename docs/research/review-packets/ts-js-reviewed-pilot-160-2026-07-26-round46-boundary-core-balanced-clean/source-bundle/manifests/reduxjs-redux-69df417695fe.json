@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**",
+      "website/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "__DO_NOT_USE__ActionTypes",
+        "Action",
+        "ActionCreator",
+        "ActionCreatorsMapObject",
+        "ActionFromReducer",
+        "ActionFromReducersMapObject",
+        "AnyAction",
+        "applyMiddleware",
+        "bindActionCreators",
+        "combineReducers",
+        "compose",
+        "createStore",
+        "Dispatch",
+        "isAction",
+        "isPlainObject",
+        "legacy_createStore",
+        "Middleware",
+        "MiddlewareAPI",
+        "Observable",
+        "Observer",
+        "PreloadedStateShapeFromReducersMapObject",
+        "Reducer",
+        "ReducerFromReducersMapObject",
+        "ReducersMapObject",
+        "StateFromReducersMapObject",
+        "Store",
+        "StoreCreator",
+        "StoreEnhancer",
+        "StoreEnhancerStoreCreator",
+        "UnknownAction",
+        "Unsubscribe"
+      ],
+      "consumes": [
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/actions.ts",
+      "publicSymbols": [
+        "Action",
+        "ActionCreator",
+        "ActionCreatorsMapObject",
+        "AnyAction",
+        "UnknownAction"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/actionTypes.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "website/**"
+      ],
+      "publicEntry": "website/docusaurus.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

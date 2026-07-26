@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-ce62dfda91320fbd",
+    "evidencePackageId": "evidence-47410087689f633c",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/celo-org-celo-composer-405b94e7541e.json",
+        "sha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4"
+      },
+      "auditLog": {
+        "path": "logs/celo-org-celo-composer-405b94e7541e/check.audit.jsonl",
+        "sha256": "514ada077ad01f01c59374f96b4cfbfbcb6a8ad1565ad728b74d96739273e07c"
+      },
+      "evidenceGraph": {
+        "path": "logs/celo-org-celo-composer-405b94e7541e/evidence-graph.json",
+        "sha256": "2906e3872dd00fb2723ff79d00f3e219196a601bcb473c42bd40c3209560c283"
+      },
+      "checkStdout": {
+        "path": "logs/celo-org-celo-composer-405b94e7541e/check.stdout.log",
+        "sha256": "c0714a2ea41a37b5949e5f27e73922dfea5ba4294b368655556f40c855667058"
+      },
+      "checkStderr": {
+        "path": "logs/celo-org-celo-composer-405b94e7541e/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:47410087689f633cdc44f164a1649d6ea0c12fd83f36d5a5495b1cb52cd7eb05",
+    "subjectId": "celo-org-celo-composer",
+    "repository": "https://github.com/celo-org/celo-composer.git",
+    "commit": "710dd89afc408e5b9385c9fdae83cd2e6246e893",
+    "gitTree": "84b33c3f13c3a9b1a5f5e8824d0d62aedaf45333",
+    "manifestSha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/generators/plop-generator.ts",
+    "line": 4,
+    "message": "generators imports private implementation from utils",
+    "cellId": "generators",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "8d641420bc8c7c81cae220a0ec8b06074ce398d49aeb6b850e55abb66a8051c1",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:47410087689f633cdc44f164a1649d6ea0c12fd83f36d5a5495b1cb52cd7eb05",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-ce62dfda91320fbd",
+    "evidencePackageId": "evidence-47410087689f633c",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

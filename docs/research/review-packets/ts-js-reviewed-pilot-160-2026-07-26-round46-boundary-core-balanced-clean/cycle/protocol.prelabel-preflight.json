@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "claim": {
+    "toolCommit": "94e07d7fe24bb18f33b9dad2832bf967af07e50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536",
+    "targetPopulation": "reviewed TS/JS workspace repositories, boundary-core rules only",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "scopeProfile": "ts-js-boundary-core-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": [
+      "error"
+    ],
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "worklistArtifactSetSha256s": [
+      "5dc6ea44f0f5eacc6e86d56219f4efcc27befbdca040d43f4cd32853b2b5f002"
+    ]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "deterministic sampled precision-eligible set from a sealed reviewed corpus bundle; pre-label preflight uses the unlabeled bundle and must be regenerated after returned labels",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": [
+      "human",
+      "organization"
+    ],
+    "allowNonHumanRaters": false,
+    "requireExternalIndependentRaters": true,
+    "externalRaterTypes": [
+      "human",
+      "organization"
+    ],
+    "minimumExternalIndependentRaters": 1,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": true,
+    "allowedReviewerTypes": [
+      "human",
+      "organization"
+    ]
+  },
+  "exclusionRules": []
+}

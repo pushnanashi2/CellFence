@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6b9eeefd53cb02fc",
+    "subjectId": "colbymchenry-codegraph",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "colbymchenry-codegraph",
+    "phase": null,
+    "repository": "https://github.com/colbymchenry/codegraph.git",
+    "commit": "5955d04c97de3311476b0ca9d8d84cfff4fcb0d3"
+  },
+  "manifestCopy": {
+    "path": "manifests/colbymchenry-codegraph-84ad40943566.json",
+    "sha256": "668cec23da165400dd559aca4c314e10998a6ce81e56bc45cd023a567012ba6f"
+  },
+  "attestationTemplate": {
+    "subjectId": "colbymchenry-codegraph",
+    "repository": "https://github.com/colbymchenry/codegraph.git",
+    "commit": "5955d04c97de3311476b0ca9d8d84cfff4fcb0d3",
+    "manifestCopy": {
+      "path": "manifests/colbymchenry-codegraph-84ad40943566.json",
+      "sha256": "668cec23da165400dd559aca4c314e10998a6ce81e56bc45cd023a567012ba6f"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "668cec23da165400dd559aca4c314e10998a6ce81e56bc45cd023a567012ba6f",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

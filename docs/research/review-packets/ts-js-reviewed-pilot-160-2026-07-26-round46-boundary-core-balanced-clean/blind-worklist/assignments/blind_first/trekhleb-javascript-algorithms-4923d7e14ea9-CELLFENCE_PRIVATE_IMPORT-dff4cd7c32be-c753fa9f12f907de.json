@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-c753fa9f12f907de",
+    "evidencePackageId": "evidence-b9d2e22a46276b57",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/trekhleb-javascript-algorithms-4923d7e14ea9.json",
+        "sha256": "045ada81e7c9e5b090450500949469af4fb4f606303a3f85800964f39ec7dab5"
+      },
+      "auditLog": {
+        "path": "logs/trekhleb-javascript-algorithms-4923d7e14ea9/check.audit.jsonl",
+        "sha256": "c881c9da74829b8d39851f74422bf59215013f4901f5e5958b6cba4c923385c1"
+      },
+      "evidenceGraph": {
+        "path": "logs/trekhleb-javascript-algorithms-4923d7e14ea9/evidence-graph.json",
+        "sha256": "0f8e8a787c5781efe24b490cc49ce74f831046f0744be5c9ba643129dde022bd"
+      },
+      "checkStdout": {
+        "path": "logs/trekhleb-javascript-algorithms-4923d7e14ea9/check.stdout.log",
+        "sha256": "33760e8164b4e7724f461c788e217fa99e2ca9c9d40bb9216bd6dfdce7cfeb72"
+      },
+      "checkStderr": {
+        "path": "logs/trekhleb-javascript-algorithms-4923d7e14ea9/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:b9d2e22a46276b579745ed7d7ac188f885c3e52ac841d3c4cb848cce7a7cfd27",
+    "subjectId": "trekhleb-javascript-algorithms",
+    "repository": "https://github.com/trekhleb/javascript-algorithms.git",
+    "commit": "0f52fbaced5d33041a5a834f72f880a9262bcb82",
+    "gitTree": "c937913668f26b6711e90a4b16b51c561d95ecb8",
+    "manifestSha256": "045ada81e7c9e5b090450500949469af4fb4f606303a3f85800964f39ec7dab5",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/algorithms/stack/valid-parentheses/validParentheses.js",
+    "line": 1,
+    "message": "algorithms imports private implementation from data-structures",
+    "cellId": "algorithms",
+    "producerCellId": "data-structures",
+    "cellfenceFingerprint": "238262066830a20c75d106610c8cbf16633c1ece0a0c48476e326d75fe24fc6f",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:b9d2e22a46276b579745ed7d7ac188f885c3e52ac841d3c4cb848cce7a7cfd27",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-c753fa9f12f907de",
+    "evidencePackageId": "evidence-b9d2e22a46276b57",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

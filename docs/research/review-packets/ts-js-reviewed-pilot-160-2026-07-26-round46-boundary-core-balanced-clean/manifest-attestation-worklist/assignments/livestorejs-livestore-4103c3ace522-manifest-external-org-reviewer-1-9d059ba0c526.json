@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ebef2554926faed6",
+    "subjectId": "livestorejs-livestore",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "livestorejs-livestore",
+    "phase": null,
+    "repository": "https://github.com/livestorejs/livestore.git",
+    "commit": "064bb8dd74c4f22bfcca47256f01b6c32ca27763"
+  },
+  "manifestCopy": {
+    "path": "manifests/livestorejs-livestore-4103c3ace522.json",
+    "sha256": "18c18df6371c68c232ec34362464285faf30150c74c65e8735db0524a10ab10f"
+  },
+  "attestationTemplate": {
+    "subjectId": "livestorejs-livestore",
+    "repository": "https://github.com/livestorejs/livestore.git",
+    "commit": "064bb8dd74c4f22bfcca47256f01b6c32ca27763",
+    "manifestCopy": {
+      "path": "manifests/livestorejs-livestore-4103c3ace522.json",
+      "sha256": "18c18df6371c68c232ec34362464285faf30150c74c65e8735db0524a10ab10f"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "18c18df6371c68c232ec34362464285faf30150c74c65e8735db0524a10ab10f",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

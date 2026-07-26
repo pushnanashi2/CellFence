@@ -1,0 +1,461 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/marketing/src/**",
+      "apps/web/src/**",
+      "packages/api/src/**",
+      "packages/auth/src/**",
+      "packages/config/eslint/**",
+      "packages/config/eslint/src/**",
+      "packages/config/storybook/**",
+      "packages/config/storybook/src/**",
+      "packages/config/tailwind/**",
+      "packages/config/tailwind/src/**",
+      "packages/config/vite/**",
+      "packages/config/vite/src/**",
+      "packages/core/src/**",
+      "packages/db/src/**",
+      "packages/env/src/**",
+      "packages/ui/src/**",
+      "packages/utils/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "api",
+      "ownedPaths": [
+        "packages/api/src/**"
+      ],
+      "publicEntry": "packages/api/src/index.ts",
+      "publicSymbols": [
+        "appRouter",
+        "AppRouter",
+        "createCaller",
+        "createTRPCContext"
+      ],
+      "packageName": "@orbitkit/api",
+      "consumes": [
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth",
+      "ownedPaths": [
+        "packages/auth/src/**"
+      ],
+      "publicEntry": "packages/auth/src/index.ts",
+      "publicSymbols": [
+        "auth",
+        "lucia",
+        "uncachedAuth"
+      ],
+      "packageName": "@orbitkit/auth",
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "config",
+      "ownedPaths": [
+        "packages/config/eslint/**",
+        "packages/config/storybook/**",
+        "packages/config/tailwind/**",
+        "packages/config/vite/**"
+      ],
+      "publicEntry": "packages/config/eslint/eslint.config.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@orbitkit/core",
+      "consumes": [
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "db",
+      "ownedPaths": [
+        "packages/db/src/**"
+      ],
+      "publicEntry": "packages/db/src/index.ts",
+      "publicSymbols": [
+        "db"
+      ],
+      "packageName": "@orbitkit/db",
+      "consumes": [
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "env",
+      "ownedPaths": [
+        "packages/env/src/**"
+      ],
+      "publicEntry": "packages/env/src/marketing/index.ts",
+      "publicSymbols": [
+        "env"
+      ],
+      "packageName": "@orbitkit/env",
+      "consumes": [
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint",
+      "ownedPaths": [
+        "packages/config/eslint/src/**"
+      ],
+      "publicEntry": "packages/config/eslint/src/index.js",
+      "publicSymbols": [
+        "configs",
+        "defineConfig"
+      ],
+      "packageName": "@orbitkit/eslint",
+      "consumes": [
+        {
+          "cell": "config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "marketing",
+      "ownedPaths": [
+        "apps/marketing/src/**"
+      ],
+      "publicEntry": "apps/marketing/src/components/avatar.tsx",
+      "publicSymbols": [
+        "MyAvatar"
+      ],
+      "packageName": "@orbitkit/marketing",
+      "consumes": [
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "tailwind"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storybook",
+      "ownedPaths": [
+        "packages/config/storybook/src/**"
+      ],
+      "publicEntry": "packages/config/storybook/src/configs/react-vite.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@orbitkit/storybook",
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tailwind",
+      "ownedPaths": [
+        "packages/config/tailwind/src/**"
+      ],
+      "publicEntry": "packages/config/tailwind/src/preset.ts",
+      "publicSymbols": [
+        "orbitKitTailwindPreset"
+      ],
+      "packageName": "@orbitkit/tailwind",
+      "consumes": [
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/src/**"
+      ],
+      "publicEntry": "packages/ui/src/primitives/accordion/index.tsx",
+      "publicSymbols": [
+        "Accordion",
+        "AccordionContent",
+        "AccordionItem",
+        "AccordionTrigger"
+      ],
+      "packageName": "@orbitkit/ui",
+      "consumes": [
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "storybook"
+        },
+        {
+          "cell": "tailwind"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/utils/src/**"
+      ],
+      "publicEntry": "packages/utils/src/filesystem.ts",
+      "publicSymbols": [
+        "getAbsolutePath"
+      ],
+      "packageName": "@orbitkit/utils",
+      "consumes": [
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite",
+      "ownedPaths": [
+        "packages/config/vite/src/**"
+      ],
+      "publicEntry": "packages/config/vite/src/index.ts",
+      "publicSymbols": [
+        "buildConfig",
+        "mergeConfig",
+        "reactConfig"
+      ],
+      "packageName": "@orbitkit/vite",
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "eslint"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "apps/web/src/**"
+      ],
+      "publicEntry": "apps/web/src/app/(auth)/login/github/callback/route.ts",
+      "publicSymbols": [
+        "GET"
+      ],
+      "packageName": "@orbitkit/web",
+      "consumes": [
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "eslint"
+        },
+        {
+          "cell": "tailwind"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,824 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/app-server/src/**",
+      "apps/client/src/**",
+      "apps/collab-server/src/**",
+      "apps/manager/src/**",
+      "apps/realtime-server/src/**",
+      "apps/scheduler/src/**",
+      "packages/@deeplib/data/src/**",
+      "packages/@deeplib/db/src/**",
+      "packages/@deeplib/mail/src/**",
+      "packages/@deeplib/misc/src/**",
+      "packages/@stdlib/base64/src/**",
+      "packages/@stdlib/color/src/**",
+      "packages/@stdlib/crypto/src/**",
+      "packages/@stdlib/data/src/**",
+      "packages/@stdlib/db/src/**",
+      "packages/@stdlib/misc/src/**",
+      "packages/@stdlib/nestjs/src/**",
+      "packages/@stdlib/redlock/src/**",
+      "packages/@stdlib/testing/src/**",
+      "packages/@stdlib/vue/src/**",
+      "packages/eslint-config-base/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app-server",
+      "ownedPaths": [
+        "apps/app-server/src/**"
+      ],
+      "publicEntry": "apps/app-server/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/app-server",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "crypto"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "db-2"
+        },
+        {
+          "cell": "mail"
+        },
+        {
+          "cell": "misc"
+        },
+        {
+          "cell": "misc-2"
+        },
+        {
+          "cell": "redlock"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "base64",
+      "ownedPaths": [
+        "packages/@stdlib/base64/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/base64/src/index.ts",
+      "publicSymbols": [
+        "base64ToBytes",
+        "base64ToBytesSafe",
+        "base64ToText",
+        "bytesToBase64",
+        "bytesToBase64Safe",
+        "isBase64",
+        "textToBase64"
+      ],
+      "packageName": "@stdlib/base64",
+      "consumes": [
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "client",
+      "ownedPaths": [
+        "apps/client/src/**"
+      ],
+      "publicEntry": "apps/client/src/boot/array-at-polyfill.client.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/client",
+      "consumes": [
+        {
+          "cell": "app-server"
+        },
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "color"
+        },
+        {
+          "cell": "crypto"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "misc"
+        },
+        {
+          "cell": "misc-2"
+        },
+        {
+          "cell": "vue"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "collab-server",
+      "ownedPaths": [
+        "apps/collab-server/src/**"
+      ],
+      "publicEntry": "apps/collab-server/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/collab-server",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "db-2"
+        },
+        {
+          "cell": "misc"
+        },
+        {
+          "cell": "misc-2"
+        },
+        {
+          "cell": "redlock"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "color",
+      "ownedPaths": [
+        "packages/@stdlib/color/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/color/src/index.ts",
+      "publicSymbols": [
+        "darkenByAmount",
+        "darkenByRatio",
+        "lightenByAmount",
+        "lightenByRatio"
+      ],
+      "packageName": "@stdlib/color",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "crypto",
+      "ownedPaths": [
+        "packages/@stdlib/crypto/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/crypto/src/index.ts",
+      "publicSymbols": [
+        "createKeyring",
+        "createPrivateKeyring",
+        "createSymmetricKeyring",
+        "cryptoJsWordArrayToUint8Array",
+        "DataLayer",
+        "decodeKeys",
+        "encodeKeys",
+        "encodePasswordHash",
+        "getPasswordHashValues",
+        "IKeyring",
+        "KeyMetadata",
+        "KeyPair",
+        "Keyring",
+        "PrivateKey",
+        "PrivateKeyring",
+        "PublicKey",
+        "SymmetricKey",
+        "SymmetricKeyring",
+        "wrapKeyPair",
+        "Wrappable",
+        "WrappedData",
+        "wrapPrivateKey",
+        "wrapPublicKey",
+        "wrapSymmetricKey"
+      ],
+      "packageName": "@stdlib/crypto",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data",
+      "ownedPaths": [
+        "packages/@deeplib/data/src/**"
+      ],
+      "publicEntry": "packages/@deeplib/data/src/index.ts",
+      "publicSymbols": [
+        "createRedisInstance",
+        "dataHashes",
+        "DataPrefix",
+        "decryptUserEmail",
+        "encryptUserEmail",
+        "getAllPageUpdates",
+        "hashUserEmail",
+        "hget",
+        "hset",
+        "insertPageSnapshot",
+        "userHasPermission"
+      ],
+      "packageName": "@deeplib/data",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "crypto"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "misc"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data-2",
+      "ownedPaths": [
+        "packages/@stdlib/data/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/data/src/index.ts",
+      "publicSymbols": [
+        "classLogger",
+        "DataAbstraction",
+        "DataAuthParams",
+        "DataField",
+        "DataHash",
+        "DataHashes",
+        "DataTransaction",
+        "DataUpdateListener",
+        "DataUpdateParams",
+        "DEFAULT_LOCAL_TTL",
+        "DEFAULT_REMOTE_TTL",
+        "getSelfPublisherID",
+        "getSelfPublisherIdBytes",
+        "HMGetParams",
+        "HMSetParams",
+        "SimpleLRUCache",
+        "validateDataHash",
+        "validateDataHashes"
+      ],
+      "packageName": "@stdlib/data",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "db",
+      "ownedPaths": [
+        "packages/@deeplib/db/src/**"
+      ],
+      "publicEntry": "packages/@deeplib/db/src/index.ts",
+      "publicSymbols": [
+        "DeviceModel",
+        "GroupJoinInvitationModel",
+        "GroupJoinRequestModel",
+        "GroupMemberModel",
+        "GroupModel",
+        "NotificationModel",
+        "PageLinkModel",
+        "PageModel",
+        "PageSnapshotModel",
+        "PageUpdateModel",
+        "SessionModel",
+        "UserModel",
+        "UserNotificationModel",
+        "UserPageModel"
+      ],
+      "packageName": "@deeplib/db",
+      "consumes": [
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "misc"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "db-2",
+      "ownedPaths": [
+        "packages/@stdlib/db/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/db/src/index.ts",
+      "publicSymbols": [
+        "patchMultiple"
+      ],
+      "packageName": "@stdlib/db",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config-base",
+      "ownedPaths": [
+        "packages/eslint-config-base/**"
+      ],
+      "publicEntry": "packages/eslint-config-base/index.js",
+      "publicSymbols": [],
+      "packageName": "eslint-config-base",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mail",
+      "ownedPaths": [
+        "packages/@deeplib/mail/src/**"
+      ],
+      "publicEntry": "packages/@deeplib/mail/src/index.ts",
+      "publicSymbols": [
+        "MailOptions",
+        "MailSendFunc",
+        "sendBrevoMail",
+        "sendMail",
+        "sendMailjetMail",
+        "sendSendGridMail"
+      ],
+      "packageName": "@deeplib/mail",
+      "consumes": [
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "manager",
+      "ownedPaths": [
+        "apps/manager/src/**"
+      ],
+      "publicEntry": "apps/manager/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/manager",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "mail"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "misc",
+      "ownedPaths": [
+        "packages/@deeplib/misc/src/**"
+      ],
+      "publicEntry": "packages/@deeplib/misc/src/index.ts",
+      "publicSymbols": [
+        "ACCESS_TOKEN_DURATION",
+        "AccessTokenPayload",
+        "canChangeRole",
+        "canManageRole",
+        "CollabClientDocMessageType",
+        "CollabMessageType",
+        "CollabServerDocMessageType",
+        "DeepNotesNotification",
+        "DeepNotesNotificationType",
+        "getRefreshTokenExpiration",
+        "GroupRoleID",
+        "GroupRolePermission",
+        "IGroupRole",
+        "maxGroupNameLength",
+        "maxNameLength",
+        "maxPageTitleLength",
+        "notificationTypes",
+        "PageSnapshotInfo",
+        "PageSnapshotType",
+        "Plan",
+        "RealtimeClientMessageType",
+        "RealtimeCommandType",
+        "RealtimeServerMessageType",
+        "REFRESH_TOKEN_LONG_DURATION",
+        "REFRESH_TOKEN_SHORT_DURATION",
+        "RefreshTokenPayload",
+        "roles",
+        "rolesMap"
+      ],
+      "packageName": "@deeplib/misc",
+      "consumes": [
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "misc-2",
+      "ownedPaths": [
+        "packages/@stdlib/misc/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/misc/src/index.ts",
+      "publicSymbols": [
+        "addDays",
+        "addHours",
+        "addMinutes",
+        "addMonths",
+        "addSeconds",
+        "addYears",
+        "allAsyncProps",
+        "AllAwaited",
+        "allResultsMerged",
+        "allSettledResults",
+        "BREAKPOINT_LG_MAX",
+        "BREAKPOINT_LG_MIN",
+        "BREAKPOINT_MD_MAX",
+        "BREAKPOINT_MD_MIN",
+        "BREAKPOINT_SM_MAX",
+        "BREAKPOINT_SM_MIN",
+        "BREAKPOINT_XL_MIN",
+        "BREAKPOINT_XS_MAX",
+        "bytesToText",
+        "bytesToUUID",
+        "ClassType",
+        "ClientSocket",
+        "coalesce",
+        "concatUint8Arrays",
+        "Constructor",
+        "ConstructorFunc",
+        "equalUint8Arrays",
+        "ExcludeFromTuple",
+        "FirstElem",
+        "getClientRectAsync",
+        "getClientRectsAsync",
+        "getClipboardText",
+        "getClosestPathPointLength",
+        "getClosestPathPointPercent",
+        "getFullKey",
+        "getLineRectIntersection",
+        "hashFNV1a",
+        "hasHorizScrollbar",
+        "hasScrollbar",
+        "hasVertScrollbar",
+        "iif",
+        "iifunc",
+        "IRect",
+        "isDetachedDOM",
+        "isIncluded",
+        "isMouseOverScrollbar",
+        "isNanoID",
+        "isNumeric",
+        "isPrimitive",
+        "isPromiseLike",
+        "isTouchOverScrollbar",
+        "isUuid4",
+        "IVec2",
+        "KeyType",
+        "lerp",
+        "Line",
+        "listenPointerEvents",
+        "mainLogger",
+        "makeLazyPromise",
+        "map",
+        "MarkName",
+        "maxEmailLength",
+        "maxUrlLength",
+        "merge",
+        "Merge",
+        "minmax",
+        "namedPromises",
+        "nanoidLength",
+        "nanoidToBytes",
+        "negateProp",
+        "NodeColors",
+        "NodeName",
+        "NonFirstElem",
+        "objectifyPromiseResults",
+        "objectifyPromises",
+        "objEntries",
+        "objFromEntries",
+        "objKeys",
+        "objValues",
+        "observeResize",
+        "once",
+        "padZeroes",
+        "pluralS",
+        "posMod",
+        "promiseProp",
+        "promiseProps",
+        "rangeCount",
+        "rangeStop",
+        "Rect",
+        "relativeTimeStr",
+        "Replace",
+        "ResizeListener",
+        "Resolvable",
+        "setClipboardText",
+        "SettledAwaited",
+        "sleep",
+        "splitStr",
+        "textToBytes",
+        "tuple",
+        "TupleToIntersection",
+        "TupleToUnion",
+        "UnionToIntersection",
+        "unobserveResize",
+        "uuidToBytes",
+        "Vec2",
+        "w3cEmailRegex"
+      ],
+      "packageName": "@stdlib/misc",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nestjs",
+      "ownedPaths": [
+        "packages/@stdlib/nestjs/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/nestjs/src/index.ts",
+      "publicSymbols": [
+        "getModuleInfo",
+        "getTestController",
+        "getTestModuleBuilder",
+        "Module",
+        "ModulePlusMetadata",
+        "UseModuleGuard"
+      ],
+      "packageName": "@stdlib/nestjs",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "realtime-server",
+      "ownedPaths": [
+        "apps/realtime-server/src/**"
+      ],
+      "publicEntry": "apps/realtime-server/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/realtime-server",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "collab-server"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "misc"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "redlock",
+      "ownedPaths": [
+        "packages/@stdlib/redlock/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/redlock/src/index.ts",
+      "publicSymbols": [
+        "checkRedlockSignalAborted",
+        "usingLocks"
+      ],
+      "packageName": "@stdlib/redlock",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scheduler",
+      "ownedPaths": [
+        "apps/scheduler/src/**"
+      ],
+      "publicEntry": "apps/scheduler/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@deepnotes/scheduler",
+      "consumes": [
+        {
+          "cell": "base64"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "data-2"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "testing",
+      "ownedPaths": [
+        "packages/@stdlib/testing/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/testing/src/index.ts",
+      "publicSymbols": [
+        "createInlineMock",
+        "createSmartMock"
+      ],
+      "packageName": "@stdlib/testing",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue",
+      "ownedPaths": [
+        "packages/@stdlib/vue/src/**"
+      ],
+      "publicEntry": "packages/@stdlib/vue/src/index.ts",
+      "publicSymbols": [
+        "createComputedDict",
+        "createSmartComputed",
+        "createSmartComputedDict",
+        "RawObject",
+        "refProp",
+        "shallowRefProp",
+        "SmartComputed",
+        "watchUntilTrue"
+      ],
+      "packageName": "@stdlib/vue",
+      "consumes": [
+        {
+          "cell": "misc-2"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

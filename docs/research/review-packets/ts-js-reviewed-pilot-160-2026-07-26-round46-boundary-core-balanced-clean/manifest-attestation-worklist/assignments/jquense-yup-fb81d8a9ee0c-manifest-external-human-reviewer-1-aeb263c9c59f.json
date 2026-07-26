@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6694f85471b5079f",
+    "subjectId": "jquense-yup",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jquense-yup",
+    "phase": null,
+    "repository": "https://github.com/jquense/yup.git",
+    "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01"
+  },
+  "manifestCopy": {
+    "path": "manifests/jquense-yup-fb81d8a9ee0c.json",
+    "sha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc"
+  },
+  "attestationTemplate": {
+    "subjectId": "jquense-yup",
+    "repository": "https://github.com/jquense/yup.git",
+    "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01",
+    "manifestCopy": {
+      "path": "manifests/jquense-yup-fb81d8a9ee0c.json",
+      "sha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

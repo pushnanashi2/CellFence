@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-71c91b9393d8b606",
+    "subjectId": "rahuldkjain-github-profile-readme-generator",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "rahuldkjain-github-profile-readme-generator",
+    "phase": null,
+    "repository": "https://github.com/rahuldkjain/github-profile-readme-generator.git",
+    "commit": "5ae90bfcbd7ab2f69809b094601f7975c32ae077"
+  },
+  "manifestCopy": {
+    "path": "manifests/rahuldkjain-github-profile-readme-generator-d9bb86d1dded.json",
+    "sha256": "1f1226eb95b8aa705e02370434464546dad8a4dd34081060a3351494d603be14"
+  },
+  "attestationTemplate": {
+    "subjectId": "rahuldkjain-github-profile-readme-generator",
+    "repository": "https://github.com/rahuldkjain/github-profile-readme-generator.git",
+    "commit": "5ae90bfcbd7ab2f69809b094601f7975c32ae077",
+    "manifestCopy": {
+      "path": "manifests/rahuldkjain-github-profile-readme-generator-d9bb86d1dded.json",
+      "sha256": "1f1226eb95b8aa705e02370434464546dad8a4dd34081060a3351494d603be14"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "1f1226eb95b8aa705e02370434464546dad8a4dd34081060a3351494d603be14",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

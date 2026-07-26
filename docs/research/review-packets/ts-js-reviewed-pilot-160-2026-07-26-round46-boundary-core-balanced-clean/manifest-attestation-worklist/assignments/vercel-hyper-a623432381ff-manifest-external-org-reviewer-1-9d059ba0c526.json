@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ddfdc047f11c2f6c",
+    "subjectId": "vercel-hyper",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "vercel-hyper",
+    "phase": null,
+    "repository": "https://github.com/vercel/hyper.git",
+    "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287"
+  },
+  "manifestCopy": {
+    "path": "manifests/vercel-hyper-a623432381ff.json",
+    "sha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8"
+  },
+  "attestationTemplate": {
+    "subjectId": "vercel-hyper",
+    "repository": "https://github.com/vercel/hyper.git",
+    "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287",
+    "manifestCopy": {
+      "path": "manifests/vercel-hyper-a623432381ff.json",
+      "sha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

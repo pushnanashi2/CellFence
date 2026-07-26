@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-d9ecae10ef069b43",
+    "evidencePackageId": "evidence-cdb6d1e437868ca0",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/vadimdemedes-ink-1b21f516c8a1.json",
+        "sha256": "c3968e9dfb7bd8d4894a5b9b41eaddc4c78ced8d61999529d0dbbd54f0660956"
+      },
+      "auditLog": {
+        "path": "logs/vadimdemedes-ink-1b21f516c8a1/check.audit.jsonl",
+        "sha256": "7900feb0be5a7233f6d844fa54ca7bb81f767dcaebd3c2038ac77a4e9a9df38a"
+      },
+      "evidenceGraph": {
+        "path": "logs/vadimdemedes-ink-1b21f516c8a1/evidence-graph.json",
+        "sha256": "7a2986adae7ee65815bbad6cff50504fe81343f219043b7ae0381e2e2ac2d49d"
+      },
+      "checkStdout": {
+        "path": "logs/vadimdemedes-ink-1b21f516c8a1/check.stdout.log",
+        "sha256": "0673c829e3de606f36e8f6dc1b90c16240cfde0b688cf588135de061cff60a91"
+      },
+      "checkStderr": {
+        "path": "logs/vadimdemedes-ink-1b21f516c8a1/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:cdb6d1e437868ca012f3b42e93f352e0a094d2f72da3f17abc257137080deb13",
+    "subjectId": "vadimdemedes-ink",
+    "repository": "https://github.com/vadimdemedes/ink.git",
+    "commit": "70af033dbd2b126a16f144164685612b2c1fd554",
+    "gitTree": "984c576142fdd5701a37aa093830f96eb50a1ca8",
+    "manifestSha256": "c3968e9dfb7bd8d4894a5b9b41eaddc4c78ced8d61999529d0dbbd54f0660956",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/index.ts",
+    "line": 30,
+    "message": "src-root imports private implementation from hooks",
+    "cellId": "src-root",
+    "producerCellId": "hooks",
+    "cellfenceFingerprint": "f9523a62b62c6b1ca41b3fdab420c7157ed2c6e015b1bca06b56910b2439df61",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:cdb6d1e437868ca012f3b42e93f352e0a094d2f72da3f17abc257137080deb13",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-d9ecae10ef069b43",
+    "evidencePackageId": "evidence-cdb6d1e437868ca0",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

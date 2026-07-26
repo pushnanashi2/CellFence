@@ -1,0 +1,230 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/desktop/src/**",
+      "apps/web/src/**",
+      "packages/theme/**",
+      "packages/ui/**",
+      "sdk/js/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "desktop",
+      "ownedPaths": [
+        "apps/desktop/src/**"
+      ],
+      "publicEntry": "apps/desktop/src/features/inference-server/file-config-store.ts",
+      "publicSymbols": [
+        "createFileConfigStore"
+      ],
+      "packageName": "@localai/desktop",
+      "consumes": [
+        {
+          "cell": "sdk"
+        },
+        {
+          "cell": "theme"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sdk",
+      "ownedPaths": [
+        "sdk/js/src/**"
+      ],
+      "publicEntry": "sdk/js/src/index.ts",
+      "publicSymbols": [
+        "life"
+      ],
+      "packageName": "@local.ai/sdk",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "theme",
+      "ownedPaths": [
+        "packages/theme/**"
+      ],
+      "publicEntry": "packages/theme/color.ts",
+      "publicSymbols": [
+        "palette",
+        "primary"
+      ],
+      "packageName": "@lab/theme",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/**"
+      ],
+      "publicEntry": "packages/ui/accordion.tsx",
+      "publicSymbols": [
+        "Accordion"
+      ],
+      "packageName": "@lab/ui",
+      "consumes": [
+        {
+          "cell": "theme"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "apps/web/src/**"
+      ],
+      "publicEntry": "apps/web/src/features/press/download-buttons.tsx",
+      "publicSymbols": [
+        "AppImageDownloadButton",
+        "DebImageDownloadButton",
+        "DownloadButtonGroup",
+        "MacArm64DownloadButton",
+        "MacIntelDownloadButton",
+        "MiniDownloadButtonGroup",
+        "ReleaseDownloadButton",
+        "WindowsExeDownloadButton",
+        "WindowsMsiDownloadButton"
+      ],
+      "packageName": "@localai/web",
+      "consumes": [
+        {
+          "cell": "desktop"
+        },
+        {
+          "cell": "theme"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

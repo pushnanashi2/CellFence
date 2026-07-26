@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b443ce0d2bc49ba2",
+    "subjectId": "socketio-socket-io",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "socketio-socket-io",
+    "phase": null,
+    "repository": "https://github.com/socketio/socket.io.git",
+    "commit": "ef026605a44e299ef6f94b6d6a07375057011060"
+  },
+  "manifestCopy": {
+    "path": "manifests/socketio-socket-io-9915c633766d.json",
+    "sha256": "7fc9e6424348af6a7d9a08050772759a62752c3367effdad195486ab636a90c4"
+  },
+  "attestationTemplate": {
+    "subjectId": "socketio-socket-io",
+    "repository": "https://github.com/socketio/socket.io.git",
+    "commit": "ef026605a44e299ef6f94b6d6a07375057011060",
+    "manifestCopy": {
+      "path": "manifests/socketio-socket-io-9915c633766d.json",
+      "sha256": "7fc9e6424348af6a7d9a08050772759a62752c3367effdad195486ab636a90c4"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "7fc9e6424348af6a7d9a08050772759a62752c3367effdad195486ab636a90c4",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

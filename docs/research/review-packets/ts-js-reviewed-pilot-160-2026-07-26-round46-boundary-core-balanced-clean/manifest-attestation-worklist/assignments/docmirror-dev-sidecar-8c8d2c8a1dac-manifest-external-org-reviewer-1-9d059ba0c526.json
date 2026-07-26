@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-fecfa54d1e43d721",
+    "subjectId": "docmirror-dev-sidecar",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "docmirror-dev-sidecar",
+    "phase": null,
+    "repository": "https://github.com/docmirror/dev-sidecar.git",
+    "commit": "1d890a34b264caa72c4cf4667645b6032de0e313"
+  },
+  "manifestCopy": {
+    "path": "manifests/docmirror-dev-sidecar-8c8d2c8a1dac.json",
+    "sha256": "b867150938ba38939e2f19dba6728ca545208d453b10a5b7f449b933517c0afa"
+  },
+  "attestationTemplate": {
+    "subjectId": "docmirror-dev-sidecar",
+    "repository": "https://github.com/docmirror/dev-sidecar.git",
+    "commit": "1d890a34b264caa72c4cf4667645b6032de0e313",
+    "manifestCopy": {
+      "path": "manifests/docmirror-dev-sidecar-8c8d2c8a1dac.json",
+      "sha256": "b867150938ba38939e2f19dba6728ca545208d453b10a5b7f449b933517c0afa"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b867150938ba38939e2f19dba6728ca545208d453b10a5b7f449b933517c0afa",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-8cd330c936c1354a",
+    "evidencePackageId": "evidence-7c42991073c8bb22",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/chatboxai-chatbox-142075f413a1.json",
+        "sha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a"
+      },
+      "auditLog": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.audit.jsonl",
+        "sha256": "a5dd4a443d7964205c3cad04c1e611faaf55be663b7e07731e9b425af2acb6c8"
+      },
+      "evidenceGraph": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/evidence-graph.json",
+        "sha256": "d1c19ea8b4d4e5ae49c865f67e0576817c387c471103b7b68b46db44b4e1ba03"
+      },
+      "checkStdout": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.stdout.log",
+        "sha256": "92a756da30041a60b4def79272970a136e27f34d367902fccafae52b155403f6"
+      },
+      "checkStderr": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:7c42991073c8bb222c0625dbbdfac26fa9c64acd3b04441875b04ca42be4786a",
+    "subjectId": "chatboxai-chatbox",
+    "repository": "https://github.com/chatboxai/chatbox.git",
+    "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647",
+    "gitTree": "eaa57eca783b8916f8b7b87cf182bf7c2cc46242",
+    "manifestSha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/renderer/packages/model-calls/tools.ts",
+    "line": 6,
+    "message": "renderer imports private implementation from shared",
+    "cellId": "renderer",
+    "producerCellId": "shared",
+    "cellfenceFingerprint": "4c59f24ce5d1b671bded56c06f286deeefa8cec28c13740aac3ef5ff929acafc",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:7c42991073c8bb222c0625dbbdfac26fa9c64acd3b04441875b04ca42be4786a",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-8cd330c936c1354a",
+    "evidencePackageId": "evidence-7c42991073c8bb22",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

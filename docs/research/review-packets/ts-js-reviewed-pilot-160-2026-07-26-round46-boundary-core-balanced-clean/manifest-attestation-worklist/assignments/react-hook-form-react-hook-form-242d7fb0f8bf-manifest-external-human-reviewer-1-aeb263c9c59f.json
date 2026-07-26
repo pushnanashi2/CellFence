@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-7e95e1f6c2c3dc7c",
+    "subjectId": "react-hook-form-react-hook-form",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "react-hook-form-react-hook-form",
+    "phase": null,
+    "repository": "https://github.com/react-hook-form/react-hook-form.git",
+    "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633"
+  },
+  "manifestCopy": {
+    "path": "manifests/react-hook-form-react-hook-form-242d7fb0f8bf.json",
+    "sha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169"
+  },
+  "attestationTemplate": {
+    "subjectId": "react-hook-form-react-hook-form",
+    "repository": "https://github.com/react-hook-form/react-hook-form.git",
+    "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633",
+    "manifestCopy": {
+      "path": "manifests/react-hook-form-react-hook-form-242d7fb0f8bf.json",
+      "sha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

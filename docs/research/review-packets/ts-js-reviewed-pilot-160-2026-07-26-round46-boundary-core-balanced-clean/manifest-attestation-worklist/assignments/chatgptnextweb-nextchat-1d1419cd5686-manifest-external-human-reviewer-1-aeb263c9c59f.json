@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e351ed39f923f422",
+    "subjectId": "chatgptnextweb-nextchat",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "chatgptnextweb-nextchat",
+    "phase": null,
+    "repository": "https://github.com/ChatGPTNextWeb/NextChat.git",
+    "commit": "706a18b95b714ab29b2a4842d3b9ff4f887935d5"
+  },
+  "manifestCopy": {
+    "path": "manifests/chatgptnextweb-nextchat-1d1419cd5686.json",
+    "sha256": "ad305cfbfb4430f0b80b33c6adea9a3212574aaa47371996be0740bc22e52249"
+  },
+  "attestationTemplate": {
+    "subjectId": "chatgptnextweb-nextchat",
+    "repository": "https://github.com/ChatGPTNextWeb/NextChat.git",
+    "commit": "706a18b95b714ab29b2a4842d3b9ff4f887935d5",
+    "manifestCopy": {
+      "path": "manifests/chatgptnextweb-nextchat-1d1419cd5686.json",
+      "sha256": "ad305cfbfb4430f0b80b33c6adea9a3212574aaa47371996be0740bc22e52249"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ad305cfbfb4430f0b80b33c6adea9a3212574aaa47371996be0740bc22e52249",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

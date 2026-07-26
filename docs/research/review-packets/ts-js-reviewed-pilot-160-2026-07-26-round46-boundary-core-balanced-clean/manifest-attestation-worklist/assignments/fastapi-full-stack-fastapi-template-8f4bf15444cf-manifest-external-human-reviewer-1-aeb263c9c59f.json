@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-c43105a1bc045ff4",
+    "subjectId": "fastapi-full-stack-fastapi-template",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "fastapi-full-stack-fastapi-template",
+    "phase": null,
+    "repository": "https://github.com/fastapi/full-stack-fastapi-template.git",
+    "commit": "4d3d5e92c1ea6b3fa0fab02c41124844ec45bca8"
+  },
+  "manifestCopy": {
+    "path": "manifests/fastapi-full-stack-fastapi-template-8f4bf15444cf.json",
+    "sha256": "e2185e68ebb8983edaf58153ddda107fb7c6871d6e1426f595dbd5534005099f"
+  },
+  "attestationTemplate": {
+    "subjectId": "fastapi-full-stack-fastapi-template",
+    "repository": "https://github.com/fastapi/full-stack-fastapi-template.git",
+    "commit": "4d3d5e92c1ea6b3fa0fab02c41124844ec45bca8",
+    "manifestCopy": {
+      "path": "manifests/fastapi-full-stack-fastapi-template-8f4bf15444cf.json",
+      "sha256": "e2185e68ebb8983edaf58153ddda107fb7c6871d6e1426f595dbd5534005099f"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "e2185e68ebb8983edaf58153ddda107fb7c6871d6e1426f595dbd5534005099f",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

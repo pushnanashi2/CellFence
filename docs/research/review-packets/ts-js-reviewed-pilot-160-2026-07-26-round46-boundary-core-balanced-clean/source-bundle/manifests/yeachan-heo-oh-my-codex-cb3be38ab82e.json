@@ -1,0 +1,1891 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/vscode-extension/src/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "adapt",
+      "ownedPaths": [
+        "src/adapt/**"
+      ],
+      "publicEntry": "src/adapt/index.ts",
+      "publicSymbols": [
+        "buildAdaptDoctorReport",
+        "buildAdaptDoctorReportForTarget",
+        "buildAdaptEnvelope",
+        "buildAdaptEnvelopeForTarget",
+        "buildAdaptPlanningLink",
+        "buildAdaptProbeReport",
+        "buildAdaptProbeReportForTarget",
+        "buildAdaptStatusReport",
+        "buildAdaptStatusReportForTarget",
+        "initAdaptFoundation",
+        "initAdaptFoundationForTarget",
+        "supportedAdaptTargets"
+      ],
+      "consumes": [
+        {
+          "cell": "openclaw"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "agents",
+      "ownedPaths": [
+        "src/agents/**"
+      ],
+      "publicEntry": "src/agents/definitions.ts",
+      "publicSymbols": [
+        "AGENT_DEFINITIONS",
+        "AgentDefinition",
+        "getAgent",
+        "getAgentNames",
+        "getAgentsByCategory"
+      ],
+      "consumes": [
+        {
+          "cell": "catalog"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth",
+      "ownedPaths": [
+        "src/auth/**"
+      ],
+      "publicEntry": "src/auth/index.ts",
+      "publicSymbols": [
+        "addSlotFromAuthFile",
+        "assertNoSymlink",
+        "assertReadableFile",
+        "atomicWriteFile",
+        "AtomicWriteOptions",
+        "AUTH_DIR_MODE",
+        "AUTH_FILE_MODE",
+        "AuthConfig",
+        "AuthMetadata",
+        "AuthRotationMode",
+        "AuthSlotRecord",
+        "buildRotationPlan",
+        "clearSlotExhaustion",
+        "CodexExitSignal",
+        "emptyMetadata",
+        "ensurePrivateDir",
+        "extractRolloutSessionId",
+        "findLatestRolloutSession",
+        "isQuotaError",
+        "LatestRolloutSession",
+        "listSlots",
+        "markSlotQuota",
+        "nextSlotAfter",
+        "readAuthConfig",
+        "readAuthMetadata",
+        "redactAuthSecrets",
+        "resolveAuthMetadataPath",
+        "resolveDefaultCodexHome",
+        "resolveLiveAuthPath",
+        "resolveOmxAuthDir",
+        "resolveSlotPath",
+        "RotationPlan",
+        "useSlot",
+        "validateSlotName",
+        "writeAuthMetadata"
+      ],
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "autopilot",
+      "ownedPaths": [
+        "src/autopilot/**"
+      ],
+      "publicEntry": "src/autopilot/completion-gate.ts",
+      "publicSymbols": [
+        "hasCleanAutopilotReviewAndQaEvidence",
+        "hasCleanCodeReviewEvidence",
+        "hasCleanUltraqaEvidence",
+        "isAutopilotSuccessfulTerminalState",
+        "validateAutopilotCompletionTransition"
+      ],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "ralplan"
+        },
+        {
+          "cell": "runtime"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "autoresearch",
+      "ownedPaths": [
+        "src/autoresearch/**"
+      ],
+      "publicEntry": "src/autoresearch/contracts.ts",
+      "publicSymbols": [
+        "AutoresearchEvaluatorContract",
+        "AutoresearchEvaluatorResult",
+        "AutoresearchKeepPolicy",
+        "AutoresearchMissionContract",
+        "loadAutoresearchMissionContract",
+        "ParsedSandboxContract",
+        "parseEvaluatorResult",
+        "parseSandboxContract",
+        "slugifyMissionName"
+      ],
+      "consumes": [
+        {
+          "cell": "goal-workflows"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "capabilities",
+      "ownedPaths": [
+        "src/capabilities/**"
+      ],
+      "publicEntry": "src/capabilities/lockfile.ts",
+      "publicSymbols": [
+        "buildCapabilitiesLockfile",
+        "canonicalStringify",
+        "CAPABILITIES_LOCKFILE_VERSION",
+        "CapabilitiesLockfile",
+        "CapabilityCheckOptions",
+        "CapabilityCheckResult",
+        "CapabilityFailure",
+        "CapabilityFailureCode",
+        "CapabilityObservation",
+        "CapabilityObservationsFile",
+        "CapabilityWarning",
+        "checkCapabilitiesPreflight",
+        "DEFAULT_CAPABILITIES_LOCKFILE",
+        "defaultCapabilitiesLockfilePath",
+        "DigestEntry",
+        "ExternalMcpServerContract",
+        "FixtureContract",
+        "sha256",
+        "ToolContract",
+        "writeCapabilitiesLockfile"
+      ],
+      "consumes": [
+        {
+          "cell": "mcp"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "catalog",
+      "ownedPaths": [
+        "src/catalog/**"
+      ],
+      "publicEntry": "src/catalog/installable.ts",
+      "publicSymbols": [
+        "getSetupInstallableSkillNames",
+        "isCatalogInstallableStatus",
+        "SETUP_ONLY_INSTALLABLE_SKILLS"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "src/cli/**"
+      ],
+      "publicEntry": "src/cli/index.ts",
+      "publicSymbols": [
+        "acquireTmuxExtendedKeysLease",
+        "BackgroundHelperLaunchMode",
+        "buildDetachedHudHookEnv",
+        "buildDetachedSessionBootstrapSteps",
+        "buildDetachedSessionFinalizeSteps",
+        "buildDetachedSessionRollbackSteps",
+        "buildDetachedTmuxSessionName",
+        "buildDetachedWindowsBootstrapScript",
+        "buildHudPaneCleanupTargets",
+        "buildInsideTmuxHudHookEnv",
+        "buildMadmaxDetachedLaunchContextKey",
+        "buildNotifyFallbackWatcherEnv",
+        "buildNotifyTempStartupMessages",
+        "buildTmuxPaneCommand",
+        "buildTmuxSessionName",
+        "buildTmuxShellCommand",
+        "buildWindowsMsysBackgroundHelperBootstrapScript",
+        "buildWindowsPromptCommand",
+        "captureMadmaxWorktreeRuntimeContext",
+        "checkDetachedTmuxLaunchHealth",
+        "classifyCodexExecFailure",
+        "cleanupLaunchOrphanedMcpProcesses",
+        "cleanupPostLaunchModeStateFiles",
+        "cleanupRuntimeCodexHome",
+        "CODEX_SQLITE_HOME_ENV",
+        "CodexExecFailureClassification",
+        "CodexLaunchPolicy",
+        "collectInheritableTeamWorkerArgs",
+        "commandOwnsLocalHelp",
+        "createMadmaxIsolatedRoot",
+        "DETACHED_TMUX_HISTORY_LIMIT",
+        "detachedSessionParentEnvFilePath",
+        "DetachedSessionTmuxStep",
+        "detectDetachedSessionWindowIndex",
+        "ensureOmxRuntimeCommandShim",
+        "execWithOverlay",
+        "findHudWatchPaneIds",
+        "HELP",
+        "injectModelInstructionsBypassArgs",
+        "isExistingTmuxWindowTooCrampedForLaunchHud",
+        "isHudWatchPane",
+        "launchWithAuthHotswap",
+        "launchWithHud",
+        "main",
+        "normalizeCodexLaunchArgs",
+        "NotifyFallbackReapResult",
+        "omxRuntimeCommandShimFileName",
+        "omxRuntimeCommandShimPath",
+        "parseResumeCodexHomeSelection",
+        "parseTmuxPaneSnapshot",
+        "persistProjectLaunchRuntimeAuthState",
+        "persistProjectLaunchRuntimeProjectTrustState",
+        "postLaunch",
+        "preflightResumeOmxPluginState",
+        "preLaunch",
+        "prepareCodexHomeForLaunch",
+        "PrepareCodexHomeForLaunchOptions",
+        "PreparedCodexHomeForLaunch",
+        "prepareRuntimeCodexHomeForProjectLaunch",
+        "PrepareRuntimeCodexHomeForProjectLaunchOptions",
+        "prependOmxRuntimeCommandShimToEnv",
+        "readPersistedSetupPreferences",
+        "readPersistedSetupScope",
+        "readTopLevelTomlString",
+        "reapPostLaunchOrphanedMcpProcesses",
+        "reapStaleNotifyFallbackWatcher",
+        "registerDetachedHudLayoutReconcileHook",
+        "registerInsideTmuxHudResizeHook",
+        "releaseTmuxExtendedKeysLease",
+        "resolveBackgroundHelperLaunchMode",
+        "resolveCliInvocation",
+        "resolveCodexConfigPathForLaunch",
+        "resolveCodexHomeForLaunch",
+        "resolveCodexLaunchPolicy",
+        "ResolvedCliInvocation",
+        "resolveDisposableWorktreeOmxRootForLaunch",
+        "resolveEffectiveLeaderLaunchPolicyOverride",
+        "resolveEnvLaunchPolicyOverride",
+        "resolveHookDerivedWatcherScript",
+        "resolveHudRuntimeRootForLaunch",
+        "resolveLaunchConfigRepairOptions",
+        "resolveLeaderLaunchPolicyOverride",
+        "resolveNativeSessionName",
+        "resolveNotifyFallbackWatcherScript",
+        "resolveNotifyHookScript",
+        "resolveNotifyTempContract",
+        "resolveOmxRootForLaunch",
+        "resolveProjectLocalCodexHomeForLaunch",
+        "resolveSetupAgentsMergePolicyArg",
+        "resolveSetupInstallModeArg",
+        "resolveSetupMcpModeArg",
+        "resolveSetupMergeAgentsArg",
+        "resolveSetupScopeArg",
+        "resolveSetupTeamModeArg",
+        "resolveSignalExitCode",
+        "resolveTeamWorkerLaunchArgsEnv",
+        "resolveUpdateChannelArg",
+        "resolveWorkerSparkModel",
+        "ResumeCodexHomeSelection",
+        "ResumePluginPreflightOptions",
+        "ResumePluginPreflightResult",
+        "runDetachedSessionPostLaunch",
+        "runtimeCodexHomePath",
+        "serializeDetachedSessionParentEnv",
+        "SetupMergeAgentsPolicyArg",
+        "shouldAttachDetachedTmuxSession",
+        "shouldAutoIsolateMadmaxLaunch",
+        "shouldDetachBackgroundHelper",
+        "shouldEnableNotifyFallbackWatcher",
+        "shouldSourceTmuxPaneShellRc",
+        "TmuxLaunchHealth",
+        "upsertTopLevelTomlString",
+        "withMadmaxDetachedContextLock",
+        "withTmuxExtendedKeys",
+        "writeDetachedSessionParentEnvFile"
+      ],
+      "consumes": [
+        {
+          "cell": "adapt"
+        },
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "autoresearch"
+        },
+        {
+          "cell": "capabilities"
+        },
+        {
+          "cell": "catalog"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "exec"
+        },
+        {
+          "cell": "goal-workflows"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "imagegen"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "performance-goal"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "ralph"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "session-history"
+        },
+        {
+          "cell": "sidecar"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "subagents"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "ultragoal"
+        },
+        {
+          "cell": "url-reader"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "wiki"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "config",
+      "ownedPaths": [
+        "src/config/**"
+      ],
+      "publicEntry": "src/config/codex-feature-flags.ts",
+      "publicSymbols": [
+        "CODEX_HOOK_FEATURE_FLAGS",
+        "CODEX_PLUGIN_SCOPED_HOOKS_FEATURE_FLAG",
+        "CodexHookFeatureFlag",
+        "DEFAULT_CODEX_HOOK_FEATURE_FLAG",
+        "formatCodexHookFeatureFlagLine",
+        "isCodexCliVersionAtLeast",
+        "isCodexHookFeatureFlagName",
+        "normalizeCodexHookFeatureFlag",
+        "parseCodexCliVersion",
+        "parseCodexFeatureNames",
+        "resolveCodexHookFeatureFlag",
+        "supportsCodexPluginScopedHooks"
+      ],
+      "consumes": [
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "document-refresh",
+      "ownedPaths": [
+        "src/document-refresh/**"
+      ],
+      "publicEntry": "src/document-refresh/config.ts",
+      "publicSymbols": [
+        "DEFAULT_DOCUMENT_REFRESH_RULES",
+        "DocumentRefreshRule"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "exec",
+      "ownedPaths": [
+        "src/exec/**"
+      ],
+      "publicEntry": "src/exec/followup.ts",
+      "publicSymbols": [
+        "buildExecFollowupStopOutput",
+        "ExecFollowupQueue",
+        "ExecFollowupRecord",
+        "execInjectCommand",
+        "formatInjectExecFollowupSuccess",
+        "injectExecFollowup",
+        "InjectExecFollowupOptions",
+        "InjectExecFollowupResult",
+        "markExecFollowupsDelivered",
+        "parseExecInjectArgs",
+        "readPendingExecFollowups"
+      ],
+      "consumes": [
+        {
+          "cell": "hooks"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "goal-workflows",
+      "ownedPaths": [
+        "src/goal-workflows/**"
+      ],
+      "publicEntry": "src/goal-workflows/artifacts.ts",
+      "publicSymbols": [
+        "appendGoalWorkflowLedger",
+        "createGoalWorkflowRun",
+        "CreateGoalWorkflowRunOptions",
+        "GOAL_WORKFLOW_LEDGER",
+        "GOAL_WORKFLOW_STATUS",
+        "GOAL_WORKFLOWS_DIR",
+        "goalWorkflowDir",
+        "GoalWorkflowError",
+        "GoalWorkflowLedgerEntry",
+        "GoalWorkflowLedgerEvent",
+        "goalWorkflowLedgerPath",
+        "GoalWorkflowRun",
+        "GoalWorkflowStatus",
+        "goalWorkflowStatusPath",
+        "GoalWorkflowValidationSummary",
+        "normalizeGoalWorkflowSegment",
+        "readGoalWorkflowRun",
+        "TransitionGoalWorkflowOptions",
+        "transitionGoalWorkflowRun"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "src/hooks/**"
+      ],
+      "publicEntry": "src/hooks/agents-overlay.ts",
+      "publicSymbols": [
+        "applyOverlay",
+        "generateOverlay",
+        "GenerateOverlayOptions",
+        "hasOverlay",
+        "removeSessionModelInstructionsFile",
+        "resolveSessionOrchestrationMode",
+        "sessionModelInstructionsPath",
+        "SessionOrchestrationMode",
+        "stripOverlay",
+        "writeSessionModelInstructionsFile"
+      ],
+      "consumes": [
+        {
+          "cell": "autopilot"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "ralplan"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hud",
+      "ownedPaths": [
+        "src/hud/**"
+      ],
+      "publicEntry": "src/hud/index.ts",
+      "publicSymbols": [
+        "buildTmuxSplitArgs",
+        "HUD_USAGE",
+        "hudCommand",
+        "resolveHudWatchCwd",
+        "ResolveHudWatchCwdDependencies",
+        "runWatchMode",
+        "shellEscape",
+        "watchRenderLoop"
+      ],
+      "consumes": [
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "subagents"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "imagegen",
+      "ownedPaths": [
+        "src/imagegen/**"
+      ],
+      "publicEntry": "src/imagegen/continuation.ts",
+      "publicSymbols": [
+        "IMAGEGEN_CONTINUATION_USAGE",
+        "imagegenCommand",
+        "ImagegenContinuationRecord",
+        "ParsedImagegenContinuationArgs",
+        "parseImagegenContinuationArgs",
+        "prepareImagegenContinuation",
+        "PrepareImagegenContinuationOptions",
+        "PrepareImagegenContinuationResult"
+      ],
+      "consumes": [
+        {
+          "cell": "exec"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "leader",
+      "ownedPaths": [
+        "src/leader/**"
+      ],
+      "publicEntry": "src/leader/contract.ts",
+      "publicSymbols": [
+        "actionKindForConductorArtifact",
+        "authorizeConductorAction",
+        "buildRoleIntentSpawnTaskName",
+        "buildRoleRoutingUnavailableGuidance",
+        "buildUnsupportedNativeSubagentGuidance",
+        "canonicalizeOriginCwd",
+        "classifyConductorArtifactKind",
+        "CONDUCTOR_ORCHESTRATION_METADATA_PREFIXES",
+        "ConductorActionKind",
+        "ConductorArtifactKind",
+        "ConductorAuthorizationDecision",
+        "ConductorAuthorizationInput",
+        "ConductorLaneKind",
+        "ConductorPhase",
+        "isAppCompatibleSpawnTaskName",
+        "isNativeSubagentSpawnToolName",
+        "isRoleRoutingUnavailableEvidence",
+        "isUnsupportedNativeSubagentEvidence",
+        "isUnsupportedNativeSubagentEvidenceForScope",
+        "LEADER_CONDUCTOR_BLOCK",
+        "LEADER_CONDUCTOR_DELEGATION_NOTE",
+        "LEADER_CONDUCTOR_GOLDEN_RULE",
+        "LEADER_CONDUCTOR_PHILOSOPHY",
+        "LEADER_CONDUCTOR_REUSE_AND_LEDGER_GUIDANCE",
+        "LEADER_CONDUCTOR_REUSE_AND_LEDGER_RULES",
+        "LEADER_CONDUCTOR_ROLE_ROUTING_DEGRADE_BLOCK",
+        "LEADER_CONDUCTOR_SILVER_RULE",
+        "LEADER_CONDUCTOR_UNSUPPORTED_NATIVE_DEGRADE_BLOCK",
+        "NATIVE_SPAWN_TASK_NAME_PATTERN",
+        "NATIVE_SUBAGENT_SUPPORT_BLOCKER_FILE",
+        "NATIVE_SUBAGENT_SUPPORT_BLOCKER_REASONS",
+        "NativeSubagentCapabilityInput",
+        "NativeSubagentSupportEvidence",
+        "NativeSubagentSupportEvidenceSource",
+        "NativeSubagentSupportStatus",
+        "NativeSubagentUnsupportedReason",
+        "parseRoleIntentCorrelationToken",
+        "resolveNativeSubagentSupportStatus",
+        "ROLE_INTENT_CORRELATION_TOKEN_PATTERN",
+        "ROLE_INTENT_SPAWN_TASK_NAME_PREFIX",
+        "RoleRoutingUnavailableMarker"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp",
+      "ownedPaths": [
+        "src/mcp/**"
+      ],
+      "publicEntry": "src/mcp/bootstrap.ts",
+      "publicSymbols": [
+        "analyzeDuplicateSiblingState",
+        "autoStartStdioMcpServer",
+        "DuplicateSiblingObservation",
+        "extractMcpEntrypointMarker",
+        "isParentProcessAlive",
+        "listProcessTable",
+        "MCP_ENTRYPOINT_MARKER_ENV",
+        "McpServerName",
+        "parseProcessTable",
+        "parseWindowsProcessTable",
+        "ProcessTableEntry",
+        "resolveCurrentMcpEntrypointMarker",
+        "resolveDuplicateSiblingWatchdogInitialDelayMs",
+        "shouldAutoStartMcpServer",
+        "shouldRunDuplicateSiblingStartupScanBeforeStopping",
+        "shouldSelfExitForDuplicateSibling",
+        "shouldSelfExitForPostTrafficSiblingHardCap",
+        "shouldSelfExitForPreTrafficSiblingHardCap",
+        "shouldStopDuplicateSiblingWatchdogAfterTraffic"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "exec"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "wiki"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "modes",
+      "ownedPaths": [
+        "src/modes/**"
+      ],
+      "publicEntry": "src/modes/base.ts",
+      "publicSymbols": [
+        "assertModeStartAllowed",
+        "cancelAllModes",
+        "cancelMode",
+        "DeprecatedModeName",
+        "getDeprecationWarning",
+        "listActiveModes",
+        "ModeName",
+        "ModeState",
+        "readModeState",
+        "readModeStateForActiveDecision",
+        "readModeStateForSession",
+        "startMode",
+        "updateModeState",
+        "UpdateModeStateOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "autopilot"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "ralph"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "state"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "notifications",
+      "ownedPaths": [
+        "src/notifications/**"
+      ],
+      "publicEntry": "src/notifications/index.ts",
+      "publicSymbols": [
+        "captureTmuxPane",
+        "computeTemplateVariables",
+        "DiscordBotNotificationConfig",
+        "DiscordNotificationConfig",
+        "dispatchNotifications",
+        "DispatchResult",
+        "EventNotificationConfig",
+        "formatAskUserQuestion",
+        "formatNotification",
+        "formatSessionEnd",
+        "formatSessionIdle",
+        "formatSessionStart",
+        "formatSessionStop",
+        "formatTmuxInfo",
+        "FullNotificationConfig",
+        "FullNotificationPayload",
+        "getActiveProfileName",
+        "getCurrentTmuxPaneId",
+        "getCurrentTmuxSession",
+        "getDefaultTemplate",
+        "getDispatchNotificationCooldownSeconds",
+        "getEnabledPlatforms",
+        "getHookConfig",
+        "getIdleNotificationCooldownSeconds",
+        "getNotificationConfig",
+        "getReplyConfig",
+        "getReplyListenerPlatformConfig",
+        "getReplyListenerStatus",
+        "getTeamTmuxSessions",
+        "getVerbosity",
+        "HookEventConfig",
+        "HookNotificationConfig",
+        "interpolateTemplate",
+        "isDaemonRunning",
+        "isEventAllowedByVerbosity",
+        "isEventEnabled",
+        "listProfiles",
+        "loadAllMappings",
+        "loadNotificationConfig",
+        "lookupByMessageId",
+        "mergeHookConfigIntoNotificationConfig",
+        "NotificationConfig",
+        "NotificationEvent",
+        "NotificationPayload",
+        "NotificationPlatform",
+        "NotificationProfilesConfig",
+        "NotificationResult",
+        "NotificationsBlock",
+        "notify",
+        "notifyLifecycle",
+        "PlatformTemplateOverride",
+        "pruneStale",
+        "recordDispatchNotificationSent",
+        "recordIdleNotificationSent",
+        "registerMessage",
+        "removeMessagesByPane",
+        "removeSession",
+        "ReplyConfig",
+        "resetHookConfigCache",
+        "resolveEventTemplate",
+        "resolveProfileConfig",
+        "sanitizeReplyInput",
+        "sanitizeTmuxAlertText",
+        "sendDiscord",
+        "sendDiscordBot",
+        "sendSlack",
+        "sendTelegram",
+        "sendWebhook",
+        "SessionMapping",
+        "shouldDispatchOpenClaw",
+        "shouldIncludeTmuxTail",
+        "shouldSendDispatchNotification",
+        "shouldSendIdleNotification",
+        "SlackNotificationConfig",
+        "startReplyListener",
+        "stopReplyListener",
+        "TelegramNotificationConfig",
+        "TemplateVariable",
+        "validateTemplate",
+        "VerbosityLevel",
+        "WebhookNotificationConfig"
+      ],
+      "consumes": [
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "openclaw"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "subagents"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "oh-my-codex-vscode",
+      "ownedPaths": [
+        "packages/vscode-extension/src/**"
+      ],
+      "publicEntry": "packages/vscode-extension/src/chatProtocol.ts",
+      "publicSymbols": [
+        "normalizeWebviewMessage",
+        "WebviewCommand"
+      ],
+      "packageName": "oh-my-codex-vscode",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "openclaw",
+      "ownedPaths": [
+        "src/openclaw/**"
+      ],
+      "publicEntry": "src/openclaw/index.ts",
+      "publicSymbols": [
+        "getOpenClawConfig",
+        "interpolateInstruction",
+        "isCommandGateway",
+        "OpenClawCommandGatewayConfig",
+        "OpenClawConfig",
+        "OpenClawContext",
+        "OpenClawGatewayConfig",
+        "OpenClawHookEvent",
+        "OpenClawHookMapping",
+        "OpenClawHttpGatewayConfig",
+        "OpenClawPayload",
+        "OpenClawResult",
+        "resetOpenClawConfigCache",
+        "resolveGateway",
+        "shellEscapeArg",
+        "validateGatewayUrl",
+        "wakeCommandGateway",
+        "wakeGateway",
+        "wakeOpenClaw"
+      ],
+      "consumes": [
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "performance-goal",
+      "ownedPaths": [
+        "src/performance-goal/**"
+      ],
+      "publicEntry": "src/performance-goal/artifacts.ts",
+      "publicSymbols": [
+        "buildPerformanceGoalInstruction",
+        "checkpointPerformanceGoal",
+        "CheckpointPerformanceGoalOptions",
+        "completePerformanceGoal",
+        "CompletePerformanceGoalOptions",
+        "createPerformanceGoal",
+        "CreatePerformanceGoalOptions",
+        "PERFORMANCE_GOAL_EVALUATOR",
+        "PERFORMANCE_GOAL_LEDGER",
+        "PERFORMANCE_GOAL_ROOT",
+        "PERFORMANCE_GOAL_STATE",
+        "PerformanceEvaluatorContract",
+        "PerformanceGoalError",
+        "performanceGoalEvaluatorPath",
+        "PerformanceGoalLedgerEntry",
+        "performanceGoalLedgerPath",
+        "PerformanceGoalState",
+        "performanceGoalStatePath",
+        "PerformanceGoalStatus",
+        "PerformanceValidationRecord",
+        "PerformanceValidationStatus",
+        "readPerformanceGoal",
+        "startPerformanceGoal"
+      ],
+      "consumes": [
+        {
+          "cell": "goal-workflows"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pipeline",
+      "ownedPaths": [
+        "src/pipeline/**"
+      ],
+      "publicEntry": "src/pipeline/index.ts",
+      "publicSymbols": [
+        "buildCodeReviewInstruction",
+        "buildDeepInterviewInstruction",
+        "buildRalphInstruction",
+        "buildTeamInstruction",
+        "buildUltragoalInstruction",
+        "buildUltraqaInstruction",
+        "cancelPipeline",
+        "canResumePipeline",
+        "CodeReviewDescriptor",
+        "CodeReviewStageOptions",
+        "CodeReviewVerdict",
+        "createAutopilotPipelineConfig",
+        "createCodeReviewStage",
+        "createDeepInterviewStage",
+        "createRalphStage",
+        "createRalphVerifyStage",
+        "createRalplanStage",
+        "CreateRalplanStageOptions",
+        "createTeamExecStage",
+        "createUltragoalStage",
+        "createUltraqaStage",
+        "DeepInterviewDescriptor",
+        "PipelineConfig",
+        "PipelineModeStateExtension",
+        "PipelineResult",
+        "PipelineStage",
+        "RalphVerifyDescriptor",
+        "RalphVerifyStageOptions",
+        "readPipelineState",
+        "runPipeline",
+        "StageContext",
+        "StageResult",
+        "TeamExecDescriptor",
+        "TeamExecStageOptions",
+        "UltragoalDescriptor",
+        "UltraqaDescriptor",
+        "UltraqaStageOptions",
+        "UltraqaVerdict"
+      ],
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "ralplan"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "planning",
+      "ownedPaths": [
+        "src/planning/**"
+      ],
+      "publicEntry": "src/planning/artifact-names.ts",
+      "publicSymbols": [
+        "comparePlanningArtifactPaths",
+        "parsePlanningArtifactFileName",
+        "PlanningArtifactKind",
+        "PlanningArtifactNameInfo",
+        "planningArtifactSlug",
+        "planningArtifactTimestamp",
+        "selectLatestPlanningArtifactPath",
+        "selectMatchingTestSpecsForPrd"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "question",
+      "ownedPaths": [
+        "src/question/**"
+      ],
+      "publicEntry": "src/question/autopilot-wait.ts",
+      "publicSymbols": [
+        "AUTOPILOT_DEEP_INTERVIEW_QUESTION_OWNER_ENV",
+        "AutopilotDeepInterviewQuestionWaitClaim",
+        "AutopilotDeepInterviewQuestionWaitState",
+        "canStartAutopilotDeepInterviewQuestion",
+        "claimAutopilotDeepInterviewQuestionWaiting",
+        "markAutopilotDeepInterviewQuestionWaiting",
+        "readAutopilotDeepInterviewQuestionWaitState",
+        "resolveAutopilotDeepInterviewQuestionWaiting",
+        "resolveAutopilotQuestionWaitLockTimeoutMs"
+      ],
+      "consumes": [
+        {
+          "cell": "autopilot"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ralph",
+      "ownedPaths": [
+        "src/ralph/**"
+      ],
+      "publicEntry": "src/ralph/completion-audit.ts",
+      "publicSymbols": [
+        "evaluateRalphCompletionAuditEvidence",
+        "isRalphCompletePhase",
+        "RalphCompletionAuditResult"
+      ],
+      "consumes": [
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "visual"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ralplan",
+      "ownedPaths": [
+        "src/ralplan/**"
+      ],
+      "publicEntry": "src/ralplan/consensus-gate.ts",
+      "publicSymbols": [
+        "buildRalplanConsensusGateForCwd",
+        "buildRalplanConsensusGateFromSources",
+        "hasDurableRalplanConsensusEvidenceForCwd",
+        "RALPLAN_CONSENSUS_BLOCKED_REASONS",
+        "RalplanConsensusBlockedReason",
+        "RalplanConsensusGateDiagnostic",
+        "RalplanConsensusGateEvidence",
+        "RalplanConsensusSource",
+        "RalplanNativeReviewDiagnostic",
+        "RalplanNativeSubagentConsensusOptions",
+        "readLocalRalplanConsensusStateCandidates",
+        "withParentReturnToRalplanContext"
+      ],
+      "consumes": [
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "subagents"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "runtime",
+      "ownedPaths": [
+        "src/runtime/**"
+      ],
+      "publicEntry": "src/runtime/bridge.ts",
+      "publicSymbols": [
+        "AuthoritySnapshot",
+        "BacklogSnapshot",
+        "DispatchRecord",
+        "getDefaultBridge",
+        "isBridgeEnabled",
+        "MailboxRecord",
+        "ReadinessSnapshot",
+        "ReplaySnapshot",
+        "resolveBridgeStateDir",
+        "resolveRuntimeBinaryPath",
+        "RuntimeBinaryDiscoveryOptions",
+        "RuntimeBridge",
+        "RuntimeBridgeError",
+        "RuntimeCommand",
+        "RuntimeEvent",
+        "RuntimeSnapshot"
+      ],
+      "consumes": [
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "src/scripts/**"
+      ],
+      "publicEntry": "src/scripts/build-api.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "autopilot"
+        },
+        {
+          "cell": "autoresearch"
+        },
+        {
+          "cell": "catalog"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "document-refresh"
+        },
+        {
+          "cell": "exec"
+        },
+        {
+          "cell": "goal-workflows"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "ralph"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "subagents"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "ultragoal"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "visual"
+        },
+        {
+          "cell": "wiki"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "session-history",
+      "ownedPaths": [
+        "src/session-history/**"
+      ],
+      "publicEntry": "src/session-history/friction.ts",
+      "publicSymbols": [
+        "buildSessionFrictionReport",
+        "SessionFrictionOptions",
+        "SessionFrictionReport",
+        "SessionFrictionRisk",
+        "SessionFrictionSessionReport",
+        "SessionFrictionSourceReport"
+      ],
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sidecar",
+      "ownedPaths": [
+        "src/sidecar/**"
+      ],
+      "publicEntry": "src/sidecar/index.ts",
+      "publicSymbols": [
+        "parseSidecarArgs",
+        "runSidecarWatch",
+        "RunSidecarWatchDeps",
+        "SIDECAR_USAGE",
+        "sidecarCommand"
+      ],
+      "consumes": [
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "team"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "AGENT_DEFINITIONS",
+        "AgentDefinition",
+        "buildDirectSessionArgs",
+        "doctor",
+        "findDangerousLaunchArgs",
+        "generateAgentToml",
+        "hudCommand",
+        "installNativeAgentConfigs",
+        "launchDirectSession",
+        "launchRequiresDangerousApproval",
+        "mergeConfig",
+        "redactOmxLogLine",
+        "resolveVscodeLaunchEnv",
+        "runOmxCatalogCommand",
+        "setup",
+        "version"
+      ],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "vscode"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "state",
+      "ownedPaths": [
+        "src/state/**"
+      ],
+      "publicEntry": "src/state/mode-state-context.ts",
+      "publicSymbols": [
+        "captureTmuxPaneFromEnv",
+        "captureTmuxWindowForPane",
+        "ModeStateContextLike",
+        "withModeRuntimeContext"
+      ],
+      "consumes": [
+        {
+          "cell": "autopilot"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "question"
+        },
+        {
+          "cell": "ralph"
+        },
+        {
+          "cell": "ralplan"
+        },
+        {
+          "cell": "runtime"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "subagents",
+      "ownedPaths": [
+        "src/subagents/**"
+      ],
+      "publicEntry": "src/subagents/adapted-role-binding.ts",
+      "publicSymbols": [
+        "bindAndPublishAdaptedRole",
+        "NATIVE_SUBAGENT_ROLE_ROUTING_MARKER_TTL_MS",
+        "recoverAdaptedRoleBindings"
+      ],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "leader"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "team",
+      "ownedPaths": [
+        "src/team/**"
+      ],
+      "publicEntry": "src/team/allocation-policy.ts",
+      "publicSymbols": [
+        "allocateTasksToWorkers",
+        "AllocationDecision",
+        "AllocationTaskInput",
+        "AllocationWorkerInput",
+        "chooseTaskOwner"
+      ],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "hud"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "modes"
+        },
+        {
+          "cell": "notifications"
+        },
+        {
+          "cell": "planning"
+        },
+        {
+          "cell": "runtime"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "verification"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ultragoal",
+      "ownedPaths": [
+        "src/ultragoal/**"
+      ],
+      "publicEntry": "src/ultragoal/artifacts.ts",
+      "publicSymbols": [
+        "addUltragoalGoal",
+        "AddUltragoalGoalOptions",
+        "buildCodexGoalInstruction",
+        "CheckpointOptions",
+        "checkpointUltragoal",
+        "CodexGoalInstructionOptions",
+        "CreateUltragoalOptions",
+        "createUltragoalPlan",
+        "deriveGoalCandidates",
+        "isFinalRunCompletionCandidate",
+        "isUltragoalDone",
+        "parseUltragoalSteeringDirective",
+        "readUltragoalPlan",
+        "recordFinalReviewBlockers",
+        "RecordFinalReviewBlockersOptions",
+        "StartNextOptions",
+        "startNextUltragoal",
+        "steerUltragoal",
+        "SteerUltragoalResult",
+        "summarizeUltragoalPlan",
+        "ULTRAGOAL_AGGREGATE_CODEX_OBJECTIVE",
+        "ULTRAGOAL_BRIEF",
+        "ULTRAGOAL_DIR",
+        "ULTRAGOAL_GOALS",
+        "ULTRAGOAL_LEDGER",
+        "ULTRAGOAL_STEERING_MUTATION_KINDS",
+        "ULTRAGOAL_STEERING_SOURCES",
+        "UltragoalAggregateCompletion",
+        "UltragoalArchitectureInvariantEvidence",
+        "ultragoalBriefPath",
+        "UltragoalCodexGoalMode",
+        "ultragoalDir",
+        "UltragoalError",
+        "ultragoalGoalsPath",
+        "UltragoalItem",
+        "UltragoalLedgerEntry",
+        "ultragoalLedgerPath",
+        "UltragoalPlan",
+        "UltragoalQualityGate",
+        "UltragoalStatus",
+        "UltragoalSteeringAfterPayload",
+        "UltragoalSteeringAudit",
+        "UltragoalSteeringChildGoal",
+        "UltragoalSteeringInvariantResult",
+        "UltragoalSteeringMutationKind",
+        "UltragoalSteeringProposal",
+        "UltragoalSteeringSource",
+        "UltragoalSteeringStatus",
+        "validateSteeringProposal",
+        "validateUltragoalSteeringProposal"
+      ],
+      "consumes": [
+        {
+          "cell": "goal-workflows"
+        },
+        {
+          "cell": "leader"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "url-reader",
+      "ownedPaths": [
+        "src/url-reader/**"
+      ],
+      "publicEntry": "src/url-reader/index.ts",
+      "publicSymbols": [
+        "FetchLike",
+        "FetchLikeResponse",
+        "readUrl",
+        "UrlReaderOptions",
+        "UrlReadError",
+        "UrlReadResult",
+        "UrlReadVerdict"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/agents-md.ts",
+      "publicSymbols": [
+        "addGeneratedAgentsMarker",
+        "extractUserOmxPolicyBlocks",
+        "hasOmxAgentsContract",
+        "hasOmxManagedAgentsSections",
+        "isOmxGeneratedAgentsMd",
+        "OMX_AGENTS_CONTRACT_HEADING",
+        "OMX_GENERATED_AGENTS_MARKER",
+        "OMX_MANAGED_AGENTS_END_MARKER",
+        "OMX_MANAGED_AGENTS_START_MARKER",
+        "OMX_USER_POLICY_END_MARKER",
+        "OMX_USER_POLICY_START_MARKER",
+        "preserveUserOmxPolicyBlocks",
+        "upsertManagedAgentsBlock"
+      ],
+      "consumes": [
+        {
+          "cell": "agents"
+        },
+        {
+          "cell": "catalog"
+        },
+        {
+          "cell": "config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "verification",
+      "ownedPaths": [
+        "src/verification/**"
+      ],
+      "publicEntry": "src/verification/verifier.ts",
+      "publicSymbols": [
+        "determineTaskSize",
+        "getFixLoopInstructions",
+        "getVerificationInstructions",
+        "hasStructuredVerificationEvidence",
+        "VerificationEvidence",
+        "VerificationResult"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "visual",
+      "ownedPaths": [
+        "src/visual/**"
+      ],
+      "publicEntry": "src/visual/constants.ts",
+      "publicSymbols": [
+        "VISUAL_NEXT_ACTIONS_LIMIT",
+        "VISUAL_VERDICT_STATUSES",
+        "VisualVerdictStatus"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vscode",
+      "ownedPaths": [
+        "src/vscode/**"
+      ],
+      "publicEntry": "src/vscode/index.ts",
+      "publicSymbols": [
+        "buildDirectSessionArgs",
+        "BuildDirectSessionArgsOptions",
+        "DIRECT_SESSION_SCHEMA_VERSION",
+        "DirectSessionMode",
+        "findDangerousLaunchArgs",
+        "launchDirectSession",
+        "LaunchDirectSessionOptions",
+        "launchRequiresDangerousApproval",
+        "OmxDirectSessionHandle",
+        "redactOmxLogLine",
+        "resolveVscodeLaunchEnv",
+        "ResolveVscodeLaunchEnvOptions",
+        "runOmxCatalogCommand",
+        "RunOmxCatalogCommandOptions",
+        "RunOmxCatalogCommandResult",
+        "VscodeLaunchEnvResolution"
+      ],
+      "consumes": [
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "wiki",
+      "ownedPaths": [
+        "src/wiki/**"
+      ],
+      "publicEntry": "src/wiki/index.ts",
+      "publicSymbols": [
+        "appendLog",
+        "appendLogUnsafe",
+        "DEFAULT_WIKI_CONFIG",
+        "deletePage",
+        "deletePageUnsafe",
+        "ensureWikiDir",
+        "getLegacyWikiDir",
+        "getWikiDir",
+        "hasReadableWiki",
+        "ingestKnowledge",
+        "isLegacyWikiFallbackActive",
+        "lintWiki",
+        "listPages",
+        "normalizeWikiPageName",
+        "onPostCompact",
+        "onPreCompact",
+        "onSessionEnd",
+        "onSessionStart",
+        "parseFrontmatter",
+        "queryWiki",
+        "readAllPages",
+        "readCanonicalPage",
+        "readIndex",
+        "readLog",
+        "readPage",
+        "serializePage",
+        "titleToSlug",
+        "tokenize",
+        "updateIndexUnsafe",
+        "WIKI_SCHEMA_VERSION",
+        "WikiCategory",
+        "WikiConfig",
+        "WikiIngestInput",
+        "WikiIngestResult",
+        "WikiLintIssue",
+        "WikiLintReport",
+        "WikiLogEntry",
+        "WikiPage",
+        "WikiPageFrontmatter",
+        "WikiQueryMatch",
+        "WikiQueryOptions",
+        "withWikiLock",
+        "writePage",
+        "writePageUnsafe"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

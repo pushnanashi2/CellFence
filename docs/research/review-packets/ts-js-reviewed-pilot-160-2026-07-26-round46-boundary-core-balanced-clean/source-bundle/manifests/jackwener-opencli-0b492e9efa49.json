@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "browser",
+      "ownedPaths": [
+        "src/browser/**"
+      ],
+      "publicEntry": "src/browser/index.ts",
+      "publicSymbols": [
+        "BrowserBridge",
+        "CDPBridge",
+        "DaemonHealth",
+        "DomSnapshotOptions",
+        "generateSnapshotJs",
+        "generateStealthJs",
+        "getDaemonHealth",
+        "getFormStateJs",
+        "Page",
+        "scrollToRefJs"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commands",
+      "ownedPaths": [
+        "src/commands/**"
+      ],
+      "publicEntry": "src/commands/auth.ts",
+      "publicSymbols": [
+        "AuthRefreshRow",
+        "AuthStatusRow",
+        "collectAuthRefresh",
+        "collectAuthStatus",
+        "registerAuthCommands"
+      ],
+      "consumes": [
+        {
+          "cell": "browser"
+        },
+        {
+          "cell": "download"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "download",
+      "ownedPaths": [
+        "src/download/**"
+      ],
+      "publicEntry": "src/download/index.ts",
+      "publicSymbols": [
+        "BrowserCookie",
+        "checkYtdlp",
+        "detectContentType",
+        "DownloadOptions",
+        "exportCookiesToNetscape",
+        "formatCookieHeader",
+        "generateFilename",
+        "getTempDir",
+        "httpDownload",
+        "requiresYtdlp",
+        "resolveRedirectUrl",
+        "sanitizeFilename",
+        "saveDocument",
+        "ytdlpDownload",
+        "YtdlpOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "observation",
+      "ownedPaths": [
+        "src/observation/**"
+      ],
+      "publicEntry": "src/observation/index.ts",
+      "publicSymbols": [
+        "ActionObservationEvent",
+        "buildTraceReceipt",
+        "ConsoleObservationEvent",
+        "createTraceId",
+        "DEFAULT_OBSERVATION_WINDOW_MS",
+        "DEFAULT_TRACE_RETENTION_POLICY",
+        "ErrorObservationEvent",
+        "ExportObservationOptions",
+        "exportObservationSession",
+        "getTraceDirectory",
+        "NetworkObservationEvent",
+        "ObservationEvent",
+        "ObservationEventInput",
+        "ObservationExportResult",
+        "ObservationExportStatus",
+        "ObservationManager",
+        "ObservationScope",
+        "ObservationSession",
+        "ObservationSessionOptions",
+        "ObservationStream",
+        "ObservationTraceReceipt",
+        "parseByteSize",
+        "pruneTraceArtifacts",
+        "redactHeaders",
+        "RedactionOptions",
+        "redactText",
+        "redactUrl",
+        "redactValue",
+        "ResolvedTraceRetentionPolicy",
+        "resolveTraceRetentionPolicy",
+        "RingBuffer",
+        "RingBufferOptions",
+        "ScreenshotObservationEvent",
+        "StateObservationEvent",
+        "traceExpiresAt",
+        "TraceRetentionPolicyInput",
+        "TraceRetentionPruneResult"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pipeline",
+      "ownedPaths": [
+        "src/pipeline/**"
+      ],
+      "publicEntry": "src/pipeline/index.ts",
+      "publicSymbols": [
+        "evalExpr",
+        "executePipeline",
+        "normalizeEvaluateSource",
+        "PipelineContext",
+        "render",
+        "RenderContext",
+        "resolvePath"
+      ],
+      "consumes": [
+        {
+          "cell": "browser"
+        },
+        {
+          "cell": "download"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "src/scripts/**"
+      ],
+      "publicEntry": "src/scripts/framework.ts",
+      "publicSymbols": [
+        "detectFramework"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/adapter-shadow.ts",
+      "publicSymbols": [
+        "AdapterShadow",
+        "AdapterShadowOptions",
+        "findShadowedUserAdapters",
+        "formatAdapterShadowIssue"
+      ],
+      "consumes": [
+        {
+          "cell": "browser"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "observation"
+        },
+        {
+          "cell": "pipeline"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

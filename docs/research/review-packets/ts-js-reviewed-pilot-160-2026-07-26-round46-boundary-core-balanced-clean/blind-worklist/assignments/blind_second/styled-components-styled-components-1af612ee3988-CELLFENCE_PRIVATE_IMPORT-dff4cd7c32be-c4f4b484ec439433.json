@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-c4f4b484ec439433",
+    "evidencePackageId": "evidence-b2a21d9279a3631a",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/styled-components-styled-components-1af612ee3988.json",
+        "sha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459"
+      },
+      "auditLog": {
+        "path": "logs/styled-components-styled-components-1af612ee3988/check.audit.jsonl",
+        "sha256": "7dcbb2331c207373f87a0129185a4b97c454958524bbf93f276c274e781c3968"
+      },
+      "evidenceGraph": {
+        "path": "logs/styled-components-styled-components-1af612ee3988/evidence-graph.json",
+        "sha256": "32e0a556dd4bb2a361bab881f7d0f1626748e202ce3aed93be72a91f20594642"
+      },
+      "checkStdout": {
+        "path": "logs/styled-components-styled-components-1af612ee3988/check.stdout.log",
+        "sha256": "7195213c8726402e15d90362007cfd6ed4aecc6c11a5cf66306f09df1b38bd26"
+      },
+      "checkStderr": {
+        "path": "logs/styled-components-styled-components-1af612ee3988/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:b2a21d9279a3631ab9b4679f60d4b678c30aff7ef4a5f0ca3fdd4eb02a21f1a3",
+    "subjectId": "styled-components-styled-components",
+    "repository": "https://github.com/styled-components/styled-components.git",
+    "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca",
+    "gitTree": "3f88b0b4008e15c1bd58a41274150cd9d935b156",
+    "manifestSha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "packages/native-showcase/src/widgets/BoxSizingHyphensBoard.tsx",
+    "line": 2,
+    "message": "native-showcase imports private implementation from styled-components",
+    "cellId": "native-showcase",
+    "producerCellId": "styled-components",
+    "cellfenceFingerprint": "516549857bb0b25415ec74ccfac39471e94385e1abfc5f13f676643557a9d44b",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:b2a21d9279a3631ab9b4679f60d4b678c30aff7ef4a5f0ca3fdd4eb02a21f1a3",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-c4f4b484ec439433",
+    "evidencePackageId": "evidence-b2a21d9279a3631a",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

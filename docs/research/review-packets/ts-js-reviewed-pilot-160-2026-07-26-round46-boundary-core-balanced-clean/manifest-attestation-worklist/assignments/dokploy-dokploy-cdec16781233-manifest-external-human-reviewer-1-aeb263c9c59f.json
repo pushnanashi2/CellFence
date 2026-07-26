@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e4ca32f6dc953c8f",
+    "subjectId": "dokploy-dokploy",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "dokploy-dokploy",
+    "phase": null,
+    "repository": "https://github.com/Dokploy/dokploy.git",
+    "commit": "df3965a5816700d61c39fd1a13241b5766d7b24e"
+  },
+  "manifestCopy": {
+    "path": "manifests/dokploy-dokploy-cdec16781233.json",
+    "sha256": "65c4397842b10a63ab21ed22a6b485b9c4683122eb3e1ea6cd326b60a9e883fa"
+  },
+  "attestationTemplate": {
+    "subjectId": "dokploy-dokploy",
+    "repository": "https://github.com/Dokploy/dokploy.git",
+    "commit": "df3965a5816700d61c39fd1a13241b5766d7b24e",
+    "manifestCopy": {
+      "path": "manifests/dokploy-dokploy-cdec16781233.json",
+      "sha256": "65c4397842b10a63ab21ed22a6b485b9c4683122eb3e1ea6cd326b60a9e883fa"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "65c4397842b10a63ab21ed22a6b485b9c4683122eb3e1ea6cd326b60a9e883fa",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

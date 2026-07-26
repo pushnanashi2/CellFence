@@ -1,0 +1,325 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/admin/src/**",
+      "apps/api/**",
+      "packages/admin-layout/src/**",
+      "packages/admin-lb-sdk/src/**",
+      "packages/admin-ui/src/**",
+      "packages/api-explorer-style/**",
+      "packages/api-helpers/src/**",
+      "packages/logger/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "admin",
+      "ownedPaths": [
+        "apps/admin/src/**"
+      ],
+      "publicEntry": "apps/admin/src/app/app-config.module.ts",
+      "publicSymbols": [
+        "AppConfigModule"
+      ],
+      "packageName": "@colmena/admin",
+      "consumes": [
+        {
+          "cell": "admin-layout"
+        },
+        {
+          "cell": "admin-lb-sdk"
+        },
+        {
+          "cell": "admin-ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "admin-layout",
+      "ownedPaths": [
+        "packages/admin-layout/src/**"
+      ],
+      "publicEntry": "packages/admin-layout/src/index.ts",
+      "publicSymbols": [
+        "Actions",
+        "ActionTypes",
+        "ColmenaLayoutModule",
+        "components",
+        "directives",
+        "FullLayoutComponent",
+        "LayoutEffects",
+        "LayoutFooterLeftAction",
+        "LayoutFooterRightAction",
+        "LayoutHeaderNavAction",
+        "LayoutSidebarNavAction",
+        "reducer",
+        "SimpleLayoutComponent",
+        "State"
+      ],
+      "packageName": "@colmena/admin-layout",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "admin-lb-sdk",
+      "ownedPaths": [
+        "packages/admin-lb-sdk/src/**"
+      ],
+      "publicEntry": "packages/admin-lb-sdk/src/index.ts",
+      "publicSymbols": [
+        "AccessToken",
+        "AccessTokenInterface",
+        "BaseLoopBackApi",
+        "BaseStorage",
+        "ContentEvent",
+        "ContentEventApi",
+        "ContentEventInterface",
+        "ContentPage",
+        "ContentPageApi",
+        "ContentPageInterface",
+        "ContentPost",
+        "ContentPostApi",
+        "ContentPostInterface",
+        "ContentProduct",
+        "ContentProductApi",
+        "ContentProductInterface",
+        "CookieBrowser",
+        "Core",
+        "CoreApi",
+        "CoreInterface",
+        "Email",
+        "EmailApi",
+        "EmailInterface",
+        "ErrorHandler",
+        "FireLoopRef",
+        "GeoPoint",
+        "InternalStorage",
+        "JSONSearchParams",
+        "LoggerService",
+        "LoopBackAuth",
+        "LoopBackConfig",
+        "LoopBackFilter",
+        "Meta",
+        "MetaApi",
+        "MetaInterface",
+        "Models",
+        "Ping",
+        "PingApi",
+        "PingInterface",
+        "RealTime",
+        "SDKBrowserModule",
+        "SDKModels",
+        "SDKStorage",
+        "SDKToken",
+        "StatFilter",
+        "StorageBrowser",
+        "StorageContainer",
+        "StorageContainerApi",
+        "StorageContainerInterface",
+        "StorageFile",
+        "StorageFileApi",
+        "StorageFileInterface",
+        "System",
+        "SystemApi",
+        "SystemDomain",
+        "SystemDomainApi",
+        "SystemDomainInterface",
+        "SystemInterface",
+        "SystemSetting",
+        "SystemSettingApi",
+        "SystemSettingInterface",
+        "SystemUser",
+        "SystemUserApi",
+        "SystemUserInterface"
+      ],
+      "packageName": "@colmena/admin-lb-sdk",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "admin-ui",
+      "ownedPaths": [
+        "packages/admin-ui/src/**"
+      ],
+      "publicEntry": "packages/admin-ui/src/index.ts",
+      "publicSymbols": [
+        "ColmenaUiModule",
+        "FormService",
+        "UiDataGridService",
+        "UiService",
+        "UiTabLink"
+      ],
+      "packageName": "@colmena/admin-ui",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "api",
+      "ownedPaths": [
+        "apps/api/**"
+      ],
+      "publicEntry": "apps/api/server/server.ts",
+      "publicSymbols": [],
+      "packageName": "@colmena/api",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "api-explorer-style",
+      "ownedPaths": [
+        "packages/api-explorer-style/**"
+      ],
+      "publicEntry": "packages/api-explorer-style/lib/loadSwaggerUI.js",
+      "publicSymbols": [],
+      "packageName": "@colmena/api-explorer-style",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "api-helpers",
+      "ownedPaths": [
+        "packages/api-helpers/src/**"
+      ],
+      "publicEntry": "packages/api-helpers/src/gravatar.js",
+      "publicSymbols": [],
+      "packageName": "@colmena/api-helpers",
+      "consumes": [
+        {
+          "cell": "logger"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger",
+      "ownedPaths": [
+        "packages/logger/**"
+      ],
+      "publicEntry": "packages/logger/index.js",
+      "publicSymbols": [],
+      "packageName": "@colmena/logger",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

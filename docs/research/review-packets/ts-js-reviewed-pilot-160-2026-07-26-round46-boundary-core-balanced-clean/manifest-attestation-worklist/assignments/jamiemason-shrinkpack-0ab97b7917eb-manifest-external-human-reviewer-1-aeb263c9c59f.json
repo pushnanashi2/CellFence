@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-7703dafa48caeff5",
+    "subjectId": "jamiemason-shrinkpack",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jamiemason-shrinkpack",
+    "phase": null,
+    "repository": "https://github.com/JamieMason/shrinkpack.git",
+    "commit": "ba19806467afe58a4507567898ea38d73aab9b41"
+  },
+  "manifestCopy": {
+    "path": "manifests/jamiemason-shrinkpack-0ab97b7917eb.json",
+    "sha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9"
+  },
+  "attestationTemplate": {
+    "subjectId": "jamiemason-shrinkpack",
+    "repository": "https://github.com/JamieMason/shrinkpack.git",
+    "commit": "ba19806467afe58a4507567898ea38d73aab9b41",
+    "manifestCopy": {
+      "path": "manifests/jamiemason-shrinkpack-0ab97b7917eb.json",
+      "sha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

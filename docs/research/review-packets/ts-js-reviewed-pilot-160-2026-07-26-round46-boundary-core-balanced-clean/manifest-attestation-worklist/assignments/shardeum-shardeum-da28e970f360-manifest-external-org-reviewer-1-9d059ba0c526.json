@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-893f6ecdbac08f49",
+    "subjectId": "shardeum-shardeum",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "shardeum-shardeum",
+    "phase": null,
+    "repository": "https://github.com/shardeum/shardeum.git",
+    "commit": "0c454caf067f7b896569eabdd5f47cb8b61738b3"
+  },
+  "manifestCopy": {
+    "path": "manifests/shardeum-shardeum-da28e970f360.json",
+    "sha256": "baea7264c6d713402c6ca4dd41425b2eff6d32c9d6e0c0a9c815ce25cbcfa639"
+  },
+  "attestationTemplate": {
+    "subjectId": "shardeum-shardeum",
+    "repository": "https://github.com/shardeum/shardeum.git",
+    "commit": "0c454caf067f7b896569eabdd5f47cb8b61738b3",
+    "manifestCopy": {
+      "path": "manifests/shardeum-shardeum-da28e970f360.json",
+      "sha256": "baea7264c6d713402c6ca4dd41425b2eff6d32c9d6e0c0a9c815ce25cbcfa639"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "baea7264c6d713402c6ca4dd41425b2eff6d32c9d6e0c0a9c815ce25cbcfa639",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

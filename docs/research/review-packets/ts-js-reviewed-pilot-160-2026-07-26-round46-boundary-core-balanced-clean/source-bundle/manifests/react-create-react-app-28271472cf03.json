@@ -1,0 +1,260 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "docusaurus/website/src/**",
+      "packages/babel-plugin-named-asset-import/**",
+      "packages/babel-preset-react-app/**",
+      "packages/confusing-browser-globals/**",
+      "packages/cra-template-typescript/**",
+      "packages/cra-template/**",
+      "packages/create-react-app/**",
+      "packages/eslint-config-react-app/**",
+      "packages/react-app-polyfill/**",
+      "packages/react-dev-utils/**",
+      "packages/react-error-overlay/src/**",
+      "packages/react-scripts/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "babel-plugin-named-asset-import",
+      "ownedPaths": [
+        "packages/babel-plugin-named-asset-import/**"
+      ],
+      "publicEntry": "packages/babel-plugin-named-asset-import/index.js",
+      "publicSymbols": [],
+      "packageName": "babel-plugin-named-asset-import",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "babel-preset-react-app",
+      "ownedPaths": [
+        "packages/babel-preset-react-app/**"
+      ],
+      "publicEntry": "packages/babel-preset-react-app/index.js",
+      "publicSymbols": [],
+      "packageName": "babel-preset-react-app",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "confusing-browser-globals",
+      "ownedPaths": [
+        "packages/confusing-browser-globals/**"
+      ],
+      "publicEntry": "packages/confusing-browser-globals/index.js",
+      "publicSymbols": [],
+      "packageName": "confusing-browser-globals",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cra-docs",
+      "ownedPaths": [
+        "docusaurus/website/src/**"
+      ],
+      "publicEntry": "docusaurus/website/src/pages/index.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "cra-docs",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cra-template",
+      "ownedPaths": [
+        "packages/cra-template/**"
+      ],
+      "publicEntry": "packages/cra-template/template/src/App.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "cra-template",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cra-template-typescript",
+      "ownedPaths": [
+        "packages/cra-template-typescript/**"
+      ],
+      "publicEntry": "packages/cra-template-typescript/template/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "cra-template-typescript",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-react-app",
+      "ownedPaths": [
+        "packages/create-react-app/**"
+      ],
+      "publicEntry": "packages/create-react-app/index.js",
+      "publicSymbols": [],
+      "packageName": "create-react-app",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config-react-app",
+      "ownedPaths": [
+        "packages/eslint-config-react-app/**"
+      ],
+      "publicEntry": "packages/eslint-config-react-app/index.js",
+      "publicSymbols": [],
+      "packageName": "eslint-config-react-app",
+      "consumes": [
+        {
+          "cell": "babel-preset-react-app"
+        },
+        {
+          "cell": "confusing-browser-globals"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-app-polyfill",
+      "ownedPaths": [
+        "packages/react-app-polyfill/**"
+      ],
+      "publicEntry": "packages/react-app-polyfill/ie11.js",
+      "publicSymbols": [],
+      "packageName": "react-app-polyfill",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-dev-utils",
+      "ownedPaths": [
+        "packages/react-dev-utils/**"
+      ],
+      "publicEntry": "packages/react-dev-utils/browsersHelper.js",
+      "publicSymbols": [],
+      "packageName": "react-dev-utils",
+      "consumes": [
+        {
+          "cell": "react-error-overlay"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-error-overlay",
+      "ownedPaths": [
+        "packages/react-error-overlay/src/**"
+      ],
+      "publicEntry": "packages/react-error-overlay/src/index.js",
+      "publicSymbols": [
+        "dismissBuildError",
+        "dismissRuntimeErrors",
+        "reportBuildError",
+        "reportRuntimeError",
+        "setEditorHandler",
+        "startReportingRuntimeErrors",
+        "stopReportingRuntimeErrors"
+      ],
+      "packageName": "react-error-overlay",
+      "consumes": [
+        {
+          "cell": "babel-preset-react-app"
+        },
+        {
+          "cell": "react-app-polyfill"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-scripts",
+      "ownedPaths": [
+        "packages/react-scripts/**"
+      ],
+      "publicEntry": "packages/react-scripts/bin/react-scripts.js",
+      "publicSymbols": [],
+      "packageName": "react-scripts",
+      "consumes": [
+        {
+          "cell": "babel-plugin-named-asset-import"
+        },
+        {
+          "cell": "babel-preset-react-app"
+        },
+        {
+          "cell": "eslint-config-react-app"
+        },
+        {
+          "cell": "react-app-polyfill"
+        },
+        {
+          "cell": "react-dev-utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-85af042aab163828",
+    "subjectId": "ajaxorg-ace",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "ajaxorg-ace",
+    "phase": null,
+    "repository": "https://github.com/ajaxorg/ace.git",
+    "commit": "de5ca297d4383b2bda12a307ee764336ccf985f8"
+  },
+  "manifestCopy": {
+    "path": "manifests/ajaxorg-ace-22a3e4df260e.json",
+    "sha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025"
+  },
+  "attestationTemplate": {
+    "subjectId": "ajaxorg-ace",
+    "repository": "https://github.com/ajaxorg/ace.git",
+    "commit": "de5ca297d4383b2bda12a307ee764336ccf985f8",
+    "manifestCopy": {
+      "path": "manifests/ajaxorg-ace-22a3e4df260e.json",
+      "sha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

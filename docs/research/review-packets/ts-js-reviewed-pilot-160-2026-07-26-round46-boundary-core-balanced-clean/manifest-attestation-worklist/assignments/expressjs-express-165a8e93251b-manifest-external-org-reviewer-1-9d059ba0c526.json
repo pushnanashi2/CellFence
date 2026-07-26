@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-421ca2197646a097",
+    "subjectId": "expressjs-express",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "expressjs-express",
+    "phase": null,
+    "repository": "https://github.com/expressjs/express.git",
+    "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4"
+  },
+  "manifestCopy": {
+    "path": "manifests/expressjs-express-165a8e93251b.json",
+    "sha256": "457c57070b1ede0b934f91a95e8c8964f7b3f814cb60e5be04be043872d3c1a1"
+  },
+  "attestationTemplate": {
+    "subjectId": "expressjs-express",
+    "repository": "https://github.com/expressjs/express.git",
+    "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4",
+    "manifestCopy": {
+      "path": "manifests/expressjs-express-165a8e93251b.json",
+      "sha256": "457c57070b1ede0b934f91a95e8c8964f7b3f814cb60e5be04be043872d3c1a1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "457c57070b1ede0b934f91a95e8c8964f7b3f814cb60e5be04be043872d3c1a1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

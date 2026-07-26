@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ab5a16d17f61aebb",
+    "subjectId": "jimliu-baoyu-skills",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jimliu-baoyu-skills",
+    "phase": null,
+    "repository": "https://github.com/JimLiu/baoyu-skills.git",
+    "commit": "6b7a2e417500561a5ecdd0b168332f4142584617"
+  },
+  "manifestCopy": {
+    "path": "manifests/jimliu-baoyu-skills-3e3030f344bd.json",
+    "sha256": "5cf074b26d109f432d7529bd80c05053615bed1dce60415bcb9fca2216ef4e07"
+  },
+  "attestationTemplate": {
+    "subjectId": "jimliu-baoyu-skills",
+    "repository": "https://github.com/JimLiu/baoyu-skills.git",
+    "commit": "6b7a2e417500561a5ecdd0b168332f4142584617",
+    "manifestCopy": {
+      "path": "manifests/jimliu-baoyu-skills-3e3030f344bd.json",
+      "sha256": "5cf074b26d109f432d7529bd80c05053615bed1dce60415bcb9fca2216ef4e07"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5cf074b26d109f432d7529bd80c05053615bed1dce60415bcb9fca2216ef4e07",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

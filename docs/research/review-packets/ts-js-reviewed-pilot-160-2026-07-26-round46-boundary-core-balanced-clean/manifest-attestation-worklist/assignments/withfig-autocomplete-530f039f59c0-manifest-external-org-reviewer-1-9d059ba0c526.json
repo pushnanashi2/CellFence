@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6b39c3b0143fcb22",
+    "subjectId": "withfig-autocomplete",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "withfig-autocomplete",
+    "phase": null,
+    "repository": "https://github.com/withfig/autocomplete.git",
+    "commit": "aef52acff84c45edde61ae610cc2c964802b9a38"
+  },
+  "manifestCopy": {
+    "path": "manifests/withfig-autocomplete-530f039f59c0.json",
+    "sha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831"
+  },
+  "attestationTemplate": {
+    "subjectId": "withfig-autocomplete",
+    "repository": "https://github.com/withfig/autocomplete.git",
+    "commit": "aef52acff84c45edde61ae610cc2c964802b9a38",
+    "manifestCopy": {
+      "path": "manifests/withfig-autocomplete-530f039f59c0.json",
+      "sha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

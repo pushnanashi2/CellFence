@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-df9289c5178571bc",
+    "subjectId": "chatboxai-chatbox",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "chatboxai-chatbox",
+    "phase": null,
+    "repository": "https://github.com/chatboxai/chatbox.git",
+    "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647"
+  },
+  "manifestCopy": {
+    "path": "manifests/chatboxai-chatbox-142075f413a1.json",
+    "sha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a"
+  },
+  "attestationTemplate": {
+    "subjectId": "chatboxai-chatbox",
+    "repository": "https://github.com/chatboxai/chatbox.git",
+    "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647",
+    "manifestCopy": {
+      "path": "manifests/chatboxai-chatbox-142075f413a1.json",
+      "sha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

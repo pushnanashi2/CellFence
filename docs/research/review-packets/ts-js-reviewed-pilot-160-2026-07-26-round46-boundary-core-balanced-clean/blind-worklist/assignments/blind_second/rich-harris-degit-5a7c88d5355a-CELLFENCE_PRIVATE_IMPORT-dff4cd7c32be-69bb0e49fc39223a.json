@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-69bb0e49fc39223a",
+    "evidencePackageId": "evidence-7577f9edddac2d29",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/rich-harris-degit-5a7c88d5355a.json",
+        "sha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314"
+      },
+      "auditLog": {
+        "path": "logs/rich-harris-degit-5a7c88d5355a/check.audit.jsonl",
+        "sha256": "2381996974f44938452c300419c67994ca37b3e49abcf1006ed0372df80a9ce9"
+      },
+      "evidenceGraph": {
+        "path": "logs/rich-harris-degit-5a7c88d5355a/evidence-graph.json",
+        "sha256": "5285bdd86e542019d69b943c31890d6f718a7165a2b33fa59758a05420083702"
+      },
+      "checkStdout": {
+        "path": "logs/rich-harris-degit-5a7c88d5355a/check.stdout.log",
+        "sha256": "67c7d2ded93055440f379648c5482ad3f95a302c1001964489e77ffd28d69383"
+      },
+      "checkStderr": {
+        "path": "logs/rich-harris-degit-5a7c88d5355a/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:7577f9edddac2d29b7644647644a0fd0fc39ccec1e39be3706206c103a7783dc",
+    "subjectId": "rich-harris-degit",
+    "repository": "https://github.com/Rich-Harris/degit.git",
+    "commit": "87008d3644a6172e7b8c12f38692b0d20b63a70d",
+    "gitTree": "94b147d5d5c39c5af103462111cacbb6483db964",
+    "manifestSha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/index.ts",
+    "line": 4,
+    "message": "src-root imports private implementation from domain",
+    "cellId": "src-root",
+    "producerCellId": "domain",
+    "cellfenceFingerprint": "c6d201e4fa8f027f86cd371967a224cdd009ec3c01439f1d536076d05aadb418",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:7577f9edddac2d29b7644647644a0fd0fc39ccec1e39be3706206c103a7783dc",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-69bb0e49fc39223a",
+    "evidencePackageId": "evidence-7577f9edddac2d29",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

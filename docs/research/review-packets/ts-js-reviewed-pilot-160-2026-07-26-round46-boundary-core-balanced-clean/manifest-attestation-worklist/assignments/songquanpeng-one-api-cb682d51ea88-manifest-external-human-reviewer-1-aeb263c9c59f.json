@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2fb4a013f1a7b687",
+    "subjectId": "songquanpeng-one-api",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "songquanpeng-one-api",
+    "phase": null,
+    "repository": "https://github.com/songquanpeng/one-api.git",
+    "commit": "8df4a2670b98266bd287c698243fff327d9748cf"
+  },
+  "manifestCopy": {
+    "path": "manifests/songquanpeng-one-api-cb682d51ea88.json",
+    "sha256": "77171451c60c6755ae33a3e0bd80dd8a760fdfe3f7f39125a1e3f9b513a5d311"
+  },
+  "attestationTemplate": {
+    "subjectId": "songquanpeng-one-api",
+    "repository": "https://github.com/songquanpeng/one-api.git",
+    "commit": "8df4a2670b98266bd287c698243fff327d9748cf",
+    "manifestCopy": {
+      "path": "manifests/songquanpeng-one-api-cb682d51ea88.json",
+      "sha256": "77171451c60c6755ae33a3e0bd80dd8a760fdfe3f7f39125a1e3f9b513a5d311"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "77171451c60c6755ae33a3e0bd80dd8a760fdfe3f7f39125a1e3f9b513a5d311",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

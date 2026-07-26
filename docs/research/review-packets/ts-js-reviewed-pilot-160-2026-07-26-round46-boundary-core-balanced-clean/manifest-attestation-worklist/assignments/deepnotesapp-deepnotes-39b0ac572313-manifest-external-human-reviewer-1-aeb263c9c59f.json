@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-bc353afdc65c96b8",
+    "subjectId": "deepnotesapp-deepnotes",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "deepnotesapp-deepnotes",
+    "phase": null,
+    "repository": "https://github.com/DeepNotesApp/DeepNotes.git",
+    "commit": "70f6c7edb00159b7011d3ac5710795631432f219"
+  },
+  "manifestCopy": {
+    "path": "manifests/deepnotesapp-deepnotes-39b0ac572313.json",
+    "sha256": "f50e74500136b9bbc20abdc7ded295922b41422e1ed73fe8bc12379a411ee652"
+  },
+  "attestationTemplate": {
+    "subjectId": "deepnotesapp-deepnotes",
+    "repository": "https://github.com/DeepNotesApp/DeepNotes.git",
+    "commit": "70f6c7edb00159b7011d3ac5710795631432f219",
+    "manifestCopy": {
+      "path": "manifests/deepnotesapp-deepnotes-39b0ac572313.json",
+      "sha256": "f50e74500136b9bbc20abdc7ded295922b41422e1ed73fe8bc12379a411ee652"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f50e74500136b9bbc20abdc7ded295922b41422e1ed73fe8bc12379a411ee652",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

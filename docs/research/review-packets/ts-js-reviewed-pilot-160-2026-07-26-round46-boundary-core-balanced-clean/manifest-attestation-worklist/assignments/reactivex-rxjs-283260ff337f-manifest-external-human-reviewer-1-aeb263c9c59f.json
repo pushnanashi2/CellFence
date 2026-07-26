@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-eb4015e358c8311c",
+    "subjectId": "reactivex-rxjs",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "reactivex-rxjs",
+    "phase": null,
+    "repository": "https://github.com/ReactiveX/rxjs.git",
+    "commit": "c15b37f81ba5f5abea8c872b0189a70b150df4cb"
+  },
+  "manifestCopy": {
+    "path": "manifests/reactivex-rxjs-283260ff337f.json",
+    "sha256": "628cb90208169d3ef9005deed969c942395d5e1256705e55df1380a69093aef1"
+  },
+  "attestationTemplate": {
+    "subjectId": "reactivex-rxjs",
+    "repository": "https://github.com/ReactiveX/rxjs.git",
+    "commit": "c15b37f81ba5f5abea8c872b0189a70b150df4cb",
+    "manifestCopy": {
+      "path": "manifests/reactivex-rxjs-283260ff337f.json",
+      "sha256": "628cb90208169d3ef9005deed969c942395d5e1256705e55df1380a69093aef1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "628cb90208169d3ef9005deed969c942395d5e1256705e55df1380a69093aef1",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

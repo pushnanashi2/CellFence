@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-561d619c34672d10",
+    "evidencePackageId": "evidence-e0c4d4df54179516",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/eyaltoledano-claude-task-master-a70853e1b7e5.json",
+        "sha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8"
+      },
+      "auditLog": {
+        "path": "logs/eyaltoledano-claude-task-master-a70853e1b7e5/check.audit.jsonl",
+        "sha256": "18f4ead59f1d3950a3c40fa2f188ac03c9402ce6e29646471eeb045a4dc0e62e"
+      },
+      "evidenceGraph": {
+        "path": "logs/eyaltoledano-claude-task-master-a70853e1b7e5/evidence-graph.json",
+        "sha256": "5c58459de153c7751b38d84d6edc6b4bad6bf6a84b77a24f82110694cf1e09a5"
+      },
+      "checkStdout": {
+        "path": "logs/eyaltoledano-claude-task-master-a70853e1b7e5/check.stdout.log",
+        "sha256": "603f71a2199e0b1d2a324d476ffb31b73e641f59b706ffa452fa47a31112afee"
+      },
+      "checkStderr": {
+        "path": "logs/eyaltoledano-claude-task-master-a70853e1b7e5/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:e0c4d4df54179516c74773e565f4842124658936e00b2892e855efb83daa3948",
+    "subjectId": "eyaltoledano-claude-task-master",
+    "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+    "commit": "c0c98d367c55296bfe69e65680625b6db437af02",
+    "gitTree": "6c7447184c0a92476ed6021373a55bb06ac92ca1",
+    "manifestSha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/ui/indicators.js",
+    "line": 7,
+    "message": "ui imports private implementation from constants",
+    "cellId": "ui",
+    "producerCellId": "constants",
+    "cellfenceFingerprint": "2ab1e0a1ddb26f4be4ae908438e4145aa2f60d70ca3420733d403c96f6260cd6",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:e0c4d4df54179516c74773e565f4842124658936e00b2892e855efb83daa3948",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-561d619c34672d10",
+    "evidencePackageId": "evidence-e0c4d4df54179516",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

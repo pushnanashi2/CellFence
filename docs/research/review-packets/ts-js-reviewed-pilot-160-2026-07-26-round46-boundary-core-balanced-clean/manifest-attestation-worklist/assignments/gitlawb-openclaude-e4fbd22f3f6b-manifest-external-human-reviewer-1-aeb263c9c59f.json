@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2a10df85fb73363d",
+    "subjectId": "gitlawb-openclaude",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "gitlawb-openclaude",
+    "phase": null,
+    "repository": "https://github.com/Gitlawb/openclaude.git",
+    "commit": "0effa0f42b6dbc6a4800e19f4b2d8d588269906b"
+  },
+  "manifestCopy": {
+    "path": "manifests/gitlawb-openclaude-e4fbd22f3f6b.json",
+    "sha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402"
+  },
+  "attestationTemplate": {
+    "subjectId": "gitlawb-openclaude",
+    "repository": "https://github.com/Gitlawb/openclaude.git",
+    "commit": "0effa0f42b6dbc6a4800e19f4b2d8d588269906b",
+    "manifestCopy": {
+      "path": "manifests/gitlawb-openclaude-e4fbd22f3f6b.json",
+      "sha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

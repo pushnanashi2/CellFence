@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-f5b3e9ac75fd3bb7",
+    "evidencePackageId": "evidence-b6a6b5f4af2f4204",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/usesend-usesend-ac0778344bfc.json",
+        "sha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d"
+      },
+      "auditLog": {
+        "path": "logs/usesend-usesend-ac0778344bfc/check.audit.jsonl",
+        "sha256": "5a543db91d2983973fd663b78810df7ca740868a0e378335a7d42e9c6f27b90b"
+      },
+      "evidenceGraph": {
+        "path": "logs/usesend-usesend-ac0778344bfc/evidence-graph.json",
+        "sha256": "0e939f6135af16fbbb3eb90c4b7626c7b637783041e693eade6f009a12650eed"
+      },
+      "checkStdout": {
+        "path": "logs/usesend-usesend-ac0778344bfc/check.stdout.log",
+        "sha256": "077ad0585c202554c67f87222bf4d8686c8811a6689785825c226565465f0f99"
+      },
+      "checkStderr": {
+        "path": "logs/usesend-usesend-ac0778344bfc/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:b6a6b5f4af2f4204daf99c04619caa1428386a74d77fd295f5339db398a72849",
+    "subjectId": "usesend-usesend",
+    "repository": "https://github.com/usesend/useSend.git",
+    "commit": "bd83535599b53fbf0f5cc84bcdbcf63c8d35be99",
+    "gitTree": "d665523a4940bf2bbaa479adb3a6f0597c6414de",
+    "manifestSha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/web/src/app/(dashboard)/emails/edit-schedule.tsx",
+    "line": 5,
+    "message": "web imports private implementation from ui",
+    "cellId": "web",
+    "producerCellId": "ui",
+    "cellfenceFingerprint": "f2e089c5c8276b38c03131164ff01da760299f64b2acb14a11e46cd5d0f9a844",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:b6a6b5f4af2f4204daf99c04619caa1428386a74d77fd295f5339db398a72849",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-f5b3e9ac75fd3bb7",
+    "evidencePackageId": "evidence-b6a6b5f4af2f4204",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

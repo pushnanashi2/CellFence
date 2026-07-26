@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-11483fb7cdef5130",
+    "evidencePackageId": "evidence-275cd1b2e323c236",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/immerjs-immer-fffa18661f11.json",
+        "sha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9"
+      },
+      "auditLog": {
+        "path": "logs/immerjs-immer-fffa18661f11/check.audit.jsonl",
+        "sha256": "424654492fd33dfb282c26f61d53b44881f6223022d7c6633641b9a995bb1426"
+      },
+      "evidenceGraph": {
+        "path": "logs/immerjs-immer-fffa18661f11/evidence-graph.json",
+        "sha256": "aebcc035d271d2142c46089dec33753428ab2256d4ca344343f7d56647f58944"
+      },
+      "checkStdout": {
+        "path": "logs/immerjs-immer-fffa18661f11/check.stdout.log",
+        "sha256": "f2033b5011bec8661c5fcdb65ae509d265d0b7b2b82195948afbe751adefd7d0"
+      },
+      "checkStderr": {
+        "path": "logs/immerjs-immer-fffa18661f11/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:275cd1b2e323c236111370b153cda54b4da2027cedb905ad9804bd98a5ad269a",
+    "subjectId": "immerjs-immer",
+    "repository": "https://github.com/immerjs/immer.git",
+    "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468",
+    "gitTree": "57fe7f98dbfb0fa5088a7489eb9a009b7535b27c",
+    "manifestSha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/utils/common.ts",
+    "line": 1,
+    "message": "utils imports private implementation from src-root",
+    "cellId": "utils",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "0ed53eb3c2b864513c426c0d41a3d37c9f89fed3754bbc6beef03097d73116dd",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:275cd1b2e323c236111370b153cda54b4da2027cedb905ad9804bd98a5ad269a",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-11483fb7cdef5130",
+    "evidencePackageId": "evidence-275cd1b2e323c236",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-82353fc5be53e71c",
+    "subjectId": "modelcontextprotocol-servers",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "modelcontextprotocol-servers",
+    "phase": null,
+    "repository": "https://github.com/modelcontextprotocol/servers.git",
+    "commit": "d31124c982401739917fd817c2a59db344529c16"
+  },
+  "manifestCopy": {
+    "path": "manifests/modelcontextprotocol-servers-c9ad5180c25a.json",
+    "sha256": "2e12511bfe245a6a4251a7282b0f4fb597ef54312bc000afa86efc33aa821277"
+  },
+  "attestationTemplate": {
+    "subjectId": "modelcontextprotocol-servers",
+    "repository": "https://github.com/modelcontextprotocol/servers.git",
+    "commit": "d31124c982401739917fd817c2a59db344529c16",
+    "manifestCopy": {
+      "path": "manifests/modelcontextprotocol-servers-c9ad5180c25a.json",
+      "sha256": "2e12511bfe245a6a4251a7282b0f4fb597ef54312bc000afa86efc33aa821277"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2e12511bfe245a6a4251a7282b0f4fb597ef54312bc000afa86efc33aa821277",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

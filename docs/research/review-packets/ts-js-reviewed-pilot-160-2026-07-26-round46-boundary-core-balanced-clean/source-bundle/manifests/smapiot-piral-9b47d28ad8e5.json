@@ -1,0 +1,2185 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "converters",
+      "ownedPaths": [
+        "src/converters/piral-aurelia/**",
+        "src/converters/piral-blazor/**",
+        "src/converters/piral-cycle/**",
+        "src/converters/piral-elm/**",
+        "src/converters/piral-ember/**",
+        "src/converters/piral-gea/**",
+        "src/converters/piral-hyperapp/**",
+        "src/converters/piral-inferno/**",
+        "src/converters/piral-litel/**",
+        "src/converters/piral-million/**",
+        "src/converters/piral-mithril/**",
+        "src/converters/piral-ng/**",
+        "src/converters/piral-ngjs/**",
+        "src/converters/piral-preact/**",
+        "src/converters/piral-react-15/**",
+        "src/converters/piral-react/**",
+        "src/converters/piral-riot/**",
+        "src/converters/piral-solid/**",
+        "src/converters/piral-svelte/**",
+        "src/converters/piral-vue-3/**",
+        "src/converters/piral-vue/**"
+      ],
+      "publicEntry": "src/converters/piral-aurelia/convert.ts",
+      "publicSymbols": [
+        "AureliaConverter",
+        "AureliaExtension",
+        "createAureliaConverter",
+        "fromAurelia",
+        "HtmlComponent"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-pilet",
+      "ownedPaths": [
+        "src/initializers/create-pilet/src/**"
+      ],
+      "publicEntry": "src/initializers/create-pilet/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "create-pilet",
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-piral-instance",
+      "ownedPaths": [
+        "src/initializers/create-piral-instance/src/**"
+      ],
+      "publicEntry": "src/initializers/create-piral-instance/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "create-piral-instance",
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "empty-piral",
+      "ownedPaths": [
+        "src/samples/empty-piral/src/**"
+      ],
+      "publicEntry": "src/samples/empty-piral/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "empty-piral",
+      "consumes": [
+        {
+          "cell": "piral-base"
+        },
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "framework",
+      "ownedPaths": [
+        "src/framework/piral/**"
+      ],
+      "publicEntry": "src/framework/piral/polyfills.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "minimal-piral",
+      "ownedPaths": [
+        "src/samples/minimal-piral/src/**"
+      ],
+      "publicEntry": "src/samples/minimal-piral/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "minimal-piral",
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pages",
+      "ownedPaths": [
+        "src/pages/common/**"
+      ],
+      "publicEntry": "src/pages/common/components/Footer.tsx",
+      "publicSymbols": [
+        "Footer"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral",
+      "ownedPaths": [
+        "src/framework/piral/src/**"
+      ],
+      "publicEntry": "src/framework/piral/src/index.tsx",
+      "publicSymbols": [
+        "createPiral",
+        "extendPiralApi",
+        "hydrateInstance",
+        "PiralRenderBaseOptions",
+        "PiralRenderOptions",
+        "PiralRunner",
+        "renderInstance"
+      ],
+      "packageName": "piral",
+      "consumes": [
+        {
+          "cell": "framework"
+        },
+        {
+          "cell": "piral-base"
+        },
+        {
+          "cell": "piral-core"
+        },
+        {
+          "cell": "piral-ext"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-adal",
+      "ownedPaths": [
+        "src/plugins/piral-adal/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-adal/src/index.ts",
+      "publicSymbols": [
+        "AdalClient",
+        "AdalConfig",
+        "AdalRequest",
+        "createAdalApi",
+        "PiletAdalApi",
+        "setupAdalClient"
+      ],
+      "packageName": "piral-adal",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-aurelia",
+      "ownedPaths": [
+        "src/converters/piral-aurelia/src/**"
+      ],
+      "publicEntry": "src/converters/piral-aurelia/src/index.ts",
+      "publicSymbols": [
+        "AureliaComponent",
+        "AureliaConfig",
+        "AureliaModule",
+        "createAureliaApi",
+        "PiletAureliaApi"
+      ],
+      "packageName": "piral-aurelia",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-auth",
+      "ownedPaths": [
+        "src/plugins/piral-auth/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-auth/src/index.ts",
+      "publicSymbols": [
+        "AuthConfig",
+        "createAuthApi",
+        "PiletAuthApi",
+        "PiralChangeUserEvent",
+        "UserFeatures",
+        "UserInfo",
+        "UserPermissions"
+      ],
+      "packageName": "piral-auth",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-axios",
+      "ownedPaths": [
+        "src/plugins/piral-axios/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-axios/src/index.ts",
+      "publicSymbols": [
+        "AxiosConfig",
+        "createAxiosApi",
+        "PiletAxiosApi"
+      ],
+      "packageName": "piral-axios",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-base",
+      "ownedPaths": [
+        "src/framework/piral-base/src/**"
+      ],
+      "publicEntry": "src/framework/piral-base/src/aggregate.ts",
+      "publicSymbols": [
+        "runPilet",
+        "runPilets"
+      ],
+      "packageName": "piral-base",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-blazor",
+      "ownedPaths": [
+        "src/converters/piral-blazor/src/**"
+      ],
+      "publicEntry": "src/converters/piral-blazor/src/index.ts",
+      "publicSymbols": [
+        "BlazorComponent",
+        "BlazorConfig",
+        "BlazorDependencyLoader",
+        "BlazorLogLevel",
+        "BlazorOptions",
+        "BlazorRootConfig",
+        "BlazorStartOptions",
+        "createBlazorApi",
+        "LegacyBlazorStartOptions",
+        "ModernBlazorStartOptions",
+        "PiletBlazorApi",
+        "WebAssemblyBootResourceType",
+        "WebAssemblyStartOptions"
+      ],
+      "packageName": "piral-blazor",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-breadcrumbs",
+      "ownedPaths": [
+        "src/plugins/piral-breadcrumbs/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-breadcrumbs/src/index.ts",
+      "publicSymbols": [
+        "BreadcrumbItemProps",
+        "BreadcrumbRegistration",
+        "Breadcrumbs",
+        "BreadcrumbsContainerProps",
+        "BreadcrumbSettings",
+        "BreadcrumbTitleParams",
+        "createBreadcrumbsApi",
+        "DashboardConfig",
+        "PiletBreadcrumbsApi",
+        "PiralBreadcrumbItem",
+        "PiralBreadcrumbsContainer",
+        "PiralCustomBreadcrumbSettings",
+        "useBreadcrumbs"
+      ],
+      "packageName": "piral-breadcrumbs",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-cli",
+      "ownedPaths": [
+        "src/tooling/piral-cli/src/**"
+      ],
+      "publicEntry": "src/tooling/piral-cli/src/index.ts",
+      "publicSymbols": [
+        "AppDefinition",
+        "apps",
+        "AuthConfig",
+        "availableBundlers",
+        "availableReleaseProviders",
+        "BaseBundleParameters",
+        "BaseBundlerDefinition",
+        "BuildPiletBundlerDefinition",
+        "BuildPiletParameters",
+        "BuildPiralBundlerDefinition",
+        "BuildPiralParameters",
+        "BundleDetails",
+        "BundleHandlerResponse",
+        "Bundler",
+        "BundlerDefinition",
+        "BundleResult",
+        "bundlerKeys",
+        "BundlerPrepareArgs",
+        "clientTypeKeys",
+        "CliPlugin",
+        "CliPluginApi",
+        "commands",
+        "DebugPiletBundlerDefinition",
+        "DebugPiletParameters",
+        "DebugPiralBundlerDefinition",
+        "DebugPiralParameters",
+        "EmulatorWebsiteManifest",
+        "EmulatorWebsiteManifestFiles",
+        "Flag",
+        "FlagType",
+        "forceOverwriteKeys",
+        "Framework",
+        "frameworkKeys",
+        "fromKeys",
+        "HeaderAuthConfig",
+        "HttpAuthConfig",
+        "IgnoredInstructions",
+        "Importmap",
+        "ImportmapMode",
+        "ImportmapVersions",
+        "keyOfForceOverwrite",
+        "ListCommands",
+        "LogLevels",
+        "NetworkSpec",
+        "NpmClientType",
+        "NpmDirectClientType",
+        "NpmWapperClientType",
+        "PackageData",
+        "PackagePatcher",
+        "PackageType",
+        "PiletBuildHandler",
+        "PiletBuildType",
+        "piletBuildTypeKeys",
+        "PiletPackageData",
+        "PiletPublishSource",
+        "PiletRuleContext",
+        "PiletSchemaVersion",
+        "PiletsInfo",
+        "PiralBuildHandler",
+        "PiralBuildType",
+        "piralBuildTypeKeys",
+        "PiralInstancePackageData",
+        "PiralPackageData",
+        "PiralPublishType",
+        "piralPublishTypeKeys",
+        "PiralRuleContext",
+        "PlatformStartModuleOptions",
+        "PlatformStartShellOptions",
+        "publishModeKeys",
+        "PublishScheme",
+        "ReleaseProvider",
+        "Rule",
+        "RuleContext",
+        "RuleRunner",
+        "runQuestionnaire",
+        "runQuestionnaireFor",
+        "schemaKeys",
+        "SelectCommands",
+        "SharedDependency",
+        "SourceLanguage",
+        "sourceLanguageKeys",
+        "StandardEnvProps",
+        "TemplateFileLocation",
+        "ToolCommand",
+        "ToolCommandFlagsSetter",
+        "ToolCommandRunner",
+        "ToolCommandWrapper",
+        "valueOfForceOverwrite",
+        "WatchPiralBundlerDefinition",
+        "WatchPiralParameters"
+      ],
+      "packageName": "piral-cli",
+      "consumes": [
+        {
+          "cell": "tooling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-cli-webpack5",
+      "ownedPaths": [
+        "src/tooling/piral-cli-webpack5/src/**"
+      ],
+      "publicEntry": "src/tooling/piral-cli-webpack5/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "piral-cli-webpack5",
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-configs",
+      "ownedPaths": [
+        "src/plugins/piral-configs/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-configs/src/index.ts",
+      "publicSymbols": [
+        "ConfigsConfig",
+        "createConfigsApi",
+        "PiletConfigsApi"
+      ],
+      "packageName": "piral-configs",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-containers",
+      "ownedPaths": [
+        "src/plugins/piral-containers/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-containers/src/index.ts",
+      "publicSymbols": [
+        "ContainersConfig",
+        "createContainersApi",
+        "PiletContainersApi",
+        "StateConnectorProps",
+        "StateContainer",
+        "StateContainerActions",
+        "StateContainerOptions",
+        "StateContainerReducer",
+        "StateContainerReducers"
+      ],
+      "packageName": "piral-containers",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-core",
+      "ownedPaths": [
+        "src/framework/piral-core/src/**"
+      ],
+      "publicEntry": "src/framework/piral-core/src/index.tsx",
+      "publicSymbols": [
+        "AnyComponent",
+        "AnyExtensionComponent",
+        "appendItem",
+        "appendItems",
+        "AppPath",
+        "AppState",
+        "attachDomPortal",
+        "AvailableDependencies",
+        "BaseComponentProps",
+        "BaseExtensionSlotProps",
+        "BaseRegistration",
+        "buildName",
+        "changeDomPortal",
+        "ComponentContext",
+        "ComponentConverters",
+        "componentName",
+        "ComponentsState",
+        "contentName",
+        "convertComponent",
+        "cookie",
+        "createActions",
+        "createCoreApi",
+        "createDataOptions",
+        "createDataView",
+        "createExtenders",
+        "createGlobalState",
+        "createInstance",
+        "createPiletOptions",
+        "createRouteMatcher",
+        "CustomDataStoreOptions",
+        "DataStoreOptions",
+        "DataStoreTarget",
+        "DeepPartial",
+        "defaultApiFactory",
+        "defaultBreakpoints",
+        "defaultDependencySelector",
+        "defaultLayouts",
+        "defaultModuleRequester",
+        "defaultRender",
+        "defer",
+        "DependencySelector",
+        "Dict",
+        "Disposable",
+        "ErrorBoundary",
+        "ErrorBoundaryProps",
+        "ErrorBoundaryState",
+        "ErrorComponentsState",
+        "ErrorInfoProps",
+        "Errors",
+        "EventEmitter",
+        "excludeItem",
+        "excludeOn",
+        "ExtensionComponentProps",
+        "ExtensionErrorInfoProps",
+        "extensionName",
+        "ExtensionParams",
+        "ExtensionRegistration",
+        "ExtensionSlot",
+        "ExtensionSlotProps",
+        "FirstParameter",
+        "FirstParametersOf",
+        "ForeignComponent",
+        "generateId",
+        "getCurrentLayout",
+        "getDataExpiration",
+        "getPiralComponent",
+        "globalDependencies",
+        "GlobalState",
+        "GlobalStateContext",
+        "HtmlComponent",
+        "includeActions",
+        "includeItem",
+        "isfunc",
+        "isSame",
+        "LayoutBreakpoints",
+        "LayoutProps",
+        "LayoutType",
+        "LayoutTypes",
+        "LoadingErrorInfoProps",
+        "LoadingIndicatorProps",
+        "MaybeAsync",
+        "Mediator",
+        "MediatorProps",
+        "NavigationAction",
+        "NavigationApi",
+        "NavigationBlocker",
+        "NavigationListener",
+        "NavigationLocation",
+        "NavigationTransition",
+        "NavigationUpdate",
+        "NestedPartial",
+        "none",
+        "noop",
+        "NotFoundErrorInfoProps",
+        "PageComponentProps",
+        "PageErrorInfoProps",
+        "PageRegistration",
+        "Pilet",
+        "PiletApi",
+        "PiletApiFactory",
+        "PiletCoreApi",
+        "PiletCustomApi",
+        "PiletEntries",
+        "PiletEntry",
+        "PiletLoader",
+        "PiletLoadingStrategy",
+        "PiletMetadata",
+        "PiletOptionsConfig",
+        "PiletRequester",
+        "PiletsBag",
+        "Piral",
+        "PiralAction",
+        "PiralActions",
+        "PiralComponentProps",
+        "PiralConfiguration",
+        "PiralContext",
+        "PiralContextProps",
+        "PiralCustomActions",
+        "PiralCustomComponentConverters",
+        "PiralCustomComponentsState",
+        "PiralCustomErrors",
+        "PiralCustomEventMap",
+        "PiralCustomExtensionSlotMap",
+        "PiralCustomPageMeta",
+        "PiralCustomRegistryState",
+        "PiralCustomState",
+        "PiralDefineActions",
+        "PiralExtensionProps",
+        "PiralExtensionSlotMap",
+        "PiralGlobals",
+        "PiralInstance",
+        "PiralInstanceOptions",
+        "PiralLoadedPiletsEvent",
+        "PiralLoadingPiletsEvent",
+        "PiralPageMeta",
+        "PiralPiletConfiguration",
+        "PiralPlugin",
+        "PiralPortalProps",
+        "PiralProps",
+        "PiralRoutes",
+        "PiralSlotProps",
+        "PiralStateConfiguration",
+        "PiralStorage",
+        "PiralStoreDataEvent",
+        "PiralSuspense",
+        "PiralSuspenseProps",
+        "PiralUnhandledErrorEvent",
+        "PiralView",
+        "PiralViewProps",
+        "portalName",
+        "PortalRenderer",
+        "PortalRendererProps",
+        "prependItem",
+        "prependItems",
+        "reactifyContent",
+        "RegisteredDebug",
+        "RegisteredErrorInfo",
+        "RegisteredLayout",
+        "RegisteredLoadingIndicator",
+        "RegisteredRouter",
+        "RegisteredRouteSwitch",
+        "RegistrationDisposer",
+        "RegistryState",
+        "RemainingArgs",
+        "removeIndicator",
+        "removeNested",
+        "renderElement",
+        "renderInDom",
+        "replaceOrAddItem",
+        "requireModule",
+        "ResponsiveLayout",
+        "ResponsiveLayoutProps",
+        "RouteBaseProps",
+        "RouteMatch",
+        "RouterProps",
+        "RoutesProps",
+        "RouteSwitchProps",
+        "SetComponent",
+        "SetComponentProps",
+        "SetError",
+        "SetErrorProps",
+        "SetErrors",
+        "SetErrorsProps",
+        "SetLayout",
+        "SetLayoutProps",
+        "SetProvider",
+        "SetProviderProps",
+        "SetRedirect",
+        "SetRedirectProps",
+        "SetRoute",
+        "SetRouteProps",
+        "SharedData",
+        "SharedDataItem",
+        "slotName",
+        "StateContext",
+        "StateDispatcher",
+        "storage",
+        "SwitchErrorInfo",
+        "toExtension",
+        "tryParseJson",
+        "UnionOf",
+        "UnionToIntersection",
+        "UnknownErrorInfoProps",
+        "Updatable",
+        "updateKey",
+        "useAction",
+        "useActions",
+        "useGlobalState",
+        "useGlobalStateContext",
+        "useMedia",
+        "usePiletApi",
+        "useSetter",
+        "useSharedData",
+        "ValuesOf",
+        "withAll",
+        "withApi",
+        "withExtension",
+        "withKey",
+        "Without",
+        "withoutExtension",
+        "withoutKey",
+        "withoutPage",
+        "withPage",
+        "withProvider",
+        "withRootExtension",
+        "withRoute",
+        "wrapComponent",
+        "WrappedComponent"
+      ],
+      "packageName": "piral-core",
+      "consumes": [
+        {
+          "cell": "piral-base"
+        },
+        {
+          "cell": "piral-debug-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-cycle",
+      "ownedPaths": [
+        "src/converters/piral-cycle/src/**"
+      ],
+      "publicEntry": "src/converters/piral-cycle/src/index.ts",
+      "publicSymbols": [
+        "createCycleApi",
+        "CycleComponent",
+        "CycleConfig",
+        "PiletCycleApi",
+        "PiralDomDrivers"
+      ],
+      "packageName": "piral-cycle",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-dashboard",
+      "ownedPaths": [
+        "src/plugins/piral-dashboard/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-dashboard/src/index.ts",
+      "publicSymbols": [
+        "BareTileComponentProps",
+        "createDashboardApi",
+        "Dashboard",
+        "DashboardConfig",
+        "DashboardContainerProps",
+        "DashboardProps",
+        "DashboardTileProps",
+        "InitialTile",
+        "PiletDashboardApi",
+        "PiralCustomTilePreferences",
+        "PiralDashboardContainer",
+        "PiralDashboardTile",
+        "TileComponentProps",
+        "TileErrorInfoProps",
+        "TilePreferences",
+        "TileRegistration"
+      ],
+      "packageName": "piral-dashboard",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-debug-utils",
+      "ownedPaths": [
+        "src/utilities/piral-debug-utils/src/**"
+      ],
+      "publicEntry": "src/utilities/piral-debug-utils/src/index.ts",
+      "publicSymbols": [
+        "ChangeSet",
+        "DebugComponents",
+        "DebugCustomBooleanSetting",
+        "DebugCustomNumberSetting",
+        "DebugCustomSetting",
+        "DebugCustomStringSetting",
+        "DebuggerBaseOptions",
+        "DebuggerExtensionOptions",
+        "DebuggerOptions",
+        "DefaultDebugSettings",
+        "EmulatorBaseOptions",
+        "EmulatorComponents",
+        "EmulatorConnectorOptions",
+        "installPiletEmulator",
+        "installPiralDebug",
+        "RouteHandler",
+        "RouteRegistration",
+        "useDebugRouteFilter"
+      ],
+      "packageName": "piral-debug-utils",
+      "consumes": [
+        {
+          "cell": "piral-base"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-documentation-page",
+      "ownedPaths": [
+        "src/pages/docs/src/**"
+      ],
+      "publicEntry": "src/pages/docs/src/codegen/bundlers.js",
+      "publicSymbols": [],
+      "packageName": "piral-documentation-page",
+      "consumes": [
+        {
+          "cell": "pages"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-elm",
+      "ownedPaths": [
+        "src/converters/piral-elm/src/**"
+      ],
+      "publicEntry": "src/converters/piral-elm/src/index.ts",
+      "publicSymbols": [
+        "createElmApi",
+        "ElmComponent",
+        "ElmConfig",
+        "ElmModule",
+        "PiletElmApi"
+      ],
+      "packageName": "piral-elm",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-ember",
+      "ownedPaths": [
+        "src/converters/piral-ember/src/**"
+      ],
+      "publicEntry": "src/converters/piral-ember/src/index.ts",
+      "publicSymbols": [
+        "createEmberApi",
+        "EmberConfig",
+        "EmberInstance",
+        "EmberModule",
+        "EmberOptions",
+        "PiletEmberApi",
+        "PiralEmberComponent"
+      ],
+      "packageName": "piral-ember",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-ext",
+      "ownedPaths": [
+        "src/plugins/piral-ext/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-ext/src/index.ts",
+      "publicSymbols": [
+        "createStandardApi",
+        "PiralExtSettings"
+      ],
+      "packageName": "piral-ext",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        },
+        {
+          "cell": "piral-dashboard"
+        },
+        {
+          "cell": "piral-feeds"
+        },
+        {
+          "cell": "piral-menu"
+        },
+        {
+          "cell": "piral-modals"
+        },
+        {
+          "cell": "piral-notifications"
+        },
+        {
+          "cell": "piral-translate"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-feeds",
+      "ownedPaths": [
+        "src/plugins/piral-feeds/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-feeds/src/index.ts",
+      "publicSymbols": [
+        "ConnectorDetails",
+        "createFeedsApi",
+        "FeedConnector",
+        "FeedConnectorOptions",
+        "FeedConnectorProps",
+        "FeedConnectorReducers",
+        "FeedDataState",
+        "FeedErrorInfoProps",
+        "FeedReducer",
+        "FeedResolver",
+        "FeedsConfig",
+        "FeedsState",
+        "FeedSubscriber",
+        "GetActions",
+        "PiletFeedsApi",
+        "useFeed",
+        "withFeed"
+      ],
+      "packageName": "piral-feeds",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-fetch",
+      "ownedPaths": [
+        "src/plugins/piral-fetch/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-fetch/src/index.ts",
+      "publicSymbols": [
+        "createFetchApi",
+        "FetchConfig",
+        "FetchMiddleware",
+        "FetchOptions",
+        "FetchResponse",
+        "httpFetch",
+        "PiletFetchApi",
+        "PiletFetchApiFetch"
+      ],
+      "packageName": "piral-fetch",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-forms",
+      "ownedPaths": [
+        "src/plugins/piral-forms/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-forms/src/index.ts",
+      "publicSymbols": [
+        "createFormsApi",
+        "FormCreator",
+        "FormDataState",
+        "FormErrorInfoProps",
+        "FormProps",
+        "FormsConfig",
+        "FormsState",
+        "InputFormOptions",
+        "PiletFormsApi",
+        "PromptMessage",
+        "useForm",
+        "usePrompt",
+        "withForm",
+        "withFormHandler"
+      ],
+      "packageName": "piral-forms",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-gea",
+      "ownedPaths": [
+        "src/converters/piral-gea/src/**"
+      ],
+      "publicEntry": "src/converters/piral-gea/src/index.ts",
+      "publicSymbols": [
+        "createGeaApi",
+        "GeaComponent",
+        "GeaComponentInstance",
+        "GeaComponentType",
+        "GeaConfig",
+        "PiletGeaApi"
+      ],
+      "packageName": "piral-gea",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-hooks-utils",
+      "ownedPaths": [
+        "src/utilities/piral-hooks-utils/src/**"
+      ],
+      "publicEntry": "src/utilities/piral-hooks-utils/src/index.ts",
+      "publicSymbols": [
+        "PiletApiProvider",
+        "useAfterVisible",
+        "useAsyncReplace",
+        "useLockBodyScroll",
+        "useOnClickOutside",
+        "useOnScreenVisible",
+        "usePiletApi",
+        "usePrompt",
+        "withPiletApi"
+      ],
+      "packageName": "piral-hooks-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-hyperapp",
+      "ownedPaths": [
+        "src/converters/piral-hyperapp/src/**"
+      ],
+      "publicEntry": "src/converters/piral-hyperapp/src/index.ts",
+      "publicSymbols": [
+        "Component",
+        "createHyperappApi",
+        "HyperappComponent",
+        "HyperappConfig",
+        "PiletHyperappApi",
+        "View",
+        "VNode"
+      ],
+      "packageName": "piral-hyperapp",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-inferno",
+      "ownedPaths": [
+        "src/converters/piral-inferno/src/**"
+      ],
+      "publicEntry": "src/converters/piral-inferno/src/index.ts",
+      "publicSymbols": [
+        "createInfernoApi",
+        "InfernoComponent",
+        "InfernoConfig",
+        "PiletInfernoApi"
+      ],
+      "packageName": "piral-inferno",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-landing-page",
+      "ownedPaths": [
+        "src/pages/www/src/**"
+      ],
+      "publicEntry": "src/pages/www/src/scripts/App.tsx",
+      "publicSymbols": [
+        "App"
+      ],
+      "packageName": "piral-landing-page",
+      "consumes": [
+        {
+          "cell": "pages"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-lazy",
+      "ownedPaths": [
+        "src/plugins/piral-lazy/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-lazy/src/index.ts",
+      "publicSymbols": [
+        "createLazyApi",
+        "LazyComponentLoader",
+        "LazyDependencyLoader",
+        "PiletLazyApi"
+      ],
+      "packageName": "piral-lazy",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-litel",
+      "ownedPaths": [
+        "src/converters/piral-litel/src/**"
+      ],
+      "publicEntry": "src/converters/piral-litel/src/index.ts",
+      "publicSymbols": [
+        "createLitElApi",
+        "LitElComponent",
+        "LitElConfig",
+        "PiletLitElApi"
+      ],
+      "packageName": "piral-litel",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-menu",
+      "ownedPaths": [
+        "src/plugins/piral-menu/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-menu/src/index.ts",
+      "publicSymbols": [
+        "createMenuApi",
+        "InitialMenuItem",
+        "Menu",
+        "MenuComponentProps",
+        "MenuConfig",
+        "MenuContainerProps",
+        "MenuItemErrorInfoProps",
+        "MenuItemProps",
+        "MenuItemRegistration",
+        "MenuProps",
+        "MenuSettings",
+        "MenuType",
+        "PiletMenuApi",
+        "PiralCustomMenuSettings",
+        "PiralCustomMenuTypes",
+        "PiralMenuContainer",
+        "PiralMenuItem",
+        "PiralMenuType",
+        "PiralSpecificMenuSettings"
+      ],
+      "packageName": "piral-menu",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-million",
+      "ownedPaths": [
+        "src/converters/piral-million/src/**"
+      ],
+      "publicEntry": "src/converters/piral-million/src/index.ts",
+      "publicSymbols": [
+        "createMillionApi",
+        "MillionComponent",
+        "MillionConfig",
+        "PiletMillionApi"
+      ],
+      "packageName": "piral-million",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-mithril",
+      "ownedPaths": [
+        "src/converters/piral-mithril/src/**"
+      ],
+      "publicEntry": "src/converters/piral-mithril/src/index.ts",
+      "publicSymbols": [
+        "Component",
+        "ComponentProps",
+        "createMithrilApi",
+        "MithrilComponent",
+        "MithrilConfig",
+        "PiletMithrilApi"
+      ],
+      "packageName": "piral-mithril",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-modals",
+      "ownedPaths": [
+        "src/plugins/piral-modals/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-modals/src/index.ts",
+      "publicSymbols": [
+        "BareModalComponentProps",
+        "BaseModalOptions",
+        "createModalsApi",
+        "InitialModalDialog",
+        "ModalComponentProps",
+        "ModalErrorInfoProps",
+        "ModalLayoutOptions",
+        "ModalOptions",
+        "ModalRegistration",
+        "Modals",
+        "ModalsConfig",
+        "ModalsDialogProps",
+        "ModalsHostProps",
+        "OpenModalDialog",
+        "PiletModalsApi",
+        "PiralCustomModalsMap",
+        "PiralModalsDialog",
+        "PiralModalsHost",
+        "PiralModalsMap"
+      ],
+      "packageName": "piral-modals",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-ng",
+      "ownedPaths": [
+        "src/converters/piral-ng/src/**"
+      ],
+      "publicEntry": "src/converters/piral-ng/src/index.ts",
+      "publicSymbols": [
+        "CONTEXT",
+        "createNgApi",
+        "LazyType",
+        "ModuleInstanceResult",
+        "NgComponent",
+        "NgComponentLoader",
+        "NgConfig",
+        "NgLazyType",
+        "NgModuleDefiner",
+        "NgModuleFlags",
+        "NgModuleInt",
+        "NgOptions",
+        "PiletNgApi",
+        "PIRAL",
+        "PrepareBootstrapResult",
+        "PROPS",
+        "Type"
+      ],
+      "packageName": "piral-ng",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-ngjs",
+      "ownedPaths": [
+        "src/converters/piral-ngjs/src/**"
+      ],
+      "publicEntry": "src/converters/piral-ngjs/src/index.ts",
+      "publicSymbols": [
+        "createNgjsApi",
+        "NgjsComponent",
+        "NgjsConfig",
+        "PiletNgjsApi"
+      ],
+      "packageName": "piral-ngjs",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-notifications",
+      "ownedPaths": [
+        "src/plugins/piral-notifications/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-notifications/src/index.ts",
+      "publicSymbols": [
+        "BareNotificationProps",
+        "createNotificationsApi",
+        "InitialNotification",
+        "NotificationComponentProps",
+        "NotificationContent",
+        "NotificationOptions",
+        "Notifications",
+        "NotificationsConfig",
+        "NotificationsHostProps",
+        "NotificationsToastProps",
+        "OpenNotification",
+        "PiletNotificationsApi",
+        "PiralCustomNotificationOptions",
+        "PiralCustomNotificationTypes",
+        "PiralNotificationsHost",
+        "PiralNotificationsToast",
+        "PiralNotificationTypes",
+        "PiralSpecificNotificationOptions",
+        "PiralStandardNotificationOptions"
+      ],
+      "packageName": "piral-notifications",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-oauth2",
+      "ownedPaths": [
+        "src/plugins/piral-oauth2/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-oauth2/src/index.ts",
+      "publicSymbols": [
+        "createOAuth2Api",
+        "createOAuth2BrowserPersistence",
+        "createOAuth2MemoryPersistence",
+        "createOAuth2SessionPersistence",
+        "OAuth2Client",
+        "OAuth2Config",
+        "OAuth2Persistence",
+        "OAuth2Request",
+        "OAuth2TokenInfo",
+        "PiralOAuth2Api",
+        "setupOAuth2Client"
+      ],
+      "packageName": "piral-oauth2",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-oidc",
+      "ownedPaths": [
+        "src/plugins/piral-oidc/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-oidc/src/index.ts",
+      "publicSymbols": [
+        "AuthenticationResult",
+        "createOidcApi",
+        "LogLevel",
+        "OidcClient",
+        "OidcConfig",
+        "OidcErrorType",
+        "OidcProfile",
+        "OidcRequest",
+        "OidcStore",
+        "PiletOidcApi",
+        "PiralCustomOidcProfile",
+        "PiralOidcError",
+        "setupOidcClient",
+        "SignInRedirectParams"
+      ],
+      "packageName": "piral-oidc",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-page-layouts",
+      "ownedPaths": [
+        "src/plugins/piral-page-layouts/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-page-layouts/src/index.ts",
+      "publicSymbols": [
+        "createPageLayoutsApi",
+        "PageLayoutErrorInfoProps",
+        "PageLayoutRegistration",
+        "PageLayoutsConfig",
+        "PiletPageLayoutsApi"
+      ],
+      "packageName": "piral-page-layouts",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-preact",
+      "ownedPaths": [
+        "src/converters/piral-preact/src/**"
+      ],
+      "publicEntry": "src/converters/piral-preact/src/index.ts",
+      "publicSymbols": [
+        "createPreactApi",
+        "PiletPreactApi",
+        "PreactComponent",
+        "PreactConfig"
+      ],
+      "packageName": "piral-preact",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-react",
+      "ownedPaths": [
+        "src/converters/piral-react/src/**"
+      ],
+      "publicEntry": "src/converters/piral-react/src/index.ts",
+      "publicSymbols": [
+        "createReactApi",
+        "PiletReactApi",
+        "ReactComponent",
+        "ReactConfig"
+      ],
+      "packageName": "piral-react",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-react-15",
+      "ownedPaths": [
+        "src/converters/piral-react-15/src/**"
+      ],
+      "publicEntry": "src/converters/piral-react-15/src/index.ts",
+      "publicSymbols": [
+        "createReact15Api",
+        "PiletReact15Api",
+        "React15Component",
+        "React15Config"
+      ],
+      "packageName": "piral-react-15",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-redux",
+      "ownedPaths": [
+        "src/plugins/piral-redux/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-redux/src/index.ts",
+      "publicSymbols": [
+        "createReduxApi",
+        "PiletReduxApi",
+        "PiralReduxActions",
+        "PiralReduxCustomActions",
+        "PiralReduxCustomState",
+        "PiralReduxState",
+        "PiralReduxStore",
+        "ReducerUnion",
+        "ReduxConfig",
+        "ReduxConnectorComponentProps",
+        "ReduxStoreConnector"
+      ],
+      "packageName": "piral-redux",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-riot",
+      "ownedPaths": [
+        "src/converters/piral-riot/src/**"
+      ],
+      "publicEntry": "src/converters/piral-riot/src/index.ts",
+      "publicSymbols": [
+        "createRiotApi",
+        "PiletRiotApi",
+        "RiotComponent",
+        "RiotConfig"
+      ],
+      "packageName": "piral-riot",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-search",
+      "ownedPaths": [
+        "src/plugins/piral-search/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-search/src/index.ts",
+      "publicSymbols": [
+        "createSearchApi",
+        "InitialSearchProvider",
+        "PiletSearchApi",
+        "PiralSearchContainer",
+        "PiralSearchInput",
+        "PiralSearchResult",
+        "Search",
+        "SearchActionsConfig",
+        "SearchConfig",
+        "SearchContainerProps",
+        "SearchHandler",
+        "SearchInput",
+        "SearchInputProps",
+        "SearchOptions",
+        "SearchProvider",
+        "SearchProviderRegistration",
+        "SearchResultComponentProps",
+        "SearchResultProps",
+        "SearchResultType",
+        "SearchSettings",
+        "SearchState",
+        "SearchWrapper",
+        "useSearch"
+      ],
+      "packageName": "piral-search",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-solid",
+      "ownedPaths": [
+        "src/converters/piral-solid/src/**"
+      ],
+      "publicEntry": "src/converters/piral-solid/src/index.ts",
+      "publicSymbols": [
+        "createSolidApi",
+        "PiletSolidApi",
+        "SolidComponent",
+        "SolidConfig"
+      ],
+      "packageName": "piral-solid",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-svelte",
+      "ownedPaths": [
+        "src/converters/piral-svelte/src/**"
+      ],
+      "publicEntry": "src/converters/piral-svelte/src/index.ts",
+      "publicSymbols": [
+        "createSvelteApi",
+        "PiletSvelteApi",
+        "SvelteComponent",
+        "SvelteComponentInstance",
+        "SvelteConfig",
+        "SvelteModule",
+        "SvelteOptions"
+      ],
+      "packageName": "piral-svelte",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-tracker",
+      "ownedPaths": [
+        "src/plugins/piral-tracker/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-tracker/src/index.ts",
+      "publicSymbols": [
+        "createTrackerApi",
+        "PiletTrackerApi",
+        "Tracker",
+        "TrackerConfig",
+        "TrackerErrorInfoProps",
+        "TrackerProps",
+        "TrackerRegistration"
+      ],
+      "packageName": "piral-tracker",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-tracking",
+      "ownedPaths": [
+        "src/plugins/piral-tracking/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-tracking/src/index.ts",
+      "publicSymbols": [
+        "createTrackingApi",
+        "PiletTrackingApi",
+        "PiralTrackEndFrameEvent",
+        "PiralTrackErrorEvent",
+        "PiralTrackEventEvent",
+        "PiralTrackStartFrameEvent",
+        "SeverityLevel",
+        "Tracker",
+        "TrackingConfig"
+      ],
+      "packageName": "piral-tracking",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-translate",
+      "ownedPaths": [
+        "src/plugins/piral-translate/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-translate/src/index.ts",
+      "publicSymbols": [
+        "AnyLocalizationMessages",
+        "createLocaleApi",
+        "getUserLocale",
+        "LanguageData",
+        "LanguageLoader",
+        "Languages",
+        "LanguagesPickerProps",
+        "LocaleConfig",
+        "Localizable",
+        "LocalizationMessages",
+        "NestedLocalizationMessages",
+        "NestedTranslations",
+        "PiletLocaleApi",
+        "PiralLanguagesPicker",
+        "PiralSelectLanguageEvent",
+        "RetrieveCurrentLanguage",
+        "setupLocalizer",
+        "TranslationFallback",
+        "Translations",
+        "useDynamicLanguage",
+        "useTranslate"
+      ],
+      "packageName": "piral-translate",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-update",
+      "ownedPaths": [
+        "src/plugins/piral-update/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-update/src/index.ts",
+      "publicSymbols": [
+        "checkPeriodically",
+        "CheckPeriodicallyFactoryOptions",
+        "checkPiralEvent",
+        "CheckPiralEventFactoryOptions",
+        "checkServerSentEvents",
+        "CheckServerSentEventsFactoryOptions",
+        "checkWebSocket",
+        "CheckWebSocketFactoryOptions",
+        "createUpdateApi",
+        "ListenCallback",
+        "PiletUpdateApi",
+        "PiletUpdateMode",
+        "PiralUpdateDialog",
+        "UpdatabilityState",
+        "UpdateConfig",
+        "UpdateDialog",
+        "UpdateDialogProps",
+        "UpdateModeRegistration"
+      ],
+      "packageName": "piral-update",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-urql",
+      "ownedPaths": [
+        "src/plugins/piral-urql/src/**"
+      ],
+      "publicEntry": "src/plugins/piral-urql/src/index.ts",
+      "publicSymbols": [
+        "createGqlApi",
+        "GqlConfig",
+        "gqlMutation",
+        "GqlMutationOptions",
+        "GqlOperationOptions",
+        "gqlQuery",
+        "GqlQueryOptions",
+        "GqlSubscriber",
+        "gqlSubscription",
+        "GqlSubscriptionOptions",
+        "GqlUnsubscriber",
+        "PiletGqlApi",
+        "PiletGqlApiMutate",
+        "PiletGqlApiQuery",
+        "PiletGqlApiSubscribe",
+        "PiletQueryResult",
+        "requestPiletsFromGraphQL",
+        "setupGqlClient",
+        "UrqlClient"
+      ],
+      "packageName": "piral-urql",
+      "consumes": [
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-vue",
+      "ownedPaths": [
+        "src/converters/piral-vue/src/**"
+      ],
+      "publicEntry": "src/converters/piral-vue/src/index.ts",
+      "publicSymbols": [
+        "createVueApi",
+        "PiletVueApi",
+        "VueComponent",
+        "VueConfig"
+      ],
+      "packageName": "piral-vue",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "piral-vue-3",
+      "ownedPaths": [
+        "src/converters/piral-vue-3/src/**"
+      ],
+      "publicEntry": "src/converters/piral-vue-3/src/index.ts",
+      "publicSymbols": [
+        "createVue3Api",
+        "PiletVue3Api",
+        "Vue3Component",
+        "Vue3Config",
+        "Vue3MiddlewareHandler"
+      ],
+      "packageName": "piral-vue-3",
+      "consumes": [
+        {
+          "cell": "converters"
+        },
+        {
+          "cell": "piral-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "publish-microfrontend",
+      "ownedPaths": [
+        "src/tooling/publish-microfrontend/src/**"
+      ],
+      "publicEntry": "src/tooling/publish-microfrontend/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "publish-microfrontend",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sample-cross-fx",
+      "ownedPaths": [
+        "src/samples/sample-cross-fx/src/**"
+      ],
+      "publicEntry": "src/samples/sample-cross-fx/src/index.html",
+      "publicSymbols": [],
+      "packageName": "sample-cross-fx",
+      "consumes": [
+        {
+          "cell": "piral-aurelia"
+        },
+        {
+          "cell": "piral-blazor"
+        },
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        },
+        {
+          "cell": "piral-core"
+        },
+        {
+          "cell": "piral-elm"
+        },
+        {
+          "cell": "piral-hyperapp"
+        },
+        {
+          "cell": "piral-inferno"
+        },
+        {
+          "cell": "piral-lazy"
+        },
+        {
+          "cell": "piral-litel"
+        },
+        {
+          "cell": "piral-mithril"
+        },
+        {
+          "cell": "piral-ng"
+        },
+        {
+          "cell": "piral-ngjs"
+        },
+        {
+          "cell": "piral-preact"
+        },
+        {
+          "cell": "piral-riot"
+        },
+        {
+          "cell": "piral-solid"
+        },
+        {
+          "cell": "piral-svelte"
+        },
+        {
+          "cell": "piral-vue"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sample-piral",
+      "ownedPaths": [
+        "src/samples/sample-piral/src/**"
+      ],
+      "publicEntry": "src/samples/sample-piral/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "sample-piral",
+      "consumes": [
+        {
+          "cell": "piral"
+        },
+        {
+          "cell": "piral-auth"
+        },
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        },
+        {
+          "cell": "piral-hooks-utils"
+        },
+        {
+          "cell": "piral-search"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sample-piral-core",
+      "ownedPaths": [
+        "src/samples/sample-piral-core/src/**"
+      ],
+      "publicEntry": "src/samples/sample-piral-core/src/index.html",
+      "publicSymbols": [],
+      "packageName": "sample-piral-core",
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        },
+        {
+          "cell": "piral-containers"
+        },
+        {
+          "cell": "piral-core"
+        },
+        {
+          "cell": "piral-dashboard"
+        },
+        {
+          "cell": "piral-feeds"
+        },
+        {
+          "cell": "piral-forms"
+        },
+        {
+          "cell": "piral-menu"
+        },
+        {
+          "cell": "piral-notifications"
+        },
+        {
+          "cell": "piral-search"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "siteless",
+      "ownedPaths": [
+        "src/framework/siteless/src/**"
+      ],
+      "publicEntry": "src/framework/siteless/src/index.ts",
+      "publicSymbols": [
+        "GenericComponents",
+        "SitelessApi",
+        "SitelessOptions"
+      ],
+      "packageName": "siteless",
+      "consumes": [
+        {
+          "cell": "piral"
+        },
+        {
+          "cell": "piral-lazy"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tooling",
+      "ownedPaths": [
+        "src/tooling/piral-cli-webpack5/**",
+        "src/tooling/piral-cli/**"
+      ],
+      "publicEntry": "src/tooling/piral-cli-webpack5/extend-config.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "piral-cli"
+        },
+        {
+          "cell": "piral-cli-webpack5"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

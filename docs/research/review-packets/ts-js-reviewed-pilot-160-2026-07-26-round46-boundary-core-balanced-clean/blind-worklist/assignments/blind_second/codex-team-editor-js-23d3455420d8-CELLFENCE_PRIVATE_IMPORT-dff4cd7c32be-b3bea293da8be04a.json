@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-b3bea293da8be04a",
+    "evidencePackageId": "evidence-04bbb9fc1317c36b",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/codex-team-editor-js-23d3455420d8.json",
+        "sha256": "e0ba645000d08cad2473a5ba0ec347856adf3dfb3abdebff3a1f1c14dd23cd96"
+      },
+      "auditLog": {
+        "path": "logs/codex-team-editor-js-23d3455420d8/check.audit.jsonl",
+        "sha256": "a6da3a565dc42dde1e6898f5ef8b84be6ffa6a6f8c82a6446fc36d21e821fc0f"
+      },
+      "evidenceGraph": {
+        "path": "logs/codex-team-editor-js-23d3455420d8/evidence-graph.json",
+        "sha256": "4b2e48153da3c96d8add38e3c25bb8643f9b7302db2cba7c9174a3a5904bb0d4"
+      },
+      "checkStdout": {
+        "path": "logs/codex-team-editor-js-23d3455420d8/check.stdout.log",
+        "sha256": "1438b509a370304c11a39d7161120db1450986c09e33d016dcdeb31d39b23190"
+      },
+      "checkStderr": {
+        "path": "logs/codex-team-editor-js-23d3455420d8/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:04bbb9fc1317c36b96a0a444446d069ba487041caf6d7a0df67fc7064069ba84",
+    "subjectId": "codex-team-editor-js",
+    "repository": "https://github.com/codex-team/editor.js.git",
+    "commit": "4ea9eb389847181ceb757735f8bd45cc8c2f1673",
+    "gitTree": "373f08c90a8913c74c4b50eb5435e599ce465079",
+    "manifestSha256": "e0ba645000d08cad2473a5ba0ec347856adf3dfb3abdebff3a1f1c14dd23cd96",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/codex.ts",
+    "line": 12,
+    "message": "src-root imports private implementation from components",
+    "cellId": "src-root",
+    "producerCellId": "components",
+    "cellfenceFingerprint": "3fabb23a2b2820d5cc28fc517a89fbb536c34818f9af1d2882e0a2e7b31a8c71",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:04bbb9fc1317c36b96a0a444446d069ba487041caf6d7a0df67fc7064069ba84",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-b3bea293da8be04a",
+    "evidencePackageId": "evidence-04bbb9fc1317c36b",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

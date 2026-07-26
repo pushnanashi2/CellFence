@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-43791e53074d79bf",
+    "evidencePackageId": "evidence-5ad2d7ce889efaa8",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/anuraghazra-github-readme-stats-5b3490bfa969.json",
+        "sha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089"
+      },
+      "auditLog": {
+        "path": "logs/anuraghazra-github-readme-stats-5b3490bfa969/check.audit.jsonl",
+        "sha256": "a5647f9538392496f483f1dccb6c7d4ede2c639de5b7bfd0475a346492ca6579"
+      },
+      "evidenceGraph": {
+        "path": "logs/anuraghazra-github-readme-stats-5b3490bfa969/evidence-graph.json",
+        "sha256": "05dd4c87321539d3d2b0a96199853d042577c9ec7b7fcebfd2386b1f700b400a"
+      },
+      "checkStdout": {
+        "path": "logs/anuraghazra-github-readme-stats-5b3490bfa969/check.stdout.log",
+        "sha256": "76129312b4fb35156cd8d6811612c5a7dc5138b97221a1255b2ba73a752139ee"
+      },
+      "checkStderr": {
+        "path": "logs/anuraghazra-github-readme-stats-5b3490bfa969/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:5ad2d7ce889efaa8400819abeb663ca96fd2e34f4d145bc22bcb9c6b6682bc4f",
+    "subjectId": "anuraghazra-github-readme-stats",
+    "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+    "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2",
+    "gitTree": "605cfba25df416dab73795ab5019840a640ce4ea",
+    "manifestSha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "api/gist.js",
+    "line": 7,
+    "message": "api imports private implementation from common",
+    "cellId": "api",
+    "producerCellId": "common",
+    "cellfenceFingerprint": "4e98db21d3752b9637cd003ed949272478de24016c38056e423d429b00ca2c4d",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:5ad2d7ce889efaa8400819abeb663ca96fd2e34f4d145bc22bcb9c6b6682bc4f",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-43791e53074d79bf",
+    "evidencePackageId": "evidence-5ad2d7ce889efaa8",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

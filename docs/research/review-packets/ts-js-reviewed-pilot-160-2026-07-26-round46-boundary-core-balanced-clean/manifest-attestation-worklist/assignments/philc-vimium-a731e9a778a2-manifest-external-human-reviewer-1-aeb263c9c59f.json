@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-65a14d775759d09d",
+    "subjectId": "philc-vimium",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "philc-vimium",
+    "phase": null,
+    "repository": "https://github.com/philc/vimium.git",
+    "commit": "7067bc768fc1c7ef9310e295c5782149fab73980"
+  },
+  "manifestCopy": {
+    "path": "manifests/philc-vimium-a731e9a778a2.json",
+    "sha256": "59ceaede2c4877fb1d95744c74d64906fefc07a858c1af0a1ef7f6c8edbeebab"
+  },
+  "attestationTemplate": {
+    "subjectId": "philc-vimium",
+    "repository": "https://github.com/philc/vimium.git",
+    "commit": "7067bc768fc1c7ef9310e295c5782149fab73980",
+    "manifestCopy": {
+      "path": "manifests/philc-vimium-a731e9a778a2.json",
+      "sha256": "59ceaede2c4877fb1d95744c74d64906fefc07a858c1af0a1ef7f6c8edbeebab"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "59ceaede2c4877fb1d95744c74d64906fefc07a858c1af0a1ef7f6c8edbeebab",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

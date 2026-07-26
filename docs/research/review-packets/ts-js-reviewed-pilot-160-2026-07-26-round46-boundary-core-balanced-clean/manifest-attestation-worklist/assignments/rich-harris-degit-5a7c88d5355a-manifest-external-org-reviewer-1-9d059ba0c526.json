@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-bc47a07ae26c852c",
+    "subjectId": "rich-harris-degit",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "rich-harris-degit",
+    "phase": null,
+    "repository": "https://github.com/Rich-Harris/degit.git",
+    "commit": "87008d3644a6172e7b8c12f38692b0d20b63a70d"
+  },
+  "manifestCopy": {
+    "path": "manifests/rich-harris-degit-5a7c88d5355a.json",
+    "sha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314"
+  },
+  "attestationTemplate": {
+    "subjectId": "rich-harris-degit",
+    "repository": "https://github.com/Rich-Harris/degit.git",
+    "commit": "87008d3644a6172e7b8c12f38692b0d20b63a70d",
+    "manifestCopy": {
+      "path": "manifests/rich-harris-degit-5a7c88d5355a.json",
+      "sha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-634a7ba3f2e3f76b",
+    "subjectId": "hyperstackjs-hyperstack",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "hyperstackjs-hyperstack",
+    "phase": null,
+    "repository": "https://github.com/hyperstackjs/hyperstack.git",
+    "commit": "55191062e7111ead165f886f398373565b194629"
+  },
+  "manifestCopy": {
+    "path": "manifests/hyperstackjs-hyperstack-5e33c3bcaa38.json",
+    "sha256": "aef2df08f61e5c3b9ee4cafad009324bb3c621bb21443754b0d8725a6a60749c"
+  },
+  "attestationTemplate": {
+    "subjectId": "hyperstackjs-hyperstack",
+    "repository": "https://github.com/hyperstackjs/hyperstack.git",
+    "commit": "55191062e7111ead165f886f398373565b194629",
+    "manifestCopy": {
+      "path": "manifests/hyperstackjs-hyperstack-5e33c3bcaa38.json",
+      "sha256": "aef2df08f61e5c3b9ee4cafad009324bb3c621bb21443754b0d8725a6a60749c"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "aef2df08f61e5c3b9ee4cafad009324bb3c621bb21443754b0d8725a6a60749c",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

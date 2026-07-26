@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-5c98ff550a71707f",
+    "subjectId": "feathericons-feather",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "feathericons-feather",
+    "phase": null,
+    "repository": "https://github.com/feathericons/feather.git",
+    "commit": "3dc050d97405062eba78aa57115c0a15c63abdaa"
+  },
+  "manifestCopy": {
+    "path": "manifests/feathericons-feather-cb0461468f3d.json",
+    "sha256": "0ed7f3dc603396c058a538fc29267e00c8d8c71adaec7222fc6cd7a088d0c8b2"
+  },
+  "attestationTemplate": {
+    "subjectId": "feathericons-feather",
+    "repository": "https://github.com/feathericons/feather.git",
+    "commit": "3dc050d97405062eba78aa57115c0a15c63abdaa",
+    "manifestCopy": {
+      "path": "manifests/feathericons-feather-cb0461468f3d.json",
+      "sha256": "0ed7f3dc603396c058a538fc29267e00c8d8c71adaec7222fc6cd7a088d0c8b2"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "0ed7f3dc603396c058a538fc29267e00c8d8c71adaec7222fc6cd7a088d0c8b2",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

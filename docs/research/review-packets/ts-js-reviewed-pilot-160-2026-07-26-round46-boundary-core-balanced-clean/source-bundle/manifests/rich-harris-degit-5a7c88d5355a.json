@@ -1,0 +1,272 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/**"
+      ],
+      "publicEntry": "src/core/orchestrator.ts",
+      "publicSymbols": [
+        "Degit"
+      ],
+      "consumes": [
+        {
+          "cell": "domain"
+        },
+        {
+          "cell": "operations"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "transports"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "domain",
+      "ownedPaths": [
+        "src/domain/**"
+      ],
+      "publicEntry": "src/domain/repo.ts",
+      "publicSymbols": [
+        "getProvider",
+        "GitProvider",
+        "parse",
+        "providerArchiveTemplates",
+        "Repo"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "operations",
+      "ownedPaths": [
+        "src/operations/**"
+      ],
+      "publicEntry": "src/operations/directives.ts",
+      "publicSymbols": [
+        "applyDirectives"
+      ],
+      "consumes": [
+        {
+          "cell": "domain"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/utils.ts",
+      "publicSymbols": [
+        "base",
+        "degitConfigName",
+        "DegitError",
+        "fetch",
+        "mkdirp",
+        "resolveBase",
+        "stashFiles",
+        "tryRequire",
+        "unstashFiles"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "Action",
+        "default",
+        "DegitAction",
+        "DegitErrorCode",
+        "FetchFn",
+        "Info",
+        "InfoCode",
+        "Options",
+        "RemoveAction",
+        "ValidModes"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "domain"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "transports",
+      "ownedPaths": [
+        "src/transports/**"
+      ],
+      "publicEntry": "src/transports/git/client-utils.ts",
+      "publicSymbols": [
+        "createMissingGitError",
+        "createSshError",
+        "getGitClonePlan",
+        "getGitUrl",
+        "isCommitHash",
+        "isMissingGitBinaryError",
+        "isMissingSshKeyError",
+        "normalizeGitRef",
+        "normalizeServerRefs",
+        "parseGitLsRemoteOutput",
+        "Ref"
+      ],
+      "consumes": [
+        {
+          "cell": "domain"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

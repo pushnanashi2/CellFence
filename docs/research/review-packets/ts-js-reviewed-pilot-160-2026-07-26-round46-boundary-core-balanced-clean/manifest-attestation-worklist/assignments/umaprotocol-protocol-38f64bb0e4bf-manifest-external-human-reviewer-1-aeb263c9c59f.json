@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-c9800f172d32e659",
+    "subjectId": "umaprotocol-protocol",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "umaprotocol-protocol",
+    "phase": null,
+    "repository": "https://github.com/UMAprotocol/protocol.git",
+    "commit": "c6ac81a699f671c4b553134e6f9852cc47e8195b"
+  },
+  "manifestCopy": {
+    "path": "manifests/umaprotocol-protocol-38f64bb0e4bf.json",
+    "sha256": "d144cb82c2761b955af9a2a20c83ab4d587d416021b1cb4696d10c77c605fe3e"
+  },
+  "attestationTemplate": {
+    "subjectId": "umaprotocol-protocol",
+    "repository": "https://github.com/UMAprotocol/protocol.git",
+    "commit": "c6ac81a699f671c4b553134e6f9852cc47e8195b",
+    "manifestCopy": {
+      "path": "manifests/umaprotocol-protocol-38f64bb0e4bf.json",
+      "sha256": "d144cb82c2761b955af9a2a20c83ab4d587d416021b1cb4696d10c77c605fe3e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d144cb82c2761b955af9a2a20c83ab4d587d416021b1cb4696d10c77c605fe3e",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

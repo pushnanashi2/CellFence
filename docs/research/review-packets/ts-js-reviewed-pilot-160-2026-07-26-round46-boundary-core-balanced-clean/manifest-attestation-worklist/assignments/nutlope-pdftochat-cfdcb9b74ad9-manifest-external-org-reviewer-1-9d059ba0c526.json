@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2adba9f043a391f4",
+    "subjectId": "nutlope-pdftochat",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "nutlope-pdftochat",
+    "phase": null,
+    "repository": "https://github.com/Nutlope/pdftochat.git",
+    "commit": "2dc75fa55b024af3125d6d0e90ce0be5eecc3975"
+  },
+  "manifestCopy": {
+    "path": "manifests/nutlope-pdftochat-cfdcb9b74ad9.json",
+    "sha256": "0f37fd2a92a91ad029ea581ee7d34895f609da90c4dbcc273eed2e8bdb367730"
+  },
+  "attestationTemplate": {
+    "subjectId": "nutlope-pdftochat",
+    "repository": "https://github.com/Nutlope/pdftochat.git",
+    "commit": "2dc75fa55b024af3125d6d0e90ce0be5eecc3975",
+    "manifestCopy": {
+      "path": "manifests/nutlope-pdftochat-cfdcb9b74ad9.json",
+      "sha256": "0f37fd2a92a91ad029ea581ee7d34895f609da90c4dbcc273eed2e8bdb367730"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "0f37fd2a92a91ad029ea581ee7d34895f609da90c4dbcc273eed2e8bdb367730",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

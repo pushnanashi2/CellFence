@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-e729f83f8a70447b",
+    "evidencePackageId": "evidence-863a2ce99ca0a1ce",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/alibaba-page-agent-a2cc1a2513ee.json",
+        "sha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352"
+      },
+      "auditLog": {
+        "path": "logs/alibaba-page-agent-a2cc1a2513ee/check.audit.jsonl",
+        "sha256": "bf18b185c4dc9a7920a3a5054da8f832dada38d117619ff5d4b9a76f57859cfe"
+      },
+      "evidenceGraph": {
+        "path": "logs/alibaba-page-agent-a2cc1a2513ee/evidence-graph.json",
+        "sha256": "a0b85eef792443ce1dec34682c370c58bb4bce554b9f6850d06a8442e2719eeb"
+      },
+      "checkStdout": {
+        "path": "logs/alibaba-page-agent-a2cc1a2513ee/check.stdout.log",
+        "sha256": "f24b165b65e6dc394ea08d9d34e6990728c7d9a2d819e43fa0e43f3cf80461f1"
+      },
+      "checkStderr": {
+        "path": "logs/alibaba-page-agent-a2cc1a2513ee/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:863a2ce99ca0a1cef83d531bbc51618916c9b1619a5d140ac088cbd87f0f27e1",
+    "subjectId": "alibaba-page-agent",
+    "repository": "https://github.com/alibaba/page-agent.git",
+    "commit": "da1db959558dcd49a6c489e76a23accfbda7b156",
+    "gitTree": "f259e44309c031ca8820c14f287dd1d127e1eeff",
+    "manifestSha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "packages/website/src/pages/home/HeroSection.tsx",
+    "line": 1,
+    "message": "website imports page-agent without declaring a consumer relationship",
+    "cellId": "website",
+    "producerCellId": "page-agent",
+    "cellfenceFingerprint": "40d49f289423f9ad9fc33410ac6f110fb7d58fa317ff0974f4e703d980aaf8fb",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:863a2ce99ca0a1cef83d531bbc51618916c9b1619a5d140ac088cbd87f0f27e1",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-e729f83f8a70447b",
+    "evidencePackageId": "evidence-863a2ce99ca0a1ce",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

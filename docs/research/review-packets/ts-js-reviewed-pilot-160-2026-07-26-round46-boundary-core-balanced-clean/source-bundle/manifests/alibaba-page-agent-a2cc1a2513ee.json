@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/core/src/**",
+      "packages/extension/src/**",
+      "packages/llms/src/**",
+      "packages/mcp/src/**",
+      "packages/page-agent/src/**",
+      "packages/page-controller/src/**",
+      "packages/ui/src/**",
+      "packages/website/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/PageAgentCore.ts",
+      "publicSymbols": [
+        "AgentActivity",
+        "AgentConfig",
+        "AgentErrorEvent",
+        "AgentReflection",
+        "AgentStatus",
+        "AgentStepEvent",
+        "ExecutionResult",
+        "HistoricalEvent",
+        "MacroToolInput",
+        "MacroToolResult",
+        "ObservationEvent",
+        "PageAgentCore",
+        "PageAgentCoreConfig",
+        "PageAgentTool",
+        "RetryEvent",
+        "SupportedLanguage",
+        "tool",
+        "ToolContext",
+        "UserTakeoverEvent"
+      ],
+      "packageName": "@page-agent/core",
+      "consumes": [
+        {
+          "cell": "llms"
+        },
+        {
+          "cell": "page-controller"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ext",
+      "ownedPaths": [
+        "packages/extension/src/**"
+      ],
+      "publicEntry": "packages/extension/src/agent/constants.ts",
+      "publicSymbols": [
+        "DEMO_BASE_URL",
+        "DEMO_CONFIG",
+        "DEMO_MODEL",
+        "isTestingEndpoint",
+        "LEGACY_TESTING_ENDPOINTS",
+        "migrateLegacyEndpoint"
+      ],
+      "packageName": "@page-agent/ext",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "llms"
+        },
+        {
+          "cell": "page-controller"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "llms",
+      "ownedPaths": [
+        "packages/llms/src/**"
+      ],
+      "publicEntry": "packages/llms/src/index.ts",
+      "publicSymbols": [
+        "InvokeError",
+        "InvokeErrorTypes",
+        "InvokeOptions",
+        "InvokeResult",
+        "LLM",
+        "LLMClient",
+        "LLMConfig",
+        "Message",
+        "parseLLMConfig",
+        "Tool"
+      ],
+      "packageName": "@page-agent/llms",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp",
+      "ownedPaths": [
+        "packages/mcp/src/**"
+      ],
+      "publicEntry": "packages/mcp/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@page-agent/mcp",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "page-agent",
+      "ownedPaths": [
+        "packages/page-agent/src/**"
+      ],
+      "publicEntry": "packages/page-agent/src/PageAgent.ts",
+      "publicSymbols": [
+        "PageAgent",
+        "PageAgentConfig"
+      ],
+      "packageName": "page-agent",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "llms"
+        },
+        {
+          "cell": "page-controller"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "page-controller",
+      "ownedPaths": [
+        "packages/page-controller/src/**"
+      ],
+      "publicEntry": "packages/page-controller/src/PageController.ts",
+      "publicSymbols": [
+        "BrowserState",
+        "clickElement",
+        "getElementByIndex",
+        "inputTextElement",
+        "PageController",
+        "PageControllerConfig",
+        "scrollHorizontally",
+        "scrollIntoViewIfNeeded",
+        "scrollVertically",
+        "selectOptionElement"
+      ],
+      "packageName": "@page-agent/page-controller",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/src/**"
+      ],
+      "publicEntry": "packages/ui/src/index.ts",
+      "publicSymbols": [
+        "I18n",
+        "Panel",
+        "PanelConfig",
+        "SupportedLanguage",
+        "TranslationKey"
+      ],
+      "packageName": "@page-agent/ui",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "packages/website/src/**"
+      ],
+      "publicEntry": "packages/website/src/components/APIReference.tsx",
+      "publicSymbols": [
+        "APIDivider",
+        "APIReference",
+        "APIReferenceProps",
+        "PropDefinition",
+        "TypeRef"
+      ],
+      "packageName": "@page-agent/website",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

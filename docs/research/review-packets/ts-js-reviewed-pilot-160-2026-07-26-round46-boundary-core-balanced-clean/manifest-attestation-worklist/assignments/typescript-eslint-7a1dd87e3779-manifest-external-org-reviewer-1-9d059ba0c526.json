@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-3e48e604c017f273",
+    "subjectId": "typescript-eslint",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "typescript-eslint",
+    "phase": null,
+    "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+    "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13"
+  },
+  "manifestCopy": {
+    "path": "manifests/typescript-eslint-7a1dd87e3779.json",
+    "sha256": "6563a0ba700bf00ae548af0367f644c9e596bdbbbbb213202536b124692049fc"
+  },
+  "attestationTemplate": {
+    "subjectId": "typescript-eslint",
+    "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+    "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13",
+    "manifestCopy": {
+      "path": "manifests/typescript-eslint-7a1dd87e3779.json",
+      "sha256": "6563a0ba700bf00ae548af0367f644c9e596bdbbbbb213202536b124692049fc"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "6563a0ba700bf00ae548af0367f644c9e596bdbbbbb213202536b124692049fc",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

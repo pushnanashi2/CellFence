@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-eb8fd171d7d92ede",
+    "subjectId": "nighttrax-ts-monorepo",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "nighttrax-ts-monorepo",
+    "phase": null,
+    "repository": "https://github.com/NiGhTTraX/ts-monorepo.git",
+    "commit": "949b99be84079e1fd3e101292173da839e8ffe1e"
+  },
+  "manifestCopy": {
+    "path": "manifests/nighttrax-ts-monorepo-55b4c5ed5fb0.json",
+    "sha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69"
+  },
+  "attestationTemplate": {
+    "subjectId": "nighttrax-ts-monorepo",
+    "repository": "https://github.com/NiGhTTraX/ts-monorepo.git",
+    "commit": "949b99be84079e1fd3e101292173da839e8ffe1e",
+    "manifestCopy": {
+      "path": "manifests/nighttrax-ts-monorepo-55b4c5ed5fb0.json",
+      "sha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

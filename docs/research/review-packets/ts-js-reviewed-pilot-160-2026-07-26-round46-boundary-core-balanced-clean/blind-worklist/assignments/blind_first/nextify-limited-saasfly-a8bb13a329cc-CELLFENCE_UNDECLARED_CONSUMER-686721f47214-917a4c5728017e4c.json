@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-917a4c5728017e4c",
+    "evidencePackageId": "evidence-a7d5c30aa9c6b73a",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/nextify-limited-saasfly-a8bb13a329cc.json",
+        "sha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4"
+      },
+      "auditLog": {
+        "path": "logs/nextify-limited-saasfly-a8bb13a329cc/check.audit.jsonl",
+        "sha256": "f19f9e4269d76ca49e33ae5fa839be184957a8e64e0f2311720c1a0cac7343b0"
+      },
+      "evidenceGraph": {
+        "path": "logs/nextify-limited-saasfly-a8bb13a329cc/evidence-graph.json",
+        "sha256": "fb4d68596decbe0a0c39009ba7d1ac1a1501f767b9096c4844c6c5f7630832e2"
+      },
+      "checkStdout": {
+        "path": "logs/nextify-limited-saasfly-a8bb13a329cc/check.stdout.log",
+        "sha256": "7eba4b104245b31c989283cecda49f9221d43527929af89c1c6191d60e952860"
+      },
+      "checkStderr": {
+        "path": "logs/nextify-limited-saasfly-a8bb13a329cc/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:a7d5c30aa9c6b73a3a3fd0f46e47d9af16e67a47ccf6467c4d40eaa147b184ad",
+    "subjectId": "nextify-limited-saasfly",
+    "repository": "https://github.com/nextify-limited/saasfly.git",
+    "commit": "49f7e28f69eae9cd9eed84221e13a3dbae87da67",
+    "gitTree": "09c3f891182161b0e979f1bd71a51324d01cc986",
+    "manifestSha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "apps/nextjs/src/components/price/pricing-cards.tsx",
+    "line": 18,
+    "message": "nextjs imports ui without declaring a consumer relationship",
+    "cellId": "nextjs",
+    "producerCellId": "ui",
+    "cellfenceFingerprint": "70fca477f74557cde19c81b2279c2aec10a923b5e6b7df4e27e16fd9d40b0b15",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:a7d5c30aa9c6b73a3a3fd0f46e47d9af16e67a47ccf6467c4d40eaa147b184ad",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-917a4c5728017e4c",
+    "evidencePackageId": "evidence-a7d5c30aa9c6b73a",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

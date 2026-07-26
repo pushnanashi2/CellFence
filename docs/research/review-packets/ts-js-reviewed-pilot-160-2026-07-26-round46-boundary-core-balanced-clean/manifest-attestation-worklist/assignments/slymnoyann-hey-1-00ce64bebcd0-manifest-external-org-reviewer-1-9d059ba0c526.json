@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-84bf5df989668d52",
+    "subjectId": "slymnoyann-hey-1",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "slymnoyann-hey-1",
+    "phase": null,
+    "repository": "https://github.com/slymnoyann/hey-1.git",
+    "commit": "88c8f9d55340d57a37846ff72f55c2c604e3a566"
+  },
+  "manifestCopy": {
+    "path": "manifests/slymnoyann-hey-1-00ce64bebcd0.json",
+    "sha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672"
+  },
+  "attestationTemplate": {
+    "subjectId": "slymnoyann-hey-1",
+    "repository": "https://github.com/slymnoyann/hey-1.git",
+    "commit": "88c8f9d55340d57a37846ff72f55c2c604e3a566",
+    "manifestCopy": {
+      "path": "manifests/slymnoyann-hey-1-00ce64bebcd0.json",
+      "sha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-def4b485c7465f96",
+    "subjectId": "drawdb-io-drawdb",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "drawdb-io-drawdb",
+    "phase": null,
+    "repository": "https://github.com/drawdb-io/drawdb.git",
+    "commit": "a85458c6392a160b4aedaa5f5152b9ebcda26bde"
+  },
+  "manifestCopy": {
+    "path": "manifests/drawdb-io-drawdb-1a7f5b994945.json",
+    "sha256": "aa862853a8ebd49cb045eb377dc4c6b8d5a3c81b67f4ad4198dcc5b5185b9ea6"
+  },
+  "attestationTemplate": {
+    "subjectId": "drawdb-io-drawdb",
+    "repository": "https://github.com/drawdb-io/drawdb.git",
+    "commit": "a85458c6392a160b4aedaa5f5152b9ebcda26bde",
+    "manifestCopy": {
+      "path": "manifests/drawdb-io-drawdb-1a7f5b994945.json",
+      "sha256": "aa862853a8ebd49cb045eb377dc4c6b8d5a3c81b67f4ad4198dcc5b5185b9ea6"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "aa862853a8ebd49cb045eb377dc4c6b8d5a3c81b67f4ad4198dcc5b5185b9ea6",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

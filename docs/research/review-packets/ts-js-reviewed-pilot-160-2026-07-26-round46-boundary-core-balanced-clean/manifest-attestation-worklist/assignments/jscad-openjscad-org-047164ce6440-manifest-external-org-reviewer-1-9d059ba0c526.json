@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-107837ace036b7ed",
+    "subjectId": "jscad-openjscad-org",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jscad-openjscad-org",
+    "phase": null,
+    "repository": "https://github.com/jscad/OpenJSCAD.org.git",
+    "commit": "f245ea3a5072024b789f276c6fb9ce6c3eb3fd0d"
+  },
+  "manifestCopy": {
+    "path": "manifests/jscad-openjscad-org-047164ce6440.json",
+    "sha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2"
+  },
+  "attestationTemplate": {
+    "subjectId": "jscad-openjscad-org",
+    "repository": "https://github.com/jscad/OpenJSCAD.org.git",
+    "commit": "f245ea3a5072024b789f276c6fb9ce6c3eb3fd0d",
+    "manifestCopy": {
+      "path": "manifests/jscad-openjscad-org-047164ce6440.json",
+      "sha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

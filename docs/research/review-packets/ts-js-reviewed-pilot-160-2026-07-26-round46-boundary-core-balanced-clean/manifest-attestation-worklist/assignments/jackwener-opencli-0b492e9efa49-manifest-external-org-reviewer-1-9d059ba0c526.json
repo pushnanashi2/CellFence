@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-40a73d5d86ea3ae2",
+    "subjectId": "jackwener-opencli",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jackwener-opencli",
+    "phase": null,
+    "repository": "https://github.com/jackwener/OpenCLI.git",
+    "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74"
+  },
+  "manifestCopy": {
+    "path": "manifests/jackwener-opencli-0b492e9efa49.json",
+    "sha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788"
+  },
+  "attestationTemplate": {
+    "subjectId": "jackwener-opencli",
+    "repository": "https://github.com/jackwener/OpenCLI.git",
+    "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74",
+    "manifestCopy": {
+      "path": "manifests/jackwener-opencli-0b492e9efa49.json",
+      "sha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

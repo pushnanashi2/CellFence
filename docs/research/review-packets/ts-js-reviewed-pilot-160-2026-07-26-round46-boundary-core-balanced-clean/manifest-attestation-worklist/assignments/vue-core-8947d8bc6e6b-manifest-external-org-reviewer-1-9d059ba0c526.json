@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-99c664a743a6eceb",
+    "subjectId": "vue-core",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "vue-core",
+    "phase": null,
+    "repository": "https://github.com/vuejs/core.git",
+    "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b"
+  },
+  "manifestCopy": {
+    "path": "manifests/vue-core-8947d8bc6e6b.json",
+    "sha256": "ef5fe6d32496d3b6ca02f0b5c2cfec070b9d8d29206e19372137d6a231256df6"
+  },
+  "attestationTemplate": {
+    "subjectId": "vue-core",
+    "repository": "https://github.com/vuejs/core.git",
+    "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+    "manifestCopy": {
+      "path": "manifests/vue-core-8947d8bc6e6b.json",
+      "sha256": "ef5fe6d32496d3b6ca02f0b5c2cfec070b9d8d29206e19372137d6a231256df6"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ef5fe6d32496d3b6ca02f0b5c2cfec070b9d8d29206e19372137d6a231256df6",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

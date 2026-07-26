@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-22491f26a444a27b",
+    "evidencePackageId": "evidence-1b25501a2058aced",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/jquense-yup-fb81d8a9ee0c.json",
+        "sha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc"
+      },
+      "auditLog": {
+        "path": "logs/jquense-yup-fb81d8a9ee0c/check.audit.jsonl",
+        "sha256": "d5b44eaef7bbde81619280811fc8c9770f580e6c810fe8a71c7d2ffdaa992d22"
+      },
+      "evidenceGraph": {
+        "path": "logs/jquense-yup-fb81d8a9ee0c/evidence-graph.json",
+        "sha256": "f95dc4694039a03427b7482b8fcd1b244465fb4c6d27e996f2bfcb16763bcef5"
+      },
+      "checkStdout": {
+        "path": "logs/jquense-yup-fb81d8a9ee0c/check.stdout.log",
+        "sha256": "e31285024d099441888a24386957603a8de5160b5861f31cc67fbc463bc3c77d"
+      },
+      "checkStderr": {
+        "path": "logs/jquense-yup-fb81d8a9ee0c/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:1b25501a2058aced0f101e424d82484f65beb0145c728542d40f565d87c83016",
+    "subjectId": "jquense-yup",
+    "repository": "https://github.com/jquense/yup.git",
+    "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01",
+    "gitTree": "f281b0e1b76bfd8f412260c35c88b5935dcb3146",
+    "manifestSha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/util/reach.ts",
+    "line": 2,
+    "message": "util imports private implementation from src-root",
+    "cellId": "util",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "a66a25913124c4c07b5aa22a14d8f78cb5ba7b77be755746d5ac5b8fd1afb4a6",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:1b25501a2058aced0f101e424d82484f65beb0145c728542d40f565d87c83016",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-22491f26a444a27b",
+    "evidencePackageId": "evidence-1b25501a2058aced",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

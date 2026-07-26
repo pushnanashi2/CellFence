@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-207053981a7a6e6c",
+    "subjectId": "keyshade-xyz-keyshade",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "keyshade-xyz-keyshade",
+    "phase": null,
+    "repository": "https://github.com/keyshade-xyz/keyshade.git",
+    "commit": "ef7e9e21a6d908d8c131e0e8bbdec3ef28c23e9a"
+  },
+  "manifestCopy": {
+    "path": "manifests/keyshade-xyz-keyshade-ee8ba7eea56f.json",
+    "sha256": "0ae2e7e971a143dd5321dbbabe881b5b63293075358152fe2b85bb54cb2892aa"
+  },
+  "attestationTemplate": {
+    "subjectId": "keyshade-xyz-keyshade",
+    "repository": "https://github.com/keyshade-xyz/keyshade.git",
+    "commit": "ef7e9e21a6d908d8c131e0e8bbdec3ef28c23e9a",
+    "manifestCopy": {
+      "path": "manifests/keyshade-xyz-keyshade-ee8ba7eea56f.json",
+      "sha256": "0ae2e7e971a143dd5321dbbabe881b5b63293075358152fe2b85bb54cb2892aa"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "0ae2e7e971a143dd5321dbbabe881b5b63293075358152fe2b85bb54cb2892aa",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,599 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "block",
+      "ownedPaths": [
+        "src/block/**"
+      ],
+      "publicEntry": "src/block/blockchain.ts",
+      "publicSymbols": [
+        "ShardeumBlock"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "config",
+      "ownedPaths": [
+        "src/config/**"
+      ],
+      "publicEntry": "src/config/index.ts",
+      "publicSymbols": [
+        "Config",
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "debug",
+      "ownedPaths": [
+        "src/debug/**"
+      ],
+      "publicEntry": "src/debug/block/blockchain.ts",
+      "publicSymbols": [
+        "blocks",
+        "getOrCreateBlockFromTimestamp",
+        "ShardeumBlock"
+      ],
+      "consumes": [
+        {
+          "cell": "evm-v2"
+        },
+        {
+          "cell": "setup"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vm-v7"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "evm-v2",
+      "ownedPaths": [
+        "src/evm_v2/**"
+      ],
+      "publicEntry": "src/evm_v2/index.ts",
+      "publicSymbols": [
+        "EOF",
+        "EVM",
+        "EvmError",
+        "EVMErrorMessage",
+        "EVMInterface",
+        "EVMResult",
+        "ExecResult",
+        "getActivePrecompiles",
+        "InterpreterStep",
+        "Log",
+        "Message",
+        "PrecompileInput"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "handlers",
+      "ownedPaths": [
+        "src/handlers/**"
+      ],
+      "publicEntry": "src/handlers/adminCertificate.ts",
+      "publicSymbols": [
+        "AdminCert",
+        "putAdminCertificateHandler",
+        "PutAdminCertRequest",
+        "PutAdminCertResult"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "middleware",
+      "ownedPaths": [
+        "src/middleware/**"
+      ],
+      "publicEntry": "src/middleware/externalApiMiddleware.ts",
+      "publicSymbols": [
+        "getExternalApiMiddleware"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "setup",
+      "ownedPaths": [
+        "src/setup/**"
+      ],
+      "publicEntry": "src/setup/index.ts",
+      "publicSymbols": [
+        "sync",
+        "validateTransaction",
+        "validateTxnFields"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "tx"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shardeum",
+      "ownedPaths": [
+        "src/shardeum/**"
+      ],
+      "publicEntry": "src/shardeum/debugRestoreAccounts.ts",
+      "publicSymbols": [
+        "loadAccountDataFromDB",
+        "LoadOptions",
+        "LoadReport",
+        "processAccountsData"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "handlers"
+        },
+        {
+          "cell": "setup"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vm-v7"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "adminCert",
+        "blocks",
+        "blocksByHash",
+        "createInternalTxReceipt",
+        "createNetworkAccount",
+        "evmCommon",
+        "genesisAccounts",
+        "getApplyTXState",
+        "getReadableAccountInfo",
+        "getStakeTxBlobFromEVMTx",
+        "isArchiverMode",
+        "isServiceMode",
+        "logFlags",
+        "readableBlocks",
+        "setGenesisAccounts",
+        "shardeumGetTime",
+        "shardusConfig",
+        "shouldLoadNetworkConfigToNetworkAccount",
+        "stakeCert"
+      ],
+      "consumes": [
+        {
+          "cell": "block"
+        },
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "evm-v2"
+        },
+        {
+          "cell": "handlers"
+        },
+        {
+          "cell": "middleware"
+        },
+        {
+          "cell": "setup"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "tx"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "versioning"
+        },
+        {
+          "cell": "vm-v7"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "state",
+      "ownedPaths": [
+        "src/state/**"
+      ],
+      "publicEntry": "src/state/index.ts",
+      "publicSymbols": [
+        "ShardeumState",
+        "TransactionState"
+      ],
+      "consumes": [
+        {
+          "cell": "evm-v2"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storage",
+      "ownedPaths": [
+        "src/storage/**"
+      ],
+      "publicEntry": "src/storage/accountStorage.ts",
+      "publicSymbols": [
+        "accountExists",
+        "accounts",
+        "cachedNetworkAccount",
+        "checkDatabaseHealth",
+        "clearAccounts",
+        "debugGetAllAccounts",
+        "fetchAccountDataFromCollector",
+        "getAccount",
+        "getAccountTimestamp",
+        "getCachedNetworkAccount",
+        "init",
+        "lazyInit",
+        "queryAccountsEntryByRanges",
+        "queryAccountsEntryByRanges2",
+        "setAccount",
+        "setCachedNetworkAccount",
+        "storage"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tx",
+      "ownedPaths": [
+        "src/tx/**"
+      ],
+      "publicEntry": "src/tx/claimReward.ts",
+      "publicSymbols": [
+        "applyClaimRewardTx",
+        "injectClaimRewardTx",
+        "validateClaimRewardState",
+        "validateClaimRewardTx"
+      ],
+      "consumes": [
+        {
+          "cell": "config"
+        },
+        {
+          "cell": "handlers"
+        },
+        {
+          "cell": "setup"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/ajv/ApplyChangeConfigTxSchema.ts",
+      "publicSymbols": [
+        "initApplyChangeConfigTx"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vm-v7"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/index.ts",
+      "publicSymbols": [
+        "_base10BNParser",
+        "_base16BNParser",
+        "_readableSHM",
+        "calculateGasPrice",
+        "comparePropertiesTypes",
+        "convertBigIntsToHex",
+        "debug_map_replacer",
+        "emptyCodeHash",
+        "findMajorityResult",
+        "fixBigIntLiteralsToBigInt",
+        "formatErrorMessage",
+        "generateTxId",
+        "getRandom",
+        "getTxSenderAddress",
+        "isInSenderCache",
+        "isObject",
+        "isStakingEVMTx",
+        "isWithinRange",
+        "operatorCLIVersion",
+        "operatorGUIVersion",
+        "readOperatorVersions",
+        "removeTxFromSenderCache",
+        "replacer",
+        "scaleByStabilityFactor",
+        "sleep",
+        "zeroAddressAccount",
+        "zeroAddressStr"
+      ],
+      "consumes": [
+        {
+          "cell": "setup"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "storage"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "versioning",
+      "ownedPaths": [
+        "src/versioning/**"
+      ],
+      "publicEntry": "src/versioning/index.ts",
+      "publicSymbols": [
+        "onActiveVersionChange"
+      ],
+      "consumes": [
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vm-v7",
+      "ownedPaths": [
+        "src/vm_v7/**"
+      ],
+      "publicEntry": "src/vm_v7/index.ts",
+      "publicSymbols": [
+        "AfterBlockEvent",
+        "AfterTxEvent",
+        "BaseTxReceipt",
+        "BlockBuilder",
+        "Bloom",
+        "BuildBlockOpts",
+        "BuilderOpts",
+        "BuildStatus",
+        "EIP4844BlobTxReceipt",
+        "encodeReceipt",
+        "PostByzantiumTxReceipt",
+        "PreByzantiumTxReceipt",
+        "RunBlockOpts",
+        "RunBlockResult",
+        "RunTxOpts",
+        "RunTxResult",
+        "SealBlockOpts",
+        "ShardeumVM",
+        "TxReceipt",
+        "VMEvents",
+        "VMOpts"
+      ],
+      "consumes": [
+        {
+          "cell": "evm-v2"
+        },
+        {
+          "cell": "shardeum"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

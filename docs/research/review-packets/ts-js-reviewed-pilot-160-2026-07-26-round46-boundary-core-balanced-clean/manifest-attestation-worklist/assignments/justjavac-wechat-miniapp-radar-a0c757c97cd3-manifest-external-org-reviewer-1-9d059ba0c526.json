@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-3f82dd27b00fb500",
+    "subjectId": "justjavac-wechat-miniapp-radar",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "justjavac-wechat-miniapp-radar",
+    "phase": null,
+    "repository": "https://github.com/justjavac/wechat-miniapp-radar.git",
+    "commit": "597c3e1763e5506b09037bd82d9897ca28dd6e4d"
+  },
+  "manifestCopy": {
+    "path": "manifests/justjavac-wechat-miniapp-radar-a0c757c97cd3.json",
+    "sha256": "e45e35fb4af971e0d83264df865dad656978e95e044ac20c21e4910062c90ef1"
+  },
+  "attestationTemplate": {
+    "subjectId": "justjavac-wechat-miniapp-radar",
+    "repository": "https://github.com/justjavac/wechat-miniapp-radar.git",
+    "commit": "597c3e1763e5506b09037bd82d9897ca28dd6e4d",
+    "manifestCopy": {
+      "path": "manifests/justjavac-wechat-miniapp-radar-a0c757c97cd3.json",
+      "sha256": "e45e35fb4af971e0d83264df865dad656978e95e044ac20c21e4910062c90ef1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "e45e35fb4af971e0d83264df865dad656978e95e044ac20c21e4910062c90ef1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-090beef72835f61c",
+    "subjectId": "besscroft-picimpact",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "besscroft-picimpact",
+    "phase": null,
+    "repository": "https://github.com/besscroft/PicImpact.git",
+    "commit": "a806e84f5a6fb3628bb4db05f67b5c7bb5cfdffc"
+  },
+  "manifestCopy": {
+    "path": "manifests/besscroft-picimpact-2c4afaa4e638.json",
+    "sha256": "425747fb8c8bc49673ec63a350318c53957ecc3e2ff623fa594e7eb521bdd843"
+  },
+  "attestationTemplate": {
+    "subjectId": "besscroft-picimpact",
+    "repository": "https://github.com/besscroft/PicImpact.git",
+    "commit": "a806e84f5a6fb3628bb4db05f67b5c7bb5cfdffc",
+    "manifestCopy": {
+      "path": "manifests/besscroft-picimpact-2c4afaa4e638.json",
+      "sha256": "425747fb8c8bc49673ec63a350318c53957ecc3e2ff623fa594e7eb521bdd843"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "425747fb8c8bc49673ec63a350318c53957ecc3e2ff623fa594e7eb521bdd843",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

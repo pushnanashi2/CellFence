@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-1f83a315588b0a66",
+    "subjectId": "ts-rest-ts-rest",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "ts-rest-ts-rest",
+    "phase": null,
+    "repository": "https://github.com/ts-rest/ts-rest.git",
+    "commit": "dd7239bc950d1e254d9c9cd6df7dbccc529c33cb"
+  },
+  "manifestCopy": {
+    "path": "manifests/ts-rest-ts-rest-c66af3e3bc1a.json",
+    "sha256": "b387843d2dc3bbb6aa2f7feb63714a4c7016c6e8f4a0950ce94564ad60f33ff9"
+  },
+  "attestationTemplate": {
+    "subjectId": "ts-rest-ts-rest",
+    "repository": "https://github.com/ts-rest/ts-rest.git",
+    "commit": "dd7239bc950d1e254d9c9cd6df7dbccc529c33cb",
+    "manifestCopy": {
+      "path": "manifests/ts-rest-ts-rest-c66af3e3bc1a.json",
+      "sha256": "b387843d2dc3bbb6aa2f7feb63714a4c7016c6e8f4a0950ce94564ad60f33ff9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b387843d2dc3bbb6aa2f7feb63714a4c7016c6e8f4a0950ce94564ad60f33ff9",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

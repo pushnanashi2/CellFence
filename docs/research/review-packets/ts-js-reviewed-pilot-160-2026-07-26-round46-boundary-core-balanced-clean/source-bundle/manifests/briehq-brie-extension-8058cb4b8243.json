@@ -1,0 +1,931 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "chrome-extension/src/**",
+      "packages/dev-utils/**",
+      "packages/env/**",
+      "packages/hmr/**",
+      "packages/i18n/**",
+      "packages/shared/**",
+      "packages/storage/**",
+      "packages/store/**",
+      "packages/tailwindcss-config/**",
+      "packages/ui/**",
+      "packages/vite-config/**",
+      "packages/zipper/**",
+      "pages/content-runtime/**",
+      "pages/content-runtime/src/**",
+      "pages/content-ui/**",
+      "pages/content-ui/src/**",
+      "pages/content/**",
+      "pages/content/src/**",
+      "pages/mic-permission/**",
+      "pages/mic-permission/src/**",
+      "pages/popup/**",
+      "pages/popup/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "chrome-extension",
+      "ownedPaths": [
+        "chrome-extension/src/**"
+      ],
+      "publicEntry": "chrome-extension/src/background/index.ts",
+      "publicSymbols": [],
+      "packageName": "chrome-extension",
+      "consumes": [
+        {
+          "cell": "dev-utils"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "hmr"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "content-runtime-script",
+      "ownedPaths": [
+        "pages/content-runtime/src/**"
+      ],
+      "publicEntry": "pages/content-runtime/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@extension/content-runtime-script",
+      "consumes": [
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "content-script",
+      "ownedPaths": [
+        "pages/content/src/**"
+      ],
+      "publicEntry": "pages/content/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@extension/content-script",
+      "consumes": [
+        {
+          "cell": "chrome-extension"
+        },
+        {
+          "cell": "content-ui"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "hmr"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "pages"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "content-ui",
+      "ownedPaths": [
+        "pages/content-ui/src/**"
+      ],
+      "publicEntry": "pages/content-ui/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@extension/content-ui",
+      "consumes": [
+        {
+          "cell": "chrome-extension"
+        },
+        {
+          "cell": "content-runtime-script"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "hmr"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "store"
+        },
+        {
+          "cell": "tailwindcss-config"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dev-utils",
+      "ownedPaths": [
+        "packages/dev-utils/**"
+      ],
+      "publicEntry": "packages/dev-utils/index.mts",
+      "publicSymbols": [
+        "colorLog",
+        "ManifestParser",
+        "ManifestParserInterface",
+        "ManifestType",
+        "streamFileToZip"
+      ],
+      "packageName": "@extension/dev-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "env",
+      "ownedPaths": [
+        "packages/env/**"
+      ],
+      "publicEntry": "packages/env/index.mts",
+      "publicSymbols": [
+        "API_BASE_URL",
+        "APP_BASE_URL",
+        "baseEnv",
+        "CLI_ENV",
+        "default",
+        "dynamicEnvValues",
+        "IS_CI",
+        "IS_DEV",
+        "IS_FIREFOX",
+        "IS_PROD",
+        "NAME"
+      ],
+      "packageName": "@extension/env",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hmr",
+      "ownedPaths": [
+        "packages/hmr/**"
+      ],
+      "publicEntry": "packages/hmr/index.mts",
+      "publicSymbols": [
+        "makeEntryPointPlugin",
+        "watchPublicPlugin",
+        "watchRebuildPlugin"
+      ],
+      "packageName": "@extension/hmr",
+      "consumes": [
+        {
+          "cell": "env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "i18n",
+      "ownedPaths": [
+        "packages/i18n/**"
+      ],
+      "publicEntry": "packages/i18n/index.mts",
+      "publicSymbols": [
+        "t"
+      ],
+      "packageName": "@extension/i18n",
+      "consumes": [
+        {
+          "cell": "env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mic-permission",
+      "ownedPaths": [
+        "pages/mic-permission/src/**"
+      ],
+      "publicEntry": "pages/mic-permission/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@extension/mic-permission",
+      "consumes": [
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "tailwindcss-config"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pages",
+      "ownedPaths": [
+        "pages/content-runtime/**",
+        "pages/content-ui/**",
+        "pages/content/**",
+        "pages/mic-permission/**",
+        "pages/popup/**"
+      ],
+      "publicEntry": "pages/content-runtime/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "chrome-extension"
+        },
+        {
+          "cell": "content-runtime-script"
+        },
+        {
+          "cell": "content-script"
+        },
+        {
+          "cell": "content-ui"
+        },
+        {
+          "cell": "mic-permission"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "popup",
+      "ownedPaths": [
+        "pages/popup/src/**"
+      ],
+      "publicEntry": "pages/popup/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@extension/popup",
+      "consumes": [
+        {
+          "cell": "chrome-extension"
+        },
+        {
+          "cell": "content-runtime-script"
+        },
+        {
+          "cell": "content-ui"
+        },
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "pages"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "store"
+        },
+        {
+          "cell": "tailwindcss-config"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "vite-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "packages/shared/**"
+      ],
+      "publicEntry": "packages/shared/index.mts",
+      "publicSymbols": [
+        "AiGenerateType",
+        "AssetOption",
+        "AssetUploadResponse",
+        "AUTH",
+        "AuthMethod",
+        "AuthMsg",
+        "AuthPayload",
+        "AuthState",
+        "BASELINE_DENYLIST",
+        "BaseRecord",
+        "BgToContentMessage",
+        "BgToPopupMessage",
+        "BlockReason",
+        "BlockRule",
+        "CANVAS_ACTION",
+        "CanvasAction",
+        "capitalizeWord",
+        "CAPTURE",
+        "CaptureMode",
+        "CaptureMsg",
+        "ConsoleMethod",
+        "ConsoleRecord",
+        "ContentToBgMessage",
+        "deepRedactSensitiveInfo",
+        "DocumentLifecycle",
+        "ERROR",
+        "ErrorMsg",
+        "EXEMPT_KEYS",
+        "formatDurationMs",
+        "FrameType",
+        "GenerateBody",
+        "GenerateResponse",
+        "getActiveTab",
+        "getInitials",
+        "getRuntimeURL",
+        "HeaderKV",
+        "HeadersMap",
+        "highRiskValuePatterns",
+        "HostPattern",
+        "HttpMethod",
+        "INITIAL_PARAMS",
+        "InitSliceRequest",
+        "InitSliceResponse",
+        "isExtensionElement",
+        "isNonProduction",
+        "isRewindBlocked",
+        "isValidJSON",
+        "ITEMS_PER_PAGE",
+        "keyedSecretPatterns",
+        "keyMatches",
+        "LabelItem",
+        "LoginPayload",
+        "NetworkRecord",
+        "NON_SENSITIVE_KEYS",
+        "nonProductionKeywords",
+        "optionalPiiPatterns",
+        "OrderBy",
+        "Organization",
+        "OrganizationPlan",
+        "Pagination",
+        "PathHint",
+        "Plan",
+        "PopupState",
+        "PopupToBgMessage",
+        "QueryFilter",
+        "RECORD",
+        "RecordArea",
+        "RECORDING",
+        "RecordingMsg",
+        "RecordingSession",
+        "RecordLike",
+        "RecordMsg",
+        "RecordSource",
+        "RecordType",
+        "REDACTED_KEYWORD",
+        "reloadTab",
+        "ReportResultV1",
+        "REWIND",
+        "RewindMsg",
+        "safePostMessage",
+        "safeStructuredClone",
+        "Screenshot",
+        "SCREENSHOT",
+        "ScreenshotMsg",
+        "Segment",
+        "sendMessageToActiveTab",
+        "sendMessageToTab",
+        "sendRuntimeMessageToActiveTab",
+        "Slice",
+        "SlicePriority",
+        "SliceState",
+        "SliceStatus",
+        "SliceType",
+        "Space",
+        "StackTrace",
+        "StepsResultV1",
+        "stripUnCloneable",
+        "STRONG_KEYS",
+        "Subscription",
+        "SubscriptionStatus",
+        "TAB",
+        "TabMsg",
+        "Tokens",
+        "UI",
+        "UiMsg",
+        "UpdateSliceState",
+        "updateTab",
+        "User",
+        "UserAndTokensResponse",
+        "useStorage",
+        "ValueOf",
+        "VIDEO",
+        "VideoMeta",
+        "VideoMsg",
+        "withErrorBoundary",
+        "withSuspense",
+        "Workspace"
+      ],
+      "packageName": "@extension/shared",
+      "consumes": [
+        {
+          "cell": "storage"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storage",
+      "ownedPaths": [
+        "packages/storage/**"
+      ],
+      "publicEntry": "packages/storage/index.mts",
+      "publicSymbols": [
+        "annotationsHistoryStorage",
+        "annotationsRedoStorage",
+        "annotationsStorage",
+        "authIdentityProviderStorage",
+        "AuthIdentityProviderStorage",
+        "authTokensStorage",
+        "AuthTokensStorage",
+        "BaseStorage",
+        "CaptureMode",
+        "captureNotifyStorage",
+        "CaptureNotifyStorage",
+        "CaptureState",
+        "captureStateStorage",
+        "captureTabStorage",
+        "domainSkipListStorage",
+        "ITokens",
+        "MicPermission",
+        "pendingReloadTabsStorage",
+        "RecordingSettings",
+        "recordingSettingsStorage",
+        "RecordingSettingsStorage",
+        "RewindSettings",
+        "rewindSettingsStorage",
+        "RewindSettingsStorage",
+        "ScreenshotCaptureState",
+        "themeStorage",
+        "userUUIDStorage",
+        "VideoRecordingState"
+      ],
+      "packageName": "@extension/storage",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "store",
+      "ownedPaths": [
+        "packages/store/**"
+      ],
+      "publicEntry": "packages/store/index.mts",
+      "publicSymbols": [
+        "AppDispatch",
+        "AppStore",
+        "clearCanvasState",
+        "CreateAction",
+        "CreateActionKey",
+        "CreateExternalIssuePayload",
+        "ExternalIssueResponse",
+        "GithubIssueResponse",
+        "IntegrationConnection",
+        "IntegrationProvider",
+        "LinkedRepository",
+        "ReduxProvider",
+        "RootState",
+        "store",
+        "triggerCanvasAction",
+        "useAppDispatch",
+        "useAppSelector",
+        "useCreateDraftSliceMutation",
+        "useCreateExternalIssueMutation",
+        "useCreateGithubIssueMutation",
+        "useCreateSliceMutation",
+        "useCreateSpacesMutation",
+        "useCreateWorkspaceMutation",
+        "useDeleteSliceByIdMutation",
+        "useGenerateWithAIMutation",
+        "useGetIntegrationsByWorkspaceIdQuery",
+        "useGetLinkedGithubReposQuery",
+        "useGetOrganizationByIdQuery",
+        "useGetOverviewQuery",
+        "useGetPublicSliceByIdQuery",
+        "useGetSlicesQuery",
+        "useGetSpacesQuery",
+        "useGetSubscriptionByIdQuery",
+        "useGetTranscriptionMutation",
+        "useGetUserDetailsQuery",
+        "useGetWorkspaceByIdQuery",
+        "useGetWorkspacePublicByIdQuery",
+        "useGetWorkspacesQuery",
+        "useLazyGetFullScreenshotQuery",
+        "useLazyGetOverviewQuery",
+        "useLazyGetSlicesQuery",
+        "useLazyGetSpacesQuery",
+        "useLazyGetSubscriptionByIdQuery",
+        "useLazyGetUserDetailsQuery",
+        "useLoginGuestMutation",
+        "useSubscription",
+        "useUpdateSliceStateMutation",
+        "useUploadAssetBySliceIdMutation",
+        "useUser",
+        "useUserOrganization"
+      ],
+      "packageName": "@extension/store",
+      "consumes": [
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tailwindcss-config",
+      "ownedPaths": [
+        "packages/tailwindcss-config/**"
+      ],
+      "publicEntry": "packages/tailwindcss-config/tailwind.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@extension/tailwindcss-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/**"
+      ],
+      "publicEntry": "packages/ui/index.ts",
+      "publicSymbols": [
+        "Alert",
+        "AlertDescription",
+        "AlertTitle",
+        "Autocomplete",
+        "Avatar",
+        "AvatarFallback",
+        "AvatarImage",
+        "Button",
+        "ButtonProps",
+        "buttonVariants",
+        "Card",
+        "CardContent",
+        "CardDescription",
+        "CardFooter",
+        "CardHeader",
+        "CardTitle",
+        "Checkbox",
+        "cn",
+        "Command",
+        "CommandDialog",
+        "CommandEmpty",
+        "CommandGroup",
+        "CommandInput",
+        "CommandItem",
+        "CommandList",
+        "CommandSeparator",
+        "CommandShortcut",
+        "ContextMenu",
+        "ContextMenuCheckboxItem",
+        "ContextMenuContent",
+        "ContextMenuGroup",
+        "ContextMenuItem",
+        "ContextMenuLabel",
+        "ContextMenuPortal",
+        "ContextMenuRadioGroup",
+        "ContextMenuRadioItem",
+        "ContextMenuSeparator",
+        "ContextMenuShortcut",
+        "ContextMenuSub",
+        "ContextMenuSubContent",
+        "ContextMenuSubTrigger",
+        "ContextMenuTrigger",
+        "Controller",
+        "Delimiter",
+        "Dialog",
+        "DialogClose",
+        "DialogContent",
+        "DialogDescription",
+        "DialogFooter",
+        "DialogHeader",
+        "DialogOverlay",
+        "DialogPortal",
+        "DialogTitle",
+        "DialogTrigger",
+        "DropdownMenu",
+        "DropdownMenuCheckboxItem",
+        "DropdownMenuContent",
+        "DropdownMenuGroup",
+        "DropdownMenuItem",
+        "DropdownMenuLabel",
+        "DropdownMenuPortal",
+        "DropdownMenuRadioGroup",
+        "DropdownMenuRadioItem",
+        "DropdownMenuSeparator",
+        "DropdownMenuShortcut",
+        "DropdownMenuSub",
+        "DropdownMenuSubContent",
+        "DropdownMenuSubTrigger",
+        "DropdownMenuTrigger",
+        "Form",
+        "FormControl",
+        "FormDescription",
+        "FormField",
+        "FormItem",
+        "FormLabel",
+        "FormMessage",
+        "getShadowRoot",
+        "Icon",
+        "IconName",
+        "IconProps",
+        "Input",
+        "Label",
+        "Popover",
+        "PopoverAnchor",
+        "PopoverContent",
+        "PopoverTrigger",
+        "Progress",
+        "RadioGroup",
+        "RadioGroupItem",
+        "ScrollArea",
+        "ScrollBar",
+        "Select",
+        "SelectContent",
+        "SelectGroup",
+        "SelectItem",
+        "SelectLabel",
+        "SelectScrollDownButton",
+        "SelectScrollUpButton",
+        "SelectSeparator",
+        "SelectTrigger",
+        "SelectValue",
+        "Separator",
+        "Skeleton",
+        "Switch",
+        "Tabs",
+        "TabsContent",
+        "TabsList",
+        "TabsTrigger",
+        "Tag",
+        "TagInput",
+        "TagInputProps",
+        "TagList",
+        "TagListProps",
+        "TagPopover",
+        "TagProps",
+        "TagType",
+        "tagVariants",
+        "Textarea",
+        "toast",
+        "ToasterProvider",
+        "Toggle",
+        "ToggleGroup",
+        "ToggleGroupItem",
+        "toggleVariants",
+        "Tooltip",
+        "TooltipContent",
+        "TooltipProvider",
+        "TooltipTrigger",
+        "useController",
+        "useFieldArray",
+        "useForm",
+        "useFormContext",
+        "useFormField",
+        "useFormState",
+        "useWatch",
+        "withUI"
+      ],
+      "packageName": "@extension/ui",
+      "consumes": [
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "storage"
+        },
+        {
+          "cell": "tailwindcss-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite-config",
+      "ownedPaths": [
+        "packages/vite-config/**"
+      ],
+      "publicEntry": "packages/vite-config/index.mts",
+      "publicSymbols": [
+        "watchOption",
+        "withPageConfig"
+      ],
+      "packageName": "@extension/vite-config",
+      "consumes": [
+        {
+          "cell": "env"
+        },
+        {
+          "cell": "hmr"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "zipper",
+      "ownedPaths": [
+        "packages/zipper/**"
+      ],
+      "publicEntry": "packages/zipper/index.mts",
+      "publicSymbols": [],
+      "packageName": "@extension/zipper",
+      "consumes": [
+        {
+          "cell": "dev-utils"
+        },
+        {
+          "cell": "env"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

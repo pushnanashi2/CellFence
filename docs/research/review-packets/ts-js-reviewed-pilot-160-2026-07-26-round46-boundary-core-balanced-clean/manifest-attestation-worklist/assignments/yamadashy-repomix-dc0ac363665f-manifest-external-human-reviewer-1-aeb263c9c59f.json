@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-c7ac2f36a3b5674e",
+    "subjectId": "yamadashy-repomix",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "yamadashy-repomix",
+    "phase": null,
+    "repository": "https://github.com/yamadashy/repomix.git",
+    "commit": "71ba866e272054e74ed7b26f5db897d2489fb3c2"
+  },
+  "manifestCopy": {
+    "path": "manifests/yamadashy-repomix-dc0ac363665f.json",
+    "sha256": "f30549bafbb8782b7cb31e796b9f74c382e45a53f4b8ea572a2bafe2b0e7356e"
+  },
+  "attestationTemplate": {
+    "subjectId": "yamadashy-repomix",
+    "repository": "https://github.com/yamadashy/repomix.git",
+    "commit": "71ba866e272054e74ed7b26f5db897d2489fb3c2",
+    "manifestCopy": {
+      "path": "manifests/yamadashy-repomix-dc0ac363665f.json",
+      "sha256": "f30549bafbb8782b7cb31e796b9f74c382e45a53f4b8ea572a2bafe2b0e7356e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f30549bafbb8782b7cb31e796b9f74c382e45a53f4b8ea572a2bafe2b0e7356e",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

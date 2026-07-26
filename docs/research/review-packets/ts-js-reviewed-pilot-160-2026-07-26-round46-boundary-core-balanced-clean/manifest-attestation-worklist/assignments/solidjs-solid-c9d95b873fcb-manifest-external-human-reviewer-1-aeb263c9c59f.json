@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-92e4d5b5d36c7af7",
+    "subjectId": "solidjs-solid",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "solidjs-solid",
+    "phase": null,
+    "repository": "https://github.com/solidjs/solid.git",
+    "commit": "d2f81d546d5dff37aa25e4fa224e2192efec8c1a"
+  },
+  "manifestCopy": {
+    "path": "manifests/solidjs-solid-c9d95b873fcb.json",
+    "sha256": "2ab2584c77d9aaed40fc96d5058aeab1889440d559200f7ee30065711b3b3d48"
+  },
+  "attestationTemplate": {
+    "subjectId": "solidjs-solid",
+    "repository": "https://github.com/solidjs/solid.git",
+    "commit": "d2f81d546d5dff37aa25e4fa224e2192efec8c1a",
+    "manifestCopy": {
+      "path": "manifests/solidjs-solid-c9d95b873fcb.json",
+      "sha256": "2ab2584c77d9aaed40fc96d5058aeab1889440d559200f7ee30065711b3b3d48"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2ab2584c77d9aaed40fc96d5058aeab1889440d559200f7ee30065711b3b3d48",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

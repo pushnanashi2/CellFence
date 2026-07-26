@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2a2cf2694f21457d",
+    "subjectId": "tanstack-table",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "tanstack-table",
+    "phase": null,
+    "repository": "https://github.com/TanStack/table.git",
+    "commit": "209699ff77b581d2b544d10c3d0d8b46c2398c0a"
+  },
+  "manifestCopy": {
+    "path": "manifests/tanstack-table-0522e7fc0035.json",
+    "sha256": "d462a17b8c092f07501285ff04ddce54807b0a4023af521db12cbc0cf2d3bec0"
+  },
+  "attestationTemplate": {
+    "subjectId": "tanstack-table",
+    "repository": "https://github.com/TanStack/table.git",
+    "commit": "209699ff77b581d2b544d10c3d0d8b46c2398c0a",
+    "manifestCopy": {
+      "path": "manifests/tanstack-table-0522e7fc0035.json",
+      "sha256": "d462a17b8c092f07501285ff04ddce54807b0a4023af521db12cbc0cf2d3bec0"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d462a17b8c092f07501285ff04ddce54807b0a4023af521db12cbc0cf2d3bec0",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-36f12134008460cc",
+    "subjectId": "muravjev-configs",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "muravjev-configs",
+    "phase": null,
+    "repository": "https://github.com/muravjev/configs.git",
+    "commit": "9b323d300b03f7bbeb4eabc85cdbbdbe51b37b56"
+  },
+  "manifestCopy": {
+    "path": "manifests/muravjev-configs-2062503c95ed.json",
+    "sha256": "57884c33c1cc2c2037eebb9cfd6d89301f9ae5e0b52639d0729e7b571d02253e"
+  },
+  "attestationTemplate": {
+    "subjectId": "muravjev-configs",
+    "repository": "https://github.com/muravjev/configs.git",
+    "commit": "9b323d300b03f7bbeb4eabc85cdbbdbe51b37b56",
+    "manifestCopy": {
+      "path": "manifests/muravjev-configs-2062503c95ed.json",
+      "sha256": "57884c33c1cc2c2037eebb9cfd6d89301f9ae5e0b52639d0729e7b571d02253e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "57884c33c1cc2c2037eebb9cfd6d89301f9ae5e0b52639d0729e7b571d02253e",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

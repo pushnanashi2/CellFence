@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-11a3d37ca936ac13",
+    "subjectId": "opencut-app-opencut",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "opencut-app-opencut",
+    "phase": null,
+    "repository": "https://github.com/OpenCut-app/OpenCut.git",
+    "commit": "5e0696bc9b921dcbaf2f42bdf3e96891a30c1e9e"
+  },
+  "manifestCopy": {
+    "path": "manifests/opencut-app-opencut-a2f914f453e0.json",
+    "sha256": "cede831ef28dd4181653b7dbbf04ca276f4060b26246ea8871618f1defbfaae7"
+  },
+  "attestationTemplate": {
+    "subjectId": "opencut-app-opencut",
+    "repository": "https://github.com/OpenCut-app/OpenCut.git",
+    "commit": "5e0696bc9b921dcbaf2f42bdf3e96891a30c1e9e",
+    "manifestCopy": {
+      "path": "manifests/opencut-app-opencut-a2f914f453e0.json",
+      "sha256": "cede831ef28dd4181653b7dbbf04ca276f4060b26246ea8871618f1defbfaae7"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "cede831ef28dd4181653b7dbbf04ca276f4060b26246ea8871618f1defbfaae7",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

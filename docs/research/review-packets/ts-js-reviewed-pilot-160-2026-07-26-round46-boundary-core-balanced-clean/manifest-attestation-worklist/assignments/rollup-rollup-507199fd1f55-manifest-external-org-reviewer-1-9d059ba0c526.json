@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-33d330dfc779e5ec",
+    "subjectId": "rollup-rollup",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "rollup-rollup",
+    "phase": null,
+    "repository": "https://github.com/rollup/rollup.git",
+    "commit": "95c2f026abcf64b125b8107696b369c2692270f5"
+  },
+  "manifestCopy": {
+    "path": "manifests/rollup-rollup-507199fd1f55.json",
+    "sha256": "9ac4736b6f11deff26956bdf64c6c6c2fcc1010d454ba724139599fdfba2d149"
+  },
+  "attestationTemplate": {
+    "subjectId": "rollup-rollup",
+    "repository": "https://github.com/rollup/rollup.git",
+    "commit": "95c2f026abcf64b125b8107696b369c2692270f5",
+    "manifestCopy": {
+      "path": "manifests/rollup-rollup-507199fd1f55.json",
+      "sha256": "9ac4736b6f11deff26956bdf64c6c6c2fcc1010d454ba724139599fdfba2d149"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "9ac4736b6f11deff26956bdf64c6c6c2fcc1010d454ba724139599fdfba2d149",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

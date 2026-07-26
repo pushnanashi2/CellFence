@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-6d521ec41118bfa3",
+    "subjectId": "floating-ui",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "floating-ui",
+    "phase": null,
+    "repository": "https://github.com/floating-ui/floating-ui.git",
+    "commit": "12d94738472e922e1b3fa31b02b2b61b9ed77e6a"
+  },
+  "manifestCopy": {
+    "path": "manifests/floating-ui-4ffa4f20794a.json",
+    "sha256": "ad1f8365c7f9a3f17db6966ac2ad2e176048759f5db45f0576916c6ac833b74a"
+  },
+  "attestationTemplate": {
+    "subjectId": "floating-ui",
+    "repository": "https://github.com/floating-ui/floating-ui.git",
+    "commit": "12d94738472e922e1b3fa31b02b2b61b9ed77e6a",
+    "manifestCopy": {
+      "path": "manifests/floating-ui-4ffa4f20794a.json",
+      "sha256": "ad1f8365c7f9a3f17db6966ac2ad2e176048759f5db45f0576916c6ac833b74a"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ad1f8365c7f9a3f17db6966ac2ad2e176048759f5db45f0576916c6ac833b74a",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

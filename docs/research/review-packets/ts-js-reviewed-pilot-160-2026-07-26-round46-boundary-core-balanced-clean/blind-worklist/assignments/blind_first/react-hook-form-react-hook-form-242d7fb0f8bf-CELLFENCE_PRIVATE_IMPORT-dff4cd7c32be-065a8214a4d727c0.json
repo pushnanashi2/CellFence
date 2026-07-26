@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-065a8214a4d727c0",
+    "evidencePackageId": "evidence-3a58504921db1fc3",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/react-hook-form-react-hook-form-242d7fb0f8bf.json",
+        "sha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169"
+      },
+      "auditLog": {
+        "path": "logs/react-hook-form-react-hook-form-242d7fb0f8bf/check.audit.jsonl",
+        "sha256": "9d236b9b17a9852cde3689ffbbf8a96ca2e8108deec725812d51ee16b34d3a1d"
+      },
+      "evidenceGraph": {
+        "path": "logs/react-hook-form-react-hook-form-242d7fb0f8bf/evidence-graph.json",
+        "sha256": "8e25ebccebe25e367f8e6f71a25dcf45ad8c03af103afd46d48921cc3627c6b2"
+      },
+      "checkStdout": {
+        "path": "logs/react-hook-form-react-hook-form-242d7fb0f8bf/check.stdout.log",
+        "sha256": "64a0ba1562531717fcc0f7a785f57aa824a36a3c2d0c46825aa7175a03ee3aeb"
+      },
+      "checkStderr": {
+        "path": "logs/react-hook-form-react-hook-form-242d7fb0f8bf/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:3a58504921db1fc366b0430974dc19e3f353ae8f8cbdb43b3594fc16e63fd88e",
+    "subjectId": "react-hook-form-react-hook-form",
+    "repository": "https://github.com/react-hook-form/react-hook-form.git",
+    "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633",
+    "gitTree": "97f6aac76213d10b5785f6d76c4c5a73e5086aab",
+    "manifestSha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/logic/createFormControl.ts",
+    "line": 58,
+    "message": "logic imports private implementation from utils",
+    "cellId": "logic",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "a4a06e843a9f38424414d2ccc4f478dc0b3ace5062f10fe230f3ce21ce33077a",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:3a58504921db1fc366b0430974dc19e3f353ae8f8cbdb43b3594fc16e63fd88e",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-065a8214a4d727c0",
+    "evidencePackageId": "evidence-3a58504921db1fc3",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

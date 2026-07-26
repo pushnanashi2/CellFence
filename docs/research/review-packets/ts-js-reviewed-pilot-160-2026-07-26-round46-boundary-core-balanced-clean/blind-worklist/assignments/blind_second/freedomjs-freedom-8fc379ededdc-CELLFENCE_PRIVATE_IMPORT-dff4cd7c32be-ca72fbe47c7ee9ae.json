@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-ca72fbe47c7ee9ae",
+    "evidencePackageId": "evidence-644ea0d7be0b3795",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/freedomjs-freedom-8fc379ededdc.json",
+        "sha256": "a53e5cb32b620690cfef58f2d238af14673c4dabb443573ad2d27337bd34901a"
+      },
+      "auditLog": {
+        "path": "logs/freedomjs-freedom-8fc379ededdc/check.audit.jsonl",
+        "sha256": "5e39a5345a04268f19470d2c32ff394a9aa2f8686cb4dffa9420327e115172d6"
+      },
+      "evidenceGraph": {
+        "path": "logs/freedomjs-freedom-8fc379ededdc/evidence-graph.json",
+        "sha256": "799739500908cbbc51a216502aec18d8bae56c1da0c023a7f988ce1e9efcc037"
+      },
+      "checkStdout": {
+        "path": "logs/freedomjs-freedom-8fc379ededdc/check.stdout.log",
+        "sha256": "c3ef6d5d0e45d90d55e16d6200a69c90d53a17a69dff78e33b74e339a0d17099"
+      },
+      "checkStderr": {
+        "path": "logs/freedomjs-freedom-8fc379ededdc/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:644ea0d7be0b37954db7e4f2eda859ce608ee074f68fb1d4e69200bdf1a515e0",
+    "subjectId": "freedomjs-freedom",
+    "repository": "https://github.com/freedomjs/freedom.git",
+    "commit": "9638e840aec9598c4d60383ed22444c525aefbf5",
+    "gitTree": "9ebdb71bfed4da8fe13576a3ffe5eeca9c82ba75",
+    "manifestSha256": "a53e5cb32b620690cfef58f2d238af14673c4dabb443573ad2d27337bd34901a",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/proxybinder.js",
+    "line": 5,
+    "message": "src-root imports private implementation from proxy",
+    "cellId": "src-root",
+    "producerCellId": "proxy",
+    "cellfenceFingerprint": "48dd6500cf68fd539c69dde6525b4b117508db3e2fdba7b0e77544cf822cab50",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:644ea0d7be0b37954db7e4f2eda859ce608ee074f68fb1d4e69200bdf1a515e0",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-ca72fbe47c7ee9ae",
+    "evidencePackageId": "evidence-644ea0d7be0b3795",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

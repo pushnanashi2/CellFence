@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e0096eab9573434c",
+    "subjectId": "chakra-ui-zag",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "chakra-ui-zag",
+    "phase": null,
+    "repository": "https://github.com/chakra-ui/zag.git",
+    "commit": "2b199781b1a8d9b8a57b03dff443cf5dbf55c912"
+  },
+  "manifestCopy": {
+    "path": "manifests/chakra-ui-zag-a7650ff9d646.json",
+    "sha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670"
+  },
+  "attestationTemplate": {
+    "subjectId": "chakra-ui-zag",
+    "repository": "https://github.com/chakra-ui/zag.git",
+    "commit": "2b199781b1a8d9b8a57b03dff443cf5dbf55c912",
+    "manifestCopy": {
+      "path": "manifests/chakra-ui-zag-a7650ff9d646.json",
+      "sha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

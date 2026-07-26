@@ -1,0 +1,201 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "src/app/**"
+      ],
+      "publicEntry": "src/app/about/page.tsx",
+      "publicSymbols": [
+        "default",
+        "metadata"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/analytics/conditional-analytics.tsx",
+      "publicSymbols": [
+        "ConditionalAnalytics"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "constants",
+      "ownedPaths": [
+        "src/constants/**"
+      ],
+      "publicEntry": "src/constants/defaults.ts",
+      "publicSymbols": [
+        "DEFAULT_DATA",
+        "DEFAULT_LINK",
+        "DEFAULT_PREFIX",
+        "DEFAULT_SOCIAL",
+        "DEFAULT_SUPPORT"
+      ],
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "src/hooks/**"
+      ],
+      "publicEntry": "src/hooks/use-consent.ts",
+      "publicSymbols": [
+        "ConsentStatus",
+        "useConsent"
+      ],
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib",
+      "ownedPaths": [
+        "src/lib/**"
+      ],
+      "publicEntry": "src/lib/analytics.ts",
+      "publicSymbols": [
+        "disableAnalytics",
+        "hasAnalyticsConsent",
+        "initializeAnalytics",
+        "trackFileExported",
+        "trackGitHubAutofill",
+        "trackReadmeGenerated"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/profile.ts",
+      "publicSymbols": [
+        "GithubStatsOptions",
+        "ProfileData",
+        "ProfileLinks",
+        "ProfilePrefix",
+        "Skills",
+        "SocialLinks",
+        "StreakStatsOptions",
+        "SupportLinks",
+        "TopLanguagesOptions"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

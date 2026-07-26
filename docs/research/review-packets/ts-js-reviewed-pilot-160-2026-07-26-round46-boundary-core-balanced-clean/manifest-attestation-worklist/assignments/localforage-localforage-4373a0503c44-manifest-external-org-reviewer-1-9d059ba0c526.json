@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-188e1cc851a73137",
+    "subjectId": "localforage-localforage",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "localforage-localforage",
+    "phase": null,
+    "repository": "https://github.com/localForage/localForage.git",
+    "commit": "fb78c77ee583fb727a558c439b5174aca38c5924"
+  },
+  "manifestCopy": {
+    "path": "manifests/localforage-localforage-4373a0503c44.json",
+    "sha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a"
+  },
+  "attestationTemplate": {
+    "subjectId": "localforage-localforage",
+    "repository": "https://github.com/localForage/localForage.git",
+    "commit": "fb78c77ee583fb727a558c439b5174aca38c5924",
+    "manifestCopy": {
+      "path": "manifests/localforage-localforage-4373a0503c44.json",
+      "sha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

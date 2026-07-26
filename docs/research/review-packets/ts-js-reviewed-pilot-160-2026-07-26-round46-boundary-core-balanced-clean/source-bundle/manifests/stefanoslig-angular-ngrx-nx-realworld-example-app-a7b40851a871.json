@@ -1,0 +1,330 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/conduit-e2e/**",
+      "apps/conduit/**",
+      "libs/articles/**",
+      "libs/auth/**",
+      "libs/core/**",
+      "libs/home/**",
+      "libs/profile/**",
+      "libs/settings/**",
+      "libs/ui/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "articles",
+      "ownedPaths": [
+        "libs/articles/**"
+      ],
+      "publicEntry": "libs/articles/data-access/src/article.store.ts",
+      "publicSymbols": [
+        "ArticleStore"
+      ],
+      "consumes": [
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth",
+      "ownedPaths": [
+        "libs/auth/**"
+      ],
+      "publicEntry": "libs/auth/data-access/src/auth.model.ts",
+      "publicSymbols": [
+        "authInitialState",
+        "AuthState",
+        "initialUserValue"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "conduit",
+      "ownedPaths": [
+        "apps/conduit/**"
+      ],
+      "publicEntry": "apps/conduit/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "consumes": [
+        {
+          "cell": "articles"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "home"
+        },
+        {
+          "cell": "profile"
+        },
+        {
+          "cell": "settings"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "conduit-e2e",
+      "ownedPaths": [
+        "apps/conduit-e2e/**"
+      ],
+      "publicEntry": "apps/conduit-e2e/playwright.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "libs/core/**"
+      ],
+      "publicEntry": "libs/core/api-types/src/index.ts",
+      "publicSymbols": [
+        "Article",
+        "ArticleResponse",
+        "Comment",
+        "CreateArticle",
+        "EditArticle",
+        "LoginUser",
+        "LoginUserRequest",
+        "MultipleCommentsResponse",
+        "NewUser",
+        "NewUserRequest",
+        "Profile",
+        "ProfileResponse",
+        "SingleCommentResponse",
+        "User",
+        "UserResponse"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "home",
+      "ownedPaths": [
+        "libs/home/**"
+      ],
+      "publicEntry": "libs/home/feature-home/src/home.component.ts",
+      "publicSymbols": [
+        "HomeComponent"
+      ],
+      "consumes": [
+        {
+          "cell": "articles"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "profile",
+      "ownedPaths": [
+        "libs/profile/**"
+      ],
+      "publicEntry": "libs/profile/data-access/src/index.ts",
+      "publicSymbols": [
+        "profileArticlesResolver",
+        "profileFavoritesResolver",
+        "profileResolver",
+        "ProfileStore"
+      ],
+      "consumes": [
+        {
+          "cell": "articles"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "settings",
+      "ownedPaths": [
+        "libs/settings/**"
+      ],
+      "publicEntry": "libs/settings/feature-settings/src/index.ts",
+      "publicSymbols": [
+        "SettingsComponent"
+      ],
+      "consumes": [
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "libs/ui/**"
+      ],
+      "publicEntry": "libs/ui/components/src/avatar/avatar.component.ts",
+      "publicSymbols": [
+        "AvatarComponent",
+        "AvatarSize"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

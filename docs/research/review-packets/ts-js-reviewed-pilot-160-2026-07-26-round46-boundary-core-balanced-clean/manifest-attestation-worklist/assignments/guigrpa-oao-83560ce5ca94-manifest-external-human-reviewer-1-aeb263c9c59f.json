@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-66050a8aa66f27e9",
+    "subjectId": "guigrpa-oao",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "guigrpa-oao",
+    "phase": null,
+    "repository": "https://github.com/guigrpa/oao.git",
+    "commit": "b5860a656ac784908753e830d81642551c136ed8"
+  },
+  "manifestCopy": {
+    "path": "manifests/guigrpa-oao-83560ce5ca94.json",
+    "sha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302"
+  },
+  "attestationTemplate": {
+    "subjectId": "guigrpa-oao",
+    "repository": "https://github.com/guigrpa/oao.git",
+    "commit": "b5860a656ac784908753e830d81642551c136ed8",
+    "manifestCopy": {
+      "path": "manifests/guigrpa-oao-83560ce5ca94.json",
+      "sha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

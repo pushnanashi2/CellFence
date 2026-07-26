@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-fe713204a2f3ab48",
+    "subjectId": "algorithm-visualizer-algorithm-visualizer",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "algorithm-visualizer-algorithm-visualizer",
+    "phase": null,
+    "repository": "https://github.com/algorithm-visualizer/algorithm-visualizer.git",
+    "commit": "18de2edf6b629e843ee4bcedfa2208d22b253f0f"
+  },
+  "manifestCopy": {
+    "path": "manifests/algorithm-visualizer-algorithm-visualizer-214b1531e1cd.json",
+    "sha256": "5cf18156c215c9aecb5c94a3ba3aa198fce3f83caa372f59250bbe8aafeb2c18"
+  },
+  "attestationTemplate": {
+    "subjectId": "algorithm-visualizer-algorithm-visualizer",
+    "repository": "https://github.com/algorithm-visualizer/algorithm-visualizer.git",
+    "commit": "18de2edf6b629e843ee4bcedfa2208d22b253f0f",
+    "manifestCopy": {
+      "path": "manifests/algorithm-visualizer-algorithm-visualizer-214b1531e1cd.json",
+      "sha256": "5cf18156c215c9aecb5c94a3ba3aa198fce3f83caa372f59250bbe8aafeb2c18"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5cf18156c215c9aecb5c94a3ba3aa198fce3f83caa372f59250bbe8aafeb2c18",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

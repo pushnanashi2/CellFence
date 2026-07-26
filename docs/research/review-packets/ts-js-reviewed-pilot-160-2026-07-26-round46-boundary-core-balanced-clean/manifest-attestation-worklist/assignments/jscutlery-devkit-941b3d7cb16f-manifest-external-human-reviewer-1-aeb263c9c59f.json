@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-aa886f66a6fe8de2",
+    "subjectId": "jscutlery-devkit",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jscutlery-devkit",
+    "phase": null,
+    "repository": "https://github.com/jscutlery/devkit.git",
+    "commit": "4c3d25d704cf126af12fcbdb8ff39e49deb8a32a"
+  },
+  "manifestCopy": {
+    "path": "manifests/jscutlery-devkit-941b3d7cb16f.json",
+    "sha256": "f6b5ef4989bafc3b38b20699dca87a47e6bb9c3e2eec3e44079d45cfa63a0f27"
+  },
+  "attestationTemplate": {
+    "subjectId": "jscutlery-devkit",
+    "repository": "https://github.com/jscutlery/devkit.git",
+    "commit": "4c3d25d704cf126af12fcbdb8ff39e49deb8a32a",
+    "manifestCopy": {
+      "path": "manifests/jscutlery-devkit-941b3d7cb16f.json",
+      "sha256": "f6b5ef4989bafc3b38b20699dca87a47e6bb9c3e2eec3e44079d45cfa63a0f27"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f6b5ef4989bafc3b38b20699dca87a47e6bb9c3e2eec3e44079d45cfa63a0f27",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,346 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "client/admin-center/**",
+      "client/remote-page/**",
+      "client/remote-page/ai-content-publish/src/**",
+      "client/remote-page/ai-model-manage/src/**",
+      "client/user-center/**",
+      "client/user-center/src/**",
+      "packages/cli/src/**",
+      "packages/sdk-js/src/**",
+      "server/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "ai-content-publish",
+      "ownedPaths": [
+        "client/remote-page/ai-content-publish/src/**"
+      ],
+      "publicEntry": "client/remote-page/ai-content-publish/src/api/ai-content.js",
+      "publicSymbols": [
+        "batchPublishWithAI",
+        "checkAIStatus",
+        "createContentWithAI",
+        "findOrCreateTagsByNames",
+        "generateImage",
+        "generateKeywords",
+        "generateSummary",
+        "generateTags",
+        "generateTitle",
+        "getAIUsageStats",
+        "getImageGenerationModels",
+        "matchCategory",
+        "previewAIEnhancements",
+        "updateContentWithAI"
+      ],
+      "packageName": "ai-content-publish",
+      "consumes": [
+        {
+          "cell": "client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ai-model-manage",
+      "ownedPaths": [
+        "client/remote-page/ai-model-manage/src/**"
+      ],
+      "publicEntry": "client/remote-page/ai-model-manage/src/api/aiModel.js",
+      "publicSymbols": [
+        "batchDelete",
+        "createModel",
+        "deleteModel",
+        "getModel",
+        "getModels",
+        "getProviders",
+        "healthCheck",
+        "testApiKey",
+        "toggleModel",
+        "updateModel"
+      ],
+      "packageName": "ai-model-manage",
+      "consumes": [
+        {
+          "cell": "client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "client",
+      "ownedPaths": [
+        "client/admin-center/**",
+        "client/remote-page/**",
+        "client/user-center/**"
+      ],
+      "publicEntry": "client/admin-center/eslint.config.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "ai-content-publish"
+        },
+        {
+          "cell": "ai-model-manage"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "doracms-cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "doracms-cli",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "doracms-user-center",
+      "ownedPaths": [
+        "client/user-center/src/**"
+      ],
+      "publicEntry": "client/user-center/src/api/apikey.js",
+      "publicSymbols": [
+        "apiKeyApi"
+      ],
+      "packageName": "doracms-user-center",
+      "consumes": [
+        {
+          "cell": "client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "doracms3",
+      "ownedPaths": [
+        "server/**"
+      ],
+      "publicEntry": "server/index.js",
+      "publicSymbols": [],
+      "packageName": "doracms3",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sdk",
+      "ownedPaths": [
+        "packages/sdk-js/src/**"
+      ],
+      "publicEntry": "packages/sdk-js/src/index.ts",
+      "publicSymbols": [
+        "AliveResponse",
+        "APIError",
+        "APIErrorResponse",
+        "APIKey",
+        "APIKeyCleanupResponse",
+        "APIKeyCreateRequest",
+        "APIKeyStats",
+        "APIKeyStatus",
+        "APIKeyUpdateRequest",
+        "APIResponse",
+        "AuthModule",
+        "Author",
+        "BatchDeleteRequest",
+        "BatchDeleteResponse",
+        "Category",
+        "CategoryCreateRequest",
+        "CategoryListParams",
+        "CategoryListResponse",
+        "CategoryQueryParams",
+        "CategoryUpdateRequest",
+        "Content",
+        "ContentCategory",
+        "ContentCreateRequest",
+        "ContentListParams",
+        "ContentListResponse",
+        "ContentModule",
+        "ContentQueryParams",
+        "ContentState",
+        "ContentTag",
+        "ContentTemplate",
+        "ContentUpdateRequest",
+        "CreateContentData",
+        "createTokenStorage",
+        "CurrentUser",
+        "DoraCMSClient",
+        "ErrorHandler",
+        "ErrorHandlerConfig",
+        "ErrorSeverity",
+        "ErrorType",
+        "FileUploadResponse",
+        "generateNonce",
+        "generateSignature",
+        "HealthCheckResponse",
+        "HealthStatus",
+        "HTTPClient",
+        "LoginCredentials",
+        "LoginRequest",
+        "LoginResponse",
+        "MemoryUsage",
+        "PaginatedResponse",
+        "PaginationParams",
+        "ReadyResponse",
+        "RefreshTokenResponse",
+        "RegisterRequest",
+        "RequestConfig",
+        "RetryConfig",
+        "RetryContext",
+        "RetryDecision",
+        "RetryStrategy",
+        "SDKConfig",
+        "ServiceHealth",
+        "Tag",
+        "TagCreateRequest",
+        "TagListParams",
+        "TagListResponse",
+        "TagQueryParams",
+        "TagUpdateRequest",
+        "TokenStorage",
+        "UpdateContentData",
+        "User",
+        "UserCreateRequest",
+        "UserListParams",
+        "UserRole",
+        "UserUpdateRequest",
+        "Webhook",
+        "WebhookCreateRequest",
+        "WebhookEventType",
+        "WebhookLog",
+        "WebhookLogParams",
+        "WebhookRetryRequest",
+        "WebhookStatus",
+        "WebhookUpdateRequest"
+      ],
+      "packageName": "@doracms/sdk",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

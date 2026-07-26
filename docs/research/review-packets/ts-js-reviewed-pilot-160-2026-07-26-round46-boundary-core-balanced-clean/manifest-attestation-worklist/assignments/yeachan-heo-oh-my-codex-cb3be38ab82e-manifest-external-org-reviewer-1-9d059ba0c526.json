@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-fd0a69f5060839fa",
+    "subjectId": "yeachan-heo-oh-my-codex",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "yeachan-heo-oh-my-codex",
+    "phase": null,
+    "repository": "https://github.com/Yeachan-Heo/oh-my-codex.git",
+    "commit": "5319c3d0388b09ad7036e6e3858afd959cfe0eea"
+  },
+  "manifestCopy": {
+    "path": "manifests/yeachan-heo-oh-my-codex-cb3be38ab82e.json",
+    "sha256": "8f0712f38e949250a87aca958c760fe9198f18367ee0655b0e3faff956338ce1"
+  },
+  "attestationTemplate": {
+    "subjectId": "yeachan-heo-oh-my-codex",
+    "repository": "https://github.com/Yeachan-Heo/oh-my-codex.git",
+    "commit": "5319c3d0388b09ad7036e6e3858afd959cfe0eea",
+    "manifestCopy": {
+      "path": "manifests/yeachan-heo-oh-my-codex-cb3be38ab82e.json",
+      "sha256": "8f0712f38e949250a87aca958c760fe9198f18367ee0655b0e3faff956338ce1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "8f0712f38e949250a87aca958c760fe9198f18367ee0655b0e3faff956338ce1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

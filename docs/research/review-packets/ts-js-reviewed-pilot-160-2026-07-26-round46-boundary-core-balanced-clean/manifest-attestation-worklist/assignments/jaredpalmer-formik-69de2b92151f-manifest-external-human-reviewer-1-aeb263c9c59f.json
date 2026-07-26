@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-93ccc2edcccb8ace",
+    "subjectId": "jaredpalmer-formik",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "jaredpalmer-formik",
+    "phase": null,
+    "repository": "https://github.com/jaredpalmer/formik.git",
+    "commit": "91475adbf33579561e580eceea0c031f4ec2e992"
+  },
+  "manifestCopy": {
+    "path": "manifests/jaredpalmer-formik-69de2b92151f.json",
+    "sha256": "d22b4510b8620b9f898557e26959c7f30396985bcc6f801fc0e4506e413e4843"
+  },
+  "attestationTemplate": {
+    "subjectId": "jaredpalmer-formik",
+    "repository": "https://github.com/jaredpalmer/formik.git",
+    "commit": "91475adbf33579561e580eceea0c031f4ec2e992",
+    "manifestCopy": {
+      "path": "manifests/jaredpalmer-formik-69de2b92151f.json",
+      "sha256": "d22b4510b8620b9f898557e26959c7f30396985bcc6f801fc0e4506e413e4843"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d22b4510b8620b9f898557e26959c7f30396985bcc6f801fc0e4506e413e4843",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

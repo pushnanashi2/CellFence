@@ -1,0 +1,274 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/game-of-life/**",
+      "apps/sandbox/**",
+      "packages/cypress-harness/src/**",
+      "packages/microwave/src/**",
+      "packages/operators/src/**",
+      "packages/playwright-ct-angular/src/**",
+      "packages/rx-computed/src/**",
+      "packages/swc-angular/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "cypress-harness",
+      "ownedPaths": [
+        "packages/cypress-harness/src/**"
+      ],
+      "publicEntry": "packages/cypress-harness/src/index.ts",
+      "publicSymbols": [
+        "getAllHarnesses",
+        "getHarness",
+        "getRootHarness"
+      ],
+      "packageName": "@jscutlery/cypress-harness",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "game-of-life",
+      "ownedPaths": [
+        "apps/game-of-life/**"
+      ],
+      "publicEntry": "apps/game-of-life/jest.config.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "microwave"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "microwave",
+      "ownedPaths": [
+        "packages/microwave/src/**"
+      ],
+      "publicEntry": "packages/microwave/src/index.ts",
+      "publicSymbols": [
+        "asapStrategy",
+        "asyncStrategy",
+        "createLocalStrategy",
+        "Microwave",
+        "rafStrategy",
+        "Strategy",
+        "StrategyDevKit",
+        "syncStrategy",
+        "watch"
+      ],
+      "packageName": "@jscutlery/microwave",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "operators",
+      "ownedPaths": [
+        "packages/operators/src/**"
+      ],
+      "publicEntry": "packages/operators/src/index.ts",
+      "publicSymbols": [
+        "pending",
+        "Suspense",
+        "SuspenseEmpty",
+        "SuspenseLax",
+        "SuspensePending",
+        "SuspenseWithError",
+        "SuspenseWithValue",
+        "suspensify",
+        "SuspensifyOptions"
+      ],
+      "packageName": "@jscutlery/operators",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "playwright-ct-angular",
+      "ownedPaths": [
+        "packages/playwright-ct-angular/src/**"
+      ],
+      "publicEntry": "packages/playwright-ct-angular/src/index.ts",
+      "publicSymbols": [
+        "ComponentFixtures",
+        "defineConfig",
+        "devices",
+        "expect",
+        "Inputs",
+        "MountOptions",
+        "MountResult",
+        "MountTemplateOptions",
+        "OutputListeners",
+        "PlaywrightTestConfig",
+        "test"
+      ],
+      "packageName": "@jscutlery/playwright-ct-angular",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rx-computed",
+      "ownedPaths": [
+        "packages/rx-computed/src/**"
+      ],
+      "publicEntry": "packages/rx-computed/src/index.ts",
+      "publicSymbols": [
+        "rxComputed"
+      ],
+      "packageName": "@jscutlery/rx-computed",
+      "consumes": [
+        {
+          "cell": "operators"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sandbox",
+      "ownedPaths": [
+        "apps/sandbox/**"
+      ],
+      "publicEntry": "apps/sandbox/jest.config.ts",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "swc-angular",
+      "ownedPaths": [
+        "packages/swc-angular/src/**"
+      ],
+      "publicEntry": "packages/swc-angular/src/index.ts",
+      "publicSymbols": [
+        "AngularPresetOptions",
+        "default",
+        "swcAngularJestTransformer",
+        "swcAngularPreset",
+        "swcAngularUnpluginOptions",
+        "swcAngularVitePreset"
+      ],
+      "packageName": "@jscutlery/swc-angular",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-668d5f63f3bc1ffe",
+    "evidencePackageId": "evidence-8603ac19bebf4d70",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/lumenstorm-orisonspace-435d36cdebb7.json",
+        "sha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d"
+      },
+      "auditLog": {
+        "path": "logs/lumenstorm-orisonspace-435d36cdebb7/check.audit.jsonl",
+        "sha256": "8d37fd08e8dc5dde20078c47890307c7c51ab05ce38c51f98952cc9fb57e091a"
+      },
+      "evidenceGraph": {
+        "path": "logs/lumenstorm-orisonspace-435d36cdebb7/evidence-graph.json",
+        "sha256": "b1c0cfcfdf710e96675a5beedb9c640c61cf6ac9182992589c5ad6b23dbbd44b"
+      },
+      "checkStdout": {
+        "path": "logs/lumenstorm-orisonspace-435d36cdebb7/check.stdout.log",
+        "sha256": "08d81a679446d6b13c8b6d0ba6357d76ca36c20a456ba8b417c594b6e3e70096"
+      },
+      "checkStderr": {
+        "path": "logs/lumenstorm-orisonspace-435d36cdebb7/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:8603ac19bebf4d7041315147d2831197cd52355fa4367cba642a47165695727f",
+    "subjectId": "lumenstorm-orisonspace",
+    "repository": "https://github.com/LumenStorm/OrisonSpace.git",
+    "commit": "f1ce8a51bc258f95f5fac60a6fbf6fa34b84f983",
+    "gitTree": "368ee464dbdab626b31598e3eddc44c86541d828",
+    "manifestSha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/desktop/client/ui/src/features/side-nav/SideNav.tsx",
+    "line": 2,
+    "message": "desktop-ui imports private implementation from desktop",
+    "cellId": "desktop-ui",
+    "producerCellId": "desktop",
+    "cellfenceFingerprint": "321da353843ca5c721f3337228b700e72c83f538f4beba48600ec4030f14bca4",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:8603ac19bebf4d7041315147d2831197cd52355fa4367cba642a47165695727f",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-668d5f63f3bc1ffe",
+    "evidencePackageId": "evidence-8603ac19bebf4d70",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

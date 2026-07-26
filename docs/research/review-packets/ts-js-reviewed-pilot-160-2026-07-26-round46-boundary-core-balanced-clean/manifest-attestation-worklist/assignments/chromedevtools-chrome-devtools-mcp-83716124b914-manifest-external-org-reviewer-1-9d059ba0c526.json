@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-42c84e7acfdb396f",
+    "subjectId": "chromedevtools-chrome-devtools-mcp",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "chromedevtools-chrome-devtools-mcp",
+    "phase": null,
+    "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp.git",
+    "commit": "76fd2424984827802867672fcc8d0e0036f4a3af"
+  },
+  "manifestCopy": {
+    "path": "manifests/chromedevtools-chrome-devtools-mcp-83716124b914.json",
+    "sha256": "ae1138b13ed2b5bc77c9ed1cb47efa44507195cf0dd761aad9445620989ca3f0"
+  },
+  "attestationTemplate": {
+    "subjectId": "chromedevtools-chrome-devtools-mcp",
+    "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp.git",
+    "commit": "76fd2424984827802867672fcc8d0e0036f4a3af",
+    "manifestCopy": {
+      "path": "manifests/chromedevtools-chrome-devtools-mcp-83716124b914.json",
+      "sha256": "ae1138b13ed2b5bc77c9ed1cb47efa44507195cf0dd761aad9445620989ca3f0"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ae1138b13ed2b5bc77c9ed1cb47efa44507195cf0dd761aad9445620989ca3f0",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

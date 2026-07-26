@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-38a8a965448c53b9",
+    "subjectId": "smapiot-piral",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "smapiot-piral",
+    "phase": null,
+    "repository": "https://github.com/smapiot/piral.git",
+    "commit": "e99325cd748f4855286bd1e1436aa4b09e5bbad0"
+  },
+  "manifestCopy": {
+    "path": "manifests/smapiot-piral-9b47d28ad8e5.json",
+    "sha256": "4f06193eb977c71a98e2a27b3cb08cb0c05df185636a018dbfdc0e8cb2e92f66"
+  },
+  "attestationTemplate": {
+    "subjectId": "smapiot-piral",
+    "repository": "https://github.com/smapiot/piral.git",
+    "commit": "e99325cd748f4855286bd1e1436aa4b09e5bbad0",
+    "manifestCopy": {
+      "path": "manifests/smapiot-piral-9b47d28ad8e5.json",
+      "sha256": "4f06193eb977c71a98e2a27b3cb08cb0c05df185636a018dbfdc0e8cb2e92f66"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "4f06193eb977c71a98e2a27b3cb08cb0c05df185636a018dbfdc0e8cb2e92f66",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

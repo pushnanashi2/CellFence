@@ -24,23 +24,24 @@ Resource, loader-safety, public-surface, Python, and inferred-manifest evidence
 remain separate claim profiles or studies. They do not contribute to this
 boundary-core denominator.
 
-## Corpus Run
+## Clean Corpus Run
 
 Command:
 
 ```bash
 npm run research:corpus -- \
   --corpus docs/research/corpora/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates.json \
-  --out reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates-study.json \
-  --workdir tmp/corpus-precision-study-ts-js-reviewed-pilot-160 \
+  --out reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates-study-clean.json \
+  --workdir tmp/corpus-precision-study-ts-js-reviewed-pilot-160-clean \
   --clone-mode shallow \
   --discard-checkouts \
-  --infer-scope production \
   --verify-evidence-graphs
 ```
 
 Result:
 
+- harness commit: `94e07d7fe24bb18f33b9dad2832bf967af07e50d`
+- harness dirty: `false`
 - subjects: 160
 - completed: 160
 - failed: 0
@@ -56,15 +57,16 @@ Command:
 
 ```bash
 npm run precision:next-cycle -- \
-  --study-id ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced \
+  --study-id ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean \
   --corpus docs/research/corpora/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates.json \
-  --report reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates-study.json \
-  --out-dir reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced \
+  --report reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates-study-clean.json \
+  --out-dir reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean \
   --raters external-human-reviewer-1,external-org-reviewer-1 \
   --rater-types human,organization \
   --claim-profile ts-js-boundary-core-v1 \
   --max-repository-contribution 0.1 \
-  --external-claim
+  --external-claim \
+  --force
 ```
 
 Selected worklist:
@@ -84,23 +86,23 @@ minimum. This does not establish precision without returned labels.
 
 Digests:
 
-- pre-label artifact set: `d248579c118dab6d4c0fbd353d4578691f664429f98176e17098cc4d98f0b93f`
-- unlabeled bundle artifact set: `ed72fbc1658324cbb73349fe89e9a3ebe5d47746b3f15194610ffbc777fff192`
-- blind worklist artifact set: `14305bb8c0fb0ccfe5984f5172afbaa2f78b4991a63f848b92e7bbc421af2724`
+- pre-label artifact set: `19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536`
+- unlabeled bundle artifact set: `4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d`
+- blind worklist artifact set: `5dc6ea44f0f5eacc6e86d56219f4efcc27befbdca040d43f4cd32853b2b5f002`
 
 ## External Worklists
 
 Manifest attestation worklist:
 
-- path: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-manifest-attestation-worklist`
-- artifact set: `6694aac2392d3f2931bf6c7776a2a2a18525eefe915045e3e142a9b1219182b8`
+- path: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean-manifest-attestation-worklist`
+- artifact set: `5c95bafc35de35b26c7870b5141e19bc60b10a141f4f2a0052a90462e66a7165`
 - subjects: 160
 - reviewers: 2
 - assignments: 320
 
 Gap worklist:
 
-- path: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-gap-worklist.json`
+- path: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean-gap-worklist.json`
 - task count: 3
 - 160 copied manifests need external review attestations
 - 650 selected findings need independent manual labels
@@ -108,9 +110,25 @@ Gap worklist:
 
 Codex or another agent must not satisfy the external human/organization gates.
 
+## Review Packet
+
+The external review packet is now tracked in git:
+
+- path: `docs/research/review-packets/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean`
+- packet `SHA256SUMS` sha256: `8c95b9387709823d809bd9157add01d062f08b5b143dbc1bc96529b92377fefb`
+- selected findings: 650
+- blind assignments: 1,300
+- manifest attestation assignments: 320
+- source bundle harness dirty: `false`
+
+The packet intentionally omits large raw logs and unsampled findings, but it
+includes the sealed blind worklist, per-assignment finding details, manifest
+copies, manifest-attestation assignments, protocols, preflight output, and the
+gap worklist. External reviewers can clone each subject at the pinned commit
+listed in the assignment and return labels bound to the sealed worklist digest.
+
 ## Claim Status
 
-Round46 is not a 99% precision claim. It is a claim-ready work queue except for
-missing labels, missing external manifest attestations, and the pre-label packet
-having been generated while the CellFence worktree was dirty. Regenerate the
-round46 packet from a clean commit before publishing any public claim bundle.
+Round46 is not a 99% precision claim. The clean packet removes the prior dirty
+worktree blocker. The remaining blockers are missing independent labels and
+missing external human/org manifest attestations.

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-32219e33bfae7714",
+    "subjectId": "infinitered-reactotron",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "infinitered-reactotron",
+    "phase": null,
+    "repository": "https://github.com/infinitered/reactotron.git",
+    "commit": "763c1c8e0d4f33d6357c3ee95567ee595eb287e0"
+  },
+  "manifestCopy": {
+    "path": "manifests/infinitered-reactotron-dd876567ad0b.json",
+    "sha256": "2cd236eff70fb46aecdcd89498a802d195399cae4bd29f0277c5773939ca4003"
+  },
+  "attestationTemplate": {
+    "subjectId": "infinitered-reactotron",
+    "repository": "https://github.com/infinitered/reactotron.git",
+    "commit": "763c1c8e0d4f33d6357c3ee95567ee595eb287e0",
+    "manifestCopy": {
+      "path": "manifests/infinitered-reactotron-dd876567ad0b.json",
+      "sha256": "2cd236eff70fb46aecdcd89498a802d195399cae4bd29f0277c5773939ca4003"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2cd236eff70fb46aecdcd89498a802d195399cae4bd29f0277c5773939ca4003",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

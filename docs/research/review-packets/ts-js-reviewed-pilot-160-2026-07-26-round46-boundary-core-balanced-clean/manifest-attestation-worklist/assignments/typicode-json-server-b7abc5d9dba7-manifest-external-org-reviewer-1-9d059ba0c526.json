@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e5aa898c481ac735",
+    "subjectId": "typicode-json-server",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "typicode-json-server",
+    "phase": null,
+    "repository": "https://github.com/typicode/json-server.git",
+    "commit": "89a34a44b7a6a5311dc84f3b8a1b8b45c0905aea"
+  },
+  "manifestCopy": {
+    "path": "manifests/typicode-json-server-b7abc5d9dba7.json",
+    "sha256": "9738cfbab4e3cdcf69de67ef4dae9c01bee903b11a276c6972368653a62f2497"
+  },
+  "attestationTemplate": {
+    "subjectId": "typicode-json-server",
+    "repository": "https://github.com/typicode/json-server.git",
+    "commit": "89a34a44b7a6a5311dc84f3b8a1b8b45c0905aea",
+    "manifestCopy": {
+      "path": "manifests/typicode-json-server-b7abc5d9dba7.json",
+      "sha256": "9738cfbab4e3cdcf69de67ef4dae9c01bee903b11a276c6972368653a62f2497"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "9738cfbab4e3cdcf69de67ef4dae9c01bee903b11a276c6972368653a62f2497",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

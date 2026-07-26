@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ce58515cdc024af1",
+    "subjectId": "antfu-collective-ni",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "antfu-collective-ni",
+    "phase": null,
+    "repository": "https://github.com/antfu-collective/ni.git",
+    "commit": "8b92b0624e9933113507857ee926a73a5ed285b3"
+  },
+  "manifestCopy": {
+    "path": "manifests/antfu-collective-ni-a2a7659f776b.json",
+    "sha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1"
+  },
+  "attestationTemplate": {
+    "subjectId": "antfu-collective-ni",
+    "repository": "https://github.com/antfu-collective/ni.git",
+    "commit": "8b92b0624e9933113507857ee926a73a5ed285b3",
+    "manifestCopy": {
+      "path": "manifests/antfu-collective-ni-a2a7659f776b.json",
+      "sha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

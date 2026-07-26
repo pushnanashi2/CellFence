@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d",
+    "preLabelArtifactSetSha256": "19dc2132d1c1b43f2d43de95ca9c25d961cf3ab9b423e67811ef653d682c0536"
+  },
+  "assignment": {
+    "assignmentId": "assignment-704d941ead5a8806",
+    "evidencePackageId": "evidence-71788726d4e023da",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "972e2e7d80e315899f0bb815b001422954a754269721ee381828f373a51e566c"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "35303139db2e09cc431db25f5dbbd02c32e6ba6b606d4c29e3745c79c17a27a7"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "febc08ad63dccb3913380f552bd949f1f8482db99f890d305bb1ffeafc528e44"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "ce21200935523d8a3e1e835b76cbec094805422392eededa70534ed3c56106e6"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/vercel-hyper-a623432381ff.json",
+        "sha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8"
+      },
+      "auditLog": {
+        "path": "logs/vercel-hyper-a623432381ff/check.audit.jsonl",
+        "sha256": "b2f5ab4ad4832e77b7adabf2196d0bb4f4a945e5ddb691f660ec51f43fb8508f"
+      },
+      "evidenceGraph": {
+        "path": "logs/vercel-hyper-a623432381ff/evidence-graph.json",
+        "sha256": "559c2ce31c9f61e5a10f0b565bd2118bd2d8dc0559fe891927faae7f9d95a062"
+      },
+      "checkStdout": {
+        "path": "logs/vercel-hyper-a623432381ff/check.stdout.log",
+        "sha256": "60fe0c615174d75deed5e12f7afd3e147f9c2733279f5e5e54ddebac5a083c74"
+      },
+      "checkStderr": {
+        "path": "logs/vercel-hyper-a623432381ff/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:71788726d4e023da66231fe7fda8c92fac1cb091b6105f4da4d5cd428b14cb8f",
+    "subjectId": "vercel-hyper",
+    "repository": "https://github.com/vercel/hyper.git",
+    "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287",
+    "gitTree": "115ed27234ff452765088b807f7f646bc3fc50a8",
+    "manifestSha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "lib/utils/plugins.ts",
+    "line": 37,
+    "message": "lib imports app without declaring a consumer relationship",
+    "cellId": "lib",
+    "producerCellId": "app",
+    "cellfenceFingerprint": "352af7bed138a3eee2b9d84d047558c89045cb16b238bc245d12b7ac66cce6e5",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+    "findingId": "sha256:71788726d4e023da66231fe7fda8c92fac1cb091b6105f4da4d5cd428b14cb8f",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-704d941ead5a8806",
+    "evidencePackageId": "evidence-71788726d4e023da",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

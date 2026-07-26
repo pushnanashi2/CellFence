@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "4780fb960202e4751ba04357501ea1963354dd65bddd3afd6bfb797d94f4d50d"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9ba64c3babd77545",
+    "subjectId": "upstash-context7",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "upstash-context7",
+    "phase": null,
+    "repository": "https://github.com/upstash/context7.git",
+    "commit": "23843e9ce62908896cf2dcd32cc5c03c05047416"
+  },
+  "manifestCopy": {
+    "path": "manifests/upstash-context7-48408ef70f49.json",
+    "sha256": "954be36a0396e640f3b000d18236f55cd2486558f05f22bfd73eaa497f64a763"
+  },
+  "attestationTemplate": {
+    "subjectId": "upstash-context7",
+    "repository": "https://github.com/upstash/context7.git",
+    "commit": "23843e9ce62908896cf2dcd32cc5c03c05047416",
+    "manifestCopy": {
+      "path": "manifests/upstash-context7-48408ef70f49.json",
+      "sha256": "954be36a0396e640f3b000d18236f55cd2486558f05f22bfd73eaa497f64a763"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "954be36a0396e640f3b000d18236f55cd2486558f05f22bfd73eaa497f64a763",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}
