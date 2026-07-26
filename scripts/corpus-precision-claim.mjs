@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { validateBundle as validateEvidenceBundle } from "./corpus-evidence-bundle.mjs";
 import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
-import { appearsNonHumanRater, isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, summarizeReturnedLabelDigestBinding, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
 const reportSchemaVersion = "cellfence.precision-claim-report.v1";
@@ -1253,6 +1253,7 @@ function evaluateClaim(options) {
         artifactSetSha256s: worklistVerifications.map((worklist) => worklist.artifactSetSha256),
         assignments: worklistVerifications.reduce((total, worklist) => total + worklist.assignments, 0),
         rounds: [...sealedRounds].sort(),
+        returnedLabelDigestBinding: summarizeReturnedLabelDigestBinding(worklistVerifications),
         issues: worklistVerifications.reduce((total, worklist) => total + worklist.issues.length, 0),
       } : null,
       externalRaterCoverage: externalCoverage,

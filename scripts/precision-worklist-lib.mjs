@@ -136,6 +136,46 @@ export function validateClaimLabelMetadata(label, line, issues, options = {}) {
   }
 }
 
+function emptyReturnedLabelDigestBinding() {
+  return {
+    checkedLabels: 0,
+    matchedAssignmentLabels: 0,
+    labelsWithWorklistArtifactSetSha256: 0,
+    labelsWithoutWorklistArtifactSetSha256: 0,
+    matchingWorklistArtifactSetSha256: 0,
+    mismatchedWorklistArtifactSetSha256: 0,
+    declaredDigestCoverage: null,
+    matchingDigestCoverage: null,
+  };
+}
+
+function finalizeReturnedLabelDigestBinding(binding) {
+  const checkedLabels = binding.checkedLabels || 0;
+  return {
+    ...binding,
+    declaredDigestCoverage: checkedLabels === 0
+      ? null
+      : binding.labelsWithWorklistArtifactSetSha256 / checkedLabels,
+    matchingDigestCoverage: checkedLabels === 0
+      ? null
+      : binding.matchingWorklistArtifactSetSha256 / checkedLabels,
+  };
+}
+
+export function summarizeReturnedLabelDigestBinding(worklists = []) {
+  const totals = emptyReturnedLabelDigestBinding();
+  for (const worklist of worklists) {
+    const binding = worklist?.returnedLabelDigestBinding || {};
+    totals.checkedLabels += binding.checkedLabels || 0;
+    totals.matchedAssignmentLabels += binding.matchedAssignmentLabels || 0;
+    totals.labelsWithWorklistArtifactSetSha256 += binding.labelsWithWorklistArtifactSetSha256 || 0;
+    totals.labelsWithoutWorklistArtifactSetSha256 += binding.labelsWithoutWorklistArtifactSetSha256 || 0;
+    totals.matchingWorklistArtifactSetSha256 += binding.matchingWorklistArtifactSetSha256 || 0;
+    totals.mismatchedWorklistArtifactSetSha256 += binding.mismatchedWorklistArtifactSetSha256 || 0;
+  }
+  return finalizeReturnedLabelDigestBinding(totals);
+}
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
@@ -867,6 +907,7 @@ function validateAssignment(worklistDir, entry, worklist, hashedFiles, context, 
 
 export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   const issues = [];
+  const returnedLabelDigestBinding = emptyReturnedLabelDigestBinding();
   if (!worklistDir || !fs.existsSync(worklistDir)) {
     return {
       artifactSetSha256: null,
@@ -874,6 +915,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
       rounds: [],
       findingIds: [],
       findingIdsByRound: {},
+      returnedLabelDigestBinding: finalizeReturnedLabelDigestBinding(returnedLabelDigestBinding),
       issues: [`worklist not found: ${worklistDir || "<missing>"}`],
     };
   }
@@ -905,7 +947,15 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
   const manifestPath = path.join(worklistDir, "worklist.json");
   if (!fs.existsSync(manifestPath)) {
     issues.push("worklist.json is missing");
-    return { artifactSetSha256, assignments: 0, rounds: [], findingIds: [], findingIdsByRound: {}, issues };
+    return {
+      artifactSetSha256,
+      assignments: 0,
+      rounds: [],
+      findingIds: [],
+      findingIdsByRound: {},
+      returnedLabelDigestBinding: finalizeReturnedLabelDigestBinding(returnedLabelDigestBinding),
+      issues,
+    };
   }
   const worklist = readJson(manifestPath);
   context.worklistBundle = worklist.bundle || {};
@@ -941,8 +991,16 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
     if (!coveredRounds.has(label?.round)) continue;
     const line = index + 1;
     validateClaimLabelMetadata(label, line, issues, { sealedWorklist: true });
+    returnedLabelDigestBinding.checkedLabels += 1;
     if (label.worklistArtifactSetSha256 !== undefined && label.worklistArtifactSetSha256 !== artifactSetSha256) {
+      returnedLabelDigestBinding.labelsWithWorklistArtifactSetSha256 += 1;
+      returnedLabelDigestBinding.mismatchedWorklistArtifactSetSha256 += 1;
       issues.push(`labels.jsonl:${line} worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS`);
+    } else if (label.worklistArtifactSetSha256 !== undefined) {
+      returnedLabelDigestBinding.labelsWithWorklistArtifactSetSha256 += 1;
+      returnedLabelDigestBinding.matchingWorklistArtifactSetSha256 += 1;
+    } else {
+      returnedLabelDigestBinding.labelsWithoutWorklistArtifactSetSha256 += 1;
     }
     const adjudication = isAdjudication(label);
     if (!adjudication && label.claimUse && label.claimUse !== "blind_labeling") {
@@ -956,6 +1014,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
       issues.push(`labels.jsonl:${line} has no sealed worklist assignment ${label.assignmentId}`);
       continue;
     }
+    returnedLabelDigestBinding.matchedAssignmentLabels += 1;
     const expected = assignment.labelTemplate || {};
     const comparisons = [
       ["findingId", label.findingId, expected.findingId],
@@ -987,6 +1046,7 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
       round,
       [...new Set(assignments.filter((entry) => entry?.round === round).map((entry) => entry?.findingId).filter(Boolean))].sort(),
     ])),
+    returnedLabelDigestBinding: finalizeReturnedLabelDigestBinding(returnedLabelDigestBinding),
     issues,
   };
 }

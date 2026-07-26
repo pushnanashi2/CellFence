@@ -456,6 +456,11 @@ test("precision labels validator accepts returned labels bound to the sealed wor
     const report = JSON.parse(result.stdout);
     assert.equal(report.ok, true);
     assert.equal(report.worklist.artifactSetSha256, worklistArtifactSetSha256);
+    assert.equal(report.worklist.returnedLabelDigestBinding.checkedLabels, 4);
+    assert.equal(report.worklist.returnedLabelDigestBinding.labelsWithWorklistArtifactSetSha256, 4);
+    assert.equal(report.worklist.returnedLabelDigestBinding.matchingWorklistArtifactSetSha256, 4);
+    assert.equal(report.worklist.returnedLabelDigestBinding.declaredDigestCoverage, 1);
+    assert.equal(report.worklist.returnedLabelDigestBinding.matchingDigestCoverage, 1);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -480,6 +485,13 @@ test("precision labels validator rejects returned labels bound to another workli
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.match(report.issues.join("\n"), /worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+    assert.equal(report.worklist.returnedLabelDigestBinding.checkedLabels, 4);
+    assert.equal(report.worklist.returnedLabelDigestBinding.labelsWithWorklistArtifactSetSha256, 1);
+    assert.equal(report.worklist.returnedLabelDigestBinding.labelsWithoutWorklistArtifactSetSha256, 3);
+    assert.equal(report.worklist.returnedLabelDigestBinding.mismatchedWorklistArtifactSetSha256, 1);
+    assert.equal(report.worklist.returnedLabelDigestBinding.matchingWorklistArtifactSetSha256, 0);
+    assert.equal(report.worklist.returnedLabelDigestBinding.declaredDigestCoverage, 0.25);
+    assert.equal(report.worklist.returnedLabelDigestBinding.matchingDigestCoverage, 0);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

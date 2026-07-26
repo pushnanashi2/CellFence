@@ -1028,6 +1028,13 @@ digest, and pre-label digest. The claim protocol binds the worklist artifact
 digest after generation; adding that digest does not invalidate the sealed
 assignment packages.
 
+When returned label rows include `worklistArtifactSetSha256`, label readiness,
+claim preflight, and claim reports surface `returnedLabelDigestBinding` under the
+worklist summary. This is not a precision metric; it reports how many returned
+labels self-declared the sealed assignment packet digest and how many
+declarations matched the supplied worklist. Missing declarations remain visible
+as unbound return evidence, while mismatches keep the claim invalid.
+
 Round33 is documented in
 [ts-js-reviewed-pilot-105-2026-07-25-round33-valid-frontier.md](ts-js-reviewed-pilot-105-2026-07-25-round33-valid-frontier.md).
 It reran the 105-subject reviewed work queue, sealed a 1,260-finding external

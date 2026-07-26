@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { appearsNonHumanRater, isAdjudication, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, summarizeReturnedLabelDigestBinding, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const allowedLabels = new Set([
   "true_positive",
@@ -311,6 +311,7 @@ function validateBundle(options) {
       artifactSetSha256s: worklists.map((worklist) => worklist.artifactSetSha256),
       assignments: worklists.reduce((total, worklist) => total + worklist.assignments, 0),
       rounds: [...sealedRounds].sort(),
+      returnedLabelDigestBinding: summarizeReturnedLabelDigestBinding(worklists),
       issues: worklists.reduce((total, worklist) => total + worklist.issues.length, 0),
     } : null,
     allowedRaterTypes: options.allowedRaterTypes,

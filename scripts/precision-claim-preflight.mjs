@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
-import { appearsNonHumanRater, isAdjudication, labelRaterType, posixify, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
+import { appearsNonHumanRater, isAdjudication, labelRaterType, posixify, summarizeReturnedLabelDigestBinding, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 const reportSchemaVersion = "cellfence.precision-claim-preflight.v1";
 const protocolSchemaVersion = "cellfence.precision-claim-protocol.v1";
@@ -1094,6 +1094,7 @@ function evaluatePreflight(options) {
       artifactSetSha256s: worklistVerifications.map((worklist) => worklist.artifactSetSha256),
       assignments: worklistVerifications.reduce((total, worklist) => total + worklist.assignments, 0),
       rounds: [...sealedRounds].sort(),
+      returnedLabelDigestBinding: summarizeReturnedLabelDigestBinding(worklistVerifications),
       issues: worklistVerifications.reduce((total, worklist) => total + worklist.issues.length, 0),
     } : null,
     summary: {

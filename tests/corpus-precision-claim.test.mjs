@@ -1626,6 +1626,10 @@ test("corpus precision claim rejects labels bound to another sealed worklist dig
     const report = JSON.parse(result.stdout);
     assert.equal(report.decision.status, "invalid");
     assert.match(report.labelQuality.issues.join("\n"), /worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+    assert.equal(report.labelQuality.worklist.returnedLabelDigestBinding.checkedLabels, labelsWithWrongWorklistDigest.length);
+    assert.equal(report.labelQuality.worklist.returnedLabelDigestBinding.labelsWithWorklistArtifactSetSha256, labelsWithWrongWorklistDigest.length);
+    assert.equal(report.labelQuality.worklist.returnedLabelDigestBinding.mismatchedWorklistArtifactSetSha256, labelsWithWrongWorklistDigest.length);
+    assert.equal(report.labelQuality.worklist.returnedLabelDigestBinding.matchingWorklistArtifactSetSha256, 0);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
