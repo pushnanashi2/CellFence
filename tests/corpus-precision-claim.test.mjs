@@ -1599,6 +1599,38 @@ test("corpus precision claim rejects labels that are not bound to a sealed workl
   }
 });
 
+test("corpus precision claim rejects labels bound to another sealed worklist digest", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-worklist-digest-"));
+  try {
+    const findings = Array.from({ length: 20 }, (_, index) => createFinding(index));
+    const correctLabels = labelsFor(findings).map((entry) => ({ ...entry, raterType: "human" }));
+    const labelsWithWrongWorklistDigest = correctLabels.map((entry) => ({
+      ...entry,
+      worklistArtifactSetSha256: "0".repeat(64),
+    }));
+    const bundleDir = createBundle(tempDir, findings, labelsWithWrongWorklistDigest);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, correctLabels);
+    const protocolPath = createProtocol(tempDir, bundleDir, {
+      claim: {
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    });
+
+    const result = runClaim(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.decision.status, "invalid");
+    assert.match(report.labelQuality.issues.join("\n"), /worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("corpus precision claim rejects protocol-bound worklist filter metadata drift", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-claim-worklist-protocol-"));
   try {

@@ -1079,6 +1079,42 @@ test("precision claim preflight rejects labels that are not bound to a sealed wo
   }
 });
 
+test("precision claim preflight rejects labels bound to another sealed worklist digest", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-worklist-digest-"));
+  try {
+    const findings = [finding(1), finding(2)];
+    const correctLabels = findings.flatMap((entry) => [
+      label(entry.findingId, "reviewer-a", "blind_first"),
+      label(entry.findingId, "reviewer-b", "blind_second"),
+    ]).map((entry) => ({ ...entry, raterType: "human" }));
+    const labelsWithWrongWorklistDigest = correctLabels.map((entry) => ({
+      ...entry,
+      worklistArtifactSetSha256: "0".repeat(64),
+    }));
+    const bundleDir = createBundle(tempDir, findings, labelsWithWrongWorklistDigest);
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, correctLabels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: {
+        ...claimBinding(bundleDir),
+        worklistArtifactSetSha256: hashFile(path.join(worklistDir, "SHA256SUMS")),
+      },
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human"],
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight rejects protocol-bound worklist filter metadata drift", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-worklist-protocol-"));
   try {
