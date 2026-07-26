@@ -613,10 +613,23 @@ record any newly sampled findings for supplemental labeling:
 npm run precision:labels:transfer -- \
   --source-bundle reports/corpus/ts-js-confirmation-v1-labeled-bundle \
   --target-bundle reports/corpus/ts-js-confirmation-v2-bundle \
+  --target-worklist reports/corpus/ts-js-confirmation-v2-blind-worklist \
   --out docs/research/labels/ts-js-confirmation-v2.labels.jsonl \
   --report reports/corpus/ts-js-confirmation-v2-label-transfer.json \
   --strict-claim-labels
 ```
+
+For claim-eligible carry-forward labels, generate the target blind worklist
+first and pass it with `--target-worklist`. The transfer step uses each sealed
+assignment's `labelTemplate` to rewrite the target `studyId`, `assignmentId`,
+`evidencePackageId`, `worklistArtifactSetSha256`, rater provenance, and
+`claimUse` fields. If a carried label has no matching target assignment, the
+transfer fails before writing `labels.jsonl`; the transfer report records the
+source-label provenance and target worklist digest without embedding that
+provenance back into returned label rows.
+`--strict-claim-labels` rejects transfers without a target worklist because
+shape-valid source assignment metadata is not proof that the label is bound to
+the new sealed assignment set.
 
 Use `--allow-partial` only for an intermediate worklist. A claim-eligible label
 file should transfer or supplement every sampled precision-eligible finding.

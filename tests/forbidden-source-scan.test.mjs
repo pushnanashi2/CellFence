@@ -33,3 +33,30 @@ test("forbidden source scan rejects a blocked reviewer term but permits the rela
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
+
+test("forbidden source scan checks mailmap but allows legacy placeholder remaps", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-forbidden-mailmap-"));
+  try {
+    const login = ["push", "nanashi2"].join("");
+    const name = ["Push", "NaNaShi"].join("");
+    const replacementEmail = ["84632330", `${login}@users.noreply.github.com`].join("+");
+    const placeholderEmail = ["your-email", "example.com"].join("@");
+
+    fs.writeFileSync(path.join(rootDir, ".mailmap"), `${name} <${replacementEmail}> <${placeholderEmail}>\n`);
+    let result = runScan(rootDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const blockedName = ["koe", "noki"].join("");
+    fs.writeFileSync(path.join(rootDir, ".mailmap"), `${blockedName} <${replacementEmail}> <${placeholderEmail}>\n`);
+    result = runScan(rootDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, new RegExp(`\\.mailmap: forbidden term '${blockedName}'`));
+
+    fs.writeFileSync(path.join(rootDir, ".mailmap"), `Broken Identity <${placeholderEmail}>\n`);
+    result = runScan(rootDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, /\.mailmap: forbidden term 'your-email@example\.com'/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});

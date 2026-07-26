@@ -58,7 +58,8 @@
     "research:claim": "node scripts/corpus-precision-claim.mjs",
     "pack:smoke": "node scripts/pack-smoke.mjs",
     "provenance:scan": "node scripts/forbidden-source-scan.mjs",
-    "release:verify": "node scripts/release-verify.mjs",
+    "git:identity:verify": "node scripts/git-identity-verify.mjs",
+    "release:verify": "node scripts/git-identity-verify.mjs && node scripts/release-verify.mjs",
     "sbom:generate": "node scripts/sbom-generate.mjs"
   },
   "devDependencies": {

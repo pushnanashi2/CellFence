@@ -2,11 +2,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { labelRaterType, validateClaimLabelMetadata } from "./precision-worklist-lib.mjs";
+import { hashFile, labelRaterType, validateClaimLabelMetadata, verifyWorklistLabels } from "./precision-worklist-lib.mjs";
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-label-transfer.mjs --source-bundle reports/corpus/old-bundle --target-bundle reports/corpus/new-bundle --out labels.jsonl [--supplemental-labels labels.jsonl] [--default-rater-type agent] [--strict-claim-labels] [--report report.json] [--allow-partial]
+  node scripts/precision-label-transfer.mjs --source-bundle reports/corpus/old-bundle --target-bundle reports/corpus/new-bundle --out labels.jsonl [--target-worklist reports/corpus/new-worklist ...] [--supplemental-labels labels.jsonl] [--default-rater-type agent] [--strict-claim-labels] [--report report.json] [--allow-partial]
 
 Transfers blind/adjudication labels between evidence bundles by stable
 findingId. The target studyId is rewritten, labels for disappeared findings are
@@ -20,6 +20,7 @@ function parseArgs(argv) {
     outPath: "",
     reportPath: "",
     supplementalLabelPaths: [],
+    targetWorklistDirs: [],
     defaultRaterType: "",
     strictClaimLabels: false,
     allowPartial: false,
@@ -51,6 +52,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--supplemental-labels=")) {
       parsed.supplementalLabelPaths.push(path.resolve(requireInlineValue(argument, "--supplemental-labels=", "--supplemental-labels")));
+    } else if (argument === "--target-worklist") {
+      parsed.targetWorklistDirs.push(path.resolve(requireValue(argv, index, "--target-worklist")));
+      index += 1;
+    } else if (argument.startsWith("--target-worklist=")) {
+      parsed.targetWorklistDirs.push(path.resolve(requireInlineValue(argument, "--target-worklist=", "--target-worklist")));
     } else if (argument === "--default-rater-type") {
       parsed.defaultRaterType = requireValue(argv, index, "--default-rater-type");
       index += 1;
@@ -170,6 +176,110 @@ function isAdjudication(label) {
   return label?.role === "adjudicator" || label?.round === "adjudication" || label?.adjudication === true || label?.adjudicated === true;
 }
 
+function assignmentKey(label) {
+  const role = isAdjudication(label) ? "adjudicator" : "independent";
+  return `${label.findingId}\0${label.rater}\0${label.round}\0${role}`;
+}
+
+function readTargetWorklistAssignments(worklistDirs, target, labelIssues) {
+  const assignments = new Map();
+  const worklists = [];
+  if (!target.artifactSetSha256) {
+    labelIssues.push(`target bundle ${target.bundleDir}: SHA256SUMS is missing; cannot verify target worklist bundle binding`);
+  }
+  for (const worklistDir of worklistDirs) {
+    const verification = verifyWorklistLabels(worklistDir, target.labels, {
+      bundleDir: target.bundleDir,
+      findings: target.findings,
+      studyId: target.study.studyId,
+      bundleArtifactSetSha256: target.artifactSetSha256,
+      preLabelArtifactSetSha256: target.study.preregistration?.preLabelArtifactSetSha256,
+    });
+    for (const issue of verification.issues) {
+      labelIssues.push(`target worklist ${worklistDir}: ${issue}`);
+    }
+    const sumsPath = path.join(worklistDir, "SHA256SUMS");
+    const manifestPath = path.join(worklistDir, "worklist.json");
+    const artifactSetSha256 = verification.artifactSetSha256 || (fs.existsSync(sumsPath) ? hashFile(sumsPath) : null);
+    if (!artifactSetSha256) {
+      labelIssues.push(`target worklist ${worklistDir}: SHA256SUMS is missing`);
+    }
+    if (!fs.existsSync(manifestPath)) {
+      worklists.push({
+        path: worklistDir,
+        artifactSetSha256,
+        assignments: 0,
+        rounds: verification.rounds,
+      });
+      continue;
+    }
+    const manifest = readJson(manifestPath);
+    worklists.push({
+      path: worklistDir,
+      artifactSetSha256,
+      assignments: Array.isArray(manifest.assignments) ? manifest.assignments.length : 0,
+      rounds: verification.rounds,
+    });
+    if (verification.issues.length > 0 || !artifactSetSha256) continue;
+    for (const entry of manifest.assignments || []) {
+      const assignmentPath = path.resolve(worklistDir, entry.path || "");
+      const relativeAssignmentPath = path.relative(worklistDir, assignmentPath);
+      if (!relativeAssignmentPath || relativeAssignmentPath.startsWith("..") || path.isAbsolute(relativeAssignmentPath)) {
+        labelIssues.push(`target worklist ${worklistDir}: unsafe assignment path ${entry.path || "<missing>"}`);
+        continue;
+      }
+      const assignment = readJson(assignmentPath);
+      const template = assignment.labelTemplate || {};
+      const key = assignmentKey(template);
+      if (assignments.has(key)) {
+        labelIssues.push(`target worklist ${worklistDir}: duplicate assignment for ${template.findingId}/${template.rater}/${template.round}`);
+        continue;
+      }
+      assignments.set(key, {
+        artifactSetSha256,
+        template,
+      });
+    }
+  }
+  return { assignments, worklists };
+}
+
+function rebindLabelToTargetWorklist(label, worklistIndex, labelIssues, stats, location) {
+  if (!worklistIndex) return label;
+  const assignment = worklistIndex.assignments.get(assignmentKey(label));
+  if (!assignment) {
+    stats.missingAssignments += 1;
+    labelIssues.push(`${location} has no target worklist assignment for ${label.findingId}/${label.rater}/${label.round}`);
+    return label;
+  }
+  const template = assignment.template;
+  const nextLabel = {
+    ...label,
+    schemaVersion: template.schemaVersion,
+    studyId: template.studyId,
+    findingId: template.findingId,
+    rater: template.rater,
+    raterType: template.raterType,
+    role: template.role,
+    round: template.round,
+    assignmentId: template.assignmentId,
+    evidencePackageId: template.evidencePackageId,
+    worklistArtifactSetSha256: assignment.artifactSetSha256,
+    sawPeerLabels: template.sawPeerLabels,
+    sourceBundleContainsLabels: template.sourceBundleContainsLabels,
+    claimUse: template.claimUse,
+  };
+  stats.reboundLabels += 1;
+  if (
+    label.assignmentId !== nextLabel.assignmentId
+    || label.evidencePackageId !== nextLabel.evidencePackageId
+    || label.worklistArtifactSetSha256 !== nextLabel.worklistArtifactSetSha256
+  ) {
+    stats.rewrittenLabels += 1;
+  }
+  return nextLabel;
+}
+
 function validateStrictClaimLabel(label, location, issues) {
   validateClaimLabelMetadata(label, 1, issues, { location, sealedWorklist: true });
   if (label.schemaVersion !== "cellfence.corpus-label.v1") issues.push(`${location} has unexpected schemaVersion`);
@@ -191,6 +301,8 @@ function validateStrictClaimLabel(label, location, issues) {
 
 function readBundle(bundleDir) {
   return {
+    bundleDir,
+    artifactSetSha256: fs.existsSync(path.join(bundleDir, "SHA256SUMS")) ? hashFile(path.join(bundleDir, "SHA256SUMS")) : null,
     study: readJson(path.join(bundleDir, "study.json")),
     sampling: readJson(path.join(bundleDir, "sampling.json")),
     findings: readJsonl(path.join(bundleDir, "findings.normalized.jsonl")),
@@ -206,6 +318,13 @@ function sampledPrecisionEligibleFindings(bundle) {
 function transferLabels(options) {
   const source = readBundle(options.sourceBundle);
   const target = readBundle(options.targetBundle);
+  const worklistRebindingStats = {
+    enabled: options.targetWorklistDirs.length > 0,
+    targetWorklists: options.targetWorklistDirs.length,
+    reboundLabels: 0,
+    rewrittenLabels: 0,
+    missingAssignments: 0,
+  };
   const targetFindings = sampledPrecisionEligibleFindings(target);
   const targetIds = new Set(targetFindings.map((finding) => finding.findingId));
   const sourceLabelsByFinding = groupBy(source.labels, (label) => label.findingId);
@@ -215,6 +334,12 @@ function transferLabels(options) {
   const transferredFindingIds = new Set();
   const missingTargetFindings = [];
   const labelIssues = [];
+  if (options.strictClaimLabels && options.targetWorklistDirs.length === 0) {
+    labelIssues.push("--strict-claim-labels requires --target-worklist so transferred labels are rebound to sealed target assignments");
+  }
+  const targetWorklistIndex = options.targetWorklistDirs.length > 0
+    ? readTargetWorklistAssignments(options.targetWorklistDirs, target, labelIssues)
+    : null;
 
   for (const finding of targetFindings) {
     const labels = sourceLabelsByFinding.get(finding.findingId) || [];
@@ -224,10 +349,20 @@ function transferLabels(options) {
     }
     transferredFindingIds.add(finding.findingId);
     for (const label of labels) {
-      const nextLabel = {
+      const sourceLabel = {
         ...sanitizeLabel(withDefaultRaterType(label, options.defaultRaterType)),
         studyId: target.study.studyId,
       };
+      if (options.strictClaimLabels) {
+        validateStrictClaimLabel(sourceLabel, `source transferred label ${finding.findingId}/${label.rater}`, labelIssues);
+      }
+      const nextLabel = rebindLabelToTargetWorklist(
+        sourceLabel,
+        targetWorklistIndex,
+        labelIssues,
+        worklistRebindingStats,
+        `transferred label ${finding.findingId}/${label.rater}`,
+      );
       transferredLabels.push(nextLabel);
       if (options.strictClaimLabels) {
         validateStrictClaimLabel(nextLabel, `transferred label ${nextLabel.findingId}/${nextLabel.rater}`, labelIssues);
@@ -252,10 +387,20 @@ function transferLabels(options) {
         droppedSupplementalLabels.push({ findingId: label.findingId, path: supplementalPath });
         continue;
       }
-      const nextLabel = {
+      const sourceLabel = {
         ...sanitizeLabel(withDefaultRaterType(label, options.defaultRaterType)),
         studyId: target.study.studyId,
       };
+      if (options.strictClaimLabels) {
+        validateStrictClaimLabel(sourceLabel, `source supplemental label ${label.findingId}/${label.rater}`, labelIssues);
+      }
+      const nextLabel = rebindLabelToTargetWorklist(
+        sourceLabel,
+        targetWorklistIndex,
+        labelIssues,
+        worklistRebindingStats,
+        `supplemental label ${label.findingId}/${label.rater}`,
+      );
       const key = labelKey(nextLabel);
       if (transferredKeys.has(key)) {
         throw new Error(`supplemental label duplicates transferred label for ${nextLabel.findingId}/${nextLabel.rater}`);
@@ -317,7 +462,9 @@ function transferLabels(options) {
       missingTargetFindings: stillMissingTargetFindings.length,
       staleSourceFindings: staleSourceFindingIds.size,
       labelIssues: labelIssues.length,
+      worklistRebinding: worklistRebindingStats,
     },
+    targetWorklists: targetWorklistIndex ? targetWorklistIndex.worklists : [],
     transferredByRule,
     transferredLabelSources,
     missingByRule,
@@ -355,7 +502,7 @@ function main() {
   try {
     const report = transferLabels(options);
     console.log(JSON.stringify(report, null, 2));
-    return report.ok || options.allowPartial ? 0 : 1;
+    return report.ok || (options.allowPartial && report.summary.labelIssues === 0) ? 0 : 1;
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     return 2;

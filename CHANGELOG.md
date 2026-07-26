@@ -7,6 +7,7 @@
 - Report TypeScript/JavaScript parser diagnostics as `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` fail-closed findings under the built-in required-rule profile.
 - Reject unknown manifest, baseline, and resource-evidence fields, plus duplicate package names and duplicate nested policy contract identifiers.
 - Strengthen TypeScript/JavaScript public surface hashes with isolated normalized declaration output, exported namespaces, local re-export roots, and regression coverage for type-facing changes without class method-body churn.
+- Add release-time git identity hygiene checks and a non-destructive mailmap for legacy placeholder commit attribution.
 
 ## 0.1.14 - 2026-07-18
 
