@@ -610,7 +610,8 @@ npm run precision:labels:transfer -- \
   --source-bundle reports/corpus/ts-js-confirmation-v1-labeled-bundle \
   --target-bundle reports/corpus/ts-js-confirmation-v2-bundle \
   --out docs/research/labels/ts-js-confirmation-v2.labels.jsonl \
-  --report reports/corpus/ts-js-confirmation-v2-label-transfer.json
+  --report reports/corpus/ts-js-confirmation-v2-label-transfer.json \
+  --strict-claim-labels
 ```
 
 Use `--allow-partial` only for an intermediate worklist. A claim-eligible label
@@ -618,6 +619,10 @@ file should transfer or supplement every sampled precision-eligible finding.
 If the source labels predate rater-provenance metadata, add a declared default
 with `--default-rater-type agent` or backfill the actual human or organization
 types before running the claim protocol.
+For an external 99% claim path, keep `--strict-claim-labels` enabled so legacy
+rows without canonical `role`, `claimUse`, `sourceBundleContainsLabels`, and
+`raterType` metadata are reported instead of being written into the transferred
+label file.
 
 Rater provenance can also be enforced at validation time:
 

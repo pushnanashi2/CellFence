@@ -60,6 +60,19 @@ function label(findingId, rater, round) {
   };
 }
 
+function claimLabel(findingId, rater, round, patch = {}) {
+  const adjudication = round === "adjudication";
+  return {
+    ...label(findingId, rater, round),
+    raterType: "human",
+    role: adjudication ? "adjudicator" : "independent",
+    sourceBundleContainsLabels: adjudication ? true : false,
+    sawPeerLabels: adjudication ? true : false,
+    claimUse: adjudication ? "sealed_adjudication" : "blind_labeling",
+    ...patch,
+  };
+}
+
 function createBundle(baseDir, studyId, findings, labels = []) {
   const bundleDir = path.join(baseDir, studyId);
   writeJson(path.join(bundleDir, "study.json"), {
@@ -233,6 +246,71 @@ test("precision label transfer can stamp known rater provenance on transferred l
     const preserved = labels.find((entry) => entry.rater === "reviewer-b");
     assert.equal(stamped.raterType, "agent");
     assert.equal(preserved.raterType, "human");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision label transfer strict mode rejects legacy labels before writing output", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-label-transfer-strict-legacy-"));
+  try {
+    const kept = finding("sha256:111111");
+    const sourceBundle = createBundle(tempDir, "source-study", [kept], [
+      label(kept.findingId, "reviewer-a", "blind_first"),
+      label(kept.findingId, "reviewer-b", "blind_second"),
+    ]);
+    const targetBundle = createBundle(tempDir, "target-study", [kept]);
+    const labelsPath = path.join(tempDir, "transferred.labels.jsonl");
+
+    const result = runTransfer([
+      "--source-bundle",
+      sourceBundle,
+      "--target-bundle",
+      targetBundle,
+      "--out",
+      labelsPath,
+      "--strict-claim-labels",
+    ]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.summary.labelIssues > 0, true);
+    assert.match(report.labelIssues.join("\n"), /role=independent|sourceBundleContainsLabels=false|claimUse=blind_labeling|raterType is required/);
+    assert.equal(fs.existsSync(labelsPath), false);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision label transfer strict mode accepts canonical claim labels", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-label-transfer-strict-ok-"));
+  try {
+    const kept = finding("sha256:111111");
+    const sourceBundle = createBundle(tempDir, "source-study", [kept], [
+      claimLabel(kept.findingId, "reviewer-a", "blind_first"),
+      claimLabel(kept.findingId, "reviewer-b", "blind_second"),
+    ]);
+    const targetBundle = createBundle(tempDir, "target-study", [kept]);
+    const labelsPath = path.join(tempDir, "transferred.labels.jsonl");
+
+    const result = runTransfer([
+      "--source-bundle",
+      sourceBundle,
+      "--target-bundle",
+      targetBundle,
+      "--out",
+      labelsPath,
+      "--strict-claim-labels",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.summary.labelIssues, 0);
+    const labels = readJsonl(labelsPath);
+    assert.equal(labels.length, 2);
+    assert.equal(labels[0].claimUse, "blind_labeling");
+    assert.equal(labels[0].sourceBundleContainsLabels, false);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

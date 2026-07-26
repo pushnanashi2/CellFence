@@ -2,10 +2,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { labelRaterType, validateClaimLabelMetadata } from "./precision-worklist-lib.mjs";
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-label-transfer.mjs --source-bundle reports/corpus/old-bundle --target-bundle reports/corpus/new-bundle --out labels.jsonl [--supplemental-labels labels.jsonl] [--default-rater-type agent] [--report report.json] [--allow-partial]
+  node scripts/precision-label-transfer.mjs --source-bundle reports/corpus/old-bundle --target-bundle reports/corpus/new-bundle --out labels.jsonl [--supplemental-labels labels.jsonl] [--default-rater-type agent] [--strict-claim-labels] [--report report.json] [--allow-partial]
 
 Transfers blind/adjudication labels between evidence bundles by stable
 findingId. The target studyId is rewritten, labels for disappeared findings are
@@ -20,6 +21,7 @@ function parseArgs(argv) {
     reportPath: "",
     supplementalLabelPaths: [],
     defaultRaterType: "",
+    strictClaimLabels: false,
     allowPartial: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -54,6 +56,8 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--default-rater-type=")) {
       parsed.defaultRaterType = requireInlineValue(argument, "--default-rater-type=", "--default-rater-type");
+    } else if (argument === "--strict-claim-labels") {
+      parsed.strictClaimLabels = true;
     } else if (argument === "--allow-partial") {
       parsed.allowPartial = true;
     } else if (argument === "--help" || argument === "-h") {
@@ -139,6 +143,14 @@ const labelAllowedKeys = new Set([
   "adjudication",
   "adjudicated",
 ]);
+const allowedLabels = new Set([
+  "true_positive",
+  "false_positive",
+  "needs_policy",
+  "needs_review",
+  "invalid_setup",
+  "out_of_scope",
+]);
 
 function sanitizeLabel(label) {
   return Object.fromEntries(Object.entries(label).filter(([key]) => labelAllowedKeys.has(key)));
@@ -151,6 +163,29 @@ function increment(counts, key) {
 function withDefaultRaterType(label, defaultRaterType) {
   if (!defaultRaterType || label.raterType || label.raterClass) return label;
   return { ...label, raterType: defaultRaterType };
+}
+
+function isAdjudication(label) {
+  return label?.role === "adjudicator" || label?.round === "adjudication" || label?.adjudication === true || label?.adjudicated === true;
+}
+
+function validateStrictClaimLabel(label, location, issues) {
+  validateClaimLabelMetadata(label, 1, issues, { location, sealedWorklist: true });
+  if (label.schemaVersion !== "cellfence.corpus-label.v1") issues.push(`${location} has unexpected schemaVersion`);
+  if (!label.findingId || typeof label.findingId !== "string") issues.push(`${location}.findingId is required`);
+  if (!label.rater || typeof label.rater !== "string") issues.push(`${location}.rater is required`);
+  if (!label.assignmentId || typeof label.assignmentId !== "string") issues.push(`${location}.assignmentId is required`);
+  if (!label.evidencePackageId || typeof label.evidencePackageId !== "string") issues.push(`${location}.evidencePackageId is required`);
+  if (!allowedLabels.has(label.label)) issues.push(`${location}.label must be one of ${[...allowedLabels].join(", ")}`);
+  if (!label.rationale || typeof label.rationale !== "string" || label.rationale.trim().length === 0) {
+    issues.push(`${location}.rationale is required`);
+  }
+  if (!labelRaterType(label)) issues.push(`${location}.raterType is required`);
+  if (isAdjudication(label)) {
+    if (label.round !== "adjudication") issues.push(`${location}.round must be adjudication`);
+  } else if (label.round !== "blind_first" && label.round !== "blind_second") {
+    issues.push(`${location}.round must be blind_first or blind_second`);
+  }
 }
 
 function readBundle(bundleDir) {
@@ -178,6 +213,7 @@ function transferLabels(options) {
   const transferredKeys = new Set();
   const transferredFindingIds = new Set();
   const missingTargetFindings = [];
+  const labelIssues = [];
 
   for (const finding of targetFindings) {
     const labels = sourceLabelsByFinding.get(finding.findingId) || [];
@@ -192,6 +228,9 @@ function transferLabels(options) {
         studyId: target.study.studyId,
       };
       transferredLabels.push(nextLabel);
+      if (options.strictClaimLabels) {
+        validateStrictClaimLabel(nextLabel, `transferred label ${nextLabel.findingId}/${nextLabel.rater}`, labelIssues);
+      }
       transferredLabelSources.push({
         findingId: nextLabel.findingId,
         rater: nextLabel.rater,
@@ -221,6 +260,9 @@ function transferLabels(options) {
         throw new Error(`supplemental label duplicates transferred label for ${nextLabel.findingId}/${nextLabel.rater}`);
       }
       supplementalLabels.push(nextLabel);
+      if (options.strictClaimLabels) {
+        validateStrictClaimLabel(nextLabel, `supplemental label ${nextLabel.findingId}/${nextLabel.rater}`, labelIssues);
+      }
       transferredLabelSources.push({
         findingId: nextLabel.findingId,
         rater: nextLabel.rater,
@@ -273,6 +315,7 @@ function transferLabels(options) {
       transferredFindings: transferredFindingIds.size,
       missingTargetFindings: stillMissingTargetFindings.length,
       staleSourceFindings: staleSourceFindingIds.size,
+      labelIssues: labelIssues.length,
     },
     transferredByRule,
     transferredLabelSources,
@@ -286,9 +329,10 @@ function transferLabels(options) {
       filePath: finding.filePath,
       message: finding.message,
     })),
-    ok: stillMissingTargetFindings.length === 0,
+    labelIssues,
+    ok: stillMissingTargetFindings.length === 0 && labelIssues.length === 0,
   };
-  writeJsonl(options.outPath, transferredLabels);
+  if (labelIssues.length === 0) writeJsonl(options.outPath, transferredLabels);
   if (options.reportPath) writeJson(options.reportPath, report);
   return report;
 }
