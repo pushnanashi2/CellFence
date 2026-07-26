@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9e0089a9c924ff6d",
+    "subjectId": "remy-nodemon",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "remy-nodemon",
+    "phase": null,
+    "repository": "https://github.com/remy/nodemon.git",
+    "commit": "f3c24537e68c3e88f5b6afd911b476aef6239560"
+  },
+  "manifestCopy": {
+    "path": "manifests/remy-nodemon-ee51c6e6b098.json",
+    "sha256": "6d0ba50c6f23c6d5977db19a71095f0325a09b25bb7ed244cd1886429b40fc75"
+  },
+  "attestationTemplate": {
+    "subjectId": "remy-nodemon",
+    "repository": "https://github.com/remy/nodemon.git",
+    "commit": "f3c24537e68c3e88f5b6afd911b476aef6239560",
+    "manifestCopy": {
+      "path": "manifests/remy-nodemon-ee51c6e6b098.json",
+      "sha256": "6d0ba50c6f23c6d5977db19a71095f0325a09b25bb7ed244cd1886429b40fc75"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "6d0ba50c6f23c6d5977db19a71095f0325a09b25bb7ed244cd1886429b40fc75",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

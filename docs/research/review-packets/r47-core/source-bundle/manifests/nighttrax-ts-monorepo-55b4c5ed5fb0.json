@@ -1,0 +1,332 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/jest-babel/src/**",
+      "apps/jest-tsjest/src/**",
+      "apps/nestjs/src/**",
+      "apps/nextjs/**",
+      "apps/rollup/src/**",
+      "apps/storybook/src/**",
+      "apps/ts-node/src/**",
+      "apps/vite/src/**",
+      "apps/webpack/src/**",
+      "packages/bar/src/**",
+      "packages/components/src/**",
+      "packages/foo/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "bar",
+      "ownedPaths": [
+        "packages/bar/src/**"
+      ],
+      "publicEntry": "packages/bar/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@nighttrax/bar",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "packages/components/src/**"
+      ],
+      "publicEntry": "packages/components/src/button.tsx",
+      "publicSymbols": [
+        "Button"
+      ],
+      "packageName": "@nighttrax/components",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "foo",
+      "ownedPaths": [
+        "packages/foo/src/**"
+      ],
+      "publicEntry": "packages/foo/src/index.ts",
+      "publicSymbols": [
+        "meaningOfLife"
+      ],
+      "packageName": "@nighttrax/foo",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-babel-example",
+      "ownedPaths": [
+        "apps/jest-babel/src/**"
+      ],
+      "publicEntry": "apps/jest-babel/src/index.ts",
+      "publicSymbols": [
+        "whatIsTheMeaningOfLife"
+      ],
+      "packageName": "@nighttrax/jest-babel-example",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-example",
+      "ownedPaths": [
+        "apps/jest-tsjest/src/**"
+      ],
+      "publicEntry": "apps/jest-tsjest/src/index.ts",
+      "publicSymbols": [
+        "whatIsTheMeaningOfLife"
+      ],
+      "packageName": "@nighttrax/jest-example",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nestjs",
+      "ownedPaths": [
+        "apps/nestjs/src/**"
+      ],
+      "publicEntry": "apps/nestjs/src/app.controller.ts",
+      "publicSymbols": [
+        "AppController"
+      ],
+      "packageName": "nestjs",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nextjs-example",
+      "ownedPaths": [
+        "apps/nextjs/**"
+      ],
+      "publicEntry": "apps/nextjs/next.config.js",
+      "publicSymbols": [],
+      "packageName": "@nighttrax/nextjs-example",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rollup-example",
+      "ownedPaths": [
+        "apps/rollup/src/**"
+      ],
+      "publicEntry": "apps/rollup/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@nighttrax/rollup-example",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storybook-example",
+      "ownedPaths": [
+        "apps/storybook/src/**"
+      ],
+      "publicEntry": "apps/storybook/src/components/foo.tsx",
+      "publicSymbols": [
+        "Foo"
+      ],
+      "packageName": "@nighttrax/storybook-example",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ts-node",
+      "ownedPaths": [
+        "apps/ts-node/src/**"
+      ],
+      "publicEntry": "apps/ts-node/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@nighttrax/ts-node",
+      "consumes": [
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite-example",
+      "ownedPaths": [
+        "apps/vite/src/**"
+      ],
+      "publicEntry": "apps/vite/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@nighttrax/vite-example",
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "foo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "webpack-example",
+      "ownedPaths": [
+        "apps/webpack/src/**"
+      ],
+      "publicEntry": "apps/webpack/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@nighttrax/webpack-example",
+      "consumes": [
+        {
+          "cell": "bar"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

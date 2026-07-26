@@ -1,0 +1,471 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/@vue/babel-preset-app/**",
+      "packages/@vue/cli-init/**",
+      "packages/@vue/cli-overlay/src/**",
+      "packages/@vue/cli-plugin-babel/**",
+      "packages/@vue/cli-plugin-e2e-cypress/**",
+      "packages/@vue/cli-plugin-e2e-nightwatch/**",
+      "packages/@vue/cli-plugin-e2e-webdriverio/**",
+      "packages/@vue/cli-plugin-eslint/**",
+      "packages/@vue/cli-plugin-pwa/**",
+      "packages/@vue/cli-plugin-router/**",
+      "packages/@vue/cli-plugin-typescript/**",
+      "packages/@vue/cli-plugin-unit-jest/**",
+      "packages/@vue/cli-plugin-unit-mocha/**",
+      "packages/@vue/cli-plugin-vuex/**",
+      "packages/@vue/cli-service/**",
+      "packages/@vue/cli-shared-utils/**",
+      "packages/@vue/cli-test-utils/**",
+      "packages/@vue/cli-ui-addon-webpack/src/**",
+      "packages/@vue/cli-ui-addon-widgets/src/**",
+      "packages/@vue/cli-ui/src/**",
+      "packages/@vue/cli/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "babel-preset-app",
+      "ownedPaths": [
+        "packages/@vue/babel-preset-app/**"
+      ],
+      "publicEntry": "packages/@vue/babel-preset-app/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/babel-preset-app",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/@vue/cli/**"
+      ],
+      "publicEntry": "packages/@vue/cli/bin/vue.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        },
+        {
+          "cell": "cli-ui"
+        },
+        {
+          "cell": "cli-ui-addon-webpack"
+        },
+        {
+          "cell": "cli-ui-addon-widgets"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-init",
+      "ownedPaths": [
+        "packages/@vue/cli-init/**"
+      ],
+      "publicEntry": "packages/@vue/cli-init/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-init",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-overlay",
+      "ownedPaths": [
+        "packages/@vue/cli-overlay/src/**"
+      ],
+      "publicEntry": "packages/@vue/cli-overlay/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-overlay",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-babel",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-babel/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-babel/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-babel",
+      "consumes": [
+        {
+          "cell": "babel-preset-app"
+        },
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-e2e-cypress",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-e2e-cypress/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-e2e-cypress/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-e2e-cypress",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-e2e-nightwatch",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-e2e-nightwatch/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-e2e-nightwatch/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-e2e-nightwatch",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-e2e-webdriverio",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-e2e-webdriverio/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-e2e-webdriverio/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-e2e-webdriverio",
+      "consumes": [
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-eslint",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-eslint/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-eslint/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-eslint",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-pwa",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-pwa/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-pwa/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-pwa",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-router",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-router/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-router/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-router",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        },
+        {
+          "cell": "cli-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-typescript",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-typescript/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-typescript/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-typescript",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-unit-jest",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-unit-jest/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-unit-jest/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-unit-jest",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-unit-mocha",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-unit-mocha/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-unit-mocha/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-unit-mocha",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-plugin-vuex",
+      "ownedPaths": [
+        "packages/@vue/cli-plugin-vuex/**"
+      ],
+      "publicEntry": "packages/@vue/cli-plugin-vuex/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-plugin-vuex",
+      "consumes": [
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-test-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-service",
+      "ownedPaths": [
+        "packages/@vue/cli-service/**"
+      ],
+      "publicEntry": "packages/@vue/cli-service/lib/Service.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-service",
+      "consumes": [
+        {
+          "cell": "cli-overlay"
+        },
+        {
+          "cell": "cli-plugin-router"
+        },
+        {
+          "cell": "cli-plugin-vuex"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-shared-utils",
+      "ownedPaths": [
+        "packages/@vue/cli-shared-utils/**"
+      ],
+      "publicEntry": "packages/@vue/cli-shared-utils/index.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-shared-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-test-utils",
+      "ownedPaths": [
+        "packages/@vue/cli-test-utils/**"
+      ],
+      "publicEntry": "packages/@vue/cli-test-utils/assertPromptModule.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-test-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-ui",
+      "ownedPaths": [
+        "packages/@vue/cli-ui/src/**"
+      ],
+      "publicEntry": "packages/@vue/cli-ui/src/filters.js",
+      "publicSymbols": [
+        "date",
+        "folder"
+      ],
+      "packageName": "@vue/cli-ui",
+      "consumes": [
+        {
+          "cell": "cli-plugin-babel"
+        },
+        {
+          "cell": "cli-plugin-e2e-cypress"
+        },
+        {
+          "cell": "cli-plugin-eslint"
+        },
+        {
+          "cell": "cli-service"
+        },
+        {
+          "cell": "cli-shared-utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-ui-addon-webpack",
+      "ownedPaths": [
+        "packages/@vue/cli-ui-addon-webpack/src/**"
+      ],
+      "publicEntry": "packages/@vue/cli-ui-addon-webpack/src/filters.js",
+      "publicSymbols": [
+        "round",
+        "size"
+      ],
+      "packageName": "@vue/cli-ui-addon-webpack",
+      "consumes": [
+        {
+          "cell": "cli-plugin-babel"
+        },
+        {
+          "cell": "cli-plugin-eslint"
+        },
+        {
+          "cell": "cli-service"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli-ui-addon-widgets",
+      "ownedPaths": [
+        "packages/@vue/cli-ui-addon-widgets/src/**"
+      ],
+      "publicEntry": "packages/@vue/cli-ui-addon-widgets/src/main.js",
+      "publicSymbols": [],
+      "packageName": "@vue/cli-ui-addon-widgets",
+      "consumes": [
+        {
+          "cell": "cli-plugin-babel"
+        },
+        {
+          "cell": "cli-plugin-eslint"
+        },
+        {
+          "cell": "cli-service"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

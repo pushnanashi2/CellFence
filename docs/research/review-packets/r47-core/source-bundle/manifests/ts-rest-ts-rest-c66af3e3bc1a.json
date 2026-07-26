@@ -1,0 +1,830 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/example-azure-function/src/**",
+      "apps/example-cloudflare-worker/**",
+      "apps/example-express/src/**",
+      "apps/example-fastify/**",
+      "apps/example-microservice/**",
+      "apps/example-nest/src/**",
+      "apps/example-next/**",
+      "libs/example-contracts/src/**",
+      "libs/example-microservice/**",
+      "libs/non-strict-mode-test/src/**",
+      "libs/ts-rest/core/**",
+      "libs/ts-rest/core/src/**",
+      "libs/ts-rest/express/**",
+      "libs/ts-rest/express/src/**",
+      "libs/ts-rest/fastify/**",
+      "libs/ts-rest/fastify/src/**",
+      "libs/ts-rest/nest/**",
+      "libs/ts-rest/nest/src/**",
+      "libs/ts-rest/next/**",
+      "libs/ts-rest/next/src/**",
+      "libs/ts-rest/open-api/**",
+      "libs/ts-rest/open-api/src/**",
+      "libs/ts-rest/react-query-v5/**",
+      "libs/ts-rest/react-query-v5/src/**",
+      "libs/ts-rest/react-query/**",
+      "libs/ts-rest/react-query/src/**",
+      "libs/ts-rest/serverless/**",
+      "libs/ts-rest/serverless/src/**",
+      "libs/ts-rest/solid-query/**",
+      "libs/ts-rest/solid-query/src/**",
+      "libs/ts-rest/vue-query/**",
+      "libs/ts-rest/vue-query/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "core",
+      "ownedPaths": [
+        "libs/ts-rest/core/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/core/src/index.ts",
+      "publicSymbols": [
+        "And",
+        "ApiFetcher",
+        "ApiFetcherArgs",
+        "ApiResponseForRoute",
+        "AppRoute",
+        "AppRouteDeleteNoBody",
+        "AppRouteFunction",
+        "AppRouteMutation",
+        "AppRouteQuery",
+        "AppRouter",
+        "AppRouteResponse",
+        "AppRouteStrictStatusCodes",
+        "AreAllPropertiesOptional",
+        "areAllSchemasLegacyZod",
+        "ClientArgs",
+        "ClientInferRequest",
+        "ClientInferResponseBody",
+        "ClientInferResponses",
+        "combineStandardSchemas",
+        "CommonAndEqual",
+        "ContractAnyType",
+        "ContractAnyTypeLegacy",
+        "ContractNoBody",
+        "ContractNoBodyType",
+        "ContractNullType",
+        "ContractOtherResponse",
+        "ContractPlainType",
+        "ContractPlainTypeRuntimeSymbol",
+        "convertQueryParamsToUrlString",
+        "DefinedOrEmpty",
+        "encodeQueryParams",
+        "encodeQueryParamsJson",
+        "ErrorHttpStatusCode",
+        "evaluateFetchApiArgs",
+        "exhaustiveGuard",
+        "Extends",
+        "extractZodObjectShape",
+        "fetchApi",
+        "FetchApiOptions",
+        "FetchOptions",
+        "FlattenAppRouter",
+        "getCompleteUrl",
+        "GetFieldType",
+        "getRouteQuery",
+        "getRouteResponses",
+        "HTTPStatusCode",
+        "IfAllPropertiesOptional",
+        "InferHeadersInput",
+        "InferHeadersOutput",
+        "InferResponseDefinedStatusCodes",
+        "InferResponseUndefinedStatusCodes",
+        "initClient",
+        "InitClientArgs",
+        "InitClientReturn",
+        "initContract",
+        "initTsRest",
+        "insertParamsIntoPath",
+        "isAppRoute",
+        "isAppRouteMutation",
+        "isAppRouteNoBody",
+        "isAppRouteOtherResponse",
+        "isAppRouteQuery",
+        "isAppRouteResponse",
+        "isErrorResponse",
+        "isResponse",
+        "isStandardSchema",
+        "isSuccessResponse",
+        "isUnknownErrorResponse",
+        "isUnknownResponse",
+        "isUnknownSuccessResponse",
+        "isZodObject",
+        "isZodObjectStrict",
+        "isZodType",
+        "LowercaseKeys",
+        "Merge",
+        "mergeHeaderSchemasForRoute",
+        "MergeHeadersWithLegacySupport",
+        "Narrow",
+        "Not",
+        "Opaque",
+        "OptionalIfAllOptional",
+        "Or",
+        "OverrideableClientArgs",
+        "ParamsFromUrl",
+        "parseAsStandardSchema",
+        "parseJsonQueryObject",
+        "PartialBy",
+        "PartialByLooseKeys",
+        "PartialClientInferRequest",
+        "Prettify",
+        "RequestValidationErrorSchema",
+        "RequestValidationErrorSchemaForNest",
+        "RequestValidationErrorSchemaWithoutMessage",
+        "ResolveResponseType",
+        "ResponseValidationError",
+        "RouterOptions",
+        "SchemaInputOrType",
+        "SchemaOutputOrType",
+        "ServerInferRequest",
+        "ServerInferResponseBody",
+        "ServerInferResponses",
+        "StandardSchemaError",
+        "StandardSchemaV1",
+        "SuccessfulHttpStatusCode",
+        "tsRestFetchApi",
+        "TsRestResponseError",
+        "TsRestResponseValidationError",
+        "UnknownOrUndefinedObjectValuesToOptionalKeys",
+        "UnknownStatusError",
+        "UnknownToUndefined",
+        "UnwrapOpaque",
+        "validateAgainstStandardSchema",
+        "validateIfSchema",
+        "validateMultiSchemaObject",
+        "validateResponse",
+        "validationErrorResponse",
+        "With",
+        "Without",
+        "WithoutUnknown",
+        "zodErrorResponse",
+        "ZodErrorSchema",
+        "ZodInferOrType",
+        "ZodInputOrType",
+        "zodMerge"
+      ],
+      "packageName": "@ts-rest/core",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-azure-function",
+      "ownedPaths": [
+        "apps/example-azure-function/src/**"
+      ],
+      "publicEntry": "apps/example-azure-function/src/functions/index.ts",
+      "publicSymbols": [],
+      "packageName": "example-azure-function",
+      "consumes": [
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "serverless"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-cloudflare-worker",
+      "ownedPaths": [
+        "apps/example-cloudflare-worker/**"
+      ],
+      "publicEntry": "apps/example-cloudflare-worker/jest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "serverless"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-contracts",
+      "ownedPaths": [
+        "libs/example-contracts/src/**"
+      ],
+      "publicEntry": "libs/example-contracts/src/index.ts",
+      "publicSymbols": [
+        "apiBlog",
+        "apiNested",
+        "contractTs",
+        "Post",
+        "PostTs"
+      ],
+      "packageName": "@ts-rest/example-contracts",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-express",
+      "ownedPaths": [
+        "apps/example-express/src/**"
+      ],
+      "publicEntry": "apps/example-express/src/authenticated-app.ts",
+      "publicSymbols": [
+        "default",
+        "SAMPLE_GUEST_JWT",
+        "SAMPLE_NON_OWNER_JWT",
+        "SAMPLE_OWNER_JWT"
+      ],
+      "packageName": "example-express",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "express"
+        },
+        {
+          "cell": "open-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-fastify",
+      "ownedPaths": [
+        "apps/example-fastify/**"
+      ],
+      "publicEntry": "apps/example-fastify/jest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "fastify"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-microservice",
+      "ownedPaths": [
+        "apps/example-microservice/**"
+      ],
+      "publicEntry": "apps/example-microservice/posts-service/jest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "example-microservice-2"
+        },
+        {
+          "cell": "express"
+        },
+        {
+          "cell": "nest"
+        },
+        {
+          "cell": "open-api"
+        },
+        {
+          "cell": "react-query-v5"
+        },
+        {
+          "cell": "solid-query"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-microservice-2",
+      "ownedPaths": [
+        "libs/example-microservice/**"
+      ],
+      "publicEntry": "libs/example-microservice/util-posts-api/jest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-nest",
+      "ownedPaths": [
+        "apps/example-nest/src/**"
+      ],
+      "publicEntry": "apps/example-nest/src/app/app.module.ts",
+      "publicSymbols": [
+        "AppModule"
+      ],
+      "packageName": "example-nest",
+      "consumes": [
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "nest"
+        },
+        {
+          "cell": "open-api"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-next",
+      "ownedPaths": [
+        "apps/example-next/**"
+      ],
+      "publicEntry": "apps/example-next/app/(react-query-streaming)/layout.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "example-next",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "example-contracts"
+        },
+        {
+          "cell": "next"
+        },
+        {
+          "cell": "react-query-v5"
+        },
+        {
+          "cell": "serverless"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "express",
+      "ownedPaths": [
+        "libs/ts-rest/express/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/express/src/index.ts",
+      "publicSymbols": [
+        "AppRouteImplementation",
+        "AppRouteMutationImplementation",
+        "AppRouteOptions",
+        "AppRouteQueryImplementation",
+        "createExpressEndpoints",
+        "initServer",
+        "RequestValidationError",
+        "TsRestExpressOptions",
+        "TsRestRequest",
+        "TsRestRequestHandler"
+      ],
+      "packageName": "@ts-rest/express",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fastify",
+      "ownedPaths": [
+        "libs/ts-rest/fastify/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/fastify/src/index.ts",
+      "publicSymbols": [
+        "ApplicationHooks",
+        "AppRouteImplementation",
+        "AppRouteImplementationOrOptions",
+        "initServer",
+        "RequestValidationError",
+        "RequestValidationErrorSchema",
+        "RouteHooks",
+        "RouterImplementation"
+      ],
+      "packageName": "@ts-rest/fastify",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nest",
+      "ownedPaths": [
+        "libs/ts-rest/nest/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/nest/src/index.ts",
+      "publicSymbols": [
+        "Api",
+        "ApiDecorator",
+        "initNestServer",
+        "nestControllerContract",
+        "NestControllerContract",
+        "NestControllerInterface",
+        "NestRequestShapes",
+        "NestResponseShapes",
+        "RequestValidationError",
+        "RequestValidationErrorSchema",
+        "ResponseValidationError",
+        "TsRest",
+        "TsRestAppRouteMetadataKey",
+        "TsRestException",
+        "tsRestHandler",
+        "TsRestHandler",
+        "TsRestHandlerInterceptor",
+        "TsRestInterceptor",
+        "TsRestModule",
+        "TsRestOptions",
+        "TsRestOptionsMetadataKey",
+        "TsRestRequest",
+        "TsRestRequestShape",
+        "TsRestRequestValidationError",
+        "TsRestResponseValidationError"
+      ],
+      "packageName": "@ts-rest/nest",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "next",
+      "ownedPaths": [
+        "libs/ts-rest/next/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/next/src/index.ts",
+      "publicSymbols": [
+        "createNextRoute",
+        "createNextRouter",
+        "createSingleRouteHandler",
+        "InitClientArgs",
+        "InitClientReturn",
+        "initNextClient",
+        "isAppRouteWithImplementation",
+        "RequestValidationError",
+        "RequestValidationErrorSchema",
+        "RouterImplementation",
+        "TsRestRequestValidationError"
+      ],
+      "packageName": "@ts-rest/next",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "non-strict-mode-test",
+      "ownedPaths": [
+        "libs/non-strict-mode-test/src/**"
+      ],
+      "publicEntry": "libs/non-strict-mode-test/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@ts-rest/non-strict-mode-test",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "open-api",
+      "ownedPaths": [
+        "libs/ts-rest/open-api/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/open-api/src/index.ts",
+      "publicSymbols": [
+        "generateOpenApi",
+        "generateOpenApiAsync",
+        "SchemaTransformer",
+        "SchemaTransformerAsync",
+        "SchemaTransformerSync"
+      ],
+      "packageName": "@ts-rest/open-api",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query",
+      "ownedPaths": [
+        "libs/ts-rest/react-query/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/react-query/src/index.ts",
+      "publicSymbols": [
+        "DataResponse",
+        "ErrorResponse",
+        "InitClientReturn",
+        "initQueryClient",
+        "ReactQueryClientArgs",
+        "TsRestReactQueryClient",
+        "UseInfiniteQueryOptions",
+        "UseInfiniteQueryResult",
+        "UseMutationOptions",
+        "UseMutationResult",
+        "UseQueryOptions",
+        "UseQueryResult",
+        "useTsRestQueryClient",
+        "UseTsRestQueryClient"
+      ],
+      "packageName": "@ts-rest/react-query",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-query-v5",
+      "ownedPaths": [
+        "libs/ts-rest/react-query-v5/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/react-query-v5/src/v5.ts",
+      "publicSymbols": [],
+      "packageName": "@ts-rest/react-query-v5",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "serverless",
+      "ownedPaths": [
+        "libs/ts-rest/serverless/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/serverless/src/index.ts",
+      "publicSymbols": [
+        "AppRouteImplementation",
+        "AppRouteImplementationOrOptions",
+        "AppRouteOptions",
+        "CompleteRouter",
+        "RequestValidationError",
+        "ResponseValidationError",
+        "RouterBuilder",
+        "RouterImplementation",
+        "RouterImplementationOrFluentRouter",
+        "ServerlessHandlerOptions",
+        "TsRestHttpError",
+        "TsRestRequest",
+        "TsRestResponse",
+        "TsRestResponseError"
+      ],
+      "packageName": "@ts-rest/serverless",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-query",
+      "ownedPaths": [
+        "libs/ts-rest/solid-query/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/solid-query/src/index.ts",
+      "publicSymbols": [
+        "InitClientReturn",
+        "initQueryClient",
+        "TsRestSolidQueryClient"
+      ],
+      "packageName": "@ts-rest/solid-query",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ts-rest",
+      "ownedPaths": [
+        "libs/ts-rest/core/**",
+        "libs/ts-rest/express/**",
+        "libs/ts-rest/fastify/**",
+        "libs/ts-rest/nest/**",
+        "libs/ts-rest/next/**",
+        "libs/ts-rest/open-api/**",
+        "libs/ts-rest/react-query-v5/**",
+        "libs/ts-rest/react-query/**",
+        "libs/ts-rest/serverless/**",
+        "libs/ts-rest/solid-query/**",
+        "libs/ts-rest/vue-query/**"
+      ],
+      "publicEntry": "libs/ts-rest/core/jest.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "express"
+        },
+        {
+          "cell": "fastify"
+        },
+        {
+          "cell": "nest"
+        },
+        {
+          "cell": "next"
+        },
+        {
+          "cell": "open-api"
+        },
+        {
+          "cell": "react-query"
+        },
+        {
+          "cell": "react-query-v5"
+        },
+        {
+          "cell": "serverless"
+        },
+        {
+          "cell": "solid-query"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-query",
+      "ownedPaths": [
+        "libs/ts-rest/vue-query/src/**"
+      ],
+      "publicEntry": "libs/ts-rest/vue-query/src/index.ts",
+      "publicSymbols": [
+        "DataReturnMutation",
+        "getRouteUseMutation",
+        "InitClientReturn",
+        "initQueryClient",
+        "TsRestVueQueryClient"
+      ],
+      "packageName": "@ts-rest/vue-query",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-bc99e552ad6d0637",
+    "evidencePackageId": "evidence-8ea961adb6c9285a",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/louislam-uptime-kuma-af634fde6534.json",
+        "sha256": "6e39b50ab6ecf3f49ecae63f337166339bfea2e56d63f7c93ba8c8640fb6e393"
+      },
+      "auditLog": {
+        "path": "logs/louislam-uptime-kuma-af634fde6534/check.audit.jsonl",
+        "sha256": "b21fde75c32fde305a575dca79359c0c36412d0fb1e0bec8ec5da524ee452ad1"
+      },
+      "evidenceGraph": {
+        "path": "logs/louislam-uptime-kuma-af634fde6534/evidence-graph.json",
+        "sha256": "7ab6b364d34daed5384a2391160fe3d6739e7680ed057479295e9618fb0c5c77"
+      },
+      "checkStdout": {
+        "path": "logs/louislam-uptime-kuma-af634fde6534/check.stdout.log",
+        "sha256": "6a94390d3e9f5ee96053538eb58fe942e387dd080513d93c44687fc630d87c47"
+      },
+      "checkStderr": {
+        "path": "logs/louislam-uptime-kuma-af634fde6534/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:8ea961adb6c9285a57cafb6b4272639dc8ad8d1900db16153f24991dc40dd442",
+    "subjectId": "louislam-uptime-kuma",
+    "repository": "https://github.com/louislam/uptime-kuma.git",
+    "commit": "d3463870af879906f26466bad171fcbeba56c9e8",
+    "gitTree": "26d140e2857e5d0c613c5516a899b1201e8e17f7",
+    "manifestSha256": "6e39b50ab6ecf3f49ecae63f337166339bfea2e56d63f7c93ba8c8640fb6e393",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "server/notification-providers/pushplus.js",
+    "line": 3,
+    "message": "server imports private implementation from src-root",
+    "cellId": "server",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "85a25f1487c6a82a2e87116275c12782a399a43b986030f4450e0b1483be9ddc",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:8ea961adb6c9285a57cafb6b4272639dc8ad8d1900db16153f24991dc40dd442",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-bc99e552ad6d0637",
+    "evidencePackageId": "evidence-8ea961adb6c9285a",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

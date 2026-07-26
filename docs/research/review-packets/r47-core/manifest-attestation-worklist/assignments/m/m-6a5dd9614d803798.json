@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-51e6e4d10675eff5",
+    "subjectId": "layui-layui",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "layui-layui",
+    "phase": null,
+    "repository": "https://github.com/layui/layui.git",
+    "commit": "2cfbc45b70ab66cb96f7f51dc4f03dae0b409b2c"
+  },
+  "manifestCopy": {
+    "path": "manifests/layui-layui-a806faeabb2a.json",
+    "sha256": "343ed44ff1dc72bb18b99438d1c7a2c184e09d76469e00a9ea4800a491e00b6d"
+  },
+  "attestationTemplate": {
+    "subjectId": "layui-layui",
+    "repository": "https://github.com/layui/layui.git",
+    "commit": "2cfbc45b70ab66cb96f7f51dc4f03dae0b409b2c",
+    "manifestCopy": {
+      "path": "manifests/layui-layui-a806faeabb2a.json",
+      "sha256": "343ed44ff1dc72bb18b99438d1c7a2c184e09d76469e00a9ea4800a491e00b6d"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "343ed44ff1dc72bb18b99438d1c7a2c184e09d76469e00a9ea4800a491e00b6d",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

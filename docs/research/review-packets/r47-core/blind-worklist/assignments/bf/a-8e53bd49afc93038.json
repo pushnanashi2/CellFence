@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-8e53bd49afc93038",
+    "evidencePackageId": "evidence-0d95af19d33f0abe",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/antfu-collective-ni-a2a7659f776b.json",
+        "sha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1"
+      },
+      "auditLog": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.audit.jsonl",
+        "sha256": "ffa3b09bc2a2dc030532b4ae72d926105f3234986e50ebfe75685a695f120d80"
+      },
+      "evidenceGraph": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/evidence-graph.json",
+        "sha256": "fd35a8c93bde7e3a3c12778bc084e66e33eb638f9c6783cb535a3420d8cdae2c"
+      },
+      "checkStdout": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.stdout.log",
+        "sha256": "0224af6bd2da66e45c074d18d48d272cacfe59c22429e3100444a7b0da56cfae"
+      },
+      "checkStderr": {
+        "path": "logs/antfu-collective-ni-a2a7659f776b/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:0d95af19d33f0abeb219b7f7d44851ad6d4c921714facd666382dfe88113fb2a",
+    "subjectId": "antfu-collective-ni",
+    "repository": "https://github.com/antfu-collective/ni.git",
+    "commit": "8b92b0624e9933113507857ee926a73a5ed285b3",
+    "gitTree": "3c78eca14e9c9347a5c17ea65b823c321b721096",
+    "manifestSha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/commands/nr.ts",
+    "line": 7,
+    "message": "commands imports private implementation from src-root",
+    "cellId": "commands",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "1308afeb289229f441deb599cf971d24f5e78063ea3883fe2caad47b510967d6",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:0d95af19d33f0abeb219b7f7d44851ad6d4c921714facd666382dfe88113fb2a",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-8e53bd49afc93038",
+    "evidencePackageId": "evidence-0d95af19d33f0abe",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

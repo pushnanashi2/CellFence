@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-70a59ad749aa88fe",
+    "evidencePackageId": "evidence-1fac1090d5714e7e",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/dsherret-dax-bfa28a40f30d.json",
+        "sha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34"
+      },
+      "auditLog": {
+        "path": "logs/dsherret-dax-bfa28a40f30d/check.audit.jsonl",
+        "sha256": "6bb2f38abac02ff59b5f2d4d38a1beb5496733c1e21b4364b7790daba4f36f2f"
+      },
+      "evidenceGraph": {
+        "path": "logs/dsherret-dax-bfa28a40f30d/evidence-graph.json",
+        "sha256": "82b837ff35e4ad1c655d01fc2543d83e54c5398ca2795e016ba5f0b9dbc1b583"
+      },
+      "checkStdout": {
+        "path": "logs/dsherret-dax-bfa28a40f30d/check.stdout.log",
+        "sha256": "255ef9843dda53b2b3e3b8b28ddf69ae742d034c1cddbc3ac97e416d57ea6900"
+      },
+      "checkStderr": {
+        "path": "logs/dsherret-dax-bfa28a40f30d/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:1fac1090d5714e7e32e24409f6094bf71fa5115105af035109b2acfa2648fb64",
+    "subjectId": "dsherret-dax",
+    "repository": "https://github.com/dsherret/dax.git",
+    "commit": "dd84816c4cfcf8344a895ace8b6768c8e6134a78",
+    "gitTree": "40ab54e94cf103128ae34fa0eacf87b8cbce9da3",
+    "manifestSha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/request.ts",
+    "line": 5,
+    "message": "src-root imports private implementation from console",
+    "cellId": "src-root",
+    "producerCellId": "console",
+    "cellfenceFingerprint": "1a279a5b6ccaa6f7419d15c47980d0010108b4954c531829f11bcaea5a61f8f9",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:1fac1090d5714e7e32e24409f6094bf71fa5115105af035109b2acfa2648fb64",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-70a59ad749aa88fe",
+    "evidencePackageId": "evidence-1fac1090d5714e7e",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

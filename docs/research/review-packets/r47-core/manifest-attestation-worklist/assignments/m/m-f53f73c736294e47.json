@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-27d574a29bde57dd",
+    "subjectId": "6pac-slickgrid",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "6pac-slickgrid",
+    "phase": null,
+    "repository": "https://github.com/6pac/SlickGrid.git",
+    "commit": "2079c2427308e5264a3ca064f50572f7b8478b5e"
+  },
+  "manifestCopy": {
+    "path": "manifests/6pac-slickgrid-a17735822f34.json",
+    "sha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774"
+  },
+  "attestationTemplate": {
+    "subjectId": "6pac-slickgrid",
+    "repository": "https://github.com/6pac/SlickGrid.git",
+    "commit": "2079c2427308e5264a3ca064f50572f7b8478b5e",
+    "manifestCopy": {
+      "path": "manifests/6pac-slickgrid-a17735822f34.json",
+      "sha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-161e0fd5c7ca1b1e",
+    "subjectId": "remix",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "remix",
+    "phase": null,
+    "repository": "https://github.com/remix-run/remix.git",
+    "commit": "2c0ef67220714e1005162be4acdb91fbf355c664"
+  },
+  "manifestCopy": {
+    "path": "manifests/remix-0c5d9661b4fb.json",
+    "sha256": "00019f332a60c61fb5a51f76ebe09e52eb25c14125cac4d8418ff5432ed19a52"
+  },
+  "attestationTemplate": {
+    "subjectId": "remix",
+    "repository": "https://github.com/remix-run/remix.git",
+    "commit": "2c0ef67220714e1005162be4acdb91fbf355c664",
+    "manifestCopy": {
+      "path": "manifests/remix-0c5d9661b4fb.json",
+      "sha256": "00019f332a60c61fb5a51f76ebe09e52eb25c14125cac4d8418ff5432ed19a52"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "00019f332a60c61fb5a51f76ebe09e52eb25c14125cac4d8418ff5432ed19a52",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

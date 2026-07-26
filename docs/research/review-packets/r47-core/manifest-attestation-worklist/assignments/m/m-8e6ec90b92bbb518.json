@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-af2af5e90bd9075a",
+    "subjectId": "nextify-limited-saasfly",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "nextify-limited-saasfly",
+    "phase": null,
+    "repository": "https://github.com/nextify-limited/saasfly.git",
+    "commit": "49f7e28f69eae9cd9eed84221e13a3dbae87da67"
+  },
+  "manifestCopy": {
+    "path": "manifests/nextify-limited-saasfly-a8bb13a329cc.json",
+    "sha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4"
+  },
+  "attestationTemplate": {
+    "subjectId": "nextify-limited-saasfly",
+    "repository": "https://github.com/nextify-limited/saasfly.git",
+    "commit": "49f7e28f69eae9cd9eed84221e13a3dbae87da67",
+    "manifestCopy": {
+      "path": "manifests/nextify-limited-saasfly-a8bb13a329cc.json",
+      "sha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

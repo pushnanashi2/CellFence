@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-fa2391cb4cd0ba0c",
+    "subjectId": "kirklin-celeris-web",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "kirklin-celeris-web",
+    "phase": null,
+    "repository": "https://github.com/kirklin/celeris-web.git",
+    "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf"
+  },
+  "manifestCopy": {
+    "path": "manifests/kirklin-celeris-web-91667fde376f.json",
+    "sha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7"
+  },
+  "attestationTemplate": {
+    "subjectId": "kirklin-celeris-web",
+    "repository": "https://github.com/kirklin/celeris-web.git",
+    "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+    "manifestCopy": {
+      "path": "manifests/kirklin-celeris-web-91667fde376f.json",
+      "sha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

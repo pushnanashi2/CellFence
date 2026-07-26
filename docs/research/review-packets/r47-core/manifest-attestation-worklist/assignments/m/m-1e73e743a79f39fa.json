@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-4aab33c1ad403e7b",
+    "subjectId": "celo-org-celo-composer",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "celo-org-celo-composer",
+    "phase": null,
+    "repository": "https://github.com/celo-org/celo-composer.git",
+    "commit": "710dd89afc408e5b9385c9fdae83cd2e6246e893"
+  },
+  "manifestCopy": {
+    "path": "manifests/celo-org-celo-composer-405b94e7541e.json",
+    "sha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4"
+  },
+  "attestationTemplate": {
+    "subjectId": "celo-org-celo-composer",
+    "repository": "https://github.com/celo-org/celo-composer.git",
+    "commit": "710dd89afc408e5b9385c9fdae83cd2e6246e893",
+    "manifestCopy": {
+      "path": "manifests/celo-org-celo-composer-405b94e7541e.json",
+      "sha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

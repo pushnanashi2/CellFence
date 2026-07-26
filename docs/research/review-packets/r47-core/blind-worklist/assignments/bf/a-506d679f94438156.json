@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-506d679f94438156",
+    "evidencePackageId": "evidence-b0a1e93022c70b54",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/guigrpa-oao-83560ce5ca94.json",
+        "sha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302"
+      },
+      "auditLog": {
+        "path": "logs/guigrpa-oao-83560ce5ca94/check.audit.jsonl",
+        "sha256": "f4e1671d972ac530cb2140d892cdfe75322843aad9def9a80fef73a196c12d4d"
+      },
+      "evidenceGraph": {
+        "path": "logs/guigrpa-oao-83560ce5ca94/evidence-graph.json",
+        "sha256": "da7d7279428b232fd9f8fc0b2f791e42a0722b1c73173367beb027873feed142"
+      },
+      "checkStdout": {
+        "path": "logs/guigrpa-oao-83560ce5ca94/check.stdout.log",
+        "sha256": "ec4683c47c2b6238eb2004a5a30bfde86f98fc739c71318732a23fc76658708e"
+      },
+      "checkStderr": {
+        "path": "logs/guigrpa-oao-83560ce5ca94/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:b0a1e93022c70b54b419ddaeff6bcbb73d0d2313838c6924b5a6b6800f90c547",
+    "subjectId": "guigrpa-oao",
+    "repository": "https://github.com/guigrpa/oao.git",
+    "commit": "b5860a656ac784908753e830d81642551c136ed8",
+    "gitTree": "7c7b5ce336be5374eb1cc8cef56983e1dd218bb8",
+    "manifestSha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/publish.js",
+    "line": 19,
+    "message": "src-root imports private implementation from utils",
+    "cellId": "src-root",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "ce1cae9ca63e33bbdbfe44b3820730b621acc720f6e99cf50319042f6a550578",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:b0a1e93022c70b54b419ddaeff6bcbb73d0d2313838c6924b5a6b6800f90c547",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-506d679f94438156",
+    "evidencePackageId": "evidence-b0a1e93022c70b54",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

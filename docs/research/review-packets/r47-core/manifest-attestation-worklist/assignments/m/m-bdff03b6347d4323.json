@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-61a7a0342c2e03e7",
+    "subjectId": "innei-template-nest-http-boilerplate",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "innei-template-nest-http-boilerplate",
+    "phase": null,
+    "repository": "https://github.com/innei-template/nest-http-boilerplate.git",
+    "commit": "2b5f324d338881dc1a207389d120fdd6ddad853c"
+  },
+  "manifestCopy": {
+    "path": "manifests/innei-template-nest-http-boilerplate-db92027687e8.json",
+    "sha256": "2fc9184188f59493c0a398f0ccca86ae41bdcebf6696b4220d477ff028bf0d80"
+  },
+  "attestationTemplate": {
+    "subjectId": "innei-template-nest-http-boilerplate",
+    "repository": "https://github.com/innei-template/nest-http-boilerplate.git",
+    "commit": "2b5f324d338881dc1a207389d120fdd6ddad853c",
+    "manifestCopy": {
+      "path": "manifests/innei-template-nest-http-boilerplate-db92027687e8.json",
+      "sha256": "2fc9184188f59493c0a398f0ccca86ae41bdcebf6696b4220d477ff028bf0d80"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2fc9184188f59493c0a398f0ccca86ae41bdcebf6696b4220d477ff028bf0d80",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

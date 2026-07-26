@@ -1,0 +1,1263 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "docs/src/*",
+      "docs/src/components/**",
+      "docs/src/content/_assets/code/**",
+      "docs/src/data/**",
+      "docs/src/pages/**",
+      "docs/src/plugins/**",
+      "docs/src/server/**",
+      "docs/src/utils/**",
+      "packages/@livestore/adapter-cloudflare/src/**",
+      "packages/@livestore/adapter-web/src/**",
+      "packages/@livestore/common-cf/src/**",
+      "packages/@livestore/common/src/**",
+      "packages/@livestore/effect-playwright/src/**",
+      "packages/@livestore/framework-toolkit/src/**",
+      "packages/@livestore/livestore/src/**",
+      "packages/@livestore/peer-deps/**",
+      "packages/@livestore/react/src/**",
+      "packages/@livestore/sqlite-wasm/src/**",
+      "packages/@livestore/sync-cf/src/**",
+      "packages/@livestore/utils-dev/src/**",
+      "packages/@livestore/utils/src/**",
+      "packages/@livestore/wa-sqlite/src/**",
+      "packages/@livestore/webmesh/src/**",
+      "packages/@local/astro-tldraw/src/**",
+      "packages/@local/astro-twoslash-code/src/**",
+      "packages/@local/shared/src/**",
+      "scripts/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "adapter-cloudflare",
+      "ownedPaths": [
+        "packages/@livestore/adapter-cloudflare/src/**"
+      ],
+      "publicEntry": "packages/@livestore/adapter-cloudflare/src/mod.ts",
+      "publicSymbols": [
+        "ClientDoWithRpcCallback",
+        "createStoreDo",
+        "CreateStoreDoOptions",
+        "createStoreDoPromise",
+        "Env",
+        "makeAdapter"
+      ],
+      "packageName": "@livestore/adapter-cloudflare",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "common-cf"
+        },
+        {
+          "cell": "livestore"
+        },
+        {
+          "cell": "sqlite-wasm"
+        },
+        {
+          "cell": "sync-cf"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "adapter-web",
+      "ownedPaths": [
+        "packages/@livestore/adapter-web/src/**"
+      ],
+      "publicEntry": "packages/@livestore/adapter-web/src/index.ts",
+      "publicSymbols": [
+        "canUseSharedWorker",
+        "makeInMemoryAdapter",
+        "makePersistedAdapter",
+        "makeSingleTabAdapter",
+        "SingleTabAdapterOptions",
+        "WebAdapterOptions",
+        "WorkerSchema"
+      ],
+      "packageName": "@livestore/adapter-web",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "sqlite-wasm"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "webmesh"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "astro-tldraw",
+      "ownedPaths": [
+        "packages/@local/astro-tldraw/src/**"
+      ],
+      "publicEntry": "packages/@local/astro-tldraw/src/mod.ts",
+      "publicSymbols": [
+        "__cliInternal",
+        "AstroTldrawOptions",
+        "buildDiagrams",
+        "BuildDiagramsError",
+        "BuildDiagramsOptions",
+        "CachedDiagram",
+        "CachedDiagramMissingError",
+        "createAstroTldrawIntegration",
+        "createTldrawPlugin",
+        "DiagramCacheEntry",
+        "DiagramDiscoveryError",
+        "DiagramManifest",
+        "FileSystemError",
+        "getCacheEntry",
+        "getSvgDimensions",
+        "isCacheValid",
+        "loadManifest",
+        "readTldrawFile",
+        "RenderedSvg",
+        "RenderInvocationError",
+        "RenderResult",
+        "RenderTimeoutError",
+        "renderTldrawToSvg",
+        "resolveCachePaths",
+        "saveManifest",
+        "TldrawCachePaths",
+        "TldrawDiagramPayload",
+        "TldrawPluginOptions",
+        "TldrawTheme",
+        "watchDiagrams",
+        "WatchDiagramsOptions",
+        "WatchDiagramsRebuildInfo"
+      ],
+      "packageName": "@local/astro-tldraw",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "astro-twoslash-code",
+      "ownedPaths": [
+        "packages/@local/astro-twoslash-code/src/**"
+      ],
+      "publicEntry": "packages/@local/astro-twoslash-code/src/mod.ts",
+      "publicSymbols": [
+        "AstroTwoslashCodeOptions",
+        "buildSnippets",
+        "BuildSnippetsOptions",
+        "createAstroTwoslashCodeIntegration",
+        "createSnippetsCommand",
+        "CreateSnippetsCommandOptions",
+        "createTwoslashSnippetPlugin",
+        "ExpressiveCodePluginDescriptor",
+        "prepareMultiCodeData",
+        "TwoslashRuntimeOptions",
+        "TwoslashSnippetFile",
+        "TwoslashSnippetGlobals",
+        "TwoslashSnippetPayload",
+        "TwoslashSnippetPluginOptions",
+        "TwoslashSnippetRenderedEntry",
+        "watchSnippets",
+        "WatchSnippetsOptions",
+        "WatchSnippetsRebuildInfo"
+      ],
+      "packageName": "@local/astro-twoslash-code",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common",
+      "ownedPaths": [
+        "packages/@livestore/common/src/**"
+      ],
+      "publicEntry": "packages/@livestore/common/src/index.ts",
+      "publicSymbols": [
+        "Adapter",
+        "AdapterArgs",
+        "BackendId",
+        "BackendIdMismatchError",
+        "Bindable",
+        "BindableWithSessionIdSymbol",
+        "BootStateProgress",
+        "BootStatus",
+        "BootWarningReason",
+        "BoundArray",
+        "BoundArraySchema",
+        "BoundMap",
+        "BoundSet",
+        "ChunkingOptions",
+        "ClientSession",
+        "ClientSessionDevtoolsChannel",
+        "ClientSessionLeaderThreadProxy",
+        "ClientSessionSyncProcessor",
+        "ConnectDevtoolsToStore",
+        "DebugInfo",
+        "Devtools",
+        "devtoolsProtocolVersion",
+        "EVENTLOG_META_TABLE",
+        "EventlogMetaRow",
+        "eventlogMetaTable",
+        "eventlogSystemTables",
+        "getExecStatementsFromMaterializer",
+        "getResultSchema",
+        "hashMaterializerResults",
+        "IntentionalShutdownCause",
+        "invalidQueryBuilder",
+        "isDevtoolsProtocolVersionSupported",
+        "IsOfflineError",
+        "isQueryBuilder",
+        "isRejectedPushError",
+        "isStateSystemTable",
+        "isWorkerTransportError",
+        "LeaderAheadError",
+        "liveStoreStorageFormatVersion",
+        "liveStoreVersion",
+        "LockStatus",
+        "LogConfig",
+        "makeClientSession",
+        "makeClientSessionSyncProcessor",
+        "makeMaterializerHash",
+        "makeMockSyncBackend",
+        "makeQueryBuilder",
+        "makeSchemaManager",
+        "MakeSqliteDb",
+        "MaterializeError",
+        "MaterializerHashMismatchError",
+        "migrateDb",
+        "migrateTable",
+        "MigrationHook",
+        "MigrationHooks",
+        "MigrationOptions",
+        "MigrationsReport",
+        "MigrationsReportEntry",
+        "MockSyncBackend",
+        "MockSyncBackendOptions",
+        "MutableDebugInfo",
+        "NetworkStatus",
+        "NonMonotonicBatchError",
+        "OtelLiveDummy",
+        "OversizeChunkItemError",
+        "ParamsObject",
+        "PersistenceInfo",
+        "prepareBindValues",
+        "PreparedBindValues",
+        "PreparedStatement",
+        "provideOtel",
+        "QueryBuilder",
+        "QueryBuilderAst",
+        "QueryBuilderAstSymbol",
+        "QueryBuilderResultSymbol",
+        "QueryBuilderTypeId",
+        "RebaseBarrierPoint",
+        "RejectedPushError",
+        "RejectedPushErrorTypeId",
+        "rematerializeFromEventlog",
+        "ResetMode",
+        "resolveDevtoolsProtocolVersion",
+        "resolveSessionIdSymbolInBindValues",
+        "RowQuery",
+        "SCHEMA_EVENT_DEFS_META_TABLE",
+        "SCHEMA_META_TABLE",
+        "SchemaEventDefsMetaRow",
+        "schemaEventDefsMetaTable",
+        "SchemaMetaRow",
+        "schemaMetaTable",
+        "ServerAheadError",
+        "SESSION_CHANGESET_META_TABLE",
+        "SessionChangesetMetaRow",
+        "sessionChangesetMetaTable",
+        "SessionIdSymbol",
+        "SlowQueryInfo",
+        "splitArrayBySize",
+        "sql",
+        "SqliteDb",
+        "SqliteDbChangeset",
+        "SqliteDbHelper",
+        "SqliteDbSession",
+        "SqliteDebugInfo",
+        "SqliteError",
+        "SqliteReal",
+        "SqlValue",
+        "SqlValueSchema",
+        "StaleRebaseGenerationError",
+        "stateSystemTables",
+        "StorageMode",
+        "StoreInterrupted",
+        "supportedDevtoolsProtocolVersions",
+        "SYNC_STATUS_TABLE",
+        "SyncBackend",
+        "SyncOptions",
+        "SyncState",
+        "SyncStatusRow",
+        "syncStatusTable",
+        "UnknownError",
+        "UnknownEventError",
+        "validatePushPayload"
+      ],
+      "packageName": "@livestore/common",
+      "consumes": [
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        },
+        {
+          "cell": "webmesh"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common-cf",
+      "ownedPaths": [
+        "packages/@livestore/common-cf/src/**"
+      ],
+      "publicEntry": "packages/@livestore/common-cf/src/mod.ts",
+      "publicSymbols": [
+        "CfTypes",
+        "ClientDoWithRpcCallback",
+        "DurableObjectWebSocketRpcConfig",
+        "emitStreamResponse",
+        "HelperTypes",
+        "layerProtocolDurableObject",
+        "layerRpcServerWebsocket",
+        "setupDurableObjectWebSocketRpc",
+        "toDurableObjectHandler",
+        "WsContext",
+        "WsRpcServerArgs"
+      ],
+      "packageName": "@livestore/common-cf",
+      "consumes": [
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs",
+      "ownedPaths": [
+        "docs/src/*",
+        "docs/src/components/**",
+        "docs/src/data/**",
+        "docs/src/pages/**",
+        "docs/src/plugins/**",
+        "docs/src/server/**",
+        "docs/src/utils/**"
+      ],
+      "publicEntry": "docs/src/components/EventsVisualizer.tsx",
+      "publicSymbols": [
+        "EventsVisualizer"
+      ],
+      "packageName": "@local/docs",
+      "consumes": [
+        {
+          "cell": "adapter-cloudflare"
+        },
+        {
+          "cell": "adapter-web"
+        },
+        {
+          "cell": "astro-tldraw"
+        },
+        {
+          "cell": "astro-twoslash-code"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "livestore"
+        },
+        {
+          "cell": "react"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "sync-cf"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs-code-snippets",
+      "ownedPaths": [
+        "docs/src/content/_assets/code/**"
+      ],
+      "publicEntry": "docs/src/content/_assets/code/.oxlintrc.json.genie.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "docs-code-snippets",
+      "consumes": [
+        {
+          "cell": "adapter-cloudflare"
+        },
+        {
+          "cell": "adapter-web"
+        },
+        {
+          "cell": "livestore"
+        },
+        {
+          "cell": "react"
+        },
+        {
+          "cell": "sync-cf"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "effect-playwright",
+      "ownedPaths": [
+        "packages/@livestore/effect-playwright/src/**"
+      ],
+      "publicEntry": "packages/@livestore/effect-playwright/src/index.ts",
+      "publicSymbols": [
+        "browserContext",
+        "BrowserContext",
+        "browserContextLayer",
+        "ConsoleMessage",
+        "handlePageConsole",
+        "MakeBrowserContextParams",
+        "pageConsole",
+        "SiteError",
+        "withPage"
+      ],
+      "packageName": "@livestore/effect-playwright",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "framework-toolkit",
+      "ownedPaths": [
+        "packages/@livestore/framework-toolkit/src/**"
+      ],
+      "publicEntry": "packages/@livestore/framework-toolkit/src/mod.ts",
+      "publicSymbols": [
+        "captureStackInfo",
+        "computeRcRefKey",
+        "createQueryResource",
+        "Dispatch",
+        "formatQueryError",
+        "getResourceLabel",
+        "NormalizedQueryable",
+        "normalizeQueryable",
+        "originalStackLimit",
+        "removeUndefinedValues",
+        "runInitialQuery",
+        "SetStateAction",
+        "SetStateActionPartial",
+        "StackInfo",
+        "StateSetters",
+        "validateTableOptions"
+      ],
+      "packageName": "@livestore/framework-toolkit",
+      "consumes": [
+        {
+          "cell": "adapter-web"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "livestore"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "livestore",
+      "ownedPaths": [
+        "packages/@livestore/livestore/src/**"
+      ],
+      "publicEntry": "packages/@livestore/livestore/src/mod.ts",
+      "publicSymbols": [
+        "Adapter",
+        "Bindable",
+        "BootStatus",
+        "ClientSession",
+        "computed",
+        "createStore",
+        "CreateStoreOptions",
+        "CreateStoreOptionsPromise",
+        "createStorePromise",
+        "DebugInfo",
+        "deepEqual",
+        "emptyDebugInfo",
+        "exposeDebugUtils",
+        "extractStackInfoFromStackTrace",
+        "IntentionalShutdownCause",
+        "isLiveQueryDef",
+        "isLiveQueryInstance",
+        "isQueryable",
+        "LiveQuery",
+        "LiveQueryDef",
+        "LiveStoreContext",
+        "LiveStoreContextRunning",
+        "liveStoreVersion",
+        "makeShutdownDeferred",
+        "MutableDebugInfo",
+        "nanoid",
+        "OtelOptions",
+        "prepareBindValues",
+        "PreparedBindValues",
+        "PreparedStatement",
+        "provideOtel",
+        "Queryable",
+        "QueryBuilder",
+        "QueryBuilderAst",
+        "queryDb",
+        "QueryDebugInfo",
+        "RcRef",
+        "RefreshReason",
+        "RegistryStoreOptions",
+        "RowQuery",
+        "Schema",
+        "SessionIdSymbol",
+        "ShutdownDeferred",
+        "signal",
+        "Signal",
+        "SignalDef",
+        "sql",
+        "SqliteDb",
+        "SqliteDbWrapper",
+        "StackFrame",
+        "StackInfo",
+        "stackInfoToString",
+        "Store",
+        "StoreInternals",
+        "StoreInternalsSymbol",
+        "StoreInterrupted",
+        "storeOptions",
+        "StoreRegistry",
+        "SubscribeOptions",
+        "SyncState",
+        "SyncStatus",
+        "Unsubscribe"
+      ],
+      "packageName": "@livestore/livestore",
+      "consumes": [
+        {
+          "cell": "adapter-web"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "peer-deps",
+      "ownedPaths": [
+        "packages/@livestore/peer-deps/**"
+      ],
+      "publicEntry": "packages/@livestore/peer-deps/package.json.genie.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@livestore/peer-deps",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react",
+      "ownedPaths": [
+        "packages/@livestore/react/src/**"
+      ],
+      "publicEntry": "packages/@livestore/react/src/mod.ts",
+      "publicSymbols": [
+        "captureStackInfo",
+        "Dispatch",
+        "LiveList",
+        "LiveListProps",
+        "ReactApi",
+        "SetStateAction",
+        "SetStateActionPartial",
+        "StateSetters",
+        "storeOptions",
+        "StoreRegistry",
+        "StoreRegistryContext",
+        "StoreRegistryProvider",
+        "StoreRegistryProviderProps",
+        "useClientDocument",
+        "UseClientDocumentResult",
+        "useQuery",
+        "useQueryRef",
+        "useStore",
+        "useStoreRegistry",
+        "useSyncStatus",
+        "withReactApi"
+      ],
+      "packageName": "@livestore/react",
+      "consumes": [
+        {
+          "cell": "adapter-web"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "framework-toolkit"
+        },
+        {
+          "cell": "livestore"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "scripts/src/**"
+      ],
+      "publicEntry": "scripts/src/commands/changesets.ts",
+      "publicSymbols": [],
+      "packageName": "@local/scripts",
+      "consumes": [
+        {
+          "cell": "astro-tldraw"
+        },
+        {
+          "cell": "astro-twoslash-code"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "docs"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "packages/@local/shared/src/**"
+      ],
+      "publicEntry": "packages/@local/shared/src/index.ts",
+      "publicSymbols": [
+        "DISCORD_INVITE_URL",
+        "EFFECT_VERSION",
+        "ExampleDeployment",
+        "ExampleDeploymentEndpoint",
+        "ExampleDeploymentEnvironment",
+        "exampleDeployments",
+        "exampleDeploymentsBySlug",
+        "ExampleDeploymentSlug",
+        "getExampleDeployment",
+        "LIVESTORE_DEVTOOLS_CHROME_DIST_PATH",
+        "MIN_NODE_VERSION",
+        "REACT_VERSION"
+      ],
+      "packageName": "@local/shared",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sqlite-wasm",
+      "ownedPaths": [
+        "packages/@livestore/sqlite-wasm/src/**"
+      ],
+      "publicEntry": "packages/@livestore/sqlite-wasm/src/index.ts",
+      "publicSymbols": [
+        "WaSqlite"
+      ],
+      "packageName": "@livestore/sqlite-wasm",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "common-cf"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "wa-sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sync-cf",
+      "ownedPaths": [
+        "packages/@livestore/sync-cf/src/**"
+      ],
+      "publicEntry": "packages/@livestore/sync-cf/src/cf-worker/do/durable-object.ts",
+      "publicSymbols": [
+        "DoObject",
+        "DoState",
+        "makeDurableObject",
+        "MakeDurableObjectClass"
+      ],
+      "packageName": "@livestore/sync-cf",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "common-cf"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/@livestore/utils/src/**"
+      ],
+      "publicEntry": "packages/@livestore/utils/src/mod.ts",
+      "publicSymbols": [
+        "assertNever",
+        "assertTag",
+        "AssertTrue",
+        "base64",
+        "capitalizeFirstLetter",
+        "casesHandled",
+        "debugCatch",
+        "debuggerPipe",
+        "deepEqual",
+        "Deferred",
+        "difference",
+        "ensureUint8ArrayBuffer",
+        "env",
+        "envTruish",
+        "errorToString",
+        "getTraceParentHeader",
+        "GetValForKey",
+        "indent",
+        "IS_BUN",
+        "IS_CI",
+        "IS_REACT_NATIVE",
+        "isDevEnv",
+        "isNonEmptyString",
+        "IsSubtype",
+        "isUint8ArrayBuffer",
+        "LiteralUnion",
+        "LS_DEV",
+        "makeNoopSpan",
+        "makeNoopTracer",
+        "memoizeByRef",
+        "memoizeByStringifyArgs",
+        "noop",
+        "NoopTracer",
+        "notYetImplemented",
+        "Nullable",
+        "NullableFieldsToOptional",
+        "objectToString",
+        "omitUndefineds",
+        "prettyBytes",
+        "Primitive",
+        "promiseMap",
+        "promiseMapDict",
+        "promiseMapPool",
+        "promiseMapToDict",
+        "prop",
+        "QR",
+        "range",
+        "recRemoveUndefinedValues",
+        "ref",
+        "shouldNeverHappen",
+        "SingleOrReadonlyArray",
+        "sleep",
+        "sluggify",
+        "stringifyObject",
+        "textEncodeToArrayBuffer",
+        "throttle",
+        "Thunk",
+        "times",
+        "toUint8ArrayBuffer",
+        "TRACE_VERBOSE",
+        "tryAsFunctionAndNew",
+        "unwrapThunk"
+      ],
+      "packageName": "@livestore/utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils-dev",
+      "ownedPaths": [
+        "packages/@livestore/utils-dev/src/**"
+      ],
+      "publicEntry": "packages/@livestore/utils-dev/src/node-vitest/global.ts",
+      "publicSymbols": [],
+      "packageName": "@livestore/utils-dev",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "wa-sqlite",
+      "ownedPaths": [
+        "packages/@livestore/wa-sqlite/src/**"
+      ],
+      "publicEntry": "packages/@livestore/wa-sqlite/src/sqlite-api.js",
+      "publicSymbols": [
+        "Factory",
+        "SQLITE_ABORT",
+        "SQLITE_ACCESS_EXISTS",
+        "SQLITE_ACCESS_READ",
+        "SQLITE_ACCESS_READWRITE",
+        "SQLITE_ALTER_TABLE",
+        "SQLITE_ANALYZE",
+        "SQLITE_ATTACH",
+        "SQLITE_AUTH",
+        "SQLITE_BLOB",
+        "SQLITE_BUSY",
+        "SQLITE_CANTOPEN",
+        "SQLITE_CHANGESET_ABORT",
+        "SQLITE_CHANGESET_CONFLICT",
+        "SQLITE_CHANGESET_CONSTRAINT",
+        "SQLITE_CHANGESET_DATA",
+        "SQLITE_CHANGESET_FOREIGN_KEY",
+        "SQLITE_CHANGESET_NOTFOUND",
+        "SQLITE_CHANGESET_OMIT",
+        "SQLITE_CHANGESET_REPLACE",
+        "SQLITE_CONSTRAINT",
+        "SQLITE_CONSTRAINT_CHECK",
+        "SQLITE_CONSTRAINT_COMMITHOOK",
+        "SQLITE_CONSTRAINT_FOREIGNKEY",
+        "SQLITE_CONSTRAINT_FUNCTION",
+        "SQLITE_CONSTRAINT_NOTNULL",
+        "SQLITE_CONSTRAINT_PINNED",
+        "SQLITE_CONSTRAINT_PRIMARYKEY",
+        "SQLITE_CONSTRAINT_ROWID",
+        "SQLITE_CONSTRAINT_TRIGGER",
+        "SQLITE_CONSTRAINT_UNIQUE",
+        "SQLITE_CONSTRAINT_VTAB",
+        "SQLITE_COPY",
+        "SQLITE_CORRUPT",
+        "SQLITE_CREATE_INDEX",
+        "SQLITE_CREATE_TABLE",
+        "SQLITE_CREATE_TEMP_INDEX",
+        "SQLITE_CREATE_TEMP_TABLE",
+        "SQLITE_CREATE_TEMP_TRIGGER",
+        "SQLITE_CREATE_TEMP_VIEW",
+        "SQLITE_CREATE_TRIGGER",
+        "SQLITE_CREATE_VIEW",
+        "SQLITE_CREATE_VTABLE",
+        "SQLITE_DELETE",
+        "SQLITE_DENY",
+        "SQLITE_DETACH",
+        "SQLITE_DETERMINISTIC",
+        "SQLITE_DIRECTONLY",
+        "SQLITE_DONE",
+        "SQLITE_DROP_INDEX",
+        "SQLITE_DROP_TABLE",
+        "SQLITE_DROP_TEMP_INDEX",
+        "SQLITE_DROP_TEMP_TABLE",
+        "SQLITE_DROP_TEMP_TRIGGER",
+        "SQLITE_DROP_TEMP_VIEW",
+        "SQLITE_DROP_TRIGGER",
+        "SQLITE_DROP_VIEW",
+        "SQLITE_DROP_VTABLE",
+        "SQLITE_EMPTY",
+        "SQLITE_ERROR",
+        "SQLITE_FCNTL_BEGIN_ATOMIC_WRITE",
+        "SQLITE_FCNTL_BUSYHANDLER",
+        "SQLITE_FCNTL_CHUNK_SIZE",
+        "SQLITE_FCNTL_CKPT_DONE",
+        "SQLITE_FCNTL_CKPT_START",
+        "SQLITE_FCNTL_COMMIT_ATOMIC_WRITE",
+        "SQLITE_FCNTL_COMMIT_PHASETWO",
+        "SQLITE_FCNTL_DATA_VERSION",
+        "SQLITE_FCNTL_FILE_POINTER",
+        "SQLITE_FCNTL_GET_LOCKPROXYFILE",
+        "SQLITE_FCNTL_HAS_MOVED",
+        "SQLITE_FCNTL_JOURNAL_POINTER",
+        "SQLITE_FCNTL_LAST_ERRNO",
+        "SQLITE_FCNTL_LOCK_TIMEOUT",
+        "SQLITE_FCNTL_LOCKSTATE",
+        "SQLITE_FCNTL_MMAP_SIZE",
+        "SQLITE_FCNTL_OVERWRITE",
+        "SQLITE_FCNTL_PDB",
+        "SQLITE_FCNTL_PERSIST_WAL",
+        "SQLITE_FCNTL_POWERSAFE_OVERWRITE",
+        "SQLITE_FCNTL_PRAGMA",
+        "SQLITE_FCNTL_RBU",
+        "SQLITE_FCNTL_RESERVE_BYTES",
+        "SQLITE_FCNTL_ROLLBACK_ATOMIC_WRITE",
+        "SQLITE_FCNTL_SET_LOCKPROXYFILE",
+        "SQLITE_FCNTL_SIZE_HINT",
+        "SQLITE_FCNTL_SIZE_LIMIT",
+        "SQLITE_FCNTL_SYNC",
+        "SQLITE_FCNTL_SYNC_OMITTED",
+        "SQLITE_FCNTL_TEMPFILENAME",
+        "SQLITE_FCNTL_TRACE",
+        "SQLITE_FCNTL_VFS_POINTER",
+        "SQLITE_FCNTL_VFSNAME",
+        "SQLITE_FCNTL_WAL_BLOCK",
+        "SQLITE_FCNTL_WIN32_AV_RETRY",
+        "SQLITE_FCNTL_WIN32_GET_HANDLE",
+        "SQLITE_FCNTL_WIN32_SET_HANDLE",
+        "SQLITE_FCNTL_ZIPVFS",
+        "SQLITE_FLOAT",
+        "SQLITE_FORMAT",
+        "SQLITE_FULL",
+        "SQLITE_FUNCTION",
+        "SQLITE_IGNORE",
+        "SQLITE_INDEX_CONSTRAINT_EQ",
+        "SQLITE_INDEX_CONSTRAINT_FUNCTION",
+        "SQLITE_INDEX_CONSTRAINT_GE",
+        "SQLITE_INDEX_CONSTRAINT_GLOB",
+        "SQLITE_INDEX_CONSTRAINT_GT",
+        "SQLITE_INDEX_CONSTRAINT_IS",
+        "SQLITE_INDEX_CONSTRAINT_ISNOT",
+        "SQLITE_INDEX_CONSTRAINT_ISNOTNULL",
+        "SQLITE_INDEX_CONSTRAINT_ISNULL",
+        "SQLITE_INDEX_CONSTRAINT_LE",
+        "SQLITE_INDEX_CONSTRAINT_LIKE",
+        "SQLITE_INDEX_CONSTRAINT_LT",
+        "SQLITE_INDEX_CONSTRAINT_MATCH",
+        "SQLITE_INDEX_CONSTRAINT_NE",
+        "SQLITE_INDEX_CONSTRAINT_REGEXP",
+        "SQLITE_INDEX_SCAN_UNIQUE",
+        "SQLITE_INNOCUOUS",
+        "SQLITE_INSERT",
+        "SQLITE_INTEGER",
+        "SQLITE_INTERNAL",
+        "SQLITE_INTERRUPT",
+        "SQLITE_IOCAP_ATOMIC",
+        "SQLITE_IOCAP_ATOMIC16K",
+        "SQLITE_IOCAP_ATOMIC1K",
+        "SQLITE_IOCAP_ATOMIC2K",
+        "SQLITE_IOCAP_ATOMIC32K",
+        "SQLITE_IOCAP_ATOMIC4K",
+        "SQLITE_IOCAP_ATOMIC512",
+        "SQLITE_IOCAP_ATOMIC64K",
+        "SQLITE_IOCAP_ATOMIC8K",
+        "SQLITE_IOCAP_BATCH_ATOMIC",
+        "SQLITE_IOCAP_IMMUTABLE",
+        "SQLITE_IOCAP_POWERSAFE_OVERWRITE",
+        "SQLITE_IOCAP_SAFE_APPEND",
+        "SQLITE_IOCAP_SEQUENTIAL",
+        "SQLITE_IOCAP_UNDELETABLE_WHEN_OPEN",
+        "SQLITE_IOERR",
+        "SQLITE_IOERR_ACCESS",
+        "SQLITE_IOERR_BEGIN_ATOMIC",
+        "SQLITE_IOERR_CHECKRESERVEDLOCK",
+        "SQLITE_IOERR_CLOSE",
+        "SQLITE_IOERR_COMMIT_ATOMIC",
+        "SQLITE_IOERR_DATA",
+        "SQLITE_IOERR_DELETE",
+        "SQLITE_IOERR_DELETE_NOENT",
+        "SQLITE_IOERR_DIR_FSYNC",
+        "SQLITE_IOERR_FSTAT",
+        "SQLITE_IOERR_FSYNC",
+        "SQLITE_IOERR_GETTEMPPATH",
+        "SQLITE_IOERR_LOCK",
+        "SQLITE_IOERR_NOMEM",
+        "SQLITE_IOERR_RDLOCK",
+        "SQLITE_IOERR_READ",
+        "SQLITE_IOERR_ROLLBACK_ATOMIC",
+        "SQLITE_IOERR_SEEK",
+        "SQLITE_IOERR_SHORT_READ",
+        "SQLITE_IOERR_TRUNCATE",
+        "SQLITE_IOERR_UNLOCK",
+        "SQLITE_IOERR_VNODE",
+        "SQLITE_IOERR_WRITE",
+        "SQLITE_LIMIT_ATTACHED",
+        "SQLITE_LIMIT_COLUMN",
+        "SQLITE_LIMIT_COMPOUND_SELECT",
+        "SQLITE_LIMIT_EXPR_DEPTH",
+        "SQLITE_LIMIT_FUNCTION_ARG",
+        "SQLITE_LIMIT_LENGTH",
+        "SQLITE_LIMIT_LIKE_PATTERN_LENGTH",
+        "SQLITE_LIMIT_SQL_LENGTH",
+        "SQLITE_LIMIT_TRIGGER_DEPTH",
+        "SQLITE_LIMIT_VARIABLE_NUMBER",
+        "SQLITE_LIMIT_VDBE_OP",
+        "SQLITE_LIMIT_WORKER_THREADS",
+        "SQLITE_LOCK_EXCLUSIVE",
+        "SQLITE_LOCK_NONE",
+        "SQLITE_LOCK_PENDING",
+        "SQLITE_LOCK_RESERVED",
+        "SQLITE_LOCK_SHARED",
+        "SQLITE_LOCKED",
+        "SQLITE_MISMATCH",
+        "SQLITE_MISUSE",
+        "SQLITE_NOLFS",
+        "SQLITE_NOMEM",
+        "SQLITE_NOTADB",
+        "SQLITE_NOTFOUND",
+        "SQLITE_NOTICE",
+        "SQLITE_NULL",
+        "SQLITE_OK",
+        "SQLITE_OPEN_AUTOPROXY",
+        "SQLITE_OPEN_CREATE",
+        "SQLITE_OPEN_DELETEONCLOSE",
+        "SQLITE_OPEN_EXCLUSIVE",
+        "SQLITE_OPEN_FULLMUTEX",
+        "SQLITE_OPEN_MAIN_DB",
+        "SQLITE_OPEN_MAIN_JOURNAL",
+        "SQLITE_OPEN_MEMORY",
+        "SQLITE_OPEN_NOFOLLOW",
+        "SQLITE_OPEN_NOMUTEX",
+        "SQLITE_OPEN_PRIVATECACHE",
+        "SQLITE_OPEN_READONLY",
+        "SQLITE_OPEN_READWRITE",
+        "SQLITE_OPEN_SHAREDCACHE",
+        "SQLITE_OPEN_SUBJOURNAL",
+        "SQLITE_OPEN_SUPER_JOURNAL",
+        "SQLITE_OPEN_TEMP_DB",
+        "SQLITE_OPEN_TEMP_JOURNAL",
+        "SQLITE_OPEN_TRANSIENT_DB",
+        "SQLITE_OPEN_URI",
+        "SQLITE_OPEN_WAL",
+        "SQLITE_PERM",
+        "SQLITE_PRAGMA",
+        "SQLITE_PREPARE_NO_VTAB",
+        "SQLITE_PREPARE_NORMALIZED",
+        "SQLITE_PREPARE_PERSISTENT",
+        "SQLITE_PROTOCOL",
+        "SQLITE_RANGE",
+        "SQLITE_READ",
+        "SQLITE_READONLY",
+        "SQLITE_RECURSIVE",
+        "SQLITE_REINDEX",
+        "SQLITE_ROW",
+        "SQLITE_SAVEPOINT",
+        "SQLITE_SCHEMA",
+        "SQLITE_SELECT",
+        "SQLITE_STATIC",
+        "SQLITE_SUBTYPE",
+        "SQLITE_SYNC_DATAONLY",
+        "SQLITE_SYNC_FULL",
+        "SQLITE_SYNC_NORMAL",
+        "SQLITE_TEXT",
+        "SQLITE_TOOBIG",
+        "SQLITE_TRANSACTION",
+        "SQLITE_TRANSIENT",
+        "SQLITE_UPDATE",
+        "SQLITE_UTF16",
+        "SQLITE_UTF16BE",
+        "SQLITE_UTF16LE",
+        "SQLITE_UTF8",
+        "SQLITE_WARNING",
+        "SQLiteError"
+      ],
+      "packageName": "@livestore/wa-sqlite",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "webmesh",
+      "ownedPaths": [
+        "packages/@livestore/webmesh/src/**"
+      ],
+      "publicEntry": "packages/@livestore/webmesh/src/mod.ts",
+      "publicSymbols": [
+        "connectViaWebSocket",
+        "EdgeAlreadyExistsError",
+        "makeMeshNode",
+        "makeWebSocketEdge",
+        "MeshNode",
+        "MessageMsgpack",
+        "SocketType",
+        "WebmeshSchema",
+        "WSEdgeInit",
+        "WSEdgeMessage",
+        "WSEdgePayload"
+      ],
+      "packageName": "@livestore/webmesh",
+      "consumes": [
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "utils-dev"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

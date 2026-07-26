@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e40d2afca39dc034",
+    "subjectId": "adguardteam-adguardhome",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "adguardteam-adguardhome",
+    "phase": null,
+    "repository": "https://github.com/AdguardTeam/AdGuardHome.git",
+    "commit": "2961664cbec08529d6e37e7ac4548eca8340e56c"
+  },
+  "manifestCopy": {
+    "path": "manifests/adguardteam-adguardhome-195110d79e06.json",
+    "sha256": "b982485bba3f49cd8ede0ef01c461ce11919b9116bfe3ff4b15066b035764e4b"
+  },
+  "attestationTemplate": {
+    "subjectId": "adguardteam-adguardhome",
+    "repository": "https://github.com/AdguardTeam/AdGuardHome.git",
+    "commit": "2961664cbec08529d6e37e7ac4548eca8340e56c",
+    "manifestCopy": {
+      "path": "manifests/adguardteam-adguardhome-195110d79e06.json",
+      "sha256": "b982485bba3f49cd8ede0ef01c461ce11919b9116bfe3ff4b15066b035764e4b"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "b982485bba3f49cd8ede0ef01c461ce11919b9116bfe3ff4b15066b035764e4b",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

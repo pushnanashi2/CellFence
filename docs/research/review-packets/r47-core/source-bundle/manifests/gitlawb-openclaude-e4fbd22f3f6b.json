@@ -1,0 +1,2371 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**",
+      "web/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "assistant",
+      "ownedPaths": [
+        "src/assistant/**"
+      ],
+      "publicEntry": "src/assistant/index.ts",
+      "publicSymbols": [
+        "getAssistantActivationPath",
+        "getAssistantSystemPromptAddendum",
+        "initializeAssistantTeam",
+        "isAssistantForced",
+        "isAssistantMode",
+        "markAssistantForced"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bootstrap",
+      "ownedPaths": [
+        "src/bootstrap/**"
+      ],
+      "publicEntry": "src/bootstrap/state.ts",
+      "publicSymbols": [
+        "addInvokedSkill",
+        "addSessionCronTask",
+        "addSlowOperation",
+        "addToInMemoryErrorLog",
+        "addToToolDuration",
+        "addToTotalCostState",
+        "addToTotalDurationState",
+        "addToTotalLinesChanged",
+        "addToTurnClassifierDuration",
+        "addToTurnHookDuration",
+        "ChannelEntry",
+        "clearBetaHeaderLatches",
+        "clearInvokedSkills",
+        "clearInvokedSkillsForAgent",
+        "clearRegisteredHooks",
+        "clearRegisteredPluginHooks",
+        "clearSystemPromptSectionState",
+        "consumePostCompaction",
+        "flushInteractionTime",
+        "getAdditionalDirectoriesForClaudeMd",
+        "getAfkModeHeaderLatched",
+        "getAgentColorMap",
+        "getAllowedChannels",
+        "getAllowedSettingSources",
+        "getApiKeyFromFd",
+        "getBudgetContinuationCount",
+        "getCachedClaudeMdContent",
+        "getCacheEditingHeaderLatched",
+        "getChromeFlagOverride",
+        "getClientType",
+        "getCurrentTurnTokenBudget",
+        "getCwdState",
+        "getDirectConnectServerUrl",
+        "getFastModeHeaderLatched",
+        "getFlagSettingsInline",
+        "getFlagSettingsPath",
+        "getHasDevChannels",
+        "getInitialMainLoopModel",
+        "getInitJsonSchema",
+        "getInlinePlugins",
+        "getInvokedSkills",
+        "getInvokedSkillsForAgent",
+        "getIsInteractive",
+        "getIsNonInteractiveSession",
+        "getIsRemoteMode",
+        "getIsScrollDraining",
+        "getKairosActive",
+        "getLastApiCompletionTimestamp",
+        "getLastAPIRequest",
+        "getLastAPIRequestMessages",
+        "getLastClassifierRequests",
+        "getLastEmittedDate",
+        "getLastInteractionTime",
+        "getLastMainRequestId",
+        "getMainLoopModelOverride",
+        "getMainThreadAgentType",
+        "getModelStrings",
+        "getModelUsage",
+        "getOauthTokenFromFd",
+        "getOriginalCwd",
+        "getParentSessionId",
+        "getPlanSlugCache",
+        "getProjectRoot",
+        "getPromptCache1hAllowlist",
+        "getPromptCache1hEligible",
+        "getPromptId",
+        "getQuestionPreviewFormat",
+        "getRegisteredHooks",
+        "getReplayIndexBuilder",
+        "getReplBridgeHandle",
+        "getScheduledTasksEnabled",
+        "getSdkAgentProgressSummariesEnabled",
+        "getSdkBetas",
+        "getSessionBypassPermissionsMode",
+        "getSessionCreatedTeams",
+        "getSessionCronTasks",
+        "getSessionDangerousPermissionMode",
+        "getSessionId",
+        "getSessionIngressToken",
+        "getSessionProjectDir",
+        "getSessionSource",
+        "getSessionTrustAccepted",
+        "getSlowOperations",
+        "getStatsStore",
+        "getStrictToolResultPairing",
+        "getSystemPromptSectionCache",
+        "getTeleportedSessionInfo",
+        "getThinkingClearLatched",
+        "getTotalAPIDuration",
+        "getTotalAPIDurationWithoutRetries",
+        "getTotalCacheCreationInputTokens",
+        "getTotalCacheReadInputTokens",
+        "getTotalCostUSD",
+        "getTotalDuration",
+        "getTotalInputTokens",
+        "getTotalLinesAdded",
+        "getTotalLinesRemoved",
+        "getTotalOutputTokens",
+        "getTotalToolDuration",
+        "getTotalWebSearchRequests",
+        "getTurnClassifierCount",
+        "getTurnClassifierDurationMs",
+        "getTurnHookCount",
+        "getTurnHookDurationMs",
+        "getTurnOutputTokens",
+        "getTurnToolCount",
+        "getTurnToolDurationMs",
+        "getUsageForModel",
+        "getUseCoworkPlugins",
+        "getUserMsgOptIn",
+        "handleAutoModeTransition",
+        "handlePlanModeTransition",
+        "hasExitedPlanModeInSession",
+        "hasShownLspRecommendationThisSession",
+        "hasUnknownModelCost",
+        "incrementBudgetContinuationCount",
+        "InvokedSkillInfo",
+        "isReplBridgeActive",
+        "isSessionPersistenceDisabled",
+        "markFirstTeleportMessageLogged",
+        "markPostCompaction",
+        "markScrollActivity",
+        "needsAutoModeExitAttachment",
+        "needsPlanModeExitAttachment",
+        "onSessionSwitch",
+        "preferThirdPartyAuthentication",
+        "regenerateSessionId",
+        "registerHookCallbacks",
+        "removeSessionCronTasks",
+        "resetAllReplayIndexBuilders",
+        "resetCostState",
+        "resetModelStringsForTestingOnly",
+        "resetReplayIndexBuilder",
+        "resetSdkInitState",
+        "resetStateForTests",
+        "resetTotalDurationStateAndCost_FOR_TESTS_ONLY",
+        "resetTurnClassifierDuration",
+        "resetTurnHookDuration",
+        "resetTurnToolDuration",
+        "runWithSdkContext",
+        "SessionCronTask",
+        "setAdditionalDirectoriesForClaudeMd",
+        "setAfkModeHeaderLatched",
+        "setAllowedChannels",
+        "setAllowedSettingSources",
+        "setApiKeyFromFd",
+        "setCachedClaudeMdContent",
+        "setCacheEditingHeaderLatched",
+        "setChromeFlagOverride",
+        "setClientType",
+        "setCostStateForRestore",
+        "setCwdState",
+        "setDirectConnectServerUrl",
+        "setFastModeHeaderLatched",
+        "setFlagSettingsInline",
+        "setFlagSettingsPath",
+        "setHasDevChannels",
+        "setHasExitedPlanMode",
+        "setHasUnknownModelCost",
+        "setInitialMainLoopModel",
+        "setInitJsonSchema",
+        "setInlinePlugins",
+        "setIsInteractive",
+        "setIsRemoteMode",
+        "setKairosActive",
+        "setLastApiCompletionTimestamp",
+        "setLastAPIRequest",
+        "setLastAPIRequestMessages",
+        "setLastClassifierRequests",
+        "setLastEmittedDate",
+        "setLastMainRequestId",
+        "setLspRecommendationShownThisSession",
+        "setMainLoopModelOverride",
+        "setMainThreadAgentType",
+        "setModelStrings",
+        "setNeedsAutoModeExitAttachment",
+        "setNeedsPlanModeExitAttachment",
+        "setOauthTokenFromFd",
+        "setOriginalCwd",
+        "setProjectRoot",
+        "setPromptCache1hAllowlist",
+        "setPromptCache1hEligible",
+        "setPromptId",
+        "setQuestionPreviewFormat",
+        "setScheduledTasksEnabled",
+        "setSdkAgentProgressSummariesEnabled",
+        "setSdkBetas",
+        "setSessionBypassPermissionsMode",
+        "setSessionDangerousPermissionMode",
+        "setSessionIngressToken",
+        "setSessionPersistenceDisabled",
+        "setSessionSource",
+        "setSessionTrustAccepted",
+        "setStatsStore",
+        "setStrictToolResultPairing",
+        "setSystemPromptSectionCacheEntry",
+        "setTeleportedSessionInfo",
+        "setThinkingClearLatched",
+        "setUseCoworkPlugins",
+        "setUserMsgOptIn",
+        "snapshotOutputTokensForTurn",
+        "switchSession",
+        "updateLastInteractionTime",
+        "waitForScrollIdle"
+      ],
+      "consumes": [
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bridge",
+      "ownedPaths": [
+        "src/bridge/**"
+      ],
+      "publicEntry": "src/bridge/bridgeApi.ts",
+      "publicSymbols": [
+        "BridgeFatalError",
+        "createBridgeApiClient",
+        "isExpiredErrorType",
+        "isSuppressible403",
+        "validateBridgeId"
+      ],
+      "consumes": [
+        {
+          "cell": "assistant"
+        },
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "buddy",
+      "ownedPaths": [
+        "src/buddy/**"
+      ],
+      "publicEntry": "src/buddy/actionEffects.ts",
+      "publicSymbols": [
+        "ACTION_EFFECTS",
+        "ActionEffect",
+        "effectTotalMs",
+        "FxRun",
+        "getActionEffect"
+      ],
+      "consumes": [
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "src/cli/**"
+      ],
+      "publicEntry": "src/cli/bg.ts",
+      "publicSymbols": [
+        "attachHandler",
+        "BackgroundChildProcessConfig",
+        "buildBackgroundChildProcessConfig",
+        "BuildBackgroundChildProcessConfigInput",
+        "buildBackgroundSessionLaunch",
+        "BuildBackgroundSessionLaunchDeps",
+        "followLogFile",
+        "handleBgFlag",
+        "killBackgroundSession",
+        "killHandler",
+        "LOG_STREAM_CHUNK_SIZE",
+        "logsHandler",
+        "parseBackgroundInvocation",
+        "ParsedBackgroundInvocation",
+        "ParsedLogsInvocation",
+        "parseLogsInvocation",
+        "printExistingLog",
+        "psHandler",
+        "terminateBackgroundProcessTree",
+        "terminateBackgroundSessionProcessTree"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "screens"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commands",
+      "ownedPaths": [
+        "src/commands/**"
+      ],
+      "publicEntry": "src/commands/add-dir/add-dir.tsx",
+      "publicSymbols": [
+        "call"
+      ],
+      "consumes": [
+        {
+          "cell": "assistant"
+        },
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "buddy"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "screens"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "voice"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/AgentProgressLine.tsx",
+      "publicSymbols": [
+        "AgentProgressLine"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "buddy"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "native-ts"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "screens"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "voice"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "constants",
+      "ownedPaths": [
+        "src/constants/**"
+      ],
+      "publicEntry": "src/constants/apiLimits.ts",
+      "publicSymbols": [
+        "API_IMAGE_MAX_BASE64_SIZE",
+        "API_MAX_MEDIA_PER_REQUEST",
+        "API_PDF_MAX_PAGES",
+        "IMAGE_MAX_HEIGHT",
+        "IMAGE_MAX_WIDTH",
+        "IMAGE_TARGET_RAW_SIZE",
+        "PDF_AT_MENTION_INLINE_THRESHOLD",
+        "PDF_EXTRACT_SIZE_THRESHOLD",
+        "PDF_MAX_EXTRACT_SIZE",
+        "PDF_MAX_PAGES_PER_READ",
+        "PDF_TARGET_RAW_SIZE"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "output-styles"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "context",
+      "ownedPaths": [
+        "src/context/**"
+      ],
+      "publicEntry": "src/context/fpsMetrics.tsx",
+      "publicSymbols": [
+        "FpsMetricsProvider",
+        "useFpsMetrics"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "coordinator",
+      "ownedPaths": [
+        "src/coordinator/**"
+      ],
+      "publicEntry": "src/coordinator/coordinatorMode.ts",
+      "publicSymbols": [
+        "getCoordinatorSystemPrompt",
+        "getCoordinatorUserContext",
+        "isCoordinatorMode",
+        "matchSessionMode"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "daemon",
+      "ownedPaths": [
+        "src/daemon/**"
+      ],
+      "publicEntry": "src/daemon/main.ts",
+      "publicSymbols": [
+        "daemonMain"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "entrypoints",
+      "ownedPaths": [
+        "src/entrypoints/**"
+      ],
+      "publicEntry": "src/entrypoints/agentSdkTypes.ts",
+      "publicSymbols": [
+        "AbortError",
+        "AccountInfo",
+        "AgentDefinition",
+        "AgentInfo",
+        "AgentMcpServerSpec",
+        "AnyZodRawShape",
+        "ApiKeySource",
+        "AsyncHookJSONOutput",
+        "BaseHookInput",
+        "BaseOutputFormat",
+        "ConfigChangeHookInput",
+        "ConfigScope",
+        "connectRemoteControl",
+        "ConnectRemoteControlOptions",
+        "createSdkMcpServer",
+        "CronJitterConfig",
+        "CronTask",
+        "CwdChangedHookInput",
+        "CwdChangedHookSpecificOutput",
+        "deleteSession",
+        "EffortLevel",
+        "ElicitationHookInput",
+        "ElicitationHookSpecificOutput",
+        "ElicitationResultHookInput",
+        "ElicitationResultHookSpecificOutput",
+        "EXIT_REASONS",
+        "ExitReason",
+        "FastModeState",
+        "FileChangedHookInput",
+        "FileChangedHookSpecificOutput",
+        "forkSession",
+        "ForkSessionOptions",
+        "ForkSessionResult",
+        "getSessionInfo",
+        "GetSessionInfoOptions",
+        "getSessionMessages",
+        "GetSessionMessagesOptions",
+        "HOOK_EVENTS",
+        "HookEvent",
+        "HookInput",
+        "HookJSONOutput",
+        "InboundPrompt",
+        "InferShape",
+        "InstructionsLoadedHookInput",
+        "InternalOptions",
+        "InternalQuery",
+        "JsonSchemaOutputFormat",
+        "listSessions",
+        "ListSessionsOptions",
+        "McpClaudeAIProxyServerConfig",
+        "McpHttpServerConfig",
+        "McpSdkServerConfig",
+        "McpServerConfigForProcessTransport",
+        "McpServerStatus",
+        "McpServerStatusConfig",
+        "McpSetServersResult",
+        "McpSSEServerConfig",
+        "McpStdioServerConfig",
+        "ModelInfo",
+        "ModelUsage",
+        "NonNullableUsage",
+        "NotificationHookInput",
+        "NotificationHookSpecificOutput",
+        "Options",
+        "OutputFormat",
+        "OutputFormatType",
+        "PermissionBehavior",
+        "PermissionDecisionClassification",
+        "PermissionDeniedHookInput",
+        "PermissionDeniedHookSpecificOutput",
+        "PermissionMode",
+        "PermissionRequestHookInput",
+        "PermissionRequestHookSpecificOutput",
+        "PermissionResult",
+        "PermissionRuleValue",
+        "PermissionUpdate",
+        "PermissionUpdateDestination",
+        "PostCompactHookInput",
+        "PostToolUseFailureHookInput",
+        "PostToolUseFailureHookSpecificOutput",
+        "PostToolUseHookInput",
+        "PostToolUseHookSpecificOutput",
+        "PreCompactHookInput",
+        "PreToolUseHookInput",
+        "PreToolUseHookSpecificOutput",
+        "PromptRequest",
+        "PromptRequestOption",
+        "PromptResponse",
+        "query",
+        "Query",
+        "QueryOptions",
+        "RemoteControlHandle",
+        "renameSession",
+        "RewindFilesResult",
+        "SandboxFilesystemConfig",
+        "SandboxIgnoreViolations",
+        "SandboxNetworkConfig",
+        "SandboxSettings",
+        "ScheduledTaskEvent",
+        "ScheduledTasksHandle",
+        "SDKAPIRetryMessage",
+        "SDKAssistantMessage",
+        "SDKAssistantMessageError",
+        "SDKAuthStatusMessage",
+        "SdkBeta",
+        "SDKCompactBoundaryMessage",
+        "SDKControlRequest",
+        "SDKControlResponse",
+        "SDKElicitationCompleteMessage",
+        "SDKFilesPersistedEvent",
+        "SDKHeartbeatMessage",
+        "SDKHookProgressMessage",
+        "SDKHookResponseMessage",
+        "SDKHookStartedMessage",
+        "SDKLocalCommandOutputMessage",
+        "SdkMcpToolDefinition",
+        "SDKMessage",
+        "SDKPartialAssistantMessage",
+        "SDKPermissionDenial",
+        "SdkPluginConfig",
+        "SDKPostTurnSummaryMessage",
+        "SDKPromptSuggestionMessage",
+        "SDKRateLimitEvent",
+        "SDKRateLimitInfo",
+        "SDKResultError",
+        "SDKResultMessage",
+        "SDKResultSuccess",
+        "SDKSession",
+        "SDKSessionInfo",
+        "SDKSessionOptions",
+        "SDKSessionStateChangedMessage",
+        "SDKStatus",
+        "SDKStatusMessage",
+        "SDKStreamlinedTextMessage",
+        "SDKStreamlinedToolUseSummaryMessage",
+        "SDKSystemMessage",
+        "SDKTaskNotificationMessage",
+        "SDKTaskProgressMessage",
+        "SDKTaskStartedMessage",
+        "SDKToolProgressMessage",
+        "SDKToolUseSummaryMessage",
+        "SDKUserMessage",
+        "SDKUserMessageReplay",
+        "SessionEndHookInput",
+        "SessionMessage",
+        "SessionMutationOptions",
+        "SessionStartHookInput",
+        "SessionStartHookSpecificOutput",
+        "Settings",
+        "SettingSource",
+        "SetupHookInput",
+        "SetupHookSpecificOutput",
+        "SlashCommand",
+        "StopFailureHookInput",
+        "StopHookInput",
+        "SubagentStartHookInput",
+        "SubagentStartHookSpecificOutput",
+        "SubagentStopHookInput",
+        "SyncHookJSONOutput",
+        "tagSession",
+        "TaskCompletedHookInput",
+        "TaskCreatedHookInput",
+        "TeammateIdleHookInput",
+        "ThinkingAdaptive",
+        "ThinkingConfig",
+        "ThinkingDisabled",
+        "ThinkingEnabled",
+        "tool",
+        "unstable_v2_createSession",
+        "unstable_v2_prompt",
+        "unstable_v2_resumeSession",
+        "UserPromptSubmitHookInput",
+        "UserPromptSubmitHookSpecificOutput",
+        "watchScheduledTasks",
+        "WorktreeCreateHookInput",
+        "WorktreeCreateHookSpecificOutput",
+        "WorktreeRemoveHookInput"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "daemon"
+        },
+        {
+          "cell": "environment-runner"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "self-hosted-runner"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "upstreamproxy"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "environment-runner",
+      "ownedPaths": [
+        "src/environment-runner/**"
+      ],
+      "publicEntry": "src/environment-runner/main.ts",
+      "publicSymbols": [
+        "environmentRunnerMain"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "grpc",
+      "ownedPaths": [
+        "src/grpc/**"
+      ],
+      "publicEntry": "src/grpc/server.ts",
+      "publicSymbols": [
+        "GrpcServer"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "src/hooks/**"
+      ],
+      "publicEntry": "src/hooks/fileSuggestions.ts",
+      "publicSymbols": [
+        "applyFileSuggestion",
+        "clearFileSuggestionCaches",
+        "collectGitPathsForTesting",
+        "collectRipgrepPathsForTesting",
+        "createFileSuggestionIgnoreMatcher",
+        "filterCandidatePathsForSuggestions",
+        "findLongestCommonPrefix",
+        "generateFileSuggestions",
+        "getDirectoryNames",
+        "getDirectoryNamesAsync",
+        "getPathsForSuggestions",
+        "normalizeFileSuggestionPath",
+        "onIndexBuildComplete",
+        "pathListSignature",
+        "shouldExcludeFileSuggestionPath",
+        "startBackgroundCacheRefresh"
+      ],
+      "consumes": [
+        {
+          "cell": "assistant"
+        },
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "native-ts"
+        },
+        {
+          "cell": "remote"
+        },
+        {
+          "cell": "screens"
+        },
+        {
+          "cell": "server"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "ssh"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vim"
+        },
+        {
+          "cell": "voice"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "i18n",
+      "ownedPaths": [
+        "src/i18n/**"
+      ],
+      "publicEntry": "src/i18n/index.ts",
+      "publicSymbols": [
+        "detectLocale",
+        "getOpenClaudeCommandDescriptionKey",
+        "InterpolationValues",
+        "Locale",
+        "LocalizationKey",
+        "localize"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ink",
+      "ownedPaths": [
+        "src/ink/**"
+      ],
+      "publicEntry": "src/ink/Ansi.tsx",
+      "publicSymbols": [
+        "Ansi"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "native-ts"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "integrations",
+      "ownedPaths": [
+        "src/integrations/**"
+      ],
+      "publicEntry": "src/integrations/index.ts",
+      "publicSymbols": [
+        "_clearRegistryForTesting",
+        "ensureIntegrationsLoaded",
+        "gatewayIdForPreset",
+        "getAllAnthropicProxies",
+        "getAllBrands",
+        "getAllGateways",
+        "getAllModels",
+        "getAllVendors",
+        "getAnthropicProxy",
+        "getBrand",
+        "getBrandsForVendor",
+        "getCatalogEntriesForRoute",
+        "getCatalogForGateway",
+        "getCatalogForVendor",
+        "getGateway",
+        "getModel",
+        "getModelsForBrand",
+        "getModelsForGateway",
+        "getModelsForVendor",
+        "getProviderPresetUiMetadata",
+        "getRouteDefaultBaseUrl",
+        "getRouteDefaultModel",
+        "getRouteDescriptor",
+        "getRouteLabel",
+        "getRouteProviderTypeLabel",
+        "getTransportKindForRoute",
+        "getVendor",
+        "isCloudflareBaseUrl",
+        "normalizeXiaomiMimoBaseUrl",
+        "ORDERED_PROVIDER_PRESETS",
+        "PROVIDER_PRESET_MANIFEST",
+        "ProviderPreset",
+        "registerAnthropicProxy",
+        "registerBrand",
+        "registerGateway",
+        "registerModel",
+        "registerVendor",
+        "resolveActiveRouteIdFromEnv",
+        "ResolvedProfileRoute",
+        "resolveProfileRoute",
+        "resolveRouteIdFromBaseUrl",
+        "routeForPreset",
+        "routeShowsAuthHeader",
+        "routeShowsAuthHeaderValue",
+        "routeShowsCustomHeaders",
+        "routeSupportsApiFormatSelection",
+        "routeSupportsAuthHeaders",
+        "routeSupportsCustomHeaders",
+        "validateIntegrationRegistry",
+        "vendorIdForPreset"
+      ],
+      "consumes": [
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jobs",
+      "ownedPaths": [
+        "src/jobs/**"
+      ],
+      "publicEntry": "src/jobs/classifier.ts",
+      "publicSymbols": [
+        "classifyAndWriteState"
+      ],
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "keybindings",
+      "ownedPaths": [
+        "src/keybindings/**"
+      ],
+      "publicEntry": "src/keybindings/defaultBindings.ts",
+      "publicSymbols": [
+        "DEFAULT_BINDINGS"
+      ],
+      "consumes": [
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "memdir",
+      "ownedPaths": [
+        "src/memdir/**"
+      ],
+      "publicEntry": "src/memdir/findRelevantMemories.ts",
+      "publicSymbols": [
+        "findRelevantMemories",
+        "RelevantMemory"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "migrations",
+      "ownedPaths": [
+        "src/migrations/**"
+      ],
+      "publicEntry": "src/migrations/migrateAutoUpdatesToSettings.ts",
+      "publicSymbols": [
+        "migrateAutoUpdatesToSettings"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "native-ts",
+      "ownedPaths": [
+        "src/native-ts/**"
+      ],
+      "publicEntry": "src/native-ts/color-diff/index.ts",
+      "publicSymbols": [
+        "__test",
+        "ColorDiff",
+        "ColorDiffClass",
+        "ColorFile",
+        "ColorFileClass",
+        "getNativeModule",
+        "getSyntaxTheme",
+        "Hunk",
+        "NativeModule",
+        "SyntaxTheme"
+      ],
+      "consumes": [
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "output-styles",
+      "ownedPaths": [
+        "src/outputStyles/**"
+      ],
+      "publicEntry": "src/outputStyles/loadOutputStylesDir.ts",
+      "publicSymbols": [
+        "clearOutputStyleCaches",
+        "getOutputStyleDirStyles"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugins",
+      "ownedPaths": [
+        "src/plugins/**"
+      ],
+      "publicEntry": "src/plugins/builtinPlugins.ts",
+      "publicSymbols": [
+        "BUILTIN_MARKETPLACE_NAME",
+        "clearBuiltinPlugins",
+        "getBuiltinPluginDefinition",
+        "getBuiltinPlugins",
+        "getBuiltinPluginSkillCommands",
+        "isBuiltinPluginId",
+        "registerBuiltinPlugin"
+      ],
+      "consumes": [
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "proactive",
+      "ownedPaths": [
+        "src/proactive/**"
+      ],
+      "publicEntry": "src/proactive/index.ts",
+      "publicSymbols": [
+        "activateProactive",
+        "deactivateProactive",
+        "getNextTickAt",
+        "isProactiveActive",
+        "isProactivePaused",
+        "pauseProactive",
+        "resumeProactive",
+        "setContextBlocked",
+        "subscribeToProactiveChanges"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "query",
+      "ownedPaths": [
+        "src/query/**"
+      ],
+      "publicEntry": "src/query/agentStepLimit.ts",
+      "publicSymbols": [
+        "AGENT_STEP_LIMIT_TOOL_RESULT_PREFIX"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "jobs"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "remote",
+      "ownedPaths": [
+        "src/remote/**"
+      ],
+      "publicEntry": "src/remote/remotePermissionBridge.ts",
+      "publicSymbols": [
+        "createRemotePermissionQueueItem",
+        "createSyntheticAssistantMessage",
+        "createToolStub"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "schemas",
+      "ownedPaths": [
+        "src/schemas/**"
+      ],
+      "publicEntry": "src/schemas/hooks.ts",
+      "publicSymbols": [
+        "AgentHook",
+        "BashCommandHook",
+        "HookCommand",
+        "HookCommandSchema",
+        "HookMatcher",
+        "HookMatcherSchema",
+        "HooksSchema",
+        "HooksSettings",
+        "HttpHook",
+        "PromptHook"
+      ],
+      "consumes": [
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "screens",
+      "ownedPaths": [
+        "src/screens/**"
+      ],
+      "publicEntry": "src/screens/Doctor.tsx",
+      "publicSymbols": [
+        "Doctor"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "buddy"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "remote"
+        },
+        {
+          "cell": "server"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "ssh"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "self-hosted-runner",
+      "ownedPaths": [
+        "src/self-hosted-runner/**"
+      ],
+      "publicEntry": "src/self-hosted-runner/main.ts",
+      "publicSymbols": [
+        "selfHostedRunnerMain"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server",
+      "ownedPaths": [
+        "src/server/**"
+      ],
+      "publicEntry": "src/server/backends/dangerousBackend.ts",
+      "publicSymbols": [
+        "DangerousBackend"
+      ],
+      "consumes": [
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "remote"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "services",
+      "ownedPaths": [
+        "src/services/**"
+      ],
+      "publicEntry": "src/services/ads.ts",
+      "publicSymbols": [
+        "adsBaseUrl",
+        "ConfirmResult",
+        "confirmTip",
+        "fetchNextTip",
+        "sanitizeForAds",
+        "SponsoredTip"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "skills",
+      "ownedPaths": [
+        "src/skills/**"
+      ],
+      "publicEntry": "src/skills/bundled/batch.ts",
+      "publicSymbols": [
+        "registerBatchSkill"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/commands.ts",
+      "publicSymbols": [
+        "BRIDGE_SAFE_COMMANDS",
+        "builtInCommandNames",
+        "clearCommandMemoizationCaches",
+        "clearCommandsCache",
+        "Command",
+        "CommandBase",
+        "CommandResultDisplay",
+        "filterCommandsForRemoteMode",
+        "findCommand",
+        "formatDescriptionWithSource",
+        "getCommand",
+        "getCommandName",
+        "getCommands",
+        "getMcpSkillCommands",
+        "getSkillToolCommands",
+        "getSlashCommandToolSkills",
+        "hasCommand",
+        "INTERNAL_ONLY_COMMANDS",
+        "isBridgeSafeCommand",
+        "isCommandEnabled",
+        "LocalCommandResult",
+        "LocalJSXCommandContext",
+        "meetsAvailabilityRequirement",
+        "PromptCommand",
+        "REMOTE_SAFE_COMMANDS",
+        "ResumeEntrypoint"
+      ],
+      "consumes": [
+        {
+          "cell": "assistant"
+        },
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "buddy"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "jobs"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "migrations"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "query"
+        },
+        {
+          "cell": "remote"
+        },
+        {
+          "cell": "screens"
+        },
+        {
+          "cell": "server"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "ssh"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ssh",
+      "ownedPaths": [
+        "src/ssh/**"
+      ],
+      "publicEntry": "src/ssh/createSSHSession.ts",
+      "publicSymbols": [
+        "createLocalSSHSession",
+        "CreateLocalSSHSessionOptions",
+        "createSSHSession",
+        "CreateSSHSessionHooks",
+        "CreateSSHSessionOptions",
+        "SSHSession",
+        "SSHSessionError"
+      ],
+      "consumes": [
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "state",
+      "ownedPaths": [
+        "src/state/**"
+      ],
+      "publicEntry": "src/state/AppState.tsx",
+      "publicSymbols": [
+        "AppState",
+        "AppStateProvider",
+        "AppStateStore",
+        "AppStoreContext",
+        "CompletionBoundary",
+        "getDefaultAppState",
+        "IDLE_SPECULATION_STATE",
+        "SpeculationResult",
+        "SpeculationState",
+        "useAppState",
+        "useAppStateMaybeOutsideOfProvider",
+        "useAppStateStore",
+        "useSetAppState"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tasks",
+      "ownedPaths": [
+        "src/tasks/**"
+      ],
+      "publicEntry": "src/tasks/DreamTask/DreamTask.ts",
+      "publicSymbols": [
+        "addDreamTurn",
+        "completeDreamTask",
+        "DreamPhase",
+        "DreamTask",
+        "DreamTaskState",
+        "DreamTurn",
+        "failDreamTask",
+        "isDreamTask",
+        "registerDreamTask"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tools",
+      "ownedPaths": [
+        "src/tools/**"
+      ],
+      "publicEntry": "src/tools/AgentTool/agentColorManager.ts",
+      "publicSymbols": [
+        "AGENT_COLOR_TO_THEME_COLOR",
+        "AGENT_COLORS",
+        "AgentColorName",
+        "getAgentColor",
+        "setAgentColor"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "query"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/command.ts",
+      "publicSymbols": [
+        "Command",
+        "CommandAvailability",
+        "CommandBase",
+        "CommandResultDisplay",
+        "getCommandName",
+        "isCommand",
+        "isCommandEnabled",
+        "LocalCommandCall",
+        "LocalCommandModule",
+        "LocalCommandResult",
+        "LocalJSXCommandCall",
+        "LocalJSXCommandContext",
+        "LocalJSXCommandModule",
+        "LocalJSXCommandOnDone",
+        "PromptCommand",
+        "ResumeEntrypoint"
+      ],
+      "consumes": [
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "upstreamproxy",
+      "ownedPaths": [
+        "src/upstreamproxy/**"
+      ],
+      "publicEntry": "src/upstreamproxy/relay.ts",
+      "publicSymbols": [
+        "decodeChunk",
+        "encodeChunk",
+        "startNodeRelay",
+        "startUpstreamProxyRelay",
+        "UpstreamProxyRelay"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/abortController.ts",
+      "publicSymbols": [
+        "createAbortController",
+        "createChildAbortController"
+      ],
+      "consumes": [
+        {
+          "cell": "bootstrap"
+        },
+        {
+          "cell": "bridge"
+        },
+        {
+          "cell": "buddy"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "commands"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "coordinator"
+        },
+        {
+          "cell": "entrypoints"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "ink"
+        },
+        {
+          "cell": "integrations"
+        },
+        {
+          "cell": "keybindings"
+        },
+        {
+          "cell": "memdir"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "proactive"
+        },
+        {
+          "cell": "schemas"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "skills"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "state"
+        },
+        {
+          "cell": "tasks"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vim",
+      "ownedPaths": [
+        "src/vim/**"
+      ],
+      "publicEntry": "src/vim/motions.ts",
+      "publicSymbols": [
+        "isInclusiveMotion",
+        "isLinewiseMotion",
+        "resolveMotion"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "voice",
+      "ownedPaths": [
+        "src/voice/**"
+      ],
+      "publicEntry": "src/voice/voiceModeEnabled.ts",
+      "publicSymbols": [
+        "hasVoiceAuth",
+        "isVoiceGrowthBookEnabled",
+        "isVoiceModeEnabled"
+      ],
+      "consumes": [
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "web/**"
+      ],
+      "publicEntry": "web/astro.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

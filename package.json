@@ -73,6 +73,7 @@
     "typescript-eslint": "^8.63.0"
   },
   "overrides": {
+    "@hono/node-server": "2.0.12",
     "qs": "6.15.3"
   }
 }

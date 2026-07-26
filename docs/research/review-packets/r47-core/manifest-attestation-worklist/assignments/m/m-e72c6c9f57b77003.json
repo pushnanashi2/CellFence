@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d808182f1c1738f4",
+    "subjectId": "reduxjs-redux",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "reduxjs-redux",
+    "phase": null,
+    "repository": "https://github.com/reduxjs/redux.git",
+    "commit": "5d65348e26635b6ec627b1030732ed38797e88e9"
+  },
+  "manifestCopy": {
+    "path": "manifests/reduxjs-redux-69df417695fe.json",
+    "sha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794"
+  },
+  "attestationTemplate": {
+    "subjectId": "reduxjs-redux",
+    "repository": "https://github.com/reduxjs/redux.git",
+    "commit": "5d65348e26635b6ec627b1030732ed38797e88e9",
+    "manifestCopy": {
+      "path": "manifests/reduxjs-redux-69df417695fe.json",
+      "sha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

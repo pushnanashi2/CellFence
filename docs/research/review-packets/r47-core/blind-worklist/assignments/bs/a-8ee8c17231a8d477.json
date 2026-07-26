@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-8ee8c17231a8d477",
+    "evidencePackageId": "evidence-01fd339f378a3346",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871.json",
+        "sha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc"
+      },
+      "auditLog": {
+        "path": "logs/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871/check.audit.jsonl",
+        "sha256": "dd31c5e16638f7d8957cc6940faae6541dd5490c534a2f7299c1ca09f7cfc990"
+      },
+      "evidenceGraph": {
+        "path": "logs/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871/evidence-graph.json",
+        "sha256": "63ec96b4d5136dcd31501e06b9f54733323d7c3d08e7f5eb36ee10174007a149"
+      },
+      "checkStdout": {
+        "path": "logs/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871/check.stdout.log",
+        "sha256": "ef32b999186625b3b0c8590424b1d2a047ff49185719e5fbbecfed0d5ab5d5e1"
+      },
+      "checkStderr": {
+        "path": "logs/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:01fd339f378a334610a7dd36b40b92c11c0473fe4f618cf210f6031b5ef04c70",
+    "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+    "repository": "https://github.com/stefanoslig/angular-ngrx-nx-realworld-example-app.git",
+    "commit": "bc7158d61319b6748b94cef301dc347efcc23f00",
+    "gitTree": "e25499782b9125223a1430e55b1b093f9dcfebfd",
+    "manifestSha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/conduit/src/app/app.config.ts",
+    "line": 25,
+    "message": "conduit imports private implementation from auth",
+    "cellId": "conduit",
+    "producerCellId": "auth",
+    "cellfenceFingerprint": "9e3bc7cb9a18ef1cba69c67cc5b9a35cd05a9fd94ab2fb05e6a6dbd5c12c4929",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:01fd339f378a334610a7dd36b40b92c11c0473fe4f618cf210f6031b5ef04c70",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-8ee8c17231a8d477",
+    "evidencePackageId": "evidence-01fd339f378a3346",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

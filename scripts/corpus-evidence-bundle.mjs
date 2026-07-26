@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { findingMatchesExclusionRule, normalizeExclusionRules } from "./precision-policy-filters.mjs";
 import { isAdjudication, validateClaimLabelMetadata } from "./precision-worklist-lib.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -43,7 +44,7 @@ const reportSchemaVersions = new Set(["cellfence.corpus-study.v1", "cellfence.hi
 
 function usage() {
   console.error(`Usage:
-  node scripts/corpus-evidence-bundle.mjs --study-id id --corpus corpus.json --report report.json --out-dir reports/corpus/id-bundle [--labels labels.jsonl] [--prelabel-artifact-set-sha256 sha256] [--force]
+  node scripts/corpus-evidence-bundle.mjs --study-id id --corpus corpus.json --report report.json --out-dir reports/corpus/id-bundle [--labels labels.jsonl] [--sampling-exclusion-rules rules.json] [--prelabel-artifact-set-sha256 sha256] [--force]
   node scripts/corpus-evidence-bundle.mjs --validate --bundle reports/corpus/id-bundle
 
 Creates and validates a reproducible evidence bundle for corpus findings. The
@@ -71,6 +72,8 @@ function parseArgs(argv) {
     minPerRepository: defaultMinPerRepository,
     maxRepositoryContribution: null,
     balanceRules: [],
+    samplingExclusionRulesPath: "",
+    samplingExclusionRules: [],
     preLabelArtifactSetSha256: "",
     force: false,
     validate: false,
@@ -137,6 +140,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--balance-rules=")) {
       parsed.balanceRules = parseList(requireInlineValue(argument, "--balance-rules=", "--balance-rules"));
+    } else if (argument === "--sampling-exclusion-rules") {
+      parsed.samplingExclusionRulesPath = path.resolve(requireValue(argv, index, "--sampling-exclusion-rules"));
+      index += 1;
+    } else if (argument.startsWith("--sampling-exclusion-rules=")) {
+      parsed.samplingExclusionRulesPath = path.resolve(requireInlineValue(argument, "--sampling-exclusion-rules=", "--sampling-exclusion-rules"));
     } else if (argument === "--prelabel-artifact-set-sha256") {
       parsed.preLabelArtifactSetSha256 = requireSha256(requireValue(argv, index, "--prelabel-artifact-set-sha256"), "--prelabel-artifact-set-sha256");
       index += 1;
@@ -163,6 +171,15 @@ function parseArgs(argv) {
   if (!parsed.corpusPath) throw new Error("--corpus is required");
   if (!parsed.reportPath) throw new Error("--report is required");
   if (!parsed.outDir) throw new Error("--out-dir is required");
+  if (parsed.samplingExclusionRulesPath) {
+    const issues = [];
+    parsed.samplingExclusionRules = normalizeExclusionRules(
+      readJson(parsed.samplingExclusionRulesPath),
+      issues,
+      { label: "--sampling-exclusion-rules" },
+    );
+    if (issues.length > 0) throw new Error(`invalid --sampling-exclusion-rules:\n- ${issues.join("\n- ")}`);
+  }
   return parsed;
 }
 
@@ -718,9 +735,12 @@ function deterministicSample(findings, corpusSha256, options = {}) {
   const minPerRepository = options.minPerRepository || defaultMinPerRepository;
   const maxRepositoryContribution = options.maxRepositoryContribution || null;
   const balanceRules = new Set(options.balanceRules || []);
+  const samplingExclusionRules = options.samplingExclusionRules || [];
   const seed = `sha256:${corpusSha256}`;
   const selectedIds = new Set();
-  const byRule = groupedBy(findings, (finding) => finding.ruleId);
+  const sampleCandidates = findings.filter((finding) => !findingMatchesExclusionRule(finding, samplingExclusionRules));
+  const excludedCandidates = findings.length - sampleCandidates.length;
+  const byRule = groupedBy(sampleCandidates, (finding) => finding.ruleId);
 
   for (const [, ruleFindings] of byRule) {
     const sortedRuleFindings = [...ruleFindings].sort((left, right) => {
@@ -731,7 +751,7 @@ function deterministicSample(findings, corpusSha256, options = {}) {
     }
   }
 
-  const byRepository = groupedBy(findings, (finding) => finding.repository || finding.subjectId);
+  const byRepository = groupedBy(sampleCandidates, (finding) => finding.repository || finding.subjectId);
   for (const [, repositoryFindings] of byRepository) {
     const selectedCount = repositoryFindings.filter((finding) => selectedIds.has(finding.findingId)).length;
     if (selectedCount >= minPerRepository) continue;
@@ -748,6 +768,7 @@ function deterministicSample(findings, corpusSha256, options = {}) {
   const repositoryBalance = maxRepositoryContribution === null
     ? { enabled: false, maxRepositoryContribution: null, removedFindingIds: [] }
     : enforceRepositoryContribution(findings, selectedIds, seed, maxRepositoryContribution, perRuleCap, balanceRules);
+  const sampledFindingIdSet = new Set(selectedIds);
   const sampledFindings = sortFindings(findings.filter((finding) => selectedIds.has(finding.findingId)));
   const precisionEligibleFindings = findings.filter((finding) => finding.precisionEligible);
   return {
@@ -764,7 +785,16 @@ function deterministicSample(findings, corpusSha256, options = {}) {
     minPerRepository,
     maxRepositoryContribution,
     balanceRules: [...balanceRules].sort(),
+    samplingExclusionRules,
     repositoryBalance,
+    sampleExclusion: {
+      enabled: samplingExclusionRules.length > 0,
+      excludedCandidates,
+      sampledExcludedFindings: findings.filter((finding) => {
+        return sampledFindingIdSet.has(finding.findingId)
+          && findingMatchesExclusionRule(finding, samplingExclusionRules);
+      }).length,
+    },
     population: {
       totalFindings: findings.length,
       sampledFindings: sampledFindings.length,
@@ -1370,6 +1400,7 @@ function buildBundle(options) {
       minPerRepository: options.minPerRepository,
       maxRepositoryContribution: options.maxRepositoryContribution,
       balanceRules: options.balanceRules,
+      samplingExclusionRules: options.samplingExclusionRules,
     });
     const sampledFindingSet = new Set(sampling.sampledFindingIds);
     const sampledFindings = normalizedFindings.filter((finding) => sampledFindingSet.has(finding.findingId));

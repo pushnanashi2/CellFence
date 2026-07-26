@@ -1,0 +1,359 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "animations",
+      "ownedPaths": [
+        "src/animations/**"
+      ],
+      "publicEntry": "src/animations/FadeIn.jsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "api",
+      "ownedPaths": [
+        "src/api/**"
+      ],
+      "publicEntry": "src/api/email.js",
+      "publicSymbols": [
+        "send"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/CodeEditor/index.jsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "icons"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "context",
+      "ownedPaths": [
+        "src/context/**"
+      ],
+      "publicEntry": "src/context/AreasContext.jsx",
+      "publicSymbols": [
+        "AreasContext",
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "data",
+      "ownedPaths": [
+        "src/data/**"
+      ],
+      "publicEntry": "src/data/constants.js",
+      "publicSymbols": [
+        "Action",
+        "binaryColor",
+        "booleanColor",
+        "Cardinality",
+        "Constraint",
+        "darkBgTheme",
+        "dateColor",
+        "DB",
+        "decimalColor",
+        "defaultBlue",
+        "defaultNoteTheme",
+        "documentColor",
+        "enumSetColor",
+        "geometricColor",
+        "gridCircleRadius",
+        "gridSize",
+        "IMPORT_FROM",
+        "intColor",
+        "minAreaSize",
+        "MODAL",
+        "networkIdColor",
+        "noteFold",
+        "noteRadius",
+        "noteWidth",
+        "ObjectType",
+        "otherColor",
+        "pngExportPixelRatio",
+        "SIDESHEET",
+        "State",
+        "STATUS",
+        "stringColor",
+        "Tab",
+        "tableColorStripHeight",
+        "tableFieldHeight",
+        "tableHeaderHeight",
+        "tableWidth",
+        "vectorColor"
+      ],
+      "consumes": [
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "templates"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "src/hooks/**"
+      ],
+      "publicEntry": "src/hooks/index.js",
+      "publicSymbols": [
+        "useAreas",
+        "useCanvas",
+        "useCollab",
+        "useDiagram",
+        "useEnums",
+        "useFullscreen",
+        "useLayout",
+        "useNavigateWithParams",
+        "useNotes",
+        "useSaveState",
+        "useSelect",
+        "useSettings",
+        "useThemedPage",
+        "useTransform",
+        "useTypes",
+        "useUndoRedo"
+      ],
+      "consumes": [
+        {
+          "cell": "context"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "i18n",
+      "ownedPaths": [
+        "src/i18n/**"
+      ],
+      "publicEntry": "src/i18n/i18n.js",
+      "publicSymbols": [
+        "default",
+        "languages"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "icons",
+      "ownedPaths": [
+        "src/icons/**"
+      ],
+      "publicEntry": "src/icons/index.js",
+      "publicSymbols": [
+        "IconAddArea",
+        "IconAddNote",
+        "IconAddTable",
+        "IconRelationship",
+        "IconTable"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pages",
+      "ownedPaths": [
+        "src/pages/**"
+      ],
+      "publicEntry": "src/pages/BugReport.jsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "animations"
+        },
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "i18n"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/App.jsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "i18n"
+        },
+        {
+          "cell": "pages"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "templates",
+      "ownedPaths": [
+        "src/templates/**"
+      ],
+      "publicEntry": "src/templates/template1.js",
+      "publicSymbols": [
+        "template1"
+      ],
+      "consumes": [
+        {
+          "cell": "data"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/arrangeTables.js",
+      "publicSymbols": [
+        "arrangeTables"
+      ],
+      "consumes": [
+        {
+          "cell": "data"
+        },
+        {
+          "cell": "i18n"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

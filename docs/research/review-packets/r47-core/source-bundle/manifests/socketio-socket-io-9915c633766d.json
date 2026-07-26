@@ -1,0 +1,305 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/engine.io-client/**",
+      "packages/engine.io-parser/**",
+      "packages/engine.io/**",
+      "packages/socket.io-adapter/**",
+      "packages/socket.io-client/**",
+      "packages/socket.io-cluster-adapter/**",
+      "packages/socket.io-cluster-engine/**",
+      "packages/socket.io-component-emitter/**",
+      "packages/socket.io-parser/**",
+      "packages/socket.io-postgres-emitter/**",
+      "packages/socket.io-redis-streams-emitter/**",
+      "packages/socket.io/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "cluster-adapter",
+      "ownedPaths": [
+        "packages/socket.io-cluster-adapter/**"
+      ],
+      "publicEntry": "packages/socket.io-cluster-adapter/lib/index.ts",
+      "publicSymbols": [
+        "createAdapter",
+        "NodeClusterAdapter",
+        "setupPrimary"
+      ],
+      "packageName": "@socket.io/cluster-adapter",
+      "consumes": [
+        {
+          "cell": "socket-io-adapter"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cluster-engine",
+      "ownedPaths": [
+        "packages/socket.io-cluster-engine/**"
+      ],
+      "publicEntry": "packages/socket.io-cluster-engine/lib/cluster.ts",
+      "publicSymbols": [
+        "NodeClusterEngine",
+        "setupPrimary"
+      ],
+      "packageName": "@socket.io/cluster-engine",
+      "consumes": [
+        {
+          "cell": "engine-io"
+        },
+        {
+          "cell": "engine-io-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "component-emitter",
+      "ownedPaths": [
+        "packages/socket.io-component-emitter/**"
+      ],
+      "publicEntry": "packages/socket.io-component-emitter/lib/esm/index.js",
+      "publicSymbols": [
+        "Emitter"
+      ],
+      "packageName": "@socket.io/component-emitter",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "engine-io",
+      "ownedPaths": [
+        "packages/engine.io/**"
+      ],
+      "publicEntry": "packages/engine.io/wrapper.mjs",
+      "publicSymbols": [
+        "attach",
+        "listen",
+        "parser",
+        "protocol",
+        "Server",
+        "Socket",
+        "Transport",
+        "transports"
+      ],
+      "packageName": "engine.io",
+      "consumes": [
+        {
+          "cell": "engine-io-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "engine-io-client",
+      "ownedPaths": [
+        "packages/engine.io-client/**"
+      ],
+      "publicEntry": "packages/engine.io-client/lib/browser-entrypoint.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "engine.io-client",
+      "consumes": [
+        {
+          "cell": "component-emitter"
+        },
+        {
+          "cell": "engine-io-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "engine-io-parser",
+      "ownedPaths": [
+        "packages/engine.io-parser/**"
+      ],
+      "publicEntry": "packages/engine.io-parser/lib/commons.ts",
+      "publicSymbols": [
+        "BinaryType",
+        "ERROR_PACKET",
+        "Packet",
+        "PACKET_TYPES",
+        "PACKET_TYPES_REVERSE",
+        "PacketType",
+        "RawData"
+      ],
+      "packageName": "engine.io-parser",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postgres-emitter",
+      "ownedPaths": [
+        "packages/socket.io-postgres-emitter/**"
+      ],
+      "publicEntry": "packages/socket.io-postgres-emitter/lib/index.ts",
+      "publicSymbols": [
+        "BroadcastOperator",
+        "Emitter",
+        "PostgresEmitterOptions",
+        "RESERVED_EVENTS"
+      ],
+      "packageName": "@socket.io/postgres-emitter",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "redis-streams-emitter",
+      "ownedPaths": [
+        "packages/socket.io-redis-streams-emitter/**"
+      ],
+      "publicEntry": "packages/socket.io-redis-streams-emitter/lib/adapter-types.ts",
+      "publicSymbols": [
+        "BroadcastFlags",
+        "ClusterMessage",
+        "MessageType",
+        "ServerId"
+      ],
+      "packageName": "@socket.io/redis-streams-emitter",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "socket-io",
+      "ownedPaths": [
+        "packages/socket.io/**"
+      ],
+      "publicEntry": "packages/socket.io/wrapper.mjs",
+      "publicSymbols": [],
+      "packageName": "socket.io",
+      "consumes": [
+        {
+          "cell": "engine-io"
+        },
+        {
+          "cell": "socket-io-adapter"
+        },
+        {
+          "cell": "socket-io-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "socket-io-adapter",
+      "ownedPaths": [
+        "packages/socket.io-adapter/**"
+      ],
+      "publicEntry": "packages/socket.io-adapter/lib/cluster-adapter.ts",
+      "publicSymbols": [
+        "ClusterAdapter",
+        "ClusterAdapterOptions",
+        "ClusterAdapterWithHeartbeat",
+        "ClusterMessage",
+        "ClusterResponse",
+        "MessageType",
+        "Offset",
+        "ServerId"
+      ],
+      "packageName": "socket.io-adapter",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "socket-io-client",
+      "ownedPaths": [
+        "packages/socket.io-client/**"
+      ],
+      "publicEntry": "packages/socket.io-client/babel.config.js",
+      "publicSymbols": [],
+      "packageName": "socket.io-client",
+      "consumes": [
+        {
+          "cell": "component-emitter"
+        },
+        {
+          "cell": "engine-io-client"
+        },
+        {
+          "cell": "socket-io-parser"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "socket-io-parser",
+      "ownedPaths": [
+        "packages/socket.io-parser/**"
+      ],
+      "publicEntry": "packages/socket.io-parser/babel.config.js",
+      "publicSymbols": [],
+      "packageName": "socket.io-parser",
+      "consumes": [
+        {
+          "cell": "component-emitter"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

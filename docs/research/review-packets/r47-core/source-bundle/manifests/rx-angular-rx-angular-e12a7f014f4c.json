@@ -1,0 +1,373 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/docs/src/**",
+      "apps/rebundle-demo-e2e/**",
+      "apps/rebundle-demo/**",
+      "apps/ssr-hydration/**",
+      "apps/ssr-isr/**",
+      "apps/ssr/**",
+      "libs/cdk/src/**",
+      "libs/eslint-plugin/src/**",
+      "libs/isr/src/**",
+      "libs/rebundle/src/**",
+      "libs/state/src/**",
+      "libs/test-helpers/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "cdk",
+      "ownedPaths": [
+        "libs/cdk/src/**"
+      ],
+      "publicEntry": "libs/cdk/src/public_api.ts",
+      "publicSymbols": [
+        "ɵɵtsModuleIndicatorApiExtractorWorkaround"
+      ],
+      "packageName": "@rx-angular/cdk",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs",
+      "ownedPaths": [
+        "apps/docs/src/**"
+      ],
+      "publicEntry": "apps/docs/src/components/HomepageFeatures/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "docs",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-plugin",
+      "ownedPaths": [
+        "libs/eslint-plugin/src/**"
+      ],
+      "publicEntry": "libs/eslint-plugin/src/index.ts",
+      "publicSymbols": [
+        "configs",
+        "rules"
+      ],
+      "packageName": "@rx-angular/eslint-plugin",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "isr",
+      "ownedPaths": [
+        "libs/isr/src/**"
+      ],
+      "publicEntry": "libs/isr/src/public-api.ts",
+      "publicSymbols": [
+        "CacheData",
+        "CacheHandler",
+        "CacheISRConfig",
+        "CacheKeyGeneratorFn",
+        "FileSystemCacheHandler",
+        "FileSystemCacheOptions",
+        "InMemoryCacheHandler",
+        "InvalidateConfig",
+        "ISRHandler",
+        "ISRHandlerConfig",
+        "isrHttpInterceptors",
+        "IsrModule",
+        "ISROptions",
+        "IsrServerService",
+        "IsrService",
+        "IsrServiceInterface",
+        "IsrState",
+        "ModifyHtmlCallbackFn",
+        "provideISR",
+        "RenderConfig",
+        "RenderVariant",
+        "RouteISRConfig",
+        "ServeFromCacheConfig",
+        "VariantRebuildItem"
+      ],
+      "packageName": "@rx-angular/isr",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rebundle",
+      "ownedPaths": [
+        "libs/rebundle/src/**"
+      ],
+      "publicEntry": "libs/rebundle/src/index.ts",
+      "publicSymbols": [
+        "applyStrategies",
+        "assignMergeGroup",
+        "BundleGraph",
+        "BundleGraphImport",
+        "BundleGraphNode",
+        "CommonStrategyDefinition",
+        "createBundleGraph",
+        "createCommonMergeGroups",
+        "createReachabilityMergeGroups",
+        "createStaticClosureMergeGroups",
+        "default",
+        "DEFAULT_MERGE_STRATEGY_CONFIG",
+        "findOutputForEntryPoint",
+        "getDynamicDependencies",
+        "getReachableGraphOutputPaths",
+        "getStaticClosure",
+        "getStaticDependencies",
+        "getTransitiveStaticDependencies",
+        "ImportKind",
+        "isJavaScriptOutput",
+        "MergeStrategy",
+        "MergeStrategyConfig",
+        "MergeStrategyContext",
+        "mergeStrategyFactory",
+        "MergeStrategyFactory",
+        "OutputImport",
+        "OutputPath",
+        "ReachabilityStrategyDefinition",
+        "StaticClosureStrategyDefinition",
+        "STRATEGY_TYPE",
+        "StrategyDefinition",
+        "StrategyType"
+      ],
+      "packageName": "@rx-angular/rebundle",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rebundle-demo",
+      "ownedPaths": [
+        "apps/rebundle-demo/**"
+      ],
+      "publicEntry": "apps/rebundle-demo/src/app/app.component.ts",
+      "publicSymbols": [
+        "AppComponent"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rebundle-demo-e2e",
+      "ownedPaths": [
+        "apps/rebundle-demo-e2e/**"
+      ],
+      "publicEntry": "apps/rebundle-demo-e2e/cypress.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rx-angular",
+      "ownedPaths": [
+        "libs/test-helpers/src/**"
+      ],
+      "publicEntry": "libs/test-helpers/src/index.ts",
+      "publicSymbols": [
+        "defaultAssert",
+        "initialNestedState",
+        "initialPrimitiveState",
+        "jestMatcher",
+        "mockConsole",
+        "mutationManagerFactory",
+        "NestedState",
+        "observableMatcher",
+        "PrimitiveState"
+      ],
+      "packageName": "@test-helpers/rx-angular",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ssr",
+      "ownedPaths": [
+        "apps/ssr/**"
+      ],
+      "publicEntry": "apps/ssr/cypress.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "state"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ssr-hydration",
+      "ownedPaths": [
+        "apps/ssr-hydration/**"
+      ],
+      "publicEntry": "apps/ssr-hydration/cypress.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ssr-isr",
+      "ownedPaths": [
+        "apps/ssr-isr/**"
+      ],
+      "publicEntry": "apps/ssr-isr/cypress.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "state",
+      "ownedPaths": [
+        "libs/state/src/**"
+      ],
+      "publicEntry": "libs/state/src/index.ts",
+      "publicSymbols": [
+        "ProjectStateFn",
+        "ProjectStateReducer",
+        "ProjectValueFn",
+        "ProjectValueReducer",
+        "provideRxStateConfig",
+        "RX_ACCUMULATOR_FN",
+        "RX_STATE_SCHEDULER",
+        "rxState",
+        "RxState",
+        "RxStateSetupFn",
+        "withAccumulatorFn",
+        "withScheduler",
+        "withSyncScheduler"
+      ],
+      "packageName": "@rx-angular/state",
+      "consumes": [
+        {
+          "cell": "cdk"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-76eb734d2969348d",
+    "subjectId": "unitech-pm2",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "unitech-pm2",
+    "phase": null,
+    "repository": "https://github.com/Unitech/pm2.git",
+    "commit": "31adee8048dbbc1ee36a7df7cdbcaca2559708df"
+  },
+  "manifestCopy": {
+    "path": "manifests/unitech-pm2-39e82f59ca83.json",
+    "sha256": "4931099e99edc70d4786d58add9772ab51c01cb522a1d85f7265041c64630c65"
+  },
+  "attestationTemplate": {
+    "subjectId": "unitech-pm2",
+    "repository": "https://github.com/Unitech/pm2.git",
+    "commit": "31adee8048dbbc1ee36a7df7cdbcaca2559708df",
+    "manifestCopy": {
+      "path": "manifests/unitech-pm2-39e82f59ca83.json",
+      "sha256": "4931099e99edc70d4786d58add9772ab51c01cb522a1d85f7265041c64630c65"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "4931099e99edc70d4786d58add9772ab51c01cb522a1d85f7265041c64630c65",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

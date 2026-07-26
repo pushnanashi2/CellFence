@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-3d2e5a4911be732f",
+    "evidencePackageId": "evidence-50858f3577d27cfc",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/chakra-ui-zag-a7650ff9d646.json",
+        "sha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670"
+      },
+      "auditLog": {
+        "path": "logs/chakra-ui-zag-a7650ff9d646/check.audit.jsonl",
+        "sha256": "3e11bead0e3404a8e3db70111581dba96bd85856cc2cc718057169a20d8b4898"
+      },
+      "evidenceGraph": {
+        "path": "logs/chakra-ui-zag-a7650ff9d646/evidence-graph.json",
+        "sha256": "4b6ba40fafd6c20a23b62dca2af3d8787a722ece561cc9e7be6b178dc3d30ef0"
+      },
+      "checkStdout": {
+        "path": "logs/chakra-ui-zag-a7650ff9d646/check.stdout.log",
+        "sha256": "2b801431e7f95e0ce98617bbcef50abf2f2e13fd19647dd68f4eea0c37d0174f"
+      },
+      "checkStderr": {
+        "path": "logs/chakra-ui-zag-a7650ff9d646/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:50858f3577d27cfcd6c0b61302920dd59620fd88eca01e56ff6db348ce3128fb",
+    "subjectId": "chakra-ui-zag",
+    "repository": "https://github.com/chakra-ui/zag.git",
+    "commit": "2b199781b1a8d9b8a57b03dff443cf5dbf55c912",
+    "gitTree": "fdea6386950e54f99e3bcf431acae75e65f6bd9c",
+    "manifestSha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "packages/machines/steps/src/steps.dom.ts",
+    "line": 1,
+    "message": "machines imports core without declaring a consumer relationship",
+    "cellId": "machines",
+    "producerCellId": "core",
+    "cellfenceFingerprint": "fdc94b8b8a3aad530f61a991589ea60c53dd0f6cca0525d56129385c1d521872",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:50858f3577d27cfcd6c0b61302920dd59620fd88eca01e56ff6db348ce3128fb",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-3d2e5a4911be732f",
+    "evidencePackageId": "evidence-50858f3577d27cfc",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

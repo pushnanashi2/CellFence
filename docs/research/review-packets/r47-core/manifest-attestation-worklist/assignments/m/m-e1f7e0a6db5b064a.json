@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-a423aeb3c4c0cf43",
+    "subjectId": "react-create-react-app",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "react-create-react-app",
+    "phase": null,
+    "repository": "https://github.com/react/create-react-app.git",
+    "commit": "6254386531d263688ccfa542d0e628fbc0de0b28"
+  },
+  "manifestCopy": {
+    "path": "manifests/react-create-react-app-28271472cf03.json",
+    "sha256": "2b579ea948a626ee4a4576b9b7eacdb5b7ec6225362097259ea004b0234dbbf1"
+  },
+  "attestationTemplate": {
+    "subjectId": "react-create-react-app",
+    "repository": "https://github.com/react/create-react-app.git",
+    "commit": "6254386531d263688ccfa542d0e628fbc0de0b28",
+    "manifestCopy": {
+      "path": "manifests/react-create-react-app-28271472cf03.json",
+      "sha256": "2b579ea948a626ee4a4576b9b7eacdb5b7ec6225362097259ea004b0234dbbf1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2b579ea948a626ee4a4576b9b7eacdb5b7ec6225362097259ea004b0234dbbf1",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

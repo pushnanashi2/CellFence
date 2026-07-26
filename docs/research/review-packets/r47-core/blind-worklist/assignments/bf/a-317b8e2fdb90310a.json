@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-317b8e2fdb90310a",
+    "evidencePackageId": "evidence-eb6e1ad2bb6b4e59",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/nteract-archived-desktop-app-19d3ec44d6c6.json",
+        "sha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005"
+      },
+      "auditLog": {
+        "path": "logs/nteract-archived-desktop-app-19d3ec44d6c6/check.audit.jsonl",
+        "sha256": "13417013402bf936ac1051114cbcf3c726b963907fa291721aa27c6b54f2fda1"
+      },
+      "evidenceGraph": {
+        "path": "logs/nteract-archived-desktop-app-19d3ec44d6c6/evidence-graph.json",
+        "sha256": "b3ff04f43d8976c8fc2abb8edbbc19b43c673229407b5312603812ff50849c86"
+      },
+      "checkStdout": {
+        "path": "logs/nteract-archived-desktop-app-19d3ec44d6c6/check.stdout.log",
+        "sha256": "86f626d30073ab358a9941fd5fdb40e4d91bdc94077d867f211c928a4617e068"
+      },
+      "checkStderr": {
+        "path": "logs/nteract-archived-desktop-app-19d3ec44d6c6/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:eb6e1ad2bb6b4e59beb09c4a4605bdc1b0c8ab516865c192437fa77e7c59126f",
+    "subjectId": "nteract-archived-desktop-app",
+    "repository": "https://github.com/nteract/archived-desktop-app.git",
+    "commit": "7516211c27bad1e5a415505b023e2221bc430d8a",
+    "gitTree": "b66bff68f47b48a7d379388b3c80b7c837011e37",
+    "manifestSha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "applications/jupyter-extension/nteract_on_jupyter/app/triggers/open-notebook.ts",
+    "line": 2,
+    "message": "nteract-on-jupyter imports core without declaring a consumer relationship",
+    "cellId": "nteract-on-jupyter",
+    "producerCellId": "core",
+    "cellfenceFingerprint": "dbc45b8a88b43e617e2529b6ea7bc0d8f984bb90a1e9fa4c3b5ac462bed26663",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:eb6e1ad2bb6b4e59beb09c4a4605bdc1b0c8ab516865c192437fa77e7c59126f",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-317b8e2fdb90310a",
+    "evidencePackageId": "evidence-eb6e1ad2bb6b4e59",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

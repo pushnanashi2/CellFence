@@ -1,0 +1,1764 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "boilerplates/auth0/**",
+      "boilerplates/authjs/**",
+      "boilerplates/aws/**",
+      "boilerplates/better-auth/**",
+      "boilerplates/biome/**",
+      "boilerplates/cloudflare/**",
+      "boilerplates/compiled/**",
+      "boilerplates/d1-kysely/**",
+      "boilerplates/d1-sqlite/**",
+      "boilerplates/d1/**",
+      "boilerplates/docker-compose/**",
+      "boilerplates/dokploy/**",
+      "boilerplates/drizzle/**",
+      "boilerplates/edgeone/**",
+      "boilerplates/elysia/**",
+      "boilerplates/eslint/**",
+      "boilerplates/express/**",
+      "boilerplates/fastify/**",
+      "boilerplates/google-analytics/**",
+      "boilerplates/hono/**",
+      "boilerplates/kysely/**",
+      "boilerplates/mantine/**",
+      "boilerplates/netlify/**",
+      "boilerplates/oxlint/**",
+      "boilerplates/plausible.io/**",
+      "boilerplates/pnpm/**",
+      "boilerplates/postgres/**",
+      "boilerplates/prettier/**",
+      "boilerplates/prisma/**",
+      "boilerplates/react-better-auth/**",
+      "boilerplates/react-sentry/**",
+      "boilerplates/react/**",
+      "boilerplates/sentry/**",
+      "boilerplates/shadcn-ui/**",
+      "boilerplates/shared-agents/**",
+      "boilerplates/shared-db/**",
+      "boilerplates/shared-env/**",
+      "boilerplates/shared-server/**",
+      "boilerplates/shared-todo/**",
+      "boilerplates/shared/**",
+      "boilerplates/solid-better-auth/**",
+      "boilerplates/solid-sentry/**",
+      "boilerplates/solid/**",
+      "boilerplates/sqlite/**",
+      "boilerplates/storybook/**",
+      "boilerplates/tailwindcss/**",
+      "boilerplates/telefunc/**",
+      "boilerplates/trpc/**",
+      "boilerplates/ts-rest/**",
+      "boilerplates/universal-deploy/**",
+      "boilerplates/vercel/**",
+      "boilerplates/vue-better-auth/**",
+      "boilerplates/vue-sentry/**",
+      "boilerplates/vue/**",
+      "packages/batijs/**",
+      "packages/cli/**",
+      "packages/compile/**",
+      "packages/core/src/**",
+      "packages/create-bati/**",
+      "packages/create-batijs-app/**",
+      "packages/features/src/**",
+      "packages/tests-utils/src/**",
+      "website/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "auth0",
+      "ownedPaths": [
+        "boilerplates/auth0/**"
+      ],
+      "publicEntry": "boilerplates/auth0/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/auth0",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "authjs",
+      "ownedPaths": [
+        "boilerplates/authjs/**"
+      ],
+      "publicEntry": "boilerplates/authjs/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/authjs",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "aws",
+      "ownedPaths": [
+        "boilerplates/aws/**"
+      ],
+      "publicEntry": "boilerplates/aws/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/aws",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "batijs",
+      "ownedPaths": [
+        "packages/batijs/**"
+      ],
+      "publicEntry": "packages/batijs/index.js",
+      "publicSymbols": [],
+      "packageName": "batijs",
+      "consumes": [
+        {
+          "cell": "cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "better-auth",
+      "ownedPaths": [
+        "boilerplates/better-auth/**"
+      ],
+      "publicEntry": "boilerplates/better-auth/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/better-auth",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "biome",
+      "ownedPaths": [
+        "boilerplates/biome/**"
+      ],
+      "publicEntry": "boilerplates/biome/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/biome",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/cli/**"
+      ],
+      "publicEntry": "packages/cli/cli.js",
+      "publicSymbols": [],
+      "packageName": "@batijs/cli",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cloudflare",
+      "ownedPaths": [
+        "boilerplates/cloudflare/**"
+      ],
+      "publicEntry": "boilerplates/cloudflare/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/cloudflare",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "compile",
+      "ownedPaths": [
+        "packages/compile/**"
+      ],
+      "publicEntry": "packages/compile/index.ts",
+      "publicSymbols": [],
+      "packageName": "@batijs/compile",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "compiled",
+      "ownedPaths": [
+        "boilerplates/compiled/**"
+      ],
+      "publicEntry": "boilerplates/compiled/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/compiled",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.ts",
+      "publicSymbols": [
+        "addVitePlugin",
+        "BaseOptions",
+        "committedValue",
+        "ConfigObject",
+        "ConfigValue",
+        "ContentGetter",
+        "CopyOptions",
+        "defineConfigArg",
+        "dockerfile",
+        "DockerfileBuilder",
+        "dockerPackageManager",
+        "DockerPackageManager",
+        "EnvRecord",
+        "EnvRegistry",
+        "EnvRegistryFactory",
+        "EnvScope",
+        "EnvSink",
+        "EnvVarDef",
+        "FileContext",
+        "formatCode",
+        "FromOptions",
+        "getArgs",
+        "getVersion",
+        "isServerVar",
+        "loadAsJson",
+        "loadMarkdown",
+        "loadPackageJson",
+        "loadYaml",
+        "MarkdownV2",
+        "markEmptyExport",
+        "mergeDts",
+        "mergeObject",
+        "PackageJson",
+        "packageManager",
+        "PackageManagerInfo",
+        "parseMarkdown",
+        "randomBytes",
+        "secretDevValue",
+        "setComposeEnvironment",
+        "StringTransformer",
+        "transformAndFormat",
+        "transformConfig",
+        "Transformer",
+        "TransformerProps",
+        "VikeMeta",
+        "which",
+        "withIcon",
+        "YAMLDocument",
+        "YAMLMap",
+        "YAMLSeq"
+      ],
+      "packageName": "@batijs/core",
+      "consumes": [
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-app",
+      "ownedPaths": [
+        "packages/create-batijs-app/**"
+      ],
+      "publicEntry": "packages/create-batijs-app/index.js",
+      "publicSymbols": [],
+      "packageName": "@batijs/create-app",
+      "consumes": [
+        {
+          "cell": "cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-vike",
+      "ownedPaths": [
+        "packages/create-bati/**"
+      ],
+      "publicEntry": "packages/create-bati/index.js",
+      "publicSymbols": [],
+      "packageName": "create-vike",
+      "consumes": [
+        {
+          "cell": "cli"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "d1",
+      "ownedPaths": [
+        "boilerplates/d1/**"
+      ],
+      "publicEntry": "boilerplates/d1/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/d1",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "d1-kysely",
+      "ownedPaths": [
+        "boilerplates/d1-kysely/**"
+      ],
+      "publicEntry": "boilerplates/d1-kysely/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/d1-kysely",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "d1-sqlite",
+      "ownedPaths": [
+        "boilerplates/d1-sqlite/**"
+      ],
+      "publicEntry": "boilerplates/d1-sqlite/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/d1-sqlite",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docker-compose",
+      "ownedPaths": [
+        "boilerplates/docker-compose/**"
+      ],
+      "publicEntry": "boilerplates/docker-compose/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/docker-compose",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dokploy",
+      "ownedPaths": [
+        "boilerplates/dokploy/**"
+      ],
+      "publicEntry": "boilerplates/dokploy/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/dokploy",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "drizzle",
+      "ownedPaths": [
+        "boilerplates/drizzle/**"
+      ],
+      "publicEntry": "boilerplates/drizzle/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/drizzle",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "edgeone",
+      "ownedPaths": [
+        "boilerplates/edgeone/**"
+      ],
+      "publicEntry": "boilerplates/edgeone/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/edgeone",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "elements",
+      "ownedPaths": [
+        "website/**"
+      ],
+      "publicEntry": "website/components/Cli.tsx",
+      "publicSymbols": [
+        "Cli"
+      ],
+      "packageName": "@batijs/elements",
+      "consumes": [
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "elysia",
+      "ownedPaths": [
+        "boilerplates/elysia/**"
+      ],
+      "publicEntry": "boilerplates/elysia/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/elysia",
+      "consumes": [
+        {
+          "cell": "authjs"
+        },
+        {
+          "cell": "better-auth"
+        },
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-db"
+        },
+        {
+          "cell": "shared-env"
+        },
+        {
+          "cell": "shared-server"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint",
+      "ownedPaths": [
+        "boilerplates/eslint/**"
+      ],
+      "publicEntry": "boilerplates/eslint/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/eslint",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "express",
+      "ownedPaths": [
+        "boilerplates/express/**"
+      ],
+      "publicEntry": "boilerplates/express/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/express",
+      "consumes": [
+        {
+          "cell": "authjs"
+        },
+        {
+          "cell": "better-auth"
+        },
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-db"
+        },
+        {
+          "cell": "shared-env"
+        },
+        {
+          "cell": "shared-server"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fastify",
+      "ownedPaths": [
+        "boilerplates/fastify/**"
+      ],
+      "publicEntry": "boilerplates/fastify/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/fastify",
+      "consumes": [
+        {
+          "cell": "authjs"
+        },
+        {
+          "cell": "better-auth"
+        },
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-db"
+        },
+        {
+          "cell": "shared-env"
+        },
+        {
+          "cell": "shared-server"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "features",
+      "ownedPaths": [
+        "packages/features/src/**"
+      ],
+      "publicEntry": "packages/features/src/index.ts",
+      "publicSymbols": [
+        "BatiSet",
+        "categories",
+        "categoriesGroups",
+        "Category",
+        "CategoryLabels",
+        "CLAUDE_SKILLS_DIR",
+        "cliFlags",
+        "Feature",
+        "FeatureLink",
+        "features",
+        "flags",
+        "Flags",
+        "SKILLS_DIR"
+      ],
+      "packageName": "@batijs/features",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "google-analytics",
+      "ownedPaths": [
+        "boilerplates/google-analytics/**"
+      ],
+      "publicEntry": "boilerplates/google-analytics/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/google-analytics",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hono",
+      "ownedPaths": [
+        "boilerplates/hono/**"
+      ],
+      "publicEntry": "boilerplates/hono/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/hono",
+      "consumes": [
+        {
+          "cell": "authjs"
+        },
+        {
+          "cell": "better-auth"
+        },
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-db"
+        },
+        {
+          "cell": "shared-env"
+        },
+        {
+          "cell": "shared-server"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "kysely",
+      "ownedPaths": [
+        "boilerplates/kysely/**"
+      ],
+      "publicEntry": "boilerplates/kysely/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/kysely",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mantine",
+      "ownedPaths": [
+        "boilerplates/mantine/**"
+      ],
+      "publicEntry": "boilerplates/mantine/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/mantine",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "react"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "netlify",
+      "ownedPaths": [
+        "boilerplates/netlify/**"
+      ],
+      "publicEntry": "boilerplates/netlify/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/netlify",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "oxlint",
+      "ownedPaths": [
+        "boilerplates/oxlint/**"
+      ],
+      "publicEntry": "boilerplates/oxlint/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/oxlint",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plausible-io",
+      "ownedPaths": [
+        "boilerplates/plausible.io/**"
+      ],
+      "publicEntry": "boilerplates/plausible.io/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/plausible.io",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "pnpm",
+      "ownedPaths": [
+        "boilerplates/pnpm/**"
+      ],
+      "publicEntry": "boilerplates/pnpm/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/pnpm",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "postgres",
+      "ownedPaths": [
+        "boilerplates/postgres/**"
+      ],
+      "publicEntry": "boilerplates/postgres/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/postgres",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prettier",
+      "ownedPaths": [
+        "boilerplates/prettier/**"
+      ],
+      "publicEntry": "boilerplates/prettier/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/prettier",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prisma",
+      "ownedPaths": [
+        "boilerplates/prisma/**"
+      ],
+      "publicEntry": "boilerplates/prisma/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/prisma",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react",
+      "ownedPaths": [
+        "boilerplates/react/**"
+      ],
+      "publicEntry": "boilerplates/react/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/react",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "react-better-auth"
+        },
+        {
+          "cell": "shared-todo"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-better-auth",
+      "ownedPaths": [
+        "boilerplates/react-better-auth/**"
+      ],
+      "publicEntry": "boilerplates/react-better-auth/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/react-better-auth",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-sentry",
+      "ownedPaths": [
+        "boilerplates/react-sentry/**"
+      ],
+      "publicEntry": "boilerplates/react-sentry/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/react-sentry",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sentry",
+      "ownedPaths": [
+        "boilerplates/sentry/**"
+      ],
+      "publicEntry": "boilerplates/sentry/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/sentry",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shadcn-ui",
+      "ownedPaths": [
+        "boilerplates/shadcn-ui/**"
+      ],
+      "publicEntry": "boilerplates/shadcn-ui/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shadcn-ui",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "boilerplates/shared/**"
+      ],
+      "publicEntry": "boilerplates/shared/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared-agents",
+      "ownedPaths": [
+        "boilerplates/shared-agents/**"
+      ],
+      "publicEntry": "boilerplates/shared-agents/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared-agents",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared-db",
+      "ownedPaths": [
+        "boilerplates/shared-db/**"
+      ],
+      "publicEntry": "boilerplates/shared-db/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared-db",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared-env",
+      "ownedPaths": [
+        "boilerplates/shared-env/**"
+      ],
+      "publicEntry": "boilerplates/shared-env/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared-env",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared-server",
+      "ownedPaths": [
+        "boilerplates/shared-server/**"
+      ],
+      "publicEntry": "boilerplates/shared-server/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared-server",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1-sqlite"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared-todo",
+      "ownedPaths": [
+        "boilerplates/shared-todo/**"
+      ],
+      "publicEntry": "boilerplates/shared-todo/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/shared-todo",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1-sqlite"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid",
+      "ownedPaths": [
+        "boilerplates/solid/**"
+      ],
+      "publicEntry": "boilerplates/solid/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/solid",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-todo"
+        },
+        {
+          "cell": "solid-better-auth"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-better-auth",
+      "ownedPaths": [
+        "boilerplates/solid-better-auth/**"
+      ],
+      "publicEntry": "boilerplates/solid-better-auth/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/solid-better-auth",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-sentry",
+      "ownedPaths": [
+        "boilerplates/solid-sentry/**"
+      ],
+      "publicEntry": "boilerplates/solid-sentry/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/solid-sentry",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sqlite",
+      "ownedPaths": [
+        "boilerplates/sqlite/**"
+      ],
+      "publicEntry": "boilerplates/sqlite/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/sqlite",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-env"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storybook",
+      "ownedPaths": [
+        "boilerplates/storybook/**"
+      ],
+      "publicEntry": "boilerplates/storybook/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/storybook",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tailwindcss",
+      "ownedPaths": [
+        "boilerplates/tailwindcss/**"
+      ],
+      "publicEntry": "boilerplates/tailwindcss/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/tailwindcss",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "telefunc",
+      "ownedPaths": [
+        "boilerplates/telefunc/**"
+      ],
+      "publicEntry": "boilerplates/telefunc/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/telefunc",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1-sqlite"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tests-utils",
+      "ownedPaths": [
+        "packages/tests-utils/src/**"
+      ],
+      "publicEntry": "packages/tests-utils/src/index.ts",
+      "publicSymbols": [
+        "analytics",
+        "AppContext",
+        "auth",
+        "Axis",
+        "Balancer",
+        "bunExists",
+        "combinate",
+        "css",
+        "data",
+        "db",
+        "deploy",
+        "exec",
+        "ExecHandle",
+        "FlagMatrix",
+        "framework",
+        "initPort",
+        "isDockerAvailable",
+        "npmCli",
+        "orm",
+        "runDevServer",
+        "runDockerCompose",
+        "runProd",
+        "server",
+        "spread",
+        "SpreadMarker",
+        "stopDockerCompose",
+        "suite",
+        "Suite",
+        "SuiteKind",
+        "SuiteMode",
+        "waitForLocalhost",
+        "zx"
+      ],
+      "packageName": "@batijs/tests-utils",
+      "consumes": [
+        {
+          "cell": "features"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "trpc",
+      "ownedPaths": [
+        "boilerplates/trpc/**"
+      ],
+      "publicEntry": "boilerplates/trpc/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/trpc",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1-sqlite"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ts-rest",
+      "ownedPaths": [
+        "boilerplates/ts-rest/**"
+      ],
+      "publicEntry": "boilerplates/ts-rest/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/ts-rest",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "d1-sqlite"
+        },
+        {
+          "cell": "drizzle"
+        },
+        {
+          "cell": "kysely"
+        },
+        {
+          "cell": "postgres"
+        },
+        {
+          "cell": "sqlite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "universal-deploy",
+      "ownedPaths": [
+        "boilerplates/universal-deploy/**"
+      ],
+      "publicEntry": "boilerplates/universal-deploy/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/universal-deploy",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vercel",
+      "ownedPaths": [
+        "boilerplates/vercel/**"
+      ],
+      "publicEntry": "boilerplates/vercel/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/vercel",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue",
+      "ownedPaths": [
+        "boilerplates/vue/**"
+      ],
+      "publicEntry": "boilerplates/vue/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/vue",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "shared-todo"
+        },
+        {
+          "cell": "tailwindcss"
+        },
+        {
+          "cell": "telefunc"
+        },
+        {
+          "cell": "trpc"
+        },
+        {
+          "cell": "ts-rest"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-better-auth",
+      "ownedPaths": [
+        "boilerplates/vue-better-auth/**"
+      ],
+      "publicEntry": "boilerplates/vue-better-auth/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/vue-better-auth",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-sentry",
+      "ownedPaths": [
+        "boilerplates/vue-sentry/**"
+      ],
+      "publicEntry": "boilerplates/vue-sentry/bati.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@batijs/vue-sentry",
+      "consumes": [
+        {
+          "cell": "compile"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

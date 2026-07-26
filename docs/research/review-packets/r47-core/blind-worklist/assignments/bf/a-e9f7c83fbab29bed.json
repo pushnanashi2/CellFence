@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-e9f7c83fbab29bed",
+    "evidencePackageId": "evidence-338210cc1a2db837",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/senegalha-template-monorepo-typescript-0d756686dfa0.json",
+        "sha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929"
+      },
+      "auditLog": {
+        "path": "logs/senegalha-template-monorepo-typescript-0d756686dfa0/check.audit.jsonl",
+        "sha256": "0f094f526be362070d03a288a9e617418bf26a9f1fcc5fa72d7a91f47b388b44"
+      },
+      "evidenceGraph": {
+        "path": "logs/senegalha-template-monorepo-typescript-0d756686dfa0/evidence-graph.json",
+        "sha256": "55aa2d0965f55b0725f235e4f9b189f49b2ddc2c0c1d22d9712769a82f233035"
+      },
+      "checkStdout": {
+        "path": "logs/senegalha-template-monorepo-typescript-0d756686dfa0/check.stdout.log",
+        "sha256": "56e5a1638350c629a78e4752a07221b9d54e2d005f1ec6be129eab0f00892719"
+      },
+      "checkStderr": {
+        "path": "logs/senegalha-template-monorepo-typescript-0d756686dfa0/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:338210cc1a2db837efa2bd300dc195033e61a8d1ab1b3bcd1480c19cf98db732",
+    "subjectId": "senegalha-template-monorepo-typescript",
+    "repository": "https://github.com/senegalha/template-monorepo-typescript.git",
+    "commit": "17afa743dfb60ef904de45029a2e8f1f7d37a25f",
+    "gitTree": "6fcdb55951ab71d5df8a1cfb4b8c746e8a2f6e6e",
+    "manifestSha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/api/jest.config.js",
+    "line": 1,
+    "message": "api imports private implementation from jestconfig",
+    "cellId": "api",
+    "producerCellId": "jestconfig",
+    "cellfenceFingerprint": "5c3a6bd335087040b091a8589326bb3412226ab36a2d4fbae71a457b4b8a7d73",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:338210cc1a2db837efa2bd300dc195033e61a8d1ab1b3bcd1480c19cf98db732",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-e9f7c83fbab29bed",
+    "evidencePackageId": "evidence-338210cc1a2db837",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

@@ -1,0 +1,3004 @@
+{
+  "schemaVersion": "cellfence.reviewed-corpus-validation.v1",
+  "generatedAt": "2026-07-26T16:25:58.152Z",
+  "corpusPath": "<cellfence-repo>/docs/research/corpora/ts-js-reviewed-pilot-160-2026-07-26-boundary-core-candidates.json",
+  "corpusSha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715",
+  "externalClaim": true,
+  "summary": {
+    "subjects": 160,
+    "precisionEligibleSubjects": 0,
+    "ineligibleSubjects": 160,
+    "issues": 532,
+    "warnings": 0
+  },
+  "subjects": [
+    {
+      "id": "changesets",
+      "repository": "https://github.com/changesets/changesets.git",
+      "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f93d96a3fd610a5d19c2697f8b44b3480386bd5df155cbb650d5762f59353053",
+      "precisionEligible": true,
+      "issues": [
+        "changesets external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "changesets external claim review requires review.reviewedAt",
+        "changesets external claim review requires review.scope",
+        "changesets external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "redux-toolkit",
+      "repository": "https://github.com/reduxjs/redux-toolkit.git",
+      "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "1c6ee4d192d7ed701d8ca40309a524e32b753d0f88b8b0daba1f7076e24f25b6",
+      "precisionEligible": true,
+      "issues": [
+        "redux-toolkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "redux-toolkit external claim review requires review.reviewedAt",
+        "redux-toolkit external claim review requires review.scope",
+        "redux-toolkit external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "typescript-eslint",
+      "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+      "commit": "c2386e49ec6347aa92d53a1f32143ca45984cc13",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "6563a0ba700bf00ae548af0367f644c9e596bdbbbbb213202536b124692049fc",
+      "precisionEligible": true,
+      "issues": [
+        "typescript-eslint external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "typescript-eslint external claim review requires review.reviewedAt",
+        "typescript-eslint external claim review requires review.scope",
+        "typescript-eslint external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jest",
+      "repository": "https://github.com/jestjs/jest.git",
+      "commit": "f49721c78e195558b40913977c9230f5b7f559d8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "30839598c0e5b0a199707949d7804463d5da17aedfdfd8283e2073b5009215ae",
+      "precisionEligible": true,
+      "issues": [
+        "jest external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jest external claim review requires review.reviewedAt",
+        "jest external claim review requires review.scope",
+        "jest external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lerna",
+      "repository": "https://github.com/lerna/lerna.git",
+      "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "29f292aa7d3342864b761f7370f2d59e4b93c5a24fd1607c2e3a5a6c1ab1e138",
+      "precisionEligible": true,
+      "issues": [
+        "lerna external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lerna external claim review requires review.reviewedAt",
+        "lerna external claim review requires review.scope",
+        "lerna external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vue-core",
+      "repository": "https://github.com/vuejs/core.git",
+      "commit": "fa2885d8c48768d26f1666a01bd540ffe3b20f9b",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ef5fe6d32496d3b6ca02f0b5c2cfec070b9d8d29206e19372137d6a231256df6",
+      "precisionEligible": true,
+      "issues": [
+        "vue-core external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vue-core external claim review requires review.reviewedAt",
+        "vue-core external claim review requires review.scope",
+        "vue-core external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tanstack-query",
+      "repository": "https://github.com/TanStack/query.git",
+      "commit": "b955f60d7965cc521df6ee8b1ce91b3d0e8c046d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "a5282d488602c6298ed5edf114fd50b6262dd6cf4b737933060fade2ae2050e8",
+      "precisionEligible": true,
+      "issues": [
+        "tanstack-query external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tanstack-query external claim review requires review.reviewedAt",
+        "tanstack-query external claim review requires review.scope",
+        "tanstack-query external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tanstack-router",
+      "repository": "https://github.com/TanStack/router.git",
+      "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ffaf379d5ced1d8d85ddaea6d9027233b61da5040f7be65cc84c8a11be9f02ad",
+      "precisionEligible": true,
+      "issues": [
+        "tanstack-router external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tanstack-router external claim review requires review.reviewedAt",
+        "tanstack-router external claim review requires review.scope",
+        "tanstack-router external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "remix",
+      "repository": "https://github.com/remix-run/remix.git",
+      "commit": "2c0ef67220714e1005162be4acdb91fbf355c664",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "00019f332a60c61fb5a51f76ebe09e52eb25c14125cac4d8418ff5432ed19a52",
+      "precisionEligible": true,
+      "issues": [
+        "remix external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "remix external claim review requires review.reviewedAt",
+        "remix external claim review requires review.scope",
+        "remix external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "hono",
+      "repository": "https://github.com/honojs/hono.git",
+      "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "788170ea05299b0dab109fc3a0bd23476bde3f12fa9582158c43907acf86cf64",
+      "precisionEligible": true,
+      "issues": [
+        "hono external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "hono external claim review requires review.reviewedAt",
+        "hono external claim review requires review.scope",
+        "hono external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "floating-ui",
+      "repository": "https://github.com/floating-ui/floating-ui.git",
+      "commit": "12d94738472e922e1b3fa31b02b2b61b9ed77e6a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ad1f8365c7f9a3f17db6966ac2ad2e176048759f5db45f0576916c6ac833b74a",
+      "precisionEligible": true,
+      "issues": [
+        "floating-ui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "floating-ui external claim review requires review.reviewedAt",
+        "floating-ui external claim review requires review.scope",
+        "floating-ui external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tanstack-table",
+      "repository": "https://github.com/TanStack/table.git",
+      "commit": "209699ff77b581d2b544d10c3d0d8b46c2398c0a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d462a17b8c092f07501285ff04ddce54807b0a4023af521db12cbc0cf2d3bec0",
+      "precisionEligible": true,
+      "issues": [
+        "tanstack-table external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tanstack-table external claim review requires review.reviewedAt",
+        "tanstack-table external claim review requires review.scope",
+        "tanstack-table external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "react-create-react-app",
+      "repository": "https://github.com/react/create-react-app.git",
+      "commit": "6254386531d263688ccfa542d0e628fbc0de0b28",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2b579ea948a626ee4a4576b9b7eacdb5b7ec6225362097259ea004b0234dbbf1",
+      "precisionEligible": true,
+      "issues": [
+        "react-create-react-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "react-create-react-app external claim review requires review.reviewedAt",
+        "react-create-react-app external claim review requires review.scope",
+        "react-create-react-app external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "unitech-pm2",
+      "repository": "https://github.com/Unitech/pm2.git",
+      "commit": "31adee8048dbbc1ee36a7df7cdbcaca2559708df",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "4931099e99edc70d4786d58add9772ab51c01cb522a1d85f7265041c64630c65",
+      "precisionEligible": true,
+      "issues": [
+        "unitech-pm2 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "unitech-pm2 external claim review requires review.reviewedAt",
+        "unitech-pm2 external claim review requires review.scope",
+        "unitech-pm2 external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vercel-hyper",
+      "repository": "https://github.com/vercel/hyper.git",
+      "commit": "da0c401d7f9e197b1fa6f29854adffa43d3a3287",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "1fec1d13ba7376a64db576854649facc7ef86ca96a01121ed96a2c4fcabb88f8",
+      "precisionEligible": true,
+      "issues": [
+        "vercel-hyper external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vercel-hyper external claim review requires review.reviewedAt",
+        "vercel-hyper external claim review requires review.scope",
+        "vercel-hyper external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jackwener-opencli",
+      "repository": "https://github.com/jackwener/OpenCLI.git",
+      "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788",
+      "precisionEligible": true,
+      "issues": [
+        "jackwener-opencli external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jackwener-opencli external claim review requires review.reviewedAt",
+        "jackwener-opencli external claim review requires review.scope",
+        "jackwener-opencli external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "codex-team-editor-js",
+      "repository": "https://github.com/codex-team/editor.js.git",
+      "commit": "4ea9eb389847181ceb757735f8bd45cc8c2f1673",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "e0ba645000d08cad2473a5ba0ec347856adf3dfb3abdebff3a1f1c14dd23cd96",
+      "precisionEligible": true,
+      "issues": [
+        "codex-team-editor-js external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "codex-team-editor-js external claim review requires review.reviewedAt",
+        "codex-team-editor-js external claim review requires review.scope",
+        "codex-team-editor-js external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "songquanpeng-one-api",
+      "repository": "https://github.com/songquanpeng/one-api.git",
+      "commit": "8df4a2670b98266bd287c698243fff327d9748cf",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "77171451c60c6755ae33a3e0bd80dd8a760fdfe3f7f39125a1e3f9b513a5d311",
+      "precisionEligible": true,
+      "issues": [
+        "songquanpeng-one-api external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "songquanpeng-one-api external claim review requires review.reviewedAt",
+        "songquanpeng-one-api external claim review requires review.scope",
+        "songquanpeng-one-api external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "virattt-dexter",
+      "repository": "https://github.com/virattt/dexter.git",
+      "commit": "823052ed687a6f3ef0e48b5e7025c73e86d95775",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "55bfcf1a94af809d5b4542171479cf35ff668a103f14718d0be6b25214a6a935",
+      "precisionEligible": true,
+      "issues": [
+        "virattt-dexter external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "virattt-dexter external claim review requires review.reviewedAt",
+        "virattt-dexter external claim review requires review.scope",
+        "virattt-dexter external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "reactivex-rxjs",
+      "repository": "https://github.com/ReactiveX/rxjs.git",
+      "commit": "c15b37f81ba5f5abea8c872b0189a70b150df4cb",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "628cb90208169d3ef9005deed969c942395d5e1256705e55df1380a69093aef1",
+      "precisionEligible": true,
+      "issues": [
+        "reactivex-rxjs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "reactivex-rxjs external claim review requires review.reviewedAt",
+        "reactivex-rxjs external claim review requires review.scope",
+        "reactivex-rxjs external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "carbon-app-carbon",
+      "repository": "https://github.com/carbon-app/carbon.git",
+      "commit": "1334429ae63f9a3d052d59ec8c6b158fa5db0943",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "19d82d7fe2c7847d5bf9f274caa8c64540b54c67c1a976ea40ecde6cda2d292d",
+      "precisionEligible": true,
+      "issues": [
+        "carbon-app-carbon external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "carbon-app-carbon external claim review requires review.reviewedAt",
+        "carbon-app-carbon external claim review requires review.scope",
+        "carbon-app-carbon external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "dayuanjiang-next-ai-draw-io",
+      "repository": "https://github.com/DayuanJiang/next-ai-draw-io.git",
+      "commit": "4b072283202d3fe4869acd847ee897ad1165d73d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "85ac0b13a490040766d2c3bc71060d06bc2d8f8c29079f7bc4b3fefb952e1228",
+      "precisionEligible": true,
+      "issues": [
+        "dayuanjiang-next-ai-draw-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "dayuanjiang-next-ai-draw-io external claim review requires review.reviewedAt",
+        "dayuanjiang-next-ai-draw-io external claim review requires review.scope",
+        "dayuanjiang-next-ai-draw-io external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "louislam-uptime-kuma",
+      "repository": "https://github.com/louislam/uptime-kuma.git",
+      "commit": "d3463870af879906f26466bad171fcbeba56c9e8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "6e39b50ab6ecf3f49ecae63f337166339bfea2e56d63f7c93ba8c8640fb6e393",
+      "precisionEligible": true,
+      "issues": [
+        "louislam-uptime-kuma external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "louislam-uptime-kuma external claim review requires review.reviewedAt",
+        "louislam-uptime-kuma external claim review requires review.scope",
+        "louislam-uptime-kuma external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "drawdb-io-drawdb",
+      "repository": "https://github.com/drawdb-io/drawdb.git",
+      "commit": "a85458c6392a160b4aedaa5f5152b9ebcda26bde",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "aa862853a8ebd49cb045eb377dc4c6b8d5a3c81b67f4ad4198dcc5b5185b9ea6",
+      "precisionEligible": true,
+      "issues": [
+        "drawdb-io-drawdb external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "drawdb-io-drawdb external claim review requires review.reviewedAt",
+        "drawdb-io-drawdb external claim review requires review.scope",
+        "drawdb-io-drawdb external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "chartjs-chart-js",
+      "repository": "https://github.com/chartjs/Chart.js.git",
+      "commit": "cb02e1d207bd4c4c40b20c259017f85f26f1e30a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f9a1eac38faa3af98316fda1b7baeee2c45955add72bc41554212f417bd390c1",
+      "precisionEligible": true,
+      "issues": [
+        "chartjs-chart-js external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "chartjs-chart-js external claim review requires review.reviewedAt",
+        "chartjs-chart-js external claim review requires review.scope",
+        "chartjs-chart-js external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "mckaywrigley-chatbot-ui",
+      "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+      "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c",
+      "precisionEligible": true,
+      "issues": [
+        "mckaywrigley-chatbot-ui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "mckaywrigley-chatbot-ui external claim review requires review.reviewedAt",
+        "mckaywrigley-chatbot-ui external claim review requires review.scope",
+        "mckaywrigley-chatbot-ui external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "react-hook-form-react-hook-form",
+      "repository": "https://github.com/react-hook-form/react-hook-form.git",
+      "commit": "ee7593ec554c7f2cb74a8ace5984bcb8cb136633",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "331ddaa3a9f62a8f77865a83c22c3f07c4ee8df4b2e4b76483e7ef4236e6c169",
+      "precisionEligible": true,
+      "issues": [
+        "react-hook-form-react-hook-form external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "react-hook-form-react-hook-form external claim review requires review.reviewedAt",
+        "react-hook-form-react-hook-form external claim review requires review.scope",
+        "react-hook-form-react-hook-form external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lfnovo-open-notebook",
+      "repository": "https://github.com/lfnovo/open-notebook.git",
+      "commit": "df106fabe6d722618bafd0d08209a2bb5648792d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "50081dc3e0c8d9548add9cf433fedcfc8b1ecd38fdac7e651d56508f01a38791",
+      "precisionEligible": true,
+      "issues": [
+        "lfnovo-open-notebook external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lfnovo-open-notebook external claim review requires review.reviewedAt",
+        "lfnovo-open-notebook external claim review requires review.scope",
+        "lfnovo-open-notebook external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "anuraghazra-github-readme-stats",
+      "repository": "https://github.com/anuraghazra/github-readme-stats.git",
+      "commit": "54a7985aeefda00d5eadb55b80c17c7f976c37d2",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b871763301a2ba256cdd66318a647c5d91c3350b52e1c81b5ea7546b2b143089",
+      "precisionEligible": true,
+      "issues": [
+        "anuraghazra-github-readme-stats external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "anuraghazra-github-readme-stats external claim review requires review.reviewedAt",
+        "anuraghazra-github-readme-stats external claim review requires review.scope",
+        "anuraghazra-github-readme-stats external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "layui-layui",
+      "repository": "https://github.com/layui/layui.git",
+      "commit": "2cfbc45b70ab66cb96f7f51dc4f03dae0b409b2c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "343ed44ff1dc72bb18b99438d1c7a2c184e09d76469e00a9ea4800a491e00b6d",
+      "precisionEligible": true,
+      "issues": [
+        "layui-layui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "layui-layui external claim review requires review.reviewedAt",
+        "layui-layui external claim review requires review.scope",
+        "layui-layui external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "chromedevtools-chrome-devtools-mcp",
+      "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp.git",
+      "commit": "76fd2424984827802867672fcc8d0e0036f4a3af",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ae1138b13ed2b5bc77c9ed1cb47efa44507195cf0dd761aad9445620989ca3f0",
+      "precisionEligible": true,
+      "issues": [
+        "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewedAt",
+        "chromedevtools-chrome-devtools-mcp external claim review requires review.scope",
+        "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nextai-translator-nextai-translator",
+      "repository": "https://github.com/nextai-translator/nextai-translator.git",
+      "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d",
+      "precisionEligible": true,
+      "issues": [
+        "nextai-translator-nextai-translator external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nextai-translator-nextai-translator external claim review requires review.reviewedAt",
+        "nextai-translator-nextai-translator external claim review requires review.scope",
+        "nextai-translator-nextai-translator external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ant-design-ant-design-pro",
+      "repository": "https://github.com/ant-design/ant-design-pro.git",
+      "commit": "bb40867ae3ef943e06e48da6911ccc5900e638a1",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "69ddfefcacd2c0dd2f93b4d6742a02f7a6764ebc09d986316e8b6244cef243e1",
+      "precisionEligible": true,
+      "issues": [
+        "ant-design-ant-design-pro external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ant-design-ant-design-pro external claim review requires review.reviewedAt",
+        "ant-design-ant-design-pro external claim review requires review.scope",
+        "ant-design-ant-design-pro external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "styled-components-styled-components",
+      "repository": "https://github.com/styled-components/styled-components.git",
+      "commit": "50df1a9190740f47a13601afb3b053ec1bdbdcca",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b5eb9e067b26d5ac1e4f63cd06c88bd96f36ad455aecb5618b9b5fdab6707459",
+      "precisionEligible": true,
+      "issues": [
+        "styled-components-styled-components external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "styled-components-styled-components external claim review requires review.reviewedAt",
+        "styled-components-styled-components external claim review requires review.scope",
+        "styled-components-styled-components external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jquense-yup",
+      "repository": "https://github.com/jquense/yup.git",
+      "commit": "ff31eee8a2b10c938bb3a22544d9e33957a8cf01",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "0188cbb28513c4df364bb26e66c35b17f2ba75a713af7c5223f7e6d4b7e86efc",
+      "precisionEligible": true,
+      "issues": [
+        "jquense-yup external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jquense-yup external claim review requires review.reviewedAt",
+        "jquense-yup external claim review requires review.scope",
+        "jquense-yup external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vadimdemedes-ink",
+      "repository": "https://github.com/vadimdemedes/ink.git",
+      "commit": "70af033dbd2b126a16f144164685612b2c1fd554",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "c3968e9dfb7bd8d4894a5b9b41eaddc4c78ced8d61999529d0dbbd54f0660956",
+      "precisionEligible": true,
+      "issues": [
+        "vadimdemedes-ink external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vadimdemedes-ink external claim review requires review.reviewedAt",
+        "vadimdemedes-ink external claim review requires review.scope",
+        "vadimdemedes-ink external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "alan2207-bulletproof-react",
+      "repository": "https://github.com/alan2207/bulletproof-react.git",
+      "commit": "9506629ed003a561c6627735480cce4994244bb4",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "231b9e40868b14218a053b2bbaacfba1c0db0bd389c31a3bb81a264aad1287e7",
+      "precisionEligible": true,
+      "issues": [
+        "alan2207-bulletproof-react external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "alan2207-bulletproof-react external claim review requires review.reviewedAt",
+        "alan2207-bulletproof-react external claim review requires review.scope",
+        "alan2207-bulletproof-react external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "rahuldkjain-github-profile-readme-generator",
+      "repository": "https://github.com/rahuldkjain/github-profile-readme-generator.git",
+      "commit": "5ae90bfcbd7ab2f69809b094601f7975c32ae077",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "1f1226eb95b8aa705e02370434464546dad8a4dd34081060a3351494d603be14",
+      "precisionEligible": true,
+      "issues": [
+        "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewedAt",
+        "rahuldkjain-github-profile-readme-generator external claim review requires review.scope",
+        "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "fingerprintjs-fingerprintjs",
+      "repository": "https://github.com/fingerprintjs/fingerprintjs.git",
+      "commit": "feab7913fbb536466bab72b1795d27ec68423003",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "3121bce3a2bb20b822b3583aed86c653b8f6cbca1aa367004965969889d22607",
+      "precisionEligible": true,
+      "issues": [
+        "fingerprintjs-fingerprintjs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "fingerprintjs-fingerprintjs external claim review requires review.reviewedAt",
+        "fingerprintjs-fingerprintjs external claim review requires review.scope",
+        "fingerprintjs-fingerprintjs external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "localforage-localforage",
+      "repository": "https://github.com/localForage/localForage.git",
+      "commit": "fb78c77ee583fb727a558c439b5174aca38c5924",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a",
+      "precisionEligible": true,
+      "issues": [
+        "localforage-localforage external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "localforage-localforage external claim review requires review.reviewedAt",
+        "localforage-localforage external claim review requires review.scope",
+        "localforage-localforage external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nginxproxymanager-nginx-proxy-manager",
+      "repository": "https://github.com/NginxProxyManager/nginx-proxy-manager.git",
+      "commit": "a62c2a6dc3ab51e6fedc34d3ea3506bc9373953f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "786f05464adcc7a5cfd29a5cfe16244773335e9c7dcea2379c636bb1c5c64f3f",
+      "precisionEligible": true,
+      "issues": [
+        "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewedAt",
+        "nginxproxymanager-nginx-proxy-manager external claim review requires review.scope",
+        "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "philc-vimium",
+      "repository": "https://github.com/philc/vimium.git",
+      "commit": "7067bc768fc1c7ef9310e295c5782149fab73980",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "59ceaede2c4877fb1d95744c74d64906fefc07a858c1af0a1ef7f6c8edbeebab",
+      "precisionEligible": true,
+      "issues": [
+        "philc-vimium external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "philc-vimium external claim review requires review.reviewedAt",
+        "philc-vimium external claim review requires review.scope",
+        "philc-vimium external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "cheeriojs-cheerio",
+      "repository": "https://github.com/cheeriojs/cheerio.git",
+      "commit": "d3cf80ca323f2923fba572e12425da0a4f233281",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "71186a9b359e8362abd63fe25f36c3abdec3ee7bd27157d2f3292d8044d120f7",
+      "precisionEligible": true,
+      "issues": [
+        "cheeriojs-cheerio external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "cheeriojs-cheerio external claim review requires review.reviewedAt",
+        "cheeriojs-cheerio external claim review requires review.scope",
+        "cheeriojs-cheerio external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "immerjs-immer",
+      "repository": "https://github.com/immerjs/immer.git",
+      "commit": "a3be9df762c1dbe9959a011ddbab0ce838cbc468",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "208b6dff3bac27cd9738269b9e4a85d495918dcfe59edfabe3d2c4e804a166b9",
+      "precisionEligible": true,
+      "issues": [
+        "immerjs-immer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "immerjs-immer external claim review requires review.reviewedAt",
+        "immerjs-immer external claim review requires review.scope",
+        "immerjs-immer external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "reduxjs-redux",
+      "repository": "https://github.com/reduxjs/redux.git",
+      "commit": "5d65348e26635b6ec627b1030732ed38797e88e9",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794",
+      "precisionEligible": true,
+      "issues": [
+        "reduxjs-redux external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "reduxjs-redux external claim review requires review.reviewedAt",
+        "reduxjs-redux external claim review requires review.scope",
+        "reduxjs-redux external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "solidjs-solid",
+      "repository": "https://github.com/solidjs/solid.git",
+      "commit": "d2f81d546d5dff37aa25e4fa224e2192efec8c1a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2ab2584c77d9aaed40fc96d5058aeab1889440d559200f7ee30065711b3b3d48",
+      "precisionEligible": true,
+      "issues": [
+        "solidjs-solid external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "solidjs-solid external claim review requires review.reviewedAt",
+        "solidjs-solid external claim review requires review.scope",
+        "solidjs-solid external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "trekhleb-javascript-algorithms",
+      "repository": "https://github.com/trekhleb/javascript-algorithms.git",
+      "commit": "0f52fbaced5d33041a5a834f72f880a9262bcb82",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "045ada81e7c9e5b090450500949469af4fb4f606303a3f85800964f39ec7dab5",
+      "precisionEligible": true,
+      "issues": [
+        "trekhleb-javascript-algorithms external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "trekhleb-javascript-algorithms external claim review requires review.reviewedAt",
+        "trekhleb-javascript-algorithms external claim review requires review.scope",
+        "trekhleb-javascript-algorithms external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "preactjs-preact",
+      "repository": "https://github.com/preactjs/preact.git",
+      "commit": "7051a371282f728da7533eab27ebbd949274374d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "02b507fa34bf6ef10d6dd437600a5e325349fb0232ed24bdd34b99ef54bc3d17",
+      "precisionEligible": true,
+      "issues": [
+        "preactjs-preact external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "preactjs-preact external claim review requires review.reviewedAt",
+        "preactjs-preact external claim review requires review.scope",
+        "preactjs-preact external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "yangshun-tech-interview-handbook",
+      "repository": "https://github.com/yangshun/tech-interview-handbook.git",
+      "commit": "8ee2acb54a05c4add123a824d15e7dfc4e703b2f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "3a8a30b2d186f25028a3d916295ab84a06d3389772793e7f784ace4197ade9b3",
+      "precisionEligible": true,
+      "issues": [
+        "yangshun-tech-interview-handbook external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "yangshun-tech-interview-handbook external claim review requires review.reviewedAt",
+        "yangshun-tech-interview-handbook external claim review requires review.scope",
+        "yangshun-tech-interview-handbook external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "wg-easy-wg-easy",
+      "repository": "https://github.com/wg-easy/wg-easy.git",
+      "commit": "78b283849895b35ad45c6f83fa01228c0f1a6774",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "04ae5f8b13d8066ac3269f410cb36a586a696b88b842cc2dd8b1e9b58f2d02df",
+      "precisionEligible": true,
+      "issues": [
+        "wg-easy-wg-easy external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "wg-easy-wg-easy external claim review requires review.reviewedAt",
+        "wg-easy-wg-easy external claim review requires review.scope",
+        "wg-easy-wg-easy external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "eyaltoledano-claude-task-master",
+      "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+      "commit": "c0c98d367c55296bfe69e65680625b6db437af02",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8",
+      "precisionEligible": true,
+      "issues": [
+        "eyaltoledano-claude-task-master external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "eyaltoledano-claude-task-master external claim review requires review.reviewedAt",
+        "eyaltoledano-claude-task-master external claim review requires review.scope",
+        "eyaltoledano-claude-task-master external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "aykutsarac-jsoncrack-com",
+      "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+      "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757",
+      "precisionEligible": true,
+      "issues": [
+        "aykutsarac-jsoncrack-com external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "aykutsarac-jsoncrack-com external claim review requires review.reviewedAt",
+        "aykutsarac-jsoncrack-com external claim review requires review.scope",
+        "aykutsarac-jsoncrack-com external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vuejs-vue-cli",
+      "repository": "https://github.com/vuejs/vue-cli.git",
+      "commit": "7eb93c169c7520935252e2473387f923ef80d856",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ed39707921f2def91a83f1cdfb97b1d6bc307679412a7f8ceae9d6505f853bd1",
+      "precisionEligible": true,
+      "issues": [
+        "vuejs-vue-cli external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vuejs-vue-cli external claim review requires review.scope",
+        "vuejs-vue-cli external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "gitroomhq-postiz-app",
+      "repository": "https://github.com/gitroomhq/postiz-app.git",
+      "commit": "ab3b1edb866486732cfa559cd47f8649bb1abd2f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "13ff948bff7c1123f0b4c888a7f0ab16ad52cf2f6042de570e60574f1af5311b",
+      "precisionEligible": true,
+      "issues": [
+        "gitroomhq-postiz-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "gitroomhq-postiz-app external claim review requires review.scope",
+        "gitroomhq-postiz-app external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "heyputer-puter",
+      "repository": "https://github.com/HeyPuter/puter.git",
+      "commit": "70f343d6fe621f27525020e2da68e1389265f5fb",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "c894922f0ea4fcd12dc9dfa19bc1d29a040a7277e81de5bbd22664b2a9e9b07b",
+      "precisionEligible": true,
+      "issues": [
+        "heyputer-puter external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "heyputer-puter external claim review requires review.scope",
+        "heyputer-puter external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ajaxorg-ace",
+      "repository": "https://github.com/ajaxorg/ace.git",
+      "commit": "de5ca297d4383b2bda12a307ee764336ccf985f8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "9cb53374a30ce101e50bd631250ad0afbb5e25274576077d886aed44c63e2025",
+      "precisionEligible": true,
+      "issues": [
+        "ajaxorg-ace external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ajaxorg-ace external claim review requires review.scope",
+        "ajaxorg-ace external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "umami-software-umami",
+      "repository": "https://github.com/umami-software/umami.git",
+      "commit": "af1b6c6efcadd65136a9ec3db6b8ec20962a8a69",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "965eb9ed5d60fe0d90d310655e6ae8800baa95c5139c52d43e80cfac89d30733",
+      "precisionEligible": true,
+      "issues": [
+        "umami-software-umami external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "umami-software-umami external claim review requires review.scope",
+        "umami-software-umami external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "yeachan-heo-oh-my-codex",
+      "repository": "https://github.com/Yeachan-Heo/oh-my-codex.git",
+      "commit": "5319c3d0388b09ad7036e6e3858afd959cfe0eea",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "8f0712f38e949250a87aca958c760fe9198f18367ee0655b0e3faff956338ce1",
+      "precisionEligible": true,
+      "issues": [
+        "yeachan-heo-oh-my-codex external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "yeachan-heo-oh-my-codex external claim review requires review.scope",
+        "yeachan-heo-oh-my-codex external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "dokploy-dokploy",
+      "repository": "https://github.com/Dokploy/dokploy.git",
+      "commit": "df3965a5816700d61c39fd1a13241b5766d7b24e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "65c4397842b10a63ab21ed22a6b485b9c4683122eb3e1ea6cd326b60a9e883fa",
+      "precisionEligible": true,
+      "issues": [
+        "dokploy-dokploy external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "dokploy-dokploy external claim review requires review.scope",
+        "dokploy-dokploy external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "gitlawb-openclaude",
+      "repository": "https://github.com/Gitlawb/openclaude.git",
+      "commit": "0effa0f42b6dbc6a4800e19f4b2d8d588269906b",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f30a98aece2bd5d49ffc87d7cf0d6e591d3773b85dda11a3ae270c497d5d1402",
+      "precisionEligible": true,
+      "issues": [
+        "gitlawb-openclaude external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "gitlawb-openclaude external claim review requires review.scope",
+        "gitlawb-openclaude external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "typeorm-typeorm",
+      "repository": "https://github.com/typeorm/typeorm.git",
+      "commit": "5543c7c462a85b79746ae61205ddd43c1d8de157",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d0a02d4e9eafcb5da7dccc8cba017205afd18750c4b95de56800aaea42401e07",
+      "precisionEligible": true,
+      "issues": [
+        "typeorm-typeorm external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "typeorm-typeorm external claim review requires review.scope",
+        "typeorm-typeorm external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "colbymchenry-codegraph",
+      "repository": "https://github.com/colbymchenry/codegraph.git",
+      "commit": "5955d04c97de3311476b0ca9d8d84cfff4fcb0d3",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "668cec23da165400dd559aca4c314e10998a6ce81e56bc45cd023a567012ba6f",
+      "precisionEligible": true,
+      "issues": [
+        "colbymchenry-codegraph external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "colbymchenry-codegraph external claim review requires review.scope",
+        "colbymchenry-codegraph external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "typicode-json-server",
+      "repository": "https://github.com/typicode/json-server.git",
+      "commit": "89a34a44b7a6a5311dc84f3b8a1b8b45c0905aea",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "9738cfbab4e3cdcf69de67ef4dae9c01bee903b11a276c6972368653a62f2497",
+      "precisionEligible": true,
+      "issues": [
+        "typicode-json-server external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "typicode-json-server external claim review requires review.scope",
+        "typicode-json-server external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "rollup-rollup",
+      "repository": "https://github.com/rollup/rollup.git",
+      "commit": "95c2f026abcf64b125b8107696b369c2692270f5",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "9ac4736b6f11deff26956bdf64c6c6c2fcc1010d454ba724139599fdfba2d149",
+      "precisionEligible": true,
+      "issues": [
+        "rollup-rollup external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "rollup-rollup external claim review requires review.scope",
+        "rollup-rollup external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "fastapi-full-stack-fastapi-template",
+      "repository": "https://github.com/fastapi/full-stack-fastapi-template.git",
+      "commit": "4d3d5e92c1ea6b3fa0fab02c41124844ec45bca8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "e2185e68ebb8983edaf58153ddda107fb7c6871d6e1426f595dbd5534005099f",
+      "precisionEligible": true,
+      "issues": [
+        "fastapi-full-stack-fastapi-template external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "fastapi-full-stack-fastapi-template external claim review requires review.scope",
+        "fastapi-full-stack-fastapi-template external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lecoupa-awesome-cheatsheets",
+      "repository": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+      "commit": "38f406dc19f556d4633e36d3ae144895fcab138f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "1efe84e8c59323e4ea661ec8b3762d4b374845e47f851dd6e1e776ebb506e1c8",
+      "precisionEligible": true,
+      "issues": [
+        "lecoupa-awesome-cheatsheets external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lecoupa-awesome-cheatsheets external claim review requires review.scope",
+        "lecoupa-awesome-cheatsheets external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "xyflow-xyflow",
+      "repository": "https://github.com/xyflow/xyflow.git",
+      "commit": "dd308ab401d49518f73d1e91c43faf254ff5a4c9",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "bf4855b8e3058d4b3bdd694caa2f35606b92a3e0ec5f90e7efada7d4b6362a2f",
+      "precisionEligible": true,
+      "issues": [
+        "xyflow-xyflow external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "xyflow-xyflow external claim review requires review.scope",
+        "xyflow-xyflow external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "digitalocean-nginxconfig-io",
+      "repository": "https://github.com/digitalocean/nginxconfig.io.git",
+      "commit": "dd290c0b706b8a8c2f86cfbffaae9c17715b431d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "914f3753c8af129848bc05c8ab33f8365be0b04f317b6d51c692acdbdd39717e",
+      "precisionEligible": true,
+      "issues": [
+        "digitalocean-nginxconfig-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "digitalocean-nginxconfig-io external claim review requires review.scope",
+        "digitalocean-nginxconfig-io external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "modelcontextprotocol-servers",
+      "repository": "https://github.com/modelcontextprotocol/servers.git",
+      "commit": "d31124c982401739917fd817c2a59db344529c16",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2e12511bfe245a6a4251a7282b0f4fb597ef54312bc000afa86efc33aa821277",
+      "precisionEligible": true,
+      "issues": [
+        "modelcontextprotocol-servers external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "modelcontextprotocol-servers external claim review requires review.scope",
+        "modelcontextprotocol-servers external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "algorithm-visualizer-algorithm-visualizer",
+      "repository": "https://github.com/algorithm-visualizer/algorithm-visualizer.git",
+      "commit": "18de2edf6b629e843ee4bcedfa2208d22b253f0f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5cf18156c215c9aecb5c94a3ba3aa198fce3f83caa372f59250bbe8aafeb2c18",
+      "precisionEligible": true,
+      "issues": [
+        "algorithm-visualizer-algorithm-visualizer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "algorithm-visualizer-algorithm-visualizer external claim review requires review.scope",
+        "algorithm-visualizer-algorithm-visualizer external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "chatboxai-chatbox",
+      "repository": "https://github.com/chatboxai/chatbox.git",
+      "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a",
+      "precisionEligible": true,
+      "issues": [
+        "chatboxai-chatbox external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "chatboxai-chatbox external claim review requires review.scope",
+        "chatboxai-chatbox external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "homebridge-homebridge",
+      "repository": "https://github.com/homebridge/homebridge.git",
+      "commit": "e40e64bab4decb4cee7d3bc3c0c9a6538f3714dc",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2749e01d3a955f2a5098cee85c4eb97de26a8cad4ede3f789a0091f9b1446887",
+      "precisionEligible": true,
+      "issues": [
+        "homebridge-homebridge external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "homebridge-homebridge external claim review requires review.scope",
+        "homebridge-homebridge external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "opencut-app-opencut",
+      "repository": "https://github.com/OpenCut-app/OpenCut.git",
+      "commit": "5e0696bc9b921dcbaf2f42bdf3e96891a30c1e9e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "cede831ef28dd4181653b7dbbf04ca276f4060b26246ea8871618f1defbfaae7",
+      "precisionEligible": true,
+      "issues": [
+        "opencut-app-opencut external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "opencut-app-opencut external claim review requires review.scope",
+        "opencut-app-opencut external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "pmndrs-react-three-fiber",
+      "repository": "https://github.com/pmndrs/react-three-fiber.git",
+      "commit": "7dfaeaaab270ebef2b176e8bcaa5819702c34794",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "805c5a4431693ef60dee42422d60cdda4b9c30e8e6f80694e8a9f6b09a6fa6d9",
+      "precisionEligible": true,
+      "issues": [
+        "pmndrs-react-three-fiber external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "pmndrs-react-three-fiber external claim review requires review.scope",
+        "pmndrs-react-three-fiber external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "alibaba-page-agent",
+      "repository": "https://github.com/alibaba/page-agent.git",
+      "commit": "da1db959558dcd49a6c489e76a23accfbda7b156",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352",
+      "precisionEligible": true,
+      "issues": [
+        "alibaba-page-agent external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "alibaba-page-agent external claim review requires review.scope",
+        "alibaba-page-agent external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jaredpalmer-formik",
+      "repository": "https://github.com/jaredpalmer/formik.git",
+      "commit": "91475adbf33579561e580eceea0c031f4ec2e992",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d22b4510b8620b9f898557e26959c7f30396985bcc6f801fc0e4506e413e4843",
+      "precisionEligible": true,
+      "issues": [
+        "jaredpalmer-formik external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jaredpalmer-formik external claim review requires review.scope",
+        "jaredpalmer-formik external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "musistudio-claude-code-router",
+      "repository": "https://github.com/musistudio/claude-code-router.git",
+      "commit": "19973394d26fb1afec697f5d091d62d300bcdf50",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e",
+      "precisionEligible": true,
+      "issues": [
+        "musistudio-claude-code-router external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "musistudio-claude-code-router external claim review requires review.scope",
+        "musistudio-claude-code-router external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "upstash-context7",
+      "repository": "https://github.com/upstash/context7.git",
+      "commit": "23843e9ce62908896cf2dcd32cc5c03c05047416",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "954be36a0396e640f3b000d18236f55cd2486558f05f22bfd73eaa497f64a763",
+      "precisionEligible": true,
+      "issues": [
+        "upstash-context7 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "upstash-context7 external claim review requires review.scope",
+        "upstash-context7 external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "adguardteam-adguardhome",
+      "repository": "https://github.com/AdguardTeam/AdGuardHome.git",
+      "commit": "2961664cbec08529d6e37e7ac4548eca8340e56c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b982485bba3f49cd8ede0ef01c461ce11919b9116bfe3ff4b15066b035764e4b",
+      "precisionEligible": true,
+      "issues": [
+        "adguardteam-adguardhome external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "adguardteam-adguardhome external claim review requires review.scope",
+        "adguardteam-adguardhome external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "chatgptnextweb-nextchat",
+      "repository": "https://github.com/ChatGPTNextWeb/NextChat.git",
+      "commit": "706a18b95b714ab29b2a4842d3b9ff4f887935d5",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ad305cfbfb4430f0b80b33c6adea9a3212574aaa47371996be0740bc22e52249",
+      "precisionEligible": true,
+      "issues": [
+        "chatgptnextweb-nextchat external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "chatgptnextweb-nextchat external claim review requires review.scope",
+        "chatgptnextweb-nextchat external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lissy93-web-check",
+      "repository": "https://github.com/lissy93/web-check.git",
+      "commit": "9154bd43e8276c0310c29c86ac70648e1ed4eda5",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "48fdcbfc41381cd01c6b017aa26f1adb0feddea12b00e991e146179dc6f302bb",
+      "precisionEligible": true,
+      "issues": [
+        "lissy93-web-check external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lissy93-web-check external claim review requires review.scope",
+        "lissy93-web-check external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "withfig-autocomplete",
+      "repository": "https://github.com/withfig/autocomplete.git",
+      "commit": "aef52acff84c45edde61ae610cc2c964802b9a38",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831",
+      "precisionEligible": true,
+      "issues": [
+        "withfig-autocomplete external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "withfig-autocomplete external claim review requires review.scope",
+        "withfig-autocomplete external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "linshenkx-prompt-optimizer",
+      "repository": "https://github.com/linshenkx/prompt-optimizer.git",
+      "commit": "0c3679511d5c61dcdbb92777e62f315f16d7d378",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "68a2b8c89a6a9cbed73f32572437464d10368e2db697c0541f672b2429990058",
+      "precisionEligible": true,
+      "issues": [
+        "linshenkx-prompt-optimizer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "linshenkx-prompt-optimizer external claim review requires review.scope",
+        "linshenkx-prompt-optimizer external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "socketio-socket-io",
+      "repository": "https://github.com/socketio/socket.io.git",
+      "commit": "ef026605a44e299ef6f94b6d6a07375057011060",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "7fc9e6424348af6a7d9a08050772759a62752c3367effdad195486ab636a90c4",
+      "precisionEligible": true,
+      "issues": [
+        "socketio-socket-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "socketio-socket-io external claim review requires review.scope",
+        "socketio-socket-io external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "feathericons-feather",
+      "repository": "https://github.com/feathericons/feather.git",
+      "commit": "3dc050d97405062eba78aa57115c0a15c63abdaa",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "0ed7f3dc603396c058a538fc29267e00c8d8c71adaec7222fc6cd7a088d0c8b2",
+      "precisionEligible": true,
+      "issues": [
+        "feathericons-feather external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "feathericons-feather external claim review requires review.scope",
+        "feathericons-feather external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lodash-lodash",
+      "repository": "https://github.com/lodash/lodash.git",
+      "commit": "a666ba591064c8011988275790ad7d625279f09c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "30af6bbd559a3b66ff7ed947b66b28247e94ef4e68c864c9e38a8eaaf366a4e5",
+      "precisionEligible": true,
+      "issues": [
+        "lodash-lodash external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lodash-lodash external claim review requires review.scope",
+        "lodash-lodash external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "markedjs-marked",
+      "repository": "https://github.com/markedjs/marked.git",
+      "commit": "9154f8f3cb2fa136d85b61e1eacc4ef381a3b629",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "99afe76ceeba6eec92670122ae281dc34ec1ef1b9e378a9a8b5e0a5ee92b6c71",
+      "precisionEligible": true,
+      "issues": [
+        "markedjs-marked external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "markedjs-marked external claim review requires review.scope",
+        "markedjs-marked external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "qishibo-anotherredisdesktopmanager",
+      "repository": "https://github.com/qishibo/AnotherRedisDesktopManager.git",
+      "commit": "4c2b7a5f1074b619eb11ca19796d896c3a8e7098",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "71895f3768536d5d4bc96c3a0334b9f643d02b1e71c99084175badc1e67cf7ea",
+      "precisionEligible": true,
+      "issues": [
+        "qishibo-anotherredisdesktopmanager external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "qishibo-anotherredisdesktopmanager external claim review requires review.scope",
+        "qishibo-anotherredisdesktopmanager external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "react-boilerplate-react-boilerplate",
+      "repository": "https://github.com/react-boilerplate/react-boilerplate.git",
+      "commit": "d19099afeff64ecfb09133c06c1cb18c0d40887e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "20f4659340dabaaee5133e855e7133bc05b10f0d581f48ad9aaf1b7d9395050a",
+      "precisionEligible": true,
+      "issues": [
+        "react-boilerplate-react-boilerplate external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "react-boilerplate-react-boilerplate external claim review requires review.scope",
+        "react-boilerplate-react-boilerplate external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vuejs-vue",
+      "repository": "https://github.com/vuejs/vue.git",
+      "commit": "9e88707940088cb1f4cd7dd210c9168a50dc347c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "dcf5de2a51f8d9f8a7800cc15a6e8408e830dc4e3764b9f5f3c9cc9a7e4ed623",
+      "precisionEligible": true,
+      "issues": [
+        "vuejs-vue external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vuejs-vue external claim review requires review.scope",
+        "vuejs-vue external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "mihomo-party-org-clash-party",
+      "repository": "https://github.com/mihomo-party-org/clash-party.git",
+      "commit": "b06667c6d7f5a178c9236bac6eebf8d217231c74",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "45f33371908cf8b52046fa72aee32758826133cab6d53b4f85e2391ff5649355",
+      "precisionEligible": true,
+      "issues": [
+        "mihomo-party-org-clash-party external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "mihomo-party-org-clash-party external claim review requires review.scope",
+        "mihomo-party-org-clash-party external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "remy-nodemon",
+      "repository": "https://github.com/remy/nodemon.git",
+      "commit": "f3c24537e68c3e88f5b6afd911b476aef6239560",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "6d0ba50c6f23c6d5977db19a71095f0325a09b25bb7ed244cd1886429b40fc75",
+      "precisionEligible": true,
+      "issues": [
+        "remy-nodemon external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "remy-nodemon external claim review requires review.scope",
+        "remy-nodemon external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "hexojs-hexo",
+      "repository": "https://github.com/hexojs/hexo.git",
+      "commit": "a16a7e609f8d3786d21d65e98ffcf602eecbc0f6",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "580a2598f9d80611570fd6102bd3cf67f47d33d50bd43c73ddae313fdbfbb9f9",
+      "precisionEligible": true,
+      "issues": [
+        "hexojs-hexo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "hexojs-hexo external claim review requires review.scope",
+        "hexojs-hexo external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "expressjs-express",
+      "repository": "https://github.com/expressjs/express.git",
+      "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "457c57070b1ede0b934f91a95e8c8964f7b3f814cb60e5be04be043872d3c1a1",
+      "precisionEligible": true,
+      "issues": [
+        "expressjs-express external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "expressjs-express external claim review requires review.scope",
+        "expressjs-express external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "juliusbrussee-caveman",
+      "repository": "https://github.com/JuliusBrussee/caveman.git",
+      "commit": "0d95a81d35a9f2d123a5e9430d1cfc43d55f1bb0",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2dcbb01a642063b7efeb515284f1a0c8181146a5215b0f7d3745418fabe5d814",
+      "precisionEligible": true,
+      "issues": [
+        "juliusbrussee-caveman external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "juliusbrussee-caveman external claim review requires review.scope",
+        "juliusbrussee-caveman external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "mobxjs-mobx",
+      "repository": "https://github.com/mobxjs/mobx.git",
+      "commit": "825244a92e0005174ec103f88aa6682248b1298e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b74b8c47d8447ea14283487dce8b63a4323792954b41e15adb36fa06bb939a80",
+      "precisionEligible": true,
+      "issues": [
+        "mobxjs-mobx external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "mobxjs-mobx external claim review requires review.scope",
+        "mobxjs-mobx external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "select2-select2",
+      "repository": "https://github.com/select2/select2.git",
+      "commit": "cc7ba1ebb79d9e816186a4d2defe6a6acdac433c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "41d3165a370398ddb74054e39ccede6229c10e2f81f7cc8b878d859ca4ab528b",
+      "precisionEligible": true,
+      "issues": [
+        "select2-select2 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "select2-select2 external claim review requires review.scope",
+        "select2-select2 external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "justjavac-wechat-miniapp-radar",
+      "repository": "https://github.com/justjavac/wechat-miniapp-radar.git",
+      "commit": "597c3e1763e5506b09037bd82d9897ca28dd6e4d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "e45e35fb4af971e0d83264df865dad656978e95e044ac20c21e4910062c90ef1",
+      "precisionEligible": true,
+      "issues": [
+        "justjavac-wechat-miniapp-radar external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "justjavac-wechat-miniapp-radar external claim review requires review.scope",
+        "justjavac-wechat-miniapp-radar external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "yamadashy-repomix",
+      "repository": "https://github.com/yamadashy/repomix.git",
+      "commit": "71ba866e272054e74ed7b26f5db897d2489fb3c2",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f30549bafbb8782b7cb31e796b9f74c382e45a53f4b8ea572a2bafe2b0e7356e",
+      "precisionEligible": true,
+      "issues": [
+        "yamadashy-repomix external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "yamadashy-repomix external claim review requires review.scope",
+        "yamadashy-repomix external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "shardeum-shardeum",
+      "repository": "https://github.com/shardeum/shardeum.git",
+      "commit": "0c454caf067f7b896569eabdd5f47cb8b61738b3",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "baea7264c6d713402c6ca4dd41425b2eff6d32c9d6e0c0a9c815ce25cbcfa639",
+      "precisionEligible": true,
+      "issues": [
+        "shardeum-shardeum external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "shardeum-shardeum external claim review requires review.scope",
+        "shardeum-shardeum external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tobi-qmd",
+      "repository": "https://github.com/tobi/qmd.git",
+      "commit": "e428df76bc0274d9e93eb7ca3e95673315c42e90",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5d2b7d4938a500e1a4a4aabfa3d1c592a78eb289ddca15b40bde22a38018ed03",
+      "precisionEligible": true,
+      "issues": [
+        "tobi-qmd external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tobi-qmd external claim review requires review.scope",
+        "tobi-qmd external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "slab-quill",
+      "repository": "https://github.com/slab/quill.git",
+      "commit": "539cbffd0a13b18e9c65eb84dd35e6596e403158",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "78d6eefae30a20c20948928d66f32448dee9c0c3fdd7b97a6e009dcd5484a00c",
+      "precisionEligible": true,
+      "issues": [
+        "slab-quill external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "slab-quill external claim review requires review.scope",
+        "slab-quill external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "google-zx",
+      "repository": "https://github.com/google/zx.git",
+      "commit": "00a2c484e219c2e84bfc3a199febf7fbce2cfbf4",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "446ffa713dcaa57e1ee60fcdc5fa6225edbe3b704eb72325c9e2f4e103225295",
+      "precisionEligible": true,
+      "issues": [
+        "google-zx external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "google-zx external claim review requires review.scope",
+        "google-zx external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jimliu-baoyu-skills",
+      "repository": "https://github.com/JimLiu/baoyu-skills.git",
+      "commit": "6b7a2e417500561a5ecdd0b168332f4142584617",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5cf074b26d109f432d7529bd80c05053615bed1dce60415bcb9fca2216ef4e07",
+      "precisionEligible": true,
+      "issues": [
+        "jimliu-baoyu-skills external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jimliu-baoyu-skills external claim review requires review.scope",
+        "jimliu-baoyu-skills external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tailwindlabs-headlessui",
+      "repository": "https://github.com/tailwindlabs/headlessui.git",
+      "commit": "eea57cf46fd6767ed1059012f7073b88eb159fba",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "88e1ecd2591ed89daaa78544bbee4fad25f37181d36f1fa758ec1b34dced88f5",
+      "precisionEligible": true,
+      "issues": [
+        "tailwindlabs-headlessui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tailwindlabs-headlessui external claim review requires review.scope",
+        "tailwindlabs-headlessui external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "smapiot-piral",
+      "repository": "https://github.com/smapiot/piral.git",
+      "commit": "e99325cd748f4855286bd1e1436aa4b09e5bbad0",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "4f06193eb977c71a98e2a27b3cb08cb0c05df185636a018dbfdc0e8cb2e92f66",
+      "precisionEligible": true,
+      "issues": [
+        "smapiot-piral external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "smapiot-piral external claim review requires review.scope",
+        "smapiot-piral external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "infinitered-reactotron",
+      "repository": "https://github.com/infinitered/reactotron.git",
+      "commit": "763c1c8e0d4f33d6357c3ee95567ee595eb287e0",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2cd236eff70fb46aecdcd89498a802d195399cae4bd29f0277c5773939ca4003",
+      "precisionEligible": true,
+      "issues": [
+        "infinitered-reactotron external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "infinitered-reactotron external claim review requires review.scope",
+        "infinitered-reactotron external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "rx-angular-rx-angular",
+      "repository": "https://github.com/rx-angular/rx-angular.git",
+      "commit": "bac373009c8be2013684b0565df9c8c90aed568c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "64f7d73936397005562bcae6dc0649dc74991ec0602952e33e0beb68a9d52710",
+      "precisionEligible": true,
+      "issues": [
+        "rx-angular-rx-angular external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "rx-angular-rx-angular external claim review requires review.scope",
+        "rx-angular-rx-angular external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "usesend-usesend",
+      "repository": "https://github.com/usesend/useSend.git",
+      "commit": "bd83535599b53fbf0f5cc84bcdbcf63c8d35be99",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b192fb2186850956893d306c26aa162ca9abe0485a0257cd8a09442bea817f2d",
+      "precisionEligible": true,
+      "issues": [
+        "usesend-usesend external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "usesend-usesend external claim review requires review.scope",
+        "usesend-usesend external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "deepnotesapp-deepnotes",
+      "repository": "https://github.com/DeepNotesApp/DeepNotes.git",
+      "commit": "70f6c7edb00159b7011d3ac5710795631432f219",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f50e74500136b9bbc20abdc7ded295922b41422e1ed73fe8bc12379a411ee652",
+      "precisionEligible": true,
+      "issues": [
+        "deepnotesapp-deepnotes external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "deepnotesapp-deepnotes external claim review requires review.scope",
+        "deepnotesapp-deepnotes external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "besscroft-picimpact",
+      "repository": "https://github.com/besscroft/PicImpact.git",
+      "commit": "a806e84f5a6fb3628bb4db05f67b5c7bb5cfdffc",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "425747fb8c8bc49673ec63a350318c53957ecc3e2ff623fa594e7eb521bdd843",
+      "precisionEligible": true,
+      "issues": [
+        "besscroft-picimpact external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "besscroft-picimpact external claim review requires review.scope",
+        "besscroft-picimpact external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "6pac-slickgrid",
+      "repository": "https://github.com/6pac/SlickGrid.git",
+      "commit": "2079c2427308e5264a3ca064f50572f7b8478b5e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774",
+      "precisionEligible": true,
+      "issues": [
+        "6pac-slickgrid external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "6pac-slickgrid external claim review requires review.scope",
+        "6pac-slickgrid external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "brackets-userland-brackets-git",
+      "repository": "https://github.com/brackets-userland/brackets-git.git",
+      "commit": "334b702d2a35f62a2a863b9aaa25d1bec95c7ed7",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646",
+      "precisionEligible": true,
+      "issues": [
+        "brackets-userland-brackets-git external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "brackets-userland-brackets-git external claim review requires review.scope",
+        "brackets-userland-brackets-git external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "freedomjs-freedom",
+      "repository": "https://github.com/freedomjs/freedom.git",
+      "commit": "9638e840aec9598c4d60383ed22444c525aefbf5",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "a53e5cb32b620690cfef58f2d238af14673c4dabb443573ad2d27337bd34901a",
+      "precisionEligible": true,
+      "issues": [
+        "freedomjs-freedom external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "freedomjs-freedom external claim review requires review.scope",
+        "freedomjs-freedom external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "rich-harris-degit",
+      "repository": "https://github.com/Rich-Harris/degit.git",
+      "commit": "87008d3644a6172e7b8c12f38692b0d20b63a70d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "fae429c812b5cd1d21db1cb965faf0a9f4f7d6a1a05b389818b555ba564a9314",
+      "precisionEligible": true,
+      "issues": [
+        "rich-harris-degit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "rich-harris-degit external claim review requires review.scope",
+        "rich-harris-degit external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "googlechromelabs-container-query-polyfill",
+      "repository": "https://github.com/GoogleChromeLabs/container-query-polyfill.git",
+      "commit": "f6831ec85e8db047218f8f8807667f1429aba457",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9",
+      "precisionEligible": true,
+      "issues": [
+        "googlechromelabs-container-query-polyfill external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "googlechromelabs-container-query-polyfill external claim review requires review.scope",
+        "googlechromelabs-container-query-polyfill external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "dsherret-dax",
+      "repository": "https://github.com/dsherret/dax.git",
+      "commit": "dd84816c4cfcf8344a895ace8b6768c8e6134a78",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34",
+      "precisionEligible": true,
+      "issues": [
+        "dsherret-dax external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "dsherret-dax external claim review requires review.scope",
+        "dsherret-dax external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "chakra-ui-zag",
+      "repository": "https://github.com/chakra-ui/zag.git",
+      "commit": "2b199781b1a8d9b8a57b03dff443cf5dbf55c912",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "4b9ca8bb73e701dd67924724e410a64500980df8b082a5d58034fa2a2742d670",
+      "precisionEligible": true,
+      "issues": [
+        "chakra-ui-zag external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "chakra-ui-zag external claim review requires review.scope",
+        "chakra-ui-zag external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lumenstorm-orisonspace",
+      "repository": "https://github.com/LumenStorm/OrisonSpace.git",
+      "commit": "f1ce8a51bc258f95f5fac60a6fbf6fa34b84f983",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d",
+      "precisionEligible": true,
+      "issues": [
+        "lumenstorm-orisonspace external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lumenstorm-orisonspace external claim review requires review.scope",
+        "lumenstorm-orisonspace external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ts-rest-ts-rest",
+      "repository": "https://github.com/ts-rest/ts-rest.git",
+      "commit": "dd7239bc950d1e254d9c9cd6df7dbccc529c33cb",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b387843d2dc3bbb6aa2f7feb63714a4c7016c6e8f4a0950ce94564ad60f33ff9",
+      "precisionEligible": true,
+      "issues": [
+        "ts-rest-ts-rest external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ts-rest-ts-rest external claim review requires review.scope",
+        "ts-rest-ts-rest external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "hyperstackjs-hyperstack",
+      "repository": "https://github.com/hyperstackjs/hyperstack.git",
+      "commit": "55191062e7111ead165f886f398373565b194629",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "aef2df08f61e5c3b9ee4cafad009324bb3c621bb21443754b0d8725a6a60749c",
+      "precisionEligible": true,
+      "issues": [
+        "hyperstackjs-hyperstack external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "hyperstackjs-hyperstack external claim review requires review.scope",
+        "hyperstackjs-hyperstack external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nutlope-pdftochat",
+      "repository": "https://github.com/Nutlope/pdftochat.git",
+      "commit": "2dc75fa55b024af3125d6d0e90ce0be5eecc3975",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "0f37fd2a92a91ad029ea581ee7d34895f609da90c4dbcc273eed2e8bdb367730",
+      "precisionEligible": true,
+      "issues": [
+        "nutlope-pdftochat external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nutlope-pdftochat external claim review requires review.scope",
+        "nutlope-pdftochat external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "puemos-hls-downloader",
+      "repository": "https://github.com/puemos/hls-downloader.git",
+      "commit": "2071e691e6d499a053f34382fe0a6c57d0b80f59",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d",
+      "precisionEligible": true,
+      "issues": [
+        "puemos-hls-downloader external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "puemos-hls-downloader external claim review requires review.scope",
+        "puemos-hls-downloader external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "kmijs-kmi",
+      "repository": "https://github.com/kmijs/kmi.git",
+      "commit": "daf893604446e8081d556a8086a0fa72e7912de4",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "086993bdb8cc1191fe556a823c165b9209d567fd471afe74c8c57c1bf42fa1ea",
+      "precisionEligible": true,
+      "issues": [
+        "kmijs-kmi external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "kmijs-kmi external claim review requires review.scope",
+        "kmijs-kmi external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "livestorejs-livestore",
+      "repository": "https://github.com/livestorejs/livestore.git",
+      "commit": "064bb8dd74c4f22bfcca47256f01b6c32ca27763",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "18c18df6371c68c232ec34362464285faf30150c74c65e8735db0524a10ab10f",
+      "precisionEligible": true,
+      "issues": [
+        "livestorejs-livestore external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "livestorejs-livestore external claim review requires review.scope",
+        "livestorejs-livestore external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "paularmstrong-onerepo",
+      "repository": "https://github.com/paularmstrong/onerepo.git",
+      "commit": "e0ef7e3394ca33ba8006df435ffdae1ae6873a21",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d5e3050cc0061241869e779eebd28072e8ee0b465a59a9573263c99afdfb4887",
+      "precisionEligible": true,
+      "issues": [
+        "paularmstrong-onerepo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "paularmstrong-onerepo external claim review requires review.scope",
+        "paularmstrong-onerepo external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "celo-org-celo-composer",
+      "repository": "https://github.com/celo-org/celo-composer.git",
+      "commit": "710dd89afc408e5b9385c9fdae83cd2e6246e893",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "036e5638452b59641e1b8499446eabc1ea10db79f21ff51d12597e4542f509b4",
+      "precisionEligible": true,
+      "issues": [
+        "celo-org-celo-composer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "celo-org-celo-composer external claim review requires review.scope",
+        "celo-org-celo-composer external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "vikejs-bati",
+      "repository": "https://github.com/vikejs/bati.git",
+      "commit": "682464ac9dd19bd5a702a91bf1951be222d2a412",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "51576a4a0b529b73c7a461b98eed28eb4247296d12e30549614b959e29a9f10e",
+      "precisionEligible": true,
+      "issues": [
+        "vikejs-bati external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "vikejs-bati external claim review requires review.scope",
+        "vikejs-bati external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jscutlery-devkit",
+      "repository": "https://github.com/jscutlery/devkit.git",
+      "commit": "4c3d25d704cf126af12fcbdb8ff39e49deb8a32a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "f6b5ef4989bafc3b38b20699dca87a47e6bb9c3e2eec3e44079d45cfa63a0f27",
+      "precisionEligible": true,
+      "issues": [
+        "jscutlery-devkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jscutlery-devkit external claim review requires review.scope",
+        "jscutlery-devkit external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "takram-design-engineering-three-geospatial",
+      "repository": "https://github.com/takram-design-engineering/three-geospatial.git",
+      "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "c0bdf4ad6da6eec79d9213317305e8bc08593c34681cca23bb7f774928f59546",
+      "precisionEligible": true,
+      "issues": [
+        "takram-design-engineering-three-geospatial external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "takram-design-engineering-three-geospatial external claim review requires review.scope",
+        "takram-design-engineering-three-geospatial external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "briehq-brie-extension",
+      "repository": "https://github.com/briehq/brie-extension.git",
+      "commit": "b18e550026e4acf322815bd91200692593397d91",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "a4eeb87c8882a2768f6805cb8773eaac4c3696e0e86819fc809fb760902e25a0",
+      "precisionEligible": true,
+      "issues": [
+        "briehq-brie-extension external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "briehq-brie-extension external claim review requires review.scope",
+        "briehq-brie-extension external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nextify-limited-saasfly",
+      "repository": "https://github.com/nextify-limited/saasfly.git",
+      "commit": "49f7e28f69eae9cd9eed84221e13a3dbae87da67",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "bfd551a02501a4820cb7b2094443b58c3b4d463e7f38ae97884ff6e10184c7e4",
+      "precisionEligible": true,
+      "issues": [
+        "nextify-limited-saasfly external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nextify-limited-saasfly external claim review requires review.scope",
+        "nextify-limited-saasfly external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "keyshade-xyz-keyshade",
+      "repository": "https://github.com/keyshade-xyz/keyshade.git",
+      "commit": "ef7e9e21a6d908d8c131e0e8bbdec3ef28c23e9a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "0ae2e7e971a143dd5321dbbabe881b5b63293075358152fe2b85bb54cb2892aa",
+      "precisionEligible": true,
+      "issues": [
+        "keyshade-xyz-keyshade external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "keyshade-xyz-keyshade external claim review requires review.scope",
+        "keyshade-xyz-keyshade external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "slymnoyann-hey-1",
+      "repository": "https://github.com/slymnoyann/hey-1.git",
+      "commit": "88c8f9d55340d57a37846ff72f55c2c604e3a566",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672",
+      "precisionEligible": true,
+      "issues": [
+        "slymnoyann-hey-1 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "slymnoyann-hey-1 external claim review requires review.scope",
+        "slymnoyann-hey-1 external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "louisgv-local-ai",
+      "repository": "https://github.com/louisgv/local.ai.git",
+      "commit": "ad9a9e63d8b0262fdf6734d10e2e9a0078c3977a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767",
+      "precisionEligible": true,
+      "issues": [
+        "louisgv-local-ai external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "louisgv-local-ai external claim review requires review.scope",
+        "louisgv-local-ai external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jscad-openjscad-org",
+      "repository": "https://github.com/jscad/OpenJSCAD.org.git",
+      "commit": "f245ea3a5072024b789f276c6fb9ce6c3eb3fd0d",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "92d954ef17ea30ec061721be2b0d8de0fa3394cb492bdd7a92d0506543f802c2",
+      "precisionEligible": true,
+      "issues": [
+        "jscad-openjscad-org external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jscad-openjscad-org external claim review requires review.scope",
+        "jscad-openjscad-org external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "docmirror-dev-sidecar",
+      "repository": "https://github.com/docmirror/dev-sidecar.git",
+      "commit": "1d890a34b264caa72c4cf4667645b6032de0e313",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b867150938ba38939e2f19dba6728ca545208d453b10a5b7f449b933517c0afa",
+      "precisionEligible": true,
+      "issues": [
+        "docmirror-dev-sidecar external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "docmirror-dev-sidecar external claim review requires review.scope",
+        "docmirror-dev-sidecar external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "antfu-collective-ni",
+      "repository": "https://github.com/antfu-collective/ni.git",
+      "commit": "8b92b0624e9933113507857ee926a73a5ed285b3",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5094b9358644c282d16a2db184b7bdd6389563f5412467072e27314762b083d1",
+      "precisionEligible": true,
+      "issues": [
+        "antfu-collective-ni external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "antfu-collective-ni external claim review requires review.scope",
+        "antfu-collective-ni external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+      "repository": "https://github.com/stefanoslig/angular-ngrx-nx-realworld-example-app.git",
+      "commit": "bc7158d61319b6748b94cef301dc347efcc23f00",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc",
+      "precisionEligible": true,
+      "issues": [
+        "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.scope",
+        "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ixahmedxi-orbitkit",
+      "repository": "https://github.com/ixahmedxi/orbitkit.git",
+      "commit": "0207fdfddf22d0f31fc88c51d275e5b4a56e0c98",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "7c48a9a8b9094480af201d014cc3304ab5808a43d8bb2d593eb602ee0498d2d9",
+      "precisionEligible": true,
+      "issues": [
+        "ixahmedxi-orbitkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ixahmedxi-orbitkit external claim review requires review.scope",
+        "ixahmedxi-orbitkit external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "guigrpa-oao",
+      "repository": "https://github.com/guigrpa/oao.git",
+      "commit": "b5860a656ac784908753e830d81642551c136ed8",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "e31b9ad88ae12238f11a8fad3278cae16d88ffcabee48b1e834586704bede302",
+      "precisionEligible": true,
+      "issues": [
+        "guigrpa-oao external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "guigrpa-oao external claim review requires review.scope",
+        "guigrpa-oao external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "react-workspaces-react-workspaces-playground",
+      "repository": "https://github.com/react-workspaces/react-workspaces-playground.git",
+      "commit": "59e2a8948a7f16579aa4776db5f09a1dcea46c7a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2deb7d373ddcb0259caa007f752c4f6e2aecf0c916a49fbc5a0eb88441608185",
+      "precisionEligible": true,
+      "issues": [
+        "react-workspaces-react-workspaces-playground external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "react-workspaces-react-workspaces-playground external claim review requires review.scope",
+        "react-workspaces-react-workspaces-playground external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "doramart-doracms",
+      "repository": "https://github.com/doramart/DoraCMS.git",
+      "commit": "bdaded858ce655fccae0c01c18e36e420c5c48fe",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b0d40966d8fc3ab3f3c1968dd8d892d831d5d68ae57d0864b0e019c85c8fed91",
+      "precisionEligible": true,
+      "issues": [
+        "doramart-doracms external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "doramart-doracms external claim review requires review.scope",
+        "doramart-doracms external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "tomalaforge-angular-challenges",
+      "repository": "https://github.com/tomalaforge/angular-challenges.git",
+      "commit": "543770b2fdf871b57cecfaffc8e4f0dd0da29549",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771",
+      "precisionEligible": true,
+      "issues": [
+        "tomalaforge-angular-challenges external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "tomalaforge-angular-challenges external claim review requires review.scope",
+        "tomalaforge-angular-challenges external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "trungvose-angular-spotify",
+      "repository": "https://github.com/trungvose/angular-spotify.git",
+      "commit": "e1bec473caae3230f94867b0300e7c7ab76e3519",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5d43691e673cff2779777f73b0c9465a8d63ed0a1ad44b027f10ca9d0f6e9d55",
+      "precisionEligible": true,
+      "issues": [
+        "trungvose-angular-spotify external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "trungvose-angular-spotify external claim review requires review.scope",
+        "trungvose-angular-spotify external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "jamiemason-shrinkpack",
+      "repository": "https://github.com/JamieMason/shrinkpack.git",
+      "commit": "ba19806467afe58a4507567898ea38d73aab9b41",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "21c135cda284e08cca413941324800d236cee690187d17fce0065dad95dfc6d9",
+      "precisionEligible": true,
+      "issues": [
+        "jamiemason-shrinkpack external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "jamiemason-shrinkpack external claim review requires review.scope",
+        "jamiemason-shrinkpack external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nighttrax-ts-monorepo",
+      "repository": "https://github.com/NiGhTTraX/ts-monorepo.git",
+      "commit": "949b99be84079e1fd3e101292173da839e8ffe1e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ee731062e46e844bb7e26c2a25bc9765f5cf68dc6d8368bd76dfe4304c737a69",
+      "precisionEligible": true,
+      "issues": [
+        "nighttrax-ts-monorepo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nighttrax-ts-monorepo external claim review requires review.scope",
+        "nighttrax-ts-monorepo external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ttttonyhe-ouorz-mono",
+      "repository": "https://github.com/ttttonyhe/ouorz-mono.git",
+      "commit": "d9dad5d6891c91c7d87a77255a8207bb4e57743f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "51904b733e01135cefb78125cbfa7932b12e8adf8af4fd1c1065e2ebd6e1c16b",
+      "precisionEligible": true,
+      "issues": [
+        "ttttonyhe-ouorz-mono external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ttttonyhe-ouorz-mono external claim review requires review.scope",
+        "ttttonyhe-ouorz-mono external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ducktors-turborepo-remote-cache",
+      "repository": "https://github.com/ducktors/turborepo-remote-cache.git",
+      "commit": "8f78fc645055b50a84470ff5ca580c848620368e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "a9f416656fe4eb46d4e375800def4bdb891ffddc25bc91fa5698d1f388005c9f",
+      "precisionEligible": true,
+      "issues": [
+        "ducktors-turborepo-remote-cache external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "ducktors-turborepo-remote-cache external claim review requires review.scope",
+        "ducktors-turborepo-remote-cache external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "nteract-archived-desktop-app",
+      "repository": "https://github.com/nteract/archived-desktop-app.git",
+      "commit": "7516211c27bad1e5a415505b023e2221bc430d8a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ca5266b66306c91eec6062a065cacbc7ed1e239001e88ae9c7f300638e242005",
+      "precisionEligible": true,
+      "issues": [
+        "nteract-archived-desktop-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "nteract-archived-desktop-app external claim review requires review.scope",
+        "nteract-archived-desktop-app external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "colmena-colmena",
+      "repository": "https://github.com/colmena/colmena.git",
+      "commit": "8d070208c59f34c85b589dec75476f7a446257e9",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "5b9968976d09fb78099ecda2d0509fdaeee2b948cfbfa964a46da0b59eb57be2",
+      "precisionEligible": true,
+      "issues": [
+        "colmena-colmena external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "colmena-colmena external claim review requires review.scope",
+        "colmena-colmena external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "lerna-lite-lerna-lite",
+      "repository": "https://github.com/lerna-lite/lerna-lite.git",
+      "commit": "bda9e921cf9a050886d335120049c396f13a2d65",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "ea361a4a5da7d8460e2aab36e777a3de993239af830ad755ca8246f1078c45bf",
+      "precisionEligible": true,
+      "issues": [
+        "lerna-lite-lerna-lite external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "lerna-lite-lerna-lite external claim review requires review.scope",
+        "lerna-lite-lerna-lite external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "umaprotocol-protocol",
+      "repository": "https://github.com/UMAprotocol/protocol.git",
+      "commit": "c6ac81a699f671c4b553134e6f9852cc47e8195b",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d144cb82c2761b955af9a2a20c83ab4d587d416021b1cb4696d10c77c605fe3e",
+      "precisionEligible": true,
+      "issues": [
+        "umaprotocol-protocol external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "umaprotocol-protocol external claim review requires review.scope",
+        "umaprotocol-protocol external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "kirklin-celeris-web",
+      "repository": "https://github.com/kirklin/celeris-web.git",
+      "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7",
+      "precisionEligible": true,
+      "issues": [
+        "kirklin-celeris-web external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "kirklin-celeris-web external claim review requires review.scope",
+        "kirklin-celeris-web external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "panoratech-panora",
+      "repository": "https://github.com/panoratech/Panora.git",
+      "commit": "38eda443ed91cccf59da5dcc2ac401a1cb02d35a",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d6cca67a083d540793f8f903357bc6c2a89ecc90654ce004173c8cefc096a677",
+      "precisionEligible": true,
+      "issues": [
+        "panoratech-panora external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "panoratech-panora external claim review requires review.scope",
+        "panoratech-panora external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "cumt-robin-fullstack-blog",
+      "repository": "https://github.com/cumt-robin/fullstack-blog.git",
+      "commit": "d3ce80d835976399ad27e3b596adcacdc983321e",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc",
+      "precisionEligible": true,
+      "issues": [
+        "cumt-robin-fullstack-blog external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "cumt-robin-fullstack-blog external claim review requires review.scope",
+        "cumt-robin-fullstack-blog external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "muravjev-configs",
+      "repository": "https://github.com/muravjev/configs.git",
+      "commit": "9b323d300b03f7bbeb4eabc85cdbbdbe51b37b56",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "57884c33c1cc2c2037eebb9cfd6d89301f9ae5e0b52639d0729e7b571d02253e",
+      "precisionEligible": true,
+      "issues": [
+        "muravjev-configs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "muravjev-configs external claim review requires review.scope",
+        "muravjev-configs external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "innei-template-nest-http-boilerplate",
+      "repository": "https://github.com/innei-template/nest-http-boilerplate.git",
+      "commit": "2b5f324d338881dc1a207389d120fdd6ddad853c",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "2fc9184188f59493c0a398f0ccca86ae41bdcebf6696b4220d477ff028bf0d80",
+      "precisionEligible": true,
+      "issues": [
+        "innei-template-nest-http-boilerplate external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "innei-template-nest-http-boilerplate external claim review requires review.scope",
+        "innei-template-nest-http-boilerplate external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "mufeiyu-ayu-vjade",
+      "repository": "https://github.com/mufeiyu-ayu/VJade.git",
+      "commit": "16b21cb4c3b3c974c8a08a47eb87b46b3cd1fdec",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "d64068f1ff11549fec1c2f196c39343a8175991ceb840a3660829a5496934c2d",
+      "precisionEligible": true,
+      "issues": [
+        "mufeiyu-ayu-vjade external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "mufeiyu-ayu-vjade external claim review requires review.scope",
+        "mufeiyu-ayu-vjade external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "senegalha-template-monorepo-typescript",
+      "repository": "https://github.com/senegalha/template-monorepo-typescript.git",
+      "commit": "17afa743dfb60ef904de45029a2e8f1f7d37a25f",
+      "manifestStrategy": "copy",
+      "manifestReviewStatus": "reviewed",
+      "manifestSourceSha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929",
+      "precisionEligible": true,
+      "issues": [
+        "senegalha-template-monorepo-typescript external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+        "senegalha-template-monorepo-typescript external claim review requires review.scope",
+        "senegalha-template-monorepo-typescript external claim review requires review.reviewedManifestSha256"
+      ],
+      "warnings": []
+    }
+  ],
+  "issues": [
+    "changesets external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "changesets external claim review requires review.reviewedAt",
+    "changesets external claim review requires review.scope",
+    "changesets external claim review requires review.reviewedManifestSha256",
+    "redux-toolkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "redux-toolkit external claim review requires review.reviewedAt",
+    "redux-toolkit external claim review requires review.scope",
+    "redux-toolkit external claim review requires review.reviewedManifestSha256",
+    "typescript-eslint external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "typescript-eslint external claim review requires review.reviewedAt",
+    "typescript-eslint external claim review requires review.scope",
+    "typescript-eslint external claim review requires review.reviewedManifestSha256",
+    "jest external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jest external claim review requires review.reviewedAt",
+    "jest external claim review requires review.scope",
+    "jest external claim review requires review.reviewedManifestSha256",
+    "lerna external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lerna external claim review requires review.reviewedAt",
+    "lerna external claim review requires review.scope",
+    "lerna external claim review requires review.reviewedManifestSha256",
+    "vue-core external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vue-core external claim review requires review.reviewedAt",
+    "vue-core external claim review requires review.scope",
+    "vue-core external claim review requires review.reviewedManifestSha256",
+    "tanstack-query external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tanstack-query external claim review requires review.reviewedAt",
+    "tanstack-query external claim review requires review.scope",
+    "tanstack-query external claim review requires review.reviewedManifestSha256",
+    "tanstack-router external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tanstack-router external claim review requires review.reviewedAt",
+    "tanstack-router external claim review requires review.scope",
+    "tanstack-router external claim review requires review.reviewedManifestSha256",
+    "remix external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "remix external claim review requires review.reviewedAt",
+    "remix external claim review requires review.scope",
+    "remix external claim review requires review.reviewedManifestSha256",
+    "hono external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "hono external claim review requires review.reviewedAt",
+    "hono external claim review requires review.scope",
+    "hono external claim review requires review.reviewedManifestSha256",
+    "floating-ui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "floating-ui external claim review requires review.reviewedAt",
+    "floating-ui external claim review requires review.scope",
+    "floating-ui external claim review requires review.reviewedManifestSha256",
+    "tanstack-table external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tanstack-table external claim review requires review.reviewedAt",
+    "tanstack-table external claim review requires review.scope",
+    "tanstack-table external claim review requires review.reviewedManifestSha256",
+    "react-create-react-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "react-create-react-app external claim review requires review.reviewedAt",
+    "react-create-react-app external claim review requires review.scope",
+    "react-create-react-app external claim review requires review.reviewedManifestSha256",
+    "unitech-pm2 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "unitech-pm2 external claim review requires review.reviewedAt",
+    "unitech-pm2 external claim review requires review.scope",
+    "unitech-pm2 external claim review requires review.reviewedManifestSha256",
+    "vercel-hyper external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vercel-hyper external claim review requires review.reviewedAt",
+    "vercel-hyper external claim review requires review.scope",
+    "vercel-hyper external claim review requires review.reviewedManifestSha256",
+    "jackwener-opencli external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jackwener-opencli external claim review requires review.reviewedAt",
+    "jackwener-opencli external claim review requires review.scope",
+    "jackwener-opencli external claim review requires review.reviewedManifestSha256",
+    "codex-team-editor-js external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "codex-team-editor-js external claim review requires review.reviewedAt",
+    "codex-team-editor-js external claim review requires review.scope",
+    "codex-team-editor-js external claim review requires review.reviewedManifestSha256",
+    "songquanpeng-one-api external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "songquanpeng-one-api external claim review requires review.reviewedAt",
+    "songquanpeng-one-api external claim review requires review.scope",
+    "songquanpeng-one-api external claim review requires review.reviewedManifestSha256",
+    "virattt-dexter external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "virattt-dexter external claim review requires review.reviewedAt",
+    "virattt-dexter external claim review requires review.scope",
+    "virattt-dexter external claim review requires review.reviewedManifestSha256",
+    "reactivex-rxjs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "reactivex-rxjs external claim review requires review.reviewedAt",
+    "reactivex-rxjs external claim review requires review.scope",
+    "reactivex-rxjs external claim review requires review.reviewedManifestSha256",
+    "carbon-app-carbon external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "carbon-app-carbon external claim review requires review.reviewedAt",
+    "carbon-app-carbon external claim review requires review.scope",
+    "carbon-app-carbon external claim review requires review.reviewedManifestSha256",
+    "dayuanjiang-next-ai-draw-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "dayuanjiang-next-ai-draw-io external claim review requires review.reviewedAt",
+    "dayuanjiang-next-ai-draw-io external claim review requires review.scope",
+    "dayuanjiang-next-ai-draw-io external claim review requires review.reviewedManifestSha256",
+    "louislam-uptime-kuma external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "louislam-uptime-kuma external claim review requires review.reviewedAt",
+    "louislam-uptime-kuma external claim review requires review.scope",
+    "louislam-uptime-kuma external claim review requires review.reviewedManifestSha256",
+    "drawdb-io-drawdb external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "drawdb-io-drawdb external claim review requires review.reviewedAt",
+    "drawdb-io-drawdb external claim review requires review.scope",
+    "drawdb-io-drawdb external claim review requires review.reviewedManifestSha256",
+    "chartjs-chart-js external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "chartjs-chart-js external claim review requires review.reviewedAt",
+    "chartjs-chart-js external claim review requires review.scope",
+    "chartjs-chart-js external claim review requires review.reviewedManifestSha256",
+    "mckaywrigley-chatbot-ui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "mckaywrigley-chatbot-ui external claim review requires review.reviewedAt",
+    "mckaywrigley-chatbot-ui external claim review requires review.scope",
+    "mckaywrigley-chatbot-ui external claim review requires review.reviewedManifestSha256",
+    "react-hook-form-react-hook-form external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "react-hook-form-react-hook-form external claim review requires review.reviewedAt",
+    "react-hook-form-react-hook-form external claim review requires review.scope",
+    "react-hook-form-react-hook-form external claim review requires review.reviewedManifestSha256",
+    "lfnovo-open-notebook external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lfnovo-open-notebook external claim review requires review.reviewedAt",
+    "lfnovo-open-notebook external claim review requires review.scope",
+    "lfnovo-open-notebook external claim review requires review.reviewedManifestSha256",
+    "anuraghazra-github-readme-stats external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "anuraghazra-github-readme-stats external claim review requires review.reviewedAt",
+    "anuraghazra-github-readme-stats external claim review requires review.scope",
+    "anuraghazra-github-readme-stats external claim review requires review.reviewedManifestSha256",
+    "layui-layui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "layui-layui external claim review requires review.reviewedAt",
+    "layui-layui external claim review requires review.scope",
+    "layui-layui external claim review requires review.reviewedManifestSha256",
+    "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewedAt",
+    "chromedevtools-chrome-devtools-mcp external claim review requires review.scope",
+    "chromedevtools-chrome-devtools-mcp external claim review requires review.reviewedManifestSha256",
+    "nextai-translator-nextai-translator external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nextai-translator-nextai-translator external claim review requires review.reviewedAt",
+    "nextai-translator-nextai-translator external claim review requires review.scope",
+    "nextai-translator-nextai-translator external claim review requires review.reviewedManifestSha256",
+    "ant-design-ant-design-pro external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ant-design-ant-design-pro external claim review requires review.reviewedAt",
+    "ant-design-ant-design-pro external claim review requires review.scope",
+    "ant-design-ant-design-pro external claim review requires review.reviewedManifestSha256",
+    "styled-components-styled-components external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "styled-components-styled-components external claim review requires review.reviewedAt",
+    "styled-components-styled-components external claim review requires review.scope",
+    "styled-components-styled-components external claim review requires review.reviewedManifestSha256",
+    "jquense-yup external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jquense-yup external claim review requires review.reviewedAt",
+    "jquense-yup external claim review requires review.scope",
+    "jquense-yup external claim review requires review.reviewedManifestSha256",
+    "vadimdemedes-ink external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vadimdemedes-ink external claim review requires review.reviewedAt",
+    "vadimdemedes-ink external claim review requires review.scope",
+    "vadimdemedes-ink external claim review requires review.reviewedManifestSha256",
+    "alan2207-bulletproof-react external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "alan2207-bulletproof-react external claim review requires review.reviewedAt",
+    "alan2207-bulletproof-react external claim review requires review.scope",
+    "alan2207-bulletproof-react external claim review requires review.reviewedManifestSha256",
+    "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewedAt",
+    "rahuldkjain-github-profile-readme-generator external claim review requires review.scope",
+    "rahuldkjain-github-profile-readme-generator external claim review requires review.reviewedManifestSha256",
+    "fingerprintjs-fingerprintjs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "fingerprintjs-fingerprintjs external claim review requires review.reviewedAt",
+    "fingerprintjs-fingerprintjs external claim review requires review.scope",
+    "fingerprintjs-fingerprintjs external claim review requires review.reviewedManifestSha256",
+    "localforage-localforage external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "localforage-localforage external claim review requires review.reviewedAt",
+    "localforage-localforage external claim review requires review.scope",
+    "localforage-localforage external claim review requires review.reviewedManifestSha256",
+    "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewedAt",
+    "nginxproxymanager-nginx-proxy-manager external claim review requires review.scope",
+    "nginxproxymanager-nginx-proxy-manager external claim review requires review.reviewedManifestSha256",
+    "philc-vimium external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "philc-vimium external claim review requires review.reviewedAt",
+    "philc-vimium external claim review requires review.scope",
+    "philc-vimium external claim review requires review.reviewedManifestSha256",
+    "cheeriojs-cheerio external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "cheeriojs-cheerio external claim review requires review.reviewedAt",
+    "cheeriojs-cheerio external claim review requires review.scope",
+    "cheeriojs-cheerio external claim review requires review.reviewedManifestSha256",
+    "immerjs-immer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "immerjs-immer external claim review requires review.reviewedAt",
+    "immerjs-immer external claim review requires review.scope",
+    "immerjs-immer external claim review requires review.reviewedManifestSha256",
+    "reduxjs-redux external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "reduxjs-redux external claim review requires review.reviewedAt",
+    "reduxjs-redux external claim review requires review.scope",
+    "reduxjs-redux external claim review requires review.reviewedManifestSha256",
+    "solidjs-solid external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "solidjs-solid external claim review requires review.reviewedAt",
+    "solidjs-solid external claim review requires review.scope",
+    "solidjs-solid external claim review requires review.reviewedManifestSha256",
+    "trekhleb-javascript-algorithms external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "trekhleb-javascript-algorithms external claim review requires review.reviewedAt",
+    "trekhleb-javascript-algorithms external claim review requires review.scope",
+    "trekhleb-javascript-algorithms external claim review requires review.reviewedManifestSha256",
+    "preactjs-preact external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "preactjs-preact external claim review requires review.reviewedAt",
+    "preactjs-preact external claim review requires review.scope",
+    "preactjs-preact external claim review requires review.reviewedManifestSha256",
+    "yangshun-tech-interview-handbook external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "yangshun-tech-interview-handbook external claim review requires review.reviewedAt",
+    "yangshun-tech-interview-handbook external claim review requires review.scope",
+    "yangshun-tech-interview-handbook external claim review requires review.reviewedManifestSha256",
+    "wg-easy-wg-easy external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "wg-easy-wg-easy external claim review requires review.reviewedAt",
+    "wg-easy-wg-easy external claim review requires review.scope",
+    "wg-easy-wg-easy external claim review requires review.reviewedManifestSha256",
+    "eyaltoledano-claude-task-master external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "eyaltoledano-claude-task-master external claim review requires review.reviewedAt",
+    "eyaltoledano-claude-task-master external claim review requires review.scope",
+    "eyaltoledano-claude-task-master external claim review requires review.reviewedManifestSha256",
+    "aykutsarac-jsoncrack-com external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "aykutsarac-jsoncrack-com external claim review requires review.reviewedAt",
+    "aykutsarac-jsoncrack-com external claim review requires review.scope",
+    "aykutsarac-jsoncrack-com external claim review requires review.reviewedManifestSha256",
+    "vuejs-vue-cli external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vuejs-vue-cli external claim review requires review.scope",
+    "vuejs-vue-cli external claim review requires review.reviewedManifestSha256",
+    "gitroomhq-postiz-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "gitroomhq-postiz-app external claim review requires review.scope",
+    "gitroomhq-postiz-app external claim review requires review.reviewedManifestSha256",
+    "heyputer-puter external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "heyputer-puter external claim review requires review.scope",
+    "heyputer-puter external claim review requires review.reviewedManifestSha256",
+    "ajaxorg-ace external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ajaxorg-ace external claim review requires review.scope",
+    "ajaxorg-ace external claim review requires review.reviewedManifestSha256",
+    "umami-software-umami external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "umami-software-umami external claim review requires review.scope",
+    "umami-software-umami external claim review requires review.reviewedManifestSha256",
+    "yeachan-heo-oh-my-codex external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "yeachan-heo-oh-my-codex external claim review requires review.scope",
+    "yeachan-heo-oh-my-codex external claim review requires review.reviewedManifestSha256",
+    "dokploy-dokploy external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "dokploy-dokploy external claim review requires review.scope",
+    "dokploy-dokploy external claim review requires review.reviewedManifestSha256",
+    "gitlawb-openclaude external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "gitlawb-openclaude external claim review requires review.scope",
+    "gitlawb-openclaude external claim review requires review.reviewedManifestSha256",
+    "typeorm-typeorm external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "typeorm-typeorm external claim review requires review.scope",
+    "typeorm-typeorm external claim review requires review.reviewedManifestSha256",
+    "colbymchenry-codegraph external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "colbymchenry-codegraph external claim review requires review.scope",
+    "colbymchenry-codegraph external claim review requires review.reviewedManifestSha256",
+    "typicode-json-server external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "typicode-json-server external claim review requires review.scope",
+    "typicode-json-server external claim review requires review.reviewedManifestSha256",
+    "rollup-rollup external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "rollup-rollup external claim review requires review.scope",
+    "rollup-rollup external claim review requires review.reviewedManifestSha256",
+    "fastapi-full-stack-fastapi-template external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "fastapi-full-stack-fastapi-template external claim review requires review.scope",
+    "fastapi-full-stack-fastapi-template external claim review requires review.reviewedManifestSha256",
+    "lecoupa-awesome-cheatsheets external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lecoupa-awesome-cheatsheets external claim review requires review.scope",
+    "lecoupa-awesome-cheatsheets external claim review requires review.reviewedManifestSha256",
+    "xyflow-xyflow external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "xyflow-xyflow external claim review requires review.scope",
+    "xyflow-xyflow external claim review requires review.reviewedManifestSha256",
+    "digitalocean-nginxconfig-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "digitalocean-nginxconfig-io external claim review requires review.scope",
+    "digitalocean-nginxconfig-io external claim review requires review.reviewedManifestSha256",
+    "modelcontextprotocol-servers external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "modelcontextprotocol-servers external claim review requires review.scope",
+    "modelcontextprotocol-servers external claim review requires review.reviewedManifestSha256",
+    "algorithm-visualizer-algorithm-visualizer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "algorithm-visualizer-algorithm-visualizer external claim review requires review.scope",
+    "algorithm-visualizer-algorithm-visualizer external claim review requires review.reviewedManifestSha256",
+    "chatboxai-chatbox external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "chatboxai-chatbox external claim review requires review.scope",
+    "chatboxai-chatbox external claim review requires review.reviewedManifestSha256",
+    "homebridge-homebridge external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "homebridge-homebridge external claim review requires review.scope",
+    "homebridge-homebridge external claim review requires review.reviewedManifestSha256",
+    "opencut-app-opencut external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "opencut-app-opencut external claim review requires review.scope",
+    "opencut-app-opencut external claim review requires review.reviewedManifestSha256",
+    "pmndrs-react-three-fiber external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "pmndrs-react-three-fiber external claim review requires review.scope",
+    "pmndrs-react-three-fiber external claim review requires review.reviewedManifestSha256",
+    "alibaba-page-agent external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "alibaba-page-agent external claim review requires review.scope",
+    "alibaba-page-agent external claim review requires review.reviewedManifestSha256",
+    "jaredpalmer-formik external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jaredpalmer-formik external claim review requires review.scope",
+    "jaredpalmer-formik external claim review requires review.reviewedManifestSha256",
+    "musistudio-claude-code-router external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "musistudio-claude-code-router external claim review requires review.scope",
+    "musistudio-claude-code-router external claim review requires review.reviewedManifestSha256",
+    "upstash-context7 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "upstash-context7 external claim review requires review.scope",
+    "upstash-context7 external claim review requires review.reviewedManifestSha256",
+    "adguardteam-adguardhome external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "adguardteam-adguardhome external claim review requires review.scope",
+    "adguardteam-adguardhome external claim review requires review.reviewedManifestSha256",
+    "chatgptnextweb-nextchat external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "chatgptnextweb-nextchat external claim review requires review.scope",
+    "chatgptnextweb-nextchat external claim review requires review.reviewedManifestSha256",
+    "lissy93-web-check external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lissy93-web-check external claim review requires review.scope",
+    "lissy93-web-check external claim review requires review.reviewedManifestSha256",
+    "withfig-autocomplete external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "withfig-autocomplete external claim review requires review.scope",
+    "withfig-autocomplete external claim review requires review.reviewedManifestSha256",
+    "linshenkx-prompt-optimizer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "linshenkx-prompt-optimizer external claim review requires review.scope",
+    "linshenkx-prompt-optimizer external claim review requires review.reviewedManifestSha256",
+    "socketio-socket-io external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "socketio-socket-io external claim review requires review.scope",
+    "socketio-socket-io external claim review requires review.reviewedManifestSha256",
+    "feathericons-feather external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "feathericons-feather external claim review requires review.scope",
+    "feathericons-feather external claim review requires review.reviewedManifestSha256",
+    "lodash-lodash external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lodash-lodash external claim review requires review.scope",
+    "lodash-lodash external claim review requires review.reviewedManifestSha256",
+    "markedjs-marked external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "markedjs-marked external claim review requires review.scope",
+    "markedjs-marked external claim review requires review.reviewedManifestSha256",
+    "qishibo-anotherredisdesktopmanager external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "qishibo-anotherredisdesktopmanager external claim review requires review.scope",
+    "qishibo-anotherredisdesktopmanager external claim review requires review.reviewedManifestSha256",
+    "react-boilerplate-react-boilerplate external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "react-boilerplate-react-boilerplate external claim review requires review.scope",
+    "react-boilerplate-react-boilerplate external claim review requires review.reviewedManifestSha256",
+    "vuejs-vue external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vuejs-vue external claim review requires review.scope",
+    "vuejs-vue external claim review requires review.reviewedManifestSha256",
+    "mihomo-party-org-clash-party external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "mihomo-party-org-clash-party external claim review requires review.scope",
+    "mihomo-party-org-clash-party external claim review requires review.reviewedManifestSha256",
+    "remy-nodemon external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "remy-nodemon external claim review requires review.scope",
+    "remy-nodemon external claim review requires review.reviewedManifestSha256",
+    "hexojs-hexo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "hexojs-hexo external claim review requires review.scope",
+    "hexojs-hexo external claim review requires review.reviewedManifestSha256",
+    "expressjs-express external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "expressjs-express external claim review requires review.scope",
+    "expressjs-express external claim review requires review.reviewedManifestSha256",
+    "juliusbrussee-caveman external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "juliusbrussee-caveman external claim review requires review.scope",
+    "juliusbrussee-caveman external claim review requires review.reviewedManifestSha256",
+    "mobxjs-mobx external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "mobxjs-mobx external claim review requires review.scope",
+    "mobxjs-mobx external claim review requires review.reviewedManifestSha256",
+    "select2-select2 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "select2-select2 external claim review requires review.scope",
+    "select2-select2 external claim review requires review.reviewedManifestSha256",
+    "justjavac-wechat-miniapp-radar external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "justjavac-wechat-miniapp-radar external claim review requires review.scope",
+    "justjavac-wechat-miniapp-radar external claim review requires review.reviewedManifestSha256",
+    "yamadashy-repomix external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "yamadashy-repomix external claim review requires review.scope",
+    "yamadashy-repomix external claim review requires review.reviewedManifestSha256",
+    "shardeum-shardeum external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "shardeum-shardeum external claim review requires review.scope",
+    "shardeum-shardeum external claim review requires review.reviewedManifestSha256",
+    "tobi-qmd external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tobi-qmd external claim review requires review.scope",
+    "tobi-qmd external claim review requires review.reviewedManifestSha256",
+    "slab-quill external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "slab-quill external claim review requires review.scope",
+    "slab-quill external claim review requires review.reviewedManifestSha256",
+    "google-zx external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "google-zx external claim review requires review.scope",
+    "google-zx external claim review requires review.reviewedManifestSha256",
+    "jimliu-baoyu-skills external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jimliu-baoyu-skills external claim review requires review.scope",
+    "jimliu-baoyu-skills external claim review requires review.reviewedManifestSha256",
+    "tailwindlabs-headlessui external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tailwindlabs-headlessui external claim review requires review.scope",
+    "tailwindlabs-headlessui external claim review requires review.reviewedManifestSha256",
+    "smapiot-piral external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "smapiot-piral external claim review requires review.scope",
+    "smapiot-piral external claim review requires review.reviewedManifestSha256",
+    "infinitered-reactotron external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "infinitered-reactotron external claim review requires review.scope",
+    "infinitered-reactotron external claim review requires review.reviewedManifestSha256",
+    "rx-angular-rx-angular external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "rx-angular-rx-angular external claim review requires review.scope",
+    "rx-angular-rx-angular external claim review requires review.reviewedManifestSha256",
+    "usesend-usesend external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "usesend-usesend external claim review requires review.scope",
+    "usesend-usesend external claim review requires review.reviewedManifestSha256",
+    "deepnotesapp-deepnotes external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "deepnotesapp-deepnotes external claim review requires review.scope",
+    "deepnotesapp-deepnotes external claim review requires review.reviewedManifestSha256",
+    "besscroft-picimpact external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "besscroft-picimpact external claim review requires review.scope",
+    "besscroft-picimpact external claim review requires review.reviewedManifestSha256",
+    "6pac-slickgrid external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "6pac-slickgrid external claim review requires review.scope",
+    "6pac-slickgrid external claim review requires review.reviewedManifestSha256",
+    "brackets-userland-brackets-git external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "brackets-userland-brackets-git external claim review requires review.scope",
+    "brackets-userland-brackets-git external claim review requires review.reviewedManifestSha256",
+    "freedomjs-freedom external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "freedomjs-freedom external claim review requires review.scope",
+    "freedomjs-freedom external claim review requires review.reviewedManifestSha256",
+    "rich-harris-degit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "rich-harris-degit external claim review requires review.scope",
+    "rich-harris-degit external claim review requires review.reviewedManifestSha256",
+    "googlechromelabs-container-query-polyfill external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "googlechromelabs-container-query-polyfill external claim review requires review.scope",
+    "googlechromelabs-container-query-polyfill external claim review requires review.reviewedManifestSha256",
+    "dsherret-dax external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "dsherret-dax external claim review requires review.scope",
+    "dsherret-dax external claim review requires review.reviewedManifestSha256",
+    "chakra-ui-zag external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "chakra-ui-zag external claim review requires review.scope",
+    "chakra-ui-zag external claim review requires review.reviewedManifestSha256",
+    "lumenstorm-orisonspace external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lumenstorm-orisonspace external claim review requires review.scope",
+    "lumenstorm-orisonspace external claim review requires review.reviewedManifestSha256",
+    "ts-rest-ts-rest external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ts-rest-ts-rest external claim review requires review.scope",
+    "ts-rest-ts-rest external claim review requires review.reviewedManifestSha256",
+    "hyperstackjs-hyperstack external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "hyperstackjs-hyperstack external claim review requires review.scope",
+    "hyperstackjs-hyperstack external claim review requires review.reviewedManifestSha256",
+    "nutlope-pdftochat external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nutlope-pdftochat external claim review requires review.scope",
+    "nutlope-pdftochat external claim review requires review.reviewedManifestSha256",
+    "puemos-hls-downloader external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "puemos-hls-downloader external claim review requires review.scope",
+    "puemos-hls-downloader external claim review requires review.reviewedManifestSha256",
+    "kmijs-kmi external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "kmijs-kmi external claim review requires review.scope",
+    "kmijs-kmi external claim review requires review.reviewedManifestSha256",
+    "livestorejs-livestore external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "livestorejs-livestore external claim review requires review.scope",
+    "livestorejs-livestore external claim review requires review.reviewedManifestSha256",
+    "paularmstrong-onerepo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "paularmstrong-onerepo external claim review requires review.scope",
+    "paularmstrong-onerepo external claim review requires review.reviewedManifestSha256",
+    "celo-org-celo-composer external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "celo-org-celo-composer external claim review requires review.scope",
+    "celo-org-celo-composer external claim review requires review.reviewedManifestSha256",
+    "vikejs-bati external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "vikejs-bati external claim review requires review.scope",
+    "vikejs-bati external claim review requires review.reviewedManifestSha256",
+    "jscutlery-devkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jscutlery-devkit external claim review requires review.scope",
+    "jscutlery-devkit external claim review requires review.reviewedManifestSha256",
+    "takram-design-engineering-three-geospatial external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "takram-design-engineering-three-geospatial external claim review requires review.scope",
+    "takram-design-engineering-three-geospatial external claim review requires review.reviewedManifestSha256",
+    "briehq-brie-extension external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "briehq-brie-extension external claim review requires review.scope",
+    "briehq-brie-extension external claim review requires review.reviewedManifestSha256",
+    "nextify-limited-saasfly external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nextify-limited-saasfly external claim review requires review.scope",
+    "nextify-limited-saasfly external claim review requires review.reviewedManifestSha256",
+    "keyshade-xyz-keyshade external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "keyshade-xyz-keyshade external claim review requires review.scope",
+    "keyshade-xyz-keyshade external claim review requires review.reviewedManifestSha256",
+    "slymnoyann-hey-1 external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "slymnoyann-hey-1 external claim review requires review.scope",
+    "slymnoyann-hey-1 external claim review requires review.reviewedManifestSha256",
+    "louisgv-local-ai external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "louisgv-local-ai external claim review requires review.scope",
+    "louisgv-local-ai external claim review requires review.reviewedManifestSha256",
+    "jscad-openjscad-org external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jscad-openjscad-org external claim review requires review.scope",
+    "jscad-openjscad-org external claim review requires review.reviewedManifestSha256",
+    "docmirror-dev-sidecar external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "docmirror-dev-sidecar external claim review requires review.scope",
+    "docmirror-dev-sidecar external claim review requires review.reviewedManifestSha256",
+    "antfu-collective-ni external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "antfu-collective-ni external claim review requires review.scope",
+    "antfu-collective-ni external claim review requires review.reviewedManifestSha256",
+    "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.scope",
+    "stefanoslig-angular-ngrx-nx-realworld-example-app external claim review requires review.reviewedManifestSha256",
+    "ixahmedxi-orbitkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ixahmedxi-orbitkit external claim review requires review.scope",
+    "ixahmedxi-orbitkit external claim review requires review.reviewedManifestSha256",
+    "guigrpa-oao external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "guigrpa-oao external claim review requires review.scope",
+    "guigrpa-oao external claim review requires review.reviewedManifestSha256",
+    "react-workspaces-react-workspaces-playground external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "react-workspaces-react-workspaces-playground external claim review requires review.scope",
+    "react-workspaces-react-workspaces-playground external claim review requires review.reviewedManifestSha256",
+    "doramart-doracms external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "doramart-doracms external claim review requires review.scope",
+    "doramart-doracms external claim review requires review.reviewedManifestSha256",
+    "tomalaforge-angular-challenges external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "tomalaforge-angular-challenges external claim review requires review.scope",
+    "tomalaforge-angular-challenges external claim review requires review.reviewedManifestSha256",
+    "trungvose-angular-spotify external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "trungvose-angular-spotify external claim review requires review.scope",
+    "trungvose-angular-spotify external claim review requires review.reviewedManifestSha256",
+    "jamiemason-shrinkpack external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "jamiemason-shrinkpack external claim review requires review.scope",
+    "jamiemason-shrinkpack external claim review requires review.reviewedManifestSha256",
+    "nighttrax-ts-monorepo external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nighttrax-ts-monorepo external claim review requires review.scope",
+    "nighttrax-ts-monorepo external claim review requires review.reviewedManifestSha256",
+    "ttttonyhe-ouorz-mono external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ttttonyhe-ouorz-mono external claim review requires review.scope",
+    "ttttonyhe-ouorz-mono external claim review requires review.reviewedManifestSha256",
+    "ducktors-turborepo-remote-cache external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "ducktors-turborepo-remote-cache external claim review requires review.scope",
+    "ducktors-turborepo-remote-cache external claim review requires review.reviewedManifestSha256",
+    "nteract-archived-desktop-app external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "nteract-archived-desktop-app external claim review requires review.scope",
+    "nteract-archived-desktop-app external claim review requires review.reviewedManifestSha256",
+    "colmena-colmena external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "colmena-colmena external claim review requires review.scope",
+    "colmena-colmena external claim review requires review.reviewedManifestSha256",
+    "lerna-lite-lerna-lite external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "lerna-lite-lerna-lite external claim review requires review.scope",
+    "lerna-lite-lerna-lite external claim review requires review.reviewedManifestSha256",
+    "umaprotocol-protocol external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "umaprotocol-protocol external claim review requires review.scope",
+    "umaprotocol-protocol external claim review requires review.reviewedManifestSha256",
+    "kirklin-celeris-web external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "kirklin-celeris-web external claim review requires review.scope",
+    "kirklin-celeris-web external claim review requires review.reviewedManifestSha256",
+    "panoratech-panora external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "panoratech-panora external claim review requires review.scope",
+    "panoratech-panora external claim review requires review.reviewedManifestSha256",
+    "cumt-robin-fullstack-blog external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "cumt-robin-fullstack-blog external claim review requires review.scope",
+    "cumt-robin-fullstack-blog external claim review requires review.reviewedManifestSha256",
+    "muravjev-configs external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "muravjev-configs external claim review requires review.scope",
+    "muravjev-configs external claim review requires review.reviewedManifestSha256",
+    "innei-template-nest-http-boilerplate external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "innei-template-nest-http-boilerplate external claim review requires review.scope",
+    "innei-template-nest-http-boilerplate external claim review requires review.reviewedManifestSha256",
+    "mufeiyu-ayu-vjade external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "mufeiyu-ayu-vjade external claim review requires review.scope",
+    "mufeiyu-ayu-vjade external claim review requires review.reviewedManifestSha256",
+    "senegalha-template-monorepo-typescript external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer",
+    "senegalha-template-monorepo-typescript external claim review requires review.scope",
+    "senegalha-template-monorepo-typescript external claim review requires review.reviewedManifestSha256"
+  ],
+  "warnings": [],
+  "ok": false
+}

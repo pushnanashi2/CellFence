@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-b9e6bab62602c4e6",
+    "evidencePackageId": "evidence-bc7fe6248cb29d14",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/aykutsarac-jsoncrack-com-cee069e79c87.json",
+        "sha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757"
+      },
+      "auditLog": {
+        "path": "logs/aykutsarac-jsoncrack-com-cee069e79c87/check.audit.jsonl",
+        "sha256": "4dabfccdc7abb6f9b68b4b20e8e93dfc4da74b2deb71c0377b967cab6dbac73e"
+      },
+      "evidenceGraph": {
+        "path": "logs/aykutsarac-jsoncrack-com-cee069e79c87/evidence-graph.json",
+        "sha256": "7359877e6e16d1fa884d22575ec9162cafd9834ab206d38aed74f4d7d79916ef"
+      },
+      "checkStdout": {
+        "path": "logs/aykutsarac-jsoncrack-com-cee069e79c87/check.stdout.log",
+        "sha256": "783588e33af54e1b328975923d68926e6ca01870eab8037f34433aa0bf30fec6"
+      },
+      "checkStderr": {
+        "path": "logs/aykutsarac-jsoncrack-com-cee069e79c87/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:bc7fe6248cb29d14d4e8d27817cec390a7605c558ced96b362fc2cf82d3f89d7",
+    "subjectId": "aykutsarac-jsoncrack-com",
+    "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+    "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059",
+    "gitTree": "3aafd1d4a92028f710997be1d8040905217eb098",
+    "manifestSha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "apps/chrome-extension/src/content-script.tsx",
+    "line": 5,
+    "message": "chrome-extension imports private implementation from jsoncrack-react",
+    "cellId": "chrome-extension",
+    "producerCellId": "jsoncrack-react",
+    "cellfenceFingerprint": "28df8ac228f76f8d3dddb156f84041a18a7a5d52b2172e2151db97efe4a001fb",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:bc7fe6248cb29d14d4e8d27817cec390a7605c558ced96b362fc2cf82d3f89d7",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-b9e6bab62602c4e6",
+    "evidencePackageId": "evidence-bc7fe6248cb29d14",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

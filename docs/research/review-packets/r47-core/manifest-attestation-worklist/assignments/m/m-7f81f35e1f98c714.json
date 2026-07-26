@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-420804734946e893",
+    "subjectId": "googlechromelabs-container-query-polyfill",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "googlechromelabs-container-query-polyfill",
+    "phase": null,
+    "repository": "https://github.com/GoogleChromeLabs/container-query-polyfill.git",
+    "commit": "f6831ec85e8db047218f8f8807667f1429aba457"
+  },
+  "manifestCopy": {
+    "path": "manifests/googlechromelabs-container-query-polyfill-71f6b4550085.json",
+    "sha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9"
+  },
+  "attestationTemplate": {
+    "subjectId": "googlechromelabs-container-query-polyfill",
+    "repository": "https://github.com/GoogleChromeLabs/container-query-polyfill.git",
+    "commit": "f6831ec85e8db047218f8f8807667f1429aba457",
+    "manifestCopy": {
+      "path": "manifests/googlechromelabs-container-query-polyfill-71f6b4550085.json",
+      "sha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-23fc0786a1d344a6",
+    "subjectId": "hono",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "hono",
+    "phase": null,
+    "repository": "https://github.com/honojs/hono.git",
+    "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d"
+  },
+  "manifestCopy": {
+    "path": "manifests/hono-8b3dc17add91.json",
+    "sha256": "788170ea05299b0dab109fc3a0bd23476bde3f12fa9582158c43907acf86cf64"
+  },
+  "attestationTemplate": {
+    "subjectId": "hono",
+    "repository": "https://github.com/honojs/hono.git",
+    "commit": "d7964503c956ae4af78597b7b11a05f9e5e73d2d",
+    "manifestCopy": {
+      "path": "manifests/hono-8b3dc17add91.json",
+      "sha256": "788170ea05299b0dab109fc3a0bd23476bde3f12fa9582158c43907acf86cf64"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "788170ea05299b0dab109fc3a0bd23476bde3f12fa9582158c43907acf86cf64",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

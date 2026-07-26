@@ -1,0 +1,228 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/aur/**",
+      "packages/cli/src/**",
+      "packages/core/src/**",
+      "packages/gui/src/**",
+      "packages/mitmproxy/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "aur",
+      "ownedPaths": [
+        "packages/aur/**"
+      ],
+      "publicEntry": "packages/aur/gen_srcinfo.py",
+      "publicSymbols": [
+        "arch_line",
+        "archs",
+        "conflicts",
+        "conflicts_m",
+        "depends",
+        "depends_m",
+        "extract",
+        "license_",
+        "lines",
+        "pathlib",
+        "pkgbuild",
+        "pkgdesc",
+        "pkgname",
+        "pkgrel",
+        "pkgver",
+        "provides",
+        "provides_m",
+        "re",
+        "sha_aarch",
+        "sha_x86",
+        "src_aarch",
+        "src_x86",
+        "url"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dev-sidecar",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@docmirror/dev-sidecar",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dev-sidecar-cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@docmirror/dev-sidecar-cli",
+      "consumes": [
+        {
+          "cell": "dev-sidecar"
+        },
+        {
+          "cell": "mitmproxy"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dev-sidecar-gui",
+      "ownedPaths": [
+        "packages/gui/src/**"
+      ],
+      "publicEntry": "packages/gui/src/background.js",
+      "publicSymbols": [],
+      "packageName": "@docmirror/dev-sidecar-gui",
+      "consumes": [
+        {
+          "cell": "dev-sidecar"
+        },
+        {
+          "cell": "mitmproxy"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mitmproxy",
+      "ownedPaths": [
+        "packages/mitmproxy/src/**"
+      ],
+      "publicEntry": "packages/mitmproxy/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@docmirror/mitmproxy",
+      "consumes": [
+        {
+          "cell": "dev-sidecar"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

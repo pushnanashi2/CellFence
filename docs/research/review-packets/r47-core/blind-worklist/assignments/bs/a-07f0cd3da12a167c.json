@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-07f0cd3da12a167c",
+    "evidencePackageId": "evidence-3bfabf48b8b9268c",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/localforage-localforage-4373a0503c44.json",
+        "sha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a"
+      },
+      "auditLog": {
+        "path": "logs/localforage-localforage-4373a0503c44/check.audit.jsonl",
+        "sha256": "65a726039dd31aa00623d32873c6749f6ccfe55a174d041bf1882ff27eb47eb5"
+      },
+      "evidenceGraph": {
+        "path": "logs/localforage-localforage-4373a0503c44/evidence-graph.json",
+        "sha256": "545b991ada1bf36e1d8da5040583fc8a3a177d5396bcedf625b908b8ba9429e1"
+      },
+      "checkStdout": {
+        "path": "logs/localforage-localforage-4373a0503c44/check.stdout.log",
+        "sha256": "2b969e3e9a965cd3c730584eb9d3cdb49116575aa43780491e4f5752c78c1ab7"
+      },
+      "checkStderr": {
+        "path": "logs/localforage-localforage-4373a0503c44/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:3bfabf48b8b9268cfe0326966687b344f801e65af5f934bc118a2f30d40ddcc2",
+    "subjectId": "localforage-localforage",
+    "repository": "https://github.com/localForage/localForage.git",
+    "commit": "fb78c77ee583fb727a558c439b5174aca38c5924",
+    "gitTree": "78818a81b86e64f10fe9006d05b71eb99b57be50",
+    "manifestSha256": "3d54e1fed0f2dcd4f02021af42e6bed901b16a8f89d6d6049649d5f28cebbd3a",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/drivers/localstorage.js",
+    "line": 7,
+    "message": "drivers imports private implementation from utils",
+    "cellId": "drivers",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "e5bbea483890df4273b734fb1edae58824890a19de76c57a8434c5dc0c97943b",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:3bfabf48b8b9268cfe0326966687b344f801e65af5f934bc118a2f30d40ddcc2",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-07f0cd3da12a167c",
+    "evidencePackageId": "evidence-3bfabf48b8b9268c",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

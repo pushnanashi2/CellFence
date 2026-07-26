@@ -1,0 +1,594 @@
+# ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean Precision Next Cycle
+
+This cycle freezes the next evidence package and blind worklist. It does not
+create labels and therefore cannot satisfy the external human/org label gate.
+
+## Artifacts
+
+- Reviewed corpus validation: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/reviewed-corpus-validation.json`
+- External corpus validation: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/reviewed-corpus-external-validation.json`
+- Unlabeled bundle: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled`
+- Blind worklist: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/blind-worklist`
+- Worklist protocol: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/protocol.worklist.json`
+- Pre-label preflight protocol: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/protocol.prelabel-preflight.json`
+- Pre-label preflight: `reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/claim-preflight.prelabel.json`
+
+## Digests
+
+- preLabelArtifactSetSha256: `e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c`
+- unlabeledBundleArtifactSetSha256: `f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade`
+- blindWorklistArtifactSetSha256: `7ce0562a52ec2a1c1462342298e9fd415dd67ae9eb22db7e85333c94586682cb`
+
+## Sampling
+
+- claim profile: `ts-js-boundary-core-v1`
+- claim profile description: Reviewed TS/JS boundary-core blocking precision: private imports and undeclared cell consumers only.
+- included rules: `CELLFENCE_PRIVATE_IMPORT,CELLFENCE_UNDECLARED_CONSUMER`
+- worklist selected findings: 646
+- worklist assignments: 1292
+- worklist selected by rule: `{"CELLFENCE_PRIVATE_IMPORT":346,"CELLFENCE_UNDECLARED_CONSUMER":300}`
+- full bundle sampled findings: 2137
+- full bundle sampled by rule: `{"CELLFENCE_OWNERSHIP_OVERLAP":82,"CELLFENCE_PRIVATE_IMPORT":346,"CELLFENCE_PUBLIC_SYMBOL_MISMATCH":6,"CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP":3,"CELLFENCE_UNDECLARED_CONSUMER":300,"CELLFENCE_UNDECLARED_RESOURCE_ACCESS":314,"CELLFENCE_UNOWNED_IMPORT_TARGET":9,"CELLFENCE_UNOWNED_SOURCE":1,"CELLFENCE_UNRESOLVED_IMPORT":229,"CELLFENCE_UNRESOLVED_RESOURCE_ACCESS":299,"CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT":53,"CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE":193,"CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX":302}`
+- sample exclusion enabled: true
+- sample-excluded candidates: 192
+- repository balance enabled: true
+- repository balance feasible: true
+- cap-pruned sampled findings: 59
+- cap-pruned by rule: `{"CELLFENCE_PRIVATE_IMPORT":53,"CELLFENCE_UNDECLARED_CONSUMER":6}`
+
+## Current Blockers
+
+- changesets external manifest review requires review.reviewerAttestations
+- changesets external manifest review requires review.reviewedAt
+- changesets external manifest review requires review.scope
+- changesets external manifest review requires review.reviewedManifestSha256
+- redux-toolkit external manifest review requires review.reviewerAttestations
+- redux-toolkit external manifest review requires review.reviewedAt
+- redux-toolkit external manifest review requires review.scope
+- redux-toolkit external manifest review requires review.reviewedManifestSha256
+- typescript-eslint external manifest review requires review.reviewerAttestations
+- typescript-eslint external manifest review requires review.reviewedAt
+- typescript-eslint external manifest review requires review.scope
+- typescript-eslint external manifest review requires review.reviewedManifestSha256
+- jest external manifest review requires review.reviewerAttestations
+- jest external manifest review requires review.reviewedAt
+- jest external manifest review requires review.scope
+- jest external manifest review requires review.reviewedManifestSha256
+- lerna external manifest review requires review.reviewerAttestations
+- lerna external manifest review requires review.reviewedAt
+- lerna external manifest review requires review.scope
+- lerna external manifest review requires review.reviewedManifestSha256
+- vue-core external manifest review requires review.reviewerAttestations
+- vue-core external manifest review requires review.reviewedAt
+- vue-core external manifest review requires review.scope
+- vue-core external manifest review requires review.reviewedManifestSha256
+- tanstack-query external manifest review requires review.reviewerAttestations
+- tanstack-query external manifest review requires review.reviewedAt
+- tanstack-query external manifest review requires review.scope
+- tanstack-query external manifest review requires review.reviewedManifestSha256
+- tanstack-router external manifest review requires review.reviewerAttestations
+- tanstack-router external manifest review requires review.reviewedAt
+- tanstack-router external manifest review requires review.scope
+- tanstack-router external manifest review requires review.reviewedManifestSha256
+- remix external manifest review requires review.reviewerAttestations
+- remix external manifest review requires review.reviewedAt
+- remix external manifest review requires review.scope
+- remix external manifest review requires review.reviewedManifestSha256
+- hono external manifest review requires review.reviewerAttestations
+- hono external manifest review requires review.reviewedAt
+- hono external manifest review requires review.scope
+- hono external manifest review requires review.reviewedManifestSha256
+- floating-ui external manifest review requires review.reviewerAttestations
+- floating-ui external manifest review requires review.reviewedAt
+- floating-ui external manifest review requires review.scope
+- floating-ui external manifest review requires review.reviewedManifestSha256
+- tanstack-table external manifest review requires review.reviewerAttestations
+- tanstack-table external manifest review requires review.reviewedAt
+- tanstack-table external manifest review requires review.scope
+- tanstack-table external manifest review requires review.reviewedManifestSha256
+- react-create-react-app external manifest review requires review.reviewerAttestations
+- react-create-react-app external manifest review requires review.reviewedAt
+- react-create-react-app external manifest review requires review.scope
+- react-create-react-app external manifest review requires review.reviewedManifestSha256
+- unitech-pm2 external manifest review requires review.reviewerAttestations
+- unitech-pm2 external manifest review requires review.reviewedAt
+- unitech-pm2 external manifest review requires review.scope
+- unitech-pm2 external manifest review requires review.reviewedManifestSha256
+- vercel-hyper external manifest review requires review.reviewerAttestations
+- vercel-hyper external manifest review requires review.reviewedAt
+- vercel-hyper external manifest review requires review.scope
+- vercel-hyper external manifest review requires review.reviewedManifestSha256
+- jackwener-opencli external manifest review requires review.reviewerAttestations
+- jackwener-opencli external manifest review requires review.reviewedAt
+- jackwener-opencli external manifest review requires review.scope
+- jackwener-opencli external manifest review requires review.reviewedManifestSha256
+- codex-team-editor-js external manifest review requires review.reviewerAttestations
+- codex-team-editor-js external manifest review requires review.reviewedAt
+- codex-team-editor-js external manifest review requires review.scope
+- codex-team-editor-js external manifest review requires review.reviewedManifestSha256
+- songquanpeng-one-api external manifest review requires review.reviewerAttestations
+- songquanpeng-one-api external manifest review requires review.reviewedAt
+- songquanpeng-one-api external manifest review requires review.scope
+- songquanpeng-one-api external manifest review requires review.reviewedManifestSha256
+- virattt-dexter external manifest review requires review.reviewerAttestations
+- virattt-dexter external manifest review requires review.reviewedAt
+- virattt-dexter external manifest review requires review.scope
+- virattt-dexter external manifest review requires review.reviewedManifestSha256
+- reactivex-rxjs external manifest review requires review.reviewerAttestations
+- reactivex-rxjs external manifest review requires review.reviewedAt
+- reactivex-rxjs external manifest review requires review.scope
+- reactivex-rxjs external manifest review requires review.reviewedManifestSha256
+- carbon-app-carbon external manifest review requires review.reviewerAttestations
+- carbon-app-carbon external manifest review requires review.reviewedAt
+- carbon-app-carbon external manifest review requires review.scope
+- carbon-app-carbon external manifest review requires review.reviewedManifestSha256
+- dayuanjiang-next-ai-draw-io external manifest review requires review.reviewerAttestations
+- dayuanjiang-next-ai-draw-io external manifest review requires review.reviewedAt
+- dayuanjiang-next-ai-draw-io external manifest review requires review.scope
+- dayuanjiang-next-ai-draw-io external manifest review requires review.reviewedManifestSha256
+- louislam-uptime-kuma external manifest review requires review.reviewerAttestations
+- louislam-uptime-kuma external manifest review requires review.reviewedAt
+- louislam-uptime-kuma external manifest review requires review.scope
+- louislam-uptime-kuma external manifest review requires review.reviewedManifestSha256
+- drawdb-io-drawdb external manifest review requires review.reviewerAttestations
+- drawdb-io-drawdb external manifest review requires review.reviewedAt
+- drawdb-io-drawdb external manifest review requires review.scope
+- drawdb-io-drawdb external manifest review requires review.reviewedManifestSha256
+- chartjs-chart-js external manifest review requires review.reviewerAttestations
+- chartjs-chart-js external manifest review requires review.reviewedAt
+- chartjs-chart-js external manifest review requires review.scope
+- chartjs-chart-js external manifest review requires review.reviewedManifestSha256
+- mckaywrigley-chatbot-ui external manifest review requires review.reviewerAttestations
+- mckaywrigley-chatbot-ui external manifest review requires review.reviewedAt
+- mckaywrigley-chatbot-ui external manifest review requires review.scope
+- mckaywrigley-chatbot-ui external manifest review requires review.reviewedManifestSha256
+- react-hook-form-react-hook-form external manifest review requires review.reviewerAttestations
+- react-hook-form-react-hook-form external manifest review requires review.reviewedAt
+- react-hook-form-react-hook-form external manifest review requires review.scope
+- react-hook-form-react-hook-form external manifest review requires review.reviewedManifestSha256
+- lfnovo-open-notebook external manifest review requires review.reviewerAttestations
+- lfnovo-open-notebook external manifest review requires review.reviewedAt
+- lfnovo-open-notebook external manifest review requires review.scope
+- lfnovo-open-notebook external manifest review requires review.reviewedManifestSha256
+- anuraghazra-github-readme-stats external manifest review requires review.reviewerAttestations
+- anuraghazra-github-readme-stats external manifest review requires review.reviewedAt
+- anuraghazra-github-readme-stats external manifest review requires review.scope
+- anuraghazra-github-readme-stats external manifest review requires review.reviewedManifestSha256
+- layui-layui external manifest review requires review.reviewerAttestations
+- layui-layui external manifest review requires review.reviewedAt
+- layui-layui external manifest review requires review.scope
+- layui-layui external manifest review requires review.reviewedManifestSha256
+- chromedevtools-chrome-devtools-mcp external manifest review requires review.reviewerAttestations
+- chromedevtools-chrome-devtools-mcp external manifest review requires review.reviewedAt
+- chromedevtools-chrome-devtools-mcp external manifest review requires review.scope
+- chromedevtools-chrome-devtools-mcp external manifest review requires review.reviewedManifestSha256
+- nextai-translator-nextai-translator external manifest review requires review.reviewerAttestations
+- nextai-translator-nextai-translator external manifest review requires review.reviewedAt
+- nextai-translator-nextai-translator external manifest review requires review.scope
+- nextai-translator-nextai-translator external manifest review requires review.reviewedManifestSha256
+- ant-design-ant-design-pro external manifest review requires review.reviewerAttestations
+- ant-design-ant-design-pro external manifest review requires review.reviewedAt
+- ant-design-ant-design-pro external manifest review requires review.scope
+- ant-design-ant-design-pro external manifest review requires review.reviewedManifestSha256
+- styled-components-styled-components external manifest review requires review.reviewerAttestations
+- styled-components-styled-components external manifest review requires review.reviewedAt
+- styled-components-styled-components external manifest review requires review.scope
+- styled-components-styled-components external manifest review requires review.reviewedManifestSha256
+- jquense-yup external manifest review requires review.reviewerAttestations
+- jquense-yup external manifest review requires review.reviewedAt
+- jquense-yup external manifest review requires review.scope
+- jquense-yup external manifest review requires review.reviewedManifestSha256
+- vadimdemedes-ink external manifest review requires review.reviewerAttestations
+- vadimdemedes-ink external manifest review requires review.reviewedAt
+- vadimdemedes-ink external manifest review requires review.scope
+- vadimdemedes-ink external manifest review requires review.reviewedManifestSha256
+- alan2207-bulletproof-react external manifest review requires review.reviewerAttestations
+- alan2207-bulletproof-react external manifest review requires review.reviewedAt
+- alan2207-bulletproof-react external manifest review requires review.scope
+- alan2207-bulletproof-react external manifest review requires review.reviewedManifestSha256
+- rahuldkjain-github-profile-readme-generator external manifest review requires review.reviewerAttestations
+- rahuldkjain-github-profile-readme-generator external manifest review requires review.reviewedAt
+- rahuldkjain-github-profile-readme-generator external manifest review requires review.scope
+- rahuldkjain-github-profile-readme-generator external manifest review requires review.reviewedManifestSha256
+- fingerprintjs-fingerprintjs external manifest review requires review.reviewerAttestations
+- fingerprintjs-fingerprintjs external manifest review requires review.reviewedAt
+- fingerprintjs-fingerprintjs external manifest review requires review.scope
+- fingerprintjs-fingerprintjs external manifest review requires review.reviewedManifestSha256
+- localforage-localforage external manifest review requires review.reviewerAttestations
+- localforage-localforage external manifest review requires review.reviewedAt
+- localforage-localforage external manifest review requires review.scope
+- localforage-localforage external manifest review requires review.reviewedManifestSha256
+- nginxproxymanager-nginx-proxy-manager external manifest review requires review.reviewerAttestations
+- nginxproxymanager-nginx-proxy-manager external manifest review requires review.reviewedAt
+- nginxproxymanager-nginx-proxy-manager external manifest review requires review.scope
+- nginxproxymanager-nginx-proxy-manager external manifest review requires review.reviewedManifestSha256
+- philc-vimium external manifest review requires review.reviewerAttestations
+- philc-vimium external manifest review requires review.reviewedAt
+- philc-vimium external manifest review requires review.scope
+- philc-vimium external manifest review requires review.reviewedManifestSha256
+- cheeriojs-cheerio external manifest review requires review.reviewerAttestations
+- cheeriojs-cheerio external manifest review requires review.reviewedAt
+- cheeriojs-cheerio external manifest review requires review.scope
+- cheeriojs-cheerio external manifest review requires review.reviewedManifestSha256
+- immerjs-immer external manifest review requires review.reviewerAttestations
+- immerjs-immer external manifest review requires review.reviewedAt
+- immerjs-immer external manifest review requires review.scope
+- immerjs-immer external manifest review requires review.reviewedManifestSha256
+- reduxjs-redux external manifest review requires review.reviewerAttestations
+- reduxjs-redux external manifest review requires review.reviewedAt
+- reduxjs-redux external manifest review requires review.scope
+- reduxjs-redux external manifest review requires review.reviewedManifestSha256
+- solidjs-solid external manifest review requires review.reviewerAttestations
+- solidjs-solid external manifest review requires review.reviewedAt
+- solidjs-solid external manifest review requires review.scope
+- solidjs-solid external manifest review requires review.reviewedManifestSha256
+- trekhleb-javascript-algorithms external manifest review requires review.reviewerAttestations
+- trekhleb-javascript-algorithms external manifest review requires review.reviewedAt
+- trekhleb-javascript-algorithms external manifest review requires review.scope
+- trekhleb-javascript-algorithms external manifest review requires review.reviewedManifestSha256
+- preactjs-preact external manifest review requires review.reviewerAttestations
+- preactjs-preact external manifest review requires review.reviewedAt
+- preactjs-preact external manifest review requires review.scope
+- preactjs-preact external manifest review requires review.reviewedManifestSha256
+- yangshun-tech-interview-handbook external manifest review requires review.reviewerAttestations
+- yangshun-tech-interview-handbook external manifest review requires review.reviewedAt
+- yangshun-tech-interview-handbook external manifest review requires review.scope
+- yangshun-tech-interview-handbook external manifest review requires review.reviewedManifestSha256
+- wg-easy-wg-easy external manifest review requires review.reviewerAttestations
+- wg-easy-wg-easy external manifest review requires review.reviewedAt
+- wg-easy-wg-easy external manifest review requires review.scope
+- wg-easy-wg-easy external manifest review requires review.reviewedManifestSha256
+- eyaltoledano-claude-task-master external manifest review requires review.reviewerAttestations
+- eyaltoledano-claude-task-master external manifest review requires review.reviewedAt
+- eyaltoledano-claude-task-master external manifest review requires review.scope
+- eyaltoledano-claude-task-master external manifest review requires review.reviewedManifestSha256
+- aykutsarac-jsoncrack-com external manifest review requires review.reviewerAttestations
+- aykutsarac-jsoncrack-com external manifest review requires review.reviewedAt
+- aykutsarac-jsoncrack-com external manifest review requires review.scope
+- aykutsarac-jsoncrack-com external manifest review requires review.reviewedManifestSha256
+- vuejs-vue-cli external manifest review requires review.reviewerAttestations
+- vuejs-vue-cli external manifest review requires review.scope
+- vuejs-vue-cli external manifest review requires review.reviewedManifestSha256
+- gitroomhq-postiz-app external manifest review requires review.reviewerAttestations
+- gitroomhq-postiz-app external manifest review requires review.scope
+- gitroomhq-postiz-app external manifest review requires review.reviewedManifestSha256
+- heyputer-puter external manifest review requires review.reviewerAttestations
+- heyputer-puter external manifest review requires review.scope
+- heyputer-puter external manifest review requires review.reviewedManifestSha256
+- ajaxorg-ace external manifest review requires review.reviewerAttestations
+- ajaxorg-ace external manifest review requires review.scope
+- ajaxorg-ace external manifest review requires review.reviewedManifestSha256
+- umami-software-umami external manifest review requires review.reviewerAttestations
+- umami-software-umami external manifest review requires review.scope
+- umami-software-umami external manifest review requires review.reviewedManifestSha256
+- yeachan-heo-oh-my-codex external manifest review requires review.reviewerAttestations
+- yeachan-heo-oh-my-codex external manifest review requires review.scope
+- yeachan-heo-oh-my-codex external manifest review requires review.reviewedManifestSha256
+- dokploy-dokploy external manifest review requires review.reviewerAttestations
+- dokploy-dokploy external manifest review requires review.scope
+- dokploy-dokploy external manifest review requires review.reviewedManifestSha256
+- gitlawb-openclaude external manifest review requires review.reviewerAttestations
+- gitlawb-openclaude external manifest review requires review.scope
+- gitlawb-openclaude external manifest review requires review.reviewedManifestSha256
+- typeorm-typeorm external manifest review requires review.reviewerAttestations
+- typeorm-typeorm external manifest review requires review.scope
+- typeorm-typeorm external manifest review requires review.reviewedManifestSha256
+- colbymchenry-codegraph external manifest review requires review.reviewerAttestations
+- colbymchenry-codegraph external manifest review requires review.scope
+- colbymchenry-codegraph external manifest review requires review.reviewedManifestSha256
+- typicode-json-server external manifest review requires review.reviewerAttestations
+- typicode-json-server external manifest review requires review.scope
+- typicode-json-server external manifest review requires review.reviewedManifestSha256
+- rollup-rollup external manifest review requires review.reviewerAttestations
+- rollup-rollup external manifest review requires review.scope
+- rollup-rollup external manifest review requires review.reviewedManifestSha256
+- fastapi-full-stack-fastapi-template external manifest review requires review.reviewerAttestations
+- fastapi-full-stack-fastapi-template external manifest review requires review.scope
+- fastapi-full-stack-fastapi-template external manifest review requires review.reviewedManifestSha256
+- lecoupa-awesome-cheatsheets external manifest review requires review.reviewerAttestations
+- lecoupa-awesome-cheatsheets external manifest review requires review.scope
+- lecoupa-awesome-cheatsheets external manifest review requires review.reviewedManifestSha256
+- xyflow-xyflow external manifest review requires review.reviewerAttestations
+- xyflow-xyflow external manifest review requires review.scope
+- xyflow-xyflow external manifest review requires review.reviewedManifestSha256
+- digitalocean-nginxconfig-io external manifest review requires review.reviewerAttestations
+- digitalocean-nginxconfig-io external manifest review requires review.scope
+- digitalocean-nginxconfig-io external manifest review requires review.reviewedManifestSha256
+- modelcontextprotocol-servers external manifest review requires review.reviewerAttestations
+- modelcontextprotocol-servers external manifest review requires review.scope
+- modelcontextprotocol-servers external manifest review requires review.reviewedManifestSha256
+- algorithm-visualizer-algorithm-visualizer external manifest review requires review.reviewerAttestations
+- algorithm-visualizer-algorithm-visualizer external manifest review requires review.scope
+- algorithm-visualizer-algorithm-visualizer external manifest review requires review.reviewedManifestSha256
+- chatboxai-chatbox external manifest review requires review.reviewerAttestations
+- chatboxai-chatbox external manifest review requires review.scope
+- chatboxai-chatbox external manifest review requires review.reviewedManifestSha256
+- homebridge-homebridge external manifest review requires review.reviewerAttestations
+- homebridge-homebridge external manifest review requires review.scope
+- homebridge-homebridge external manifest review requires review.reviewedManifestSha256
+- opencut-app-opencut external manifest review requires review.reviewerAttestations
+- opencut-app-opencut external manifest review requires review.scope
+- opencut-app-opencut external manifest review requires review.reviewedManifestSha256
+- pmndrs-react-three-fiber external manifest review requires review.reviewerAttestations
+- pmndrs-react-three-fiber external manifest review requires review.scope
+- pmndrs-react-three-fiber external manifest review requires review.reviewedManifestSha256
+- alibaba-page-agent external manifest review requires review.reviewerAttestations
+- alibaba-page-agent external manifest review requires review.scope
+- alibaba-page-agent external manifest review requires review.reviewedManifestSha256
+- jaredpalmer-formik external manifest review requires review.reviewerAttestations
+- jaredpalmer-formik external manifest review requires review.scope
+- jaredpalmer-formik external manifest review requires review.reviewedManifestSha256
+- musistudio-claude-code-router external manifest review requires review.reviewerAttestations
+- musistudio-claude-code-router external manifest review requires review.scope
+- musistudio-claude-code-router external manifest review requires review.reviewedManifestSha256
+- upstash-context7 external manifest review requires review.reviewerAttestations
+- upstash-context7 external manifest review requires review.scope
+- upstash-context7 external manifest review requires review.reviewedManifestSha256
+- adguardteam-adguardhome external manifest review requires review.reviewerAttestations
+- adguardteam-adguardhome external manifest review requires review.scope
+- adguardteam-adguardhome external manifest review requires review.reviewedManifestSha256
+- chatgptnextweb-nextchat external manifest review requires review.reviewerAttestations
+- chatgptnextweb-nextchat external manifest review requires review.scope
+- chatgptnextweb-nextchat external manifest review requires review.reviewedManifestSha256
+- lissy93-web-check external manifest review requires review.reviewerAttestations
+- lissy93-web-check external manifest review requires review.scope
+- lissy93-web-check external manifest review requires review.reviewedManifestSha256
+- withfig-autocomplete external manifest review requires review.reviewerAttestations
+- withfig-autocomplete external manifest review requires review.scope
+- withfig-autocomplete external manifest review requires review.reviewedManifestSha256
+- linshenkx-prompt-optimizer external manifest review requires review.reviewerAttestations
+- linshenkx-prompt-optimizer external manifest review requires review.scope
+- linshenkx-prompt-optimizer external manifest review requires review.reviewedManifestSha256
+- socketio-socket-io external manifest review requires review.reviewerAttestations
+- socketio-socket-io external manifest review requires review.scope
+- socketio-socket-io external manifest review requires review.reviewedManifestSha256
+- feathericons-feather external manifest review requires review.reviewerAttestations
+- feathericons-feather external manifest review requires review.scope
+- feathericons-feather external manifest review requires review.reviewedManifestSha256
+- lodash-lodash external manifest review requires review.reviewerAttestations
+- lodash-lodash external manifest review requires review.scope
+- lodash-lodash external manifest review requires review.reviewedManifestSha256
+- markedjs-marked external manifest review requires review.reviewerAttestations
+- markedjs-marked external manifest review requires review.scope
+- markedjs-marked external manifest review requires review.reviewedManifestSha256
+- qishibo-anotherredisdesktopmanager external manifest review requires review.reviewerAttestations
+- qishibo-anotherredisdesktopmanager external manifest review requires review.scope
+- qishibo-anotherredisdesktopmanager external manifest review requires review.reviewedManifestSha256
+- react-boilerplate-react-boilerplate external manifest review requires review.reviewerAttestations
+- react-boilerplate-react-boilerplate external manifest review requires review.scope
+- react-boilerplate-react-boilerplate external manifest review requires review.reviewedManifestSha256
+- vuejs-vue external manifest review requires review.reviewerAttestations
+- vuejs-vue external manifest review requires review.scope
+- vuejs-vue external manifest review requires review.reviewedManifestSha256
+- mihomo-party-org-clash-party external manifest review requires review.reviewerAttestations
+- mihomo-party-org-clash-party external manifest review requires review.scope
+- mihomo-party-org-clash-party external manifest review requires review.reviewedManifestSha256
+- remy-nodemon external manifest review requires review.reviewerAttestations
+- remy-nodemon external manifest review requires review.scope
+- remy-nodemon external manifest review requires review.reviewedManifestSha256
+- hexojs-hexo external manifest review requires review.reviewerAttestations
+- hexojs-hexo external manifest review requires review.scope
+- hexojs-hexo external manifest review requires review.reviewedManifestSha256
+- expressjs-express external manifest review requires review.reviewerAttestations
+- expressjs-express external manifest review requires review.scope
+- expressjs-express external manifest review requires review.reviewedManifestSha256
+- juliusbrussee-caveman external manifest review requires review.reviewerAttestations
+- juliusbrussee-caveman external manifest review requires review.scope
+- juliusbrussee-caveman external manifest review requires review.reviewedManifestSha256
+- mobxjs-mobx external manifest review requires review.reviewerAttestations
+- mobxjs-mobx external manifest review requires review.scope
+- mobxjs-mobx external manifest review requires review.reviewedManifestSha256
+- select2-select2 external manifest review requires review.reviewerAttestations
+- select2-select2 external manifest review requires review.scope
+- select2-select2 external manifest review requires review.reviewedManifestSha256
+- justjavac-wechat-miniapp-radar external manifest review requires review.reviewerAttestations
+- justjavac-wechat-miniapp-radar external manifest review requires review.scope
+- justjavac-wechat-miniapp-radar external manifest review requires review.reviewedManifestSha256
+- yamadashy-repomix external manifest review requires review.reviewerAttestations
+- yamadashy-repomix external manifest review requires review.scope
+- yamadashy-repomix external manifest review requires review.reviewedManifestSha256
+- shardeum-shardeum external manifest review requires review.reviewerAttestations
+- shardeum-shardeum external manifest review requires review.scope
+- shardeum-shardeum external manifest review requires review.reviewedManifestSha256
+- tobi-qmd external manifest review requires review.reviewerAttestations
+- tobi-qmd external manifest review requires review.scope
+- tobi-qmd external manifest review requires review.reviewedManifestSha256
+- slab-quill external manifest review requires review.reviewerAttestations
+- slab-quill external manifest review requires review.scope
+- slab-quill external manifest review requires review.reviewedManifestSha256
+- google-zx external manifest review requires review.reviewerAttestations
+- google-zx external manifest review requires review.scope
+- google-zx external manifest review requires review.reviewedManifestSha256
+- jimliu-baoyu-skills external manifest review requires review.reviewerAttestations
+- jimliu-baoyu-skills external manifest review requires review.scope
+- jimliu-baoyu-skills external manifest review requires review.reviewedManifestSha256
+- tailwindlabs-headlessui external manifest review requires review.reviewerAttestations
+- tailwindlabs-headlessui external manifest review requires review.scope
+- tailwindlabs-headlessui external manifest review requires review.reviewedManifestSha256
+- smapiot-piral external manifest review requires review.reviewerAttestations
+- smapiot-piral external manifest review requires review.scope
+- smapiot-piral external manifest review requires review.reviewedManifestSha256
+- infinitered-reactotron external manifest review requires review.reviewerAttestations
+- infinitered-reactotron external manifest review requires review.scope
+- infinitered-reactotron external manifest review requires review.reviewedManifestSha256
+- rx-angular-rx-angular external manifest review requires review.reviewerAttestations
+- rx-angular-rx-angular external manifest review requires review.scope
+- rx-angular-rx-angular external manifest review requires review.reviewedManifestSha256
+- usesend-usesend external manifest review requires review.reviewerAttestations
+- usesend-usesend external manifest review requires review.scope
+- usesend-usesend external manifest review requires review.reviewedManifestSha256
+- deepnotesapp-deepnotes external manifest review requires review.reviewerAttestations
+- deepnotesapp-deepnotes external manifest review requires review.scope
+- deepnotesapp-deepnotes external manifest review requires review.reviewedManifestSha256
+- besscroft-picimpact external manifest review requires review.reviewerAttestations
+- besscroft-picimpact external manifest review requires review.scope
+- besscroft-picimpact external manifest review requires review.reviewedManifestSha256
+- 6pac-slickgrid external manifest review requires review.reviewerAttestations
+- 6pac-slickgrid external manifest review requires review.scope
+- 6pac-slickgrid external manifest review requires review.reviewedManifestSha256
+- brackets-userland-brackets-git external manifest review requires review.reviewerAttestations
+- brackets-userland-brackets-git external manifest review requires review.scope
+- brackets-userland-brackets-git external manifest review requires review.reviewedManifestSha256
+- freedomjs-freedom external manifest review requires review.reviewerAttestations
+- freedomjs-freedom external manifest review requires review.scope
+- freedomjs-freedom external manifest review requires review.reviewedManifestSha256
+- rich-harris-degit external manifest review requires review.reviewerAttestations
+- rich-harris-degit external manifest review requires review.scope
+- rich-harris-degit external manifest review requires review.reviewedManifestSha256
+- googlechromelabs-container-query-polyfill external manifest review requires review.reviewerAttestations
+- googlechromelabs-container-query-polyfill external manifest review requires review.scope
+- googlechromelabs-container-query-polyfill external manifest review requires review.reviewedManifestSha256
+- dsherret-dax external manifest review requires review.reviewerAttestations
+- dsherret-dax external manifest review requires review.scope
+- dsherret-dax external manifest review requires review.reviewedManifestSha256
+- chakra-ui-zag external manifest review requires review.reviewerAttestations
+- chakra-ui-zag external manifest review requires review.scope
+- chakra-ui-zag external manifest review requires review.reviewedManifestSha256
+- lumenstorm-orisonspace external manifest review requires review.reviewerAttestations
+- lumenstorm-orisonspace external manifest review requires review.scope
+- lumenstorm-orisonspace external manifest review requires review.reviewedManifestSha256
+- ts-rest-ts-rest external manifest review requires review.reviewerAttestations
+- ts-rest-ts-rest external manifest review requires review.scope
+- ts-rest-ts-rest external manifest review requires review.reviewedManifestSha256
+- hyperstackjs-hyperstack external manifest review requires review.reviewerAttestations
+- hyperstackjs-hyperstack external manifest review requires review.scope
+- hyperstackjs-hyperstack external manifest review requires review.reviewedManifestSha256
+- nutlope-pdftochat external manifest review requires review.reviewerAttestations
+- nutlope-pdftochat external manifest review requires review.scope
+- nutlope-pdftochat external manifest review requires review.reviewedManifestSha256
+- puemos-hls-downloader external manifest review requires review.reviewerAttestations
+- puemos-hls-downloader external manifest review requires review.scope
+- puemos-hls-downloader external manifest review requires review.reviewedManifestSha256
+- kmijs-kmi external manifest review requires review.reviewerAttestations
+- kmijs-kmi external manifest review requires review.scope
+- kmijs-kmi external manifest review requires review.reviewedManifestSha256
+- livestorejs-livestore external manifest review requires review.reviewerAttestations
+- livestorejs-livestore external manifest review requires review.scope
+- livestorejs-livestore external manifest review requires review.reviewedManifestSha256
+- paularmstrong-onerepo external manifest review requires review.reviewerAttestations
+- paularmstrong-onerepo external manifest review requires review.scope
+- paularmstrong-onerepo external manifest review requires review.reviewedManifestSha256
+- celo-org-celo-composer external manifest review requires review.reviewerAttestations
+- celo-org-celo-composer external manifest review requires review.scope
+- celo-org-celo-composer external manifest review requires review.reviewedManifestSha256
+- vikejs-bati external manifest review requires review.reviewerAttestations
+- vikejs-bati external manifest review requires review.scope
+- vikejs-bati external manifest review requires review.reviewedManifestSha256
+- jscutlery-devkit external manifest review requires review.reviewerAttestations
+- jscutlery-devkit external manifest review requires review.scope
+- jscutlery-devkit external manifest review requires review.reviewedManifestSha256
+- takram-design-engineering-three-geospatial external manifest review requires review.reviewerAttestations
+- takram-design-engineering-three-geospatial external manifest review requires review.scope
+- takram-design-engineering-three-geospatial external manifest review requires review.reviewedManifestSha256
+- briehq-brie-extension external manifest review requires review.reviewerAttestations
+- briehq-brie-extension external manifest review requires review.scope
+- briehq-brie-extension external manifest review requires review.reviewedManifestSha256
+- nextify-limited-saasfly external manifest review requires review.reviewerAttestations
+- nextify-limited-saasfly external manifest review requires review.scope
+- nextify-limited-saasfly external manifest review requires review.reviewedManifestSha256
+- keyshade-xyz-keyshade external manifest review requires review.reviewerAttestations
+- keyshade-xyz-keyshade external manifest review requires review.scope
+- keyshade-xyz-keyshade external manifest review requires review.reviewedManifestSha256
+- slymnoyann-hey-1 external manifest review requires review.reviewerAttestations
+- slymnoyann-hey-1 external manifest review requires review.scope
+- slymnoyann-hey-1 external manifest review requires review.reviewedManifestSha256
+- louisgv-local-ai external manifest review requires review.reviewerAttestations
+- louisgv-local-ai external manifest review requires review.scope
+- louisgv-local-ai external manifest review requires review.reviewedManifestSha256
+- jscad-openjscad-org external manifest review requires review.reviewerAttestations
+- jscad-openjscad-org external manifest review requires review.scope
+- jscad-openjscad-org external manifest review requires review.reviewedManifestSha256
+- docmirror-dev-sidecar external manifest review requires review.reviewerAttestations
+- docmirror-dev-sidecar external manifest review requires review.scope
+- docmirror-dev-sidecar external manifest review requires review.reviewedManifestSha256
+- antfu-collective-ni external manifest review requires review.reviewerAttestations
+- antfu-collective-ni external manifest review requires review.scope
+- antfu-collective-ni external manifest review requires review.reviewedManifestSha256
+- stefanoslig-angular-ngrx-nx-realworld-example-app external manifest review requires review.reviewerAttestations
+- stefanoslig-angular-ngrx-nx-realworld-example-app external manifest review requires review.scope
+- stefanoslig-angular-ngrx-nx-realworld-example-app external manifest review requires review.reviewedManifestSha256
+- ixahmedxi-orbitkit external manifest review requires review.reviewerAttestations
+- ixahmedxi-orbitkit external manifest review requires review.scope
+- ixahmedxi-orbitkit external manifest review requires review.reviewedManifestSha256
+- guigrpa-oao external manifest review requires review.reviewerAttestations
+- guigrpa-oao external manifest review requires review.scope
+- guigrpa-oao external manifest review requires review.reviewedManifestSha256
+- react-workspaces-react-workspaces-playground external manifest review requires review.reviewerAttestations
+- react-workspaces-react-workspaces-playground external manifest review requires review.scope
+- react-workspaces-react-workspaces-playground external manifest review requires review.reviewedManifestSha256
+- doramart-doracms external manifest review requires review.reviewerAttestations
+- doramart-doracms external manifest review requires review.scope
+- doramart-doracms external manifest review requires review.reviewedManifestSha256
+- tomalaforge-angular-challenges external manifest review requires review.reviewerAttestations
+- tomalaforge-angular-challenges external manifest review requires review.scope
+- tomalaforge-angular-challenges external manifest review requires review.reviewedManifestSha256
+- trungvose-angular-spotify external manifest review requires review.reviewerAttestations
+- trungvose-angular-spotify external manifest review requires review.scope
+- trungvose-angular-spotify external manifest review requires review.reviewedManifestSha256
+- jamiemason-shrinkpack external manifest review requires review.reviewerAttestations
+- jamiemason-shrinkpack external manifest review requires review.scope
+- jamiemason-shrinkpack external manifest review requires review.reviewedManifestSha256
+- nighttrax-ts-monorepo external manifest review requires review.reviewerAttestations
+- nighttrax-ts-monorepo external manifest review requires review.scope
+- nighttrax-ts-monorepo external manifest review requires review.reviewedManifestSha256
+- ttttonyhe-ouorz-mono external manifest review requires review.reviewerAttestations
+- ttttonyhe-ouorz-mono external manifest review requires review.scope
+- ttttonyhe-ouorz-mono external manifest review requires review.reviewedManifestSha256
+- ducktors-turborepo-remote-cache external manifest review requires review.reviewerAttestations
+- ducktors-turborepo-remote-cache external manifest review requires review.scope
+- ducktors-turborepo-remote-cache external manifest review requires review.reviewedManifestSha256
+- nteract-archived-desktop-app external manifest review requires review.reviewerAttestations
+- nteract-archived-desktop-app external manifest review requires review.scope
+- nteract-archived-desktop-app external manifest review requires review.reviewedManifestSha256
+- colmena-colmena external manifest review requires review.reviewerAttestations
+- colmena-colmena external manifest review requires review.scope
+- colmena-colmena external manifest review requires review.reviewedManifestSha256
+- lerna-lite-lerna-lite external manifest review requires review.reviewerAttestations
+- lerna-lite-lerna-lite external manifest review requires review.scope
+- lerna-lite-lerna-lite external manifest review requires review.reviewedManifestSha256
+- umaprotocol-protocol external manifest review requires review.reviewerAttestations
+- umaprotocol-protocol external manifest review requires review.scope
+- umaprotocol-protocol external manifest review requires review.reviewedManifestSha256
+- kirklin-celeris-web external manifest review requires review.reviewerAttestations
+- kirklin-celeris-web external manifest review requires review.scope
+- kirklin-celeris-web external manifest review requires review.reviewedManifestSha256
+- panoratech-panora external manifest review requires review.reviewerAttestations
+- panoratech-panora external manifest review requires review.scope
+- panoratech-panora external manifest review requires review.reviewedManifestSha256
+- cumt-robin-fullstack-blog external manifest review requires review.reviewerAttestations
+- cumt-robin-fullstack-blog external manifest review requires review.scope
+- cumt-robin-fullstack-blog external manifest review requires review.reviewedManifestSha256
+- muravjev-configs external manifest review requires review.reviewerAttestations
+- muravjev-configs external manifest review requires review.scope
+- muravjev-configs external manifest review requires review.reviewedManifestSha256
+- innei-template-nest-http-boilerplate external manifest review requires review.reviewerAttestations
+- innei-template-nest-http-boilerplate external manifest review requires review.scope
+- innei-template-nest-http-boilerplate external manifest review requires review.reviewedManifestSha256
+- mufeiyu-ayu-vjade external manifest review requires review.reviewerAttestations
+- mufeiyu-ayu-vjade external manifest review requires review.scope
+- mufeiyu-ayu-vjade external manifest review requires review.reviewedManifestSha256
+- senegalha-template-monorepo-typescript external manifest review requires review.reviewerAttestations
+- senegalha-template-monorepo-typescript external manifest review requires review.scope
+- senegalha-template-monorepo-typescript external manifest review requires review.reviewedManifestSha256
+- 646 selected findings are not fully independently labeled
+- 646 selected findings lack 1 external human/organization independent label(s)
+- external manifest review attestation gate has 532 issue(s)
+- external manifest review: changesets external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer
+- external manifest review: changesets external claim review requires review.reviewedAt
+- external manifest review: changesets external claim review requires review.scope
+- external manifest review: changesets external claim review requires review.reviewedManifestSha256
+- external manifest review: redux-toolkit external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer
+- external manifest review: redux-toolkit external claim review requires review.reviewedAt
+- external manifest review: redux-toolkit external claim review requires review.scope
+- external manifest review: redux-toolkit external claim review requires review.reviewedManifestSha256
+- external manifest review: typescript-eslint external claim review requires review.reviewerAttestations with at least one independent human/organization reviewer
+- external manifest review: typescript-eslint external claim review requires review.reviewedAt
+- external manifest review: 522 additional issue(s) omitted from summary
+
+## Next Steps
+
+- Return two independent blind label files from the sealed worklist assignments.
+- Rebuild a labeled bundle with the same pre-label artifact digest.
+- Generate adjudication worklist for disagreements, if any.
+- Update the final claim protocol with the labeled bundle digest and all worklist digests.
+- Run label readiness, claim preflight, and the statistical claim report.

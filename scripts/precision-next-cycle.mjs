@@ -620,6 +620,11 @@ function samplingSummaryFromBundle(bundleDir) {
   return {
     sampledFindings: sampling.population?.sampledFindings ?? (sampling.sampledFindingIds || []).length,
     sampledByRule: sampling.sampledByRule || {},
+    sampleExclusion: {
+      enabled: sampling.sampleExclusion?.enabled === true,
+      excludedCandidates: sampling.sampleExclusion?.excludedCandidates ?? 0,
+      sampledExcludedFindings: sampling.sampleExclusion?.sampledExcludedFindings ?? 0,
+    },
     repositoryBalance: {
       enabled: sampling.repositoryBalance?.enabled === true,
       feasible: sampling.repositoryBalance?.feasible ?? null,
@@ -685,6 +690,8 @@ function writeMarkdown(outPath, summary) {
     `- worklist selected by rule: \`${JSON.stringify(summary.worklist?.selectedByRule || {})}\``,
     `- full bundle sampled findings: ${summary.sampling?.sampledFindings ?? "n/a"}`,
     `- full bundle sampled by rule: \`${JSON.stringify(summary.sampling?.sampledByRule || {})}\``,
+    `- sample exclusion enabled: ${summary.sampling?.sampleExclusion?.enabled === true}`,
+    `- sample-excluded candidates: ${summary.sampling?.sampleExclusion?.excludedCandidates ?? 0}`,
     `- repository balance enabled: ${summary.sampling?.repositoryBalance?.enabled === true}`,
     `- repository balance feasible: ${summary.sampling?.repositoryBalance?.feasible ?? "n/a"}`,
     `- cap-pruned sampled findings: ${summary.sampling?.repositoryBalance?.removedFindingIds ?? 0}`,
@@ -728,6 +735,10 @@ function main() {
     const worklistProtocolPath = path.join(options.outDir, "protocol.worklist.json");
     const preflightProtocolPath = path.join(options.outDir, "protocol.prelabel-preflight.json");
     const preflightPath = path.join(options.outDir, "claim-preflight.prelabel.json");
+    const profile = claimProfile(options);
+    const samplingExclusionRulesPath = profile?.exclusionRules?.length
+      ? path.join(options.outDir, "sampling-exclusion-rules.json")
+      : "";
 
     let step = runStep("reviewed corpus validation", process.execPath, [
       path.join(repoRoot, "scripts", "reviewed-corpus-validate.mjs"),
@@ -768,6 +779,10 @@ function main() {
       "--out-dir",
       unlabeledBundleDir,
     ];
+    if (samplingExclusionRulesPath) {
+      writeJson(samplingExclusionRulesPath, profile.exclusionRules);
+      bundleArgs.push("--sampling-exclusion-rules", samplingExclusionRulesPath);
+    }
     if (options.maxRepositoryContribution !== null) {
       bundleArgs.push("--max-repository-contribution", String(options.maxRepositoryContribution));
       bundleArgs.push("--balance-rules", options.includeRules.join(","));
@@ -861,6 +876,7 @@ function main() {
         worklistProtocol: portablePath(worklistProtocolPath),
         preflightProtocol: portablePath(preflightProtocolPath),
         preflight: portablePath(preflightPath),
+        samplingExclusionRules: samplingExclusionRulesPath ? portablePath(samplingExclusionRulesPath) : null,
       },
       digests: {
         preLabelArtifactSetSha256: binding.preLabelArtifactSetSha256,

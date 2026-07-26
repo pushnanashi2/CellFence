@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9f30b79fe8f30f91",
+    "subjectId": "vikejs-bati",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "vikejs-bati",
+    "phase": null,
+    "repository": "https://github.com/vikejs/bati.git",
+    "commit": "682464ac9dd19bd5a702a91bf1951be222d2a412"
+  },
+  "manifestCopy": {
+    "path": "manifests/vikejs-bati-8923331351b4.json",
+    "sha256": "51576a4a0b529b73c7a461b98eed28eb4247296d12e30549614b959e29a9f10e"
+  },
+  "attestationTemplate": {
+    "subjectId": "vikejs-bati",
+    "repository": "https://github.com/vikejs/bati.git",
+    "commit": "682464ac9dd19bd5a702a91bf1951be222d2a412",
+    "manifestCopy": {
+      "path": "manifests/vikejs-bati-8923331351b4.json",
+      "sha256": "51576a4a0b529b73c7a461b98eed28eb4247296d12e30549614b959e29a9f10e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "51576a4a0b529b73c7a461b98eed28eb4247296d12e30549614b959e29a9f10e",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

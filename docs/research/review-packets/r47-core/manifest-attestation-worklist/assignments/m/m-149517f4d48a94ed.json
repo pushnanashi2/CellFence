@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d475ccdc4e8a487f",
+    "subjectId": "changesets",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "changesets",
+    "phase": null,
+    "repository": "https://github.com/changesets/changesets.git",
+    "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6"
+  },
+  "manifestCopy": {
+    "path": "manifests/changesets-33d33c0a60f9.json",
+    "sha256": "f93d96a3fd610a5d19c2697f8b44b3480386bd5df155cbb650d5762f59353053"
+  },
+  "attestationTemplate": {
+    "subjectId": "changesets",
+    "repository": "https://github.com/changesets/changesets.git",
+    "commit": "180833ed1ceb7e2f3bbcfd9fefa48b0c631a8bb6",
+    "manifestCopy": {
+      "path": "manifests/changesets-33d33c0a60f9.json",
+      "sha256": "f93d96a3fd610a5d19c2697f8b44b3480386bd5df155cbb650d5762f59353053"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f93d96a3fd610a5d19c2697f8b44b3480386bd5df155cbb650d5762f59353053",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

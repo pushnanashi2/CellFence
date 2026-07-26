@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-b498780dc9f31037",
+    "evidencePackageId": "evidence-afec048f4d96a723",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/slymnoyann-hey-1-00ce64bebcd0.json",
+        "sha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672"
+      },
+      "auditLog": {
+        "path": "logs/slymnoyann-hey-1-00ce64bebcd0/check.audit.jsonl",
+        "sha256": "eef11efbb897e429fc141581c9db41e1398775aa6667925827ed03357de95540"
+      },
+      "evidenceGraph": {
+        "path": "logs/slymnoyann-hey-1-00ce64bebcd0/evidence-graph.json",
+        "sha256": "ada9460378d6055e9e0970834f0fd5d0a9340295350175a3ce35fbca88c30e0b"
+      },
+      "checkStdout": {
+        "path": "logs/slymnoyann-hey-1-00ce64bebcd0/check.stdout.log",
+        "sha256": "41845aecfe2ed55967833ab74f12ee4f49566854aa5102ad3034fbde7e91c730"
+      },
+      "checkStderr": {
+        "path": "logs/slymnoyann-hey-1-00ce64bebcd0/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:afec048f4d96a72343116372ab41078aeb3aca02af861df68c609325a0575aa4",
+    "subjectId": "slymnoyann-hey-1",
+    "repository": "https://github.com/slymnoyann/hey-1.git",
+    "commit": "88c8f9d55340d57a37846ff72f55c2c604e3a566",
+    "gitTree": "31e546389af0d9802b9c12a5bacb5ea625db59d5",
+    "manifestSha256": "bfd18b72f4f1e8c41143986c1dfcdd1c7acb7321156713b47ca10dd071605672",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/components/Groups/List.tsx",
+    "line": 15,
+    "message": "components imports private implementation from store",
+    "cellId": "components",
+    "producerCellId": "store",
+    "cellfenceFingerprint": "a64ad2b60417cc8bf969db41061350583ba729ecc0aeced96fd44d10ae87b50e",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:afec048f4d96a72343116372ab41078aeb3aca02af861df68c609325a0575aa4",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-b498780dc9f31037",
+    "evidencePackageId": "evidence-afec048f4d96a723",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

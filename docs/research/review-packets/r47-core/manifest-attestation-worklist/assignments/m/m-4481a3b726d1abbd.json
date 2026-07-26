@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-3dfb433780d4cd9e",
+    "subjectId": "typeorm-typeorm",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "typeorm-typeorm",
+    "phase": null,
+    "repository": "https://github.com/typeorm/typeorm.git",
+    "commit": "5543c7c462a85b79746ae61205ddd43c1d8de157"
+  },
+  "manifestCopy": {
+    "path": "manifests/typeorm-typeorm-dc6831970594.json",
+    "sha256": "d0a02d4e9eafcb5da7dccc8cba017205afd18750c4b95de56800aaea42401e07"
+  },
+  "attestationTemplate": {
+    "subjectId": "typeorm-typeorm",
+    "repository": "https://github.com/typeorm/typeorm.git",
+    "commit": "5543c7c462a85b79746ae61205ddd43c1d8de157",
+    "manifestCopy": {
+      "path": "manifests/typeorm-typeorm-dc6831970594.json",
+      "sha256": "d0a02d4e9eafcb5da7dccc8cba017205afd18750c4b95de56800aaea42401e07"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d0a02d4e9eafcb5da7dccc8cba017205afd18750c4b95de56800aaea42401e07",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2620ee83f2b1c533",
+    "subjectId": "lumenstorm-orisonspace",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lumenstorm-orisonspace",
+    "phase": null,
+    "repository": "https://github.com/LumenStorm/OrisonSpace.git",
+    "commit": "f1ce8a51bc258f95f5fac60a6fbf6fa34b84f983"
+  },
+  "manifestCopy": {
+    "path": "manifests/lumenstorm-orisonspace-435d36cdebb7.json",
+    "sha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d"
+  },
+  "attestationTemplate": {
+    "subjectId": "lumenstorm-orisonspace",
+    "repository": "https://github.com/LumenStorm/OrisonSpace.git",
+    "commit": "f1ce8a51bc258f95f5fac60a6fbf6fa34b84f983",
+    "manifestCopy": {
+      "path": "manifests/lumenstorm-orisonspace-435d36cdebb7.json",
+      "sha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "a15eef2e82747881b5fd6facefc29bf03edcaa3d2cbd24dc7188e9731e6e026d",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

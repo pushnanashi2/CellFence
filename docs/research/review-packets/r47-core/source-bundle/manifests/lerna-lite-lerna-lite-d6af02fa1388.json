@@ -1,0 +1,722 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "e2e-utils/src/**",
+      "packages/changed/src/**",
+      "packages/cli/src/**",
+      "packages/core/src/**",
+      "packages/diff/src/**",
+      "packages/exec/src/**",
+      "packages/init/src/**",
+      "packages/list/src/**",
+      "packages/listable/src/**",
+      "packages/npmlog/src/**",
+      "packages/profiler/src/**",
+      "packages/publish/src/**",
+      "packages/run/src/**",
+      "packages/version/src/**",
+      "packages/watch/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "changed",
+      "ownedPaths": [
+        "packages/changed/src/**"
+      ],
+      "publicEntry": "packages/changed/src/index.ts",
+      "publicSymbols": [
+        "ChangedCommand",
+        "factory"
+      ],
+      "packageName": "@lerna-lite/changed",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "list"
+        },
+        {
+          "cell": "listable"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/cli-commands/cli-changed-commands.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@lerna-lite/cli",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "init"
+        },
+        {
+          "cell": "npmlog"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.ts",
+      "publicSymbols": [
+        "applyExtends",
+        "ArboristLoadOption",
+        "CatalogConfig",
+        "ChangedCommandOption",
+        "ChangelogPresetOptions",
+        "checkWorkingTree",
+        "cleanStack",
+        "collectDependents",
+        "collectPackages",
+        "collectUncommitted",
+        "collectUncommittedSync",
+        "collectUpdates",
+        "colorize",
+        "columnify",
+        "Command",
+        "CommandOptions",
+        "CommandType",
+        "Conf",
+        "copy",
+        "copySync",
+        "createRunner",
+        "CyclicPackageGraphNode",
+        "Defaults",
+        "deleteComplexObjectProp",
+        "DependenciesType",
+        "describeRef",
+        "DescribeRefDetailedResult",
+        "DescribeRefFallbackResult",
+        "DescribeRefOptions",
+        "describeRefSync",
+        "diffCatalogs",
+        "DiffCommandOption",
+        "diffWorkspaceCatalog",
+        "ensureDir",
+        "ensureDirSync",
+        "envReplace",
+        "EOL",
+        "excludeValuesFromArray",
+        "exec",
+        "ExecCommandOption",
+        "ExecOpts",
+        "execPackageManager",
+        "execPackageManagerSync",
+        "execSync",
+        "extractCatalogConfigFromPkg",
+        "extractCatalogConfigFromYaml",
+        "FetchConfig",
+        "FilterOptions",
+        "filterPackages",
+        "find",
+        "findPrefix",
+        "getChildProcessCount",
+        "getClientConfigFilename",
+        "getComplexObjectValue",
+        "getExitCode",
+        "getFilteredPackages",
+        "getPackagesForOption",
+        "hasTags",
+        "InitCommandOption",
+        "isCorepackEnabled",
+        "isEmpty",
+        "JsonArray",
+        "JsonObject",
+        "JsonPrimitive",
+        "JsonValue",
+        "LernaConfig",
+        "LifecycleConfig",
+        "ListableOption",
+        "ListCommandOption",
+        "logExecCommand",
+        "logOutput",
+        "logPackageError",
+        "looselyJsonParse",
+        "makeDiffPredicate",
+        "makeFileFinder",
+        "makeSyncFileFinder",
+        "Manifest",
+        "mkThrowIfUncommitted",
+        "move",
+        "moveSync",
+        "NpaResolveResult",
+        "NpmClient",
+        "npmConf",
+        "outputFile",
+        "outputFileSync",
+        "outputJson",
+        "outputJsonSync",
+        "Package",
+        "PackageGraph",
+        "PackageGraphNode",
+        "PackConfig",
+        "parseField",
+        "pathExists",
+        "pathExistsSync",
+        "pluralize",
+        "pMap",
+        "prereleaseIdFromVersion",
+        "ProfileData",
+        "Project",
+        "ProjectConfig",
+        "promptConfirmation",
+        "promptSelectOne",
+        "promptTextInput",
+        "PublishCommandOption",
+        "pulseTillDone",
+        "QueryGraph",
+        "QueryGraphConfig",
+        "RawManifest",
+        "readJson",
+        "readJsonSync",
+        "readWorkspaceCatalogConfig",
+        "RemoteClientType",
+        "remove",
+        "removeSync",
+        "reportCycles",
+        "RunCommandOption",
+        "runLifecycle",
+        "runTopologically",
+        "shallowExtend",
+        "slash",
+        "spawn",
+        "spawnProcess",
+        "spawnStreaming",
+        "StyleFormat",
+        "throwIfReleased",
+        "throwIfUncommitted",
+        "TinyExecOptions",
+        "toNerfDart",
+        "TopologicalConfig",
+        "tryOrFalse",
+        "types",
+        "UncommittedConfig",
+        "UpdateCollectorOptions",
+        "ValidationError",
+        "VersionCommandOption",
+        "warnIfHanging",
+        "WatchCommandOption",
+        "wrapError",
+        "writeJson",
+        "writeJsonSync",
+        "writeLogFile",
+        "writePackage",
+        "YARN_PATCH_PROTOCOL_REG_EXP"
+      ],
+      "packageName": "@lerna-lite/core",
+      "consumes": [
+        {
+          "cell": "npmlog"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "diff",
+      "ownedPaths": [
+        "packages/diff/src/**"
+      ],
+      "publicEntry": "packages/diff/src/index.ts",
+      "publicSymbols": [
+        "DiffCommand",
+        "factory"
+      ],
+      "packageName": "@lerna-lite/diff",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "npmlog"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "e2e-utils",
+      "ownedPaths": [
+        "e2e-utils/src/**"
+      ],
+      "publicEntry": "e2e-utils/src/index.ts",
+      "publicSymbols": [
+        "Fixture",
+        "FixtureCreateOptions",
+        "getE2eRoot",
+        "normalizeCommandOutput",
+        "normalizeCommitSHAs",
+        "normalizeEnvironment",
+        "RunCommandResult",
+        "trimEnds"
+      ],
+      "packageName": "@lerna-lite/e2e-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "exec",
+      "ownedPaths": [
+        "packages/exec/src/**"
+      ],
+      "publicEntry": "packages/exec/src/index.ts",
+      "publicSymbols": [
+        "ExecCommand",
+        "ExecScriptOption",
+        "ExecStreamingOption",
+        "factory"
+      ],
+      "packageName": "@lerna-lite/exec",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "profiler"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "init",
+      "ownedPaths": [
+        "packages/init/src/**"
+      ],
+      "publicEntry": "packages/init/src/index.ts",
+      "publicSymbols": [
+        "factory",
+        "InitCommand"
+      ],
+      "packageName": "@lerna-lite/init",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "list",
+      "ownedPaths": [
+        "packages/list/src/**"
+      ],
+      "publicEntry": "packages/list/src/index.ts",
+      "publicSymbols": [
+        "factory",
+        "ListCommand"
+      ],
+      "packageName": "@lerna-lite/list",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "listable"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "listable",
+      "ownedPaths": [
+        "packages/listable/src/**"
+      ],
+      "publicEntry": "packages/listable/src/index.ts",
+      "publicSymbols": [
+        "listable"
+      ],
+      "packageName": "@lerna-lite/listable",
+      "consumes": [
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "npmlog",
+      "ownedPaths": [
+        "packages/npmlog/src/**"
+      ],
+      "publicEntry": "packages/npmlog/src/index.ts",
+      "publicSymbols": [
+        "alignCenter",
+        "alignLeft",
+        "alignRight",
+        "hasUnicode",
+        "log",
+        "Logger",
+        "stringWidth",
+        "stripAnsi",
+        "wideTruncate"
+      ],
+      "packageName": "@lerna-lite/npmlog",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "profiler",
+      "ownedPaths": [
+        "packages/profiler/src/**"
+      ],
+      "publicEntry": "packages/profiler/src/index.ts",
+      "publicSymbols": [
+        "Profiler",
+        "ProfilerConfig",
+        "TraceEvent"
+      ],
+      "packageName": "@lerna-lite/profiler",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "npmlog"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "publish",
+      "ownedPaths": [
+        "packages/publish/src/**"
+      ],
+      "publicEntry": "packages/publish/src/index.ts",
+      "publicSymbols": [
+        "add",
+        "createTempLicenses",
+        "DistTagOptions",
+        "factory",
+        "fetchTags",
+        "getCurrentSHA",
+        "getCurrentTags",
+        "getFetchConfig",
+        "getNpmUsername",
+        "getPackagesWithoutLicense",
+        "getPacked",
+        "getProfileData",
+        "getTaggedPackages",
+        "getTwoFactorAuthRequired",
+        "getUnpublishedPackages",
+        "getWhoAmI",
+        "gitCheckout",
+        "KebabCase",
+        "LibNpmPublishOptions",
+        "list",
+        "logPacked",
+        "npmPublish",
+        "PackagePublishConfig",
+        "packDirectory",
+        "PublishCommand",
+        "Queue",
+        "remove",
+        "removeTempLicenses",
+        "TailHeadQueue",
+        "Tarball",
+        "verifyNpmPackageAccess"
+      ],
+      "packageName": "@lerna-lite/publish",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "npmlog"
+        },
+        {
+          "cell": "version"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "run",
+      "ownedPaths": [
+        "packages/run/src/**"
+      ],
+      "publicEntry": "packages/run/src/index.ts",
+      "publicSymbols": [
+        "factory",
+        "getNpmExecOpts",
+        "npmRunScript",
+        "npmRunScriptStreaming",
+        "RunCommand",
+        "timer"
+      ],
+      "packageName": "@lerna-lite/run",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "npmlog"
+        },
+        {
+          "cell": "profiler"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "version",
+      "ownedPaths": [
+        "packages/version/src/**"
+      ],
+      "publicEntry": "packages/version/src/index.ts",
+      "publicSymbols": [
+        "applyBuildMetadata",
+        "BaseChangelogOptions",
+        "BLANK_LINE",
+        "CHANGELOG_HEADER",
+        "ChangelogBumperOption",
+        "ChangelogConfig",
+        "ChangelogPresetConfig",
+        "ChangelogType",
+        "ClientCommit",
+        "CommentResolvedOptions",
+        "COMMIT_GUIDELINE",
+        "CommitData",
+        "countLeftRight",
+        "createGitHubClient",
+        "createGitLabClient",
+        "createRelease",
+        "createReleaseClient",
+        "factory",
+        "GetChangelogConfig",
+        "getCommitsSinceLastRelease",
+        "getCurrentBranch",
+        "getGithubCommits",
+        "getOldestCommitSinceLastTag",
+        "getOneTimePassword",
+        "gitAdd",
+        "GitClient",
+        "GitClientReleaseOption",
+        "gitCommit",
+        "GitCommitOption",
+        "GitCreateReleaseFn",
+        "gitPush",
+        "gitPushSingleTag",
+        "gitTag",
+        "GitTagOption",
+        "isAnythingCommitted",
+        "isBehindUpstream",
+        "isBreakingChange",
+        "loadPackageLockFileWhenExists",
+        "makeBumpOnlyFilter",
+        "makePromptVersion",
+        "OctokitClientOutput",
+        "OneTimePasswordCache",
+        "otplease",
+        "parseGitRepo",
+        "promptVersion",
+        "readExistingChangelog",
+        "recommendVersion",
+        "ReleaseClient",
+        "ReleaseCommandProps",
+        "ReleaseNote",
+        "ReleaseOptions",
+        "remoteBranchExists",
+        "RemoteCommit",
+        "runInstallLockFileOnly",
+        "saveUpdatedLockJsonFile",
+        "setConfigChangelogCommitClientLogin",
+        "setConfigChangelogCommitGitAuthor",
+        "tempWrite",
+        "truncateReleaseBody",
+        "updateChangelog",
+        "UpdateChangelogOption",
+        "updateClassicLockfileVersion",
+        "updateNpmLockFileVersion2",
+        "updateRemote",
+        "updateTempModernLockfileVersion",
+        "validateFileExists",
+        "VersionCommand",
+        "VersioningStrategy"
+      ],
+      "packageName": "@lerna-lite/version",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "npmlog"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "watch",
+      "ownedPaths": [
+        "packages/watch/src/**"
+      ],
+      "publicEntry": "packages/watch/src/index.ts",
+      "publicSymbols": [
+        "ChangesStructure",
+        "factory",
+        "WatchCommand"
+      ],
+      "packageName": "@lerna-lite/watch",
+      "consumes": [
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

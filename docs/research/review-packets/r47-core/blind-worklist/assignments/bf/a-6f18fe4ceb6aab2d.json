@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-6f18fe4ceb6aab2d",
+    "evidencePackageId": "evidence-2f63afecffd08a55",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/puemos-hls-downloader-7cc65e436ec2.json",
+        "sha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d"
+      },
+      "auditLog": {
+        "path": "logs/puemos-hls-downloader-7cc65e436ec2/check.audit.jsonl",
+        "sha256": "49a60392b3321484734d86cc944924b19b8dd4ffcfeb07599e5e912a0f23421d"
+      },
+      "evidenceGraph": {
+        "path": "logs/puemos-hls-downloader-7cc65e436ec2/evidence-graph.json",
+        "sha256": "f72e7494069175c15228cad22470d70af54f3cb6a8060656eb06f0acbd351b19"
+      },
+      "checkStdout": {
+        "path": "logs/puemos-hls-downloader-7cc65e436ec2/check.stdout.log",
+        "sha256": "88be6e581bc3a16677bfe452e11046cadc1c06ee6a83b54191a9e723d229fe23"
+      },
+      "checkStderr": {
+        "path": "logs/puemos-hls-downloader-7cc65e436ec2/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:2f63afecffd08a559d0a3a66b1406701589e987effff8ae4af89b175e63f3fab",
+    "subjectId": "puemos-hls-downloader",
+    "repository": "https://github.com/puemos/hls-downloader.git",
+    "commit": "2071e691e6d499a053f34382fe0a6c57d0b80f59",
+    "gitTree": "043a0538f4ea86e574b34c7cc1e6e2575e07d29d",
+    "manifestSha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/popup/src/modules/Job/JobController.ts",
+    "line": 4,
+    "message": "popup imports private implementation from core",
+    "cellId": "popup",
+    "producerCellId": "core",
+    "cellfenceFingerprint": "3e950f3651caf177e92c0a96b367b7e47a035146aba1076cf67fe8b7dfe7eb03",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:2f63afecffd08a559d0a3a66b1406701589e987effff8ae4af89b175e63f3fab",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-6f18fe4ceb6aab2d",
+    "evidencePackageId": "evidence-2f63afecffd08a55",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

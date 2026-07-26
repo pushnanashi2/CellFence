@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "cellfence.precision-claim-protocol.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "claim": {
+    "toolCommit": "94e07d7fe24bb18f33b9dad2832bf967af07e50d",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c",
+    "targetPopulation": "reviewed TS/JS workspace repositories, boundary-core rules only",
+    "supportedSyntaxProfile": "ts-js-supported-v1",
+    "scopeProfile": "ts-js-boundary-core-v1",
+    "includedRules": [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER"
+    ],
+    "primaryMetric": "blocking_precision",
+    "minimumPrecision": 0.99,
+    "confidence": 0.95,
+    "blockingSeverities": [
+      "error"
+    ],
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "worklistArtifactSetSha256s": [
+      "7ce0562a52ec2a1c1462342298e9fd415dd67ae9eb22db7e85333c94586682cb"
+    ]
+  },
+  "samplingPlan": {
+    "unit": "finding",
+    "method": "deterministic sampled precision-eligible set from a sealed reviewed corpus bundle; pre-label preflight uses the unlabeled bundle and must be regenerated after returned labels",
+    "maxRepositoryContribution": 0.1
+  },
+  "labelingPlan": {
+    "minimumIndependentRaters": 2,
+    "requireAdjudicationForDisagreements": true,
+    "requireKnownRaterType": true,
+    "allowedRaterTypes": [
+      "human",
+      "organization"
+    ],
+    "allowNonHumanRaters": false,
+    "requireExternalIndependentRaters": true,
+    "externalRaterTypes": [
+      "human",
+      "organization"
+    ],
+    "minimumExternalIndependentRaters": 1,
+    "countNeedsPolicyAs": "blocking_failure_semantic_success",
+    "countNeedsReviewAs": "blocking_failure"
+  },
+  "manifestReviewPlan": {
+    "requireExternalAttestations": true,
+    "allowedReviewerTypes": [
+      "human",
+      "organization"
+    ]
+  },
+  "exclusionRules": [
+    {
+      "field": "filePath",
+      "pattern": "**/__fixtures__/**",
+      "reason": "test and fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "__fixtures__/**",
+      "reason": "test and fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/__generated__/**",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "__generated__/**",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/__tests__/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "__tests__/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/*.generated.*",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "*.generated.*",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/*.spec.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "*.spec.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/*.test.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "*.test.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/*_test.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/fixture/**",
+      "reason": "fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "fixture/**",
+      "reason": "fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/fixtures/**",
+      "reason": "fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "fixtures/**",
+      "reason": "fixture files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/generated/**",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "generated/**",
+      "reason": "generated files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/test/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "test/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "**/tests/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "tests/**",
+      "reason": "test files are outside the boundary-core production-source claim"
+    },
+    {
+      "field": "filePath",
+      "pattern": "*_test.*",
+      "reason": "test files are outside the boundary-core production-source claim"
+    }
+  ]
+}

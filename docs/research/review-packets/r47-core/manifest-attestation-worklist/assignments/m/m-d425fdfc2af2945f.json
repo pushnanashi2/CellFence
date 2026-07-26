@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-8786ca4fdf616e7e",
+    "subjectId": "lfnovo-open-notebook",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lfnovo-open-notebook",
+    "phase": null,
+    "repository": "https://github.com/lfnovo/open-notebook.git",
+    "commit": "df106fabe6d722618bafd0d08209a2bb5648792d"
+  },
+  "manifestCopy": {
+    "path": "manifests/lfnovo-open-notebook-5621f1cae53c.json",
+    "sha256": "50081dc3e0c8d9548add9cf433fedcfc8b1ecd38fdac7e651d56508f01a38791"
+  },
+  "attestationTemplate": {
+    "subjectId": "lfnovo-open-notebook",
+    "repository": "https://github.com/lfnovo/open-notebook.git",
+    "commit": "df106fabe6d722618bafd0d08209a2bb5648792d",
+    "manifestCopy": {
+      "path": "manifests/lfnovo-open-notebook-5621f1cae53c.json",
+      "sha256": "50081dc3e0c8d9548add9cf433fedcfc8b1ecd38fdac7e651d56508f01a38791"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "50081dc3e0c8d9548add9cf433fedcfc8b1ecd38fdac7e651d56508f01a38791",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

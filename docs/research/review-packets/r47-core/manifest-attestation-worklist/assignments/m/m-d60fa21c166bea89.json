@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-f4242ecec4eee250",
+    "subjectId": "markedjs-marked",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "markedjs-marked",
+    "phase": null,
+    "repository": "https://github.com/markedjs/marked.git",
+    "commit": "9154f8f3cb2fa136d85b61e1eacc4ef381a3b629"
+  },
+  "manifestCopy": {
+    "path": "manifests/markedjs-marked-f67a79bbfef8.json",
+    "sha256": "99afe76ceeba6eec92670122ae281dc34ec1ef1b9e378a9a8b5e0a5ee92b6c71"
+  },
+  "attestationTemplate": {
+    "subjectId": "markedjs-marked",
+    "repository": "https://github.com/markedjs/marked.git",
+    "commit": "9154f8f3cb2fa136d85b61e1eacc4ef381a3b629",
+    "manifestCopy": {
+      "path": "manifests/markedjs-marked-f67a79bbfef8.json",
+      "sha256": "99afe76ceeba6eec92670122ae281dc34ec1ef1b9e378a9a8b5e0a5ee92b6c71"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "99afe76ceeba6eec92670122ae281dc34ec1ef1b9e378a9a8b5e0a5ee92b6c71",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

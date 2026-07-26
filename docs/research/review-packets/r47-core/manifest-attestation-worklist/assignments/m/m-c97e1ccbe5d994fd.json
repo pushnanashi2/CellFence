@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-3cdca3e0ccb653a9",
+    "subjectId": "trungvose-angular-spotify",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "trungvose-angular-spotify",
+    "phase": null,
+    "repository": "https://github.com/trungvose/angular-spotify.git",
+    "commit": "e1bec473caae3230f94867b0300e7c7ab76e3519"
+  },
+  "manifestCopy": {
+    "path": "manifests/trungvose-angular-spotify-96c056600706.json",
+    "sha256": "5d43691e673cff2779777f73b0c9465a8d63ed0a1ad44b027f10ca9d0f6e9d55"
+  },
+  "attestationTemplate": {
+    "subjectId": "trungvose-angular-spotify",
+    "repository": "https://github.com/trungvose/angular-spotify.git",
+    "commit": "e1bec473caae3230f94867b0300e7c7ab76e3519",
+    "manifestCopy": {
+      "path": "manifests/trungvose-angular-spotify-96c056600706.json",
+      "sha256": "5d43691e673cff2779777f73b0c9465a8d63ed0a1ad44b027f10ca9d0f6e9d55"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5d43691e673cff2779777f73b0c9465a8d63ed0a1ad44b027f10ca9d0f6e9d55",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

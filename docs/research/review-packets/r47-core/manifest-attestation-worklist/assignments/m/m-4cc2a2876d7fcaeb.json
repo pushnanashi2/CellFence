@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9b7e4c8db0b772dc",
+    "subjectId": "hexojs-hexo",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "hexojs-hexo",
+    "phase": null,
+    "repository": "https://github.com/hexojs/hexo.git",
+    "commit": "a16a7e609f8d3786d21d65e98ffcf602eecbc0f6"
+  },
+  "manifestCopy": {
+    "path": "manifests/hexojs-hexo-928dec1031a5.json",
+    "sha256": "580a2598f9d80611570fd6102bd3cf67f47d33d50bd43c73ddae313fdbfbb9f9"
+  },
+  "attestationTemplate": {
+    "subjectId": "hexojs-hexo",
+    "repository": "https://github.com/hexojs/hexo.git",
+    "commit": "a16a7e609f8d3786d21d65e98ffcf602eecbc0f6",
+    "manifestCopy": {
+      "path": "manifests/hexojs-hexo-928dec1031a5.json",
+      "sha256": "580a2598f9d80611570fd6102bd3cf67f47d33d50bd43c73ddae313fdbfbb9f9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "580a2598f9d80611570fd6102bd3cf67f47d33d50bd43c73ddae313fdbfbb9f9",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

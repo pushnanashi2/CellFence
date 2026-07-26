@@ -1,0 +1,821 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/alpine-table/src/**",
+      "packages/angular-table-devtools/src/**",
+      "packages/angular-table/src/**",
+      "packages/ember-table/src/**",
+      "packages/lit-table/src/**",
+      "packages/match-sorter-utils/src/**",
+      "packages/preact-table-devtools/src/**",
+      "packages/preact-table/src/**",
+      "packages/react-table-devtools/src/**",
+      "packages/react-table/src/**",
+      "packages/solid-table-devtools/src/**",
+      "packages/solid-table/src/**",
+      "packages/svelte-table/src/**",
+      "packages/table-core/src/**",
+      "packages/table-devtools/src/**",
+      "packages/vue-table-devtools/src/**",
+      "packages/vue-table/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "alpine-table",
+      "ownedPaths": [
+        "packages/alpine-table/src/**"
+      ],
+      "publicEntry": "packages/alpine-table/src/index.ts",
+      "publicSymbols": [
+        "AlpineTable",
+        "AppAlpineTable",
+        "AppColumnHelper",
+        "createTable",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderProps"
+      ],
+      "packageName": "@tanstack/alpine-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "angular-table",
+      "ownedPaths": [
+        "packages/angular-table/src/**"
+      ],
+      "publicEntry": "packages/angular-table/src/index.ts",
+      "publicSymbols": [
+        "AngularTable",
+        "AppAngularTable",
+        "AppCellContext",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderContext",
+        "CreateTableContextOptions",
+        "createTableHook",
+        "CreateTableHookResult",
+        "FlexRender",
+        "FlexRenderCell",
+        "flexRenderComponent",
+        "FlexRenderComponent",
+        "FlexRenderComponentInstance",
+        "FlexRenderComponentProps",
+        "FlexRenderContent",
+        "FlexRenderDirective",
+        "FlexRenderInputContent",
+        "injectFlexRenderContext",
+        "injectTable",
+        "injectTableCellContext",
+        "injectTableContext",
+        "injectTableHeaderContext",
+        "RenderableComponent",
+        "shallow",
+        "SubscribeSource",
+        "TanStackTable",
+        "TanStackTableCell",
+        "TanStackTableCellContext",
+        "TanStackTableCellToken",
+        "TanStackTableHeader",
+        "TanStackTableHeaderContext",
+        "TanStackTableHeaderToken",
+        "TanStackTableToken"
+      ],
+      "packageName": "@tanstack/angular-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "angular-table-devtools",
+      "ownedPaths": [
+        "packages/angular-table-devtools/src/**"
+      ],
+      "publicEntry": "packages/angular-table-devtools/src/index.ts",
+      "publicSymbols": [
+        "injectTanStackTableDevtools",
+        "InjectTanStackTableDevtoolsOptions",
+        "TableDevtoolsAngularInit",
+        "TableDevtoolsPanel",
+        "tableDevtoolsPlugin"
+      ],
+      "packageName": "@tanstack/angular-table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        },
+        {
+          "cell": "table-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ember-table",
+      "ownedPaths": [
+        "packages/ember-table/src/**"
+      ],
+      "publicEntry": "packages/ember-table/src/index.ts",
+      "publicSymbols": [
+        "AppColumnHelper",
+        "AppEmberTable",
+        "CellRenderableSignature",
+        "computed",
+        "ComputedSignal",
+        "createAtom",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "emberReactivity",
+        "flexRender",
+        "FlexRenderableSignature",
+        "FlexRenderCell",
+        "flexRenderComponent",
+        "FlexRenderComponentConfig",
+        "FlexRenderContext",
+        "FlexRenderFooter",
+        "FlexRenderHeader",
+        "signal",
+        "Signal",
+        "useTable"
+      ],
+      "packageName": "@tanstack/ember-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lit-table",
+      "ownedPaths": [
+        "packages/lit-table/src/**"
+      ],
+      "publicEntry": "packages/lit-table/src/index.ts",
+      "publicSymbols": [
+        "AppCellContext",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderContext",
+        "AppLitTable",
+        "BoundComponents",
+        "ComponentType",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderProps",
+        "LitTable",
+        "SelectionSource",
+        "subscribe",
+        "SubscribeDirective",
+        "TableController"
+      ],
+      "packageName": "@tanstack/lit-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "match-sorter-utils",
+      "ownedPaths": [
+        "packages/match-sorter-utils/src/**"
+      ],
+      "publicEntry": "packages/match-sorter-utils/src/index.ts",
+      "publicSymbols": [
+        "Accessor",
+        "AccessorAttributes",
+        "AccessorFn",
+        "AccessorOptions",
+        "compareItems",
+        "Ranking",
+        "RankingInfo",
+        "rankings",
+        "rankItem",
+        "RankItemOptions"
+      ],
+      "packageName": "@tanstack/match-sorter-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preact-table",
+      "ownedPaths": [
+        "packages/preact-table/src/**"
+      ],
+      "publicEntry": "packages/preact-table/src/index.ts",
+      "publicSymbols": [
+        "AppCellComponent",
+        "AppCellContext",
+        "AppCellPropsWithoutSelector",
+        "AppCellPropsWithSelector",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderComponent",
+        "AppHeaderContext",
+        "AppHeaderPropsWithoutSelector",
+        "AppHeaderPropsWithSelector",
+        "AppPreactTable",
+        "AppTableComponent",
+        "AppTablePropsWithoutSelector",
+        "AppTablePropsWithSelector",
+        "createTableHook",
+        "createTableHookContexts",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderProps",
+        "PreactTable",
+        "Renderable",
+        "Subscribe",
+        "SubscribeProps",
+        "SubscribePropsWithSource",
+        "SubscribePropsWithSourceIdentity",
+        "SubscribePropsWithSourceWithSelector",
+        "SubscribePropsWithStore",
+        "SubscribeSource",
+        "TableHookContexts",
+        "useTable"
+      ],
+      "packageName": "@tanstack/preact-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preact-table-devtools",
+      "ownedPaths": [
+        "packages/preact-table-devtools/src/**"
+      ],
+      "publicEntry": "packages/preact-table-devtools/src/index.ts",
+      "publicSymbols": [
+        "TableDevtoolsPanel",
+        "tableDevtoolsPlugin",
+        "TableDevtoolsPreactInit",
+        "useTanStackTableDevtools",
+        "UseTanStackTableDevtoolsOptions"
+      ],
+      "packageName": "@tanstack/preact-table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        },
+        {
+          "cell": "table-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-table",
+      "ownedPaths": [
+        "packages/react-table/src/**"
+      ],
+      "publicEntry": "packages/react-table/src/index.ts",
+      "publicSymbols": [
+        "AppCellComponent",
+        "AppCellContext",
+        "AppCellPropsWithoutSelector",
+        "AppCellPropsWithSelector",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderComponent",
+        "AppHeaderContext",
+        "AppHeaderPropsWithoutSelector",
+        "AppHeaderPropsWithSelector",
+        "AppReactTable",
+        "AppTableComponent",
+        "AppTablePropsWithoutSelector",
+        "AppTablePropsWithSelector",
+        "createTableHook",
+        "createTableHookContexts",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderProps",
+        "ReactTable",
+        "Renderable",
+        "Subscribe",
+        "SubscribeProps",
+        "SubscribePropsWithSource",
+        "SubscribePropsWithSourceIdentity",
+        "SubscribePropsWithSourceWithSelector",
+        "SubscribePropsWithStore",
+        "SubscribeSource",
+        "TableHookContexts",
+        "useTable"
+      ],
+      "packageName": "@tanstack/react-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "react-table-devtools",
+      "ownedPaths": [
+        "packages/react-table-devtools/src/**"
+      ],
+      "publicEntry": "packages/react-table-devtools/src/index.ts",
+      "publicSymbols": [
+        "TableDevtoolsPanel",
+        "tableDevtoolsPlugin",
+        "TableDevtoolsReactInit",
+        "useTanStackTableDevtools",
+        "UseTanStackTableDevtoolsOptions"
+      ],
+      "packageName": "@tanstack/react-table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        },
+        {
+          "cell": "table-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-table",
+      "ownedPaths": [
+        "packages/solid-table/src/**"
+      ],
+      "publicEntry": "packages/solid-table/src/index.tsx",
+      "publicSymbols": [
+        "AppCellComponent",
+        "AppCellContext",
+        "AppCellProps",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderComponent",
+        "AppHeaderContext",
+        "AppHeaderProps",
+        "AppSolidTable",
+        "AppTableComponent",
+        "AppTableProps",
+        "ComponentType",
+        "createTable",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderProps",
+        "SolidTable"
+      ],
+      "packageName": "@tanstack/solid-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "solid-table-devtools",
+      "ownedPaths": [
+        "packages/solid-table-devtools/src/**"
+      ],
+      "publicEntry": "packages/solid-table-devtools/src/index.ts",
+      "publicSymbols": [
+        "TableDevtoolsPanel",
+        "tableDevtoolsPlugin",
+        "TableDevtoolsSolidInit",
+        "useTanStackTableDevtools",
+        "UseTanStackTableDevtoolsOptions"
+      ],
+      "packageName": "@tanstack/solid-table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        },
+        {
+          "cell": "table-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svelte-table",
+      "ownedPaths": [
+        "packages/svelte-table/src/**"
+      ],
+      "publicEntry": "packages/svelte-table/src/index.ts",
+      "publicSymbols": [
+        "AppCellContext",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppGroupColumnDef",
+        "AppHeaderContext",
+        "AppSvelteTable",
+        "ComponentType",
+        "createTable",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "createTableState",
+        "FlexRender",
+        "renderComponent",
+        "renderSnippet",
+        "SubscribeSource",
+        "subscribeTable",
+        "SvelteTable"
+      ],
+      "packageName": "@tanstack/svelte-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "table-core",
+      "ownedPaths": [
+        "packages/table-core/src/**"
+      ],
+      "publicEntry": "packages/table-core/src/index.ts",
+      "publicSymbols": [
+        "AccessorColumnDef",
+        "AccessorFn",
+        "AccessorFnColumnDef",
+        "AccessorFnColumnDefBase",
+        "AccessorKeyColumnDef",
+        "AccessorKeyColumnDefBase",
+        "aggregationFn_count",
+        "aggregationFn_extent",
+        "aggregationFn_first",
+        "aggregationFn_last",
+        "aggregationFn_max",
+        "aggregationFn_mean",
+        "aggregationFn_median",
+        "aggregationFn_min",
+        "aggregationFn_sum",
+        "aggregationFn_unique",
+        "aggregationFn_uniqueCount",
+        "aggregationFns",
+        "API",
+        "APIObject",
+        "assignPrototypeAPIs",
+        "assignTableAPIs",
+        "buildHeaderGroups",
+        "BuiltInAggregationFn",
+        "BuiltInFilterFn",
+        "BuiltInSortFn",
+        "CachedRowModel_All",
+        "CachedRowModels",
+        "CachedRowModels_FeatureMap",
+        "callMemoOrStaticFn",
+        "Cell",
+        "Cell_Core",
+        "Cell_FeatureMap",
+        "CellData",
+        "cloneState",
+        "Column",
+        "Column_Core",
+        "Column_FeatureMap",
+        "Column_Internal",
+        "ColumnDef",
+        "ColumnDef_FeatureMap",
+        "ColumnDefBase",
+        "ColumnDefBase_All",
+        "ColumnDefResolved",
+        "ColumnDefTemplate",
+        "columnFacetingFeature",
+        "columnFilteringFeature",
+        "columnGroupingFeature",
+        "ColumnHelper",
+        "ColumnMeta",
+        "columnOrderingFeature",
+        "columnPinningFeature",
+        "columnResizingFeature",
+        "columnSizingFeature",
+        "columnVisibilityFeature",
+        "constructCell",
+        "constructColumn",
+        "constructFilterFn",
+        "constructHeader",
+        "constructRow",
+        "constructSortFn",
+        "constructTable",
+        "copyInstancePropertiesWithoutMemos",
+        "coreCellsFeature",
+        "coreColumnsFeature",
+        "coreFeatures",
+        "CoreFeatures",
+        "coreHeadersFeature",
+        "coreRowModelsFeature",
+        "coreRowsFeature",
+        "coreTablesFeature",
+        "createColumnHelper",
+        "createCoreRowModel",
+        "createExpandedRowModel",
+        "createFacetedMinMaxValues",
+        "createFacetedRowModel",
+        "createFacetedUniqueValues",
+        "createFilteredRowModel",
+        "createGroupedRowModel",
+        "createPaginatedRowModel",
+        "createSortedRowModel",
+        "DebugOptions",
+        "DeepKeys",
+        "DeepValue",
+        "DisplayColumnDef",
+        "expandRows",
+        "ExtractColumnMeta",
+        "ExtractFeatureMapTypes",
+        "FeatureSlotPrereqs",
+        "filterFn_arrHas",
+        "filterFn_arrIncludes",
+        "filterFn_arrIncludesAll",
+        "filterFn_arrIncludesSome",
+        "filterFn_between",
+        "filterFn_betweenInclusive",
+        "filterFn_empty",
+        "filterFn_endsWith",
+        "filterFn_equals",
+        "filterFn_equalsString",
+        "filterFn_equalsStringSensitive",
+        "filterFn_greaterThan",
+        "filterFn_greaterThanOrEqualTo",
+        "filterFn_includesString",
+        "filterFn_includesStringSensitive",
+        "filterFn_inDateRange",
+        "filterFn_inNumberRange",
+        "filterFn_lessThan",
+        "filterFn_lessThanOrEqualTo",
+        "filterFn_notEmpty",
+        "filterFn_startsWith",
+        "filterFn_weakEquals",
+        "filterFns",
+        "flattenBy",
+        "functionalUpdate",
+        "getFunctionNameInfo",
+        "getInitialTableState",
+        "Getter",
+        "globalFilteringFeature",
+        "GroupColumnDef",
+        "hasOwn",
+        "Header",
+        "Header_Core",
+        "Header_FeatureMap",
+        "HeaderGroup",
+        "HeaderGroup_Core",
+        "IdentifiedColumnDef",
+        "IdIdentifier",
+        "IsAny",
+        "isFunction",
+        "makeObjectMap",
+        "makeStateUpdater",
+        "memo",
+        "metaHelper",
+        "NoInfer",
+        "NonFeatureKeys",
+        "OnChangeFn",
+        "PartialKeys",
+        "Plugins",
+        "Prettify",
+        "PrototypeAPI",
+        "PrototypeAPIObject",
+        "RequiredKeys",
+        "reSplitAlphaNumeric",
+        "Row",
+        "Row_Core",
+        "Row_FeatureMap",
+        "rowAggregationFeature",
+        "RowData",
+        "rowExpandingFeature",
+        "RowModelFns",
+        "RowModelFns_All",
+        "RowModelFns_Core",
+        "RowModelFns_FeatureMap",
+        "rowPaginationFeature",
+        "rowPinningFeature",
+        "rowSelectionFeature",
+        "rowSortingFeature",
+        "sortFn_alphanumeric",
+        "sortFn_alphanumericCaseSensitive",
+        "sortFn_basic",
+        "sortFn_datetime",
+        "sortFn_text",
+        "sortFn_textCaseSensitive",
+        "sortFns",
+        "stockFeatures",
+        "StockFeatures",
+        "StringHeaderIdentifier",
+        "StringOrTemplateHeader",
+        "Table",
+        "Table_Core",
+        "Table_FeatureMap",
+        "Table_Internal",
+        "TableFeature",
+        "tableFeatures",
+        "TableFeatures",
+        "tableMemo",
+        "tableOptions",
+        "TableOptions",
+        "TableOptions_All",
+        "TableOptions_Core",
+        "TableOptions_FeatureMap",
+        "TableState",
+        "TableState_All",
+        "TableState_FeatureMap",
+        "TransformDataValueFn",
+        "UnionToIntersection",
+        "Updater",
+        "ValidateFeatureSlots"
+      ],
+      "packageName": "@tanstack/table-core",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "table-devtools",
+      "ownedPaths": [
+        "packages/table-devtools/src/**"
+      ],
+      "publicEntry": "packages/table-devtools/src/index.ts",
+      "publicSymbols": [
+        "getTableDevtoolsTargets",
+        "removeTableDevtoolsTarget",
+        "setTableDevtoolsTarget",
+        "subscribeTableDevtoolsTargets",
+        "TableDevtoolsCore",
+        "TableDevtoolsInit",
+        "TableDevtoolsRegistration",
+        "TableDevtoolsStore",
+        "TableDevtoolsTable",
+        "upsertTableDevtoolsTarget",
+        "UpsertTableDevtoolsTargetOptions"
+      ],
+      "packageName": "@tanstack/table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-table",
+      "ownedPaths": [
+        "packages/vue-table/src/**"
+      ],
+      "publicEntry": "packages/vue-table/src/index.ts",
+      "publicSymbols": [
+        "AppCellContext",
+        "AppCellProps",
+        "AppColumnDefBase",
+        "AppColumnDefTemplate",
+        "AppColumnHelper",
+        "AppDisplayColumnDef",
+        "AppFlexRender",
+        "AppGroupColumnDef",
+        "AppHeaderContext",
+        "AppHeaderProps",
+        "AppTableProps",
+        "AppVueTable",
+        "ComponentType",
+        "createTableHook",
+        "CreateTableHookOptions",
+        "CreateTableHookResult",
+        "flexRender",
+        "FlexRender",
+        "FlexRenderCell",
+        "FlexRenderHeader",
+        "TableOptionsWithReactiveData",
+        "useTable",
+        "VueTable"
+      ],
+      "packageName": "@tanstack/vue-table",
+      "consumes": [
+        {
+          "cell": "table-core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-table-devtools",
+      "ownedPaths": [
+        "packages/vue-table-devtools/src/**"
+      ],
+      "publicEntry": "packages/vue-table-devtools/src/index.ts",
+      "publicSymbols": [
+        "TableDevtoolsPanel",
+        "tableDevtoolsPlugin",
+        "TableDevtoolsVueInit",
+        "useTanStackTableDevtools",
+        "UseTanStackTableDevtoolsOptions"
+      ],
+      "packageName": "@tanstack/vue-table-devtools",
+      "consumes": [
+        {
+          "cell": "table-core"
+        },
+        {
+          "cell": "table-devtools"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

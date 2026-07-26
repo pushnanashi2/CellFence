@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b8273bde10bd8983",
+    "subjectId": "react-boilerplate-react-boilerplate",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "react-boilerplate-react-boilerplate",
+    "phase": null,
+    "repository": "https://github.com/react-boilerplate/react-boilerplate.git",
+    "commit": "d19099afeff64ecfb09133c06c1cb18c0d40887e"
+  },
+  "manifestCopy": {
+    "path": "manifests/react-boilerplate-react-boilerplate-5e2b708060df.json",
+    "sha256": "20f4659340dabaaee5133e855e7133bc05b10f0d581f48ad9aaf1b7d9395050a"
+  },
+  "attestationTemplate": {
+    "subjectId": "react-boilerplate-react-boilerplate",
+    "repository": "https://github.com/react-boilerplate/react-boilerplate.git",
+    "commit": "d19099afeff64ecfb09133c06c1cb18c0d40887e",
+    "manifestCopy": {
+      "path": "manifests/react-boilerplate-react-boilerplate-5e2b708060df.json",
+      "sha256": "20f4659340dabaaee5133e855e7133bc05b10f0d581f48ad9aaf1b7d9395050a"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "20f4659340dabaaee5133e855e7133bc05b10f0d581f48ad9aaf1b7d9395050a",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-62f5cf3ed2fcdead",
+    "evidencePackageId": "evidence-9e56dcaf10321396",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/brackets-userland-brackets-git-36657268ea0c.json",
+        "sha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646"
+      },
+      "auditLog": {
+        "path": "logs/brackets-userland-brackets-git-36657268ea0c/check.audit.jsonl",
+        "sha256": "83a4be3a0bc73e143f79dfd2ecf27166074a352efc14ddd0d2dc7c910068e831"
+      },
+      "evidenceGraph": {
+        "path": "logs/brackets-userland-brackets-git-36657268ea0c/evidence-graph.json",
+        "sha256": "bf953d68687467c46199be51107f04fe83f8e609167795066c20b7da932ceb9d"
+      },
+      "checkStdout": {
+        "path": "logs/brackets-userland-brackets-git-36657268ea0c/check.stdout.log",
+        "sha256": "36cd8e482b239f7b5748e15179b599a593d04adac67df4c72aaea28dfaa41838"
+      },
+      "checkStderr": {
+        "path": "logs/brackets-userland-brackets-git-36657268ea0c/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:9e56dcaf10321396353c514ed4c6a17d851d45cb1abd167976bdad8a9db2d83a",
+    "subjectId": "brackets-userland-brackets-git",
+    "repository": "https://github.com/brackets-userland/brackets-git.git",
+    "commit": "334b702d2a35f62a2a863b9aaa25d1bec95c7ed7",
+    "gitTree": "7700b983a027a5279893b0593969bf9983871826",
+    "manifestSha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/dialogs/RemoteCommon.ts",
+    "line": 2,
+    "message": "dialogs imports private implementation from src-root",
+    "cellId": "dialogs",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "534809f06eb2d000a005eadeb2860156cb7a581bcd42a31ecf7d6f7ca0277c65",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:9e56dcaf10321396353c514ed4c6a17d851d45cb1abd167976bdad8a9db2d83a",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-62f5cf3ed2fcdead",
+    "evidencePackageId": "evidence-9e56dcaf10321396",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

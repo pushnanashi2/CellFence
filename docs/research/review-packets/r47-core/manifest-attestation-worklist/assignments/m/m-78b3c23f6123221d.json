@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-b2ade91b5c96838d",
+    "subjectId": "paularmstrong-onerepo",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "paularmstrong-onerepo",
+    "phase": null,
+    "repository": "https://github.com/paularmstrong/onerepo.git",
+    "commit": "e0ef7e3394ca33ba8006df435ffdae1ae6873a21"
+  },
+  "manifestCopy": {
+    "path": "manifests/paularmstrong-onerepo-b9c9a5ece427.json",
+    "sha256": "d5e3050cc0061241869e779eebd28072e8ee0b465a59a9573263c99afdfb4887"
+  },
+  "attestationTemplate": {
+    "subjectId": "paularmstrong-onerepo",
+    "repository": "https://github.com/paularmstrong/onerepo.git",
+    "commit": "e0ef7e3394ca33ba8006df435ffdae1ae6873a21",
+    "manifestCopy": {
+      "path": "manifests/paularmstrong-onerepo-b9c9a5ece427.json",
+      "sha256": "d5e3050cc0061241869e779eebd28072e8ee0b465a59a9573263c99afdfb4887"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d5e3050cc0061241869e779eebd28072e8ee0b465a59a9573263c99afdfb4887",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

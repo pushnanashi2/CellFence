@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-13cec6987a0866c7",
+    "evidencePackageId": "evidence-7c8137bfeb23aa48",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/chatboxai-chatbox-142075f413a1.json",
+        "sha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a"
+      },
+      "auditLog": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.audit.jsonl",
+        "sha256": "a5dd4a443d7964205c3cad04c1e611faaf55be663b7e07731e9b425af2acb6c8"
+      },
+      "evidenceGraph": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/evidence-graph.json",
+        "sha256": "d1c19ea8b4d4e5ae49c865f67e0576817c387c471103b7b68b46db44b4e1ba03"
+      },
+      "checkStdout": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.stdout.log",
+        "sha256": "92a756da30041a60b4def79272970a136e27f34d367902fccafae52b155403f6"
+      },
+      "checkStderr": {
+        "path": "logs/chatboxai-chatbox-142075f413a1/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:7c8137bfeb23aa48d817d53ca9f369e94ce65d11d002db1e0409451ebea2bae3",
+    "subjectId": "chatboxai-chatbox",
+    "repository": "https://github.com/chatboxai/chatbox.git",
+    "commit": "8639c946c0baedfdd12bbc88ac10f5aa87431647",
+    "gitTree": "eaa57eca783b8916f8b7b87cf182bf7c2cc46242",
+    "manifestSha256": "7cd4849e899de4ebc25064c9b0d4573f7b5fb76638e5bc70cdc4273c7e249f1a",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/renderer/stores/session/export.ts",
+    "line": 1,
+    "message": "renderer imports private implementation from shared",
+    "cellId": "renderer",
+    "producerCellId": "shared",
+    "cellfenceFingerprint": "aef5be4beb771c0242c2a68747a336471be0f2cd26636916cbe82348a6941daa",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:7c8137bfeb23aa48d817d53ca9f369e94ce65d11d002db1e0409451ebea2bae3",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-13cec6987a0866c7",
+    "evidencePackageId": "evidence-7c8137bfeb23aa48",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

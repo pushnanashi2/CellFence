@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-90c20bf9788abff8",
+    "subjectId": "linshenkx-prompt-optimizer",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "linshenkx-prompt-optimizer",
+    "phase": null,
+    "repository": "https://github.com/linshenkx/prompt-optimizer.git",
+    "commit": "0c3679511d5c61dcdbb92777e62f315f16d7d378"
+  },
+  "manifestCopy": {
+    "path": "manifests/linshenkx-prompt-optimizer-df70b2784442.json",
+    "sha256": "68a2b8c89a6a9cbed73f32572437464d10368e2db697c0541f672b2429990058"
+  },
+  "attestationTemplate": {
+    "subjectId": "linshenkx-prompt-optimizer",
+    "repository": "https://github.com/linshenkx/prompt-optimizer.git",
+    "commit": "0c3679511d5c61dcdbb92777e62f315f16d7d378",
+    "manifestCopy": {
+      "path": "manifests/linshenkx-prompt-optimizer-df70b2784442.json",
+      "sha256": "68a2b8c89a6a9cbed73f32572437464d10368e2db697c0541f672b2429990058"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "68a2b8c89a6a9cbed73f32572437464d10368e2db697c0541f672b2429990058",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

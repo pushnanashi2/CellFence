@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d3e61b74408b63b4",
+    "subjectId": "aykutsarac-jsoncrack-com",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "aykutsarac-jsoncrack-com",
+    "phase": null,
+    "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+    "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059"
+  },
+  "manifestCopy": {
+    "path": "manifests/aykutsarac-jsoncrack-com-cee069e79c87.json",
+    "sha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757"
+  },
+  "attestationTemplate": {
+    "subjectId": "aykutsarac-jsoncrack-com",
+    "repository": "https://github.com/AykutSarac/jsoncrack.com.git",
+    "commit": "3c9af69e23c635356293b6b28cf4cd0af10d1059",
+    "manifestCopy": {
+      "path": "manifests/aykutsarac-jsoncrack-com-cee069e79c87.json",
+      "sha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "521448fff8b6c3ab0e11985893a930203587596ed931418ce39d8aa7c3b66757",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

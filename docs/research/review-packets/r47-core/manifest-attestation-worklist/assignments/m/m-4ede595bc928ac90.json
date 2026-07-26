@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-cf566ae070e8be63",
+    "subjectId": "chartjs-chart-js",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "chartjs-chart-js",
+    "phase": null,
+    "repository": "https://github.com/chartjs/Chart.js.git",
+    "commit": "cb02e1d207bd4c4c40b20c259017f85f26f1e30a"
+  },
+  "manifestCopy": {
+    "path": "manifests/chartjs-chart-js-87de6f4b0783.json",
+    "sha256": "f9a1eac38faa3af98316fda1b7baeee2c45955add72bc41554212f417bd390c1"
+  },
+  "attestationTemplate": {
+    "subjectId": "chartjs-chart-js",
+    "repository": "https://github.com/chartjs/Chart.js.git",
+    "commit": "cb02e1d207bd4c4c40b20c259017f85f26f1e30a",
+    "manifestCopy": {
+      "path": "manifests/chartjs-chart-js-87de6f4b0783.json",
+      "sha256": "f9a1eac38faa3af98316fda1b7baeee2c45955add72bc41554212f417bd390c1"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "f9a1eac38faa3af98316fda1b7baeee2c45955add72bc41554212f417bd390c1",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

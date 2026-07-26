@@ -319,6 +319,163 @@ function createRepositoryCapFixture(rootDir) {
   return { corpusPath, reportPath };
 }
 
+function createRepositoryCapWithExclusionFixture(rootDir) {
+  const corpusPath = path.join(rootDir, "corpus-cap-exclusion.json");
+  const reportPath = path.join(rootDir, "corpus-cap-exclusion-report.json");
+  const subjects = [];
+  const reportSubjects = [];
+  const manifest = {
+    schemaVersion: "cellfence.manifest.v1",
+    governance: {
+      requireOwnership: true,
+      include: ["src/**"],
+      exclude: [],
+      requiredRules: ["CELLFENCE_PRIVATE_IMPORT"],
+    },
+    cells: [
+      {
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+    ],
+  };
+  const entries = [
+    { id: "cap-a", repository: "https://github.com/example/cap-a.git", productionFindings: 5, testFindings: 0, commit: "a".repeat(40) },
+    { id: "cap-b", repository: "https://github.com/example/cap-b.git", productionFindings: 5, testFindings: 0, commit: "b".repeat(40) },
+    { id: "cap-c", repository: "https://github.com/example/cap-c.git", productionFindings: 1, testFindings: 3, commit: "c".repeat(40) },
+  ];
+  for (const entry of entries) {
+    const subjectDir = path.join(rootDir, "subjects", entry.id);
+    const manifestPath = path.join(subjectDir, "control", "cellfence.manifest.json");
+    const reviewedManifestSourcePath = path.join(rootDir, "manifests", `${entry.id}.cellfence.manifest.json`);
+    const auditLogPath = path.join(subjectDir, "logs", "check.audit.jsonl");
+    writeJson(manifestPath, manifest);
+    writeJson(reviewedManifestSourcePath, manifest);
+    const findings = [];
+    for (let index = 0; index < entry.productionFindings; index += 1) {
+      findings.push({
+        schemaVersion: "cellfence.audit-event.v1",
+        runId: "precision-next-cycle-cap-exclusion-test",
+        timestamp: "2026-07-25T00:00:00.000Z",
+        commit: entry.commit,
+        event: "finding.detected",
+        command: "check",
+        ruleId: "CELLFENCE_PRIVATE_IMPORT",
+        severity: "error",
+        cellId: "app",
+        producerCellId: "core",
+        filePath: `src/app/leak-${index}.ts`,
+        line: 1,
+        message: "private import",
+        fingerprint: `${entry.id}-private-import-${index}`,
+        outcome: "rejected",
+      });
+    }
+    for (let index = 0; index < entry.testFindings; index += 1) {
+      findings.push({
+        schemaVersion: "cellfence.audit-event.v1",
+        runId: "precision-next-cycle-cap-exclusion-test",
+        timestamp: "2026-07-25T00:00:00.000Z",
+        commit: entry.commit,
+        event: "finding.detected",
+        command: "check",
+        ruleId: "CELLFENCE_PRIVATE_IMPORT",
+        severity: "error",
+        cellId: "app",
+        producerCellId: "core",
+        filePath: `src/app/leak-${index}.test.ts`,
+        line: 1,
+        message: "private import from test file",
+        fingerprint: `${entry.id}-private-import-test-${index}`,
+        outcome: "rejected",
+      });
+    }
+    writeJsonl(auditLogPath, findings);
+    subjects.push({
+      id: entry.id,
+      repository: entry.repository,
+      commit: entry.commit,
+      manifest: {
+        strategy: "copy",
+        source: `manifests/${entry.id}.cellfence.manifest.json`,
+        reviewStatus: "reviewed",
+        review: {
+          reviewers: ["fixture-reviewer"],
+          boundaryEvidence: ["fixture manifest derived from declared test boundaries"],
+        },
+      },
+    });
+    reportSubjects.push({
+      id: entry.id,
+      repository: entry.repository,
+      requestedCommit: entry.commit,
+      requestedRef: null,
+      status: "checked_findings",
+      commit: entry.commit,
+      gitTree: "d".repeat(40),
+      subjectDir,
+      manifest: {
+        strategy: "copy",
+        reviewStatus: "reviewed",
+        path: "cellfence.manifest.json",
+        effectivePath: manifestPath,
+        sha256: hashFile(manifestPath),
+        status: "completed",
+      },
+      check: {
+        status: "checked_findings",
+        exitCode: 1,
+        ok: false,
+        findings: findings.length,
+        warnings: 0,
+        auditLogPath,
+        auditLogSha256: hashFile(auditLogPath),
+      },
+    });
+  }
+  writeJson(corpusPath, {
+    schemaVersion: "cellfence.corpus.v1",
+    selectionPolicy: {
+      frozenAt: "2026-07-25T00:00:00.000Z",
+      method: "local precision-next-cycle repository cap exclusion test fixture",
+    },
+    subjects,
+  });
+  writeJson(reportPath, {
+    schemaVersion: "cellfence.corpus-study.v1",
+    generatedAt: "2026-07-25T00:00:01.000Z",
+    corpusPath,
+    dryRun: false,
+    allowFloatingRef: false,
+    environment: {
+      harnessCommit: "e".repeat(40),
+      harnessDirty: false,
+      cellfenceVersion: "0.1.14",
+      corpusSha256: hashFile(corpusPath),
+    },
+    subjects: reportSubjects,
+    summary: {
+      total: 3,
+      completed: 3,
+      failed: 0,
+      totalFindings: entries.reduce((sum, entry) => sum + entry.productionFindings + entry.testFindings, 0),
+    },
+  });
+  return { corpusPath, reportPath };
+}
+
 function runNextCycle(args) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: repoRoot,
@@ -511,7 +668,9 @@ test("precision next cycle boundary-core profile excludes test files from the se
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const summary = readJson(path.join(outDir, "summary.json"));
-    assert.equal(summary.sampling.sampledFindings, 6);
+    assert.equal(summary.sampling.sampledFindings, 1);
+    assert.equal(summary.sampling.sampleExclusion.enabled, true);
+    assert.equal(summary.sampling.sampleExclusion.excludedCandidates, 5);
     assert.equal(summary.worklist.selectedFindings, 1);
     assert.deepEqual(summary.worklist.selectedByRule, {
       CELLFENCE_PRIVATE_IMPORT: 1,
@@ -530,9 +689,9 @@ test("precision next cycle boundary-core profile excludes test files from the se
     ]);
     assert.equal(assignedFindingPaths.some((filePath) => excludedPaths.has(filePath)), false);
     const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
-    assert.equal(preflight.summary.selectedFindingsBeforeExclusions, 6);
+    assert.equal(preflight.summary.selectedFindingsBeforeExclusions, 1);
+    assert.equal(preflight.summary.excludedFindings, 0);
     assert.equal(preflight.summary.selectedFindings, 1);
-    assert.equal(preflight.summary.excludedFindings, 5);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });
@@ -725,6 +884,47 @@ test("precision next cycle surfaces repository-cap pruning in the summary", () =
       "https://github.com/example/cap-a.git": 17,
     });
     assert.match(fs.readFileSync(path.join(outDir, "SUMMARY.md"), "utf8"), /cap-pruned sampled findings: 17/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle applies claim-profile exclusions before repository-cap sampling", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-cap-exclusion-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-cap-exclusion-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createRepositoryCapWithExclusionFixture(rootDir);
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-cap-exclusion-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "agent-a,agent-b",
+      "--rater-types",
+      "agent,agent",
+      "--claim-profile",
+      "ts-js-boundary-core-v1",
+      "--max-repository-contribution",
+      "0.4",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.equal(summary.worklist.selectedFindings, 5);
+    assert.equal(summary.sampling.sampleExclusion.enabled, true);
+    assert.equal(summary.sampling.sampleExclusion.excludedCandidates, 3);
+    assert.equal(summary.sampling.repositoryBalance.enabled, true);
+    assert.equal(summary.sampling.repositoryBalance.feasible, true);
+    assert.equal(summary.sampling.repositoryBalance.removedFindingIds, 6);
+    const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
+    assert.equal(preflight.repositoryContribution.repositories.filter((repository) => repository.overLimit).length, 0);
+    assert.doesNotMatch(preflight.gateFailures.join("\n"), /contributes .* selected findings/);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });

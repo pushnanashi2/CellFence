@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d2cd98d4c7013179",
+    "subjectId": "mckaywrigley-chatbot-ui",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "mckaywrigley-chatbot-ui",
+    "phase": null,
+    "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+    "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8"
+  },
+  "manifestCopy": {
+    "path": "manifests/mckaywrigley-chatbot-ui-f262c2427758.json",
+    "sha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c"
+  },
+  "attestationTemplate": {
+    "subjectId": "mckaywrigley-chatbot-ui",
+    "repository": "https://github.com/mckaywrigley/chatbot-ui.git",
+    "commit": "81328b61d2a4ab597a7a057be70e785cf756d9f8",
+    "manifestCopy": {
+      "path": "manifests/mckaywrigley-chatbot-ui-f262c2427758.json",
+      "sha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "c6abb291cc10163a2ba47232f7024292b190e5c5a54ee7c87fed3397bc75762c",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

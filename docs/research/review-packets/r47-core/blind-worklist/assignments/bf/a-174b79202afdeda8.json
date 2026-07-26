@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-174b79202afdeda8",
+    "evidencePackageId": "evidence-ddbbf30c59571f76",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/wg-easy-wg-easy-8e37ed8c1f13.json",
+        "sha256": "04ae5f8b13d8066ac3269f410cb36a586a696b88b842cc2dd8b1e9b58f2d02df"
+      },
+      "auditLog": {
+        "path": "logs/wg-easy-wg-easy-8e37ed8c1f13/check.audit.jsonl",
+        "sha256": "5835969c821ce5f51a8324ce75f02099237132eaa881ee6d4c44ef03b421f6f3"
+      },
+      "evidenceGraph": {
+        "path": "logs/wg-easy-wg-easy-8e37ed8c1f13/evidence-graph.json",
+        "sha256": "17dd5488188decb6290e38d24839468cded217de4d69a8e0388f9fd7366b532a"
+      },
+      "checkStdout": {
+        "path": "logs/wg-easy-wg-easy-8e37ed8c1f13/check.stdout.log",
+        "sha256": "529c9fd588feee9ab34924e3c1d1cc49fb3b72c3cc3bee0af191a4a39118927c"
+      },
+      "checkStderr": {
+        "path": "logs/wg-easy-wg-easy-8e37ed8c1f13/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:ddbbf30c59571f76eebc604625bde2de85fd867bf334ca44235ca54a1c14e497",
+    "subjectId": "wg-easy-wg-easy",
+    "repository": "https://github.com/wg-easy/wg-easy.git",
+    "commit": "78b283849895b35ad45c6f83fa01228c0f1a6774",
+    "gitTree": "bec91e2c5e24c26a63ad41178dc962f22df7479d",
+    "manifestSha256": "04ae5f8b13d8066ac3269f410cb36a586a696b88b842cc2dd8b1e9b58f2d02df",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "src/cli/clients/qr.ts",
+    "line": 6,
+    "message": "cli imports server without declaring a consumer relationship",
+    "cellId": "cli",
+    "producerCellId": "server",
+    "cellfenceFingerprint": "a1a5c5091783fa0f7d296c57389b9ded2f8b64db13abe065f54eddec6c90b951",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:ddbbf30c59571f76eebc604625bde2de85fd867bf334ca44235ca54a1c14e497",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-174b79202afdeda8",
+    "evidencePackageId": "evidence-ddbbf30c59571f76",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

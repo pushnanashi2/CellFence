@@ -1,0 +1,583 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "bin",
+      "ownedPaths": [
+        "src/bin/**"
+      ],
+      "publicEntry": "src/bin/codegraph.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "installer"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "search"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "sync"
+        },
+        {
+          "cell": "telemetry"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "upgrade"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "context",
+      "ownedPaths": [
+        "src/context/**"
+      ],
+      "publicEntry": "src/context/index.ts",
+      "publicSymbols": [
+        "ContextBuilder",
+        "createContextBuilder",
+        "formatContextAsJson",
+        "formatContextAsMarkdown",
+        "LOW_CONFIDENCE_MARKER"
+      ],
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "search"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "db",
+      "ownedPaths": [
+        "src/db/**"
+      ],
+      "publicEntry": "src/db/index.ts",
+      "publicSymbols": [
+        "DATABASE_FILENAME",
+        "DatabaseConnection",
+        "getDatabasePath",
+        "removeDatabaseFiles",
+        "SqliteBackend",
+        "SqliteDatabase"
+      ],
+      "consumes": [
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "search"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "extraction",
+      "ownedPaths": [
+        "src/extraction/**"
+      ],
+      "publicEntry": "src/extraction/index.ts",
+      "publicSymbols": [
+        "buildDefaultIgnore",
+        "buildScopeIgnore",
+        "detectLanguage",
+        "discoverEmbeddedRepoRoots",
+        "extractFromSource",
+        "ExtractionOrchestrator",
+        "findUnindexedIgnoredRepos",
+        "getSupportedLanguages",
+        "hashContent",
+        "IndexProgress",
+        "IndexResult",
+        "initGrammars",
+        "isGrammarLoaded",
+        "isLanguageSupported",
+        "isSourceFile",
+        "loadAllGrammars",
+        "loadGrammarsForLanguages",
+        "scanDirectory",
+        "scanDirectoryAsync",
+        "ScopeIgnore",
+        "SyncResult"
+      ],
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "resolution"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "graph",
+      "ownedPaths": [
+        "src/graph/**"
+      ],
+      "publicEntry": "src/graph/index.ts",
+      "publicSymbols": [
+        "GraphQueryManager",
+        "GraphTraverser"
+      ],
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "installer",
+      "ownedPaths": [
+        "src/installer/**"
+      ],
+      "publicEntry": "src/installer/index.ts",
+      "publicSymbols": [
+        "hasMcpConfig",
+        "hasPermissions",
+        "InstallLocation",
+        "offerWatchFallback",
+        "RefreshReport",
+        "RefreshStatus",
+        "refreshTargets",
+        "runInstaller",
+        "RunInstallerOptions",
+        "runInstallerWithOptions",
+        "runUninstaller",
+        "RunUninstallerOptions",
+        "UninstallReport",
+        "UninstallStatus",
+        "uninstallTargets",
+        "writeMcpConfig",
+        "writePermissions"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "sync"
+        },
+        {
+          "cell": "telemetry"
+        },
+        {
+          "cell": "upgrade"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mcp",
+      "ownedPaths": [
+        "src/mcp/**"
+      ],
+      "publicEntry": "src/mcp/index.ts",
+      "publicSymbols": [
+        "CodeGraphPackageVersion",
+        "Daemon",
+        "MCPServer",
+        "StdioTransport",
+        "ToolHandler",
+        "tools"
+      ],
+      "consumes": [
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "resolution"
+        },
+        {
+          "cell": "search"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "sync"
+        },
+        {
+          "cell": "telemetry"
+        },
+        {
+          "cell": "upgrade"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "resolution",
+      "ownedPaths": [
+        "src/resolution/**"
+      ],
+      "publicEntry": "src/resolution/index.ts",
+      "publicSymbols": [
+        "createResolver",
+        "FrameworkExtractionResult",
+        "FrameworkResolver",
+        "ImportMapping",
+        "ReExport",
+        "ReferenceResolver",
+        "ResolutionContext",
+        "ResolutionResult",
+        "ResolvedRef",
+        "UnresolvedRef"
+      ],
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "search",
+      "ownedPaths": [
+        "src/search/**"
+      ],
+      "publicEntry": "src/search/identifier-segments.ts",
+      "publicSymbols": [
+        "extractProseCandidates",
+        "normalizeProseWord",
+        "segmentLookupVariants",
+        "splitIdentifierSegments"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "BuildContextOptions",
+        "CodeBlock",
+        "CodeGraph",
+        "CODEGRAPH_DIR",
+        "CodeGraphError",
+        "ConfigError",
+        "Context",
+        "DatabaseConnection",
+        "DatabaseError",
+        "debounce",
+        "default",
+        "defaultLogger",
+        "detectLanguage",
+        "Edge",
+        "EDGE_KINDS",
+        "EdgeKind",
+        "ExtractionError",
+        "ExtractionResult",
+        "FileError",
+        "FileLock",
+        "FileRecord",
+        "FileWatcher",
+        "findNearestCodeGraphRoot",
+        "FindRelevantContextOptions",
+        "getCodeGraphDir",
+        "getDatabasePath",
+        "getLogger",
+        "getSupportedLanguages",
+        "GraphStats",
+        "IndexOptions",
+        "IndexProgress",
+        "IndexResult",
+        "initGrammars",
+        "InitOptions",
+        "isGrammarLoaded",
+        "isInitialized",
+        "isLanguageSupported",
+        "Language",
+        "LANGUAGES",
+        "loadAllGrammars",
+        "loadGrammarsForLanguages",
+        "LockUnavailableError",
+        "Logger",
+        "MCPServer",
+        "MemoryMonitor",
+        "Mutex",
+        "Node",
+        "NODE_KINDS",
+        "NodeKind",
+        "OpenOptions",
+        "ParseError",
+        "PendingFile",
+        "processInBatches",
+        "QueryBuilder",
+        "ReferenceKind",
+        "ResolutionResult",
+        "SchemaVersion",
+        "SearchError",
+        "SearchOptions",
+        "SearchResult",
+        "SegmentMatch",
+        "setLogger",
+        "silentLogger",
+        "Subgraph",
+        "SyncResult",
+        "TaskContext",
+        "TaskInput",
+        "throttle",
+        "TraversalOptions",
+        "UnresolvedReference",
+        "VectorError",
+        "WatchOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "context"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "resolution"
+        },
+        {
+          "cell": "search"
+        },
+        {
+          "cell": "sync"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sync",
+      "ownedPaths": [
+        "src/sync/**"
+      ],
+      "publicEntry": "src/sync/index.ts",
+      "publicSymbols": [
+        "DEFAULT_SYNC_HOOKS",
+        "detectWorktreeIndexMismatch",
+        "detectWsl",
+        "FileWatcher",
+        "GitHookName",
+        "GitHookResult",
+        "gitWorktreeRoot",
+        "installGitSyncHook",
+        "isGitRepo",
+        "isSyncHookInstalled",
+        "LockUnavailableError",
+        "PendingFile",
+        "removeGitSyncHook",
+        "watchDisabledReason",
+        "WatchOptions",
+        "WorktreeIndexMismatch",
+        "worktreeMismatchNotice",
+        "worktreeMismatchWarning"
+      ],
+      "consumes": [
+        {
+          "cell": "extraction"
+        },
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "telemetry",
+      "ownedPaths": [
+        "src/telemetry/**"
+      ],
+      "publicEntry": "src/telemetry/index.ts",
+      "publicSymbols": [
+        "bucketDuration",
+        "bucketFileCount",
+        "ClientInfo",
+        "getTelemetry",
+        "LifecycleEvent",
+        "recordIndexEvent",
+        "Telemetry",
+        "TELEMETRY_DOCS",
+        "TELEMETRY_ENDPOINT",
+        "TelemetryOptions",
+        "TelemetryStatus",
+        "UsageKind"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "src/ui/**"
+      ],
+      "publicEntry": "src/ui/color.ts",
+      "publicSymbols": [
+        "ansiColorsEnabled"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "upgrade",
+      "ownedPaths": [
+        "src/upgrade/**"
+      ],
+      "publicEntry": "src/upgrade/index.ts",
+      "publicSymbols": [
+        "buildWindowsUpgradeScript",
+        "compareVersions",
+        "defaultCapture",
+        "defaultRun",
+        "deriveInstallDir",
+        "DetectInput",
+        "detectInstallMethod",
+        "hasCommand",
+        "INSTALL_SH_URL",
+        "InstallMethod",
+        "isUpdateAvailable",
+        "normalizeVersion",
+        "NPM_PACKAGE",
+        "npmInvocation",
+        "parseLatestTagFromLocation",
+        "parseSemver",
+        "reindexAdvisory",
+        "REPO",
+        "resolveLatestVersion",
+        "runUpgrade",
+        "Semver",
+        "stripV",
+        "UpgradeDeps",
+        "UpgradeOptions",
+        "verifyResolvedVersion"
+      ],
+      "consumes": [
+        {
+          "cell": "installer"
+        },
+        {
+          "cell": "mcp"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

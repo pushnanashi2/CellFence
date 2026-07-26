@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-397218428e835ec4",
+    "subjectId": "puemos-hls-downloader",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "puemos-hls-downloader",
+    "phase": null,
+    "repository": "https://github.com/puemos/hls-downloader.git",
+    "commit": "2071e691e6d499a053f34382fe0a6c57d0b80f59"
+  },
+  "manifestCopy": {
+    "path": "manifests/puemos-hls-downloader-7cc65e436ec2.json",
+    "sha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d"
+  },
+  "attestationTemplate": {
+    "subjectId": "puemos-hls-downloader",
+    "repository": "https://github.com/puemos/hls-downloader.git",
+    "commit": "2071e691e6d499a053f34382fe0a6c57d0b80f59",
+    "manifestCopy": {
+      "path": "manifests/puemos-hls-downloader-7cc65e436ec2.json",
+      "sha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2607a42188cbc25153e8870984742cd29f1ff951a0356bc2dab312808f13371d",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

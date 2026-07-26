@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "main",
+      "ownedPaths": [
+        "src/main/**"
+      ],
+      "publicEntry": "src/main/index.ts",
+      "publicSymbols": [
+        "closeMainWindow",
+        "mainWindow",
+        "showMainWindow",
+        "triggerMainWindow"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "native",
+      "ownedPaths": [
+        "src/native/**"
+      ],
+      "publicEntry": "src/native/sysproxy/index.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preload",
+      "ownedPaths": [
+        "src/preload/**"
+      ],
+      "publicEntry": "src/preload/index.ts",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "renderer",
+      "ownedPaths": [
+        "src/renderer/**"
+      ],
+      "publicEntry": "src/renderer/src/App.tsx",
+      "publicSymbols": [
+        "default",
+        "getDriver"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/appConfig.ts",
+      "publicSymbols": [
+        "DEFAULT_CONTROL_DNS",
+        "DEFAULT_CONTROL_SNIFF",
+        "DEFAULT_ENABLE_TRAFFIC_LOGGER",
+        "DEFAULT_MIHOMO_DNS_CONFIG",
+        "DEFAULT_MIHOMO_LAN_ALLOWED_IPS",
+        "DEFAULT_MIHOMO_PORTS",
+        "DEFAULT_MIHOMO_SKIP_AUTH_PREFIXES",
+        "DEFAULT_MIHOMO_SNIFFER_CONFIG",
+        "DEFAULT_MIHOMO_TUN_CONFIG",
+        "DEFAULT_NAMESERVER_POLICY",
+        "DEFAULT_NETWORK_INFO_CARD_ORDER",
+        "DEFAULT_SIDER_ORDER",
+        "DEFAULT_USE_NAMESERVER_POLICY",
+        "DEFAULT_USE_SUB_STORE",
+        "getDefaultMihomoTunDevice"
+      ],
+      "consumes": [
+        {
+          "cell": "renderer"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

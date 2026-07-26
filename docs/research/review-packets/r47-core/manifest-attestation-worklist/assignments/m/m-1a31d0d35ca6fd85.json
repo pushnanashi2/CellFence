@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2592d5e4c4f8a768",
+    "subjectId": "alan2207-bulletproof-react",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "alan2207-bulletproof-react",
+    "phase": null,
+    "repository": "https://github.com/alan2207/bulletproof-react.git",
+    "commit": "9506629ed003a561c6627735480cce4994244bb4"
+  },
+  "manifestCopy": {
+    "path": "manifests/alan2207-bulletproof-react-9a2fcc122e23.json",
+    "sha256": "231b9e40868b14218a053b2bbaacfba1c0db0bd389c31a3bb81a264aad1287e7"
+  },
+  "attestationTemplate": {
+    "subjectId": "alan2207-bulletproof-react",
+    "repository": "https://github.com/alan2207/bulletproof-react.git",
+    "commit": "9506629ed003a561c6627735480cce4994244bb4",
+    "manifestCopy": {
+      "path": "manifests/alan2207-bulletproof-react-9a2fcc122e23.json",
+      "sha256": "231b9e40868b14218a053b2bbaacfba1c0db0bd389c31a3bb81a264aad1287e7"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "231b9e40868b14218a053b2bbaacfba1c0db0bd389c31a3bb81a264aad1287e7",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

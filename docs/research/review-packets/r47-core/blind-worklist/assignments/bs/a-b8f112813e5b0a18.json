@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-b8f112813e5b0a18",
+    "evidencePackageId": "evidence-bc4e1c30bdac42a5",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/withfig-autocomplete-530f039f59c0.json",
+        "sha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831"
+      },
+      "auditLog": {
+        "path": "logs/withfig-autocomplete-530f039f59c0/check.audit.jsonl",
+        "sha256": "99802b837b7059cc4fac5824c9bdcc05eb64c46c655004ddd63547a5088ba38c"
+      },
+      "evidenceGraph": {
+        "path": "logs/withfig-autocomplete-530f039f59c0/evidence-graph.json",
+        "sha256": "816b81e6d0d83d9253cf74b65cfefa62b71177a542e0c7db5c4249a64da2fc0c"
+      },
+      "checkStdout": {
+        "path": "logs/withfig-autocomplete-530f039f59c0/check.stdout.log",
+        "sha256": "ba1cfc6f8507918f4fb75ddca7f52806bdab2ae6a1d2514481dfe6f85fdbdc17"
+      },
+      "checkStderr": {
+        "path": "logs/withfig-autocomplete-530f039f59c0/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:bc4e1c30bdac42a583242e00fc78a9608a6666a84e106477271db0fcc8cf5274",
+    "subjectId": "withfig-autocomplete",
+    "repository": "https://github.com/withfig/autocomplete.git",
+    "commit": "aef52acff84c45edde61ae610cc2c964802b9a38",
+    "gitTree": "d3bf08bea14aefa4aaffd40bd757f7e79805733d",
+    "manifestSha256": "62f30c845b020942ac6a7d4de4cb995da7e419a57631881d08c6c0fcaf724831",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/@magnolia/cli.ts",
+    "line": 1,
+    "message": "magnolia imports private implementation from src-root",
+    "cellId": "magnolia",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "51744a32776d6041770da5721daf553209fd139cad1cdc2964f9a3086f2e5091",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:bc4e1c30bdac42a583242e00fc78a9608a6666a84e106477271db0fcc8cf5274",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-b8f112813e5b0a18",
+    "evidencePackageId": "evidence-bc4e1c30bdac42a5",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

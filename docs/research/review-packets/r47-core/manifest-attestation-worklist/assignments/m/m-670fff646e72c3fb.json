@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ccc74f174639d465",
+    "subjectId": "tomalaforge-angular-challenges",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "tomalaforge-angular-challenges",
+    "phase": null,
+    "repository": "https://github.com/tomalaforge/angular-challenges.git",
+    "commit": "543770b2fdf871b57cecfaffc8e4f0dd0da29549"
+  },
+  "manifestCopy": {
+    "path": "manifests/tomalaforge-angular-challenges-6d3e525e3c65.json",
+    "sha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771"
+  },
+  "attestationTemplate": {
+    "subjectId": "tomalaforge-angular-challenges",
+    "repository": "https://github.com/tomalaforge/angular-challenges.git",
+    "commit": "543770b2fdf871b57cecfaffc8e4f0dd0da29549",
+    "manifestCopy": {
+      "path": "manifests/tomalaforge-angular-challenges-6d3e525e3c65.json",
+      "sha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "029c6cdbd6acbbe62e2b2d698cc75974d1b72cc9e725b5ecf3d3fe6ed09b5771",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

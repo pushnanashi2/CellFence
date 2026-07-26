@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d1e60a3b065330f2",
+    "subjectId": "tailwindlabs-headlessui",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "tailwindlabs-headlessui",
+    "phase": null,
+    "repository": "https://github.com/tailwindlabs/headlessui.git",
+    "commit": "eea57cf46fd6767ed1059012f7073b88eb159fba"
+  },
+  "manifestCopy": {
+    "path": "manifests/tailwindlabs-headlessui-3aef18a3790e.json",
+    "sha256": "88e1ecd2591ed89daaa78544bbee4fad25f37181d36f1fa758ec1b34dced88f5"
+  },
+  "attestationTemplate": {
+    "subjectId": "tailwindlabs-headlessui",
+    "repository": "https://github.com/tailwindlabs/headlessui.git",
+    "commit": "eea57cf46fd6767ed1059012f7073b88eb159fba",
+    "manifestCopy": {
+      "path": "manifests/tailwindlabs-headlessui-3aef18a3790e.json",
+      "sha256": "88e1ecd2591ed89daaa78544bbee4fad25f37181d36f1fa758ec1b34dced88f5"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "88e1ecd2591ed89daaa78544bbee4fad25f37181d36f1fa758ec1b34dced88f5",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "server/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "components",
+      "ownedPaths": [
+        "src/components/**"
+      ],
+      "publicEntry": "src/components/notifications/index.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mixins",
+      "ownedPaths": [
+        "src/mixins/**"
+      ],
+      "publicEntry": "src/mixins/public.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "modules",
+      "ownedPaths": [
+        "src/modules/**"
+      ],
+      "publicEntry": "src/modules/dayjs/constant.js",
+      "publicSymbols": [
+        "D",
+        "DATE",
+        "FORMAT_DEFAULT",
+        "H",
+        "INVALID_DATE_STRING",
+        "M",
+        "MILLISECONDS_A_DAY",
+        "MILLISECONDS_A_HOUR",
+        "MILLISECONDS_A_MINUTE",
+        "MILLISECONDS_A_SECOND",
+        "MILLISECONDS_A_WEEK",
+        "MIN",
+        "MS",
+        "Q",
+        "REGEX_FORMAT",
+        "REGEX_PARSE",
+        "S",
+        "SECONDS_A_DAY",
+        "SECONDS_A_HOUR",
+        "SECONDS_A_MINUTE",
+        "SECONDS_A_WEEK",
+        "W",
+        "Y"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server",
+      "ownedPaths": [
+        "server/**"
+      ],
+      "publicEntry": "server/2fa.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/i18n.js",
+      "publicSymbols": [
+        "currentLocale",
+        "i18n",
+        "localeDirection"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "mixins"
+        },
+        {
+          "cell": "modules"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-0906ea7c1439dec6",
+    "subjectId": "tanstack-router",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "tanstack-router",
+    "phase": null,
+    "repository": "https://github.com/TanStack/router.git",
+    "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347"
+  },
+  "manifestCopy": {
+    "path": "manifests/tanstack-router-93e9c9305ed7.json",
+    "sha256": "ffaf379d5ced1d8d85ddaea6d9027233b61da5040f7be65cc84c8a11be9f02ad"
+  },
+  "attestationTemplate": {
+    "subjectId": "tanstack-router",
+    "repository": "https://github.com/TanStack/router.git",
+    "commit": "31a634d84ecf393dfb95adcf713fd5f1a13ab347",
+    "manifestCopy": {
+      "path": "manifests/tanstack-router-93e9c9305ed7.json",
+      "sha256": "ffaf379d5ced1d8d85ddaea6d9027233b61da5040f7be65cc84c8a11be9f02ad"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ffaf379d5ced1d8d85ddaea6d9027233b61da5040f7be65cc84c8a11be9f02ad",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

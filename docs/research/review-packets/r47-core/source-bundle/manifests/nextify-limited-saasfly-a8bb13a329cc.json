@@ -1,0 +1,408 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/auth-proxy/**",
+      "apps/nextjs/src/**",
+      "packages/api/src/**",
+      "packages/auth/**",
+      "packages/common/src/**",
+      "packages/db/**",
+      "packages/stripe/src/**",
+      "packages/ui/src/**",
+      "tooling/eslint-config/**",
+      "tooling/prettier-config/**",
+      "tooling/tailwind-config/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "api",
+      "ownedPaths": [
+        "packages/api/src/**"
+      ],
+      "publicEntry": "packages/api/src/index.ts",
+      "publicSymbols": [
+        "AppRouter",
+        "createTRPCContext",
+        "RouterInputs",
+        "RouterOutputs",
+        "t"
+      ],
+      "packageName": "@saasfly/api",
+      "consumes": [
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth",
+      "ownedPaths": [
+        "packages/auth/**"
+      ],
+      "publicEntry": "packages/auth/index.ts",
+      "publicSymbols": [
+        "authOptions",
+        "getCurrentUser",
+        "User"
+      ],
+      "packageName": "@saasfly/auth",
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "auth-proxy",
+      "ownedPaths": [
+        "apps/auth-proxy/**"
+      ],
+      "publicEntry": "apps/auth-proxy/routes/[...auth].ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@saasfly/auth-proxy",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "tailwind-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common",
+      "ownedPaths": [
+        "packages/common/src/**"
+      ],
+      "publicEntry": "packages/common/src/index.ts",
+      "publicSymbols": [
+        "MagicLinkEmail",
+        "resend",
+        "siteConfig"
+      ],
+      "packageName": "@saasfly/common",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "ui"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "db",
+      "ownedPaths": [
+        "packages/db/**"
+      ],
+      "publicEntry": "packages/db/index.ts",
+      "publicSymbols": [
+        "Account",
+        "Customer",
+        "db",
+        "DB",
+        "Generated",
+        "jsonArrayFrom",
+        "jsonObjectFrom",
+        "K8sClusterConfig",
+        "Session",
+        "Status",
+        "SubscriptionPlan",
+        "Timestamp",
+        "User",
+        "VerificationToken"
+      ],
+      "packageName": "@saasfly/db",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config",
+      "ownedPaths": [
+        "tooling/eslint-config/**"
+      ],
+      "publicEntry": "tooling/eslint-config/base.js",
+      "publicSymbols": [],
+      "packageName": "@saasfly/eslint-config",
+      "consumes": [
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nextjs",
+      "ownedPaths": [
+        "apps/nextjs/src/**"
+      ],
+      "publicEntry": "apps/nextjs/src/app/[lang]/(auth)/layout.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@saasfly/nextjs",
+      "consumes": [
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "auth"
+        },
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "stripe"
+        },
+        {
+          "cell": "tailwind-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prettier-config",
+      "ownedPaths": [
+        "tooling/prettier-config/**"
+      ],
+      "publicEntry": "tooling/prettier-config/index.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@saasfly/prettier-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "stripe",
+      "ownedPaths": [
+        "packages/stripe/src/**"
+      ],
+      "publicEntry": "packages/stripe/src/index.ts",
+      "publicSymbols": [
+        "handleEvent",
+        "stripe",
+        "Stripe"
+      ],
+      "packageName": "@saasfly/stripe",
+      "consumes": [
+        {
+          "cell": "db"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tailwind-config",
+      "ownedPaths": [
+        "tooling/tailwind-config/**"
+      ],
+      "publicEntry": "tooling/tailwind-config/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@saasfly/tailwind-config",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/ui/src/**"
+      ],
+      "publicEntry": "packages/ui/src/index.ts",
+      "publicSymbols": [
+        "cn"
+      ],
+      "packageName": "@saasfly/ui",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "tailwind-config"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

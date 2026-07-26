@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "fetch",
+      "ownedPaths": [
+        "src/fetch/**"
+      ],
+      "publicEntry": "src/fetch/src/mcp_server_fetch/__init__.py",
+      "publicSymbols": [
+        "main",
+        "serve"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "git",
+      "ownedPaths": [
+        "src/git/**"
+      ],
+      "publicEntry": "src/git/src/mcp_server_git/__init__.py",
+      "publicSymbols": [
+        "click",
+        "logging",
+        "main",
+        "Path",
+        "serve",
+        "sys"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server-everything",
+      "ownedPaths": [
+        "src/everything/**"
+      ],
+      "publicEntry": "src/everything/index.ts",
+      "publicSymbols": [],
+      "packageName": "@modelcontextprotocol/server-everything",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server-filesystem",
+      "ownedPaths": [
+        "src/filesystem/**"
+      ],
+      "publicEntry": "src/filesystem/index.ts",
+      "publicSymbols": [],
+      "packageName": "@modelcontextprotocol/server-filesystem",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server-memory",
+      "ownedPaths": [
+        "src/memory/**"
+      ],
+      "publicEntry": "src/memory/index.ts",
+      "publicSymbols": [
+        "defaultMemoryPath",
+        "ensureMemoryFilePath",
+        "Entity",
+        "KnowledgeGraph",
+        "KnowledgeGraphManager",
+        "registerKnowledgeGraphResource",
+        "registerKnowledgeGraphSubscriptions",
+        "Relation"
+      ],
+      "packageName": "@modelcontextprotocol/server-memory",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server-sequential-thinking",
+      "ownedPaths": [
+        "src/sequentialthinking/**"
+      ],
+      "publicEntry": "src/sequentialthinking/index.ts",
+      "publicSymbols": [],
+      "packageName": "@modelcontextprotocol/server-sequential-thinking",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "time",
+      "ownedPaths": [
+        "src/time/**"
+      ],
+      "publicEntry": "src/time/src/mcp_server_time/__init__.py",
+      "publicSymbols": [
+        "main",
+        "serve"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

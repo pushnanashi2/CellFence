@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-14114a756b13b62d",
+    "subjectId": "lerna",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "lerna",
+    "phase": null,
+    "repository": "https://github.com/lerna/lerna.git",
+    "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e"
+  },
+  "manifestCopy": {
+    "path": "manifests/lerna-8b21dcf6e506.json",
+    "sha256": "29f292aa7d3342864b761f7370f2d59e4b93c5a24fd1607c2e3a5a6c1ab1e138"
+  },
+  "attestationTemplate": {
+    "subjectId": "lerna",
+    "repository": "https://github.com/lerna/lerna.git",
+    "commit": "5319e18369a074f87d1fb8f64a91d149b39e0b7e",
+    "manifestCopy": {
+      "path": "manifests/lerna-8b21dcf6e506.json",
+      "sha256": "29f292aa7d3342864b761f7370f2d59e4b93c5a24fd1607c2e3a5a6c1ab1e138"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "29f292aa7d3342864b761f7370f2d59e4b93c5a24fd1607c2e3a5a6c1ab1e138",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

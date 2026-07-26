@@ -1178,9 +1178,21 @@ turning them into a precision claim. The 160-subject corpus rerun completed
 20/650 (3.1%). The `CELLFENCE_UNDECLARED_CONSUMER` zero-failure sample-size
 deficit is therefore closed for the narrow boundary-core plan, but the packet is
 still not claim-ready: it has no returned labels, no external human/org labels,
-no external manifest attestations, and the generated packet was made before the
-CellFence worktree was clean. The round handoff is
+and no external manifest attestations. After Round47's production-scope filter
+repair, Round46 should be treated as limited-use triage evidence rather than the
+current external review packet. The round handoff is
 [ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core.md](ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core.md).
+
+Round47 supersedes Round46 for new external review handoff after moving the
+boundary-core production-scope exclusions into bundle sampling before
+repository-cap balancing. The sealed worklist now selects 646 findings:
+346 `CELLFENCE_PRIVATE_IMPORT` and 300 `CELLFENCE_UNDECLARED_CONSUMER`.
+The top repositories are `chakra-ui-zag` and `Gitlawb/openclaude`, each with
+64/646 findings (9.9%), below the 10% cap. The gap worklist has three tasks:
+160 copied manifests need external review attestations, 646 selected findings
+need independent manual labels, and 646 selected findings need external
+human/organization labels. It is still not a precision claim. The round handoff
+is [ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core.md](ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core.md).
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

@@ -1,0 +1,280 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "bin",
+      "ownedPaths": [
+        "src/bin/**"
+      ],
+      "publicEntry": "src/bin/check-latest-version.ts",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "daemon"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "telemetry"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "daemon",
+      "ownedPaths": [
+        "src/daemon/**"
+      ],
+      "publicEntry": "src/daemon/client.ts",
+      "publicSymbols": [
+        "handleResponse",
+        "sendCommand",
+        "startDaemon",
+        "stopDaemon"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "devtools",
+      "ownedPaths": [
+        "src/devtools/**"
+      ],
+      "publicEntry": "src/devtools/DevToolsConnectionAdapter.ts",
+      "publicSymbols": [
+        "PuppeteerDevToolsConnection"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "formatters",
+      "ownedPaths": [
+        "src/formatters/**"
+      ],
+      "publicEntry": "src/formatters/ConsoleFormatter.ts",
+      "publicSymbols": [
+        "ConsoleFormatter",
+        "ConsoleFormatterOptions",
+        "GroupedConsoleFormatter",
+        "IgnoreCheck"
+      ],
+      "consumes": [
+        {
+          "cell": "devtools"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/index.ts",
+      "publicSymbols": [
+        "buildFlag",
+        "createMcpServer",
+        "logDisclaimers"
+      ],
+      "consumes": [
+        {
+          "cell": "bin"
+        },
+        {
+          "cell": "devtools"
+        },
+        {
+          "cell": "formatters"
+        },
+        {
+          "cell": "telemetry"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "trace-processing"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "telemetry",
+      "ownedPaths": [
+        "src/telemetry/**"
+      ],
+      "publicEntry": "src/telemetry/ClearcutLogger.ts",
+      "publicSymbols": [
+        "ClearcutLogger",
+        "ClearcutLoggerOptions"
+      ],
+      "consumes": [
+        {
+          "cell": "bin"
+        },
+        {
+          "cell": "daemon"
+        },
+        {
+          "cell": "tools"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "tools",
+      "ownedPaths": [
+        "src/tools/**"
+      ],
+      "publicEntry": "src/tools/categories.ts",
+      "publicSymbols": [
+        "labels",
+        "OFF_BY_DEFAULT_CATEGORIES",
+        "ToolCategory"
+      ],
+      "consumes": [
+        {
+          "cell": "bin"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "trace-processing"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "trace-processing",
+      "ownedPaths": [
+        "src/trace-processing/**"
+      ],
+      "publicEntry": "src/trace-processing/parse.ts",
+      "publicSymbols": [
+        "getInsightOutput",
+        "getTraceSummary",
+        "InsightName",
+        "InsightOutput",
+        "parseRawTraceBuffer",
+        "TraceParseError",
+        "TraceResult",
+        "traceResultIsSuccess"
+      ],
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/check-for-updates.ts",
+      "publicSymbols": [
+        "checkForUpdates",
+        "resetUpdateCheckFlagForTesting"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

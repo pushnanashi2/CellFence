@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-c9d7fea3e93913c4",
+    "evidencePackageId": "evidence-79faec84e6e58b27",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/jackwener-opencli-0b492e9efa49.json",
+        "sha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788"
+      },
+      "auditLog": {
+        "path": "logs/jackwener-opencli-0b492e9efa49/check.audit.jsonl",
+        "sha256": "ccab4ef2062b832c5418f8e62e7e9f3021b87c0d2028a0f246a9db64a7310281"
+      },
+      "evidenceGraph": {
+        "path": "logs/jackwener-opencli-0b492e9efa49/evidence-graph.json",
+        "sha256": "a0f9ffad45efa2f317d37a1e69b8dab4784a7ff3f63d640154a270e39749bd72"
+      },
+      "checkStdout": {
+        "path": "logs/jackwener-opencli-0b492e9efa49/check.stdout.log",
+        "sha256": "423272c7c20c9cb0f05f2fcfcf18397de8a61607d949b02fb5ecaedb21cc28f0"
+      },
+      "checkStderr": {
+        "path": "logs/jackwener-opencli-0b492e9efa49/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:79faec84e6e58b27329417c3df93bde59aeaf709947ba2047aae0392eeb2a5cb",
+    "subjectId": "jackwener-opencli",
+    "repository": "https://github.com/jackwener/OpenCLI.git",
+    "commit": "b0f84c99c93037add29e1c1b361f5f7094f52f74",
+    "gitTree": "3ca390134f193b3c1e980486c2386e145a31e5d2",
+    "manifestSha256": "c13a6d3c47a1da796b8514356ae700967eff4eaa2d47057f8acde779ee8e8788",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/pipeline/steps/transform.ts",
+    "line": 5,
+    "message": "pipeline imports private implementation from src-root",
+    "cellId": "pipeline",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "bdc4443fcca1834140fcb6f0930be108947657516f3509e80cfbab523557bf00",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:79faec84e6e58b27329417c3df93bde59aeaf709947ba2047aae0392eeb2a5cb",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-c9d7fea3e93913c4",
+    "evidencePackageId": "evidence-79faec84e6e58b27",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

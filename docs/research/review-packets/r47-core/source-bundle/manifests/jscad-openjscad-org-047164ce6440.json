@@ -1,0 +1,723 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/cli/src/**",
+      "packages/core/src/**",
+      "packages/desktop/src/**",
+      "packages/io/3mf-serializer/src/**",
+      "packages/io/amf-deserializer/src/**",
+      "packages/io/amf-serializer/**",
+      "packages/io/dxf-deserializer/**",
+      "packages/io/dxf-serializer/**",
+      "packages/io/gcode-deserializer/**",
+      "packages/io/io-utils/**",
+      "packages/io/io/**",
+      "packages/io/json-deserializer/**",
+      "packages/io/json-serializer/**",
+      "packages/io/obj-deserializer/**",
+      "packages/io/obj-serializer/**",
+      "packages/io/scad-deserializer/src/**",
+      "packages/io/stl-deserializer/**",
+      "packages/io/stl-serializer/**",
+      "packages/io/svg-deserializer/src/**",
+      "packages/io/svg-serializer/**",
+      "packages/io/x3d-deserializer/src/**",
+      "packages/io/x3d-serializer/src/**",
+      "packages/modeling/src/**",
+      "packages/utils/array-utils/src/**",
+      "packages/utils/img/src/**",
+      "packages/utils/regl-renderer/**",
+      "packages/utils/regl-renderer/src/**",
+      "packages/vtree/**",
+      "packages/web/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "3mf-serializer",
+      "ownedPaths": [
+        "packages/io/3mf-serializer/src/**"
+      ],
+      "publicEntry": "packages/io/3mf-serializer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/3mf-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "amf-deserializer",
+      "ownedPaths": [
+        "packages/io/amf-deserializer/src/**"
+      ],
+      "publicEntry": "packages/io/amf-deserializer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/amf-deserializer",
+      "consumes": [
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "amf-serializer",
+      "ownedPaths": [
+        "packages/io/amf-serializer/**"
+      ],
+      "publicEntry": "packages/io/amf-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/amf-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "array-utils",
+      "ownedPaths": [
+        "packages/utils/array-utils/src/**"
+      ],
+      "publicEntry": "packages/utils/array-utils/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/array-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "packages/cli/src/**"
+      ],
+      "publicEntry": "packages/cli/src/determineOutputNameAndFormat.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/cli",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "io"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/core",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "io"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "desktop",
+      "ownedPaths": [
+        "packages/desktop/src/**"
+      ],
+      "publicEntry": "packages/desktop/src/app.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/desktop",
+      "consumes": [
+        {
+          "cell": "amf-serializer"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "io"
+        },
+        {
+          "cell": "vtree"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dxf-deserializer",
+      "ownedPaths": [
+        "packages/io/dxf-deserializer/**"
+      ],
+      "publicEntry": "packages/io/dxf-deserializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/dxf-deserializer",
+      "consumes": [
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "dxf-serializer",
+      "ownedPaths": [
+        "packages/io/dxf-serializer/**"
+      ],
+      "publicEntry": "packages/io/dxf-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/dxf-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gcode-deserializer",
+      "ownedPaths": [
+        "packages/io/gcode-deserializer/**"
+      ],
+      "publicEntry": "packages/io/gcode-deserializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/gcode-deserializer",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "img-utils",
+      "ownedPaths": [
+        "packages/utils/img/src/**"
+      ],
+      "publicEntry": "packages/utils/img/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/img-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "io",
+      "ownedPaths": [
+        "packages/io/io/**"
+      ],
+      "publicEntry": "packages/io/io/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/io",
+      "consumes": [
+        {
+          "cell": "3mf-serializer"
+        },
+        {
+          "cell": "amf-deserializer"
+        },
+        {
+          "cell": "amf-serializer"
+        },
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "dxf-deserializer"
+        },
+        {
+          "cell": "dxf-serializer"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "json-deserializer"
+        },
+        {
+          "cell": "json-serializer"
+        },
+        {
+          "cell": "modeling"
+        },
+        {
+          "cell": "obj-deserializer"
+        },
+        {
+          "cell": "obj-serializer"
+        },
+        {
+          "cell": "stl-deserializer"
+        },
+        {
+          "cell": "stl-serializer"
+        },
+        {
+          "cell": "svg-deserializer"
+        },
+        {
+          "cell": "svg-serializer"
+        },
+        {
+          "cell": "x3d-deserializer"
+        },
+        {
+          "cell": "x3d-serializer"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "io-utils",
+      "ownedPaths": [
+        "packages/io/io-utils/**"
+      ],
+      "publicEntry": "packages/io/io-utils/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/io-utils",
+      "consumes": [
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "json-deserializer",
+      "ownedPaths": [
+        "packages/io/json-deserializer/**"
+      ],
+      "publicEntry": "packages/io/json-deserializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/json-deserializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "json-serializer",
+      "ownedPaths": [
+        "packages/io/json-serializer/**"
+      ],
+      "publicEntry": "packages/io/json-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/json-serializer",
+      "consumes": [
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "modeling",
+      "ownedPaths": [
+        "packages/modeling/src/**"
+      ],
+      "publicEntry": "packages/modeling/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/modeling",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "obj-deserializer",
+      "ownedPaths": [
+        "packages/io/obj-deserializer/**"
+      ],
+      "publicEntry": "packages/io/obj-deserializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/obj-deserializer",
+      "consumes": [
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "obj-serializer",
+      "ownedPaths": [
+        "packages/io/obj-serializer/**"
+      ],
+      "publicEntry": "packages/io/obj-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/obj-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "regl-renderer",
+      "ownedPaths": [
+        "packages/utils/regl-renderer/src/**"
+      ],
+      "publicEntry": "packages/utils/regl-renderer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/regl-renderer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "img-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scad-deserializer",
+      "ownedPaths": [
+        "packages/io/scad-deserializer/src/**"
+      ],
+      "publicEntry": "packages/io/scad-deserializer/src/parserWrapper.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/scad-deserializer",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "stl-deserializer",
+      "ownedPaths": [
+        "packages/io/stl-deserializer/**"
+      ],
+      "publicEntry": "packages/io/stl-deserializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/stl-deserializer",
+      "consumes": [
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "stl-serializer",
+      "ownedPaths": [
+        "packages/io/stl-serializer/**"
+      ],
+      "publicEntry": "packages/io/stl-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/stl-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svg-deserializer",
+      "ownedPaths": [
+        "packages/io/svg-deserializer/src/**"
+      ],
+      "publicEntry": "packages/io/svg-deserializer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/svg-deserializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "svg-serializer",
+      "ownedPaths": [
+        "packages/io/svg-serializer/**"
+      ],
+      "publicEntry": "packages/io/svg-serializer/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/svg-serializer",
+      "consumes": [
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/utils/regl-renderer/**"
+      ],
+      "publicEntry": "packages/utils/regl-renderer/demo-cli.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "regl-renderer"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vtree",
+      "ownedPaths": [
+        "packages/vtree/**"
+      ],
+      "publicEntry": "packages/vtree/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/vtree",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        },
+        {
+          "cell": "stl-serializer"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "packages/web/src/**"
+      ],
+      "publicEntry": "packages/web/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/web",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "io"
+        },
+        {
+          "cell": "modeling"
+        },
+        {
+          "cell": "regl-renderer"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "x3d-deserializer",
+      "ownedPaths": [
+        "packages/io/x3d-deserializer/src/**"
+      ],
+      "publicEntry": "packages/io/x3d-deserializer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/x3d-deserializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "io-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "x3d-serializer",
+      "ownedPaths": [
+        "packages/io/x3d-serializer/src/**"
+      ],
+      "publicEntry": "packages/io/x3d-serializer/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@jscad/x3d-serializer",
+      "consumes": [
+        {
+          "cell": "array-utils"
+        },
+        {
+          "cell": "modeling"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

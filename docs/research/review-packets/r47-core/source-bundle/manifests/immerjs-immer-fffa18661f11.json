@@ -1,0 +1,238 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "src/**",
+      "website/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__mocks__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.spec.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixtures/**",
+      "**/generated/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "core",
+      "ownedPaths": [
+        "src/core/**"
+      ],
+      "publicEntry": "src/core/current.ts",
+      "publicSymbols": [
+        "current"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugins",
+      "ownedPaths": [
+        "src/plugins/**"
+      ],
+      "publicEntry": "src/plugins/arrayMethods.ts",
+      "publicSymbols": [
+        "ArrayOperationMethod",
+        "enableArrayMethods"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/immer.ts",
+      "publicSymbols": [
+        "applyPatches",
+        "castDraft",
+        "castImmutable",
+        "createDraft",
+        "current",
+        "Draft",
+        "enableArrayMethods",
+        "enableMapSet",
+        "enablePatches",
+        "finishDraft",
+        "freeze",
+        "Immer",
+        "immerable",
+        "Immutable",
+        "isDraft",
+        "isDraftable",
+        "nothing",
+        "Objectish",
+        "original",
+        "Patch",
+        "PatchListener",
+        "produce",
+        "Producer",
+        "produceWithPatches",
+        "setAutoFreeze",
+        "setUseStrictIteration",
+        "setUseStrictShallowCopy",
+        "StrictMode",
+        "WritableDraft"
+      ],
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "plugins"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "src/types/**"
+      ],
+      "publicEntry": "src/types/types-external.ts",
+      "publicSymbols": [
+        "Draft",
+        "IfAvailable",
+        "Immutable",
+        "IProduce",
+        "IProduceWithPatches",
+        "never_used",
+        "Patch",
+        "PatchListener",
+        "Produced",
+        "Producer",
+        "WritableDraft"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/common.ts",
+      "publicSymbols": [
+        "CONFIGURABLE",
+        "CONSTRUCTOR",
+        "each",
+        "ENUMERABLE",
+        "freeze",
+        "get",
+        "getArchtype",
+        "getFinalValue",
+        "getPrototypeOf",
+        "getProxyDraft",
+        "getValue",
+        "has",
+        "is",
+        "isArray",
+        "isArrayIndex",
+        "isBoolean",
+        "isDraft",
+        "isDraftable",
+        "isFrozen",
+        "isFunction",
+        "isMap",
+        "isObjectish",
+        "isPlainObject",
+        "isSet",
+        "latest",
+        "original",
+        "PROTOTYPE",
+        "set",
+        "shallowCopy",
+        "VALUE",
+        "WRITABLE"
+      ],
+      "consumes": [
+        {
+          "cell": "src-root"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "website",
+      "ownedPaths": [
+        "website/**"
+      ],
+      "publicEntry": "website/docusaurus.config.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

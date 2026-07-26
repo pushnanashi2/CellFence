@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-46b65ae69c705497",
+    "subjectId": "kmijs-kmi",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "kmijs-kmi",
+    "phase": null,
+    "repository": "https://github.com/kmijs/kmi.git",
+    "commit": "daf893604446e8081d556a8086a0fa72e7912de4"
+  },
+  "manifestCopy": {
+    "path": "manifests/kmijs-kmi-741110157ffc.json",
+    "sha256": "086993bdb8cc1191fe556a823c165b9209d567fd471afe74c8c57c1bf42fa1ea"
+  },
+  "attestationTemplate": {
+    "subjectId": "kmijs-kmi",
+    "repository": "https://github.com/kmijs/kmi.git",
+    "commit": "daf893604446e8081d556a8086a0fa72e7912de4",
+    "manifestCopy": {
+      "path": "manifests/kmijs-kmi-741110157ffc.json",
+      "sha256": "086993bdb8cc1191fe556a823c165b9209d567fd471afe74c8c57c1bf42fa1ea"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "086993bdb8cc1191fe556a823c165b9209d567fd471afe74c8c57c1bf42fa1ea",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

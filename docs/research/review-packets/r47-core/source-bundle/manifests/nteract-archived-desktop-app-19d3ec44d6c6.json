@@ -1,0 +1,1559 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "applications/desktop/src/**",
+      "applications/jupyter-extension/*",
+      "applications/jupyter-extension/nteract_on_jupyter/**",
+      "applications/web/**",
+      "packages/actions/src/**",
+      "packages/commutable/src/**",
+      "packages/connected-components/src/**",
+      "packages/core/src/**",
+      "packages/editor/src/**",
+      "packages/epics/src/**",
+      "packages/host-cache/src/**",
+      "packages/messaging/src/**",
+      "packages/monaco-editor/src/**",
+      "packages/mythic-configuration/src/**",
+      "packages/mythic-multiselect/src/**",
+      "packages/mythic-notifications/src/**",
+      "packages/mythic-rtc/src/**",
+      "packages/mythic-windowing/src/**",
+      "packages/myths/src/**",
+      "packages/notebook-app-component/src/**",
+      "packages/presentational-components/src/**",
+      "packages/reducers/src/**",
+      "packages/rx-binder/src/**",
+      "packages/rx-jupyter/src/**",
+      "packages/selectors/src/**",
+      "packages/stateful-components/src/**",
+      "packages/styles/**",
+      "packages/types/src/**",
+      "packages/webpack-configurator/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "actions",
+      "ownedPaths": [
+        "packages/actions/src/**"
+      ],
+      "publicEntry": "packages/actions/src/index.ts",
+      "publicSymbols": [
+        "ACCEPT_PAYLOAD_MESSAGE",
+        "acceptPayloadMessage",
+        "AcceptPayloadMessage",
+        "Action",
+        "ADD_EDITOR",
+        "ADD_HOST",
+        "ADD_TRANSFORM",
+        "addEditor",
+        "AddEditor",
+        "addHost",
+        "AddHost",
+        "addTransform",
+        "AddTransform",
+        "APPEND_OUTPUT",
+        "appendOutput",
+        "AppendOutput",
+        "CHANGE_CELL_TYPE",
+        "CHANGE_CONTENT_NAME",
+        "CHANGE_CONTENT_NAME_FAILED",
+        "CHANGE_CONTENT_NAME_FULFILLED",
+        "CHANGE_FILENAME",
+        "CHANGE_KERNEL_BY_NAME",
+        "changeCellType",
+        "ChangeCellType",
+        "changeContentName",
+        "ChangeContentName",
+        "changeContentNameFailed",
+        "ChangeContentNameFailed",
+        "changeContentNameFulfilled",
+        "ChangeContentNameFulfilled",
+        "changeFilename",
+        "ChangeFilenameAction",
+        "changeKernelByName",
+        "ChangeKernelByName",
+        "CLEAR_ALL_OUTPUTS",
+        "CLEAR_MESSAGE_QUEUE",
+        "CLEAR_OUTPUTS",
+        "clearAllOutputs",
+        "ClearAllOutputs",
+        "clearMessageQueue",
+        "ClearMessageQueue",
+        "clearOutputs",
+        "ClearOutputs",
+        "CLOSE_MODAL",
+        "CLOSE_NOTEBOOK",
+        "closeModal",
+        "CloseModal",
+        "closeNotebook",
+        "CloseNotebook",
+        "COMM_MESSAGE",
+        "COMM_OPEN",
+        "commMessageAction",
+        "CommMessageAction",
+        "commOpenAction",
+        "CommOpenAction",
+        "COPY_CELL",
+        "copyCell",
+        "CopyCell",
+        "coreError",
+        "CoreError",
+        "CREATE_CELL_ABOVE",
+        "CREATE_CELL_APPEND",
+        "CREATE_CELL_BELOW",
+        "createCellAbove",
+        "CreateCellAbove",
+        "createCellAppend",
+        "CreateCellAppend",
+        "createCellBelow",
+        "CreateCellBelow",
+        "CUT_CELL",
+        "cutCell",
+        "CutCell",
+        "DELETE_CELL",
+        "DELETE_CONNECTION_FILE_FAILED",
+        "DELETE_CONNECTION_FILE_SUCCESSFUL",
+        "DELETE_METADATA_FIELD",
+        "deleteCell",
+        "DeleteCell",
+        "deleteConnectionFileFailed",
+        "DeleteConnectionFileFailedAction",
+        "deleteConnectionFileSuccessful",
+        "DeleteConnectionFileSuccessfulAction",
+        "deleteMetadataField",
+        "DeleteMetadataField",
+        "DISPOSE_CONTENT",
+        "DISPOSE_KERNEL",
+        "disposeContent",
+        "DisposeContent",
+        "disposeKernel",
+        "DisposeKernel",
+        "DOWNLOAD_CONTENT",
+        "DOWNLOAD_CONTENT_FAILED",
+        "DOWNLOAD_CONTENT_FULFILLED",
+        "downloadContent",
+        "DownloadContent",
+        "downloadContentFailed",
+        "DownloadContentFailed",
+        "downloadContentFulfilled",
+        "DownloadContentFulfilled",
+        "ENQUEUE_ACTION",
+        "enqueueAction",
+        "EnqueueAction",
+        "ERROR",
+        "ErrorAction",
+        "EXECUTE_ALL_CELLS",
+        "EXECUTE_ALL_CELLS_ABOVE",
+        "EXECUTE_ALL_CELLS_BELOW",
+        "EXECUTE_CANCELED",
+        "EXECUTE_CELL",
+        "EXECUTE_FAILED",
+        "EXECUTE_FOCUSED_CELL",
+        "executeAllCells",
+        "ExecuteAllCells",
+        "executeAllCellsAbove",
+        "ExecuteAllCellsAbove",
+        "executeAllCellsBelow",
+        "ExecuteAllCellsBelow",
+        "executeCanceled",
+        "ExecuteCanceled",
+        "executeCell",
+        "ExecuteCell",
+        "executeFailed",
+        "ExecuteFailed",
+        "executeFocusedCell",
+        "ExecuteFocusedCell",
+        "FETCH_CONTENT",
+        "FETCH_CONTENT_FAILED",
+        "FETCH_CONTENT_FULFILLED",
+        "FETCH_KERNELSPECS",
+        "FETCH_KERNELSPECS_FAILED",
+        "FETCH_KERNELSPECS_FULFILLED",
+        "fetchContent",
+        "FetchContent",
+        "fetchContentFailed",
+        "FetchContentFailed",
+        "fetchContentFulfilled",
+        "FetchContentFulfilled",
+        "fetchKernelspecs",
+        "FetchKernelspecs",
+        "fetchKernelspecsFailed",
+        "FetchKernelspecsFailed",
+        "fetchKernelspecsFulfilled",
+        "FetchKernelspecsFulfilled",
+        "FOCUS_CELL",
+        "FOCUS_CELL_EDITOR",
+        "FOCUS_NEXT_CELL",
+        "FOCUS_NEXT_CELL_EDITOR",
+        "FOCUS_PREVIOUS_CELL",
+        "FOCUS_PREVIOUS_CELL_EDITOR",
+        "focusCell",
+        "FocusCell",
+        "focusCellEditor",
+        "FocusCellEditor",
+        "focusNextCell",
+        "FocusNextCell",
+        "focusNextCellEditor",
+        "FocusNextCellEditor",
+        "focusPreviousCell",
+        "FocusPreviousCell",
+        "focusPreviousCellEditor",
+        "FocusPreviousCellEditor",
+        "INTERRUPT_KERNEL",
+        "INTERRUPT_KERNEL_FAILED",
+        "INTERRUPT_KERNEL_SUCCESSFUL",
+        "interruptKernel",
+        "InterruptKernel",
+        "interruptKernelFailed",
+        "InterruptKernelFailed",
+        "interruptKernelSuccessful",
+        "InterruptKernelSuccessful",
+        "KERNEL_RAW_STDERR",
+        "KERNEL_RAW_STDOUT",
+        "kernelRawStderr",
+        "KernelRawStderr",
+        "kernelRawStdout",
+        "KernelRawStdout",
+        "KILL_KERNEL",
+        "KILL_KERNEL_FAILED",
+        "KILL_KERNEL_SUCCESSFUL",
+        "killKernel",
+        "KillKernelAction",
+        "killKernelFailed",
+        "KillKernelFailed",
+        "killKernelSuccessful",
+        "KillKernelSuccessful",
+        "LAUNCH_KERNEL",
+        "LAUNCH_KERNEL_BY_NAME",
+        "LAUNCH_KERNEL_FAILED",
+        "LAUNCH_KERNEL_SUCCESSFUL",
+        "launchKernel",
+        "LaunchKernelAction",
+        "launchKernelByName",
+        "LaunchKernelByNameAction",
+        "launchKernelFailed",
+        "LaunchKernelFailed",
+        "launchKernelSuccessful",
+        "makeActionFunction",
+        "MARK_CELL_AS_DELETING",
+        "markCellAsDeleting",
+        "MarkCellAsDeleting",
+        "MOVE_CELL",
+        "moveCell",
+        "MoveCell",
+        "NEW_NOTEBOOK",
+        "NewKernelAction",
+        "newNotebook",
+        "NewNotebook",
+        "OPEN_MODAL",
+        "openModal",
+        "OpenModal",
+        "OVERWRITE_METADATA_FIELD",
+        "OVERWRITE_METADATA_FIELDS",
+        "overwriteMetadataField",
+        "OverwriteMetadataField",
+        "overwriteMetadataFields",
+        "OverwriteMetadataFields",
+        "PASTE_CELL",
+        "pasteCell",
+        "PasteCell",
+        "PROMPT_INPUT_REQUEST",
+        "promptInputRequest",
+        "PromptInputRequest",
+        "PUBLISH_GIST",
+        "PUBLISH_TO_BOOKSTORE",
+        "PUBLISH_TO_BOOKSTORE_AFTER_SAVE",
+        "PUBLISH_TO_BOOKSTORE_FAILED",
+        "PUBLISH_TO_BOOKSTORE_SUCCEEDED",
+        "publishGist",
+        "PublishGist",
+        "publishToBookstore",
+        "PublishToBookstore",
+        "publishToBookstoreAfterSave",
+        "PublishToBookstoreAfterSave",
+        "publishToBookstoreFailed",
+        "PublishToBookstoreFailed",
+        "publishToBookstoreSucceeded",
+        "PublishToBookstoreSucceeded",
+        "REGISTER_COMM_TARGET",
+        "RegisterCommTargetAction",
+        "REMOVE_HOST",
+        "REMOVE_TRANSFORM",
+        "removeHost",
+        "RemoveHost",
+        "removeTransform",
+        "RemoveTransform",
+        "RESTART_KERNEL",
+        "RESTART_KERNEL_FAILED",
+        "RESTART_KERNEL_SUCCESSFUL",
+        "restartKernel",
+        "RestartKernel",
+        "restartKernelFailed",
+        "RestartKernelFailed",
+        "RestartKernelOutputHandling",
+        "restartKernelSuccessful",
+        "RestartKernelSuccessful",
+        "save",
+        "Save",
+        "SAVE",
+        "SAVE_AS",
+        "SAVE_AS_FAILED",
+        "SAVE_AS_FULFILLED",
+        "SAVE_FAILED",
+        "SAVE_FULFILLED",
+        "saveAs",
+        "SaveAs",
+        "saveAsFailed",
+        "SaveAsFailed",
+        "saveAsFulfilled",
+        "SaveAsFulfilled",
+        "saveFailed",
+        "SaveFailed",
+        "saveFulfilled",
+        "SaveFulfilled",
+        "SEND_EXECUTE_REQUEST",
+        "SEND_INPUT_REPLY",
+        "sendExecuteRequest",
+        "SendExecuteRequest",
+        "sendInputReply",
+        "SendInputReply",
+        "SET_APP_HOST",
+        "SET_EXECUTION_STATE",
+        "SET_GITHUB_TOKEN",
+        "SET_IN_CELL",
+        "SET_KERNEL_INFO",
+        "SET_KERNEL_METADATA",
+        "SET_KERNELSPEC_INFO",
+        "SET_LANGUAGE_INFO",
+        "setAppHost",
+        "SetAppHostAction",
+        "setExecutionState",
+        "SetExecutionStateAction",
+        "setGithubToken",
+        "SetGithubTokenAction",
+        "setInCell",
+        "SetInCell",
+        "setKernelInfo",
+        "SetKernelInfo",
+        "setKernelMetadata",
+        "SetKernelMetadata",
+        "setKernelspecInfo",
+        "SetKernelspecInfo",
+        "setLanguageInfo",
+        "SetLanguageInfo",
+        "SHUTDOWN_REPLY_SUCCEEDED",
+        "SHUTDOWN_REPLY_TIMED_OUT",
+        "shutdownReplySucceeded",
+        "ShutdownReplySucceeded",
+        "shutdownReplyTimedOut",
+        "ShutdownReplyTimedOut",
+        "TOGGLE_CELL_INPUT_VISIBILITY",
+        "TOGGLE_CELL_OUTPUT_VISIBILITY",
+        "TOGGLE_HEADER_EDITOR",
+        "TOGGLE_OUTPUT_EXPANSION",
+        "TOGGLE_SIDEBAR",
+        "TOGGLE_TAG_IN_CELL",
+        "ToggleCellExpansion",
+        "toggleCellInputVisibility",
+        "ToggleCellInputVisibility",
+        "toggleCellOutputVisibility",
+        "ToggleCellOutputVisibility",
+        "toggleHeaderEditor",
+        "ToggleHeaderEditor",
+        "toggleOutputExpansion",
+        "toggleParameterCell",
+        "toggleSidebar",
+        "ToggleSidebar",
+        "toggleTagInCell",
+        "ToggleTagInCell",
+        "UNHIDE_ALL",
+        "unhideAll",
+        "UnhideAll",
+        "UNMARK_CELL_AS_DELETING",
+        "unmarkCellAsDeleting",
+        "UnmarkCellAsDeleting",
+        "UPDATE_CELL_STATUS",
+        "UPDATE_DISPLAY",
+        "UPDATE_DISPLAY_FAILED",
+        "UPDATE_FILE_TEXT",
+        "UPDATE_OUTPUT_METADATA",
+        "updateCellExecutionCount",
+        "updateCellSource",
+        "updateCellStatus",
+        "UpdateCellStatus",
+        "updateDisplay",
+        "UpdateDisplay",
+        "updateDisplayFailed",
+        "UpdateDisplayFailed",
+        "updateFileText",
+        "UpdateFileText",
+        "updateOutputMetadata",
+        "UpdateOutputMetadata"
+      ],
+      "packageName": "@nteract/actions",
+      "consumes": [
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "messaging"
+        },
+        {
+          "cell": "rx-jupyter"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "commutable",
+      "ownedPaths": [
+        "packages/commutable/src/**"
+      ],
+      "publicEntry": "packages/commutable/src/index.ts",
+      "publicSymbols": [
+        "appendCell",
+        "appendCellToNotebook",
+        "CellId",
+        "CellStructure",
+        "CellType",
+        "CodeCellParams",
+        "createCellId",
+        "createCodeCell",
+        "createFrozenMediaBundle",
+        "createImmutableOutput",
+        "createMarkdownCell",
+        "createNotebook",
+        "createOnDiskMediaBundle",
+        "deepFreeze",
+        "defaultNotebook",
+        "deleteCell",
+        "demultiline",
+        "DisplayDataParams",
+        "emptyCodeCell",
+        "emptyMarkdownCell",
+        "emptyNotebook",
+        "ErrorOutputParams",
+        "ExecuteResultParams",
+        "ExecutionCount",
+        "fromJS",
+        "ImmutableCell",
+        "ImmutableCodeCell",
+        "ImmutableDisplayData",
+        "ImmutableErrorOutput",
+        "ImmutableExecuteResult",
+        "ImmutableJSONList",
+        "ImmutableJSONMap",
+        "ImmutableJSONType",
+        "ImmutableMarkdownCell",
+        "ImmutableNotebook",
+        "ImmutableOutput",
+        "ImmutableRawCell",
+        "ImmutableStreamOutput",
+        "insertCellAfter",
+        "insertCellAt",
+        "JSONArray",
+        "JSONObject",
+        "JSONType",
+        "makeCodeCell",
+        "makeDisplayData",
+        "makeErrorOutput",
+        "makeExecuteResult",
+        "makeMarkdownCell",
+        "makeNotebookRecord",
+        "makeRawCell",
+        "makeStreamOutput",
+        "markCellDeleting",
+        "markCellNotDeleting",
+        "MarkdownCellParams",
+        "MediaBundle",
+        "MimeBundle",
+        "monocellNotebook",
+        "MultiLineString",
+        "normalizeLineEndings",
+        "Notebook",
+        "NotebookRecordParams",
+        "OnDiskDisplayData",
+        "OnDiskErrorOutput",
+        "OnDiskExecuteResult",
+        "OnDiskMediaBundle",
+        "OnDiskOutput",
+        "OnDiskStreamOutput",
+        "parseNotebook",
+        "PrimitiveImmutable",
+        "RawCellParams",
+        "removeCell",
+        "remultiline",
+        "StreamOutputParams",
+        "stringifyNotebook",
+        "toJS"
+      ],
+      "packageName": "@nteract/commutable",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "connected-components",
+      "ownedPaths": [
+        "packages/connected-components/src/**"
+      ],
+      "publicEntry": "packages/connected-components/src/index.tsx",
+      "publicSymbols": [
+        "HeaderEditor",
+        "ModalController",
+        "NewNotebookNavigation",
+        "NotebookMenu",
+        "PureNewNotebookNavigation"
+      ],
+      "packageName": "@nteract/connected-components",
+      "consumes": [
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/index.ts",
+      "publicSymbols": [
+        "actions",
+        "epics",
+        "middlewares",
+        "reducers",
+        "selectors",
+        "state"
+      ],
+      "packageName": "@nteract/core",
+      "consumes": [
+        {
+          "cell": "actions"
+        },
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "epics"
+        },
+        {
+          "cell": "reducers"
+        },
+        {
+          "cell": "selectors"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "editor",
+      "ownedPaths": [
+        "packages/editor/src/**"
+      ],
+      "publicEntry": "packages/editor/src/index.tsx",
+      "publicSymbols": [
+        "CodeMirrorCSS",
+        "CodeMirrorEditorProps",
+        "default",
+        "EditorKeyEvent",
+        "ShowHintCSS"
+      ],
+      "packageName": "@nteract/editor",
+      "consumes": [
+        {
+          "cell": "messaging"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "epics",
+      "ownedPaths": [
+        "packages/epics/src/**"
+      ],
+      "publicEntry": "packages/epics/src/index.ts",
+      "publicSymbols": [
+        "acquireKernelInfoEpic",
+        "allEpics",
+        "autoSaveCurrentContentEpic",
+        "changeWebSocketKernelEpic",
+        "closeNotebookEpic",
+        "commListenEpic",
+        "executeAllCellsEpic",
+        "executeCellAfterKernelLaunchEpic",
+        "executeCellEpic",
+        "executeFocusedCellEpic",
+        "fetchContentEpic",
+        "fetchKernelspecsEpic",
+        "interruptKernelEpic",
+        "killKernelEpic",
+        "launchKernelWhenNotebookSetEpic",
+        "launchWebSocketKernelEpic",
+        "lazyLaunchKernelEpic",
+        "publishToBookstore",
+        "publishToBookstoreAfterSave",
+        "restartKernelEpic",
+        "restartWebSocketKernelEpic",
+        "saveAsContentEpic",
+        "saveContentEpic",
+        "sendExecuteRequestEpic",
+        "sendInputReplyEpic",
+        "updateContentEpic",
+        "updateDisplayEpic",
+        "watchExecutionStateEpic"
+      ],
+      "packageName": "@nteract/epics",
+      "consumes": [
+        {
+          "cell": "actions"
+        },
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "messaging"
+        },
+        {
+          "cell": "mythic-configuration"
+        },
+        {
+          "cell": "mythic-notifications"
+        },
+        {
+          "cell": "rx-jupyter"
+        },
+        {
+          "cell": "selectors"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "host-cache",
+      "ownedPaths": [
+        "packages/host-cache/src/**"
+      ],
+      "publicEntry": "packages/host-cache/src/index.ts",
+      "publicSymbols": [
+        "Host",
+        "Kernel",
+        "LocalHostStorage"
+      ],
+      "packageName": "@mybinder/host-cache",
+      "consumes": [
+        {
+          "cell": "rx-binder"
+        },
+        {
+          "cell": "rx-jupyter"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "messaging",
+      "ownedPaths": [
+        "packages/messaging/src/**"
+      ],
+      "publicEntry": "packages/messaging/src/index.ts",
+      "publicSymbols": [
+        "BasicOutputMessageContent",
+        "Channel",
+        "Channels",
+        "childOf",
+        "clearOutput",
+        "convertOutputMessageToNotebookFormat",
+        "createCommCloseMessage",
+        "createCommMessage",
+        "createCommOpenMessage",
+        "createMessage",
+        "CreateMessageFields",
+        "displayData",
+        "error",
+        "executeInput",
+        "ExecuteMessageContent",
+        "executeReply",
+        "ExecuteReplyError",
+        "ExecuteReplyOk",
+        "executeRequest",
+        "ExecuteRequest",
+        "executeResult",
+        "executionCounts",
+        "inputReply",
+        "inputRequests",
+        "JupyterMessage",
+        "JupyterMessageHeader",
+        "kernelInfoRequest",
+        "kernelStatuses",
+        "message",
+        "MessageType",
+        "ofMessageType",
+        "outputs",
+        "payloads",
+        "shutdownRequest",
+        "status",
+        "stream",
+        "updateDisplayData",
+        "UpdateDisplayData",
+        "UpdateDisplayDataContent",
+        "updatedOutputs",
+        "wireProtocol",
+        "withCommId"
+      ],
+      "packageName": "@nteract/messaging",
+      "consumes": [
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "monaco-editor",
+      "ownedPaths": [
+        "packages/monaco-editor/src/**"
+      ],
+      "publicEntry": "packages/monaco-editor/src/index.ts",
+      "publicSymbols": [
+        "completionProvider",
+        "DarkThemeName",
+        "default",
+        "DocumentUri",
+        "IMonacoProps",
+        "IMonacoShortCutProps",
+        "LightThemeName",
+        "mapCodeMirrorModeToMonaco",
+        "Mode"
+      ],
+      "packageName": "@nteract/monaco-editor",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "messaging"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mythic-configuration",
+      "ownedPaths": [
+        "packages/mythic-configuration/src/**"
+      ],
+      "publicEntry": "packages/mythic-configuration/src/index.ts",
+      "publicSymbols": [
+        "allConfigOptionDefinitions",
+        "allConfigOptions",
+        "allDeprecations",
+        "configOption",
+        "configuration",
+        "Configuration",
+        "ConfigurationBackend",
+        "ConfigurationOption",
+        "ConfigurationOptionDefinition",
+        "ConfigurationOptionDeprecatedDefinition",
+        "ConfigurationState",
+        "createConfigCollection",
+        "createDeprecatedConfigOption",
+        "defineConfigOption",
+        "HasPrivateConfigurationState",
+        "setConfigAtKey",
+        "toggleConfigAtKey"
+      ],
+      "packageName": "@nteract/mythic-configuration",
+      "consumes": [
+        {
+          "cell": "myths"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mythic-multiselect",
+      "ownedPaths": [
+        "packages/mythic-multiselect/src/**"
+      ],
+      "publicEntry": "packages/mythic-multiselect/src/index.ts",
+      "publicSymbols": [
+        "clearSelectedCells",
+        "multiselect",
+        "MultiSelectAction",
+        "MultiselectCells",
+        "selectCell",
+        "unselectCell"
+      ],
+      "packageName": "@nteract/mythic-multiselect",
+      "consumes": [
+        {
+          "cell": "myths"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mythic-notifications",
+      "ownedPaths": [
+        "packages/mythic-notifications/src/**"
+      ],
+      "publicEntry": "packages/mythic-notifications/src/index.ts",
+      "publicSymbols": [
+        "NotificationAction",
+        "NotificationMessage",
+        "NotificationRoot",
+        "notifications",
+        "NotificationSystem",
+        "sendNotification"
+      ],
+      "packageName": "@nteract/mythic-notifications",
+      "consumes": [
+        {
+          "cell": "myths"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mythic-rtc",
+      "ownedPaths": [
+        "packages/mythic-rtc/src/**"
+      ],
+      "publicEntry": "packages/mythic-rtc/src/index.ts",
+      "publicSymbols": [
+        "collaboration",
+        "collaborationMiddleware",
+        "initCollaboration",
+        "joinSession",
+        "leaveSession"
+      ],
+      "packageName": "@nteract/mythic-rtc",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "mythic-windowing",
+      "ownedPaths": [
+        "packages/mythic-windowing/src/**"
+      ],
+      "publicEntry": "packages/mythic-windowing/src/index.ts",
+      "publicSymbols": [
+        "closeWindow",
+        "electronBackend",
+        "openExternalFile",
+        "openExternalUrl",
+        "setWindowingBackend",
+        "showWindow",
+        "Window",
+        "windowing",
+        "Windowing",
+        "WindowingBackend",
+        "WindowingState",
+        "WindowProps",
+        "WindowRef"
+      ],
+      "packageName": "@nteract/mythic-windowing",
+      "consumes": [
+        {
+          "cell": "myths"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "myths",
+      "ownedPaths": [
+        "packages/myths/src/**"
+      ],
+      "publicEntry": "packages/myths/src/index.ts",
+      "publicSymbols": [
+        "ConnectedComponentProps",
+        "createMythicPackage",
+        "EpicFuncDefinition",
+        "EpicWhenFuncDefinition",
+        "makeConfigureStore",
+        "mapErrorTo",
+        "MaybeRootState",
+        "Myth",
+        "MythDefinition",
+        "MythicAction",
+        "MythicComponent",
+        "MythicPackage",
+        "Myths",
+        "PackageDefinition",
+        "ReducerDefinition",
+        "RootState",
+        "Selector"
+      ],
+      "packageName": "@nteract/myths",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nbextension",
+      "ownedPaths": [
+        "applications/jupyter-extension/*"
+      ],
+      "publicEntry": "applications/jupyter-extension/setup.py",
+      "publicSymbols": [
+        "config_d_filepath",
+        "data_files",
+        "here",
+        "json",
+        "name",
+        "os",
+        "setuptools"
+      ],
+      "packageName": "@nteract/nbextension",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "notebook-app-component",
+      "ownedPaths": [
+        "packages/notebook-app-component/src/**"
+      ],
+      "publicEntry": "packages/notebook-app-component/src/index.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@nteract/notebook-app-component",
+      "consumes": [
+        {
+          "cell": "actions"
+        },
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "editor"
+        },
+        {
+          "cell": "mythic-configuration"
+        },
+        {
+          "cell": "mythic-notifications"
+        },
+        {
+          "cell": "presentational-components"
+        },
+        {
+          "cell": "selectors"
+        },
+        {
+          "cell": "stateful-components"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nteract",
+      "ownedPaths": [
+        "applications/desktop/src/**"
+      ],
+      "publicEntry": "applications/desktop/src/common/accelerators.ts",
+      "publicSymbols": [
+        "accelerators"
+      ],
+      "packageName": "nteract",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nteract-on-jupyter",
+      "ownedPaths": [
+        "applications/jupyter-extension/nteract_on_jupyter/**"
+      ],
+      "publicEntry": "applications/jupyter-extension/nteract_on_jupyter/app/index.tsx",
+      "publicSymbols": [],
+      "packageName": "nteract-on-jupyter",
+      "consumes": [
+        {
+          "cell": "rx-jupyter"
+        },
+        {
+          "cell": "webpack-configurator"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "presentational-components",
+      "ownedPaths": [
+        "packages/presentational-components/src/**"
+      ],
+      "publicEntry": "packages/presentational-components/src/index.ts",
+      "publicSymbols": [
+        "Cell",
+        "CellMenu",
+        "CellMenuItem",
+        "CellMenuSection",
+        "Cells",
+        "CircularButton",
+        "CommandButtonRow",
+        "CommandPalette",
+        "CommandPaletteProps",
+        "DarkTheme",
+        "Error",
+        "Icons",
+        "Input",
+        "LightTheme",
+        "Outputs",
+        "Pagers",
+        "Prompt",
+        "PromptBuffer",
+        "Sidebar",
+        "SidebarItem",
+        "SidebarItemProps",
+        "Source",
+        "ToggleSwitch",
+        "Toolbar",
+        "ToolbarIcons",
+        "ToolbarItem",
+        "ToolbarItemProps"
+      ],
+      "packageName": "@nteract/presentational-components",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reducers",
+      "ownedPaths": [
+        "packages/reducers/src/**"
+      ],
+      "publicEntry": "packages/reducers/src/index.ts",
+      "publicSymbols": [
+        "app",
+        "core"
+      ],
+      "packageName": "@nteract/reducers",
+      "consumes": [
+        {
+          "cell": "actions"
+        },
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rx-binder",
+      "ownedPaths": [
+        "packages/rx-binder/src/**"
+      ],
+      "publicEntry": "packages/rx-binder/src/index.ts",
+      "publicSymbols": [
+        "binder",
+        "formBinderURL",
+        "IEventSource"
+      ],
+      "packageName": "rx-binder",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rx-jupyter",
+      "ownedPaths": [
+        "packages/rx-jupyter/src/**"
+      ],
+      "publicEntry": "packages/rx-jupyter/src/index.ts",
+      "publicSymbols": [
+        "apiVersion",
+        "bookstore",
+        "contents",
+        "kernels",
+        "kernelspecs",
+        "sessions",
+        "shutdown",
+        "terminals"
+      ],
+      "packageName": "rx-jupyter",
+      "consumes": [
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "messaging"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "selectors",
+      "ownedPaths": [
+        "packages/selectors/src/**"
+      ],
+      "publicEntry": "packages/selectors/src/index.ts",
+      "publicSymbols": [
+        "appVersion",
+        "cell",
+        "comms",
+        "content",
+        "contentByRef",
+        "contentRefByFilepath",
+        "currentHost",
+        "currentHostType",
+        "currentKernel",
+        "currentKernelRef",
+        "currentKernelspecs",
+        "currentKernelspecsRef",
+        "currentKernelStatus",
+        "currentKernelType",
+        "displayOrder",
+        "editor",
+        "editorbyEditorType",
+        "filepath",
+        "hostRecordByHostRef",
+        "hostRefByHostRecord",
+        "hostsByRef",
+        "info",
+        "infoById",
+        "isCurrentHostJupyter",
+        "isCurrentKernelJupyterWebsocket",
+        "isCurrentKernelZeroMQ",
+        "isSidebarVisible",
+        "kernel",
+        "kernelByContentRef",
+        "kernelRefByContentRef",
+        "kernelsByRef",
+        "kernelspecByName",
+        "kernelspecsByRef",
+        "messageQueue",
+        "modalType",
+        "model",
+        "modelById",
+        "models",
+        "notebook",
+        "notebookModel",
+        "serverConfig",
+        "targetById",
+        "targets",
+        "transform",
+        "transformsById"
+      ],
+      "packageName": "@nteract/selectors",
+      "consumes": [
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "rx-jupyter"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "stateful-components",
+      "ownedPaths": [
+        "packages/stateful-components/src/**"
+      ],
+      "publicEntry": "packages/stateful-components/src/index.tsx",
+      "publicSymbols": [
+        "AppSidebar",
+        "AppSidebarContext",
+        "AppSidebarProps",
+        "AppToolbar",
+        "AppToolbarContext",
+        "AppToolbarProps",
+        "Cells",
+        "CellToolbar",
+        "CellToolbarContext",
+        "CodeCell",
+        "CommandContainer",
+        "CommandContext",
+        "CommandDispatchProps",
+        "CommandProps",
+        "default",
+        "MarkdownCell",
+        "RawCell",
+        "StatusBar",
+        "StatusBarContext",
+        "ThemeFromConfig",
+        "userTheme"
+      ],
+      "packageName": "@nteract/stateful-components",
+      "consumes": [
+        {
+          "cell": "commutable"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "mythic-configuration"
+        },
+        {
+          "cell": "presentational-components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "styles",
+      "ownedPaths": [
+        "packages/styles/**"
+      ],
+      "publicEntry": "packages/styles/index.js",
+      "publicSymbols": [],
+      "packageName": "@nteract/styles",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/types/src/**"
+      ],
+      "publicEntry": "packages/types/src/index.ts",
+      "publicSymbols": [
+        "AppRecord",
+        "AppRecordProps",
+        "AppState",
+        "AskExitPayloadMessage",
+        "AuthorObject",
+        "BaseHostProps",
+        "Bookstore",
+        "BookstoreDataModel",
+        "castToHostId",
+        "castToKernelId",
+        "castToSessionId",
+        "CommsRecord",
+        "CommsRecordProps",
+        "ContentModel",
+        "ContentRecord",
+        "ContentRef",
+        "ContentsRecord",
+        "ContentsRecordProps",
+        "CoreRecord",
+        "createContentRef",
+        "createHostRef",
+        "createKernelRef",
+        "createKernelspecsRef",
+        "DirectoryContentRecord",
+        "DirectoryContentRecordProps",
+        "DirectoryModelRecord",
+        "DirectoryModelRecordProps",
+        "DocumentRecordProps",
+        "DummyContentRecord",
+        "DummyContentRecordProps",
+        "EditorComponentProps",
+        "EditorsRecord",
+        "EditPayloadMessage",
+        "EmptyHost",
+        "EmptyHostRecord",
+        "EmptyModelRecord",
+        "EmptyModelRecordProps",
+        "EntitiesRecord",
+        "EntitiesRecordProps",
+        "errors",
+        "FileContentRecord",
+        "FileContentRecordProps",
+        "FileModelRecord",
+        "FileModelRecordProps",
+        "FileType",
+        "HeaderDataProps",
+        "HelpLink",
+        "HelpLinkRecord",
+        "HostId",
+        "HostRecord",
+        "HostRecordProps",
+        "HostRef",
+        "HostsRecordProps",
+        "IContent",
+        "IContentProvider",
+        "IEmptyContent",
+        "IGetParams",
+        "InputRequestMessage",
+        "IStatContent",
+        "JupyterHostRecord",
+        "JupyterHostRecordProps",
+        "KernelId",
+        "KernelInfo",
+        "KernelInfoRecord",
+        "KernelNotStartedProps",
+        "KernelNotStartedRecord",
+        "KernelRecord",
+        "KernelRef",
+        "KernelspecInfo",
+        "KernelspecMetadata",
+        "KernelspecProps",
+        "KernelspecRecord",
+        "Kernelspecs",
+        "KernelspecsByRefRecord",
+        "KernelspecsByRefRecordProps",
+        "KernelSpecsRecord",
+        "KernelspecsRecordProps",
+        "KernelspecsRef",
+        "KernelsRecordProps",
+        "KernelStatus",
+        "LanguageInfoMetadata",
+        "LocalHostRecord",
+        "LocalHostRecordProps",
+        "LocalKernelProps",
+        "LocalKernelRecord",
+        "makeAppRecord",
+        "makeCommsRecord",
+        "makeContentsRecord",
+        "makeDirectoryContentRecord",
+        "makeDirectoryModel",
+        "makeDocumentRecord",
+        "makeDummyContentRecord",
+        "makeEditorsRecord",
+        "makeEmptyHostRecord",
+        "makeEmptyModel",
+        "makeEntitiesRecord",
+        "makeFileContentRecord",
+        "makeFileModelRecord",
+        "makeHelpLinkRecord",
+        "makeHostsRecord",
+        "makeJupyterHostRecord",
+        "makeKernelInfoRecord",
+        "makeKernelNotStartedRecord",
+        "makeKernelspec",
+        "makeKernelspecsByRefRecord",
+        "makeKernelspecsRecord",
+        "makeKernelsRecord",
+        "makeLocalHostRecord",
+        "makeLocalKernelRecord",
+        "makeMessagesRecord",
+        "makeModalsRecord",
+        "makeNotebookContentRecord",
+        "makeRemoteKernelRecord",
+        "makeSidebarRecord",
+        "makeStateRecord",
+        "makeTransformsRecord",
+        "MessagesRecord",
+        "MessagesRecordProps",
+        "ModalsRecord",
+        "ModalsRecordProps",
+        "NotebookContentRecord",
+        "NotebookContentRecordProps",
+        "NotebookMetadata",
+        "NotebookModel",
+        "NotebookTypes",
+        "ofHostType",
+        "PagePayloadMessage",
+        "PayloadMessage",
+        "RemoteKernelProps",
+        "RemoteKernelRecord",
+        "ServerConfig",
+        "SessionId",
+        "SetNextInputPayloadMessage",
+        "SidebarRecord",
+        "SidebarRecordProps",
+        "StateRecordProps",
+        "TransformsRecord",
+        "TransformsRecordProps"
+      ],
+      "packageName": "@nteract/types",
+      "consumes": [
+        {
+          "cell": "commutable"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "applications/web/**"
+      ],
+      "publicEntry": "applications/web/components/Avatar.tsx",
+      "publicSymbols": [
+        "Avatar",
+        "Props"
+      ],
+      "packageName": "@nteract/web",
+      "consumes": [
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "editor"
+        },
+        {
+          "cell": "host-cache"
+        },
+        {
+          "cell": "notebook-app-component"
+        },
+        {
+          "cell": "rx-jupyter"
+        },
+        {
+          "cell": "stateful-components"
+        },
+        {
+          "cell": "styles"
+        },
+        {
+          "cell": "webpack-configurator"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "webpack-configurator",
+      "ownedPaths": [
+        "packages/webpack-configurator/**"
+      ],
+      "publicEntry": "packages/webpack-configurator/index.js",
+      "publicSymbols": [],
+      "packageName": "@nteract/webpack-configurator",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

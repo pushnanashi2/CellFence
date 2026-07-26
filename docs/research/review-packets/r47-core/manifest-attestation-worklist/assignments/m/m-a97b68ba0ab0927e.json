@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-170cfe67a3dcd2f4",
+    "subjectId": "rx-angular-rx-angular",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "rx-angular-rx-angular",
+    "phase": null,
+    "repository": "https://github.com/rx-angular/rx-angular.git",
+    "commit": "bac373009c8be2013684b0565df9c8c90aed568c"
+  },
+  "manifestCopy": {
+    "path": "manifests/rx-angular-rx-angular-e12a7f014f4c.json",
+    "sha256": "64f7d73936397005562bcae6dc0649dc74991ec0602952e33e0beb68a9d52710"
+  },
+  "attestationTemplate": {
+    "subjectId": "rx-angular-rx-angular",
+    "repository": "https://github.com/rx-angular/rx-angular.git",
+    "commit": "bac373009c8be2013684b0565df9c8c90aed568c",
+    "manifestCopy": {
+      "path": "manifests/rx-angular-rx-angular-e12a7f014f4c.json",
+      "sha256": "64f7d73936397005562bcae6dc0649dc74991ec0602952e33e0beb68a9d52710"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "64f7d73936397005562bcae6dc0649dc74991ec0602952e33e0beb68a9d52710",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-4f8171c2448d6cd1",
+    "subjectId": "briehq-brie-extension",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "briehq-brie-extension",
+    "phase": null,
+    "repository": "https://github.com/briehq/brie-extension.git",
+    "commit": "b18e550026e4acf322815bd91200692593397d91"
+  },
+  "manifestCopy": {
+    "path": "manifests/briehq-brie-extension-8058cb4b8243.json",
+    "sha256": "a4eeb87c8882a2768f6805cb8773eaac4c3696e0e86819fc809fb760902e25a0"
+  },
+  "attestationTemplate": {
+    "subjectId": "briehq-brie-extension",
+    "repository": "https://github.com/briehq/brie-extension.git",
+    "commit": "b18e550026e4acf322815bd91200692593397d91",
+    "manifestCopy": {
+      "path": "manifests/briehq-brie-extension-8058cb4b8243.json",
+      "sha256": "a4eeb87c8882a2768f6805cb8773eaac4c3696e0e86819fc809fb760902e25a0"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "a4eeb87c8882a2768f6805cb8773eaac4c3696e0e86819fc809fb760902e25a0",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

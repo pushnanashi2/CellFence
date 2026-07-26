@@ -1,0 +1,325 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/analytics/**",
+      "apps/interface/**",
+      "apps/main/src/**",
+      "apps/preview/src/**",
+      "apps/wordpress/**",
+      "packages/eslint-config-next/**",
+      "packages/eslint-config-react/**",
+      "packages/eslint-config-root/**",
+      "packages/prettier-config/**",
+      "packages/twilight-protocol/**",
+      "packages/twilight-ui/src/**",
+      "packages/twilight-utils/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "analytics",
+      "ownedPaths": [
+        "apps/analytics/**"
+      ],
+      "publicEntry": "apps/analytics/.eslintrc.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/analytics",
+      "consumes": [
+        {
+          "cell": "eslint-config-next"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config-next",
+      "ownedPaths": [
+        "packages/eslint-config-next/**"
+      ],
+      "publicEntry": "packages/eslint-config-next/index.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/eslint-config-next",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config-react",
+      "ownedPaths": [
+        "packages/eslint-config-react/**"
+      ],
+      "publicEntry": "packages/eslint-config-react/index.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/eslint-config-react",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config-root",
+      "ownedPaths": [
+        "packages/eslint-config-root/**"
+      ],
+      "publicEntry": "packages/eslint-config-root/index.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/eslint-config-root",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "interface",
+      "ownedPaths": [
+        "apps/interface/**"
+      ],
+      "publicEntry": "apps/interface/app/layout.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@ouorz/interface",
+      "consumes": [
+        {
+          "cell": "twilight-protocol"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "main",
+      "ownedPaths": [
+        "apps/main/src/**"
+      ],
+      "publicEntry": "apps/main/src/assets/scripts/vendors/cloudflare/index.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/main",
+      "consumes": [
+        {
+          "cell": "eslint-config-next"
+        },
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "ui"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prettier-config",
+      "ownedPaths": [
+        "packages/prettier-config/**"
+      ],
+      "publicEntry": "packages/prettier-config/index.js",
+      "publicSymbols": [],
+      "packageName": "@ouorz/prettier-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preview",
+      "ownedPaths": [
+        "apps/preview/src/**"
+      ],
+      "publicEntry": "apps/preview/src/app/@aside/blog/page.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@ouorz/preview",
+      "consumes": [
+        {
+          "cell": "eslint-config-next"
+        },
+        {
+          "cell": "prettier-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "twilight-protocol",
+      "ownedPaths": [
+        "packages/twilight-protocol/**"
+      ],
+      "publicEntry": "packages/twilight-protocol/constants/arguments.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@ouorz/twilight-protocol",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ui",
+      "ownedPaths": [
+        "packages/twilight-ui/src/**"
+      ],
+      "publicEntry": "packages/twilight-ui/src/index.ts",
+      "publicSymbols": [
+        "Button",
+        "ButtonProps",
+        "Icon",
+        "IconProps",
+        "Label",
+        "LabelGroup",
+        "LabelGroupProps",
+        "LabelProps"
+      ],
+      "packageName": "@twilight-toolkit/ui",
+      "consumes": [
+        {
+          "cell": "prettier-config"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/twilight-utils/src/**"
+      ],
+      "publicEntry": "packages/twilight-utils/src/index.ts",
+      "publicSymbols": [
+        "propTypes"
+      ],
+      "packageName": "@twilight-toolkit/utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "wordpress",
+      "ownedPaths": [
+        "apps/wordpress/**"
+      ],
+      "publicEntry": "apps/wordpress/wp-content/plugins/classic-editor/js/block-editor-plugin.js",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

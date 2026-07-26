@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-08e8f5e79ca1ef52",
+    "subjectId": "brackets-userland-brackets-git",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "brackets-userland-brackets-git",
+    "phase": null,
+    "repository": "https://github.com/brackets-userland/brackets-git.git",
+    "commit": "334b702d2a35f62a2a863b9aaa25d1bec95c7ed7"
+  },
+  "manifestCopy": {
+    "path": "manifests/brackets-userland-brackets-git-36657268ea0c.json",
+    "sha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646"
+  },
+  "attestationTemplate": {
+    "subjectId": "brackets-userland-brackets-git",
+    "repository": "https://github.com/brackets-userland/brackets-git.git",
+    "commit": "334b702d2a35f62a2a863b9aaa25d1bec95c7ed7",
+    "manifestCopy": {
+      "path": "manifests/brackets-userland-brackets-git-36657268ea0c.json",
+      "sha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "88531c7f5f8a3abfaba568248ec9584825a2b3dd47b479ec709482a793be8646",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

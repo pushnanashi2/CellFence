@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-c0c61a408c90c860",
+    "subjectId": "alibaba-page-agent",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "alibaba-page-agent",
+    "phase": null,
+    "repository": "https://github.com/alibaba/page-agent.git",
+    "commit": "da1db959558dcd49a6c489e76a23accfbda7b156"
+  },
+  "manifestCopy": {
+    "path": "manifests/alibaba-page-agent-a2cc1a2513ee.json",
+    "sha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352"
+  },
+  "attestationTemplate": {
+    "subjectId": "alibaba-page-agent",
+    "repository": "https://github.com/alibaba/page-agent.git",
+    "commit": "da1db959558dcd49a6c489e76a23accfbda7b156",
+    "manifestCopy": {
+      "path": "manifests/alibaba-page-agent-a2cc1a2513ee.json",
+      "sha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2a0405efd70609933546595e3c1efe2a773436f4eb2134117b083ed5976e3352",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

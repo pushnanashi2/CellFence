@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-1a9f27926889d9ad",
+    "subjectId": "umami-software-umami",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "umami-software-umami",
+    "phase": null,
+    "repository": "https://github.com/umami-software/umami.git",
+    "commit": "af1b6c6efcadd65136a9ec3db6b8ec20962a8a69"
+  },
+  "manifestCopy": {
+    "path": "manifests/umami-software-umami-d4570a11d3dc.json",
+    "sha256": "965eb9ed5d60fe0d90d310655e6ae8800baa95c5139c52d43e80cfac89d30733"
+  },
+  "attestationTemplate": {
+    "subjectId": "umami-software-umami",
+    "repository": "https://github.com/umami-software/umami.git",
+    "commit": "af1b6c6efcadd65136a9ec3db6b8ec20962a8a69",
+    "manifestCopy": {
+      "path": "manifests/umami-software-umami-d4570a11d3dc.json",
+      "sha256": "965eb9ed5d60fe0d90d310655e6ae8800baa95c5139c52d43e80cfac89d30733"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "965eb9ed5d60fe0d90d310655e6ae8800baa95c5139c52d43e80cfac89d30733",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

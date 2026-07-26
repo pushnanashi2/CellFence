@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-93965b9df2e347e8",
+    "subjectId": "louisgv-local-ai",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "louisgv-local-ai",
+    "phase": null,
+    "repository": "https://github.com/louisgv/local.ai.git",
+    "commit": "ad9a9e63d8b0262fdf6734d10e2e9a0078c3977a"
+  },
+  "manifestCopy": {
+    "path": "manifests/louisgv-local-ai-38c04c23a23b.json",
+    "sha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767"
+  },
+  "attestationTemplate": {
+    "subjectId": "louisgv-local-ai",
+    "repository": "https://github.com/louisgv/local.ai.git",
+    "commit": "ad9a9e63d8b0262fdf6734d10e2e9a0078c3977a",
+    "manifestCopy": {
+      "path": "manifests/louisgv-local-ai-38c04c23a23b.json",
+      "sha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "cc8b3c1797763a9ed2fea8b63954434da69e5252ffd7d111917a9fd1edc2b767",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

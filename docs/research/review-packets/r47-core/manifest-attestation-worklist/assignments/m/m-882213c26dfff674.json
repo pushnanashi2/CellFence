@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-ef46c17b0f2bb876",
+    "subjectId": "juliusbrussee-caveman",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "juliusbrussee-caveman",
+    "phase": null,
+    "repository": "https://github.com/JuliusBrussee/caveman.git",
+    "commit": "0d95a81d35a9f2d123a5e9430d1cfc43d55f1bb0"
+  },
+  "manifestCopy": {
+    "path": "manifests/juliusbrussee-caveman-786f04a92bcf.json",
+    "sha256": "2dcbb01a642063b7efeb515284f1a0c8181146a5215b0f7d3745418fabe5d814"
+  },
+  "attestationTemplate": {
+    "subjectId": "juliusbrussee-caveman",
+    "repository": "https://github.com/JuliusBrussee/caveman.git",
+    "commit": "0d95a81d35a9f2d123a5e9430d1cfc43d55f1bb0",
+    "manifestCopy": {
+      "path": "manifests/juliusbrussee-caveman-786f04a92bcf.json",
+      "sha256": "2dcbb01a642063b7efeb515284f1a0c8181146a5215b0f7d3745418fabe5d814"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "2dcbb01a642063b7efeb515284f1a0c8181146a5215b0f7d3745418fabe5d814",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

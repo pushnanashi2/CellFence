@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-a8b8425caec6f6ed",
+    "evidencePackageId": "evidence-34887cdb0b4821b5",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/kirklin-celeris-web-91667fde376f.json",
+        "sha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7"
+      },
+      "auditLog": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.audit.jsonl",
+        "sha256": "1c1ad7122fa1dcbf2e64452c2a03ed93f631389a7d8050a9a8f8fc884c7da627"
+      },
+      "evidenceGraph": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/evidence-graph.json",
+        "sha256": "25b623e5a6bf37e890feae351b35ab3c2008a638b8bd7c928ea7ce56a75cff44"
+      },
+      "checkStdout": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.stdout.log",
+        "sha256": "154e94609e80dee1294dc39652e594f67ba4fbc0741dd690353942e9992517f6"
+      },
+      "checkStderr": {
+        "path": "logs/kirklin-celeris-web-91667fde376f/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:34887cdb0b4821b56a05cd87205ca70ac511c6064f2a167366a2e3acca3d962e",
+    "subjectId": "kirklin-celeris-web",
+    "repository": "https://github.com/kirklin/celeris-web.git",
+    "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+    "gitTree": "266349523a228b92461aa04180924c4eca164fed",
+    "manifestSha256": "b066479c7008d259568d0eb6a3a162c51cb6f7a6a52bba10923f37a20da342a7",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "packages/shared/vite/src/plugins/index.ts",
+    "line": 12,
+    "message": "vite imports private implementation from shared",
+    "cellId": "vite",
+    "producerCellId": "shared",
+    "cellfenceFingerprint": "a4c0261e6b92159f645a7901d2b2e51d72b79ea1d2cd3b4c89c44b766967c4e3",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:34887cdb0b4821b56a05cd87205ca70ac511c6064f2a167366a2e3acca3d962e",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-a8b8425caec6f6ed",
+    "evidencePackageId": "evidence-34887cdb0b4821b5",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

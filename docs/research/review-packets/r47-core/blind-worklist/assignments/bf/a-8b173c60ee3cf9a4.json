@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-8b173c60ee3cf9a4",
+    "evidencePackageId": "evidence-e398dc36789bce5c",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/musistudio-claude-code-router-5a42fe86bb96.json",
+        "sha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e"
+      },
+      "auditLog": {
+        "path": "logs/musistudio-claude-code-router-5a42fe86bb96/check.audit.jsonl",
+        "sha256": "cfe44f33ae93f7a5bded5686eccaef8cb231dce78515a1d30e7cf4476517bafa"
+      },
+      "evidenceGraph": {
+        "path": "logs/musistudio-claude-code-router-5a42fe86bb96/evidence-graph.json",
+        "sha256": "162ee4289d66d0a6304988e54b9b247f0695b82eb0fc0ecc8afa246d19546c96"
+      },
+      "checkStdout": {
+        "path": "logs/musistudio-claude-code-router-5a42fe86bb96/check.stdout.log",
+        "sha256": "8f0d4413535f4b6c30a6768e919ad656709886a983cbaf12cfaaab6cc11d7f72"
+      },
+      "checkStderr": {
+        "path": "logs/musistudio-claude-code-router-5a42fe86bb96/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:e398dc36789bce5cb022770b6656dbd7117046b08f02e431dde92259339b8dad",
+    "subjectId": "musistudio-claude-code-router",
+    "repository": "https://github.com/musistudio/claude-code-router.git",
+    "commit": "19973394d26fb1afec697f5d091d62d300bcdf50",
+    "gitTree": "969cbcc449ecdfaee3edf910337535d302fc4fd5",
+    "manifestSha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "packages/ui/src/pages/home/shared/external.tsx",
+    "line": 140,
+    "message": "ui imports private implementation from core",
+    "cellId": "ui",
+    "producerCellId": "core",
+    "cellfenceFingerprint": "45773dc73084569b59cc1c95a9a3a01a6431cd507d12d4fdbcb2f9cb30ec3aa6",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:e398dc36789bce5cb022770b6656dbd7117046b08f02e431dde92259339b8dad",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-8b173c60ee3cf9a4",
+    "evidencePackageId": "evidence-e398dc36789bce5c",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

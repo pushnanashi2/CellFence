@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-5b6af98ef4a3f472",
+    "subjectId": "mihomo-party-org-clash-party",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "mihomo-party-org-clash-party",
+    "phase": null,
+    "repository": "https://github.com/mihomo-party-org/clash-party.git",
+    "commit": "b06667c6d7f5a178c9236bac6eebf8d217231c74"
+  },
+  "manifestCopy": {
+    "path": "manifests/mihomo-party-org-clash-party-1f15536b2b26.json",
+    "sha256": "45f33371908cf8b52046fa72aee32758826133cab6d53b4f85e2391ff5649355"
+  },
+  "attestationTemplate": {
+    "subjectId": "mihomo-party-org-clash-party",
+    "repository": "https://github.com/mihomo-party-org/clash-party.git",
+    "commit": "b06667c6d7f5a178c9236bac6eebf8d217231c74",
+    "manifestCopy": {
+      "path": "manifests/mihomo-party-org-clash-party-1f15536b2b26.json",
+      "sha256": "45f33371908cf8b52046fa72aee32758826133cab6d53b4f85e2391ff5649355"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "45f33371908cf8b52046fa72aee32758826133cab6d53b4f85e2391ff5649355",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

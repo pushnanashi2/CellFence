@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-c22239f01e111481",
+    "subjectId": "panoratech-panora",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "panoratech-panora",
+    "phase": null,
+    "repository": "https://github.com/panoratech/Panora.git",
+    "commit": "38eda443ed91cccf59da5dcc2ac401a1cb02d35a"
+  },
+  "manifestCopy": {
+    "path": "manifests/panoratech-panora-2daa6111e89e.json",
+    "sha256": "d6cca67a083d540793f8f903357bc6c2a89ecc90654ce004173c8cefc096a677"
+  },
+  "attestationTemplate": {
+    "subjectId": "panoratech-panora",
+    "repository": "https://github.com/panoratech/Panora.git",
+    "commit": "38eda443ed91cccf59da5dcc2ac401a1cb02d35a",
+    "manifestCopy": {
+      "path": "manifests/panoratech-panora-2daa6111e89e.json",
+      "sha256": "d6cca67a083d540793f8f903357bc6c2a89ecc90654ce004173c8cefc096a677"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "d6cca67a083d540793f8f903357bc6c2a89ecc90654ce004173c8cefc096a677",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

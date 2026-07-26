@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d7a789cc6b12e03c",
+    "subjectId": "gitroomhq-postiz-app",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "gitroomhq-postiz-app",
+    "phase": null,
+    "repository": "https://github.com/gitroomhq/postiz-app.git",
+    "commit": "ab3b1edb866486732cfa559cd47f8649bb1abd2f"
+  },
+  "manifestCopy": {
+    "path": "manifests/gitroomhq-postiz-app-e31d29ab5864.json",
+    "sha256": "13ff948bff7c1123f0b4c888a7f0ab16ad52cf2f6042de570e60574f1af5311b"
+  },
+  "attestationTemplate": {
+    "subjectId": "gitroomhq-postiz-app",
+    "repository": "https://github.com/gitroomhq/postiz-app.git",
+    "commit": "ab3b1edb866486732cfa559cd47f8649bb1abd2f",
+    "manifestCopy": {
+      "path": "manifests/gitroomhq-postiz-app-e31d29ab5864.json",
+      "sha256": "13ff948bff7c1123f0b4c888a7f0ab16ad52cf2f6042de570e60574f1af5311b"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "13ff948bff7c1123f0b4c888a7f0ab16ad52cf2f6042de570e60574f1af5311b",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

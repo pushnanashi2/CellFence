@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-414ee99bd3b59d2b",
+    "evidencePackageId": "evidence-85fcc0962d71f7fd",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/cumt-robin-fullstack-blog-42fb59ad29a9.json",
+        "sha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc"
+      },
+      "auditLog": {
+        "path": "logs/cumt-robin-fullstack-blog-42fb59ad29a9/check.audit.jsonl",
+        "sha256": "1e36471b8b51b16facf601e0e176ae99c4136d7266a621fca881d7cc1dcf92ca"
+      },
+      "evidenceGraph": {
+        "path": "logs/cumt-robin-fullstack-blog-42fb59ad29a9/evidence-graph.json",
+        "sha256": "3455d93755a6308dfba915d76295ff33f14b180c21b9b0ae5f204aca7b56933f"
+      },
+      "checkStdout": {
+        "path": "logs/cumt-robin-fullstack-blog-42fb59ad29a9/check.stdout.log",
+        "sha256": "68b8bdbddf74e80e1ee975a657ab0814e48dd3ac50eda6a7fa0cb1b30f40dc97"
+      },
+      "checkStderr": {
+        "path": "logs/cumt-robin-fullstack-blog-42fb59ad29a9/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:85fcc0962d71f7fd32a81d4c2ac2c6c2c01bf8b593e99ef6770ad5ff0a75903f",
+    "subjectId": "cumt-robin-fullstack-blog",
+    "repository": "https://github.com/cumt-robin/fullstack-blog.git",
+    "commit": "d3ce80d835976399ad27e3b596adcacdc983321e",
+    "gitTree": "d4fc577681200d6da5a5116a42e88fdb76680050",
+    "manifestSha256": "de5630a94661631305e9b77d9efc2b8cb6ceb89cc67e5db9eb8e5b22b61c57bc",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_UNDECLARED_CONSUMER",
+    "severity": "error",
+    "filePath": "app/vite-react19/src/components/BaseLayout/HotColumn.tsx",
+    "line": 6,
+    "message": "app imports types without declaring a consumer relationship",
+    "cellId": "app",
+    "producerCellId": "types",
+    "cellfenceFingerprint": "c0a26ff0bccc4c5a87cebdf63f1a97a38dd8f03c81703bf801226e2dde367f29",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:85fcc0962d71f7fd32a81d4c2ac2c6c2c01bf8b593e99ef6770ad5ff0a75903f",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-414ee99bd3b59d2b",
+    "evidencePackageId": "evidence-85fcc0962d71f7fd",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

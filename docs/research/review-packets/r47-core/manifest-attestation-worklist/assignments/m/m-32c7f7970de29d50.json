@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d387a800992a9b8f",
+    "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+    "phase": null,
+    "repository": "https://github.com/stefanoslig/angular-ngrx-nx-realworld-example-app.git",
+    "commit": "bc7158d61319b6748b94cef301dc347efcc23f00"
+  },
+  "manifestCopy": {
+    "path": "manifests/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871.json",
+    "sha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc"
+  },
+  "attestationTemplate": {
+    "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+    "repository": "https://github.com/stefanoslig/angular-ngrx-nx-realworld-example-app.git",
+    "commit": "bc7158d61319b6748b94cef301dc347efcc23f00",
+    "manifestCopy": {
+      "path": "manifests/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871.json",
+      "sha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "ea1af7d64414b1f6b0d2ee4d1bc70b760150ba760ebb495fcbe0719d53a71ccc",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

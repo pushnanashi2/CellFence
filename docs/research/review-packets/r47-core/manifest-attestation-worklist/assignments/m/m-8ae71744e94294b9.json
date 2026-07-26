@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-41ca9d7529cfd475",
+    "subjectId": "eyaltoledano-claude-task-master",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "eyaltoledano-claude-task-master",
+    "phase": null,
+    "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+    "commit": "c0c98d367c55296bfe69e65680625b6db437af02"
+  },
+  "manifestCopy": {
+    "path": "manifests/eyaltoledano-claude-task-master-a70853e1b7e5.json",
+    "sha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8"
+  },
+  "attestationTemplate": {
+    "subjectId": "eyaltoledano-claude-task-master",
+    "repository": "https://github.com/eyaltoledano/claude-task-master.git",
+    "commit": "c0c98d367c55296bfe69e65680625b6db437af02",
+    "manifestCopy": {
+      "path": "manifests/eyaltoledano-claude-task-master-a70853e1b7e5.json",
+      "sha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "163d9143cae3ba2ebf2bbbaf0b179921a60631f8756970249cd60600716cd5c8",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

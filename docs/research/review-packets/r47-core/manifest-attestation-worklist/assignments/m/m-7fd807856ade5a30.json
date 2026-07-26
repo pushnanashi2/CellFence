@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-d7b8d84c72286c45",
+    "subjectId": "nextai-translator-nextai-translator",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "nextai-translator-nextai-translator",
+    "phase": null,
+    "repository": "https://github.com/nextai-translator/nextai-translator.git",
+    "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0"
+  },
+  "manifestCopy": {
+    "path": "manifests/nextai-translator-nextai-translator-e7ecaaa85f0f.json",
+    "sha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d"
+  },
+  "attestationTemplate": {
+    "subjectId": "nextai-translator-nextai-translator",
+    "repository": "https://github.com/nextai-translator/nextai-translator.git",
+    "commit": "6bd32d0ba44823ceb39963d29f0dc15e8e3332c0",
+    "manifestCopy": {
+      "path": "manifests/nextai-translator-nextai-translator-e7ecaaa85f0f.json",
+      "sha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "fe16bcbea8907cea422c53f2564aa6d8d02c87fd39af0a536efde1c69bb60d5d",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

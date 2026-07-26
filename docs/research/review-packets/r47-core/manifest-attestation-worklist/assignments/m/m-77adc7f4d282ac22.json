@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-e10a4838461c759b",
+    "subjectId": "dsherret-dax",
+    "phase": null,
+    "reviewer": "external-human-reviewer-1",
+    "reviewerType": "human",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "dsherret-dax",
+    "phase": null,
+    "repository": "https://github.com/dsherret/dax.git",
+    "commit": "dd84816c4cfcf8344a895ace8b6768c8e6134a78"
+  },
+  "manifestCopy": {
+    "path": "manifests/dsherret-dax-bfa28a40f30d.json",
+    "sha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34"
+  },
+  "attestationTemplate": {
+    "subjectId": "dsherret-dax",
+    "repository": "https://github.com/dsherret/dax.git",
+    "commit": "dd84816c4cfcf8344a895ace8b6768c8e6134a78",
+    "manifestCopy": {
+      "path": "manifests/dsherret-dax-bfa28a40f30d.json",
+      "sha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "86e169664640e70f95389113ef1fb9c5249693e5a1f723d3fb41ea5f58e52a34",
+      "reviewerAttestations": [
+        {
+          "id": "external-human-reviewer-1",
+          "reviewerType": "human",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

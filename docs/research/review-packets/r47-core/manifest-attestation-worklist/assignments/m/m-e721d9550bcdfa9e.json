@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-9122b65d9f18d1db",
+    "subjectId": "senegalha-template-monorepo-typescript",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "senegalha-template-monorepo-typescript",
+    "phase": null,
+    "repository": "https://github.com/senegalha/template-monorepo-typescript.git",
+    "commit": "17afa743dfb60ef904de45029a2e8f1f7d37a25f"
+  },
+  "manifestCopy": {
+    "path": "manifests/senegalha-template-monorepo-typescript-0d756686dfa0.json",
+    "sha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929"
+  },
+  "attestationTemplate": {
+    "subjectId": "senegalha-template-monorepo-typescript",
+    "repository": "https://github.com/senegalha/template-monorepo-typescript.git",
+    "commit": "17afa743dfb60ef904de45029a2e8f1f7d37a25f",
+    "manifestCopy": {
+      "path": "manifests/senegalha-template-monorepo-typescript-0d756686dfa0.json",
+      "sha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "0d07546d22434cbe6745853cd9db12ca7acafd2e2d50265fddf137e279ca7929",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

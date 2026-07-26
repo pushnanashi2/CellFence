@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-aec201c9b67a3ca1",
+    "subjectId": "colmena-colmena",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "colmena-colmena",
+    "phase": null,
+    "repository": "https://github.com/colmena/colmena.git",
+    "commit": "8d070208c59f34c85b589dec75476f7a446257e9"
+  },
+  "manifestCopy": {
+    "path": "manifests/colmena-colmena-a6805522c8cf.json",
+    "sha256": "5b9968976d09fb78099ecda2d0509fdaeee2b948cfbfa964a46da0b59eb57be2"
+  },
+  "attestationTemplate": {
+    "subjectId": "colmena-colmena",
+    "repository": "https://github.com/colmena/colmena.git",
+    "commit": "8d070208c59f34c85b589dec75476f7a446257e9",
+    "manifestCopy": {
+      "path": "manifests/colmena-colmena-a6805522c8cf.json",
+      "sha256": "5b9968976d09fb78099ecda2d0509fdaeee2b948cfbfa964a46da0b59eb57be2"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "5b9968976d09fb78099ecda2d0509fdaeee2b948cfbfa964a46da0b59eb57be2",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

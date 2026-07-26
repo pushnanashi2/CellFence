@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-9f351820d766823c",
+    "evidencePackageId": "evidence-77baacdd4353a0b0",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/googlechromelabs-container-query-polyfill-71f6b4550085.json",
+        "sha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9"
+      },
+      "auditLog": {
+        "path": "logs/googlechromelabs-container-query-polyfill-71f6b4550085/check.audit.jsonl",
+        "sha256": "8377cded61d662d1942ea5ec48c7627fe802834cd4a21116b54c1c454f5f51af"
+      },
+      "evidenceGraph": {
+        "path": "logs/googlechromelabs-container-query-polyfill-71f6b4550085/evidence-graph.json",
+        "sha256": "3e08ec03d9de3de8b572ead80717ea7b474889c58971f4bbb3170144c1f2ba25"
+      },
+      "checkStdout": {
+        "path": "logs/googlechromelabs-container-query-polyfill-71f6b4550085/check.stdout.log",
+        "sha256": "7a4f645b3444ef4ed69cf345173f49298a25ec82a168b95be32a52f874ab0259"
+      },
+      "checkStderr": {
+        "path": "logs/googlechromelabs-container-query-polyfill-71f6b4550085/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:77baacdd4353a0b04abfd005281bd7bc690919d137a16f276fc5cf4adb7abe30",
+    "subjectId": "googlechromelabs-container-query-polyfill",
+    "repository": "https://github.com/GoogleChromeLabs/container-query-polyfill.git",
+    "commit": "f6831ec85e8db047218f8f8807667f1429aba457",
+    "gitTree": "27c60006a68b82d3e65df826c51e83ba3b474bb7",
+    "manifestSha256": "28fcfa5c57ad0bdf25484e2c811518efd49e525f8a3d2791b2d59eab4fddbed9",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/transform.ts",
+    "line": 33,
+    "message": "src-root imports private implementation from utils",
+    "cellId": "src-root",
+    "producerCellId": "utils",
+    "cellfenceFingerprint": "2a3147f7a07b9b2c80fb8d4c49e0b308d5de6093a8e3e312c055e21d68da1799",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:77baacdd4353a0b04abfd005281bd7bc690919d137a16f276fc5cf4adb7abe30",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-9f351820d766823c",
+    "evidencePackageId": "evidence-77baacdd4353a0b0",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

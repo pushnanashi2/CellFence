@@ -1,0 +1,2908 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-worklist.v1",
+  "createdAt": "2026-07-26T16:32:05.117Z",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "reviewers": [
+    {
+      "id": "external-human-reviewer-1",
+      "reviewerType": "human"
+    },
+    {
+      "id": "external-org-reviewer-1",
+      "reviewerType": "organization"
+    }
+  ],
+  "summary": {
+    "subjects": 160,
+    "reviewers": 2,
+    "assignments": 320
+  },
+  "assignments": [
+    {
+      "path": "assignments/m/m-149517f4d48a94ed.json",
+      "assignmentId": "manifest-attestation-d475ccdc4e8a487f",
+      "subjectId": "changesets",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/changesets-33d33c0a60f9-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-59d81b1a3c6e00c0.json",
+      "assignmentId": "manifest-attestation-4001410204a64390",
+      "subjectId": "changesets",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/changesets-33d33c0a60f9-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-a51cbd197f940005.json",
+      "assignmentId": "manifest-attestation-877a58aaaa85e91c",
+      "subjectId": "redux-toolkit",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/redux-toolkit-0484966eb5bd-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-494ec6ce172850d8.json",
+      "assignmentId": "manifest-attestation-89dd7a007b09d58f",
+      "subjectId": "redux-toolkit",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/redux-toolkit-0484966eb5bd-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-d444dcefd11a191f.json",
+      "assignmentId": "manifest-attestation-aca6770206926694",
+      "subjectId": "typescript-eslint",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/typescript-eslint-7a1dd87e3779-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-92bcbfc76e640588.json",
+      "assignmentId": "manifest-attestation-05977fbaad257265",
+      "subjectId": "typescript-eslint",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/typescript-eslint-7a1dd87e3779-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-427dd14ecf45558b.json",
+      "assignmentId": "manifest-attestation-27e9a002f7083a84",
+      "subjectId": "jest",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jest-35e99f929e01-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4ffbcd196dbd372a.json",
+      "assignmentId": "manifest-attestation-43574adf09be37e3",
+      "subjectId": "jest",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jest-35e99f929e01-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-9eb0e4cf6c35c0dd.json",
+      "assignmentId": "manifest-attestation-14114a756b13b62d",
+      "subjectId": "lerna",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lerna-8b21dcf6e506-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6fada18d0a48891d.json",
+      "assignmentId": "manifest-attestation-7e71184349cbee5d",
+      "subjectId": "lerna",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lerna-8b21dcf6e506-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f0c4075c8cd8ef86.json",
+      "assignmentId": "manifest-attestation-0f509432012aa2e1",
+      "subjectId": "vue-core",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vue-core-8947d8bc6e6b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4593ca04e3e7d4ba.json",
+      "assignmentId": "manifest-attestation-00d58c3fddf0e4b5",
+      "subjectId": "vue-core",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vue-core-8947d8bc6e6b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-d7180e5ef63f5165.json",
+      "assignmentId": "manifest-attestation-9cad3d1ebbe22cbf",
+      "subjectId": "tanstack-query",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tanstack-query-0aab081942af-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8350956152c94eb4.json",
+      "assignmentId": "manifest-attestation-4bb156d231b55aa5",
+      "subjectId": "tanstack-query",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tanstack-query-0aab081942af-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-7c5b95d8dda70870.json",
+      "assignmentId": "manifest-attestation-0906ea7c1439dec6",
+      "subjectId": "tanstack-router",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tanstack-router-93e9c9305ed7-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-cf60618f4752b9b6.json",
+      "assignmentId": "manifest-attestation-1084696580cf2aca",
+      "subjectId": "tanstack-router",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tanstack-router-93e9c9305ed7-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ea49ea0dd5d77c1a.json",
+      "assignmentId": "manifest-attestation-ef9ba9099ffffb34",
+      "subjectId": "remix",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/remix-0c5d9661b4fb-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b4e06c13f7feefe6.json",
+      "assignmentId": "manifest-attestation-161e0fd5c7ca1b1e",
+      "subjectId": "remix",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/remix-0c5d9661b4fb-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-d7544e8ea3e449c4.json",
+      "assignmentId": "manifest-attestation-4cc1c7f5c98b51de",
+      "subjectId": "hono",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/hono-8b3dc17add91-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-865bc5d0cdd68b7d.json",
+      "assignmentId": "manifest-attestation-23fc0786a1d344a6",
+      "subjectId": "hono",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/hono-8b3dc17add91-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-9542477c15fe91e1.json",
+      "assignmentId": "manifest-attestation-4eaae10e4486b7ab",
+      "subjectId": "floating-ui",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/floating-ui-4ffa4f20794a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-679f050d3f53433e.json",
+      "assignmentId": "manifest-attestation-b2d45cb7883a7338",
+      "subjectId": "floating-ui",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/floating-ui-4ffa4f20794a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ae15a3af9f66c14f.json",
+      "assignmentId": "manifest-attestation-a6fec6c8df598146",
+      "subjectId": "tanstack-table",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tanstack-table-0522e7fc0035-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a16886fdd2467907.json",
+      "assignmentId": "manifest-attestation-2250f00554cb8eec",
+      "subjectId": "tanstack-table",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tanstack-table-0522e7fc0035-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-1e12576f4dd32a00.json",
+      "assignmentId": "manifest-attestation-4a36f0bc22c3afb6",
+      "subjectId": "react-create-react-app",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/react-create-react-app-28271472cf03-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e1f7e0a6db5b064a.json",
+      "assignmentId": "manifest-attestation-a423aeb3c4c0cf43",
+      "subjectId": "react-create-react-app",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/react-create-react-app-28271472cf03-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c90f36d5bee1c284.json",
+      "assignmentId": "manifest-attestation-efc48a628605b161",
+      "subjectId": "unitech-pm2",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/unitech-pm2-39e82f59ca83-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-57c03ab3299408fc.json",
+      "assignmentId": "manifest-attestation-76eb734d2969348d",
+      "subjectId": "unitech-pm2",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/unitech-pm2-39e82f59ca83-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f85eb959c63d6a6c.json",
+      "assignmentId": "manifest-attestation-cc3fa2a549252449",
+      "subjectId": "vercel-hyper",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vercel-hyper-a623432381ff-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5a77bd5b65b8fab9.json",
+      "assignmentId": "manifest-attestation-6d40da26bdf8a7a6",
+      "subjectId": "vercel-hyper",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vercel-hyper-a623432381ff-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-820e13ace12b1d3f.json",
+      "assignmentId": "manifest-attestation-4d76d03adf1e4767",
+      "subjectId": "jackwener-opencli",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jackwener-opencli-0b492e9efa49-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a820b2d75ce2a62e.json",
+      "assignmentId": "manifest-attestation-94bebc379d9c8d12",
+      "subjectId": "jackwener-opencli",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jackwener-opencli-0b492e9efa49-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8c1bc268491e1776.json",
+      "assignmentId": "manifest-attestation-1b3405554f7011ea",
+      "subjectId": "codex-team-editor-js",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/codex-team-editor-js-23d3455420d8-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5d12427890fbd761.json",
+      "assignmentId": "manifest-attestation-51c80a6d12210ab2",
+      "subjectId": "codex-team-editor-js",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/codex-team-editor-js-23d3455420d8-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5e9fa0ca07c399d3.json",
+      "assignmentId": "manifest-attestation-e01f33d8a46a211a",
+      "subjectId": "songquanpeng-one-api",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/songquanpeng-one-api-cb682d51ea88-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-23d9b7c46070d4d4.json",
+      "assignmentId": "manifest-attestation-f8b6211ce783a4e5",
+      "subjectId": "songquanpeng-one-api",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/songquanpeng-one-api-cb682d51ea88-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5eb81abcfc97ee19.json",
+      "assignmentId": "manifest-attestation-94a096ba1ed8441f",
+      "subjectId": "virattt-dexter",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/virattt-dexter-6c82688c46fc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5bd6038676c73a0a.json",
+      "assignmentId": "manifest-attestation-254a017582049ed3",
+      "subjectId": "virattt-dexter",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/virattt-dexter-6c82688c46fc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ab9ef821862648ac.json",
+      "assignmentId": "manifest-attestation-65b9ab3419a8dcac",
+      "subjectId": "reactivex-rxjs",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/reactivex-rxjs-283260ff337f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8dd33d187d51869a.json",
+      "assignmentId": "manifest-attestation-6dd57d4681f01bbc",
+      "subjectId": "reactivex-rxjs",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/reactivex-rxjs-283260ff337f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b612577a8ce57bf8.json",
+      "assignmentId": "manifest-attestation-b0aa1e4486cf4950",
+      "subjectId": "carbon-app-carbon",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/carbon-app-carbon-ddb3b6cc6227-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c1548ec2c3a65b7d.json",
+      "assignmentId": "manifest-attestation-67b2d36fb92e356c",
+      "subjectId": "carbon-app-carbon",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/carbon-app-carbon-ddb3b6cc6227-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-fff4f5952b0422bb.json",
+      "assignmentId": "manifest-attestation-e67bc02b6fd7aeae",
+      "subjectId": "dayuanjiang-next-ai-draw-io",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/dayuanjiang-next-ai-draw-io-e11182f04294-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3fadeabac0c18e86.json",
+      "assignmentId": "manifest-attestation-9b012e504223a68d",
+      "subjectId": "dayuanjiang-next-ai-draw-io",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/dayuanjiang-next-ai-draw-io-e11182f04294-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-456cea44913e550a.json",
+      "assignmentId": "manifest-attestation-e47975d28fc45509",
+      "subjectId": "louislam-uptime-kuma",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/louislam-uptime-kuma-af634fde6534-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d0e77193c987f104.json",
+      "assignmentId": "manifest-attestation-2f37b153d7509bd7",
+      "subjectId": "louislam-uptime-kuma",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/louislam-uptime-kuma-af634fde6534-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b38e1972c0079aa9.json",
+      "assignmentId": "manifest-attestation-8be5108e874704f6",
+      "subjectId": "drawdb-io-drawdb",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/drawdb-io-drawdb-1a7f5b994945-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-134126378ee71c49.json",
+      "assignmentId": "manifest-attestation-286ec14e3c3946a3",
+      "subjectId": "drawdb-io-drawdb",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/drawdb-io-drawdb-1a7f5b994945-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-4ede595bc928ac90.json",
+      "assignmentId": "manifest-attestation-cf566ae070e8be63",
+      "subjectId": "chartjs-chart-js",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/chartjs-chart-js-87de6f4b0783-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a3cb9c36a7172aba.json",
+      "assignmentId": "manifest-attestation-4b7ab6c2a61fbc06",
+      "subjectId": "chartjs-chart-js",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/chartjs-chart-js-87de6f4b0783-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-cf776dc8a02e29d8.json",
+      "assignmentId": "manifest-attestation-0b78eeaee09decb6",
+      "subjectId": "mckaywrigley-chatbot-ui",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/mckaywrigley-chatbot-ui-f262c2427758-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e4f1a4f1a91547f1.json",
+      "assignmentId": "manifest-attestation-d2cd98d4c7013179",
+      "subjectId": "mckaywrigley-chatbot-ui",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/mckaywrigley-chatbot-ui-f262c2427758-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ec34c81a5779e503.json",
+      "assignmentId": "manifest-attestation-20219fcb2d4f0fc1",
+      "subjectId": "react-hook-form-react-hook-form",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/react-hook-form-react-hook-form-242d7fb0f8bf-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f9a14221f7214a6a.json",
+      "assignmentId": "manifest-attestation-122943bc4c073116",
+      "subjectId": "react-hook-form-react-hook-form",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/react-hook-form-react-hook-form-242d7fb0f8bf-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-568163c1f9931e28.json",
+      "assignmentId": "manifest-attestation-428d90ab8bfcaa9d",
+      "subjectId": "lfnovo-open-notebook",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lfnovo-open-notebook-5621f1cae53c-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d425fdfc2af2945f.json",
+      "assignmentId": "manifest-attestation-8786ca4fdf616e7e",
+      "subjectId": "lfnovo-open-notebook",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lfnovo-open-notebook-5621f1cae53c-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f533837c4111d6c6.json",
+      "assignmentId": "manifest-attestation-8497c1a1586c4409",
+      "subjectId": "anuraghazra-github-readme-stats",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/anuraghazra-github-readme-stats-5b3490bfa969-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-06b73cdbd322d26c.json",
+      "assignmentId": "manifest-attestation-2eee224b9b5f858a",
+      "subjectId": "anuraghazra-github-readme-stats",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/anuraghazra-github-readme-stats-5b3490bfa969-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-30eb74c49561783b.json",
+      "assignmentId": "manifest-attestation-a4738305355b12f2",
+      "subjectId": "layui-layui",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/layui-layui-a806faeabb2a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6a5dd9614d803798.json",
+      "assignmentId": "manifest-attestation-51e6e4d10675eff5",
+      "subjectId": "layui-layui",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/layui-layui-a806faeabb2a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f9883279c18cba29.json",
+      "assignmentId": "manifest-attestation-0f1c6271e7fc387f",
+      "subjectId": "chromedevtools-chrome-devtools-mcp",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/chromedevtools-chrome-devtools-mcp-83716124b914-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6de024270b492fbd.json",
+      "assignmentId": "manifest-attestation-6195f9d4fc546082",
+      "subjectId": "chromedevtools-chrome-devtools-mcp",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/chromedevtools-chrome-devtools-mcp-83716124b914-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-7fd807856ade5a30.json",
+      "assignmentId": "manifest-attestation-d7b8d84c72286c45",
+      "subjectId": "nextai-translator-nextai-translator",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nextai-translator-nextai-translator-e7ecaaa85f0f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-ecb3d91a98be4037.json",
+      "assignmentId": "manifest-attestation-2bd0ef7c068b300a",
+      "subjectId": "nextai-translator-nextai-translator",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nextai-translator-nextai-translator-e7ecaaa85f0f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-edccd99fef71d44e.json",
+      "assignmentId": "manifest-attestation-e71ba12f732310b0",
+      "subjectId": "ant-design-ant-design-pro",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ant-design-ant-design-pro-bd3783d37957-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c36bc2f6a40e151d.json",
+      "assignmentId": "manifest-attestation-d7615317f48e5190",
+      "subjectId": "ant-design-ant-design-pro",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ant-design-ant-design-pro-bd3783d37957-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-d6dabb19a4a7948a.json",
+      "assignmentId": "manifest-attestation-324b4d1362515b6e",
+      "subjectId": "styled-components-styled-components",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/styled-components-styled-components-1af612ee3988-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f83c631c24fe997d.json",
+      "assignmentId": "manifest-attestation-a8ff47170397b478",
+      "subjectId": "styled-components-styled-components",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/styled-components-styled-components-1af612ee3988-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-fbedfb3eeac13ca8.json",
+      "assignmentId": "manifest-attestation-351e89096c7f8cec",
+      "subjectId": "jquense-yup",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jquense-yup-fb81d8a9ee0c-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-423220054807227e.json",
+      "assignmentId": "manifest-attestation-dd649535dda95fcd",
+      "subjectId": "jquense-yup",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jquense-yup-fb81d8a9ee0c-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-061e910c66193255.json",
+      "assignmentId": "manifest-attestation-c80d32c895721fbc",
+      "subjectId": "vadimdemedes-ink",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vadimdemedes-ink-1b21f516c8a1-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e089e2566a8e93db.json",
+      "assignmentId": "manifest-attestation-79181a46ee795ec4",
+      "subjectId": "vadimdemedes-ink",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vadimdemedes-ink-1b21f516c8a1-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-bd12db1581098423.json",
+      "assignmentId": "manifest-attestation-991736e52fb9ef0f",
+      "subjectId": "alan2207-bulletproof-react",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/alan2207-bulletproof-react-9a2fcc122e23-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1a31d0d35ca6fd85.json",
+      "assignmentId": "manifest-attestation-2592d5e4c4f8a768",
+      "subjectId": "alan2207-bulletproof-react",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/alan2207-bulletproof-react-9a2fcc122e23-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5542dde80958da3e.json",
+      "assignmentId": "manifest-attestation-745ca57841601eb0",
+      "subjectId": "rahuldkjain-github-profile-readme-generator",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/rahuldkjain-github-profile-readme-generator-d9bb86d1dded-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1e10e1d1e742e4fc.json",
+      "assignmentId": "manifest-attestation-596d6f03f1eba722",
+      "subjectId": "rahuldkjain-github-profile-readme-generator",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/rahuldkjain-github-profile-readme-generator-d9bb86d1dded-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-423d26239db3d2d1.json",
+      "assignmentId": "manifest-attestation-7ae2a378fbc4c3a7",
+      "subjectId": "fingerprintjs-fingerprintjs",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/fingerprintjs-fingerprintjs-8b12c418b25d-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4a04872ea3d08deb.json",
+      "assignmentId": "manifest-attestation-6bbd265999548d61",
+      "subjectId": "fingerprintjs-fingerprintjs",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/fingerprintjs-fingerprintjs-8b12c418b25d-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-4da6136aa719f0ee.json",
+      "assignmentId": "manifest-attestation-95ec22f4a033cd7a",
+      "subjectId": "localforage-localforage",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/localforage-localforage-4373a0503c44-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e87d0b21f76423a2.json",
+      "assignmentId": "manifest-attestation-c4e2eee6289c5f3d",
+      "subjectId": "localforage-localforage",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/localforage-localforage-4373a0503c44-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2bbaedf65dec910d.json",
+      "assignmentId": "manifest-attestation-11ddc68383b73d66",
+      "subjectId": "nginxproxymanager-nginx-proxy-manager",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nginxproxymanager-nginx-proxy-manager-368e59c54ff3-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c6b40480ecba650c.json",
+      "assignmentId": "manifest-attestation-8142ec26a51ab92f",
+      "subjectId": "nginxproxymanager-nginx-proxy-manager",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nginxproxymanager-nginx-proxy-manager-368e59c54ff3-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b5f75ae14b6e5b3b.json",
+      "assignmentId": "manifest-attestation-e5128fc0196ae7d8",
+      "subjectId": "philc-vimium",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/philc-vimium-a731e9a778a2-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-2a7b9f6fa09a969e.json",
+      "assignmentId": "manifest-attestation-b81d1f42b1885920",
+      "subjectId": "philc-vimium",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/philc-vimium-a731e9a778a2-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-e2be8cdf6e37d866.json",
+      "assignmentId": "manifest-attestation-6ab8d86860d3af83",
+      "subjectId": "cheeriojs-cheerio",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/cheeriojs-cheerio-4a0403b4d998-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-00f64f31125eafe3.json",
+      "assignmentId": "manifest-attestation-9a7d9f3d0df5b95c",
+      "subjectId": "cheeriojs-cheerio",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/cheeriojs-cheerio-4a0403b4d998-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0de42f973af6e2b9.json",
+      "assignmentId": "manifest-attestation-39de883f4c385551",
+      "subjectId": "immerjs-immer",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/immerjs-immer-fffa18661f11-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4ad6c743884382ed.json",
+      "assignmentId": "manifest-attestation-436e04abb688eaf5",
+      "subjectId": "immerjs-immer",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/immerjs-immer-fffa18661f11-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-9fd25c83ebf6a609.json",
+      "assignmentId": "manifest-attestation-23e0a3c7611244e5",
+      "subjectId": "reduxjs-redux",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/reduxjs-redux-69df417695fe-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e72c6c9f57b77003.json",
+      "assignmentId": "manifest-attestation-d808182f1c1738f4",
+      "subjectId": "reduxjs-redux",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/reduxjs-redux-69df417695fe-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f5dd7ea015626acf.json",
+      "assignmentId": "manifest-attestation-015c755c85ef458d",
+      "subjectId": "solidjs-solid",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/solidjs-solid-c9d95b873fcb-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6b04fdbef6613052.json",
+      "assignmentId": "manifest-attestation-72003c16f5d82edc",
+      "subjectId": "solidjs-solid",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/solidjs-solid-c9d95b873fcb-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ec6fd9781e994f4c.json",
+      "assignmentId": "manifest-attestation-34e671288c70b671",
+      "subjectId": "trekhleb-javascript-algorithms",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/trekhleb-javascript-algorithms-4923d7e14ea9-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-ee41c95fbc10a897.json",
+      "assignmentId": "manifest-attestation-5fcf0bad4702a313",
+      "subjectId": "trekhleb-javascript-algorithms",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/trekhleb-javascript-algorithms-4923d7e14ea9-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0f15b2ff2b2644e9.json",
+      "assignmentId": "manifest-attestation-97e7f8b29995a6b8",
+      "subjectId": "preactjs-preact",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/preactjs-preact-7971ce073966-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-72bd750fde9ea7ec.json",
+      "assignmentId": "manifest-attestation-852c401811de9329",
+      "subjectId": "preactjs-preact",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/preactjs-preact-7971ce073966-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-e47c35737c715fa7.json",
+      "assignmentId": "manifest-attestation-54bcadfc58b78d8c",
+      "subjectId": "yangshun-tech-interview-handbook",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/yangshun-tech-interview-handbook-b67a6823109b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1ee406ddfaafdd85.json",
+      "assignmentId": "manifest-attestation-d9c3464b29f1c488",
+      "subjectId": "yangshun-tech-interview-handbook",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/yangshun-tech-interview-handbook-b67a6823109b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f223f5a658310a5a.json",
+      "assignmentId": "manifest-attestation-8677a5808183977f",
+      "subjectId": "wg-easy-wg-easy",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/wg-easy-wg-easy-8e37ed8c1f13-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-38eb3aa3e12dfd3d.json",
+      "assignmentId": "manifest-attestation-0f5a8cca0433dfad",
+      "subjectId": "wg-easy-wg-easy",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/wg-easy-wg-easy-8e37ed8c1f13-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8ae71744e94294b9.json",
+      "assignmentId": "manifest-attestation-41ca9d7529cfd475",
+      "subjectId": "eyaltoledano-claude-task-master",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/eyaltoledano-claude-task-master-a70853e1b7e5-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9107bef22ae95024.json",
+      "assignmentId": "manifest-attestation-8dd64f7492a985ca",
+      "subjectId": "eyaltoledano-claude-task-master",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/eyaltoledano-claude-task-master-a70853e1b7e5-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-09c7f18334448727.json",
+      "assignmentId": "manifest-attestation-1639995a95150d47",
+      "subjectId": "aykutsarac-jsoncrack-com",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/aykutsarac-jsoncrack-com-cee069e79c87-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-2a3218068751c377.json",
+      "assignmentId": "manifest-attestation-d3e61b74408b63b4",
+      "subjectId": "aykutsarac-jsoncrack-com",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/aykutsarac-jsoncrack-com-cee069e79c87-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-783f0a01706dc220.json",
+      "assignmentId": "manifest-attestation-4f168f2d0fe106db",
+      "subjectId": "vuejs-vue-cli",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vuejs-vue-cli-1c78ebf831bb-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-851ade8a7360cfac.json",
+      "assignmentId": "manifest-attestation-04a2e69e34aee06a",
+      "subjectId": "vuejs-vue-cli",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vuejs-vue-cli-1c78ebf831bb-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-eb6f4c25b46dfa8e.json",
+      "assignmentId": "manifest-attestation-d7a789cc6b12e03c",
+      "subjectId": "gitroomhq-postiz-app",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/gitroomhq-postiz-app-e31d29ab5864-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-2f4268247cb02bf3.json",
+      "assignmentId": "manifest-attestation-a531bf80c27a4ea0",
+      "subjectId": "gitroomhq-postiz-app",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/gitroomhq-postiz-app-e31d29ab5864-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-10a1cca4774a6b6b.json",
+      "assignmentId": "manifest-attestation-d9dca185391b61b1",
+      "subjectId": "heyputer-puter",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/heyputer-puter-cdad9bdf2b6a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4d1949de4a930837.json",
+      "assignmentId": "manifest-attestation-c01befd6be9a9f2f",
+      "subjectId": "heyputer-puter",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/heyputer-puter-cdad9bdf2b6a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5234264bdf1b9954.json",
+      "assignmentId": "manifest-attestation-1603865d0b6297c8",
+      "subjectId": "ajaxorg-ace",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ajaxorg-ace-22a3e4df260e-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9061a595695f62ed.json",
+      "assignmentId": "manifest-attestation-99610a4d5fbe8624",
+      "subjectId": "ajaxorg-ace",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ajaxorg-ace-22a3e4df260e-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-605fb8f3c7cfe0ab.json",
+      "assignmentId": "manifest-attestation-86d48339f532db7e",
+      "subjectId": "umami-software-umami",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/umami-software-umami-d4570a11d3dc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-00d90f69b94a3fd0.json",
+      "assignmentId": "manifest-attestation-1a9f27926889d9ad",
+      "subjectId": "umami-software-umami",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/umami-software-umami-d4570a11d3dc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-936796d73403609c.json",
+      "assignmentId": "manifest-attestation-a4bb14286ed49794",
+      "subjectId": "yeachan-heo-oh-my-codex",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/yeachan-heo-oh-my-codex-cb3be38ab82e-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3a06be69d61eb011.json",
+      "assignmentId": "manifest-attestation-b530527c62c3835e",
+      "subjectId": "yeachan-heo-oh-my-codex",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/yeachan-heo-oh-my-codex-cb3be38ab82e-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c335df79b3daba91.json",
+      "assignmentId": "manifest-attestation-e3dcc03f0f4d3aea",
+      "subjectId": "dokploy-dokploy",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/dokploy-dokploy-cdec16781233-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1c03d62efd4aeae2.json",
+      "assignmentId": "manifest-attestation-1e594f269e6e1c7b",
+      "subjectId": "dokploy-dokploy",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/dokploy-dokploy-cdec16781233-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-dd217cd76ff60172.json",
+      "assignmentId": "manifest-attestation-e3cc8057be660bfa",
+      "subjectId": "gitlawb-openclaude",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/gitlawb-openclaude-e4fbd22f3f6b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-0f820693a4b08a70.json",
+      "assignmentId": "manifest-attestation-79ebfe81dd94b7b1",
+      "subjectId": "gitlawb-openclaude",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/gitlawb-openclaude-e4fbd22f3f6b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5b6624a31e97509a.json",
+      "assignmentId": "manifest-attestation-28096116eeac0353",
+      "subjectId": "typeorm-typeorm",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/typeorm-typeorm-dc6831970594-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4481a3b726d1abbd.json",
+      "assignmentId": "manifest-attestation-3dfb433780d4cd9e",
+      "subjectId": "typeorm-typeorm",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/typeorm-typeorm-dc6831970594-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-10569ee106749852.json",
+      "assignmentId": "manifest-attestation-2030b5aecc262dd7",
+      "subjectId": "colbymchenry-codegraph",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/colbymchenry-codegraph-84ad40943566-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f7b74dc2f2305f03.json",
+      "assignmentId": "manifest-attestation-153ff0d829ee0ccc",
+      "subjectId": "colbymchenry-codegraph",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/colbymchenry-codegraph-84ad40943566-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f250a437e95ecac6.json",
+      "assignmentId": "manifest-attestation-a4b5629686aeb477",
+      "subjectId": "typicode-json-server",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/typicode-json-server-b7abc5d9dba7-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6a4b779fa5e9f016.json",
+      "assignmentId": "manifest-attestation-2c38ffc1c0387d8c",
+      "subjectId": "typicode-json-server",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/typicode-json-server-b7abc5d9dba7-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-440e7837e6b3d8cf.json",
+      "assignmentId": "manifest-attestation-efcf9426ba464854",
+      "subjectId": "rollup-rollup",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/rollup-rollup-507199fd1f55-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-0b8d1d72b79adcdb.json",
+      "assignmentId": "manifest-attestation-68dc7325d686c361",
+      "subjectId": "rollup-rollup",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/rollup-rollup-507199fd1f55-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-a8273cc4c33cfacc.json",
+      "assignmentId": "manifest-attestation-c4883ef3fbddd112",
+      "subjectId": "fastapi-full-stack-fastapi-template",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/fastapi-full-stack-fastapi-template-8f4bf15444cf-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-7e44d5e2f5ca31a4.json",
+      "assignmentId": "manifest-attestation-0e09c4f5715a9564",
+      "subjectId": "fastapi-full-stack-fastapi-template",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/fastapi-full-stack-fastapi-template-8f4bf15444cf-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c0529b2dd8313195.json",
+      "assignmentId": "manifest-attestation-6834d108d0463ce4",
+      "subjectId": "lecoupa-awesome-cheatsheets",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lecoupa-awesome-cheatsheets-331c0af269f9-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5aebbaae970b5810.json",
+      "assignmentId": "manifest-attestation-335bdf5f13950661",
+      "subjectId": "lecoupa-awesome-cheatsheets",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lecoupa-awesome-cheatsheets-331c0af269f9-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-59c75d47ba55a387.json",
+      "assignmentId": "manifest-attestation-41961d0040e57afe",
+      "subjectId": "xyflow-xyflow",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/xyflow-xyflow-dd8877977705-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b8f0236edbdc77c6.json",
+      "assignmentId": "manifest-attestation-15a52a3cf1565aab",
+      "subjectId": "xyflow-xyflow",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/xyflow-xyflow-dd8877977705-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5b2582f2e5cbb496.json",
+      "assignmentId": "manifest-attestation-8cd2cb220b65d396",
+      "subjectId": "digitalocean-nginxconfig-io",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/digitalocean-nginxconfig-io-4f97aa6baafe-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-04ff62a5bbe93959.json",
+      "assignmentId": "manifest-attestation-ddacefd51f9fc4cc",
+      "subjectId": "digitalocean-nginxconfig-io",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/digitalocean-nginxconfig-io-4f97aa6baafe-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8a84d910da9e878b.json",
+      "assignmentId": "manifest-attestation-e89874cade468d62",
+      "subjectId": "modelcontextprotocol-servers",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/modelcontextprotocol-servers-c9ad5180c25a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a7c75dd7d1ffdeb8.json",
+      "assignmentId": "manifest-attestation-4b4ccd3a68bb0f21",
+      "subjectId": "modelcontextprotocol-servers",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/modelcontextprotocol-servers-c9ad5180c25a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b4d31e3ed373478c.json",
+      "assignmentId": "manifest-attestation-bee84e1650e76676",
+      "subjectId": "algorithm-visualizer-algorithm-visualizer",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/algorithm-visualizer-algorithm-visualizer-214b1531e1cd-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-05a1082d505ed8c1.json",
+      "assignmentId": "manifest-attestation-45bdbb1466f7e8b9",
+      "subjectId": "algorithm-visualizer-algorithm-visualizer",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/algorithm-visualizer-algorithm-visualizer-214b1531e1cd-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-75e46816ecbf7359.json",
+      "assignmentId": "manifest-attestation-9e26875f6e31dcbc",
+      "subjectId": "chatboxai-chatbox",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/chatboxai-chatbox-142075f413a1-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-be33d27bf501d24d.json",
+      "assignmentId": "manifest-attestation-45e9911ddb9cab83",
+      "subjectId": "chatboxai-chatbox",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/chatboxai-chatbox-142075f413a1-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c4d05e043a8558f4.json",
+      "assignmentId": "manifest-attestation-79c17648ef5fd729",
+      "subjectId": "homebridge-homebridge",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/homebridge-homebridge-fc8ad90ecf8b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6ac2bc59b3f5c6cb.json",
+      "assignmentId": "manifest-attestation-f920b7f2d1608a5b",
+      "subjectId": "homebridge-homebridge",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/homebridge-homebridge-fc8ad90ecf8b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-71b59f6569cccc8b.json",
+      "assignmentId": "manifest-attestation-fb4371ea62edc5f6",
+      "subjectId": "opencut-app-opencut",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/opencut-app-opencut-a2f914f453e0-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e04e507325b3ac66.json",
+      "assignmentId": "manifest-attestation-1e144e4bf1027a34",
+      "subjectId": "opencut-app-opencut",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/opencut-app-opencut-a2f914f453e0-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-430e787805f27e9c.json",
+      "assignmentId": "manifest-attestation-9e409d5be2f54926",
+      "subjectId": "pmndrs-react-three-fiber",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/pmndrs-react-three-fiber-1b4074202c23-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-bca59acee074e53f.json",
+      "assignmentId": "manifest-attestation-aa12877f7dfc4652",
+      "subjectId": "pmndrs-react-three-fiber",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/pmndrs-react-three-fiber-1b4074202c23-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-1e3a05d4877f3a96.json",
+      "assignmentId": "manifest-attestation-4413909e5605afb4",
+      "subjectId": "alibaba-page-agent",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/alibaba-page-agent-a2cc1a2513ee-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-6ca77d98939f9ff0.json",
+      "assignmentId": "manifest-attestation-c0c61a408c90c860",
+      "subjectId": "alibaba-page-agent",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/alibaba-page-agent-a2cc1a2513ee-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-9e2db4251d28ae45.json",
+      "assignmentId": "manifest-attestation-17b8521e84c7cd94",
+      "subjectId": "jaredpalmer-formik",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jaredpalmer-formik-69de2b92151f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1210ee2bb6e2ea4c.json",
+      "assignmentId": "manifest-attestation-89551a1b1ed966c0",
+      "subjectId": "jaredpalmer-formik",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jaredpalmer-formik-69de2b92151f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8d1169ebe4bd188f.json",
+      "assignmentId": "manifest-attestation-6cc4584c6cc9a8b8",
+      "subjectId": "musistudio-claude-code-router",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/musistudio-claude-code-router-5a42fe86bb96-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8fed1fda0b98f9c3.json",
+      "assignmentId": "manifest-attestation-2876b4a95d2d53fb",
+      "subjectId": "musistudio-claude-code-router",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/musistudio-claude-code-router-5a42fe86bb96-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5062d56376413ed6.json",
+      "assignmentId": "manifest-attestation-da30e0a0a8fd8a40",
+      "subjectId": "upstash-context7",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/upstash-context7-48408ef70f49-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1c391a3662f31526.json",
+      "assignmentId": "manifest-attestation-20b1cd8ca74f141c",
+      "subjectId": "upstash-context7",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/upstash-context7-48408ef70f49-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-6b14850472ef30c0.json",
+      "assignmentId": "manifest-attestation-e40d2afca39dc034",
+      "subjectId": "adguardteam-adguardhome",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/adguardteam-adguardhome-195110d79e06-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8e707b2ad49ea472.json",
+      "assignmentId": "manifest-attestation-51a890a0a1f85a3d",
+      "subjectId": "adguardteam-adguardhome",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/adguardteam-adguardhome-195110d79e06-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-04d02ce9f3510070.json",
+      "assignmentId": "manifest-attestation-3ea837cb62700a18",
+      "subjectId": "chatgptnextweb-nextchat",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/chatgptnextweb-nextchat-1d1419cd5686-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-0e27c1f0039bc694.json",
+      "assignmentId": "manifest-attestation-254495ac91305310",
+      "subjectId": "chatgptnextweb-nextchat",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/chatgptnextweb-nextchat-1d1419cd5686-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0e95891a43fe0218.json",
+      "assignmentId": "manifest-attestation-813e13d8d5f5cd10",
+      "subjectId": "lissy93-web-check",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lissy93-web-check-67ee1205b170-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-80af16f16706f802.json",
+      "assignmentId": "manifest-attestation-5dbd49b01b596e28",
+      "subjectId": "lissy93-web-check",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lissy93-web-check-67ee1205b170-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-dfec26b093a3f8ce.json",
+      "assignmentId": "manifest-attestation-192c06f6401605f5",
+      "subjectId": "withfig-autocomplete",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/withfig-autocomplete-530f039f59c0-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8b699cd021cff251.json",
+      "assignmentId": "manifest-attestation-0381de909ae8a32b",
+      "subjectId": "withfig-autocomplete",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/withfig-autocomplete-530f039f59c0-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c5a80cae055da767.json",
+      "assignmentId": "manifest-attestation-90c20bf9788abff8",
+      "subjectId": "linshenkx-prompt-optimizer",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/linshenkx-prompt-optimizer-df70b2784442-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e76efae28db5d4f0.json",
+      "assignmentId": "manifest-attestation-5aebd9281b0f7518",
+      "subjectId": "linshenkx-prompt-optimizer",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/linshenkx-prompt-optimizer-df70b2784442-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-34f9a53f9e393ba2.json",
+      "assignmentId": "manifest-attestation-4c5574f355252e41",
+      "subjectId": "socketio-socket-io",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/socketio-socket-io-9915c633766d-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-cdb366cb50b0d55a.json",
+      "assignmentId": "manifest-attestation-6eaf63a9f7cf0aff",
+      "subjectId": "socketio-socket-io",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/socketio-socket-io-9915c633766d-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8787d2cc17d5c116.json",
+      "assignmentId": "manifest-attestation-49dc148a6e729622",
+      "subjectId": "feathericons-feather",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/feathericons-feather-cb0461468f3d-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-916fab64d8b15540.json",
+      "assignmentId": "manifest-attestation-5a7c172214b4b6b7",
+      "subjectId": "feathericons-feather",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/feathericons-feather-cb0461468f3d-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5dfeda81095fe448.json",
+      "assignmentId": "manifest-attestation-602639ea3d6a2be6",
+      "subjectId": "lodash-lodash",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lodash-lodash-0358ac2418fa-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4a9bc6ecd92cb8bf.json",
+      "assignmentId": "manifest-attestation-0e1ebcff95a9eb0d",
+      "subjectId": "lodash-lodash",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lodash-lodash-0358ac2418fa-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-d60fa21c166bea89.json",
+      "assignmentId": "manifest-attestation-f4242ecec4eee250",
+      "subjectId": "markedjs-marked",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/markedjs-marked-f67a79bbfef8-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-76c59a50a748da27.json",
+      "assignmentId": "manifest-attestation-77c7ed6055a5a5c8",
+      "subjectId": "markedjs-marked",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/markedjs-marked-f67a79bbfef8-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f9d7aaae77ec2dd6.json",
+      "assignmentId": "manifest-attestation-45c27f82b8b09a6c",
+      "subjectId": "qishibo-anotherredisdesktopmanager",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/qishibo-anotherredisdesktopmanager-83fa83b0c2eb-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-30ae74ccbba666c9.json",
+      "assignmentId": "manifest-attestation-2aa410db8caa0980",
+      "subjectId": "qishibo-anotherredisdesktopmanager",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/qishibo-anotherredisdesktopmanager-83fa83b0c2eb-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0156da05bd50d605.json",
+      "assignmentId": "manifest-attestation-b8273bde10bd8983",
+      "subjectId": "react-boilerplate-react-boilerplate",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/react-boilerplate-react-boilerplate-5e2b708060df-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d303c132dbeb574f.json",
+      "assignmentId": "manifest-attestation-4dcf576169dfe168",
+      "subjectId": "react-boilerplate-react-boilerplate",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/react-boilerplate-react-boilerplate-5e2b708060df-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0f9312bb25470f8c.json",
+      "assignmentId": "manifest-attestation-52f9863553f54829",
+      "subjectId": "vuejs-vue",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vuejs-vue-468a2aa952d3-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a46ec6b592060b6a.json",
+      "assignmentId": "manifest-attestation-e9a8d4f85262e2fd",
+      "subjectId": "vuejs-vue",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vuejs-vue-468a2aa952d3-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2dca86e6c394bd62.json",
+      "assignmentId": "manifest-attestation-d3ea535ba80f7fd7",
+      "subjectId": "mihomo-party-org-clash-party",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/mihomo-party-org-clash-party-1f15536b2b26-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3658b896cbb2244e.json",
+      "assignmentId": "manifest-attestation-5b6af98ef4a3f472",
+      "subjectId": "mihomo-party-org-clash-party",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/mihomo-party-org-clash-party-1f15536b2b26-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-38487ebd7744c754.json",
+      "assignmentId": "manifest-attestation-c488207c64a58ce2",
+      "subjectId": "remy-nodemon",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/remy-nodemon-ee51c6e6b098-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3c8ff3ac5c47b14a.json",
+      "assignmentId": "manifest-attestation-9e0089a9c924ff6d",
+      "subjectId": "remy-nodemon",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/remy-nodemon-ee51c6e6b098-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-4cc2a2876d7fcaeb.json",
+      "assignmentId": "manifest-attestation-9b7e4c8db0b772dc",
+      "subjectId": "hexojs-hexo",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/hexojs-hexo-928dec1031a5-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-467252c2416bec82.json",
+      "assignmentId": "manifest-attestation-99379bfe7e9ce453",
+      "subjectId": "hexojs-hexo",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/hexojs-hexo-928dec1031a5-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-fcd9c45545966176.json",
+      "assignmentId": "manifest-attestation-56a43c8ea6c5d7c3",
+      "subjectId": "expressjs-express",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/expressjs-express-165a8e93251b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d2a90752467ff7e8.json",
+      "assignmentId": "manifest-attestation-c832fb133d853c65",
+      "subjectId": "expressjs-express",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/expressjs-express-165a8e93251b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-882213c26dfff674.json",
+      "assignmentId": "manifest-attestation-ef46c17b0f2bb876",
+      "subjectId": "juliusbrussee-caveman",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/juliusbrussee-caveman-786f04a92bcf-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5de04f7d87b5ffc7.json",
+      "assignmentId": "manifest-attestation-a693a245c0535fc1",
+      "subjectId": "juliusbrussee-caveman",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/juliusbrussee-caveman-786f04a92bcf-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-24b7b89ad47e37a5.json",
+      "assignmentId": "manifest-attestation-1fe3f1820af07169",
+      "subjectId": "mobxjs-mobx",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/mobxjs-mobx-7c7411ed10c7-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-028eb5e31125b222.json",
+      "assignmentId": "manifest-attestation-fe45f08800c43318",
+      "subjectId": "mobxjs-mobx",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/mobxjs-mobx-7c7411ed10c7-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-6585ad0b67e64294.json",
+      "assignmentId": "manifest-attestation-81f8d32212e26690",
+      "subjectId": "select2-select2",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/select2-select2-d271b16453ea-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8cfbf91aa5a42a67.json",
+      "assignmentId": "manifest-attestation-53d927b40f37a32e",
+      "subjectId": "select2-select2",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/select2-select2-d271b16453ea-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-1ad77842b334a285.json",
+      "assignmentId": "manifest-attestation-1e056e9e6e60dfab",
+      "subjectId": "justjavac-wechat-miniapp-radar",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/justjavac-wechat-miniapp-radar-a0c757c97cd3-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5ba15dfd4cfd3321.json",
+      "assignmentId": "manifest-attestation-58adbf45e6a8702f",
+      "subjectId": "justjavac-wechat-miniapp-radar",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/justjavac-wechat-miniapp-radar-a0c757c97cd3-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-c151e5789893c791.json",
+      "assignmentId": "manifest-attestation-190441beedbe05e4",
+      "subjectId": "yamadashy-repomix",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/yamadashy-repomix-dc0ac363665f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c09d6e5a4fcc84de.json",
+      "assignmentId": "manifest-attestation-57c17b5862e0893e",
+      "subjectId": "yamadashy-repomix",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/yamadashy-repomix-dc0ac363665f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f5060b9cf40018f7.json",
+      "assignmentId": "manifest-attestation-d2aa16a0dc14c2ef",
+      "subjectId": "shardeum-shardeum",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/shardeum-shardeum-da28e970f360-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3fbfc5aa88268f83.json",
+      "assignmentId": "manifest-attestation-8d5cb36a67cd3c7b",
+      "subjectId": "shardeum-shardeum",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/shardeum-shardeum-da28e970f360-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8ca9b0c34f1bae8a.json",
+      "assignmentId": "manifest-attestation-c0b91a8c6d806417",
+      "subjectId": "tobi-qmd",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tobi-qmd-41751617ccec-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b5b6121ee22c7807.json",
+      "assignmentId": "manifest-attestation-9cb84365b0e942f6",
+      "subjectId": "tobi-qmd",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tobi-qmd-41751617ccec-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ee4381bbaff05b36.json",
+      "assignmentId": "manifest-attestation-76eb09045a1cd85a",
+      "subjectId": "slab-quill",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/slab-quill-6d6457dfa608-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5c6b2b3872c8abb0.json",
+      "assignmentId": "manifest-attestation-0f1c832e73f85328",
+      "subjectId": "slab-quill",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/slab-quill-6d6457dfa608-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-415f09f7a8377964.json",
+      "assignmentId": "manifest-attestation-f629edabb7c3c83a",
+      "subjectId": "google-zx",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/google-zx-89911010d31d-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-599b292d0393ee32.json",
+      "assignmentId": "manifest-attestation-62e62b89d2b38290",
+      "subjectId": "google-zx",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/google-zx-89911010d31d-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-cc350d505f38f564.json",
+      "assignmentId": "manifest-attestation-f1cda689ebef1022",
+      "subjectId": "jimliu-baoyu-skills",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jimliu-baoyu-skills-3e3030f344bd-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9bc4b515985c76c3.json",
+      "assignmentId": "manifest-attestation-a55cea68ede599e8",
+      "subjectId": "jimliu-baoyu-skills",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jimliu-baoyu-skills-3e3030f344bd-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2936e4daac446861.json",
+      "assignmentId": "manifest-attestation-4f96d0ee4ae9deb9",
+      "subjectId": "tailwindlabs-headlessui",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tailwindlabs-headlessui-3aef18a3790e-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-34ac103ce5dc9d1a.json",
+      "assignmentId": "manifest-attestation-d1e60a3b065330f2",
+      "subjectId": "tailwindlabs-headlessui",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tailwindlabs-headlessui-3aef18a3790e-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-da72f9dd28d1a4a0.json",
+      "assignmentId": "manifest-attestation-241c8609df107cb6",
+      "subjectId": "smapiot-piral",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/smapiot-piral-9b47d28ad8e5-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-41c2b4309b02e3cb.json",
+      "assignmentId": "manifest-attestation-812f50a98c417384",
+      "subjectId": "smapiot-piral",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/smapiot-piral-9b47d28ad8e5-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-4019df6a91da7d0f.json",
+      "assignmentId": "manifest-attestation-9a6772ef829d890b",
+      "subjectId": "infinitered-reactotron",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/infinitered-reactotron-dd876567ad0b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-bce51fe5c319de4f.json",
+      "assignmentId": "manifest-attestation-2e0444e761a57f05",
+      "subjectId": "infinitered-reactotron",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/infinitered-reactotron-dd876567ad0b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-a97b68ba0ab0927e.json",
+      "assignmentId": "manifest-attestation-170cfe67a3dcd2f4",
+      "subjectId": "rx-angular-rx-angular",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/rx-angular-rx-angular-e12a7f014f4c-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-19bc4addc7903d63.json",
+      "assignmentId": "manifest-attestation-fb4639120fa40da8",
+      "subjectId": "rx-angular-rx-angular",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/rx-angular-rx-angular-e12a7f014f4c-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-132838b527c241dc.json",
+      "assignmentId": "manifest-attestation-40e48561a6dadbbb",
+      "subjectId": "usesend-usesend",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/usesend-usesend-ac0778344bfc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8ea4c796e52a4fd5.json",
+      "assignmentId": "manifest-attestation-b41400a91db4fca7",
+      "subjectId": "usesend-usesend",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/usesend-usesend-ac0778344bfc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-314bb5104e289759.json",
+      "assignmentId": "manifest-attestation-6ae743a79d80d0e0",
+      "subjectId": "deepnotesapp-deepnotes",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/deepnotesapp-deepnotes-39b0ac572313-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-67344842a94d0d10.json",
+      "assignmentId": "manifest-attestation-dffe93a49bd94f9f",
+      "subjectId": "deepnotesapp-deepnotes",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/deepnotesapp-deepnotes-39b0ac572313-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0fe532748346dfc6.json",
+      "assignmentId": "manifest-attestation-eb3c8b9f7e57062c",
+      "subjectId": "besscroft-picimpact",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/besscroft-picimpact-2c4afaa4e638-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4749f5a5150d1496.json",
+      "assignmentId": "manifest-attestation-fd9e1f0595b98b64",
+      "subjectId": "besscroft-picimpact",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/besscroft-picimpact-2c4afaa4e638-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f53f73c736294e47.json",
+      "assignmentId": "manifest-attestation-27d574a29bde57dd",
+      "subjectId": "6pac-slickgrid",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/6pac-slickgrid-a17735822f34-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8618717b37051873.json",
+      "assignmentId": "manifest-attestation-3597373a21bb8287",
+      "subjectId": "6pac-slickgrid",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/6pac-slickgrid-a17735822f34-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-96d8c28b698c00ad.json",
+      "assignmentId": "manifest-attestation-589827ff507efa64",
+      "subjectId": "brackets-userland-brackets-git",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/brackets-userland-brackets-git-36657268ea0c-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-2f7bfce01e8d36da.json",
+      "assignmentId": "manifest-attestation-08e8f5e79ca1ef52",
+      "subjectId": "brackets-userland-brackets-git",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/brackets-userland-brackets-git-36657268ea0c-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-bf870401d6ca8d19.json",
+      "assignmentId": "manifest-attestation-7302ee98f218c924",
+      "subjectId": "freedomjs-freedom",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/freedomjs-freedom-8fc379ededdc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c0b22dfe7ac32775.json",
+      "assignmentId": "manifest-attestation-36aed1e6aed2485c",
+      "subjectId": "freedomjs-freedom",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/freedomjs-freedom-8fc379ededdc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-efc184d600636fa4.json",
+      "assignmentId": "manifest-attestation-ebcc51ee4e504e6e",
+      "subjectId": "rich-harris-degit",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/rich-harris-degit-5a7c88d5355a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f9d308e2a8ebca86.json",
+      "assignmentId": "manifest-attestation-1a0e87d5237964bb",
+      "subjectId": "rich-harris-degit",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/rich-harris-degit-5a7c88d5355a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-30c6faf47af23969.json",
+      "assignmentId": "manifest-attestation-ac7c46ba54c8ff85",
+      "subjectId": "googlechromelabs-container-query-polyfill",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/googlechromelabs-container-query-polyfill-71f6b4550085-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-7f81f35e1f98c714.json",
+      "assignmentId": "manifest-attestation-420804734946e893",
+      "subjectId": "googlechromelabs-container-query-polyfill",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/googlechromelabs-container-query-polyfill-71f6b4550085-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-77adc7f4d282ac22.json",
+      "assignmentId": "manifest-attestation-e10a4838461c759b",
+      "subjectId": "dsherret-dax",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/dsherret-dax-bfa28a40f30d-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3a66e92811a66acd.json",
+      "assignmentId": "manifest-attestation-d920f71de5f8243e",
+      "subjectId": "dsherret-dax",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/dsherret-dax-bfa28a40f30d-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-186913931058f1a9.json",
+      "assignmentId": "manifest-attestation-8dda60ccc147b2f8",
+      "subjectId": "chakra-ui-zag",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/chakra-ui-zag-a7650ff9d646-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b30962244eee2282.json",
+      "assignmentId": "manifest-attestation-59945fcd8fd6d4c7",
+      "subjectId": "chakra-ui-zag",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/chakra-ui-zag-a7650ff9d646-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-24d6781bedfa1e49.json",
+      "assignmentId": "manifest-attestation-2620ee83f2b1c533",
+      "subjectId": "lumenstorm-orisonspace",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lumenstorm-orisonspace-435d36cdebb7-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-0a54fdf87b0a0073.json",
+      "assignmentId": "manifest-attestation-811f26a08d07c2ac",
+      "subjectId": "lumenstorm-orisonspace",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lumenstorm-orisonspace-435d36cdebb7-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2a5a7f69490211ad.json",
+      "assignmentId": "manifest-attestation-6884b0baa7453e80",
+      "subjectId": "ts-rest-ts-rest",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ts-rest-ts-rest-c66af3e3bc1a-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5e3288a9f1afd3b7.json",
+      "assignmentId": "manifest-attestation-7007ca8cfe0897e6",
+      "subjectId": "ts-rest-ts-rest",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ts-rest-ts-rest-c66af3e3bc1a-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5d6a3db43d0374a6.json",
+      "assignmentId": "manifest-attestation-316ff9df809a7ca5",
+      "subjectId": "hyperstackjs-hyperstack",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/hyperstackjs-hyperstack-5e33c3bcaa38-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a7b6dc8f2bb465e0.json",
+      "assignmentId": "manifest-attestation-b5f760ed3099942a",
+      "subjectId": "hyperstackjs-hyperstack",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/hyperstackjs-hyperstack-5e33c3bcaa38-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-1ca97b28b7a7aa37.json",
+      "assignmentId": "manifest-attestation-c6a9e7a0fd1a6e90",
+      "subjectId": "nutlope-pdftochat",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nutlope-pdftochat-cfdcb9b74ad9-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1aff98d40a3066a6.json",
+      "assignmentId": "manifest-attestation-2a9c18c9348e7c15",
+      "subjectId": "nutlope-pdftochat",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nutlope-pdftochat-cfdcb9b74ad9-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5c041c155e731b93.json",
+      "assignmentId": "manifest-attestation-4714ab23f1abe6a7",
+      "subjectId": "puemos-hls-downloader",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/puemos-hls-downloader-7cc65e436ec2-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b8d113a7cf373fe9.json",
+      "assignmentId": "manifest-attestation-397218428e835ec4",
+      "subjectId": "puemos-hls-downloader",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/puemos-hls-downloader-7cc65e436ec2-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2a007153cadfcdb9.json",
+      "assignmentId": "manifest-attestation-39d3880a94d9db75",
+      "subjectId": "kmijs-kmi",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/kmijs-kmi-741110157ffc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-34505d3e6e082edf.json",
+      "assignmentId": "manifest-attestation-46b65ae69c705497",
+      "subjectId": "kmijs-kmi",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/kmijs-kmi-741110157ffc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-e8280e9f044b4fd4.json",
+      "assignmentId": "manifest-attestation-46d7bee2a0db6871",
+      "subjectId": "livestorejs-livestore",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/livestorejs-livestore-4103c3ace522-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-b2494a9734251573.json",
+      "assignmentId": "manifest-attestation-9d310e2b3fd8df6f",
+      "subjectId": "livestorejs-livestore",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/livestorejs-livestore-4103c3ace522-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-78b3c23f6123221d.json",
+      "assignmentId": "manifest-attestation-b2ade91b5c96838d",
+      "subjectId": "paularmstrong-onerepo",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/paularmstrong-onerepo-b9c9a5ece427-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-36cc34669605f287.json",
+      "assignmentId": "manifest-attestation-bcebdf657341dbd9",
+      "subjectId": "paularmstrong-onerepo",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/paularmstrong-onerepo-b9c9a5ece427-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-fa7bba4af2b46434.json",
+      "assignmentId": "manifest-attestation-a4f561fb15e0810b",
+      "subjectId": "celo-org-celo-composer",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/celo-org-celo-composer-405b94e7541e-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-1e73e743a79f39fa.json",
+      "assignmentId": "manifest-attestation-4aab33c1ad403e7b",
+      "subjectId": "celo-org-celo-composer",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/celo-org-celo-composer-405b94e7541e-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-cf7db1be99bc155b.json",
+      "assignmentId": "manifest-attestation-fd64cc7ef6de3752",
+      "subjectId": "vikejs-bati",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/vikejs-bati-8923331351b4-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-001484834aa9dfd0.json",
+      "assignmentId": "manifest-attestation-9f30b79fe8f30f91",
+      "subjectId": "vikejs-bati",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/vikejs-bati-8923331351b4-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-04913a91c09de7c5.json",
+      "assignmentId": "manifest-attestation-b5f485827f58d861",
+      "subjectId": "jscutlery-devkit",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jscutlery-devkit-941b3d7cb16f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-42ad90c0959fea65.json",
+      "assignmentId": "manifest-attestation-50dc914be8508cbd",
+      "subjectId": "jscutlery-devkit",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jscutlery-devkit-941b3d7cb16f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-be557cdcfa0545dd.json",
+      "assignmentId": "manifest-attestation-d55a059f99bc8f82",
+      "subjectId": "takram-design-engineering-three-geospatial",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/takram-design-engineering-three-geospatial-f3ebbddf3150-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5c864eb62c1e84fc.json",
+      "assignmentId": "manifest-attestation-3402416536274885",
+      "subjectId": "takram-design-engineering-three-geospatial",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/takram-design-engineering-three-geospatial-f3ebbddf3150-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f4bf32040e3f4249.json",
+      "assignmentId": "manifest-attestation-ff28a2b294132cfc",
+      "subjectId": "briehq-brie-extension",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/briehq-brie-extension-8058cb4b8243-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9e40e231f47db853.json",
+      "assignmentId": "manifest-attestation-4f8171c2448d6cd1",
+      "subjectId": "briehq-brie-extension",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/briehq-brie-extension-8058cb4b8243-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-aad5480fb443eb8e.json",
+      "assignmentId": "manifest-attestation-f1ce6aa8ac3b8fa0",
+      "subjectId": "nextify-limited-saasfly",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nextify-limited-saasfly-a8bb13a329cc-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8e6ec90b92bbb518.json",
+      "assignmentId": "manifest-attestation-af2af5e90bd9075a",
+      "subjectId": "nextify-limited-saasfly",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nextify-limited-saasfly-a8bb13a329cc-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-fd1eef259abef0ae.json",
+      "assignmentId": "manifest-attestation-d1e28b7e29e60886",
+      "subjectId": "keyshade-xyz-keyshade",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/keyshade-xyz-keyshade-ee8ba7eea56f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3527dba8bfe5f778.json",
+      "assignmentId": "manifest-attestation-e5a3f9dc12580334",
+      "subjectId": "keyshade-xyz-keyshade",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/keyshade-xyz-keyshade-ee8ba7eea56f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-f65ebce69f413288.json",
+      "assignmentId": "manifest-attestation-c615e482591d63c3",
+      "subjectId": "slymnoyann-hey-1",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/slymnoyann-hey-1-00ce64bebcd0-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-96fb812d6c668add.json",
+      "assignmentId": "manifest-attestation-ca1e7bf7fecc556c",
+      "subjectId": "slymnoyann-hey-1",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/slymnoyann-hey-1-00ce64bebcd0-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-9b4326c19ab3c474.json",
+      "assignmentId": "manifest-attestation-93965b9df2e347e8",
+      "subjectId": "louisgv-local-ai",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/louisgv-local-ai-38c04c23a23b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-643ac2e7d9883c35.json",
+      "assignmentId": "manifest-attestation-54bcfaca4eba0002",
+      "subjectId": "louisgv-local-ai",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/louisgv-local-ai-38c04c23a23b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-29592e33aae91a0b.json",
+      "assignmentId": "manifest-attestation-3d97aac266e089f6",
+      "subjectId": "jscad-openjscad-org",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jscad-openjscad-org-047164ce6440-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a3eb93b9ae818eb4.json",
+      "assignmentId": "manifest-attestation-52196abde1353bc1",
+      "subjectId": "jscad-openjscad-org",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jscad-openjscad-org-047164ce6440-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2570f811550445d8.json",
+      "assignmentId": "manifest-attestation-fa935d0bd655759e",
+      "subjectId": "docmirror-dev-sidecar",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/docmirror-dev-sidecar-8c8d2c8a1dac-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d76c0ab79180c680.json",
+      "assignmentId": "manifest-attestation-9d03040e43c3f97d",
+      "subjectId": "docmirror-dev-sidecar",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/docmirror-dev-sidecar-8c8d2c8a1dac-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-5ef156c752ce6859.json",
+      "assignmentId": "manifest-attestation-3e400a356f129f08",
+      "subjectId": "antfu-collective-ni",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/antfu-collective-ni-a2a7659f776b-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f71260b1cb1660bf.json",
+      "assignmentId": "manifest-attestation-450d3dfc5dfe94e9",
+      "subjectId": "antfu-collective-ni",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/antfu-collective-ni-a2a7659f776b-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-86a19b88840902a8.json",
+      "assignmentId": "manifest-attestation-722f9627f62374da",
+      "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-32c7f7970de29d50.json",
+      "assignmentId": "manifest-attestation-d387a800992a9b8f",
+      "subjectId": "stefanoslig-angular-ngrx-nx-realworld-example-app",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/stefanoslig-angular-ngrx-nx-realworld-example-app-a7b40851a871-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-21a5987bb0ec361a.json",
+      "assignmentId": "manifest-attestation-604fa29a1361c5fa",
+      "subjectId": "ixahmedxi-orbitkit",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ixahmedxi-orbitkit-5b7953d31e45-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9fedc47e6e7b1cd8.json",
+      "assignmentId": "manifest-attestation-df84d14a95586d4e",
+      "subjectId": "ixahmedxi-orbitkit",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ixahmedxi-orbitkit-5b7953d31e45-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-538771b6afbbefd6.json",
+      "assignmentId": "manifest-attestation-0ef9106337394e8e",
+      "subjectId": "guigrpa-oao",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/guigrpa-oao-83560ce5ca94-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-dbb396aa4939b2e5.json",
+      "assignmentId": "manifest-attestation-8d22f457a018abbc",
+      "subjectId": "guigrpa-oao",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/guigrpa-oao-83560ce5ca94-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-46be5388cd99a540.json",
+      "assignmentId": "manifest-attestation-fa1e10eb6f692268",
+      "subjectId": "react-workspaces-react-workspaces-playground",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/react-workspaces-react-workspaces-playground-fd369e6f0bc8-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c30392d90b37c5d6.json",
+      "assignmentId": "manifest-attestation-056dd692e73340c3",
+      "subjectId": "react-workspaces-react-workspaces-playground",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/react-workspaces-react-workspaces-playground-fd369e6f0bc8-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b722e7ab8ecc6ac2.json",
+      "assignmentId": "manifest-attestation-e31f4b7d9f6b5c66",
+      "subjectId": "doramart-doracms",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/doramart-doracms-4c1eaa3dea54-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-23049cdde16ec173.json",
+      "assignmentId": "manifest-attestation-c60bccb697f7ae1e",
+      "subjectId": "doramart-doracms",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/doramart-doracms-4c1eaa3dea54-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-4ec0f007e6b8a89b.json",
+      "assignmentId": "manifest-attestation-88949330a9c7791e",
+      "subjectId": "tomalaforge-angular-challenges",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/tomalaforge-angular-challenges-6d3e525e3c65-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-670fff646e72c3fb.json",
+      "assignmentId": "manifest-attestation-ccc74f174639d465",
+      "subjectId": "tomalaforge-angular-challenges",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/tomalaforge-angular-challenges-6d3e525e3c65-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-a7daa7fcc39fb144.json",
+      "assignmentId": "manifest-attestation-6c97eaba7642f9e1",
+      "subjectId": "trungvose-angular-spotify",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/trungvose-angular-spotify-96c056600706-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-c97e1ccbe5d994fd.json",
+      "assignmentId": "manifest-attestation-3cdca3e0ccb653a9",
+      "subjectId": "trungvose-angular-spotify",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/trungvose-angular-spotify-96c056600706-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-bc708ee203df0b0d.json",
+      "assignmentId": "manifest-attestation-ae7dc042d163fb4f",
+      "subjectId": "jamiemason-shrinkpack",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/jamiemason-shrinkpack-0ab97b7917eb-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-757976d76706935c.json",
+      "assignmentId": "manifest-attestation-f5d68e1abbbf1c6c",
+      "subjectId": "jamiemason-shrinkpack",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/jamiemason-shrinkpack-0ab97b7917eb-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-773e479ac0e9ff87.json",
+      "assignmentId": "manifest-attestation-63b1b7f41165a998",
+      "subjectId": "nighttrax-ts-monorepo",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nighttrax-ts-monorepo-55b4c5ed5fb0-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-f1933331a77ee954.json",
+      "assignmentId": "manifest-attestation-d13d53506e72393a",
+      "subjectId": "nighttrax-ts-monorepo",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nighttrax-ts-monorepo-55b4c5ed5fb0-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0daccc3da20e31bb.json",
+      "assignmentId": "manifest-attestation-4894f5b8d654ce3c",
+      "subjectId": "ttttonyhe-ouorz-mono",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ttttonyhe-ouorz-mono-d23b6c644e01-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-8bffc09f7412ef5d.json",
+      "assignmentId": "manifest-attestation-d959bea6cba93524",
+      "subjectId": "ttttonyhe-ouorz-mono",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ttttonyhe-ouorz-mono-d23b6c644e01-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b2eed9a4f122d343.json",
+      "assignmentId": "manifest-attestation-5e7fdeeb73c358b2",
+      "subjectId": "ducktors-turborepo-remote-cache",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/ducktors-turborepo-remote-cache-488cedd2b5df-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-2ac2d4759103c7a1.json",
+      "assignmentId": "manifest-attestation-cf74631e72eb6214",
+      "subjectId": "ducktors-turborepo-remote-cache",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/ducktors-turborepo-remote-cache-488cedd2b5df-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-18153b05032d20d9.json",
+      "assignmentId": "manifest-attestation-1776d9828e2b036e",
+      "subjectId": "nteract-archived-desktop-app",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/nteract-archived-desktop-app-19d3ec44d6c6-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3b4ef8bbd69cb51e.json",
+      "assignmentId": "manifest-attestation-d7c7513326d23913",
+      "subjectId": "nteract-archived-desktop-app",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/nteract-archived-desktop-app-19d3ec44d6c6-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-57e376511734730b.json",
+      "assignmentId": "manifest-attestation-4a94c5158d72752b",
+      "subjectId": "colmena-colmena",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/colmena-colmena-a6805522c8cf-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-3b742d2ff1f1ef1c.json",
+      "assignmentId": "manifest-attestation-aec201c9b67a3ca1",
+      "subjectId": "colmena-colmena",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/colmena-colmena-a6805522c8cf-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-a970f79c238edf12.json",
+      "assignmentId": "manifest-attestation-38a7f8038cc4e55f",
+      "subjectId": "lerna-lite-lerna-lite",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/lerna-lite-lerna-lite-d6af02fa1388-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-5c73b9f72684d81c.json",
+      "assignmentId": "manifest-attestation-3059f6cdb2755849",
+      "subjectId": "lerna-lite-lerna-lite",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/lerna-lite-lerna-lite-d6af02fa1388-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-419b95c67ed6aec7.json",
+      "assignmentId": "manifest-attestation-0da8831ad523a582",
+      "subjectId": "umaprotocol-protocol",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/umaprotocol-protocol-38f64bb0e4bf-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-53b264642b1bafb2.json",
+      "assignmentId": "manifest-attestation-3534e2ad6b5c9aa1",
+      "subjectId": "umaprotocol-protocol",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/umaprotocol-protocol-38f64bb0e4bf-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-b65fc5044c4dc097.json",
+      "assignmentId": "manifest-attestation-f6357f4b5cd72dd0",
+      "subjectId": "kirklin-celeris-web",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/kirklin-celeris-web-91667fde376f-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-ad8490b0ead00a59.json",
+      "assignmentId": "manifest-attestation-fa2391cb4cd0ba0c",
+      "subjectId": "kirklin-celeris-web",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/kirklin-celeris-web-91667fde376f-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-0ae3f7d2a8512496.json",
+      "assignmentId": "manifest-attestation-042b4a4955ae0c1f",
+      "subjectId": "panoratech-panora",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/panoratech-panora-2daa6111e89e-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-a3f653f65e950263.json",
+      "assignmentId": "manifest-attestation-c22239f01e111481",
+      "subjectId": "panoratech-panora",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/panoratech-panora-2daa6111e89e-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-8d3aa2c6f71d84f3.json",
+      "assignmentId": "manifest-attestation-46c4f1455f31f967",
+      "subjectId": "cumt-robin-fullstack-blog",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/cumt-robin-fullstack-blog-42fb59ad29a9-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-d1ce3142ee596d65.json",
+      "assignmentId": "manifest-attestation-bfc391c61b8f5a4a",
+      "subjectId": "cumt-robin-fullstack-blog",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/cumt-robin-fullstack-blog-42fb59ad29a9-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-2c949400c7f03d42.json",
+      "assignmentId": "manifest-attestation-c21eca39f336005f",
+      "subjectId": "muravjev-configs",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/muravjev-configs-2062503c95ed-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-9ea3038f01e56e19.json",
+      "assignmentId": "manifest-attestation-454de9388ab3564a",
+      "subjectId": "muravjev-configs",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/muravjev-configs-2062503c95ed-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-bdff03b6347d4323.json",
+      "assignmentId": "manifest-attestation-61a7a0342c2e03e7",
+      "subjectId": "innei-template-nest-http-boilerplate",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/innei-template-nest-http-boilerplate-db92027687e8-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-4c096bc2ed41fd57.json",
+      "assignmentId": "manifest-attestation-c10af2f261524687",
+      "subjectId": "innei-template-nest-http-boilerplate",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/innei-template-nest-http-boilerplate-db92027687e8-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-ead32b38318f8217.json",
+      "assignmentId": "manifest-attestation-55afdbed8269193f",
+      "subjectId": "mufeiyu-ayu-vjade",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/mufeiyu-ayu-vjade-be60dad98d85-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-85926201a2b3d52e.json",
+      "assignmentId": "manifest-attestation-edffca536b38ffa5",
+      "subjectId": "mufeiyu-ayu-vjade",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/mufeiyu-ayu-vjade-be60dad98d85-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    },
+    {
+      "path": "assignments/m/m-76a789e77211332e.json",
+      "assignmentId": "manifest-attestation-9c98b389e6ea2210",
+      "subjectId": "senegalha-template-monorepo-typescript",
+      "phase": null,
+      "reviewer": "external-human-reviewer-1",
+      "reviewerType": "human",
+      "sourcePath": "assignments/senegalha-template-monorepo-typescript-0d756686dfa0-manifest-external-human-reviewer-1-aeb263c9c59f.json"
+    },
+    {
+      "path": "assignments/m/m-e721d9550bcdfa9e.json",
+      "assignmentId": "manifest-attestation-9122b65d9f18d1db",
+      "subjectId": "senegalha-template-monorepo-typescript",
+      "phase": null,
+      "reviewer": "external-org-reviewer-1",
+      "reviewerType": "organization",
+      "sourcePath": "assignments/senegalha-template-monorepo-typescript-0d756686dfa0-manifest-external-org-reviewer-1-9d059ba0c526.json"
+    }
+  ],
+  "pathMode": "compact",
+  "sourceWorklistPath": "source-worklist.json"
+}

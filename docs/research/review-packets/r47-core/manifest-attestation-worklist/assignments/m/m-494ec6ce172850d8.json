@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-89dd7a007b09d58f",
+    "subjectId": "redux-toolkit",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "redux-toolkit",
+    "phase": null,
+    "repository": "https://github.com/reduxjs/redux-toolkit.git",
+    "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3"
+  },
+  "manifestCopy": {
+    "path": "manifests/redux-toolkit-0484966eb5bd.json",
+    "sha256": "1c6ee4d192d7ed701d8ca40309a524e32b753d0f88b8b0daba1f7076e24f25b6"
+  },
+  "attestationTemplate": {
+    "subjectId": "redux-toolkit",
+    "repository": "https://github.com/reduxjs/redux-toolkit.git",
+    "commit": "e4725cece4b4649df9eb5b31ba1cf6140fa5c7d3",
+    "manifestCopy": {
+      "path": "manifests/redux-toolkit-0484966eb5bd.json",
+      "sha256": "1c6ee4d192d7ed701d8ca40309a524e32b753d0f88b8b0daba1f7076e24f25b6"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "1c6ee4d192d7ed701d8ca40309a524e32b753d0f88b8b0daba1f7076e24f25b6",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

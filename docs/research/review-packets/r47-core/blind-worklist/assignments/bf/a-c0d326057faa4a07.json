@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-c0d326057faa4a07",
+    "evidencePackageId": "evidence-aa8d3d42bac5a48a",
+    "round": "blind_first",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/reduxjs-redux-69df417695fe.json",
+        "sha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794"
+      },
+      "auditLog": {
+        "path": "logs/reduxjs-redux-69df417695fe/check.audit.jsonl",
+        "sha256": "5350771e6664721e22e128e5fd759e42739bb4713acee2416ecf1105585d4d18"
+      },
+      "evidenceGraph": {
+        "path": "logs/reduxjs-redux-69df417695fe/evidence-graph.json",
+        "sha256": "8981410dde981d187250fbaf2d672f7ce76f98e01bf00a8694b6480d29127b4e"
+      },
+      "checkStdout": {
+        "path": "logs/reduxjs-redux-69df417695fe/check.stdout.log",
+        "sha256": "23cbd2838bfb95df190db6798aa112edada803a3921869f3371b776ea285b9d5"
+      },
+      "checkStderr": {
+        "path": "logs/reduxjs-redux-69df417695fe/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:aa8d3d42bac5a48afba7bb8bde43dbf47970e3c1299c0546525e7d2f58332ea5",
+    "subjectId": "reduxjs-redux",
+    "repository": "https://github.com/reduxjs/redux.git",
+    "commit": "5d65348e26635b6ec627b1030732ed38797e88e9",
+    "gitTree": "63778de2e0367d9ab782ca4c87774b6dfb230e99",
+    "manifestSha256": "8fe1aedd6fe81c39a36e6bb5723f329caf3125980e23d47a54a730256eab3794",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/createStore.ts",
+    "line": 3,
+    "message": "src-root imports private implementation from types",
+    "cellId": "src-root",
+    "producerCellId": "types",
+    "cellfenceFingerprint": "8135b9c513a112ef5dde9dc61a4911a53ebca3f72b945664dc901e9c8e4e83d4",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:aa8d3d42bac5a48afba7bb8bde43dbf47970e3c1299c0546525e7d2f58332ea5",
+    "rater": "external-human-reviewer-1",
+    "raterType": "human",
+    "role": "independent",
+    "round": "blind_first",
+    "assignmentId": "assignment-c0d326057faa4a07",
+    "evidencePackageId": "evidence-aa8d3d42bac5a48a",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-2876b4a95d2d53fb",
+    "subjectId": "musistudio-claude-code-router",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "musistudio-claude-code-router",
+    "phase": null,
+    "repository": "https://github.com/musistudio/claude-code-router.git",
+    "commit": "19973394d26fb1afec697f5d091d62d300bcdf50"
+  },
+  "manifestCopy": {
+    "path": "manifests/musistudio-claude-code-router-5a42fe86bb96.json",
+    "sha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e"
+  },
+  "attestationTemplate": {
+    "subjectId": "musistudio-claude-code-router",
+    "repository": "https://github.com/musistudio/claude-code-router.git",
+    "commit": "19973394d26fb1afec697f5d091d62d300bcdf50",
+    "manifestCopy": {
+      "path": "manifests/musistudio-claude-code-router-5a42fe86bb96.json",
+      "sha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "8346b9e80fc723b4fcdbf8077787cadc44c3bc27eef9fc4b0900e89419172e7e",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}

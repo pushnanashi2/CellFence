@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "cellfence.precision-label-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "reports/corpus/ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean/bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade",
+    "preLabelArtifactSetSha256": "e4ec99a32a73016acf7188714a071d166bdc6bd343ef619681e9dfcf0a7f4d5c"
+  },
+  "assignment": {
+    "assignmentId": "assignment-680be27e810febd4",
+    "evidencePackageId": "evidence-38c20a822a0ac268",
+    "round": "blind_second",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "sawPeerLabels": false,
+    "peerLabelsIncluded": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling"
+  },
+  "evidenceArtifacts": {
+    "bundleFiles": {
+      "corpus": {
+        "path": "corpus.json",
+        "sha256": "2e9709ea26637a99592c127344035c306475cac73a46a991e0f03820abf67715"
+      },
+      "report": {
+        "path": "report.json",
+        "sha256": "ac1a33053cbdea2286d80c66bfd4e49013aff0b5f04234f692175881c2277a29"
+      },
+      "rawFindings": {
+        "path": "findings.raw.jsonl",
+        "sha256": "cfec270a5f77dc978fa3ff86e88927816e88b48c2c92c08f29b353d9532539aa"
+      },
+      "normalizedFindings": {
+        "path": "findings.normalized.jsonl",
+        "sha256": "2b43365b8939d6abbd44756d8a3e3632d573d1bc114aa4d4747430e798da1cf5"
+      },
+      "sampledFindings": {
+        "path": "findings.sampled.jsonl",
+        "sha256": "672da0a1f4349747d592b23d6df234d070ad6146b5695f309f51d3e5e4399b1e"
+      },
+      "sampling": {
+        "path": "sampling.json",
+        "sha256": "d0ba15170e1d776fc78e6876ccd1c2516257dd1403d7686fe1bd6a94c3a7be7b"
+      }
+    },
+    "subject": {
+      "manifest": {
+        "path": "manifests/6pac-slickgrid-a17735822f34.json",
+        "sha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774"
+      },
+      "auditLog": {
+        "path": "logs/6pac-slickgrid-a17735822f34/check.audit.jsonl",
+        "sha256": "18ba7efb04685550481e6cc7949c354a3a9329cb681e531e9de3155791c193f4"
+      },
+      "evidenceGraph": {
+        "path": "logs/6pac-slickgrid-a17735822f34/evidence-graph.json",
+        "sha256": "e02abcdf3b66401790e3c4824547a0f75cef66cd946744bb35c6a6c54dc8cad5"
+      },
+      "checkStdout": {
+        "path": "logs/6pac-slickgrid-a17735822f34/check.stdout.log",
+        "sha256": "5090d31ecad90b61eacefd26e18e8eb7945d1bd7638cae7922b08d85468e728b"
+      },
+      "checkStderr": {
+        "path": "logs/6pac-slickgrid-a17735822f34/check.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "finding": {
+    "findingId": "sha256:38c20a822a0ac268d017a5205b2aca10ffe73d94b5d47e73b0e23c89989feca4",
+    "subjectId": "6pac-slickgrid",
+    "repository": "https://github.com/6pac/SlickGrid.git",
+    "commit": "2079c2427308e5264a3ca064f50572f7b8478b5e",
+    "gitTree": "e27199eba2dd6cb4f55ad38cbfc7349824016061",
+    "manifestSha256": "7eb87b76df7b6cf6e7d42b2a82101c726c419bdbc8445ee044acaa865ca0b774",
+    "manifestStrategy": "copy",
+    "manifestReviewStatus": "reviewed",
+    "ruleId": "CELLFENCE_PRIVATE_IMPORT",
+    "severity": "error",
+    "filePath": "src/plugins/slick.headermenu.ts",
+    "line": 20,
+    "message": "plugins imports private implementation from src-root",
+    "cellId": "plugins",
+    "producerCellId": "src-root",
+    "cellfenceFingerprint": "38e69a6b3d16334ee591f9cdb0b17fce1bdabd6aba3e4c824f3d684da74014e2",
+    "occurrenceIndex": 0
+  },
+  "sourceLabels": [],
+  "allowedLabels": [
+    "true_positive",
+    "false_positive",
+    "needs_policy",
+    "needs_review",
+    "invalid_setup",
+    "out_of_scope"
+  ],
+  "labelTemplate": {
+    "schemaVersion": "cellfence.corpus-label.v1",
+    "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+    "findingId": "sha256:38c20a822a0ac268d017a5205b2aca10ffe73d94b5d47e73b0e23c89989feca4",
+    "rater": "external-org-reviewer-1",
+    "raterType": "organization",
+    "role": "independent",
+    "round": "blind_second",
+    "assignmentId": "assignment-680be27e810febd4",
+    "evidencePackageId": "evidence-38c20a822a0ac268",
+    "sawPeerLabels": false,
+    "sourceBundleContainsLabels": false,
+    "claimUse": "blind_labeling",
+    "label": "",
+    "rationale": ""
+  }
+}

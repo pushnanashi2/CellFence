@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "cellfence.manifest-attestation-assignment.v1",
+  "studyId": "ts-js-reviewed-pilot-160-2026-07-26-round47-boundary-core-balanced-clean",
+  "bundle": {
+    "pathHint": "bundle-unlabeled",
+    "artifactSetSha256": "f617b6fefa7d16620b42e9d9acdcdb04e7e7429c308ab4c028020be248180ade"
+  },
+  "assignment": {
+    "assignmentId": "manifest-attestation-aa12877f7dfc4652",
+    "subjectId": "pmndrs-react-three-fiber",
+    "phase": null,
+    "reviewer": "external-org-reviewer-1",
+    "reviewerType": "organization",
+    "claimUse": "external_manifest_review"
+  },
+  "subject": {
+    "subjectId": "pmndrs-react-three-fiber",
+    "phase": null,
+    "repository": "https://github.com/pmndrs/react-three-fiber.git",
+    "commit": "7dfaeaaab270ebef2b176e8bcaa5819702c34794"
+  },
+  "manifestCopy": {
+    "path": "manifests/pmndrs-react-three-fiber-1b4074202c23.json",
+    "sha256": "805c5a4431693ef60dee42422d60cdda4b9c30e8e6f80694e8a9f6b09a6fa6d9"
+  },
+  "attestationTemplate": {
+    "subjectId": "pmndrs-react-three-fiber",
+    "repository": "https://github.com/pmndrs/react-three-fiber.git",
+    "commit": "7dfaeaaab270ebef2b176e8bcaa5819702c34794",
+    "manifestCopy": {
+      "path": "manifests/pmndrs-react-three-fiber-1b4074202c23.json",
+      "sha256": "805c5a4431693ef60dee42422d60cdda4b9c30e8e6f80694e8a9f6b09a6fa6d9"
+    },
+    "reviewStatus": "reviewed",
+    "review": {
+      "reviewedAt": "YYYY-MM-DD",
+      "scope": "package/workspace boundary manifest review",
+      "reviewedManifestSha256": "805c5a4431693ef60dee42422d60cdda4b9c30e8e6f80694e8a9f6b09a6fa6d9",
+      "reviewerAttestations": [
+        {
+          "id": "external-org-reviewer-1",
+          "reviewerType": "organization",
+          "independent": true
+        }
+      ]
+    }
+  }
+}
