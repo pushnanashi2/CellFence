@@ -1,0 +1,982 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Exploratory gap-directed TS/JS monorepo candidate corpus generated on 2026-07-26 to close remaining CELLFENCE_UNDECLARED_CONSUMER sample deficits. Diagnostic only, not reviewed precision evidence.",
+  "selectionPolicy": {
+    "date": "2026-07-26",
+    "source": "GitHub repository search topics + exact default-branch git ls-remote",
+    "queries": [
+      "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:monorepo language:JavaScript stars:>=50 archived:false fork:false",
+      "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:turborepo language:JavaScript stars:>=50 archived:false fork:false",
+      "topic:nx language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:yarn-workspaces language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:pnpm-workspace language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:workspaces language:TypeScript stars:>=50 archived:false fork:false"
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "primary language TypeScript or JavaScript",
+      "stars >= 50",
+      "diskUsageKb <= 120000",
+      "not already present in prior reviewed work queues or 2026-07-26 diagnostic consumer corpora",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no dependency install, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer and production scope results are candidate-sourcing diagnostics only; excluded from precision denominators until manifests and labels are externally reviewed."
+  },
+  "subjects": [
+    {
+      "id": "nteract-archived-desktop-app",
+      "repository": "https://github.com/nteract/archived-desktop-app.git",
+      "commit": "7516211c27bad1e5a415505b023e2221bc430d8a",
+      "metadata": {
+        "nameWithOwner": "nteract/archived-desktop-app",
+        "url": "https://github.com/nteract/archived-desktop-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 6249,
+        "forks": 549,
+        "diskUsageKb": 41048,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "colmena-colmena",
+      "repository": "https://github.com/colmena/colmena.git",
+      "commit": "8d070208c59f34c85b589dec75476f7a446257e9",
+      "metadata": {
+        "nameWithOwner": "colmena/colmena",
+        "url": "https://github.com/colmena/colmena",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 1382,
+        "forks": 391,
+        "diskUsageKb": 5477,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "panoratech-panora",
+      "repository": "https://github.com/panoratech/Panora.git",
+      "commit": "38eda443ed91cccf59da5dcc2ac401a1cb02d35a",
+      "metadata": {
+        "nameWithOwner": "panoratech/Panora",
+        "url": "https://github.com/panoratech/Panora",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1033,
+        "forks": 200,
+        "diskUsageKb": 109553,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "hospitalrun-hospitalrun",
+      "repository": "https://github.com/HospitalRun/hospitalrun.git",
+      "commit": "731b08bf9ace3d53f3651d608b721c278fbc358f",
+      "metadata": {
+        "nameWithOwner": "HospitalRun/hospitalrun",
+        "url": "https://github.com/HospitalRun/hospitalrun",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 989,
+        "forks": 376,
+        "diskUsageKb": 1728,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "metamask-snaps",
+      "repository": "https://github.com/MetaMask/snaps.git",
+      "commit": "a2ea600bc3cfa66a5e476fed4335d557c9cb2a4b",
+      "metadata": {
+        "nameWithOwner": "MetaMask/snaps",
+        "url": "https://github.com/MetaMask/snaps",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 844,
+        "forks": 656,
+        "diskUsageKb": 107745,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "marve10s-better-fullstack",
+      "repository": "https://github.com/Marve10s/Better-Fullstack.git",
+      "commit": "4d667c7625824dab1a36f9003cadb73b811cb824",
+      "metadata": {
+        "nameWithOwner": "Marve10s/Better-Fullstack",
+        "url": "https://github.com/Marve10s/Better-Fullstack",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 699,
+        "forks": 49,
+        "diskUsageKb": 81532,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lucivhuang-heimdallr-sdk",
+      "repository": "https://github.com/LucivHuang/heimdallr-sdk.git",
+      "commit": "b7ee4c2c232abb1d4ad8e1634a3e72fd3a2c33f3",
+      "metadata": {
+        "nameWithOwner": "LucivHuang/heimdallr-sdk",
+        "url": "https://github.com/LucivHuang/heimdallr-sdk",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 688,
+        "forks": 137,
+        "diskUsageKb": 10469,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "wixplosives-sample-monorepo",
+      "repository": "https://github.com/wixplosives/sample-monorepo.git",
+      "commit": "800c1696a77ba79dd4981aeb32a5a7d142ab5a90",
+      "metadata": {
+        "nameWithOwner": "wixplosives/sample-monorepo",
+        "url": "https://github.com/wixplosives/sample-monorepo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 647,
+        "forks": 95,
+        "diskUsageKb": 7659,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "klis87-normy",
+      "repository": "https://github.com/klis87/normy.git",
+      "commit": "2a8527bbc5d7b864c5ceecb928eb55f77a86c404",
+      "metadata": {
+        "nameWithOwner": "klis87/normy",
+        "url": "https://github.com/klis87/normy",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 608,
+        "forks": 13,
+        "diskUsageKb": 2218,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "enjidev-enji-dev",
+      "repository": "https://github.com/enjidev/enji.dev.git",
+      "commit": "e043d22e887d916229bad767e5bad8a26ad58bb6",
+      "metadata": {
+        "nameWithOwner": "enjidev/enji.dev",
+        "url": "https://github.com/enjidev/enji.dev",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 593,
+        "forks": 151,
+        "diskUsageKb": 6104,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "contentful-rich-text",
+      "repository": "https://github.com/contentful/rich-text.git",
+      "commit": "6987d0305cd057977fcaed84f7f283ec2f48e70d",
+      "metadata": {
+        "nameWithOwner": "contentful/rich-text",
+        "url": "https://github.com/contentful/rich-text",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 585,
+        "forks": 113,
+        "diskUsageKb": 14077,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "nx-go-nx-go",
+      "repository": "https://github.com/nx-go/nx-go.git",
+      "commit": "34ede1dd3d0d8eb1e9a57af11f2e7979ae90c4f5",
+      "metadata": {
+        "nameWithOwner": "nx-go/nx-go",
+        "url": "https://github.com/nx-go/nx-go",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 566,
+        "forks": 53,
+        "diskUsageKb": 1231,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lerna-lite-lerna-lite",
+      "repository": "https://github.com/lerna-lite/lerna-lite.git",
+      "commit": "bda9e921cf9a050886d335120049c396f13a2d65",
+      "metadata": {
+        "nameWithOwner": "lerna-lite/lerna-lite",
+        "url": "https://github.com/lerna-lite/lerna-lite",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 566,
+        "forks": 49,
+        "diskUsageKb": 12609,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "vltpkg-vltpkg",
+      "repository": "https://github.com/vltpkg/vltpkg.git",
+      "commit": "0668497b1d67cdd0385d8da7920160f85ddf7454",
+      "metadata": {
+        "nameWithOwner": "vltpkg/vltpkg",
+        "url": "https://github.com/vltpkg/vltpkg",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 526,
+        "forks": 29,
+        "diskUsageKb": 32844,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "entria-entria-fullstack",
+      "repository": "https://github.com/entria/entria-fullstack.git",
+      "commit": "9845f8221ded7c3f12a3928a7a3e01385386d46c",
+      "metadata": {
+        "nameWithOwner": "entria/entria-fullstack",
+        "url": "https://github.com/entria/entria-fullstack",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 498,
+        "forks": 72,
+        "diskUsageKb": 4175,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "kirklin-celeris-web",
+      "repository": "https://github.com/kirklin/celeris-web.git",
+      "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+      "metadata": {
+        "nameWithOwner": "kirklin/celeris-web",
+        "url": "https://github.com/kirklin/celeris-web",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 496,
+        "forks": 64,
+        "diskUsageKb": 3758,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "gitmono-dev-mega",
+      "repository": "https://github.com/gitmono-dev/mega.git",
+      "commit": "8cd0bbc5b9355c2eac2a24b5f3f0b482571ffe1c",
+      "metadata": {
+        "nameWithOwner": "gitmono-dev/mega",
+        "url": "https://github.com/gitmono-dev/mega",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 493,
+        "forks": 123,
+        "diskUsageKb": 109090,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tunnckocore-opensource",
+      "repository": "https://github.com/tunnckoCore/opensource.git",
+      "commit": "a45321fb1f44e323762d1c1c464f1a2594447063",
+      "metadata": {
+        "nameWithOwner": "tunnckoCore/opensource",
+        "url": "https://github.com/tunnckoCore/opensource",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 486,
+        "forks": 19,
+        "diskUsageKb": 27857,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "abduvik-developer-codex",
+      "repository": "https://github.com/abduvik/developer-codex.git",
+      "commit": "42462fe98a3fb77b5369870beca94e8bae8a6973",
+      "metadata": {
+        "nameWithOwner": "abduvik/developer-codex",
+        "url": "https://github.com/abduvik/developer-codex",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 485,
+        "forks": 33,
+        "diskUsageKb": 3295,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "umaprotocol-protocol",
+      "repository": "https://github.com/UMAprotocol/protocol.git",
+      "commit": "c6ac81a699f671c4b553134e6f9852cc47e8195b",
+      "metadata": {
+        "nameWithOwner": "UMAprotocol/protocol",
+        "url": "https://github.com/UMAprotocol/protocol",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 480,
+        "forks": 213,
+        "diskUsageKb": 57492,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "innocces-taro-hooks",
+      "repository": "https://github.com/innocces/taro-hooks.git",
+      "commit": "a677366d72a9a4235887f916646d3e777bea14c8",
+      "metadata": {
+        "nameWithOwner": "innocces/taro-hooks",
+        "url": "https://github.com/innocces/taro-hooks",
+        "defaultBranch": "next",
+        "primaryLanguage": "TypeScript",
+        "stars": 453,
+        "forks": 36,
+        "diskUsageKb": 35768,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "elie222-inbox-zero",
+      "repository": "https://github.com/elie222/inbox-zero.git",
+      "commit": "df5d68c6ba2123601ae53726e9a8b3d4d49adc04",
+      "metadata": {
+        "nameWithOwner": "elie222/inbox-zero",
+        "url": "https://github.com/elie222/inbox-zero",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 11708,
+        "forks": 1447,
+        "diskUsageKb": 101857,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "clerk-t3-turbo-and-clerk",
+      "repository": "https://github.com/clerk/t3-turbo-and-clerk.git",
+      "commit": "a23a2cdf6c6e2e2a0e5665d49fcbdfdf1abafe86",
+      "metadata": {
+        "nameWithOwner": "clerk/t3-turbo-and-clerk",
+        "url": "https://github.com/clerk/t3-turbo-and-clerk",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1026,
+        "forks": 73,
+        "diskUsageKb": 416,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "chroxify-feedbase",
+      "repository": "https://github.com/chroxify/feedbase.git",
+      "commit": "18dca32a923e12b3af54f1f761c063c7925dfeef",
+      "metadata": {
+        "nameWithOwner": "chroxify/feedbase",
+        "url": "https://github.com/chroxify/feedbase",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 674,
+        "forks": 47,
+        "diskUsageKb": 4676,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "quenti-io-quenti",
+      "repository": "https://github.com/quenti-io/quenti.git",
+      "commit": "b8fa3527c662c6a059875a0add36389f447b7d47",
+      "metadata": {
+        "nameWithOwner": "quenti-io/quenti",
+        "url": "https://github.com/quenti-io/quenti",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 466,
+        "forks": 82,
+        "diskUsageKb": 16101,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "nrwl-monorepo-tools",
+      "repository": "https://github.com/nrwl/monorepo.tools.git",
+      "commit": "56b8ae3b411b82b19a2427c68ef4f7203c7e9edc",
+      "metadata": {
+        "nameWithOwner": "nrwl/monorepo.tools",
+        "url": "https://github.com/nrwl/monorepo.tools",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 353,
+        "forks": 37,
+        "diskUsageKb": 9505,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mininglamp-oss-octo-web",
+      "repository": "https://github.com/Mininglamp-OSS/octo-web.git",
+      "commit": "c47980acda818476de2aa04c2db2bf3d88fd750c",
+      "metadata": {
+        "nameWithOwner": "Mininglamp-OSS/octo-web",
+        "url": "https://github.com/Mininglamp-OSS/octo-web",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 341,
+        "forks": 69,
+        "diskUsageKb": 37652,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mobilereality-react-native-select-pro",
+      "repository": "https://github.com/MobileReality/react-native-select-pro.git",
+      "commit": "f22ec049624fef4ad51e2a2133e77eb645709387",
+      "metadata": {
+        "nameWithOwner": "MobileReality/react-native-select-pro",
+        "url": "https://github.com/MobileReality/react-native-select-pro",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 324,
+        "forks": 18,
+        "diskUsageKb": 3710,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "notum-cz-strapi-next-monorepo-starter",
+      "repository": "https://github.com/notum-cz/strapi-next-monorepo-starter.git",
+      "commit": "c6b856ea15ca5a7b2039ad92d10e277728ac44fd",
+      "metadata": {
+        "nameWithOwner": "notum-cz/strapi-next-monorepo-starter",
+        "url": "https://github.com/notum-cz/strapi-next-monorepo-starter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 304,
+        "forks": 61,
+        "diskUsageKb": 11550,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "nktnet1-rt-stack",
+      "repository": "https://github.com/nktnet1/rt-stack.git",
+      "commit": "95b9ac3f47477cfa7622fdab8a1f8ebe1932d3f3",
+      "metadata": {
+        "nameWithOwner": "nktnet1/rt-stack",
+        "url": "https://github.com/nktnet1/rt-stack",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 296,
+        "forks": 18,
+        "diskUsageKb": 2250,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "daltonmenezes-opendocs",
+      "repository": "https://github.com/daltonmenezes/opendocs.git",
+      "commit": "a4fc4d31a768a0f980314530ab1fafa13caf1fba",
+      "metadata": {
+        "nameWithOwner": "daltonmenezes/opendocs",
+        "url": "https://github.com/daltonmenezes/opendocs",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 277,
+        "forks": 17,
+        "diskUsageKb": 4770,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mmazzarolo-tangerine-monorepo",
+      "repository": "https://github.com/mmazzarolo/tangerine-monorepo.git",
+      "commit": "b76c157ec9b54dff2c31878c5f8c452618b94e01",
+      "metadata": {
+        "nameWithOwner": "mmazzarolo/tangerine-monorepo",
+        "url": "https://github.com/mmazzarolo/tangerine-monorepo",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 272,
+        "forks": 23,
+        "diskUsageKb": 135,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "cording12-next-fast-turbo",
+      "repository": "https://github.com/cording12/next-fast-turbo.git",
+      "commit": "0b135d79b59a1b347ad3659924f09564cb7b24b7",
+      "metadata": {
+        "nameWithOwner": "cording12/next-fast-turbo",
+        "url": "https://github.com/cording12/next-fast-turbo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 260,
+        "forks": 35,
+        "diskUsageKb": 957,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "erkelost-create-vite-app",
+      "repository": "https://github.com/ErKeLost/create-vite-app.git",
+      "commit": "9546198c15e84180769fae5a34b1560f74a164f2",
+      "metadata": {
+        "nameWithOwner": "ErKeLost/create-vite-app",
+        "url": "https://github.com/ErKeLost/create-vite-app",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 245,
+        "forks": 31,
+        "diskUsageKb": 4197,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "g3root-nextjs-dapp-starter-ts",
+      "repository": "https://github.com/G3root/nextjs-dapp-starter-ts.git",
+      "commit": "a3a244eb57e91fbcb6eca8944503d3af987ec83f",
+      "metadata": {
+        "nameWithOwner": "G3root/nextjs-dapp-starter-ts",
+        "url": "https://github.com/G3root/nextjs-dapp-starter-ts",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 238,
+        "forks": 34,
+        "diskUsageKb": 1562,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "adirishi-turborepo-remote-cache-cloudflare",
+      "repository": "https://github.com/AdiRishi/turborepo-remote-cache-cloudflare.git",
+      "commit": "b0aaab5c3063dd5f8d15e38e69398a0c040edcda",
+      "metadata": {
+        "nameWithOwner": "AdiRishi/turborepo-remote-cache-cloudflare",
+        "url": "https://github.com/AdiRishi/turborepo-remote-cache-cloudflare",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 236,
+        "forks": 67,
+        "diskUsageKb": 6990,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "vugar005-youtube-webapp-turborepo",
+      "repository": "https://github.com/vugar005/youtube-webapp-turborepo.git",
+      "commit": "2ac1dff316466fe6f34a8c0f5ce0a30ad47e8a9f",
+      "metadata": {
+        "nameWithOwner": "vugar005/youtube-webapp-turborepo",
+        "url": "https://github.com/vugar005/youtube-webapp-turborepo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 229,
+        "forks": 44,
+        "diskUsageKb": 384,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "phildl-react-router-gospel-stack",
+      "repository": "https://github.com/PhilDL/react-router-gospel-stack.git",
+      "commit": "1cc44fb0080ffbd1f2f8d1395414842e0f372ae7",
+      "metadata": {
+        "nameWithOwner": "PhilDL/react-router-gospel-stack",
+        "url": "https://github.com/PhilDL/react-router-gospel-stack",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 229,
+        "forks": 17,
+        "diskUsageKb": 8699,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "typv-nest-turbo-starter",
+      "repository": "https://github.com/typv/nest-turbo-starter.git",
+      "commit": "0fa229f36b56f71068caa004dd1b642ba589f766",
+      "metadata": {
+        "nameWithOwner": "typv/nest-turbo-starter",
+        "url": "https://github.com/typv/nest-turbo-starter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 219,
+        "forks": 46,
+        "diskUsageKb": 43898,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "wumingdao-zenith-image-generator",
+      "repository": "https://github.com/WuMingDao/zenith-image-generator.git",
+      "commit": "5007474a18974561e5ed8144f06374692729c0f5",
+      "metadata": {
+        "nameWithOwner": "WuMingDao/zenith-image-generator",
+        "url": "https://github.com/WuMingDao/zenith-image-generator",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 214,
+        "forks": 123,
+        "diskUsageKb": 1577,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "ycjcl868-monorepo",
+      "repository": "https://github.com/ycjcl868/monorepo.git",
+      "commit": "10857e4f252bd6b8112fcfc8c6542e7f4a509ac0",
+      "metadata": {
+        "nameWithOwner": "ycjcl868/monorepo",
+        "url": "https://github.com/ycjcl868/monorepo",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 208,
+        "forks": 37,
+        "diskUsageKb": 2319,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "rharkor-caching-for-turbo",
+      "repository": "https://github.com/rharkor/caching-for-turbo.git",
+      "commit": "347ddfd1c03bfbfe5719d083d3f7a74123212943",
+      "metadata": {
+        "nameWithOwner": "rharkor/caching-for-turbo",
+        "url": "https://github.com/rharkor/caching-for-turbo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 208,
+        "forks": 22,
+        "diskUsageKb": 51372,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "qiuweikangdev-taro-react-echarts",
+      "repository": "https://github.com/qiuweikangdev/taro-react-echarts.git",
+      "commit": "b9e36d361ed3795a2277cbfe18690bfdf1939349",
+      "metadata": {
+        "nameWithOwner": "qiuweikangdev/taro-react-echarts",
+        "url": "https://github.com/qiuweikangdev/taro-react-echarts",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 205,
+        "forks": 7,
+        "diskUsageKb": 1304,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "hyesungoh-comet-land",
+      "repository": "https://github.com/hyesungoh/comet-land.git",
+      "commit": "5315983b056304fa59a5b19c75b48935d7491b8a",
+      "metadata": {
+        "nameWithOwner": "hyesungoh/comet-land",
+        "url": "https://github.com/hyesungoh/comet-land",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 203,
+        "forks": 30,
+        "diskUsageKb": 2074,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "arevalolance-design-system-template",
+      "repository": "https://github.com/arevalolance/design-system-template.git",
+      "commit": "cc09563a1862ac7f1da06471493fbabc974ea101",
+      "metadata": {
+        "nameWithOwner": "arevalolance/design-system-template",
+        "url": "https://github.com/arevalolance/design-system-template",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 197,
+        "forks": 14,
+        "diskUsageKb": 348,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pheralb-toast",
+      "repository": "https://github.com/pheralb/toast.git",
+      "commit": "89016eeb25e4a59f867e8e94695b87b1ddc67313",
+      "metadata": {
+        "nameWithOwner": "pheralb/toast",
+        "url": "https://github.com/pheralb/toast",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 197,
+        "forks": 6,
+        "diskUsageKb": 4789,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "gurselcakar-universal-react-monorepo",
+      "repository": "https://github.com/gurselcakar/universal-react-monorepo.git",
+      "commit": "5eb70b251b99d39a6ea1675871590265b74c1c85",
+      "metadata": {
+        "nameWithOwner": "gurselcakar/universal-react-monorepo",
+        "url": "https://github.com/gurselcakar/universal-react-monorepo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 189,
+        "forks": 22,
+        "diskUsageKb": 3912,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mkosir-frontend-monorepo-boilerplate",
+      "repository": "https://github.com/mkosir/frontend-monorepo-boilerplate.git",
+      "commit": "4c6ee244285f3332cc3c91c93c095463630e1576",
+      "metadata": {
+        "nameWithOwner": "mkosir/frontend-monorepo-boilerplate",
+        "url": "https://github.com/mkosir/frontend-monorepo-boilerplate",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 177,
+        "forks": 25,
+        "diskUsageKb": 11284,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "gadingnst-fullstack-next-template",
+      "repository": "https://github.com/gadingnst/fullstack-next-template.git",
+      "commit": "c22154727e9185619239b26c78cbaf108f29b910",
+      "metadata": {
+        "nameWithOwner": "gadingnst/fullstack-next-template",
+        "url": "https://github.com/gadingnst/fullstack-next-template",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 175,
+        "forks": 19,
+        "diskUsageKb": 2063,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "taneba-fullstack-graphql-app",
+      "repository": "https://github.com/taneba/fullstack-graphql-app.git",
+      "commit": "28392d96bfbd48f12be4216ddc70e3aa707a3c4b",
+      "metadata": {
+        "nameWithOwner": "taneba/fullstack-graphql-app",
+        "url": "https://github.com/taneba/fullstack-graphql-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 171,
+        "forks": 20,
+        "diskUsageKb": 4016,
+        "selectionQuery": "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}

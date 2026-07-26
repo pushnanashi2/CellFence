@@ -1,0 +1,745 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/admin/src/**",
+      "packages/shared/vite/**",
+      "packages/shared/vite/src/**",
+      "packages/web/assets/src/**",
+      "packages/web/CAComponents/**",
+      "packages/web/CAComponents/src/**",
+      "packages/web/components/**",
+      "packages/web/components/src/**",
+      "packages/web/constants/**",
+      "packages/web/constants/src/**",
+      "packages/web/directives/**",
+      "packages/web/directives/src/**",
+      "packages/web/hooks/**",
+      "packages/web/hooks/src/**",
+      "packages/web/locale/**",
+      "packages/web/locale/src/**",
+      "packages/web/request/**",
+      "packages/web/request/src/**",
+      "packages/web/styles/**",
+      "packages/web/types/**",
+      "packages/web/types/src/**",
+      "packages/web/utils/**",
+      "packages/web/utils/src/**",
+      "scripts/src/**",
+      "services/admin/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "admin",
+      "ownedPaths": [
+        "apps/admin/src/**"
+      ],
+      "publicEntry": "apps/admin/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "@celeris/admin",
+      "consumes": [
+        {
+          "cell": "admin-api"
+        },
+        {
+          "cell": "assets"
+        },
+        {
+          "cell": "ca-components"
+        },
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "directives"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "locale"
+        },
+        {
+          "cell": "request"
+        },
+        {
+          "cell": "styles"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "admin-api",
+      "ownedPaths": [
+        "services/admin/**"
+      ],
+      "publicEntry": "services/admin/data/auth/fakeCodeList.ts",
+      "publicSymbols": [
+        "fakeCodeList"
+      ],
+      "packageName": "@celeris/admin-api",
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "assets",
+      "ownedPaths": [
+        "packages/web/assets/src/**"
+      ],
+      "publicEntry": "packages/web/assets/src/index.ts",
+      "publicSymbols": [
+        "avatar",
+        "earningsIndicator",
+        "interwovenReflections",
+        "logoImage",
+        "totalIncomeIndicator"
+      ],
+      "packageName": "@celeris/assets",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "ca-components",
+      "ownedPaths": [
+        "packages/web/CAComponents/src/**"
+      ],
+      "publicEntry": "packages/web/CAComponents/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@celeris/ca-components",
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "packages/web/components/src/**"
+      ],
+      "publicEntry": "packages/web/components/src/index.ts",
+      "publicSymbols": [
+        "AppLogo",
+        "AppNaiveUIProvider",
+        "CAAppLogo",
+        "CAAppNaiveUIProvider",
+        "CACharts",
+        "CAIcon",
+        "Charts",
+        "Icon",
+        "normalizeIconName",
+        "renderIcon",
+        "ToolTipFormatterParams"
+      ],
+      "packageName": "@celeris/components",
+      "consumes": [
+        {
+          "cell": "assets"
+        },
+        {
+          "cell": "ca-components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "styles"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "constants",
+      "ownedPaths": [
+        "packages/web/constants/src/**"
+      ],
+      "publicEntry": "packages/web/constants/src/index.ts",
+      "publicSymbols": [
+        "CELERIS_WEB_GITHUB_URL",
+        "ContentTypeConstants",
+        "HttpStatusConstants",
+        "LOCALES_STORE_KEY",
+        "NOOP",
+        "OperatingSystem",
+        "OS",
+        "PageConstants",
+        "PermissionCacheTypeConstants",
+        "PermissionModeConstants",
+        "PROJECT_CONFIG_KEY",
+        "RequestConstants",
+        "ResultConstants",
+        "RoleConstants",
+        "RouterTransitionConstants",
+        "SessionTimeoutProcessingConstants",
+        "SettingButtonPositionConstants",
+        "VITE_DOCS_CN_URL",
+        "VITE_DOCS_URL",
+        "VUE_DOCS_URL"
+      ],
+      "packageName": "@celeris/constants",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "directives",
+      "ownedPaths": [
+        "packages/web/directives/src/**"
+      ],
+      "publicEntry": "packages/web/directives/src/anchor/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@celeris/directives",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "packages/web/hooks/src/**"
+      ],
+      "publicEntry": "packages/web/hooks/src/index.ts",
+      "publicSymbols": [
+        "breakpoints",
+        "isExtraLargeScreen",
+        "isGreaterOrEqual2xl",
+        "isGreaterOrEqualLg",
+        "isGreaterOrEqualMd",
+        "isGreaterOrEqualSm",
+        "isGreaterOrEqualXl",
+        "isMediumOrLargeScreen",
+        "isSmallerOrEqual2xl",
+        "isSmallerOrEqualLg",
+        "isSmallerOrEqualMd",
+        "isSmallerOrEqualSm",
+        "isSmallerOrEqualXl",
+        "useComponentRef",
+        "useMergeState",
+        "useState"
+      ],
+      "packageName": "@celeris/hooks",
+      "consumes": [
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "locale",
+      "ownedPaths": [
+        "packages/web/locale/src/**"
+      ],
+      "publicEntry": "packages/web/locale/src/index.ts",
+      "publicSymbols": [
+        "i18n",
+        "setupI18n"
+      ],
+      "packageName": "@celeris/locale",
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "request",
+      "ownedPaths": [
+        "packages/web/request/src/**"
+      ],
+      "publicEntry": "packages/web/request/src/index.ts",
+      "publicSymbols": [
+        "createHttpClient",
+        "defaultHttpClient"
+      ],
+      "packageName": "@celeris/request",
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "locale"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "web"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "scripts/src/**"
+      ],
+      "publicEntry": "scripts/src/build.ts",
+      "publicSymbols": [],
+      "packageName": "scripts",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "packages/shared/vite/**"
+      ],
+      "publicEntry": "packages/shared/vite/index.ts",
+      "publicSymbols": [
+        "createViteConfig",
+        "mergeConfigs"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "styles",
+      "ownedPaths": [
+        "packages/web/styles/**"
+      ],
+      "publicEntry": "packages/web/styles/index.ts",
+      "publicSymbols": [],
+      "packageName": "@celeris/styles",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/web/types/src/**"
+      ],
+      "publicEntry": "packages/web/types/src/index.ts",
+      "publicSymbols": [
+        "global",
+        "GlobConfig",
+        "GlobEnvConfig",
+        "HeaderSetting",
+        "Menu",
+        "MenuModule",
+        "MenuSetting",
+        "ProjectSetting",
+        "ThemeSetting",
+        "TransitionSetting",
+        "UserInfo",
+        "ViteEnvVariables"
+      ],
+      "packageName": "@celeris/types",
+      "consumes": [
+        {
+          "cell": "constants"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/web/utils/src/**"
+      ],
+      "publicEntry": "packages/web/utils/src/index.ts",
+      "publicSymbols": [
+        "black",
+        "blue",
+        "buildShortUUID",
+        "buildUUID",
+        "celerisBlue",
+        "colorToRgb",
+        "convertColorToRgbString",
+        "convertColorToRgbValues",
+        "copyToClipboard",
+        "createErrorResponse",
+        "createInjectionKey",
+        "createPaginatedSuccessResponse",
+        "createPathMatcher",
+        "createStorageName",
+        "createSuccessResponse",
+        "cyan",
+        "dateUtil",
+        "deepMerge",
+        "detectOperatingSystem",
+        "Emitter",
+        "Encryption",
+        "EncryptionFactory",
+        "EncryptionParams",
+        "ErrorResponse",
+        "EventHandlerList",
+        "EventHandlerMap",
+        "EventType",
+        "extractAuthorizationToken",
+        "field",
+        "filterTree",
+        "findAllNodePaths",
+        "findFirstNodePath",
+        "findTreeNode",
+        "findTreeNodes",
+        "flattenMultiLevelRoutes",
+        "flattenToTree",
+        "flattenTree",
+        "flattenVNodes",
+        "formatToDate",
+        "formatToDateTime",
+        "forwardRefComponent",
+        "generateColorPalette",
+        "generateColorPalettes",
+        "getAllParentPaths",
+        "getAppConfigFileName",
+        "getAppGlobalConfig",
+        "getElement",
+        "getErrorMessage",
+        "getFirstMatchingParent",
+        "getRawRoute",
+        "gold",
+        "gray",
+        "green",
+        "grey",
+        "Handler",
+        "Hashing",
+        "HashingFactory",
+        "isArguments",
+        "isArray",
+        "isArrayBuffer",
+        "isArrayLike",
+        "isArrayLikeObject",
+        "isBlackColor",
+        "isBoolean",
+        "isBuffer",
+        "isClient",
+        "isColor",
+        "isComponentInstance",
+        "isDate",
+        "isElement",
+        "isEmpty",
+        "isEqual",
+        "isEqualWith",
+        "isError",
+        "isFinite",
+        "isFunction",
+        "isHttpUrl",
+        "isLength",
+        "isLinux",
+        "isMacOS",
+        "isMap",
+        "isMatch",
+        "isMatchWith",
+        "isMobile",
+        "isNative",
+        "isNil",
+        "isNull",
+        "isNumber",
+        "isObject",
+        "isObjectLike",
+        "isPlainObject",
+        "isRegExp",
+        "isSafeInteger",
+        "isServer",
+        "isServerRendering",
+        "isSet",
+        "isString",
+        "isSymbol",
+        "isTouchSupported",
+        "isTypedArray",
+        "isUndefined",
+        "isUnix",
+        "isWeakMap",
+        "isWeakSet",
+        "isWhiteColor",
+        "isWindows",
+        "lime",
+        "loadDataFromModules",
+        "loadMenusFromModules",
+        "loadRoutesFromModules",
+        "logger",
+        "magenta",
+        "mapTreeNodeStructure",
+        "mapTreeStructure",
+        "memo",
+        "mitt",
+        "NOOP",
+        "off",
+        "on",
+        "openWindow",
+        "orange",
+        "orangered",
+        "paginate",
+        "PalettesProps",
+        "parseCSS",
+        "pinkpurple",
+        "presetDarkPalettes",
+        "presetPalettes",
+        "presetPrimaryColors",
+        "purple",
+        "querySelector",
+        "red",
+        "RequestParams",
+        "serializeCSS",
+        "setCssVariable",
+        "setCssVariables",
+        "SFCInstallWithContext",
+        "SFCWithInstall",
+        "SuccessResponse",
+        "toggleCssClass",
+        "transformMenuModule",
+        "transformRouteToMenu",
+        "traverseTreeIterative",
+        "traverseTreeIterativeWithParent",
+        "traverseTreeRecursive",
+        "white",
+        "WildCardEventHandlerList",
+        "WildcardHandler",
+        "withInstall",
+        "withInstallDirective",
+        "withInstallFunction",
+        "withNoopInstall",
+        "yellow"
+      ],
+      "packageName": "@celeris/utils",
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "web"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite",
+      "ownedPaths": [
+        "packages/shared/vite/src/**"
+      ],
+      "publicEntry": "packages/shared/vite/src/index.ts",
+      "publicSymbols": [
+        "createViteConfig",
+        "mergeConfigs"
+      ],
+      "packageName": "@celeris/vite",
+      "consumes": [
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "styles"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "web",
+      "ownedPaths": [
+        "packages/web/CAComponents/**",
+        "packages/web/components/**",
+        "packages/web/constants/**",
+        "packages/web/directives/**",
+        "packages/web/hooks/**",
+        "packages/web/locale/**",
+        "packages/web/request/**",
+        "packages/web/types/**",
+        "packages/web/utils/**"
+      ],
+      "publicEntry": "packages/web/CAComponents/build.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "components"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "directives"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "locale"
+        },
+        {
+          "cell": "request"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

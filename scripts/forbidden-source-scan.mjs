@@ -35,7 +35,10 @@ function escapeRegExp(value) {
 
 function containsForbiddenTerm(text, term) {
   const normalizedTerm = term.toLowerCase();
-  if (normalizedTerm === "advisor") {
+  if (normalizedTerm === "/home/") {
+    return /(^|[^a-z0-9._-])\/home\//.test(text);
+  }
+  if (normalizedTerm === "advisor" || normalizedTerm === "earnings") {
     return new RegExp(`(^|[^a-z0-9])${escapeRegExp(normalizedTerm)}([^a-z0-9]|$)`).test(text);
   }
   return text.includes(normalizedTerm);

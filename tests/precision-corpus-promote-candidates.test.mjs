@@ -205,6 +205,66 @@ test("precision corpus promotion copies manifests and produces a reviewed-corpus
   }
 });
 
+test("precision corpus promotion reports only current deficit coverage in claim-progress metadata", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-promote-deficit-only-"));
+  try {
+    const { currentCorpus, candidateCorpus, candidateBundle, expansionPlan } = createFixture(rootDir);
+    const plan = readJson(expansionPlan);
+    plan.current = {
+      deficits: {
+        CELLFENCE_UNDECLARED_CONSUMER: 3,
+        CELLFENCE_UNDECLARED_RESOURCE_ACCESS: 0,
+      },
+    };
+    plan.candidatePool.topCandidates[0].sampledCountsByRule = {
+      CELLFENCE_PRIVATE_IMPORT: 7,
+      CELLFENCE_UNDECLARED_CONSUMER: 6,
+      CELLFENCE_UNDECLARED_RESOURCE_ACCESS: 1,
+    };
+    plan.candidatePool.topCandidates[0].sampledDeficitCoverageScore = 3;
+    writeJson(expansionPlan, plan);
+    const outCorpus = path.join(rootDir, "next.json");
+    const reportPath = path.join(rootDir, "promotion.json");
+
+    const result = run(promoteScript, [
+      "--current-corpus",
+      currentCorpus,
+      "--candidate-corpus",
+      candidateCorpus,
+      "--candidate-bundle",
+      candidateBundle,
+      "--expansion-plan",
+      expansionPlan,
+      "--out-corpus",
+      outCorpus,
+      "--top",
+      "1",
+      "--report",
+      reportPath,
+      "--reviewed-at",
+      "2026-07-25",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const corpus = readJson(outCorpus);
+    assert.deepEqual(corpus.selectionPolicy.promotion.selectedDeficitCoverage, {
+      sampledDeficitCoverageScore: 3,
+      sampledCountsByRule: {
+        CELLFENCE_UNDECLARED_CONSUMER: 3,
+      },
+    });
+    const report = readJson(reportPath);
+    assert.deepEqual(report.summary.selectedDeficitCoverage, corpus.selectionPolicy.promotion.selectedDeficitCoverage);
+    assert.deepEqual(corpus.subjects[1].metadata.promotionSource.diagnosticSampledCountsByRule, {
+      CELLFENCE_PRIVATE_IMPORT: 7,
+      CELLFENCE_UNDECLARED_CONSUMER: 6,
+      CELLFENCE_UNDECLARED_RESOURCE_ACCESS: 1,
+    });
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("precision corpus promotion rejects zero-deficit candidates before copying manifests", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-corpus-promote-zero-gap-"));
   try {

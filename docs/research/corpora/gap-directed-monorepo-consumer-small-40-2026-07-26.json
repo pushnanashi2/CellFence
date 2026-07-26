@@ -1,0 +1,792 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Exploratory small TS/JS workspace candidate corpus generated on 2026-07-26 to close the remaining CELLFENCE_UNDECLARED_CONSUMER sample deficit under a 10% repository cap. Diagnostic only, not reviewed precision evidence.",
+  "selectionPolicy": {
+    "date": "2026-07-26",
+    "source": "GitHub repository search workspace topics + exact default-branch git ls-remote",
+    "queries": [
+      "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:yarn-workspaces language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:npm-workspaces language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:workspace language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:turborepo language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:nx language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:monorepo language:TypeScript stars:>=20 archived:false fork:false",
+      "topic:monorepo language:JavaScript stars:>=20 archived:false fork:false"
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "primary language TypeScript or JavaScript",
+      "stars >= 20",
+      "diskUsageKb <= 50000",
+      "not already present in prior reviewed work queues or diagnostic consumer corpora",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no dependency install, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer and production scope results are candidate-sourcing diagnostics only; excluded from precision denominators until manifests and labels are externally reviewed."
+  },
+  "subjects": [
+    {
+      "id": "antfu-vscode-pnpm-catalog-lens",
+      "repository": "https://github.com/antfu/vscode-pnpm-catalog-lens.git",
+      "commit": "85508bf3b9811e764eb0e324da006e1352bf9fca",
+      "metadata": {
+        "nameWithOwner": "antfu/vscode-pnpm-catalog-lens",
+        "url": "https://github.com/antfu/vscode-pnpm-catalog-lens",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 256,
+        "forks": 25,
+        "diskUsageKb": 262,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "karabharat-reactvitenstack",
+      "repository": "https://github.com/KaraBharat/ReactViTenStack.git",
+      "commit": "5b5553b0610f737f2417fb0bb000b8c3817777f5",
+      "metadata": {
+        "nameWithOwner": "KaraBharat/ReactViTenStack",
+        "url": "https://github.com/KaraBharat/ReactViTenStack",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 132,
+        "forks": 22,
+        "diskUsageKb": 11022,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "bakeruk-modern-typescript-monorepo-example",
+      "repository": "https://github.com/bakeruk/modern-typescript-monorepo-example.git",
+      "commit": "b7da36d8a24796a5bd4da82aedebf902d37a0378",
+      "metadata": {
+        "nameWithOwner": "bakeruk/modern-typescript-monorepo-example",
+        "url": "https://github.com/bakeruk/modern-typescript-monorepo-example",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 110,
+        "forks": 15,
+        "diskUsageKb": 85,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "zhensherlock-sp500-mcp-server",
+      "repository": "https://github.com/zhensherlock/sp500-mcp-server.git",
+      "commit": "ee180b81d8a788b84123fe11eef995301824366f",
+      "metadata": {
+        "nameWithOwner": "zhensherlock/sp500-mcp-server",
+        "url": "https://github.com/zhensherlock/sp500-mcp-server",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 106,
+        "forks": 1,
+        "diskUsageKb": 7588,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mohitkumartoshniwal-jsonlens",
+      "repository": "https://github.com/mohitkumartoshniwal/jsonlens.git",
+      "commit": "ab8f40492b166c19c75e88d2a9b25c133e75dd6f",
+      "metadata": {
+        "nameWithOwner": "mohitkumartoshniwal/jsonlens",
+        "url": "https://github.com/mohitkumartoshniwal/jsonlens",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 103,
+        "forks": 16,
+        "diskUsageKb": 33895,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tkssharma-swiggy-clone-full-stack",
+      "repository": "https://github.com/tkssharma/swiggy-clone-full-stack.git",
+      "commit": "74f242adbe73f492112d07f5c8e87063bebfe046",
+      "metadata": {
+        "nameWithOwner": "tkssharma/swiggy-clone-full-stack",
+        "url": "https://github.com/tkssharma/swiggy-clone-full-stack",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 97,
+        "forks": 57,
+        "diskUsageKb": 3192,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "joshuajaco-eslint-plugin-workspaces",
+      "repository": "https://github.com/joshuajaco/eslint-plugin-workspaces.git",
+      "commit": "66079e038dca676e2c440ea46b6f41064f80634c",
+      "metadata": {
+        "nameWithOwner": "joshuajaco/eslint-plugin-workspaces",
+        "url": "https://github.com/joshuajaco/eslint-plugin-workspaces",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 80,
+        "forks": 9,
+        "diskUsageKb": 547,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "cryogenicplanet-typescript-monorepo-example",
+      "repository": "https://github.com/CryogenicPlanet/typescript-monorepo-example.git",
+      "commit": "2bd6380b98ca7841ebbb3c370170e5e36cad0898",
+      "metadata": {
+        "nameWithOwner": "CryogenicPlanet/typescript-monorepo-example",
+        "url": "https://github.com/CryogenicPlanet/typescript-monorepo-example",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 73,
+        "forks": 15,
+        "diskUsageKb": 100,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "wayofdev-next-starter-tpl",
+      "repository": "https://github.com/wayofdev/next-starter-tpl.git",
+      "commit": "73a43db7904273a5d126d539fbb4a74b2948d7ae",
+      "metadata": {
+        "nameWithOwner": "wayofdev/next-starter-tpl",
+        "url": "https://github.com/wayofdev/next-starter-tpl",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 70,
+        "forks": 8,
+        "diskUsageKb": 4711,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "smorsic-pacwich",
+      "repository": "https://github.com/smorsic/pacwich.git",
+      "commit": "6f86d7e7f261744a3817fb0ae12af2d65a4f43e0",
+      "metadata": {
+        "nameWithOwner": "smorsic/pacwich",
+        "url": "https://github.com/smorsic/pacwich",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 65,
+        "forks": 5,
+        "diskUsageKb": 5067,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "iamrohanshrestha-form-builder",
+      "repository": "https://github.com/iamrohanshrestha/form-builder.git",
+      "commit": "8d7d802c8996942818f72628583c14f8074c5c64",
+      "metadata": {
+        "nameWithOwner": "iamrohanshrestha/form-builder",
+        "url": "https://github.com/iamrohanshrestha/form-builder",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 49,
+        "forks": 15,
+        "diskUsageKb": 476,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "alejandronanez-turborepo-nextjs-starter",
+      "repository": "https://github.com/alejandronanez/turborepo-nextjs-starter.git",
+      "commit": "c634b5a6d67af714ddbe5d1a8410918f4b29450c",
+      "metadata": {
+        "nameWithOwner": "alejandronanez/turborepo-nextjs-starter",
+        "url": "https://github.com/alejandronanez/turborepo-nextjs-starter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 44,
+        "forks": 1,
+        "diskUsageKb": 871,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "dmokel-tutorial-monorepo",
+      "repository": "https://github.com/dmokel/tutorial-monorepo.git",
+      "commit": "b8e06d2c0859c1d229b1d7582050d6672223f588",
+      "metadata": {
+        "nameWithOwner": "dmokel/tutorial-monorepo",
+        "url": "https://github.com/dmokel/tutorial-monorepo",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 39,
+        "forks": 1,
+        "diskUsageKb": 673,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "worldzhao-rush-monorepo-example",
+      "repository": "https://github.com/worldzhao/rush-monorepo-example.git",
+      "commit": "2503e108277ee91e54bc5c489c4c99c744a813c5",
+      "metadata": {
+        "nameWithOwner": "worldzhao/rush-monorepo-example",
+        "url": "https://github.com/worldzhao/rush-monorepo-example",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 37,
+        "forks": 6,
+        "diskUsageKb": 481,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "retconned-pnpm-turborepo-boilerplate",
+      "repository": "https://github.com/retconned/pnpm-turborepo-boilerplate.git",
+      "commit": "73583b423a386d164a88de711ed5d5136a10dbae",
+      "metadata": {
+        "nameWithOwner": "retconned/pnpm-turborepo-boilerplate",
+        "url": "https://github.com/retconned/pnpm-turborepo-boilerplate",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 36,
+        "forks": 0,
+        "diskUsageKb": 513,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "senegalha-template-monorepo-typescript",
+      "repository": "https://github.com/senegalha/template-monorepo-typescript.git",
+      "commit": "17afa743dfb60ef904de45029a2e8f1f7d37a25f",
+      "metadata": {
+        "nameWithOwner": "senegalha/template-monorepo-typescript",
+        "url": "https://github.com/senegalha/template-monorepo-typescript",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 31,
+        "forks": 4,
+        "diskUsageKb": 556,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "prncexe-chronex",
+      "repository": "https://github.com/prncexe/chronex.git",
+      "commit": "ced05db228917bf2bb33e195a146b4d9c3e7cf7c",
+      "metadata": {
+        "nameWithOwner": "prncexe/chronex",
+        "url": "https://github.com/prncexe/chronex",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 26,
+        "forks": 8,
+        "diskUsageKb": 16139,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mufeiyu-ayu-vjade",
+      "repository": "https://github.com/mufeiyu-ayu/VJade.git",
+      "commit": "16b21cb4c3b3c974c8a08a47eb87b46b3cd1fdec",
+      "metadata": {
+        "nameWithOwner": "mufeiyu-ayu/VJade",
+        "url": "https://github.com/mufeiyu-ayu/VJade",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 26,
+        "forks": 0,
+        "diskUsageKb": 10238,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "hengshanmwc-pkgs",
+      "repository": "https://github.com/hengshanMWC/pkgs.git",
+      "commit": "610bcb5ae481e18064b16ab9f72f1dc79c6868f0",
+      "metadata": {
+        "nameWithOwner": "hengshanMWC/pkgs",
+        "url": "https://github.com/hengshanMWC/pkgs",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 19,
+        "forks": 4,
+        "diskUsageKb": 2319,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "thecodeheist-coder-rexial",
+      "repository": "https://github.com/TheCodeHeist-Coder/Rexial.git",
+      "commit": "1c5aeb7666cb855efa3cd6e34494ccaac5366cea",
+      "metadata": {
+        "nameWithOwner": "TheCodeHeist-Coder/Rexial",
+        "url": "https://github.com/TheCodeHeist-Coder/Rexial",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 19,
+        "forks": 2,
+        "diskUsageKb": 8261,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "doctor-wu-agent-im-relay",
+      "repository": "https://github.com/Doctor-wu/agent-im-relay.git",
+      "commit": "1fb3ee77de04277f8eb696da897ed22850417265",
+      "metadata": {
+        "nameWithOwner": "Doctor-wu/agent-im-relay",
+        "url": "https://github.com/Doctor-wu/agent-im-relay",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 19,
+        "forks": 5,
+        "diskUsageKb": 1424,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "aruniverse-cospace",
+      "repository": "https://github.com/aruniverse/cospace.git",
+      "commit": "09f376e044799756fa040679aa8121e38701497a",
+      "metadata": {
+        "nameWithOwner": "aruniverse/cospace",
+        "url": "https://github.com/aruniverse/cospace",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 16,
+        "forks": 1,
+        "diskUsageKb": 881,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "dxiongya-fourdim-fronend",
+      "repository": "https://github.com/dxiongya/fourdim-fronend.git",
+      "commit": "f13fd3964ff631b9552a7c5f16335d9b82397c35",
+      "metadata": {
+        "nameWithOwner": "dxiongya/fourdim-fronend",
+        "url": "https://github.com/dxiongya/fourdim-fronend",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 14,
+        "forks": 0,
+        "diskUsageKb": 3323,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "wayofdev-npm-shareable-configs",
+      "repository": "https://github.com/wayofdev/npm-shareable-configs.git",
+      "commit": "e6c38e3939519f6dfbc5d431f86438cf642cd4a0",
+      "metadata": {
+        "nameWithOwner": "wayofdev/npm-shareable-configs",
+        "url": "https://github.com/wayofdev/npm-shareable-configs",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 13,
+        "forks": 1,
+        "diskUsageKb": 2811,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "louisbrulenaudet-monorepo-template",
+      "repository": "https://github.com/louisbrulenaudet/monorepo-template.git",
+      "commit": "eb617f1f8051f47ea3bd92db8248be7c941c12da",
+      "metadata": {
+        "nameWithOwner": "louisbrulenaudet/monorepo-template",
+        "url": "https://github.com/louisbrulenaudet/monorepo-template",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 13,
+        "forks": 1,
+        "diskUsageKb": 2325,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "auditmos-saas-on-cf",
+      "repository": "https://github.com/auditmos/saas-on-cf.git",
+      "commit": "60c6a43f981beee6c6b92a4a78857c4b1fb60294",
+      "metadata": {
+        "nameWithOwner": "auditmos/saas-on-cf",
+        "url": "https://github.com/auditmos/saas-on-cf",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 13,
+        "forks": 2,
+        "diskUsageKb": 1914,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "betterrunner-ts-monorepo-starter",
+      "repository": "https://github.com/betterRunner/ts-monorepo-starter.git",
+      "commit": "8a8c746c8d3c19cc1a1a6f45a84beba8b2b33ac9",
+      "metadata": {
+        "nameWithOwner": "betterRunner/ts-monorepo-starter",
+        "url": "https://github.com/betterRunner/ts-monorepo-starter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 12,
+        "forks": 0,
+        "diskUsageKb": 49,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "zuoqiu-yingyi-siyuan-packages-monorepo",
+      "repository": "https://github.com/Zuoqiu-Yingyi/siyuan-packages-monorepo.git",
+      "commit": "0a94d0d623b85eab9615d79e11be3bb29ef40431",
+      "metadata": {
+        "nameWithOwner": "Zuoqiu-Yingyi/siyuan-packages-monorepo",
+        "url": "https://github.com/Zuoqiu-Yingyi/siyuan-packages-monorepo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 12,
+        "forks": 4,
+        "diskUsageKb": 21091,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "savager-pnpm-monorepo-boilerplate",
+      "repository": "https://github.com/savager/pnpm-monorepo-boilerplate.git",
+      "commit": "c60d236fa6664883c730155d1d7a6b8b211d168b",
+      "metadata": {
+        "nameWithOwner": "savager/pnpm-monorepo-boilerplate",
+        "url": "https://github.com/savager/pnpm-monorepo-boilerplate",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 12,
+        "forks": 2,
+        "diskUsageKb": 805,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "miracle-git-mate-ui",
+      "repository": "https://github.com/miracle-git/mate-ui.git",
+      "commit": "7894d5426b8a12ce8806ddf30895145b336d7349",
+      "metadata": {
+        "nameWithOwner": "miracle-git/mate-ui",
+        "url": "https://github.com/miracle-git/mate-ui",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 11,
+        "forks": 2,
+        "diskUsageKb": 7419,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "binbandit-tomorrow",
+      "repository": "https://github.com/binbandit/tomorrow.git",
+      "commit": "91c944c98a50049c2254933a8dc135433445cfea",
+      "metadata": {
+        "nameWithOwner": "binbandit/tomorrow",
+        "url": "https://github.com/binbandit/tomorrow",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 11,
+        "forks": 0,
+        "diskUsageKb": 10734,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "pdsuwwz-docx-preview-demo",
+      "repository": "https://github.com/pdsuwwz/docx-preview-demo.git",
+      "commit": "d7409939cea46a87b0158fc6a3e2e3a7936b21b9",
+      "metadata": {
+        "nameWithOwner": "pdsuwwz/docx-preview-demo",
+        "url": "https://github.com/pdsuwwz/docx-preview-demo",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 10,
+        "forks": 2,
+        "diskUsageKb": 348,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "yynss21-tracker-hub",
+      "repository": "https://github.com/yynss21/tracker-hub.git",
+      "commit": "f7ab091ca8c7c94cfa88cdbaaf8b445bcabd5e1a",
+      "metadata": {
+        "nameWithOwner": "yynss21/tracker-hub",
+        "url": "https://github.com/yynss21/tracker-hub",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 10,
+        "forks": 0,
+        "diskUsageKb": 19444,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "panoply-mithril-pnpm",
+      "repository": "https://github.com/panoply/mithril-pnpm.git",
+      "commit": "c67ca62831b118393bc91fd8e19ec55263ec5978",
+      "metadata": {
+        "nameWithOwner": "panoply/mithril-pnpm",
+        "url": "https://github.com/panoply/mithril-pnpm",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 10,
+        "forks": 0,
+        "diskUsageKb": 160,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mjyocca-serverless-nextjs-aws-dynamodb-cognito",
+      "repository": "https://github.com/mjyocca/serverless-nextjs-aws-dynamodb-cognito.git",
+      "commit": "89305aedfbb8c33af5e9b74955a0feffc41e4d13",
+      "metadata": {
+        "nameWithOwner": "mjyocca/serverless-nextjs-aws-dynamodb-cognito",
+        "url": "https://github.com/mjyocca/serverless-nextjs-aws-dynamodb-cognito",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 10,
+        "forks": 2,
+        "diskUsageKb": 1457,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "js-banana-jack",
+      "repository": "https://github.com/JS-banana/jack.git",
+      "commit": "85861f6b604c78156f7428e5ee70b22643bea77e",
+      "metadata": {
+        "nameWithOwner": "JS-banana/jack",
+        "url": "https://github.com/JS-banana/jack",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 9,
+        "forks": 0,
+        "diskUsageKb": 5523,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "team-timo-timo-client",
+      "repository": "https://github.com/Team-Timo/Timo-client.git",
+      "commit": "cd4310f68a3b217a4840d098c1e1223527949dca",
+      "metadata": {
+        "nameWithOwner": "Team-Timo/Timo-client",
+        "url": "https://github.com/Team-Timo/Timo-client",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 9,
+        "forks": 0,
+        "diskUsageKb": 4804,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tkssharma-stack-overflow-full-stack-clone",
+      "repository": "https://github.com/tkssharma/stack-overflow-full-stack-clone.git",
+      "commit": "5fbfa5cf64413e23b83182793c590aabd94d9fbd",
+      "metadata": {
+        "nameWithOwner": "tkssharma/stack-overflow-full-stack-clone",
+        "url": "https://github.com/tkssharma/stack-overflow-full-stack-clone",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 8,
+        "forks": 7,
+        "diskUsageKb": 1008,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "nagell-vue-monorepo-template",
+      "repository": "https://github.com/Nagell/vue_monorepo_template.git",
+      "commit": "f9929b7ae2e571e7b6d8b299a63d2820ea1d12cb",
+      "metadata": {
+        "nameWithOwner": "Nagell/vue_monorepo_template",
+        "url": "https://github.com/Nagell/vue_monorepo_template",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 8,
+        "forks": 1,
+        "diskUsageKb": 1232,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "zhixiangyao-vite-vue-ts-monorepo-starter",
+      "repository": "https://github.com/zhixiangyao/vite-vue-ts-monorepo-starter.git",
+      "commit": "faf08796dafecf7aa482c2015fc0c02215820b86",
+      "metadata": {
+        "nameWithOwner": "zhixiangyao/vite-vue-ts-monorepo-starter",
+        "url": "https://github.com/zhixiangyao/vite-vue-ts-monorepo-starter",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 8,
+        "forks": 0,
+        "diskUsageKb": 76,
+        "selectionQuery": "topic:pnpm-workspace language:TypeScript stars:>=20 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}

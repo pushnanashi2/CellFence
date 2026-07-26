@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Selected diagnostic TS/JS monorepo candidate subset generated on 2026-07-26 from the 50-repo consumer search. Contains only subjects that produced CELLFENCE_UNDECLARED_CONSUMER diagnostics in the first run; diagnostic only, not reviewed precision evidence.",
+  "selectionPolicy": {
+    "date": "2026-07-26",
+    "source": "GitHub repository search topics + exact default-branch git ls-remote",
+    "queries": [
+      "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:monorepo language:JavaScript stars:>=50 archived:false fork:false",
+      "topic:turborepo language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:turborepo language:JavaScript stars:>=50 archived:false fork:false",
+      "topic:nx language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:yarn-workspaces language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:pnpm-workspace language:TypeScript stars:>=50 archived:false fork:false",
+      "topic:workspaces language:TypeScript stars:>=50 archived:false fork:false"
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "primary language TypeScript or JavaScript",
+      "stars >= 50",
+      "diskUsageKb <= 120000",
+      "not already present in prior reviewed work queues or 2026-07-26 diagnostic consumer corpora",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no dependency install, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer and production scope results are candidate-sourcing diagnostics only; excluded from precision denominators until manifests and labels are externally reviewed.",
+    "parentCorpus": "docs/research/corpora/gap-directed-monorepo-consumer-50-2026-07-26.json",
+    "subsetRule": "subjects with CELLFENCE_UNDECLARED_CONSUMER diagnostics in the first 50-repo run; rerun required because the first audit logs were not preserved"
+  },
+  "subjects": [
+    {
+      "id": "nteract-archived-desktop-app",
+      "repository": "https://github.com/nteract/archived-desktop-app.git",
+      "commit": "7516211c27bad1e5a415505b023e2221bc430d8a",
+      "metadata": {
+        "nameWithOwner": "nteract/archived-desktop-app",
+        "url": "https://github.com/nteract/archived-desktop-app",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 6249,
+        "forks": 549,
+        "diskUsageKb": 41048,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "colmena-colmena",
+      "repository": "https://github.com/colmena/colmena.git",
+      "commit": "8d070208c59f34c85b589dec75476f7a446257e9",
+      "metadata": {
+        "nameWithOwner": "colmena/colmena",
+        "url": "https://github.com/colmena/colmena",
+        "defaultBranch": "develop",
+        "primaryLanguage": "TypeScript",
+        "stars": 1382,
+        "forks": 391,
+        "diskUsageKb": 5477,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "panoratech-panora",
+      "repository": "https://github.com/panoratech/Panora.git",
+      "commit": "38eda443ed91cccf59da5dcc2ac401a1cb02d35a",
+      "metadata": {
+        "nameWithOwner": "panoratech/Panora",
+        "url": "https://github.com/panoratech/Panora",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1033,
+        "forks": 200,
+        "diskUsageKb": 109553,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lerna-lite-lerna-lite",
+      "repository": "https://github.com/lerna-lite/lerna-lite.git",
+      "commit": "bda9e921cf9a050886d335120049c396f13a2d65",
+      "metadata": {
+        "nameWithOwner": "lerna-lite/lerna-lite",
+        "url": "https://github.com/lerna-lite/lerna-lite",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 566,
+        "forks": 49,
+        "diskUsageKb": 12609,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "kirklin-celeris-web",
+      "repository": "https://github.com/kirklin/celeris-web.git",
+      "commit": "a578a495f2f767f10dc2d9e3ac4f4b61afd56ddf",
+      "metadata": {
+        "nameWithOwner": "kirklin/celeris-web",
+        "url": "https://github.com/kirklin/celeris-web",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 496,
+        "forks": 64,
+        "diskUsageKb": 3758,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "umaprotocol-protocol",
+      "repository": "https://github.com/UMAprotocol/protocol.git",
+      "commit": "c6ac81a699f671c4b553134e6f9852cc47e8195b",
+      "metadata": {
+        "nameWithOwner": "UMAprotocol/protocol",
+        "url": "https://github.com/UMAprotocol/protocol",
+        "defaultBranch": "master",
+        "primaryLanguage": "JavaScript",
+        "stars": 480,
+        "forks": 213,
+        "diskUsageKb": 57492,
+        "selectionQuery": "topic:monorepo language:TypeScript stars:>=50 archived:false fork:false"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}

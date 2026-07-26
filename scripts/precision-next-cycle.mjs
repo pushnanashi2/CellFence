@@ -45,6 +45,13 @@ const claimProfiles = {
       "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
     ],
   },
+  "ts-js-public-surface-v1": {
+    description: "Reviewed TS/JS public-surface blocking precision: stale public-symbol manifest drift only.",
+    targetPopulation: "reviewed TS/JS workspace repositories, public-surface drift rules only",
+    includedRules: [
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    ],
+  },
 };
 
 function usage() {

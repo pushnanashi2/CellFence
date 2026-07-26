@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/external/**",
+      "src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "common",
+      "ownedPaths": [
+        "src/common/**"
+      ],
+      "publicEntry": "src/common/adapter/fastify.adapter.ts",
+      "publicSymbols": [
+        "fastifyApp"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "global"
+        },
+        {
+          "cell": "processors"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "transformers"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "constants",
+      "ownedPaths": [
+        "src/constants/**"
+      ],
+      "publicEntry": "src/constants/cache.constant.ts",
+      "publicSymbols": [
+        "CacheKeys",
+        "RedisKeys"
+      ],
+      "consumes": [
+        {
+          "cell": "global"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "external",
+      "ownedPaths": [
+        "packages/external/**"
+      ],
+      "publicEntry": "packages/external/index.ts",
+      "publicSymbols": [
+        "nanoid"
+      ],
+      "packageName": "@nest-http/external",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "global",
+      "ownedPaths": [
+        "src/global/**"
+      ],
+      "publicEntry": "src/global/consola.global.ts",
+      "publicSymbols": [
+        "consola",
+        "logger"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "modules",
+      "ownedPaths": [
+        "src/modules/**"
+      ],
+      "publicEntry": "src/modules/auth/auth.controller.ts",
+      "publicSymbols": [
+        "AuthController",
+        "TokenDto"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "processors"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "transformers"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "processors",
+      "ownedPaths": [
+        "src/processors/**"
+      ],
+      "publicEntry": "src/processors/cache/cache.config.service.ts",
+      "publicSymbols": [
+        "CacheConfigService"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "modules"
+        },
+        {
+          "cell": "src-root"
+        },
+        {
+          "cell": "transformers"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "src/shared/**"
+      ],
+      "publicEntry": "src/shared/dto/id.dto.ts",
+      "publicSymbols": [
+        "IntIdOrMongoIdDto",
+        "MongoIdDto"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "src-root",
+      "ownedPaths": [
+        "src/*"
+      ],
+      "publicEntry": "src/app.config.ts",
+      "publicSymbols": [
+        "AXIOS_CONFIG",
+        "CROSS_DOMAIN",
+        "MONGO_DB",
+        "PORT",
+        "REDIS",
+        "SECURITY"
+      ],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "external"
+        },
+        {
+          "cell": "global"
+        },
+        {
+          "cell": "modules"
+        },
+        {
+          "cell": "processors"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "transformers",
+      "ownedPaths": [
+        "src/transformers/**"
+      ],
+      "publicEntry": "src/transformers/get-req.transformer.ts",
+      "publicSymbols": [
+        "getNestExecutionContextRequest"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        },
+        {
+          "cell": "modules"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "src/utils/**"
+      ],
+      "publicEntry": "src/utils/environment.utils.ts",
+      "publicSymbols": [
+        "isDev"
+      ],
+      "consumes": [
+        {
+          "cell": "constants"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

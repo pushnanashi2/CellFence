@@ -1,0 +1,713 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/babel-preset-react/src/**",
+      "packages/bundler-compiled/src/**",
+      "packages/bundler-rspack/src/**",
+      "packages/bundler-shared-config/src/**",
+      "packages/bundler-shared/src/**",
+      "packages/bundler-webpack/src/**",
+      "packages/create-kmi/src/**",
+      "packages/plugin-code-inspector/src/**",
+      "packages/plugin-rsdoctor/src/**",
+      "packages/plugin-svgr/src/**",
+      "packages/preset-bundler/src/**",
+      "packages/shared/src/**",
+      "packages/types/src/**",
+      "scripts/kmi-scripts/src/**",
+      "scripts/prettier-plugin-sort-keys/**",
+      "scripts/test-utils/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "babel-preset-react",
+      "ownedPaths": [
+        "packages/babel-preset-react/src/**"
+      ],
+      "publicEntry": "packages/babel-preset-react/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@kmijs/babel-preset-react",
+      "consumes": [
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler-compiled",
+      "ownedPaths": [
+        "packages/bundler-compiled/src/**"
+      ],
+      "publicEntry": "packages/bundler-compiled/src/index.ts",
+      "publicSymbols": [
+        "BabelPlugin",
+        "BundleAnalyzerOptions",
+        "CSSMinifier",
+        "DEFAULT_CSS_MINIFIER",
+        "DEFAULT_JS_MINIFIER",
+        "getSchemas",
+        "ICopy",
+        "JSMinifier",
+        "ManifestOptions",
+        "prettyPrintEsBuildErrors",
+        "TerserOptions"
+      ],
+      "packageName": "@kmijs/bundler-compiled",
+      "consumes": [
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler-rspack",
+      "ownedPaths": [
+        "packages/bundler-rspack/src/**"
+      ],
+      "publicEntry": "packages/bundler-rspack/src/index.ts",
+      "publicSymbols": [
+        "BabelConfigUtils",
+        "BabelLoaderOptions",
+        "build",
+        "Compilation",
+        "Compiler",
+        "Configuration",
+        "dev",
+        "Express",
+        "getConfig",
+        "getSchemas",
+        "IApplyOpts",
+        "IBundlerConfig",
+        "IOpts",
+        "RequestHandler",
+        "rspack",
+        "rspackVersion",
+        "Stats",
+        "StatsChunk",
+        "StatsCompilation",
+        "SwcLoaderOptions"
+      ],
+      "packageName": "@kmijs/bundler-rspack",
+      "consumes": [
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "bundler-shared-config"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler-shared",
+      "ownedPaths": [
+        "packages/bundler-shared/src/**"
+      ],
+      "publicEntry": "packages/bundler-shared/src/index.ts",
+      "publicSymbols": [
+        "CHAIN_ID",
+        "ChainIdentifier",
+        "createHttpsServer",
+        "createProxy",
+        "DEFAULT_INLINE_LIMIT",
+        "DEFAULT_OUTPUT_PATH",
+        "depMatch",
+        "esbuild",
+        "getFirstStats",
+        "getOutputPath",
+        "HttpsServerOptions",
+        "KmiTarget",
+        "lastStats",
+        "parseModule",
+        "ParseModuleResult",
+        "parseModuleSync",
+        "ProxyOptions",
+        "resolveHttpsConfig"
+      ],
+      "packageName": "@kmijs/bundler-shared",
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler-shared-config",
+      "ownedPaths": [
+        "packages/bundler-shared-config/src/**"
+      ],
+      "publicEntry": "packages/bundler-shared-config/src/index.ts",
+      "publicSymbols": [
+        "ASSETS_DIST_DIR",
+        "AUDIO_EXTENSIONS",
+        "BaseBundler",
+        "BaseBundlerConfig",
+        "BundlerPlugins",
+        "BundlerType",
+        "createBaseServer",
+        "CSS_DIST_DIR",
+        "DEFAULT_DEVTOOL",
+        "DEFAULT_ESBUILD_TARGET_KEYS",
+        "DEFAULT_WEB_BROWSERSLIST",
+        "Env",
+        "FONT_DIST_DIR",
+        "FONT_EXTENSIONS",
+        "IBaseBundlerApplyOpts",
+        "IBaseBundlerConfigOpts",
+        "IBaseConfigOpts",
+        "IBaseCreateServerOpts",
+        "IBaseServerOpts",
+        "IBuildOpts",
+        "IBundlerConfig",
+        "IDevOpts",
+        "IMAGE_DIST_DIR",
+        "IMAGE_EXTENSIONS",
+        "JS_DIST_DIR",
+        "MEDIA_DIST_DIR",
+        "MESSAGE_TYPE",
+        "SVG_DIST_DIR",
+        "VIDEO_EXTENSIONS",
+        "WASM_DIST_DIR"
+      ],
+      "packageName": "@kmijs/bundler-shared-config",
+      "consumes": [
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "bundler-webpack",
+      "ownedPaths": [
+        "packages/bundler-webpack/src/**"
+      ],
+      "publicEntry": "packages/bundler-webpack/src/index.ts",
+      "publicSymbols": [
+        "build",
+        "Compiler",
+        "dev",
+        "Express",
+        "getConfig",
+        "getSchemas",
+        "IApplyOpts",
+        "IOpts",
+        "RequestHandler",
+        "Stats",
+        "webpack",
+        "WebpackConfig"
+      ],
+      "packageName": "@kmijs/bundler-webpack",
+      "consumes": [
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "bundler-rspack"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "bundler-shared-config"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "create-kmi",
+      "ownedPaths": [
+        "packages/create-kmi/src/**"
+      ],
+      "publicEntry": "packages/create-kmi/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "IDefaultData"
+      ],
+      "packageName": "@kmijs/create-kmi",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "kmi-scripts",
+      "ownedPaths": [
+        "scripts/kmi-scripts/src/**"
+      ],
+      "publicEntry": "scripts/kmi-scripts/src/bootstrap.ts",
+      "publicSymbols": [],
+      "packageName": "@scripts/kmi-scripts",
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-code-inspector",
+      "ownedPaths": [
+        "packages/plugin-code-inspector/src/**"
+      ],
+      "publicEntry": "packages/plugin-code-inspector/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@kmijs/plugin-code-inspector",
+      "consumes": [
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-rsdoctor",
+      "ownedPaths": [
+        "packages/plugin-rsdoctor/src/**"
+      ],
+      "publicEntry": "packages/plugin-rsdoctor/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@kmijs/plugin-rsdoctor",
+      "consumes": [
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-svgr",
+      "ownedPaths": [
+        "packages/plugin-svgr/src/**"
+      ],
+      "publicEntry": "packages/plugin-svgr/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@kmijs/plugin-svgr",
+      "consumes": [
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "preset-bundler",
+      "ownedPaths": [
+        "packages/preset-bundler/src/**"
+      ],
+      "publicEntry": "packages/preset-bundler/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@kmijs/preset-bundler",
+      "consumes": [
+        {
+          "cell": "babel-preset-react"
+        },
+        {
+          "cell": "bundler-compiled"
+        },
+        {
+          "cell": "bundler-rspack"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "bundler-webpack"
+        },
+        {
+          "cell": "plugin-svgr"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prettier-plugin-sort-keys",
+      "ownedPaths": [
+        "scripts/prettier-plugin-sort-keys/**"
+      ],
+      "publicEntry": "scripts/prettier-plugin-sort-keys/index.js",
+      "publicSymbols": [],
+      "packageName": "@scripts/prettier-plugin-sort-keys",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "packages/shared/src/**"
+      ],
+      "publicEntry": "packages/shared/src/index.ts",
+      "publicSymbols": [
+        "$",
+        "address",
+        "aliasUtils",
+        "axios",
+        "BaseGenerator",
+        "boxen",
+        "CACHE_DIR_NAME",
+        "castArray",
+        "catchUnhandledRejection",
+        "cd",
+        "chalk",
+        "checkLocal",
+        "checkVersion",
+        "chokidar",
+        "clackPrompts",
+        "clearTmp",
+        "CLIExample",
+        "CodeFrameError",
+        "createDependenciesRegExp",
+        "crossSpawn",
+        "dayjs",
+        "debug",
+        "deepmerge",
+        "DEFAULT_BROWSER_TARGETS",
+        "DEFAULT_DEV_HOST",
+        "defu",
+        "DownloadNpm",
+        "DownloadNpmOptions",
+        "enquirer",
+        "ENTRY_JS",
+        "ERROR_CODE",
+        "ES_FLOW_COMMANDS",
+        "execa",
+        "fastestLevenshtein",
+        "filesize",
+        "FRAMEWORK_NAME",
+        "fsExtra",
+        "generateFile",
+        "Generator",
+        "getArgsValueAndAlias",
+        "getBrowsersList",
+        "getCorejsVersion",
+        "getDevBanner",
+        "getLaneId",
+        "getNodeEnv",
+        "getNpmClient",
+        "getNpmConfig",
+        "getPkgJsonSync",
+        "glob",
+        "globalConfig",
+        "GlobalConfig",
+        "gzipSize",
+        "HOME_DIR",
+        "importLazy",
+        "importsToStr",
+        "installDeps",
+        "installWithNpmClient",
+        "IS_CLOUD_KWS",
+        "IS_CLOUDDEV",
+        "IS_KCI",
+        "isJavaScriptFile",
+        "isLocalDev",
+        "isMonorepo",
+        "isPackageInstalled",
+        "isTypeScriptFile",
+        "isZodSchema",
+        "json5",
+        "KMI_HOME_DIR",
+        "loadEnvByJia",
+        "lodash",
+        "logger",
+        "MagicString",
+        "minimatch",
+        "Mustache",
+        "npa",
+        "NpmClient",
+        "NpmClientEnum",
+        "npmClients",
+        "open",
+        "openBrowser",
+        "openKmiUrl",
+        "ora",
+        "PackageManager",
+        "pathe",
+        "picocolors",
+        "pkgUp",
+        "pkgUpSync",
+        "portfinder",
+        "prompts",
+        "register",
+        "RegistryURL",
+        "remapping",
+        "resolve",
+        "resolveDepPath",
+        "resolveNodeModulePath",
+        "resolveProjectDep",
+        "resolveProjectPath",
+        "rimraf",
+        "semver",
+        "setNodeEnv",
+        "setNodeTitle",
+        "sleep",
+        "spinner",
+        "stdEnv",
+        "stringify",
+        "stringifyConfig",
+        "stripAnsi",
+        "tryFiles",
+        "tryPaths",
+        "tsconfigPaths",
+        "updatePackageJSON",
+        "webpackMerge",
+        "winPath",
+        "withTmpPath",
+        "yoctoSpinner",
+        "yParser",
+        "zod",
+        "zodValidationError"
+      ],
+      "packageName": "@kmijs/shared",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-utils",
+      "ownedPaths": [
+        "scripts/test-utils/src/**"
+      ],
+      "publicEntry": "scripts/test-utils/src/index.ts",
+      "publicSymbols": [
+        "createKmi",
+        "createSnapshotSerializer",
+        "pathe",
+        "SnapshotSerializerOptions"
+      ],
+      "packageName": "@scripts/test-utils",
+      "consumes": [
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "preset-bundler"
+        },
+        {
+          "cell": "shared"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/types/src/**"
+      ],
+      "publicEntry": "packages/types/src/index.ts",
+      "publicSymbols": [
+        "BasicChainUtils",
+        "BundlerConfig",
+        "BundlerPluginInstance",
+        "BundlerRule",
+        "BundlerType",
+        "BundlerTypeEnum",
+        "CacheGroup",
+        "CacheGroups",
+        "Compiler",
+        "Configuration",
+        "defineKmiConfigSchema",
+        "DefineKmiConfigSchema",
+        "DefineKmiConfigSchemaObject",
+        "Env",
+        "ForceSplitting",
+        "IApi",
+        "IBaseConfig",
+        "IConfig",
+        "IOnAfterCreateCompilerOpts",
+        "IOnBeforeCreateCompilerOpts",
+        "ModifyBundlerConfigUtils",
+        "ModifyChainUtils",
+        "registerKmiConfig",
+        "SplitChunks"
+      ],
+      "packageName": "@kmijs/types",
+      "consumes": [
+        {
+          "cell": "bundler-rspack"
+        },
+        {
+          "cell": "bundler-shared"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -335,13 +335,27 @@ function sampledDeficitCoverage(candidateRow) {
   return Object.values(candidateRow?.sampledCountsByRule || {}).reduce((sum, count) => sum + Number(count || 0), 0);
 }
 
-function selectedDeficitCoverage(promoted) {
+function selectedDeficitCoverage(promoted, plan) {
+  const remainingDeficits = { ...(plan.current?.deficits || {}) };
   const byRule = {};
   let sampledDeficitCoverageScore = 0;
   for (const entry of promoted) {
-    sampledDeficitCoverageScore += sampledDeficitCoverage(entry.candidateRow);
     for (const [ruleId, count] of Object.entries(entry.candidateRow?.sampledCountsByRule || {})) {
-      byRule[ruleId] = (byRule[ruleId] || 0) + count;
+      const remaining = Number(remainingDeficits[ruleId] || 0);
+      if (remaining <= 0) continue;
+      const covered = Math.min(Number(count || 0), remaining);
+      if (covered <= 0) continue;
+      remainingDeficits[ruleId] = remaining - covered;
+      byRule[ruleId] = (byRule[ruleId] || 0) + covered;
+      sampledDeficitCoverageScore += covered;
+    }
+  }
+  if (Object.keys(plan.current?.deficits || {}).length === 0) {
+    sampledDeficitCoverageScore = promoted.reduce((sum, entry) => sum + sampledDeficitCoverage(entry.candidateRow), 0);
+    for (const entry of promoted) {
+      for (const [ruleId, count] of Object.entries(entry.candidateRow?.sampledCountsByRule || {})) {
+        byRule[ruleId] = (byRule[ruleId] || 0) + count;
+      }
     }
   }
   return {
@@ -425,7 +439,7 @@ function buildPromotedCorpus(options) {
       candidateCorpus: relativePosix(path.dirname(options.outCorpusPath), options.candidateCorpusPath),
       candidateBundle: relativePosix(path.dirname(options.outCorpusPath), options.candidateBundleDir),
       promotedSubjects: promoted.map((entry) => entry.subject.id),
-      selectedDeficitCoverage: selectedDeficitCoverage(promoted),
+      selectedDeficitCoverage: selectedDeficitCoverage(promoted, plan),
       reviewer: options.reviewer,
       limitation: "Agent-reviewed promotion only; external human/organization labels and manifest attestations remain required for public claim use.",
       sourceCorpusSelectionPolicy: currentCorpus.selectionPolicy
@@ -467,7 +481,7 @@ function reportFor(options, result) {
       promotedSubjects: result.promoted.length,
       outputSubjects: (result.corpus.subjects || []).length,
       outputCorpusSha256: corpusSha256,
-      selectedDeficitCoverage: selectedDeficitCoverage(result.promoted),
+      selectedDeficitCoverage: selectedDeficitCoverage(result.promoted, result.plan),
       externalClaimReady: false,
     },
     promotedSubjects: result.promoted.map((entry) => ({

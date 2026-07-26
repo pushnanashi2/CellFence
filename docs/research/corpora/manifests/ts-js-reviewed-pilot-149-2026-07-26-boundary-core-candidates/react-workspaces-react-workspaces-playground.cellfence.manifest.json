@@ -1,0 +1,271 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/apps/app-ant-design/**",
+      "packages/apps/app-ant-design/src/**",
+      "packages/apps/app-multi-comps/src/**",
+      "packages/apps/app-single-comp/src/**",
+      "packages/apps/app-typescript/**",
+      "packages/apps/app-typescript/src/**",
+      "packages/components-typescript/src/**",
+      "packages/components/src/**",
+      "packages/storybook-typescript/**",
+      "packages/storybook/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app-ant-design-rewired",
+      "ownedPaths": [
+        "packages/apps/app-ant-design/src/**"
+      ],
+      "publicEntry": "packages/apps/app-ant-design/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@project/app-ant-design-rewired",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "app-multi-comps",
+      "ownedPaths": [
+        "packages/apps/app-multi-comps/src/**"
+      ],
+      "publicEntry": "packages/apps/app-multi-comps/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@project/app-multi-comps",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "app-single-comp",
+      "ownedPaths": [
+        "packages/apps/app-single-comp/src/**"
+      ],
+      "publicEntry": "packages/apps/app-single-comp/src/index.js",
+      "publicSymbols": [],
+      "packageName": "@project/app-single-comp",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "app-typescript",
+      "ownedPaths": [
+        "packages/apps/app-typescript/src/**"
+      ],
+      "publicEntry": "packages/apps/app-typescript/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "@project/app-typescript",
+      "consumes": [
+        {
+          "cell": "components-typescript"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "apps",
+      "ownedPaths": [
+        "packages/apps/app-ant-design/**",
+        "packages/apps/app-typescript/**"
+      ],
+      "publicEntry": "packages/apps/app-ant-design/config-overrides.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "app-ant-design-rewired"
+        },
+        {
+          "cell": "app-typescript"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components",
+      "ownedPaths": [
+        "packages/components/src/**"
+      ],
+      "publicEntry": "packages/components/src/CompOne/CompOne.js",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@project/components",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "components-typescript",
+      "ownedPaths": [
+        "packages/components-typescript/src/**"
+      ],
+      "publicEntry": "packages/components-typescript/src/CompOne/CompOne.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@project/components-typescript",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storybook",
+      "ownedPaths": [
+        "packages/storybook/**"
+      ],
+      "publicEntry": "packages/storybook/.storybook/addons.js",
+      "publicSymbols": [],
+      "packageName": "@project/storybook",
+      "consumes": [
+        {
+          "cell": "components"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "storybook-typescript",
+      "ownedPaths": [
+        "packages/storybook-typescript/**"
+      ],
+      "publicEntry": "packages/storybook-typescript/.eslintrc.js",
+      "publicSymbols": [],
+      "packageName": "@project/storybook-typescript",
+      "consumes": [
+        {
+          "cell": "components-typescript"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

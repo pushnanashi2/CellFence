@@ -1,0 +1,484 @@
+{
+  "schemaVersion": "cellfence.corpus.v1",
+  "description": "Exploratory gap-directed TS/JS monorepo candidate corpus generated on 2026-07-26 to add balanced CELLFENCE_UNDECLARED_CONSUMER evidence. This is diagnostic only, not reviewed precision evidence.",
+  "selectionPolicy": {
+    "date": "2026-07-26",
+    "source": "GitHub legacy code search + gh repo metadata + exact default-branch git ls-remote",
+    "queries": [
+      "pnpm-workspace.yaml packages (packages filename:pnpm-workspace.yaml)",
+      "package.json workspace (workspace filename:package.json)",
+      "turbo.json pipeline (pipeline filename:turbo.json)",
+      "nx.json projects (projects filename:nx.json)"
+    ],
+    "constraints": [
+      "public repositories",
+      "archived:false",
+      "fork:false",
+      "primary language TypeScript or JavaScript",
+      "stars >= 100",
+      "diskUsageKb <= 100000",
+      "not already present in the 117 reviewed work queue, original 200 diagnostic corpus, round26 gap corpus, or round27 monorepo corpus",
+      "exact default-branch HEAD commit recorded before running"
+    ],
+    "safety": "Static CellFence checks only; no dependency install, package scripts, PRs, or issues.",
+    "interpretation": "manifest.strategy=infer and production scope results are candidate-sourcing diagnostics only; they are excluded from precision denominators until manifests and labels are externally reviewed."
+  },
+  "subjects": [
+    {
+      "id": "celo-org-celo-composer",
+      "repository": "https://github.com/celo-org/celo-composer.git",
+      "commit": "710dd89afc408e5b9385c9fdae83cd2e6246e893",
+      "metadata": {
+        "nameWithOwner": "celo-org/celo-composer",
+        "url": "https://github.com/celo-org/celo-composer",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 187,
+        "forks": 190,
+        "diskUsageKb": 14390,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "kucherenko-jscpd",
+      "repository": "https://github.com/kucherenko/jscpd.git",
+      "commit": "a79127fde5352e30ad22f1c4be545b6215b72883",
+      "metadata": {
+        "nameWithOwner": "kucherenko/jscpd",
+        "url": "https://github.com/kucherenko/jscpd",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 5932,
+        "forks": 250,
+        "diskUsageKb": 12158,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "puemos-hls-downloader",
+      "repository": "https://github.com/puemos/hls-downloader.git",
+      "commit": "2071e691e6d499a053f34382fe0a6c57d0b80f59",
+      "metadata": {
+        "nameWithOwner": "puemos/hls-downloader",
+        "url": "https://github.com/puemos/hls-downloader",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 2649,
+        "forks": 304,
+        "diskUsageKb": 55009,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "damianricobelli-stepperize",
+      "repository": "https://github.com/damianricobelli/stepperize.git",
+      "commit": "f1b5bfafa5d585de47f6c70eeeb355b76b20ff24",
+      "metadata": {
+        "nameWithOwner": "damianricobelli/stepperize",
+        "url": "https://github.com/damianricobelli/stepperize",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1587,
+        "forks": 61,
+        "diskUsageKb": 3234,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "hyperstackjs-hyperstack",
+      "repository": "https://github.com/hyperstackjs/hyperstack.git",
+      "commit": "55191062e7111ead165f886f398373565b194629",
+      "metadata": {
+        "nameWithOwner": "hyperstackjs/hyperstack",
+        "url": "https://github.com/hyperstackjs/hyperstack",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 409,
+        "forks": 11,
+        "diskUsageKb": 20169,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "itschip-screencapture",
+      "repository": "https://github.com/itschip/screencapture.git",
+      "commit": "11b39af69c7c340d9c1d60894ae9b17c35b6b734",
+      "metadata": {
+        "nameWithOwner": "itschip/screencapture",
+        "url": "https://github.com/itschip/screencapture",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 155,
+        "forks": 43,
+        "diskUsageKb": 236,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "ts-rest-ts-rest",
+      "repository": "https://github.com/ts-rest/ts-rest.git",
+      "commit": "dd7239bc950d1e254d9c9cd6df7dbccc529c33cb",
+      "metadata": {
+        "nameWithOwner": "ts-rest/ts-rest",
+        "url": "https://github.com/ts-rest/ts-rest",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 3330,
+        "forks": 176,
+        "diskUsageKb": 10230,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "makio64-makio-meshline",
+      "repository": "https://github.com/Makio64/makio-meshline.git",
+      "commit": "29454ea25a0be556508858bf6ecbf438d5d42b49",
+      "metadata": {
+        "nameWithOwner": "Makio64/makio-meshline",
+        "url": "https://github.com/Makio64/makio-meshline",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 147,
+        "forks": 10,
+        "diskUsageKb": 71656,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "mrkev-webgpu-waveform",
+      "repository": "https://github.com/mrkev/webgpu-waveform.git",
+      "commit": "3a0b5a5f2883729d0752a13650804b7ffe47771b",
+      "metadata": {
+        "nameWithOwner": "mrkev/webgpu-waveform",
+        "url": "https://github.com/mrkev/webgpu-waveform",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 116,
+        "forks": 1,
+        "diskUsageKb": 10281,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "lumenstorm-orisonspace",
+      "repository": "https://github.com/LumenStorm/OrisonSpace.git",
+      "commit": "f1ce8a51bc258f95f5fac60a6fbf6fa34b84f983",
+      "metadata": {
+        "nameWithOwner": "LumenStorm/OrisonSpace",
+        "url": "https://github.com/LumenStorm/OrisonSpace",
+        "defaultBranch": "dev",
+        "primaryLanguage": "TypeScript",
+        "stars": 113,
+        "forks": 12,
+        "diskUsageKb": 4633,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "texpile-texpile",
+      "repository": "https://github.com/texpile/texpile.git",
+      "commit": "327cd645e4378a92aec7706dcf7e19a260b78518",
+      "metadata": {
+        "nameWithOwner": "texpile/texpile",
+        "url": "https://github.com/texpile/texpile",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 105,
+        "forks": 3,
+        "diskUsageKb": 5586,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "nutlope-pdftochat",
+      "repository": "https://github.com/Nutlope/pdftochat.git",
+      "commit": "2dc75fa55b024af3125d6d0e90ce0be5eecc3975",
+      "metadata": {
+        "nameWithOwner": "Nutlope/pdftochat",
+        "url": "https://github.com/Nutlope/pdftochat",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1393,
+        "forks": 291,
+        "diskUsageKb": 9473,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "livestorejs-livestore",
+      "repository": "https://github.com/livestorejs/livestore.git",
+      "commit": "064bb8dd74c4f22bfcca47256f01b6c32ca27763",
+      "metadata": {
+        "nameWithOwner": "livestorejs/livestore",
+        "url": "https://github.com/livestorejs/livestore",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 3639,
+        "forks": 135,
+        "diskUsageKb": 94339,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "chakra-ui-zag",
+      "repository": "https://github.com/chakra-ui/zag.git",
+      "commit": "2b199781b1a8d9b8a57b03dff443cf5dbf55c912",
+      "metadata": {
+        "nameWithOwner": "chakra-ui/zag",
+        "url": "https://github.com/chakra-ui/zag",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 5168,
+        "forks": 264,
+        "diskUsageKb": 93677,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "vikejs-bati",
+      "repository": "https://github.com/vikejs/bati.git",
+      "commit": "682464ac9dd19bd5a702a91bf1951be222d2a412",
+      "metadata": {
+        "nameWithOwner": "vikejs/bati",
+        "url": "https://github.com/vikejs/bati",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 484,
+        "forks": 38,
+        "diskUsageKb": 23238,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "jsen1024-front-end-knowledge-systems",
+      "repository": "https://github.com/jsen1024/front-end-knowledge-systems.git",
+      "commit": "d5e4125399843b0ae59ad03cd55e5255423e01b9",
+      "metadata": {
+        "nameWithOwner": "jsen1024/front-end-knowledge-systems",
+        "url": "https://github.com/jsen1024/front-end-knowledge-systems",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 139,
+        "forks": 1,
+        "diskUsageKb": 302,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "ctrlplanedev-ctrlplane",
+      "repository": "https://github.com/ctrlplanedev/ctrlplane.git",
+      "commit": "66e0888e94016296c5e22cdc58fc62617e187a8a",
+      "metadata": {
+        "nameWithOwner": "ctrlplanedev/ctrlplane",
+        "url": "https://github.com/ctrlplanedev/ctrlplane",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 167,
+        "forks": 23,
+        "diskUsageKb": 62191,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "kmijs-kmi",
+      "repository": "https://github.com/kmijs/kmi.git",
+      "commit": "daf893604446e8081d556a8086a0fa72e7912de4",
+      "metadata": {
+        "nameWithOwner": "kmijs/kmi",
+        "url": "https://github.com/kmijs/kmi",
+        "defaultBranch": "main",
+        "primaryLanguage": "JavaScript",
+        "stars": 109,
+        "forks": 5,
+        "diskUsageKb": 12597,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "paularmstrong-onerepo",
+      "repository": "https://github.com/paularmstrong/onerepo.git",
+      "commit": "e0ef7e3394ca33ba8006df435ffdae1ae6873a21",
+      "metadata": {
+        "nameWithOwner": "paularmstrong/onerepo",
+        "url": "https://github.com/paularmstrong/onerepo",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 132,
+        "forks": 12,
+        "diskUsageKb": 12641,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "emilkowalski-sonner",
+      "repository": "https://github.com/emilkowalski/sonner.git",
+      "commit": "45d894085af8ca8421912789a8f5a4ac4ac3d0ea",
+      "metadata": {
+        "nameWithOwner": "emilkowalski/sonner",
+        "url": "https://github.com/emilkowalski/sonner",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 12711,
+        "forks": 453,
+        "diskUsageKb": 1224,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "tldraw-signia",
+      "repository": "https://github.com/tldraw/signia.git",
+      "commit": "b55c1ec1349dc0bcd61520b59ac1f15b6f02bfd6",
+      "metadata": {
+        "nameWithOwner": "tldraw/signia",
+        "url": "https://github.com/tldraw/signia",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 986,
+        "forks": 21,
+        "diskUsageKb": 4605,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "jscutlery-devkit",
+      "repository": "https://github.com/jscutlery/devkit.git",
+      "commit": "4c3d25d704cf126af12fcbdb8ff39e49deb8a32a",
+      "metadata": {
+        "nameWithOwner": "jscutlery/devkit",
+        "url": "https://github.com/jscutlery/devkit",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 268,
+        "forks": 18,
+        "diskUsageKb": 42633,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "takram-design-engineering-three-geospatial",
+      "repository": "https://github.com/takram-design-engineering/three-geospatial.git",
+      "commit": "b012ad06d858fc035d88aacfd73f092f93c994e4",
+      "metadata": {
+        "nameWithOwner": "takram-design-engineering/three-geospatial",
+        "url": "https://github.com/takram-design-engineering/three-geospatial",
+        "defaultBranch": "main",
+        "primaryLanguage": "TypeScript",
+        "stars": 1561,
+        "forks": 179,
+        "diskUsageKb": 13045,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    },
+    {
+      "id": "javierbrea-eslint-plugin-boundaries",
+      "repository": "https://github.com/javierbrea/eslint-plugin-boundaries.git",
+      "commit": "9484b4d2d0bf0e15cdc378c76b164b705b8c9d69",
+      "metadata": {
+        "nameWithOwner": "javierbrea/eslint-plugin-boundaries",
+        "url": "https://github.com/javierbrea/eslint-plugin-boundaries",
+        "defaultBranch": "master",
+        "primaryLanguage": "TypeScript",
+        "stars": 941,
+        "forks": 21,
+        "diskUsageKb": 5220,
+        "selectionQuery": "gap-directed-monorepo-consumer-code-search"
+      },
+      "manifest": {
+        "strategy": "infer",
+        "scope": "production"
+      }
+    }
+  ]
+}

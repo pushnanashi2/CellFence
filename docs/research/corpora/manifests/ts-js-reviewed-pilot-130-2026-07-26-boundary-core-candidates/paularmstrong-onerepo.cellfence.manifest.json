@@ -1,0 +1,774 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "docs/src/**",
+      "internal/eslint-plugin/src/**",
+      "internal/jest-config/src/**",
+      "internal/prettier-config/src/**",
+      "internal/vitest-config/src/**",
+      "modules/builders/src/**",
+      "modules/eslint-formatter/src/**",
+      "modules/file/src/**",
+      "modules/git/src/**",
+      "modules/github-action/src/**",
+      "modules/graph/src/**",
+      "modules/logger/src/**",
+      "modules/onerepo/src/**",
+      "modules/package-manager/src/**",
+      "modules/subprocess/src/**",
+      "modules/test-cli/src/**",
+      "modules/yargs/src/**",
+      "plugins/docgen/src/**",
+      "plugins/eslint/src/**",
+      "plugins/jest/src/**",
+      "plugins/performance-writer/src/**",
+      "plugins/prettier/src/**",
+      "plugins/typescript/src/**",
+      "plugins/vitest/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "builders",
+      "ownedPaths": [
+        "modules/builders/src/**"
+      ],
+      "publicEntry": "modules/builders/src/index.ts",
+      "publicSymbols": [
+        "Argv",
+        "FileGetterOptions",
+        "getAffected",
+        "getFilepaths",
+        "GetterOptions",
+        "getWorkspaces",
+        "Staged",
+        "Through",
+        "withAffected",
+        "WithAffected",
+        "withAllInputs",
+        "WithAllInputs",
+        "withFiles",
+        "WithFiles",
+        "withWorkspaces",
+        "WithWorkspaces"
+      ],
+      "packageName": "@onerepo/builders",
+      "consumes": [
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "docs",
+      "ownedPaths": [
+        "docs/src/**"
+      ],
+      "publicEntry": "docs/src/components/visualizer.ts",
+      "publicSymbols": [],
+      "packageName": "@onerepo/docs",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-formatter-onerepo",
+      "ownedPaths": [
+        "modules/eslint-formatter/src/**"
+      ],
+      "publicEntry": "modules/eslint-formatter/src/index.js",
+      "publicSymbols": [],
+      "packageName": "eslint-formatter-onerepo",
+      "consumes": [
+        {
+          "cell": "jest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-plugin",
+      "ownedPaths": [
+        "internal/eslint-plugin/src/**"
+      ],
+      "publicEntry": "internal/eslint-plugin/src/index.ts",
+      "publicSymbols": [
+        "rootConfig"
+      ],
+      "packageName": "@internal/eslint-plugin",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "file",
+      "ownedPaths": [
+        "modules/file/src/**"
+      ],
+      "publicEntry": "modules/file/src/index.ts",
+      "publicSymbols": [
+        "chmod",
+        "copy",
+        "exists",
+        "isSigned",
+        "lstat",
+        "makeTempDir",
+        "mkdirp",
+        "Options",
+        "read",
+        "readJson",
+        "ReadJsonOptions",
+        "readSafe",
+        "ReadSafeOptions",
+        "remove",
+        "signContents",
+        "SigningStatus",
+        "verifySignature",
+        "write",
+        "WriteOptions",
+        "writeSafe",
+        "WriteSafeOptions"
+      ],
+      "packageName": "@onerepo/file",
+      "consumes": [
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "git",
+      "ownedPaths": [
+        "modules/git/src/**"
+      ],
+      "publicEntry": "modules/git/src/index.ts",
+      "publicSymbols": [
+        "flushUpdateIndex",
+        "getBranch",
+        "getCurrentSha",
+        "getMergeBase",
+        "getModifiedFiles",
+        "isClean",
+        "ModifiedBaseOptions",
+        "ModifiedByStatus",
+        "ModifiedFromThrough",
+        "ModifiedStaged",
+        "Options",
+        "StagingWorkflow",
+        "updateIndex",
+        "UpdateIndexOptions"
+      ],
+      "packageName": "@onerepo/git",
+      "consumes": [
+        {
+          "cell": "file"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "subprocess"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "github-action",
+      "ownedPaths": [
+        "modules/github-action/src/**"
+      ],
+      "publicEntry": "modules/github-action/src/get-tasks.ts",
+      "publicSymbols": [],
+      "packageName": "@onerepo/github-action",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "graph",
+      "ownedPaths": [
+        "modules/graph/src/**"
+      ],
+      "publicEntry": "modules/graph/src/index.ts",
+      "publicSymbols": [
+        "DependencyType",
+        "DepType",
+        "getGraph",
+        "getRootPackageJson",
+        "Graph",
+        "Serialized",
+        "Workspace"
+      ],
+      "packageName": "@onerepo/graph",
+      "consumes": [
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "package-manager"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "jest-config",
+      "ownedPaths": [
+        "internal/jest-config/src/**"
+      ],
+      "publicEntry": "internal/jest-config/src/index.js",
+      "publicSymbols": [
+        "makeConfig"
+      ],
+      "packageName": "@internal/jest-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger",
+      "ownedPaths": [
+        "modules/logger/src/**"
+      ],
+      "publicEntry": "modules/logger/src/index.ts",
+      "publicSymbols": [
+        "bufferSubLogger",
+        "destroyLogger",
+        "getLogger",
+        "Logger",
+        "LoggerOptions",
+        "LogStep",
+        "stepWrapper",
+        "Verbosity"
+      ],
+      "packageName": "@onerepo/logger",
+      "consumes": [
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "onerepo",
+      "ownedPaths": [
+        "modules/onerepo/src/**"
+      ],
+      "publicEntry": "modules/onerepo/src/index.ts",
+      "publicSymbols": [
+        "App",
+        "builders",
+        "Config",
+        "corePlugins",
+        "CorePlugins",
+        "defaultConfig",
+        "file",
+        "git",
+        "GraphSchemaValidators",
+        "internalSetup",
+        "Lifecycle",
+        "noRepoPlugins",
+        "Plugin",
+        "PluginObject",
+        "RootConfig",
+        "runTasks",
+        "setup",
+        "Task",
+        "TaskConfig",
+        "TaskDef",
+        "Tasks",
+        "WorkspaceConfig"
+      ],
+      "packageName": "onerepo",
+      "consumes": [
+        {
+          "cell": "builders"
+        },
+        {
+          "cell": "file"
+        },
+        {
+          "cell": "git"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "package-manager"
+        },
+        {
+          "cell": "subprocess"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        },
+        {
+          "cell": "yargs"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "package-manager",
+      "ownedPaths": [
+        "modules/package-manager/src/**"
+      ],
+      "publicEntry": "modules/package-manager/src/index.ts",
+      "publicSymbols": [
+        "BasePackageJson",
+        "getLockfile",
+        "getPackageManager",
+        "getPackageManagerName",
+        "getPublishablePackageJson",
+        "MinimalWorkspace",
+        "NpmInfo",
+        "PackageJson",
+        "PackageManager",
+        "Person",
+        "PrivatePackageJson",
+        "PublicPackageJson",
+        "PublishConfig"
+      ],
+      "packageName": "@onerepo/package-manager",
+      "consumes": [
+        {
+          "cell": "subprocess"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-docgen",
+      "ownedPaths": [
+        "plugins/docgen/src/**"
+      ],
+      "publicEntry": "plugins/docgen/src/index.ts",
+      "publicSymbols": [
+        "docgen",
+        "Options"
+      ],
+      "packageName": "@onerepo/plugin-docgen",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-eslint",
+      "ownedPaths": [
+        "plugins/eslint/src/**"
+      ],
+      "publicEntry": "plugins/eslint/src/index.ts",
+      "publicSymbols": [
+        "eslint",
+        "Options"
+      ],
+      "packageName": "@onerepo/plugin-eslint",
+      "consumes": [
+        {
+          "cell": "eslint-formatter-onerepo"
+        },
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-jest",
+      "ownedPaths": [
+        "plugins/jest/src/**"
+      ],
+      "publicEntry": "plugins/jest/src/index.ts",
+      "publicSymbols": [
+        "jest",
+        "Options"
+      ],
+      "packageName": "@onerepo/plugin-jest",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-performance-writer",
+      "ownedPaths": [
+        "plugins/performance-writer/src/**"
+      ],
+      "publicEntry": "plugins/performance-writer/src/index.ts",
+      "publicSymbols": [
+        "Options",
+        "performanceWriter"
+      ],
+      "packageName": "@onerepo/plugin-performance-writer",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-prettier",
+      "ownedPaths": [
+        "plugins/prettier/src/**"
+      ],
+      "publicEntry": "plugins/prettier/src/index.ts",
+      "publicSymbols": [
+        "Options",
+        "prettier"
+      ],
+      "packageName": "@onerepo/plugin-prettier",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-typescript",
+      "ownedPaths": [
+        "plugins/typescript/src/**"
+      ],
+      "publicEntry": "plugins/typescript/src/index.ts",
+      "publicSymbols": [
+        "Options",
+        "typescript"
+      ],
+      "packageName": "@onerepo/plugin-typescript",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "plugin-vitest",
+      "ownedPaths": [
+        "plugins/vitest/src/**"
+      ],
+      "publicEntry": "plugins/vitest/src/index.ts",
+      "publicSymbols": [
+        "Options",
+        "vitest"
+      ],
+      "packageName": "@onerepo/plugin-vitest",
+      "consumes": [
+        {
+          "cell": "onerepo"
+        },
+        {
+          "cell": "test-cli"
+        },
+        {
+          "cell": "vitest-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "prettier-config",
+      "ownedPaths": [
+        "internal/prettier-config/src/**"
+      ],
+      "publicEntry": "internal/prettier-config/src/index.cjs",
+      "publicSymbols": [],
+      "packageName": "@internal/prettier-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "subprocess",
+      "ownedPaths": [
+        "modules/subprocess/src/**"
+      ],
+      "publicEntry": "modules/subprocess/src/index.ts",
+      "publicSymbols": [
+        "batch",
+        "BatchError",
+        "BatchOptions",
+        "PromiseFn",
+        "run",
+        "RunSpec",
+        "start",
+        "SubprocessError",
+        "sudo"
+      ],
+      "packageName": "@onerepo/subprocess",
+      "consumes": [
+        {
+          "cell": "jest-config"
+        },
+        {
+          "cell": "logger"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "test-cli",
+      "ownedPaths": [
+        "modules/test-cli/src/**"
+      ],
+      "publicEntry": "modules/test-cli/src/index.ts",
+      "publicSymbols": [
+        "getCommand"
+      ],
+      "packageName": "@onerepo/test-cli",
+      "consumes": [
+        {
+          "cell": "builders"
+        },
+        {
+          "cell": "graph"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "yargs"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vitest-config",
+      "ownedPaths": [
+        "internal/vitest-config/src/**"
+      ],
+      "publicEntry": "internal/vitest-config/src/index.js",
+      "publicSymbols": [
+        "defineProject"
+      ],
+      "packageName": "@internal/vitest-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "yargs",
+      "ownedPaths": [
+        "modules/yargs/src/**"
+      ],
+      "publicEntry": "modules/yargs/src/index.ts",
+      "publicSymbols": [
+        "Arguments",
+        "Argv",
+        "Builder",
+        "commandDirOptions",
+        "DefaultArgv",
+        "Handler",
+        "HandlerExtra",
+        "parserConfiguration",
+        "PositionalArgv",
+        "setupYargs",
+        "Yargs"
+      ],
+      "packageName": "@onerepo/yargs",
+      "consumes": [
+        {
+          "cell": "builders"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "subprocess"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

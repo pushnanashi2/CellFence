@@ -1,0 +1,797 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/affiliates/**",
+      "packages/api/src/**",
+      "packages/common/src/**",
+      "packages/contract-notifier/src/**",
+      "packages/contracts-frontend/**",
+      "packages/contracts-node/**",
+      "packages/core/src/**",
+      "packages/discord-ticket-api/src/**",
+      "packages/financial-templates-lib/src/**",
+      "packages/fx-tunnel-relayer/src/**",
+      "packages/llm-bot/src/**",
+      "packages/logger/src/**",
+      "packages/monitor-v2/src/**",
+      "packages/monitors/src/**",
+      "packages/optimistic-oracle/src/**",
+      "packages/polymarket-notifier/src/**",
+      "packages/scripts/src/**",
+      "packages/sdk/src/**",
+      "packages/serverless-orchestration/src/**",
+      "packages/toolkit/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "affiliates",
+      "ownedPaths": [
+        "packages/affiliates/**"
+      ],
+      "publicEntry": "packages/affiliates/.mocharc.js",
+      "publicSymbols": [],
+      "packageName": "@uma/affiliates",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "api",
+      "ownedPaths": [
+        "packages/api/src/**"
+      ],
+      "publicEntry": "packages/api/src/index.ts",
+      "publicSymbols": [
+        "apps",
+        "examples",
+        "libs",
+        "services",
+        "tables",
+        "types"
+      ],
+      "packageName": "@uma/api",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "financial-templates-lib"
+        },
+        {
+          "cell": "sdk"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common",
+      "ownedPaths": [
+        "packages/common/src/**"
+      ],
+      "publicEntry": "packages/common/src/index.ts",
+      "publicSymbols": [
+        "accountHasPendingTransactions",
+        "addGlobalHardhatTestingAddress",
+        "addressFromPublicKey",
+        "addSign",
+        "advanceBlockAndSetTime",
+        "AugmentedSendOptions",
+        "averageBlockTimeSeconds",
+        "axiosWithRetry",
+        "BATCH_MAX_COMMITS",
+        "BATCH_MAX_RETRIEVALS",
+        "BATCH_MAX_REVEALS",
+        "blockUntilBlockMined",
+        "BN",
+        "computeCollateralizationRatio",
+        "computePoolAddress",
+        "computeTopicHash",
+        "computeVoteHash",
+        "computeVoteHashAncillary",
+        "ConvertDecimals",
+        "CORE_CONTRACTS_NODE_VERSION_MAPPING",
+        "createBasicProvider",
+        "createConstructorParamsForContractVersion",
+        "createContractObjectFromJson",
+        "createEtherscanLinkFromtx",
+        "createEtherscanLinkMarkdown",
+        "createFormatFunction",
+        "createObjectFromDefaultProps",
+        "createShortHexString",
+        "createTenderlyFork",
+        "decodePriceSqrt",
+        "decryptMessage",
+        "deleteTenderlyFork",
+        "deriveKeyPair",
+        "deriveKeyPairFromSignatureMetamask",
+        "deriveKeyPairFromSignatureTruffle",
+        "didContractRevertWith",
+        "didContractThrow",
+        "EMPTY_MERKLE_ROOT",
+        "encodePath",
+        "encodePriceSqrt",
+        "encryptMessage",
+        "EthersTxRunnerError",
+        "EventSearchConfig",
+        "EventSearchOptions",
+        "ExecutedTransaction",
+        "FeeAmount",
+        "findArtifactFromPath",
+        "findBlockNumberAtTimestamp",
+        "findForkByDescription",
+        "formatDate",
+        "formatDateShort",
+        "formatFixed",
+        "formatHours",
+        "formatWei",
+        "formatWithMaxDecimals",
+        "getAdminRequestId",
+        "getAllFilesInPath",
+        "getBridgeChainId",
+        "getContractsNodePackageAliasForVerion",
+        "getCurrentPrice",
+        "getEthersSigner",
+        "getEventsForMultipleProviders",
+        "getEventsWithPaginatedBlockSearch",
+        "getFromBlock",
+        "getGckmsSigner",
+        "getHardhatConfig",
+        "getKeyGenMessage",
+        "getMaxTick",
+        "getMessageSignatureMetamask",
+        "getMessageSignatureTruffle",
+        "getMinTick",
+        "getMnemonic",
+        "getMnemonicSigner",
+        "getMulticallAddress",
+        "getNodeUrl",
+        "getPaginatedBlockRanges",
+        "getPendingTransactionCount",
+        "getPrecisionForIdentifier",
+        "getRandomSignedInt",
+        "getRandomUnsignedInt",
+        "getRetryProvider",
+        "getRetryWeb3sByChainId",
+        "getTenderlyFork",
+        "getTickBitmapIndex",
+        "getTickFromPrice",
+        "getWeb3",
+        "getWeb3ByChainId",
+        "GovernorV2RolesEnum",
+        "HRE",
+        "IDENTIFIER_BLACKLIST",
+        "IDENTIFIER_NON_18_PRECISION",
+        "InsuredBridgeRelayStateEnum",
+        "interfaceName",
+        "isAdminRequest",
+        "isEthersTxRunnerError",
+        "isNextChar",
+        "isPublicNetwork",
+        "isRecordStringUnknown",
+        "LiquidationStatesEnum",
+        "ManagedSecretProvider",
+        "MAX_SAFE_ALLOWANCE",
+        "MAX_SAFE_JS_INT",
+        "MAX_UINT_VAL",
+        "MerkleTree",
+        "MIN_INT_VALUE",
+        "mineTransactionsAtTime",
+        "mineTransactionsAtTimeHardhat",
+        "objectMap",
+        "OptimisticOracleRequestStatesEnum",
+        "paginatedEventQuery",
+        "parseAncillaryData",
+        "parseFixed",
+        "PositionStatesEnum",
+        "PostWithdrawLiquidationRewardsStatusTranslations",
+        "PriceRequestStatusEnum",
+        "processTenderlyEnv",
+        "processTransactionPromiseBatch",
+        "PublicNetworks",
+        "recoverPublicKey",
+        "RegistryRolesEnum",
+        "replaceAddressCase",
+        "replaceLibraryBindingReferenceInArtitifact",
+        "retrieveGckmsKeys",
+        "RetryConfig",
+        "RetryProvider",
+        "revertToSnapshot",
+        "revertWrapper",
+        "runDefaultFixture",
+        "runEthersContractTransaction",
+        "runEthersTransaction",
+        "runTestForVersion",
+        "runTransaction",
+        "runVotingV2Fixture",
+        "setForkSimulationDescription",
+        "setTenderlyBalance",
+        "shareTenderlyFork",
+        "signMessage",
+        "simulateTenderlyTx",
+        "StateOverride",
+        "stopMining",
+        "SUPPORTED_CONTRACT_VERSIONS",
+        "takeSnapshot",
+        "TenderlyEnvironment",
+        "TenderlyForkParams",
+        "TenderlyForkResult",
+        "TenderlySimulationParams",
+        "TenderlySimulationResult",
+        "TEST_DECIMAL_COMBOS",
+        "TESTED_CONTRACT_VERSIONS",
+        "TICK_SPACINGS",
+        "toBNWei",
+        "TokenRolesEnum",
+        "TransactionType",
+        "translateAdminVote",
+        "TruffleContract",
+        "TruffleInstance",
+        "UMA_FIRST_EMP_BLOCK",
+        "unshareTenderlyFork",
+        "VotePhasesEnum",
+        "Web3Contract",
+        "ZERO_ADDRESS"
+      ],
+      "packageName": "@uma/common",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "contract-notifier",
+      "ownedPaths": [
+        "packages/contract-notifier/src/**"
+      ],
+      "publicEntry": "packages/contract-notifier/src/ContractNotifier.js",
+      "publicSymbols": [],
+      "packageName": "@uma/contract-notifier",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "contracts-frontend",
+      "ownedPaths": [
+        "packages/contracts-frontend/**"
+      ],
+      "publicEntry": "packages/contracts-frontend/hardhat.config.cjs",
+      "publicSymbols": [],
+      "packageName": "@uma/contracts-frontend",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "contracts-node",
+      "ownedPaths": [
+        "packages/contracts-node/**"
+      ],
+      "publicEntry": "packages/contracts-node/hardhat.config.js",
+      "publicSymbols": [],
+      "packageName": "@uma/contracts-node",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "core"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core",
+      "ownedPaths": [
+        "packages/core/src/**"
+      ],
+      "publicEntry": "packages/core/src/FindContractVersion.ts",
+      "publicSymbols": [
+        "findContractVersion"
+      ],
+      "packageName": "@uma/core",
+      "consumes": [
+        {
+          "cell": "common"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "discord-ticket-api",
+      "ownedPaths": [
+        "packages/discord-ticket-api/src/**"
+      ],
+      "publicEntry": "packages/discord-ticket-api/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@uma/discord-ticket-api",
+      "consumes": [
+        {
+          "cell": "logger"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "financial-templates-lib",
+      "ownedPaths": [
+        "packages/financial-templates-lib/src/**"
+      ],
+      "publicEntry": "packages/financial-templates-lib/src/index.ts",
+      "publicSymbols": [
+        "aggregateTransactionsAndCall",
+        "aggregateTransactionsAndSend",
+        "BlockFinder",
+        "BlockHistory",
+        "calculateDeviationError",
+        "computeTWAP",
+        "createBalancerPriceFeedForFinancialContractI",
+        "createPriceFeed",
+        "createReferencePriceFeedForFinancialContract",
+        "createTokenPriceFeedForFinancialContract",
+        "createUniswapPriceFeedForFinancialContract",
+        "decodeTransaction",
+        "DSProxyManager",
+        "FinancialContractClient",
+        "FinancialContractEventClient",
+        "FinancialContractFactoryClient",
+        "GasEstimator",
+        "getUniswapPairDetails",
+        "InvalidPriceFeedMock",
+        "isDeviationOutsideErrorMargin",
+        "MAPPING_BY_NETWORK",
+        "multicallAddressMap",
+        "Networker",
+        "NetworkerInterface",
+        "OptimisticOracleClient",
+        "OptimisticOracleContract",
+        "OptimisticOracleEventClient",
+        "OptimisticOracleType",
+        "PriceFeedMock",
+        "PriceFeedMockScaled",
+        "PriceHistory",
+        "setAllowance",
+        "TokenBalanceClient",
+        "TransactionDataDecoder",
+        "UniswapPriceFeed",
+        "UniswapV2PriceFeed",
+        "UniswapV3PriceFeed"
+      ],
+      "packageName": "@uma/financial-templates-lib",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "logger"
+        },
+        {
+          "cell": "sdk"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fx-tunnel-relayer",
+      "ownedPaths": [
+        "packages/fx-tunnel-relayer/src/**"
+      ],
+      "publicEntry": "packages/fx-tunnel-relayer/src/index.ts",
+      "publicSymbols": [
+        "run"
+      ],
+      "packageName": "@uma/fx-tunnel-relayer",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "llm-bot",
+      "ownedPaths": [
+        "packages/llm-bot/src/**"
+      ],
+      "publicEntry": "packages/llm-bot/src/core/common.ts",
+      "publicSymbols": [
+        "BlockRange",
+        "calculateRequestId",
+        "LLMDisputerStrategy",
+        "OptimisticOracleClient",
+        "OptimisticOracleClientFilter",
+        "OptimisticOracleRequest",
+        "OptimisticOracleRequestData",
+        "OptimisticOracleRequestDisputable",
+        "OptimisticOracleRequestDisputableData",
+        "OptimisticOracleType"
+      ],
+      "packageName": "@uma/llm-bot",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "logger",
+      "ownedPaths": [
+        "packages/logger/src/**"
+      ],
+      "publicEntry": "packages/logger/src/index.ts",
+      "publicSymbols": [
+        "AugmentedLogger",
+        "bigNumberFormatter",
+        "botIdentifyFormatter",
+        "createConsoleTransport",
+        "createNewLogger",
+        "createPinoConfig",
+        "createPinoLogger",
+        "createPinoTransports",
+        "delay",
+        "errorStackTracerFormatter",
+        "generateRandomRunId",
+        "handleRecursiveErrorArray",
+        "isDictionary",
+        "lastSpyLogIncludes",
+        "lastSpyLogLevel",
+        "Logger",
+        "noBotId",
+        "PinoLogger",
+        "PinoLoggerOptions",
+        "redisDefaultUrl",
+        "removeAnchorTextFromLinks",
+        "spyLogIncludes",
+        "spyLogLevel",
+        "SpyTransport",
+        "waitForLogger"
+      ],
+      "packageName": "@uma/logger",
+      "consumes": [
+        {
+          "cell": "common"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "monitor-v2",
+      "ownedPaths": [
+        "packages/monitor-v2/src/**"
+      ],
+      "publicEntry": "packages/monitor-v2/src/balance-monitor/BalanceMonitor.ts",
+      "publicSymbols": [
+        "BalanceMonitor",
+        "isMonitoredAccountsArray",
+        "MonitoredAccount",
+        "MonitoredToken"
+      ],
+      "packageName": "@uma/monitor-v2",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "financial-templates-lib"
+        },
+        {
+          "cell": "sdk"
+        },
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "monitors",
+      "ownedPaths": [
+        "packages/monitors/src/**"
+      ],
+      "publicEntry": "packages/monitors/src/BalanceMonitor.js",
+      "publicSymbols": [],
+      "packageName": "@uma/monitors",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "core"
+        },
+        {
+          "cell": "financial-templates-lib"
+        },
+        {
+          "cell": "toolkit"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "optimistic-oracle",
+      "ownedPaths": [
+        "packages/optimistic-oracle/src/**"
+      ],
+      "publicEntry": "packages/optimistic-oracle/src/proposer.js",
+      "publicSymbols": [],
+      "packageName": "@uma/optimistic-oracle",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "polymarket-notifier",
+      "ownedPaths": [
+        "packages/polymarket-notifier/src/**"
+      ],
+      "publicEntry": "packages/polymarket-notifier/src/abi/abi.js",
+      "publicSymbols": [],
+      "packageName": "@uma/polymarket-notifier",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "packages/scripts/src/**"
+      ],
+      "publicEntry": "packages/scripts/src/admin-proposals/add-address-whitelist/0_Propose.ts",
+      "publicSymbols": [],
+      "packageName": "@uma/scripts",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "contracts-node"
+        },
+        {
+          "cell": "financial-templates-lib"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "sdk",
+      "ownedPaths": [
+        "packages/sdk/src/**"
+      ],
+      "publicEntry": "packages/sdk/src/index.ts",
+      "publicSymbols": [
+        "across",
+        "BlockFinder",
+        "Callable",
+        "clients",
+        "Coingecko",
+        "GetEventType",
+        "HasId",
+        "MakeId",
+        "MaybeId",
+        "Multicall",
+        "Multicall2",
+        "oracle",
+        "SerializableEvent",
+        "SignerOrProvider",
+        "stores",
+        "tables",
+        "utils"
+      ],
+      "packageName": "@uma/sdk",
+      "consumes": [
+        {
+          "cell": "contracts-frontend"
+        },
+        {
+          "cell": "contracts-node"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "serverless-orchestration",
+      "ownedPaths": [
+        "packages/serverless-orchestration/src/**"
+      ],
+      "publicEntry": "packages/serverless-orchestration/src/ServerlessHub.js",
+      "publicSymbols": [],
+      "packageName": "@uma/serverless-orchestration",
+      "consumes": [
+        {
+          "cell": "logger"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "toolkit",
+      "ownedPaths": [
+        "packages/toolkit/src/**"
+      ],
+      "publicEntry": "packages/toolkit/src/index.ts",
+      "publicSymbols": [
+        "createHttpClient",
+        "http",
+        "HttpClientOptions",
+        "RateLimitOptions",
+        "RetryOptions"
+      ],
+      "packageName": "@uma/toolkit",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

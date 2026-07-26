@@ -1,0 +1,360 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/angular/**",
+      "apps/forms/**",
+      "apps/nx/**",
+      "apps/performance/**",
+      "apps/rxjs/**",
+      "apps/signal/**",
+      "apps/testing/**",
+      "apps/typescript/**",
+      "libs/cli/src/**",
+      "libs/custom-plugin/src/**",
+      "libs/decoupling/**",
+      "libs/fake-utils/src/**",
+      "libs/module-to-standalone/**",
+      "libs/shared/**",
+      "libs/static-dynamic-import/**",
+      "libs/testing-table/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "angular",
+      "ownedPaths": [
+        "apps/angular/**"
+      ],
+      "publicEntry": "apps/angular/1-projection/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "decoupling"
+        },
+        {
+          "cell": "module-to-standalone"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cli",
+      "ownedPaths": [
+        "libs/cli/src/**"
+      ],
+      "publicEntry": "libs/cli/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@angular-challenges/cli",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "custom-plugin",
+      "ownedPaths": [
+        "libs/custom-plugin/src/**"
+      ],
+      "publicEntry": "libs/custom-plugin/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "@angular-challenges/custom-plugin",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "decoupling",
+      "ownedPaths": [
+        "libs/decoupling/**"
+      ],
+      "publicEntry": "libs/decoupling/brain/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "fake-utils",
+      "ownedPaths": [
+        "libs/fake-utils/src/**"
+      ],
+      "publicEntry": "libs/fake-utils/src/index.ts",
+      "publicSymbols": [
+        "BASE_URL"
+      ],
+      "packageName": "@angular-challenges/fake-utils",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "forms",
+      "ownedPaths": [
+        "apps/forms/**"
+      ],
+      "publicEntry": "apps/forms/41-control-value-accessor/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "module-to-standalone",
+      "ownedPaths": [
+        "libs/module-to-standalone/**"
+      ],
+      "publicEntry": "libs/module-to-standalone/admin/feature/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nx",
+      "ownedPaths": [
+        "apps/nx/**"
+      ],
+      "publicEntry": "apps/nx/42-static-vs-dynamic-import/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "static-dynamic-import"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "performance",
+      "ownedPaths": [
+        "apps/performance/**"
+      ],
+      "publicEntry": "apps/performance/12-optimize-change-detection/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "rxjs",
+      "ownedPaths": [
+        "apps/rxjs/**"
+      ],
+      "publicEntry": "apps/rxjs/11-high-order-operator-bug/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "libs/shared/**"
+      ],
+      "publicEntry": "libs/shared/directives/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "signal",
+      "ownedPaths": [
+        "apps/signal/**"
+      ],
+      "publicEntry": "apps/signal/30-interop-rxjs-signal/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "static-dynamic-import",
+      "ownedPaths": [
+        "libs/static-dynamic-import/**"
+      ],
+      "publicEntry": "libs/static-dynamic-import/users/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "testing",
+      "ownedPaths": [
+        "apps/testing/**"
+      ],
+      "publicEntry": "apps/testing/17-router/cypress.config.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "testing-table",
+      "ownedPaths": [
+        "libs/testing-table/**"
+      ],
+      "publicEntry": "libs/testing-table/backend/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "typescript",
+      "ownedPaths": [
+        "apps/typescript/**"
+      ],
+      "publicEntry": "apps/typescript/15-function-overload/eslint.config.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

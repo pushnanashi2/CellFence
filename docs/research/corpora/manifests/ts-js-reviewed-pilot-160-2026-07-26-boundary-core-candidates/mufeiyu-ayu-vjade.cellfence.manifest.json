@@ -1,0 +1,527 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "app/admin/**",
+      "app/admin/src/**",
+      "configs/css-propress/**",
+      "configs/lint/**",
+      "configs/vite/src/**",
+      "packages/common/src/**",
+      "packages/core-common/src/**",
+      "packages/hooks/src/**",
+      "packages/model/src/**",
+      "packages/request/src/**",
+      "packages/utils/src/**",
+      "scripts/**",
+      "server/**",
+      "story-book/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "app/admin/**"
+      ],
+      "publicEntry": "app/admin/postcss.config.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "core-common"
+        },
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "lint"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "request"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "common",
+      "ownedPaths": [
+        "packages/common/src/**"
+      ],
+      "publicEntry": "packages/common/src/index.ts",
+      "publicSymbols": [
+        "AyuButton",
+        "AyuGroup",
+        "AyuIcon",
+        "ButtonEmits",
+        "ButtonInstance",
+        "ButtonProps",
+        "ButtonSize",
+        "ButtonType",
+        "IconProps",
+        "NativeType"
+      ],
+      "packageName": "@ayu-mu/common",
+      "consumes": [
+        {
+          "cell": "hooks"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "core-common",
+      "ownedPaths": [
+        "packages/core-common/src/**"
+      ],
+      "publicEntry": "packages/core-common/src/index.ts",
+      "publicSymbols": [
+        "ActionBar",
+        "ActionBarProps",
+        "AyuDate",
+        "AyuDateTime",
+        "AyuInput",
+        "AyuRadio",
+        "AyuSelect",
+        "AyuUploadImg",
+        "BtnConfig",
+        "ComponentType",
+        "CustomVxeColumnProps",
+        "DataGrid",
+        "FieldItemConfig",
+        "FieldType",
+        "FormProps",
+        "FormView",
+        "JsonEditor",
+        "QueryBar",
+        "QueryBarExposeInstance",
+        "QueryBarProps",
+        "RadioProps",
+        "Render",
+        "setTheme",
+        "TableExposeInstance",
+        "TableProps",
+        "TableResponse",
+        "VXEPlugin"
+      ],
+      "packageName": "@ayu-mu/core-common",
+      "consumes": [
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "css"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "css",
+      "ownedPaths": [
+        "configs/css-propress/**"
+      ],
+      "publicEntry": "configs/css-propress/postcss.js",
+      "publicSymbols": [],
+      "packageName": "@configs/css",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hooks",
+      "ownedPaths": [
+        "packages/hooks/src/**"
+      ],
+      "publicEntry": "packages/hooks/src/index.ts",
+      "publicSymbols": [
+        "CustomEventBusCallbackType",
+        "CustomEventType",
+        "defaultNamespace",
+        "EventBusType",
+        "EventTypeEnum",
+        "namespaceContextKey",
+        "useEventBus",
+        "useNamespace",
+        "UseNamespaceReturn",
+        "useSizeProp"
+      ],
+      "packageName": "@ayu-mu/hooks",
+      "consumes": [
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lint",
+      "ownedPaths": [
+        "configs/lint/**"
+      ],
+      "publicEntry": "configs/lint/commitlint.js",
+      "publicSymbols": [],
+      "packageName": "@configs/lint",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "model",
+      "ownedPaths": [
+        "packages/model/src/**"
+      ],
+      "publicEntry": "packages/model/src/index.ts",
+      "publicSymbols": [
+        "AuthMode",
+        "AuthType",
+        "CommonResultType",
+        "ContentTypeEnum",
+        "CreateAxiosOptionsType",
+        "DataBaseType",
+        "DataSourceResultType",
+        "DataType",
+        "EnvConfigType",
+        "EnvEnum",
+        "EnvType",
+        "ExtractComponentProps",
+        "FileType",
+        "LoginParamType",
+        "MenuItem",
+        "Nullable",
+        "OrgansType",
+        "PageParameter",
+        "PageResultType",
+        "QueryAttribute",
+        "QueryCondition",
+        "QueryConditionOptions",
+        "QueryOperator",
+        "QueryParameter",
+        "Recordable",
+        "RequestConfigType",
+        "RequestMethodEnum",
+        "RequestOptionsType",
+        "ResponseCodeEnum",
+        "RolesType",
+        "SortParameter",
+        "SummaryParameter",
+        "SumType",
+        "SystemArchEnum",
+        "TenantsType",
+        "UploadFileParamsType",
+        "UploadFileType",
+        "UserRoleType",
+        "UserType"
+      ],
+      "packageName": "@ayu-mu/model",
+      "consumes": [
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "request",
+      "ownedPaths": [
+        "packages/request/src/**"
+      ],
+      "publicEntry": "packages/request/src/index.ts",
+      "publicSymbols": [
+        "createAxios",
+        "http"
+      ],
+      "packageName": "@ayu-mu/request",
+      "consumes": [
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "utils"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "scripts",
+      "ownedPaths": [
+        "scripts/**"
+      ],
+      "publicEntry": "scripts/package-init.js",
+      "publicSymbols": [],
+      "packageName": "@ayu-mu/scripts",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "server",
+      "ownedPaths": [
+        "server/**"
+      ],
+      "publicEntry": "server/.nitro/dev/index.mjs",
+      "publicSymbols": [],
+      "packageName": "@ayu-mu/server",
+      "consumes": [
+        {
+          "cell": "model"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "story-book",
+      "ownedPaths": [
+        "story-book/src/**"
+      ],
+      "publicEntry": "story-book/src/main.ts",
+      "publicSymbols": [],
+      "packageName": "story-book",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/utils/src/**"
+      ],
+      "publicEntry": "packages/utils/src/index.ts",
+      "publicSymbols": [
+        "isFunction",
+        "isJsonString",
+        "isJsonStringTryCatch",
+        "isMobile",
+        "makeInstaller",
+        "useThrottle",
+        "webStorage",
+        "withInstall",
+        "withInstallDirective",
+        "withInstallFunction",
+        "withNoopInstall"
+      ],
+      "packageName": "@ayu-mu/utils",
+      "consumes": [
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "scripts"
+        },
+        {
+          "cell": "vite"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite",
+      "ownedPaths": [
+        "configs/vite/src/**"
+      ],
+      "publicEntry": "configs/vite/src/index.ts",
+      "publicSymbols": [
+        "definePkgConfig"
+      ],
+      "packageName": "@ayu-mu/vite",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vue-com",
+      "ownedPaths": [
+        "app/admin/src/**"
+      ],
+      "publicEntry": "app/admin/src/apis/auth/index.ts",
+      "publicSymbols": [
+        "getMenuList",
+        "login"
+      ],
+      "packageName": "vue-com",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "common"
+        },
+        {
+          "cell": "core-common"
+        },
+        {
+          "cell": "css"
+        },
+        {
+          "cell": "lint"
+        },
+        {
+          "cell": "model"
+        },
+        {
+          "cell": "request"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

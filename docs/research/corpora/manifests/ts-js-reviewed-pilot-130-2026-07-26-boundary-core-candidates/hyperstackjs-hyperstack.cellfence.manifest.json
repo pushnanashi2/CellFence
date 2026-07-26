@@ -1,0 +1,645 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "packages/_empty/src/**",
+      "packages/create-hyperstack/*",
+      "packages/create-hyperstack/template-app/**",
+      "packages/create-hyperstack/template-app/src/**",
+      "packages/create-hyperstack/template-blank/**",
+      "packages/create-hyperstack/template-blank/src/**",
+      "packages/gen/src/**",
+      "packages/hypercontroller/src/**",
+      "packages/hypermodel/src/**",
+      "packages/hypernight/src/**",
+      "packages/hyperportal/src/**",
+      "packages/hyperstack/src/**",
+      "packages/hyperworker/src/**",
+      "packages/initializer-jwt/src/**",
+      "packages/testing/src/**",
+      "packages/typings/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "create-hyperstack",
+      "ownedPaths": [
+        "packages/create-hyperstack/*",
+        "packages/create-hyperstack/template-app/**",
+        "packages/create-hyperstack/template-blank/**"
+      ],
+      "publicEntry": "packages/create-hyperstack/index.js",
+      "publicSymbols": [],
+      "packageName": "create-hyperstack",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "empty",
+      "ownedPaths": [
+        "packages/_empty/src/**"
+      ],
+      "publicEntry": "packages/_empty/src/index.ts",
+      "publicSymbols": [],
+      "packageName": "empty",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "gen",
+      "ownedPaths": [
+        "packages/gen/src/**"
+      ],
+      "publicEntry": "packages/gen/src/index.ts",
+      "publicSymbols": [
+        "gen"
+      ],
+      "packageName": "@hyperstackjs/gen",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hypercontroller",
+      "ownedPaths": [
+        "packages/hypercontroller/src/**"
+      ],
+      "publicEntry": "packages/hypercontroller/src/index.ts",
+      "publicSymbols": [
+        "asOpenAPIPath",
+        "asOpenAPIPathParams",
+        "authWithJWT",
+        "ClassErrorMiddleware",
+        "ClassMiddleware",
+        "Controller",
+        "createServer",
+        "CreateServerOptions",
+        "Delete",
+        "err",
+        "ErrorMiddleware",
+        "Get",
+        "getRouteMap",
+        "getRouteSnippets",
+        "HttpResponse",
+        "HttpResponseBadRequest",
+        "HttpResponseClientError",
+        "HttpResponseConflict",
+        "HttpResponseCreated",
+        "HttpResponseForbidden",
+        "HttpResponseInternalServerError",
+        "HttpResponseMethodNotAllowed",
+        "HttpResponseMovedPermanently",
+        "HttpResponseNoContent",
+        "HttpResponseNotFound",
+        "HttpResponseNotImplemented",
+        "HttpResponseOK",
+        "HttpResponseRedirect",
+        "HttpResponseRedirection",
+        "HttpResponseServerError",
+        "HttpResponseSuccess",
+        "HttpResponseTooManyRequests",
+        "HttpResponseUnauthorized",
+        "isHttpResponse",
+        "isHttpResponseBadRequest",
+        "isHttpResponseClientError",
+        "isHttpResponseConflict",
+        "isHttpResponseCreated",
+        "isHttpResponseForbidden",
+        "isHttpResponseInternalServerError",
+        "isHttpResponseMethodNotAllowed",
+        "isHttpResponseMovedPermanently",
+        "isHttpResponseNoContent",
+        "isHttpResponseNotFound",
+        "isHttpResponseNotImplemented",
+        "isHttpResponseOK",
+        "isHttpResponseRedirect",
+        "isHttpResponseRedirection",
+        "isHttpResponseServerError",
+        "isHttpResponseSuccess",
+        "isHttpResponseTooManyRequests",
+        "isHttpResponseUnauthorized",
+        "listen",
+        "listRoutes",
+        "load",
+        "Middleware",
+        "NextFunction",
+        "notfound",
+        "ok",
+        "ParseBody",
+        "Patch",
+        "permits",
+        "Post",
+        "printRoutes",
+        "Put",
+        "Request",
+        "RequestIdOpts",
+        "requires",
+        "Response",
+        "routemapToOpenAPI",
+        "ServerOptions",
+        "unauthorized",
+        "ValidateBody",
+        "ValidationError"
+      ],
+      "packageName": "@hyperstackjs/hypercontroller",
+      "consumes": [
+        {
+          "cell": "hypernight"
+        },
+        {
+          "cell": "typings"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hypermodel",
+      "ownedPaths": [
+        "packages/hypermodel/src/**"
+      ],
+      "publicEntry": "packages/hypermodel/src/index.ts",
+      "publicSymbols": [
+        "buildModels",
+        "converge",
+        "dropSchema",
+        "generateHexToken",
+        "hashPassword",
+        "HyperModel",
+        "HyperModelError",
+        "migrate",
+        "ModelAssertionError",
+        "ModelsConvergeConfig",
+        "ModelsOpts",
+        "OrderItem",
+        "Schema",
+        "syncSchema",
+        "tableBuilder",
+        "truncate",
+        "verifyPassword"
+      ],
+      "packageName": "@hyperstackjs/hypermodel",
+      "consumes": [
+        {
+          "cell": "typings"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hypernight",
+      "ownedPaths": [
+        "packages/hypernight/src/**"
+      ],
+      "publicEntry": "packages/hypernight/src/index.ts",
+      "publicSymbols": [
+        "addBasePathToClassMetadata",
+        "addChildControllersToClassMetadata",
+        "addClassOptionsToClassMetadata",
+        "addErrorMiddlewareToMetadata",
+        "addHttpVerbToMethodMetadata",
+        "addMiddlewareToMetadata",
+        "addWrapperToMetadata",
+        "All",
+        "Checkout",
+        "ChildControllers",
+        "Children",
+        "ClassErrorMiddleware",
+        "ClassMiddleware",
+        "ClassOptions",
+        "ClassWrapper",
+        "Controller",
+        "Copy",
+        "Delete",
+        "ErrorMiddleware",
+        "Get",
+        "Head",
+        "Lock",
+        "Merge",
+        "Middleware",
+        "Mkactivity",
+        "Mkcol",
+        "Move",
+        "MSearch",
+        "Notify",
+        "Options",
+        "Patch",
+        "Post",
+        "Purge",
+        "Put",
+        "Report",
+        "Search",
+        "Server",
+        "Subscribe",
+        "Trace",
+        "Unlock",
+        "Unsubscribe",
+        "Wrapper"
+      ],
+      "packageName": "@hyperstackjs/hypernight",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hyperportal",
+      "ownedPaths": [
+        "packages/hyperportal/src/**"
+      ],
+      "publicEntry": "packages/hyperportal/src/index.ts",
+      "publicSymbols": [
+        "startPortal"
+      ],
+      "packageName": "@hyperstackjs/hyperportal",
+      "consumes": [
+        {
+          "cell": "typings"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hyperstack",
+      "ownedPaths": [
+        "packages/hyperstack/src/**"
+      ],
+      "publicEntry": "packages/hyperstack/src/index.ts",
+      "publicSymbols": [
+        "App",
+        "authWithJWT",
+        "ClassErrorMiddleware",
+        "ClassMiddleware",
+        "cli",
+        "Config",
+        "context",
+        "Context",
+        "Controller",
+        "createApp",
+        "createUseApp",
+        "Delete",
+        "err",
+        "ErrorMiddleware",
+        "generateHexToken",
+        "Get",
+        "hashPassword",
+        "HttpResponse",
+        "HttpResponseBadRequest",
+        "HttpResponseClientError",
+        "HttpResponseConflict",
+        "HttpResponseCreated",
+        "HttpResponseForbidden",
+        "HttpResponseInternalServerError",
+        "HttpResponseMethodNotAllowed",
+        "HttpResponseMovedPermanently",
+        "HttpResponseNoContent",
+        "HttpResponseNotFound",
+        "HttpResponseNotImplemented",
+        "HttpResponseOK",
+        "HttpResponseRedirect",
+        "HttpResponseRedirection",
+        "HttpResponseServerError",
+        "HttpResponseSuccess",
+        "HttpResponseTooManyRequests",
+        "HttpResponseUnauthorized",
+        "HyperModel",
+        "HyperModelError",
+        "HyperWorker",
+        "initializer",
+        "Initializer",
+        "isDevelopment",
+        "isProduction",
+        "Mailer",
+        "Middleware",
+        "MigrationsMode",
+        "ModelAssertionError",
+        "NextFunction",
+        "notfound",
+        "ok",
+        "ParseBody",
+        "Patch",
+        "permits",
+        "Post",
+        "producerOnly",
+        "Put",
+        "queueAs",
+        "Request",
+        "requires",
+        "Response",
+        "runApp",
+        "Schema",
+        "seed",
+        "shutDown",
+        "task",
+        "Task",
+        "unauthorized",
+        "useApp",
+        "useControllers",
+        "useModels",
+        "usePortal",
+        "useSeed",
+        "useTasks",
+        "useWorkers",
+        "ValidateBody",
+        "ValidationError",
+        "verifyPassword",
+        "WorkersMode"
+      ],
+      "packageName": "hyperstack",
+      "consumes": [
+        {
+          "cell": "gen"
+        },
+        {
+          "cell": "hypercontroller"
+        },
+        {
+          "cell": "hypermodel"
+        },
+        {
+          "cell": "hyperportal"
+        },
+        {
+          "cell": "hyperworker"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "hyperworker",
+      "ownedPaths": [
+        "packages/hyperworker/src/**"
+      ],
+      "publicEntry": "packages/hyperworker/src/index.ts",
+      "publicSymbols": [
+        "buildWorkers",
+        "BuildWorkersParams",
+        "CreateWorkerConnectionOpts",
+        "getJobCounts",
+        "HyperWorker",
+        "LoadWorkersOpts",
+        "Mailer",
+        "MailerSettings",
+        "producerOnly",
+        "queueAs",
+        "Worker",
+        "WorkerBackendOpts",
+        "WorkersMode",
+        "WorkerTypes"
+      ],
+      "packageName": "@hyperstackjs/hyperworker",
+      "consumes": [
+        {
+          "cell": "typings"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "initializer-jwt",
+      "ownedPaths": [
+        "packages/initializer-jwt/src/**"
+      ],
+      "publicEntry": "packages/initializer-jwt/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "DEFAULT_AUTH_COOKIE_NAME",
+        "getProps",
+        "JWTProps",
+        "resolveAuthCookieName"
+      ],
+      "packageName": "@hyperstackjs/initializer-jwt",
+      "consumes": [
+        {
+          "cell": "hypercontroller"
+        },
+        {
+          "cell": "hyperstack"
+        },
+        {
+          "cell": "typings"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "template-app",
+      "ownedPaths": [
+        "packages/create-hyperstack/template-app/src/**"
+      ],
+      "publicEntry": "packages/create-hyperstack/template-app/src/app/controllers/auth.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "template-app",
+      "consumes": [
+        {
+          "cell": "create-hyperstack"
+        },
+        {
+          "cell": "hyperstack"
+        },
+        {
+          "cell": "initializer-jwt"
+        },
+        {
+          "cell": "testing"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "template-blank",
+      "ownedPaths": [
+        "packages/create-hyperstack/template-blank/src/**"
+      ],
+      "publicEntry": "packages/create-hyperstack/template-blank/src/app/controllers/index.ts",
+      "publicSymbols": [
+        "AppController"
+      ],
+      "packageName": "template-blank",
+      "consumes": [
+        {
+          "cell": "create-hyperstack"
+        },
+        {
+          "cell": "hyperstack"
+        },
+        {
+          "cell": "initializer-jwt"
+        },
+        {
+          "cell": "testing"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "testing",
+      "ownedPaths": [
+        "packages/testing/src/**"
+      ],
+      "publicEntry": "packages/testing/src/index.ts",
+      "publicSymbols": [
+        "expectRequestWithSnapshot",
+        "test",
+        "TestKit",
+        "TestKitMailers",
+        "TestKitModels",
+        "TestKitModelsFn",
+        "TestKitWorkers",
+        "TestKitWorkersFn"
+      ],
+      "packageName": "@hyperstackjs/testing",
+      "consumes": [
+        {
+          "cell": "hyperstack"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "typings",
+      "ownedPaths": [
+        "packages/typings/src/**"
+      ],
+      "publicEntry": "packages/typings/src/index.ts",
+      "publicSymbols": [
+        "App",
+        "AppLoggerOptions",
+        "BeforeLoggerFn",
+        "Config",
+        "ConfigPaths",
+        "Context",
+        "ContextStore",
+        "DatabaseOptions",
+        "LifecycleHooks",
+        "LifecycleMap",
+        "Logger",
+        "MailerSettings",
+        "Task",
+        "TaskFn",
+        "TaskMap",
+        "WorkerBackendOpts",
+        "WorkersMode"
+      ],
+      "packageName": "@hyperstackjs/typings",
+      "consumes": [],
+      "producesArtifacts": []
+    }
+  ]
+}

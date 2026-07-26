@@ -1,0 +1,501 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "app/cra-react18/**",
+      "app/cra-react18/src/**",
+      "app/express-server/**",
+      "app/express-server/src/**",
+      "app/nest-server/**",
+      "app/nest-server/src/**",
+      "app/nuxt4-web/**",
+      "app/vite-react19/**",
+      "app/vite-react19/src/**",
+      "app/vite-vue3/**",
+      "app/vite-vue3/src/**",
+      "app/webpack-vue3/**",
+      "app/webpack-vue3/src/**",
+      "packages/eslint-config/**",
+      "packages/services/src/**",
+      "packages/types/src/**",
+      "packages/utils/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "app",
+      "ownedPaths": [
+        "app/cra-react18/**",
+        "app/express-server/**",
+        "app/nest-server/**",
+        "app/vite-react19/**",
+        "app/vite-vue3/**",
+        "app/webpack-vue3/**"
+      ],
+      "publicEntry": "app/cra-react18/.eslintrc.cjs",
+      "publicSymbols": [],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "cra-react18",
+      "ownedPaths": [
+        "app/cra-react18/src/**"
+      ],
+      "publicEntry": "app/cra-react18/src/index.tsx",
+      "publicSymbols": [],
+      "packageName": "cra-react18",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "eslint-config",
+      "ownedPaths": [
+        "packages/eslint-config/**"
+      ],
+      "publicEntry": "packages/eslint-config/base.js",
+      "publicSymbols": [],
+      "packageName": "@fullstack-blog/eslint-config",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "express-server",
+      "ownedPaths": [
+        "app/express-server/src/**"
+      ],
+      "publicEntry": "app/express-server/src/app.js",
+      "publicSymbols": [],
+      "packageName": "express-server",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "eslint-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nest-server",
+      "ownedPaths": [
+        "app/nest-server/src/**"
+      ],
+      "publicEntry": "app/nest-server/src/app.module.ts",
+      "publicSymbols": [
+        "AppModule"
+      ],
+      "packageName": "nest-server",
+      "consumes": [
+        {
+          "cell": "app"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "nuxt4-web",
+      "ownedPaths": [
+        "app/nuxt4-web/**"
+      ],
+      "publicEntry": "app/nuxt4-web/.stylelintrc.mjs",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "nuxt4-web",
+      "consumes": [
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "services",
+      "ownedPaths": [
+        "packages/services/src/**"
+      ],
+      "publicEntry": "packages/services/src/index.ts",
+      "publicSymbols": [
+        "articleService",
+        "categoryService",
+        "chatgptService",
+        "commentService",
+        "getOrCreateDeviceId",
+        "pushSubscriptionService",
+        "replyService",
+        "tagService",
+        "useAxios",
+        "userService",
+        "validatorService"
+      ],
+      "packageName": "@fullstack-blog/services",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "types",
+      "ownedPaths": [
+        "packages/types/src/**"
+      ],
+      "publicEntry": "packages/types/src/index.ts",
+      "publicSymbols": [
+        "ArrayResponse",
+        "ArticleDTO",
+        "ArticleOutlineDTO",
+        "CategoryCamelCaseDTO",
+        "CategoryDTO",
+        "CommentDTO",
+        "CommentUserInfo",
+        "CommonResponse",
+        "GeneralFunction",
+        "Lazy",
+        "LoginModel",
+        "LogoutModel",
+        "PageResponse",
+        "PlainNode",
+        "PlainObject",
+        "PlainResponse",
+        "PrimitiveType",
+        "PushEventType",
+        "PushNotificationPayload",
+        "PushPermissionState",
+        "PushSubscriptionPayload",
+        "QueryCategoryModel",
+        "QueryCommentPageModel",
+        "QueryHotColumnModel",
+        "QueryPageModel",
+        "QuerySearchModel",
+        "QueryTagModel",
+        "RecordDTO",
+        "RecordResponse",
+        "ReplyDTO",
+        "SubscribePushModel",
+        "TagCamelCaseDTO",
+        "TagDTO",
+        "TreeNode",
+        "UnbindPushByDeviceModel",
+        "UnsubscribePushModel",
+        "UpdateArticleDeletedModel",
+        "UpdateArticlePrivateModel",
+        "UpdateCategoryModel",
+        "UserDTO"
+      ],
+      "packageName": "@fullstack-blog/types",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "utils",
+      "ownedPaths": [
+        "packages/utils/src/**"
+      ],
+      "publicEntry": "packages/utils/src/index.ts",
+      "publicSymbols": [
+        "addClass",
+        "approvedFormatter",
+        "DATE_STANDARD_FORMAT",
+        "DATE_STANDARD_FORMAT_CN",
+        "EMAIL_VALIDATOR",
+        "format",
+        "getDateByOffset",
+        "getDayEnd",
+        "getDayStart",
+        "getLocalData",
+        "getMonthEnd",
+        "getMonthStart",
+        "getOffset",
+        "getOneDayRange",
+        "getOneMonthRange",
+        "getOneWeekRange",
+        "getOneYearRange",
+        "getScrollContainer",
+        "getTime",
+        "getTimeInterval",
+        "getType",
+        "getValueOfDate",
+        "getWeekEnd",
+        "getWeekStart",
+        "getYearEnd",
+        "getYearStart",
+        "HOUR_FORMAT",
+        "humanizeDuration",
+        "initDayjs",
+        "isArray",
+        "isBasicType",
+        "isBefore",
+        "isBlob",
+        "isBool",
+        "isDefined",
+        "isFile",
+        "isFunction",
+        "isMap",
+        "isMoreThanOneDay",
+        "isNull",
+        "isNumber",
+        "isObject",
+        "isPromise",
+        "isSameDay",
+        "isSet",
+        "isString",
+        "isSymbol",
+        "isUndefined",
+        "isUndefOrNull",
+        "ONE_DAY_MILLSECONDS",
+        "ONE_WEEK_MILLSECONDS",
+        "removeClass",
+        "requestParamsFilter",
+        "REQUIRED_VALIDATOR_BLUR",
+        "setScrollTop",
+        "sleep",
+        "tree2Arr",
+        "TreeNode",
+        "triggerC3Animation",
+        "URL_VALIDATOR"
+      ],
+      "packageName": "@fullstack-blog/utils",
+      "consumes": [
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "types"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite-react19",
+      "ownedPaths": [
+        "app/vite-react19/src/**"
+      ],
+      "publicEntry": "app/vite-react19/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "vite-react19",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "vite-vue3",
+      "ownedPaths": [
+        "app/vite-vue3/src/**"
+      ],
+      "publicEntry": "app/vite-vue3/src/directives/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "vite-vue3",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "webpack-vue3",
+      "ownedPaths": [
+        "app/webpack-vue3/src/**"
+      ],
+      "publicEntry": "app/webpack-vue3/src/directives/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "webpack-vue3",
+      "consumes": [
+        {
+          "cell": "app"
+        },
+        {
+          "cell": "eslint-config"
+        },
+        {
+          "cell": "services"
+        },
+        {
+          "cell": "types"
+        },
+        {
+          "cell": "utils"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

@@ -452,6 +452,56 @@ test("precision next cycle can freeze a named boundary-core claim profile", () =
   }
 });
 
+test("precision next cycle can freeze a named public-surface claim profile", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-public-surface-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-public-surface-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createFixture(rootDir, {
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+    });
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-public-surface-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "external-human-reviewer-1,external-org-reviewer-1",
+      "--rater-types",
+      "human,organization",
+      "--claim-profile",
+      "ts-js-public-surface-v1",
+      "--external-claim",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const expectedRules = ["CELLFENCE_PUBLIC_SYMBOL_MISMATCH"];
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.equal(summary.claimProfile, "ts-js-public-surface-v1");
+    assert.match(summary.claimProfileDescription, /public-surface/);
+    assert.deepEqual(summary.includedRules, expectedRules);
+    assert.deepEqual(summary.worklist.selectedByRule, {
+      CELLFENCE_PUBLIC_SYMBOL_MISMATCH: 1,
+    });
+    const protocol = readJson(path.join(outDir, "protocol.worklist.json"));
+    assert.equal(protocol.claim.scopeProfile, "ts-js-public-surface-v1");
+    assert.match(protocol.claim.targetPopulation, /public-surface drift rules only/);
+    assert.deepEqual(protocol.claim.includedRules, expectedRules);
+    const worklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
+    assert.deepEqual(worklist.filters.includedRules, expectedRules);
+    const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
+    assert.equal(preflight.valid, true);
+    assert.equal(preflight.claimReady, false);
+    assert.match(preflight.gateFailures.join("\n"), /external human\/organization independent label/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
 test("precision next cycle rejects a claim profile with mismatched include rules", () => {
   const result = runNextCycle([
     "--study-id",

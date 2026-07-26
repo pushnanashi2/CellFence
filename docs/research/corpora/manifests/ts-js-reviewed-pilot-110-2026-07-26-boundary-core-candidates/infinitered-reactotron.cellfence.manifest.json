@@ -1,0 +1,574 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/example-app/**",
+      "apps/reactotron-app/src/**",
+      "lib/eslint-plugin-reactotron/src/**",
+      "lib/reactotron-apisauce/**",
+      "lib/reactotron-apisauce/src/**",
+      "lib/reactotron-core-client/**",
+      "lib/reactotron-core-client/src/**",
+      "lib/reactotron-core-contract/src/**",
+      "lib/reactotron-core-server/src/**",
+      "lib/reactotron-core-ui/**",
+      "lib/reactotron-core-ui/src/**",
+      "lib/reactotron-mcp/**",
+      "lib/reactotron-mcp/src/**",
+      "lib/reactotron-mst/src/**",
+      "lib/reactotron-react-js/**",
+      "lib/reactotron-react-js/src/**",
+      "lib/reactotron-react-native-mmkv/src/**",
+      "lib/reactotron-react-native/**",
+      "lib/reactotron-react-native/src/**",
+      "lib/reactotron-redux/**",
+      "lib/reactotron-redux/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "eslint-plugin-reactotron",
+      "ownedPaths": [
+        "lib/eslint-plugin-reactotron/src/**"
+      ],
+      "publicEntry": "lib/eslint-plugin-reactotron/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "rules"
+      ],
+      "packageName": "eslint-plugin-reactotron",
+      "consumes": [
+        {
+          "cell": "reactotron-core-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "example-app",
+      "ownedPaths": [
+        "apps/example-app/**"
+      ],
+      "publicEntry": "apps/example-app/index.js",
+      "publicSymbols": [],
+      "packageName": "example-app",
+      "consumes": [
+        {
+          "cell": "eslint-plugin-reactotron"
+        },
+        {
+          "cell": "reactotron-core-client"
+        },
+        {
+          "cell": "reactotron-mst"
+        },
+        {
+          "cell": "reactotron-react-js"
+        },
+        {
+          "cell": "reactotron-react-native"
+        },
+        {
+          "cell": "reactotron-redux"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "lib",
+      "ownedPaths": [
+        "lib/reactotron-apisauce/**",
+        "lib/reactotron-core-client/**",
+        "lib/reactotron-core-ui/**",
+        "lib/reactotron-mcp/**",
+        "lib/reactotron-react-js/**",
+        "lib/reactotron-react-native/**",
+        "lib/reactotron-redux/**"
+      ],
+      "publicEntry": "lib/reactotron-apisauce/src/index.ts",
+      "publicSymbols": [
+        "ApisuacePluginOptions",
+        "default"
+      ],
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-apisauce",
+      "ownedPaths": [
+        "lib/reactotron-apisauce/src/**"
+      ],
+      "publicEntry": "lib/reactotron-apisauce/src/index.ts",
+      "publicSymbols": [
+        "ApisuacePluginOptions",
+        "default"
+      ],
+      "packageName": "reactotron-apisauce",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-app",
+      "ownedPaths": [
+        "apps/reactotron-app/src/**"
+      ],
+      "publicEntry": "apps/reactotron-app/src/main/index.ts",
+      "publicSymbols": [],
+      "packageName": "reactotron-app",
+      "consumes": [
+        {
+          "cell": "reactotron-core-contract"
+        },
+        {
+          "cell": "reactotron-core-server"
+        },
+        {
+          "cell": "reactotron-core-ui"
+        },
+        {
+          "cell": "reactotron-mcp"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-core-client",
+      "ownedPaths": [
+        "lib/reactotron-core-client/src/**"
+      ],
+      "publicEntry": "lib/reactotron-core-client/src/index.ts",
+      "publicSymbols": [
+        "ArgType",
+        "assertHasLoggerPlugin",
+        "assertHasStateResponsePlugin",
+        "ClientOptions",
+        "corePlugins",
+        "createClient",
+        "CustomCommand",
+        "CustomCommandArg",
+        "CustomCommandArgs",
+        "hasStateResponsePlugin",
+        "InferFeatures",
+        "InferFeaturesFromPlugins",
+        "InferPluginsFromCreators",
+        "LifeCycleMethods",
+        "LoggerPlugin",
+        "Plugin",
+        "PluginCreator",
+        "Reactotron",
+        "ReactotronCore",
+        "ReactotronImpl",
+        "StateResponsePlugin"
+      ],
+      "packageName": "reactotron-core-client",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-contract"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-core-contract",
+      "ownedPaths": [
+        "lib/reactotron-core-contract/src/**"
+      ],
+      "publicEntry": "lib/reactotron-core-contract/src/index.ts",
+      "publicSymbols": [
+        "ApiResponsePayload",
+        "AsyncStorageMutationPayload",
+        "BenchmarkReportPayload",
+        "BenchmarkStep",
+        "CertServerOptions",
+        "ClientIntroPayload",
+        "Command",
+        "CommandEvent",
+        "CommandMap",
+        "CommandType",
+        "CommandTypeKey",
+        "CustomCommandRegisterPayload",
+        "CustomCommandUnregisterPayload",
+        "Difference",
+        "DifferenceChange",
+        "DifferenceCreate",
+        "DifferenceRemove",
+        "DisplayPayload",
+        "EditorOpenPayload",
+        "ErrorLogPayload",
+        "ErrorStackFrame",
+        "ImagePayload",
+        "isErrorStackFrame",
+        "isErrorStackFrameArray",
+        "LogPayload",
+        "McpRedactionConfig",
+        "McpRedactionRules",
+        "PartialConnection",
+        "PfxServerOptions",
+        "ReplExecuteResponsePayload",
+        "ReplLsResponsePayload",
+        "SagaTaskCompleteChild",
+        "SagaTaskCompletePayload",
+        "ServerEvent",
+        "ServerEventKey",
+        "ServerEventMap",
+        "ServerOptions",
+        "StateActionCompletePayload",
+        "StateActionDispatchPayload",
+        "StateBackupRequestPayload",
+        "StateBackupResponsePayload",
+        "StateKeysRequestPayload",
+        "StateKeysResponsePayload",
+        "StateRestoreRequestPayload",
+        "StateValuesChangePayload",
+        "StateValuesRequestPayload",
+        "StateValuesResponsePayload",
+        "StateValuesSubscribePayload",
+        "WebSocketEvent",
+        "WssServerOptions"
+      ],
+      "packageName": "reactotron-core-contract",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-core-server",
+      "ownedPaths": [
+        "lib/reactotron-core-server/src/**"
+      ],
+      "publicEntry": "lib/reactotron-core-server/src/index.ts",
+      "publicSymbols": [
+        "createServer",
+        "default"
+      ],
+      "packageName": "reactotron-core-server",
+      "consumes": [
+        {
+          "cell": "reactotron-core-contract"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-core-ui",
+      "ownedPaths": [
+        "lib/reactotron-core-ui/src/**"
+      ],
+      "publicEntry": "lib/reactotron-core-ui/src/index.ts",
+      "publicSymbols": [
+        "ActionButton",
+        "ContentView",
+        "CustomCommand",
+        "CustomCommandsContext",
+        "CustomCommandsProvider",
+        "DispatchActionModal",
+        "EmptyState",
+        "filterCommands",
+        "Header",
+        "Modal",
+        "RandomJoke",
+        "ReactNativeContext",
+        "ReactNativeProvider",
+        "ReactotronAppProvider",
+        "ReactotronContext",
+        "ReactotronProvider",
+        "repairSerialization",
+        "Snapshot",
+        "SnapshotRenameModal",
+        "StateContext",
+        "StateProvider",
+        "SubscriptionAddModal",
+        "themes",
+        "TimelineCommand",
+        "timelineCommandResolver",
+        "TimelineCommandTabButton",
+        "TimelineContext",
+        "TimelineFilterModal",
+        "TimelineProvider",
+        "Timestamp",
+        "Tooltip",
+        "TreeView",
+        "TreeViewDiff"
+      ],
+      "packageName": "reactotron-core-ui",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-contract"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-mcp",
+      "ownedPaths": [
+        "lib/reactotron-mcp/src/**"
+      ],
+      "publicEntry": "lib/reactotron-mcp/src/index.ts",
+      "publicSymbols": [
+        "createMcpServer",
+        "createRedactor",
+        "DEFAULT_REDACTION_RULES",
+        "DEFAULT_SERVER_CONFIG",
+        "getClientRedactionConfig",
+        "McpRedactionServerConfig",
+        "ReactotronMcpServer",
+        "redact",
+        "REDACTED",
+        "Redactor",
+        "resolveEffectiveRules"
+      ],
+      "packageName": "reactotron-mcp",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-contract"
+        },
+        {
+          "cell": "reactotron-core-server"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-mst",
+      "ownedPaths": [
+        "lib/reactotron-mst/src/**"
+      ],
+      "publicEntry": "lib/reactotron-mst/src/index.ts",
+      "publicSymbols": [
+        "mst",
+        "MstPluginFilter",
+        "MstPluginOptions"
+      ],
+      "packageName": "reactotron-mst",
+      "consumes": [
+        {
+          "cell": "reactotron-core-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-react-js",
+      "ownedPaths": [
+        "lib/reactotron-react-js/src/**"
+      ],
+      "publicEntry": "lib/reactotron-react-js/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "trackGlobalErrors"
+      ],
+      "packageName": "reactotron-react-js",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-react-native",
+      "ownedPaths": [
+        "lib/reactotron-react-native/src/**"
+      ],
+      "publicEntry": "lib/reactotron-react-native/src/index.ts",
+      "publicSymbols": [
+        "asyncStorage",
+        "ClientOptions",
+        "default",
+        "devTools",
+        "McpRedactionConfig",
+        "McpRedactionRules",
+        "networking",
+        "openInEditor",
+        "overlay",
+        "reactNativeCorePlugins",
+        "ReactotronReactNative",
+        "storybook",
+        "trackGlobalErrors",
+        "trackGlobalLogs",
+        "UseReactNativeOptions"
+      ],
+      "packageName": "reactotron-react-native",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-client"
+        },
+        {
+          "cell": "reactotron-core-contract"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-react-native-mmkv",
+      "ownedPaths": [
+        "lib/reactotron-react-native-mmkv/src/**"
+      ],
+      "publicEntry": "lib/reactotron-react-native-mmkv/src/index.ts",
+      "publicSymbols": [
+        "default",
+        "MmkvPluginConfig"
+      ],
+      "packageName": "reactotron-react-native-mmkv",
+      "consumes": [
+        {
+          "cell": "reactotron-core-client"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "reactotron-redux",
+      "ownedPaths": [
+        "lib/reactotron-redux/src/**"
+      ],
+      "publicEntry": "lib/reactotron-redux/src/index.ts",
+      "publicSymbols": [
+        "reactotronRedux",
+        "ReactotronReduxPlugin"
+      ],
+      "packageName": "reactotron-redux",
+      "consumes": [
+        {
+          "cell": "lib"
+        },
+        {
+          "cell": "reactotron-core-client"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}

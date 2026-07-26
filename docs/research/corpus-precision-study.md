@@ -40,17 +40,18 @@ The first external claim should stay narrow:
 > the pre-registered one-sided 95% lower confidence bound for blocking
 > precision.
 
-Resource rules, Python framework adapters, inferred manifests, and public
-surface drift should be reported as separate studies until they have their own
-reviewed manifests, labels, and recall evidence.
+Resource rules, loader-safety rules, Python framework adapters, inferred
+manifests, and public-surface drift should be reported as separate studies
+until they have their own reviewed manifests, labels, and recall evidence.
 
 The next-cycle helper exposes this first narrow scope as the named profile
 `--claim-profile ts-js-boundary-core-v1`. Use the named profile for a public
 claim packet instead of hand-maintaining an ad hoc `--include-rules` list. The
 profile fixes the target population and included rules in the sealed worklist
 protocol. The helper rejects conflicting `--include-rules` or
-`--target-population` overrides. Loader-safety and static-resource detectors
-have separate profiles; they are not evidence for the boundary-core claim.
+`--target-population` overrides. Loader-safety, static-resource, and
+public-surface detectors have separate profiles; they are not evidence for the
+boundary-core claim.
 
 Before a corpus can feed a blocking-precision claim, validate that it is a
 reviewed-manifest corpus:
@@ -1102,6 +1103,20 @@ human/organization labels, external manifest attestations, 158 more
 better repository balance because `Gitlawb/openclaude` and `rollup/rollup`
 exceed the 10% contribution cap. The effect of the profile is narrower evidence,
 not a shortcut around labels, attestations, sample size, or balance.
+
+Round46 closes the boundary-core sample-size and repository-balance gaps without
+turning them into a precision claim. The 160-subject corpus rerun completed
+160/160 subjects with zero timeouts and 160/160 verified evidence graphs. With
+`--claim-profile ts-js-boundary-core-v1` and
+`--max-repository-contribution 0.1`, the sealed worklist selected 650 findings:
+349 `CELLFENCE_PRIVATE_IMPORT` and 301 `CELLFENCE_UNDECLARED_CONSUMER`.
+`Gitlawb/openclaude` contributed 65/650 findings (10.0%) and `rollup/rollup`
+20/650 (3.1%). The `CELLFENCE_UNDECLARED_CONSUMER` zero-failure sample-size
+deficit is therefore closed for the narrow boundary-core plan, but the packet is
+still not claim-ready: it has no returned labels, no external human/org labels,
+no external manifest attestations, and the generated packet was made before the
+CellFence worktree was clean. The round handoff is
+[ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core.md](ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core.md).
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

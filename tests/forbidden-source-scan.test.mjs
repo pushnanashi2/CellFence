@@ -16,6 +16,10 @@ function runScan(cwd) {
   });
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test("forbidden source scan rejects a blocked reviewer term but permits the related advisory word", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-forbidden-scan-"));
   try {
@@ -29,6 +33,38 @@ test("forbidden source scan rejects a blocked reviewer term but permits the rela
     result = runScan(rootDir);
     assert.equal(result.status, 1, result.stderr || result.stdout);
     assert.match(result.stderr, new RegExp(`unsafe\\.md: forbidden term '${blockedTerm}'`));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("forbidden source scan distinguishes local provenance from public corpus identifiers", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-forbidden-public-corpus-"));
+  try {
+    const homeSegment = ["ho", "me"].join("");
+    const localHomeTerm = `/${homeSegment}/`;
+    const blockedFinancialTerm = ["earn", "ings"].join("");
+    fs.writeFileSync(
+      path.join(rootDir, "manifest.json"),
+      JSON.stringify({
+        ownedPaths: [`libs/${homeSegment}/**`],
+        publicEntry: `components/${homeSegment}/Footer.tsx`,
+        publicSymbols: [`${blockedFinancialTerm}Indicator`],
+      }),
+    );
+    let result = runScan(rootDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    fs.writeFileSync(path.join(rootDir, "unsafe-home.md"), `bundle was copied from ${localHomeTerm}ubuntu/source\n`);
+    result = runScan(rootDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, new RegExp(`unsafe-home\\.md: forbidden term '${escapeRegExp(localHomeTerm)}'`));
+
+    fs.rmSync(path.join(rootDir, "unsafe-home.md"));
+    fs.writeFileSync(path.join(rootDir, "unsafe-term.md"), `private ${blockedFinancialTerm} notes leaked here\n`);
+    result = runScan(rootDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, new RegExp(`unsafe-term\\.md: forbidden term '${blockedFinancialTerm}'`));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

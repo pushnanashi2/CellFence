@@ -1,0 +1,324 @@
+{
+  "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": [
+      "apps/embedded-catalog/react/**",
+      "apps/embedded-catalog/react/src/**",
+      "apps/frontend-sdk/src/**",
+      "apps/magic-link/src/**",
+      "apps/webapp/src/**",
+      "packages/api/src/**",
+      "packages/shared/src/**"
+    ],
+    "exclude": [
+      "**/__fixtures__/**",
+      "**/__generated__/**",
+      "**/__mocks__/**",
+      "**/__snapshots__/**",
+      "**/__testfixtures__/**",
+      "**/__tests__/**",
+      "**/*.bench.*",
+      "**/*.benchmark.*",
+      "**/*.css",
+      "**/*.d.ts",
+      "**/*.gen.*",
+      "**/*.generated.*",
+      "**/*.gif",
+      "**/*.jpeg",
+      "**/*.jpg",
+      "**/*.less",
+      "**/*.md",
+      "**/*.module.css",
+      "**/*.module.scss",
+      "**/*.png",
+      "**/*.sass",
+      "**/*.scss",
+      "**/*.snap",
+      "**/*.snapshot.*",
+      "**/*.spec.*",
+      "**/*.test-*.*",
+      "**/*.stories.*",
+      "**/*.story.*",
+      "**/*.styl",
+      "**/*.svg",
+      "**/*.test.*",
+      "**/*.vue",
+      "**/*.webp",
+      "**/bench/**",
+      "**/benchmark/**",
+      "**/benchmarks/**",
+      "**/build/**",
+      "**/codemod/**",
+      "**/codemods/**",
+      "**/demo/**",
+      "**/demos/**",
+      "**/dist/**",
+      "**/dts-test/**",
+      "**/e2e/**",
+      "**/e2e-tests/**",
+      "**/example/**",
+      "**/examples/**",
+      "**/fixture/**",
+      "**/fixture-generated/**",
+      "**/fixtures/**",
+      "**/fixtures-generated/**",
+      "**/generated/**",
+      "**/guides/**",
+      "**/integration-tests/**",
+      "**/playground/**",
+      "**/playgrounds/**",
+      "**/*playground*/**",
+      "**/template/**",
+      "**/templates/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/third_party/**",
+      "**/vendor/**",
+      "__fixtures__/**",
+      "__generated__/**",
+      "__mocks__/**",
+      "__snapshots__/**",
+      "__testfixtures__/**",
+      "__tests__/**",
+      "bench/**",
+      "benchmark/**",
+      "benchmarks/**",
+      "build/**",
+      "codemod/**",
+      "codemods/**",
+      "demo/**",
+      "demos/**",
+      "dist/**",
+      "dts-test/**",
+      "e2e/**",
+      "e2e-tests/**",
+      "example/**",
+      "examples/**",
+      "fixture/**",
+      "fixture-generated/**",
+      "fixtures/**",
+      "fixtures-generated/**",
+      "generated/**",
+      "guides/**",
+      "integrations/**",
+      "integration-tests/**",
+      "playground/**",
+      "playgrounds/**",
+      "*playground*/**",
+      "template/**",
+      "templates/**",
+      "test/**",
+      "tests/**",
+      "third_party/**",
+      "vendor/**"
+    ],
+    "requiredRules": [
+      "CELLFENCE_OWNERSHIP_OVERLAP",
+      "CELLFENCE_UNOWNED_SOURCE",
+      "CELLFENCE_UNOWNED_IMPORT_TARGET",
+      "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
+      "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
+      "CELLFENCE_REQUIRED_RULE_DISABLED",
+      "CELLFENCE_WAIVER_INVALID"
+    ]
+  },
+  "cells": [
+    {
+      "id": "api",
+      "ownedPaths": [
+        "packages/api/src/**"
+      ],
+      "publicEntry": "packages/api/src/@core/@core-services/encryption/encryption.service.ts",
+      "publicSymbols": [
+        "EncryptionService"
+      ],
+      "packageName": "api",
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "embedded-card-react",
+      "ownedPaths": [
+        "apps/embedded-catalog/react/src/**"
+      ],
+      "publicEntry": "apps/embedded-catalog/react/src/index.tsx",
+      "publicSymbols": [
+        "PanoraDynamicCatalogCard",
+        "PanoraProviderCard"
+      ],
+      "packageName": "@panora/embedded-card-react",
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "embedded-catalog",
+      "ownedPaths": [
+        "apps/embedded-catalog/react/**"
+      ],
+      "publicEntry": "apps/embedded-catalog/react/postcss.config.js",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "embedded-card-react"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "frontend-sdk",
+      "ownedPaths": [
+        "apps/frontend-sdk/src/**"
+      ],
+      "publicEntry": "apps/frontend-sdk/src/index.ts",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "@panora/frontend-sdk",
+      "consumes": [
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "magic-link",
+      "ownedPaths": [
+        "apps/magic-link/src/**"
+      ],
+      "publicEntry": "apps/magic-link/src/App.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "magic-link",
+      "consumes": [
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "embedded-card-react"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    },
+    {
+      "id": "shared",
+      "ownedPaths": [
+        "packages/shared/src/**"
+      ],
+      "publicEntry": "packages/shared/src/index.ts",
+      "publicSymbols": [
+        "ACCOUNTING_PROVIDERS",
+        "AccountingObject",
+        "ALL_PROVIDERS",
+        "ApiAuthData",
+        "AuthData",
+        "AuthStrategy",
+        "AuthType",
+        "BasicAuthData",
+        "categoriesVerticals",
+        "categoryFromSlug",
+        "ConnectorCategory",
+        "CONNECTORS_METADATA",
+        "constructAuthUrl",
+        "CRM_PROVIDERS",
+        "CrmConnectors",
+        "CrmObject",
+        "DynamicApiUrl",
+        "DynamicAuthorization",
+        "ECOMMERCE_PROVIDERS",
+        "EcommerceConnectors",
+        "EcommerceObject",
+        "extractAuthMode",
+        "extractProvider",
+        "extractSoftwareMode",
+        "extractVertical",
+        "FILESTORAGE_PROVIDERS",
+        "FilestorageConnectors",
+        "FileStorageObject",
+        "findConnectorCategory",
+        "findProviderByName",
+        "getAccountingCommonObjects",
+        "getCommonObjectsForVertical",
+        "getCrmCommonObjects",
+        "getDescription",
+        "getEcommerceCommonObjects",
+        "getFileStorageCommonObjects",
+        "getLogoURL",
+        "getMarketingAutomationCommonObjects",
+        "getTicketingCommonObjects",
+        "MARKETINGAUTOMATION_PROVIDERS",
+        "MarketingAutomationObject",
+        "mergeAllProviders",
+        "needsEndUserSubdomain",
+        "needsScope",
+        "needsSubdomain",
+        "OAuth2AuthData",
+        "Provider",
+        "ProviderConfig",
+        "providersArray",
+        "ProvidersConfig",
+        "providerToType",
+        "randomString",
+        "scopes",
+        "slugFromCategory",
+        "SoftwareMode",
+        "standardObjects",
+        "StaticApiUrl",
+        "StringAuthorization",
+        "TICKETING_PROVIDERS",
+        "TicketingConnectors",
+        "TicketingObject",
+        "VerticalConfig",
+        "WebhookScopes"
+      ],
+      "packageName": "@panora/shared",
+      "consumes": [],
+      "producesArtifacts": []
+    },
+    {
+      "id": "webapp",
+      "ownedPaths": [
+        "apps/webapp/src/**"
+      ],
+      "publicEntry": "apps/webapp/src/app/(Dashboard)/api-keys/page.tsx",
+      "publicSymbols": [
+        "default"
+      ],
+      "packageName": "webapp",
+      "consumes": [
+        {
+          "cell": "api"
+        },
+        {
+          "cell": "embedded-card-react"
+        },
+        {
+          "cell": "magic-link"
+        },
+        {
+          "cell": "shared"
+        }
+      ],
+      "producesArtifacts": []
+    }
+  ]
+}
