@@ -100,6 +100,9 @@ function createFixture(tempDir) {
   writeText(path.join(bundleDir, "logs", "example", "check.audit.jsonl"), "must not be copied\n");
   writeText(path.join(bundleDir, "SHA256SUMS"), "source bundle sums\n");
 
+  const longBlindAssignmentPath = "assignments/blind_first/example-owner-example-repository-with-a-long-name-CELLFENCE_PRIVATE_IMPORT-deadbeefcafebabe-0123456789abcdef.json";
+  const longManifestAssignmentPath = "assignments/example-owner-example-repository-with-a-long-name-manifest-external-human-reviewer-1-aeb263c9c59f.json";
+
   writeJson(path.join(blindWorklistDir, "worklist.json"), {
     schemaVersion: "cellfence.precision-label-worklist.v1",
     studyId,
@@ -109,14 +112,16 @@ function createFixture(tempDir) {
       selectedBySubject: { example: 1 },
     },
     assignments: [{
-      path: "assignments/blind_first/example.json",
+      path: longBlindAssignmentPath,
       assignmentId: "assignment-example",
       findingId: `sha256:${hashText("finding")}`,
       subjectId: "example",
       ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      round: "blind_first",
+      rater: "external-human-reviewer-1",
     }],
   });
-  writeJson(path.join(blindWorklistDir, "assignments", "blind_first", "example.json"), {
+  writeJson(path.join(blindWorklistDir, longBlindAssignmentPath), {
     schemaVersion: "cellfence.precision-label-assignment.v1",
     studyId,
   });
@@ -130,9 +135,14 @@ function createFixture(tempDir) {
       subjects: 1,
       assignments: 2,
     },
-    assignments: [],
+    assignments: [{
+      path: longManifestAssignmentPath,
+      assignmentId: "manifest-attestation-example",
+      subjectId: "example",
+      reviewer: "external-human-reviewer-1",
+    }],
   });
-  writeJson(path.join(manifestWorklistDir, "assignments", "example-human.json"), {
+  writeJson(path.join(manifestWorklistDir, longManifestAssignmentPath), {
     schemaVersion: "cellfence.manifest-attestation-assignment.v1",
   });
   writeText(path.join(manifestWorklistDir, "SHA256SUMS"), "manifest sums\n");
@@ -171,8 +181,19 @@ test("precision review packet export writes a compact external review packet", (
     assert.equal(packet.manifestAttestation.subjects, 1);
     assert.equal(packet.gapWorklist.json.path, "cycle/gap-worklist.json");
     assert.equal(packet.source.harnessDirty, false);
-    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "assignments", "blind_first", "example.json")));
-    assert.ok(fs.existsSync(path.join(outDir, "manifest-attestation-worklist", "assignments", "example-human.json")));
+    const blindWorklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
+    const blindAssignmentPath = blindWorklist.assignments[0].path;
+    assert.match(blindAssignmentPath, /^assignments\/bf\/a-[a-f0-9]{16}\.json$/);
+    assert.equal(blindWorklist.assignments[0].sourcePath, "assignments/blind_first/example-owner-example-repository-with-a-long-name-CELLFENCE_PRIVATE_IMPORT-deadbeefcafebabe-0123456789abcdef.json");
+    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", blindAssignmentPath)));
+    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "source-worklist.json")));
+    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "source-SHA256SUMS")));
+    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "path-map.jsonl")));
+    const manifestWorklist = readJson(path.join(outDir, "manifest-attestation-worklist", "worklist.json"));
+    const manifestAssignmentPath = manifestWorklist.assignments[0].path;
+    assert.match(manifestAssignmentPath, /^assignments\/m\/m-[a-f0-9]{16}\.json$/);
+    assert.ok(fs.existsSync(path.join(outDir, "manifest-attestation-worklist", manifestAssignmentPath)));
+    assert.ok(fs.existsSync(path.join(outDir, "manifest-attestation-worklist", "source-worklist.json")));
     assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "manifests", "example.json")));
     assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "findings.sampled.jsonl")));
     assert.ok(fs.existsSync(path.join(outDir, "cycle", "gap-worklist.json")));

@@ -122,6 +122,10 @@ function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
+function hashText(value, length = 16) {
+  return crypto.createHash("sha256").update(value).digest("hex").slice(0, length);
+}
+
 function posixify(value) {
   return String(value).replace(/\\/g, "/").split(path.sep).join("/");
 }
@@ -199,6 +203,90 @@ function copyDirectory(srcDir, destDir) {
   requireDir(srcDir);
   fs.mkdirSync(destDir, { recursive: true });
   fs.cpSync(srcDir, destDir, { recursive: true, dereference: false, errorOnExist: false });
+}
+
+function writeJsonl(filePath, values) {
+  writeText(filePath, values.map((value) => JSON.stringify(value)).join("\n"));
+}
+
+function compactBlindRound(round) {
+  if (round === "blind_first") return "bf";
+  if (round === "blind_second") return "bs";
+  return hashText(round || "round", 8);
+}
+
+function compactBlindAssignmentPath(assignment) {
+  const assignmentId = typeof assignment.assignmentId === "string" ? assignment.assignmentId : "";
+  const suffix = assignmentId.startsWith("assignment-") ? assignmentId.slice("assignment-".length) : "";
+  const stableId = suffix && /^[a-f0-9]{12,}$/i.test(suffix)
+    ? suffix.slice(0, 16)
+    : hashText([
+      assignment.path,
+      assignment.assignmentId,
+      assignment.findingId,
+      assignment.rater,
+    ].join("\0"));
+  return `assignments/${compactBlindRound(assignment.round)}/a-${stableId}.json`;
+}
+
+function compactManifestAssignmentPath(assignment) {
+  return `assignments/m/m-${hashText([
+    assignment.path,
+    assignment.assignmentId,
+    assignment.subjectId,
+    assignment.reviewer,
+  ].join("\0"))}.json`;
+}
+
+function copyCompactWorklist(srcDir, destDir, compactPathForAssignment) {
+  requireDir(srcDir);
+  fs.mkdirSync(destDir, { recursive: true });
+  const sourceWorklist = readJson(path.join(srcDir, "worklist.json"));
+  copyFile(srcDir, "worklist.json", destDir);
+  fs.renameSync(path.join(destDir, "worklist.json"), path.join(destDir, "source-worklist.json"));
+  if (fs.existsSync(path.join(srcDir, "SHA256SUMS"))) {
+    copyFile(srcDir, "SHA256SUMS", destDir);
+    fs.renameSync(path.join(destDir, "SHA256SUMS"), path.join(destDir, "source-SHA256SUMS"));
+  }
+  for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name.startsWith(".cellfence-")) copyFile(srcDir, entry.name, destDir);
+  }
+  const pathMap = [];
+  const compactAssignments = [];
+  const usedPaths = new Set();
+  for (const assignment of sourceWorklist.assignments || []) {
+    const sourceRelativePath = assignment.path;
+    if (!sourceRelativePath || sourceRelativePath.startsWith("../") || path.isAbsolute(sourceRelativePath)) {
+      throw new Error(`unsafe assignment path in ${srcDir}: ${sourceRelativePath}`);
+    }
+    let compactPath = compactPathForAssignment(assignment);
+    if (usedPaths.has(compactPath)) {
+      const parsed = path.parse(compactPath);
+      compactPath = path.join(parsed.dir, `${parsed.name}-${hashText(sourceRelativePath, 8)}${parsed.ext}`);
+    }
+    usedPaths.add(compactPath);
+    copyFile(srcDir, sourceRelativePath, destDir);
+    fs.mkdirSync(path.dirname(path.join(destDir, compactPath)), { recursive: true });
+    fs.renameSync(path.join(destDir, sourceRelativePath), path.join(destDir, compactPath));
+    pathMap.push({
+      assignmentId: assignment.assignmentId,
+      sourcePath: posixify(sourceRelativePath),
+      packetPath: posixify(compactPath),
+    });
+    compactAssignments.push({
+      ...assignment,
+      sourcePath: posixify(sourceRelativePath),
+      path: posixify(compactPath),
+    });
+  }
+  writeJson(path.join(destDir, "worklist.json"), {
+    ...sourceWorklist,
+    pathMode: "compact",
+    sourceWorklistPath: "source-worklist.json",
+    assignments: compactAssignments,
+  });
+  writeJsonl(path.join(destDir, "path-map.jsonl"), pathMap);
+  writeSha256Sums(destDir);
 }
 
 function redactLocalAbsolutePaths(baseDir) {
@@ -377,8 +465,12 @@ function createReviewPacket(options) {
   if (options.gapMarkdownPath) copyAbsoluteFile(options.gapMarkdownPath, path.join(options.outDir, "cycle", "gap-worklist.md"));
   for (const relativePath of copiedBundleFiles) copyFile(bundleDir, relativePath, path.join(options.outDir, "source-bundle"));
   copyDirectory(path.join(bundleDir, "manifests"), path.join(options.outDir, "source-bundle", "manifests"));
-  copyDirectory(blindWorklistDir, path.join(options.outDir, "blind-worklist"));
-  copyDirectory(options.manifestWorklistDir, path.join(options.outDir, "manifest-attestation-worklist"));
+  copyCompactWorklist(blindWorklistDir, path.join(options.outDir, "blind-worklist"), compactBlindAssignmentPath);
+  copyCompactWorklist(
+    options.manifestWorklistDir,
+    path.join(options.outDir, "manifest-attestation-worklist"),
+    compactManifestAssignmentPath,
+  );
   redactLocalAbsolutePaths(options.outDir);
 
   const summary = readJson(path.join(options.roundDir, "summary.json"));

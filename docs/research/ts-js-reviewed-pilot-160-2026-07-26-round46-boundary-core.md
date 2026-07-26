@@ -114,18 +114,20 @@ Codex or another agent must not satisfy the external human/organization gates.
 
 The external review packet is now tracked in git:
 
-- path: `docs/research/review-packets/ts-js-reviewed-pilot-160-2026-07-26-round46-boundary-core-balanced-clean`
-- packet `SHA256SUMS` sha256: `8c95b9387709823d809bd9157add01d062f08b5b143dbc1bc96529b92377fefb`
+- path: `docs/research/review-packets/r46-core`
+- packet `SHA256SUMS` sha256: `8663aa5b7dba03e959058f6e2d934141a6de75c4446abf295bfd70f6389cb966`
 - selected findings: 650
 - blind assignments: 1,300
 - manifest attestation assignments: 320
 - source bundle harness dirty: `false`
+- longest packet file path: 129 characters
 
 The packet intentionally omits large raw logs and unsampled findings, but it
-includes the sealed blind worklist, per-assignment finding details, manifest
-copies, manifest-attestation assignments, protocols, preflight output, and the
-gap worklist. External reviewers can clone each subject at the pinned commit
-listed in the assignment and return labels bound to the sealed worklist digest.
+includes the source sealed blind worklist, a compact path-mapped worklist for
+reviewers, per-assignment finding details, manifest copies,
+manifest-attestation assignments, protocols, preflight output, and the gap
+worklist. External reviewers can clone each subject at the pinned commit listed
+in the assignment and return labels bound to the clean worklist digest.
 
 ## Claim Status
 
