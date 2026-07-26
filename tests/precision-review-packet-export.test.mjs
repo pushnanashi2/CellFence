@@ -1,0 +1,195 @@
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+
+const root = process.cwd();
+const scriptPath = path.join(root, "scripts", "precision-review-packet-export.mjs");
+
+function writeJson(filePath, value) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function writeText(filePath, value) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, value.endsWith("\n") ? value : `${value}\n`);
+}
+
+function hashText(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function runExport(args) {
+  return spawnSync(process.execPath, [scriptPath, ...args], {
+    cwd: root,
+    encoding: "utf8",
+  });
+}
+
+function makeTempDir(prefix) {
+  const baseDir = path.join(root, "tmp");
+  fs.mkdirSync(baseDir, { recursive: true });
+  return fs.mkdtempSync(path.join(baseDir, prefix));
+}
+
+function createFixture(tempDir) {
+  const roundDir = path.join(tempDir, "round");
+  const bundleDir = path.join(roundDir, "bundle-unlabeled");
+  const blindWorklistDir = path.join(roundDir, "blind-worklist");
+  const manifestWorklistDir = path.join(tempDir, "manifest-worklist");
+  const studyId = "packet-fixture";
+
+  writeJson(path.join(roundDir, ".cellfence-precision-next-cycle"), {
+    schemaVersion: "cellfence.precision-next-cycle-marker.v1",
+  });
+  writeText(path.join(roundDir, "SUMMARY.md"), "# packet-fixture\n");
+  writeJson(path.join(roundDir, "summary.json"), {
+    schemaVersion: "cellfence.precision-next-cycle.v1",
+    studyId,
+    claimProfile: "ts-js-boundary-core-v1",
+    includedRules: ["CELLFENCE_PRIVATE_IMPORT"],
+    digests: {
+      unlabeledBundleArtifactSetSha256: "a".repeat(64),
+      blindWorklistArtifactSetSha256: "b".repeat(64),
+    },
+    blockers: ["650 selected findings lack 1 external human/organization independent label(s)"],
+  });
+  writeJson(path.join(roundDir, "reviewed-corpus-validation.json"), { ok: true });
+  writeJson(path.join(roundDir, "reviewed-corpus-external-validation.json"), { ok: false });
+  writeJson(path.join(roundDir, "protocol.worklist.json"), { schemaVersion: "cellfence.precision-claim-protocol.v1" });
+  writeJson(path.join(roundDir, "protocol.prelabel-preflight.json"), { schemaVersion: "cellfence.precision-claim-protocol.v1" });
+  writeJson(path.join(roundDir, "claim-preflight.prelabel.json"), { ok: false });
+
+  writeJson(path.join(bundleDir, "corpus.json"), { schemaVersion: "cellfence.corpus.v1", subjects: [] });
+  writeJson(path.join(bundleDir, "study.json"), {
+    schemaVersion: "cellfence.corpus-evidence-bundle.v1",
+    studyId,
+    environment: {
+      harnessCommit: "c".repeat(40),
+      harnessDirty: false,
+      corpusSha256: "d".repeat(64),
+    },
+    manifestCopies: [{ path: "manifests/example.json" }],
+  });
+  writeJson(path.join(bundleDir, "report.json"), { schemaVersion: "cellfence.corpus-study.v1" });
+  writeJson(path.join(bundleDir, "sampling.json"), { population: { sampledFindings: 1 } });
+  writeText(path.join(bundleDir, "findings.sampled.jsonl"), `${JSON.stringify({
+    schemaVersion: "cellfence.corpus-normalized-finding.v1",
+    studyId,
+    findingId: `sha256:${hashText("finding")}`,
+    subjectId: "example",
+    ruleId: "CELLFENCE_PRIVATE_IMPORT",
+  })}\n`);
+  writeText(path.join(bundleDir, "labels.jsonl"), "");
+  writeJson(path.join(bundleDir, "manifests", "example.json"), { cells: [] });
+  writeText(path.join(bundleDir, "findings.raw.jsonl"), "must not be copied\n");
+  writeText(path.join(bundleDir, "findings.normalized.jsonl"), "must not be copied\n");
+  writeText(path.join(bundleDir, "logs", "example", "check.audit.jsonl"), "must not be copied\n");
+  writeText(path.join(bundleDir, "SHA256SUMS"), "source bundle sums\n");
+
+  writeJson(path.join(blindWorklistDir, "worklist.json"), {
+    schemaVersion: "cellfence.precision-label-worklist.v1",
+    studyId,
+    summary: {
+      selectedFindings: 1,
+      selectedByRule: { CELLFENCE_PRIVATE_IMPORT: 1 },
+      selectedBySubject: { example: 1 },
+    },
+    assignments: [{
+      path: "assignments/blind_first/example.json",
+      assignmentId: "assignment-example",
+      findingId: `sha256:${hashText("finding")}`,
+      subjectId: "example",
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+    }],
+  });
+  writeJson(path.join(blindWorklistDir, "assignments", "blind_first", "example.json"), {
+    schemaVersion: "cellfence.precision-label-assignment.v1",
+    studyId,
+  });
+  writeText(path.join(blindWorklistDir, "SHA256SUMS"), "blind sums\n");
+
+  writeText(path.join(manifestWorklistDir, ".cellfence-manifest-attestation-worklist"), "marker\n");
+  writeJson(path.join(manifestWorklistDir, "worklist.json"), {
+    schemaVersion: "cellfence.manifest-attestation-worklist.v1",
+    studyId,
+    summary: {
+      subjects: 1,
+      assignments: 2,
+    },
+    assignments: [],
+  });
+  writeJson(path.join(manifestWorklistDir, "assignments", "example-human.json"), {
+    schemaVersion: "cellfence.manifest-attestation-assignment.v1",
+  });
+  writeText(path.join(manifestWorklistDir, "SHA256SUMS"), "manifest sums\n");
+
+  return { roundDir, manifestWorklistDir };
+}
+
+test("precision review packet export writes a compact external review packet", () => {
+  const tempDir = makeTempDir("cellfence-review-packet-");
+  try {
+    const { roundDir, manifestWorklistDir } = createFixture(tempDir);
+    const outDir = path.join(tempDir, "packet");
+    const result = runExport([
+      "--round-dir",
+      roundDir,
+      "--manifest-worklist-dir",
+      manifestWorklistDir,
+      "--out-dir",
+      outDir,
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const packet = readJson(path.join(outDir, "review-packet.json"));
+    assert.equal(packet.schemaVersion, "cellfence.precision-review-packet.v1");
+    assert.equal(packet.selectedFindings, 1);
+    assert.equal(packet.blindAssignments, 1);
+    assert.equal(packet.manifestAttestation.subjects, 1);
+    assert.equal(packet.source.harnessDirty, false);
+    assert.ok(fs.existsSync(path.join(outDir, "blind-worklist", "assignments", "blind_first", "example.json")));
+    assert.ok(fs.existsSync(path.join(outDir, "manifest-attestation-worklist", "assignments", "example-human.json")));
+    assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "manifests", "example.json")));
+    assert.ok(fs.existsSync(path.join(outDir, "source-bundle", "findings.sampled.jsonl")));
+    assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "findings.raw.jsonl")));
+    assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "findings.normalized.jsonl")));
+    assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "logs")));
+    assert.match(fs.readFileSync(path.join(outDir, "README.md"), "utf8"), /not a final precision claim/);
+    assert.match(fs.readFileSync(path.join(outDir, "SHA256SUMS"), "utf8"), /review-packet\.json/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision review packet export refuses to replace unmarked directories", () => {
+  const tempDir = makeTempDir("cellfence-review-packet-force-");
+  try {
+    const { roundDir, manifestWorklistDir } = createFixture(tempDir);
+    const outDir = path.join(tempDir, "packet");
+    fs.mkdirSync(outDir);
+    writeText(path.join(outDir, "user-file.txt"), "keep me\n");
+
+    const result = runExport([
+      "--round-dir",
+      roundDir,
+      "--manifest-worklist-dir",
+      manifestWorklistDir,
+      "--out-dir",
+      outDir,
+      "--force",
+    ]);
+
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /refusing to delete unmarked output directory/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
