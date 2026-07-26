@@ -325,6 +325,11 @@ test("precision next cycle freezes bundle, worklist, and unlabeled preflight", (
     assert.match(summary.digests.preLabelArtifactSetSha256, /^[a-f0-9]{64}$/);
     assert.match(summary.digests.unlabeledBundleArtifactSetSha256, /^[a-f0-9]{64}$/);
     assert.match(summary.digests.blindWorklistArtifactSetSha256, /^[a-f0-9]{64}$/);
+    assert.equal(summary.worklist.selectedFindings, 1);
+    assert.equal(summary.worklist.assignments, 2);
+    assert.deepEqual(summary.worklist.selectedByRule, {
+      CELLFENCE_PRIVATE_IMPORT: 1,
+    });
     assert.equal(summary.sampling.repositoryBalance.enabled, false);
     assert.equal(summary.sampling.repositoryBalance.removedFindingIds, 0);
     assert.equal(fs.existsSync(path.join(outDir, "bundle-unlabeled", "SHA256SUMS")), true);
@@ -389,6 +394,133 @@ test("precision next cycle can freeze a rule-scoped public-symbol supplemental c
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });
   }
+});
+
+test("precision next cycle can freeze a named boundary-core claim profile", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-boundary-core-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-boundary-core-test-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createFixture(rootDir);
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-boundary-core-test",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "external-human-reviewer-1,external-org-reviewer-1",
+      "--rater-types",
+      "human,organization",
+      "--claim-profile",
+      "ts-js-boundary-core-v1",
+      "--external-claim",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const expectedRules = ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"];
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.equal(summary.claimProfile, "ts-js-boundary-core-v1");
+    assert.match(summary.claimProfileDescription, /boundary-core/);
+    assert.deepEqual(summary.includedRules, expectedRules);
+    assert.equal(summary.worklist.selectedFindings, 1);
+    assert.deepEqual(summary.worklist.selectedByRule, {
+      CELLFENCE_PRIVATE_IMPORT: 1,
+    });
+    assert.equal(summary.samplingOptions.claimProfileProvided, true);
+    assert.equal(summary.samplingOptions.includeRulesProvided, false);
+    const summaryMarkdown = fs.readFileSync(path.join(outDir, "SUMMARY.md"), "utf8");
+    assert.match(summaryMarkdown, /claim profile: `ts-js-boundary-core-v1`/);
+    assert.match(summaryMarkdown, /claim profile description: Reviewed TS\/JS boundary-core/);
+    assert.match(summaryMarkdown, /worklist selected findings: 1/);
+    const protocol = readJson(path.join(outDir, "protocol.worklist.json"));
+    assert.equal(protocol.claim.scopeProfile, "ts-js-boundary-core-v1");
+    assert.match(protocol.claim.targetPopulation, /boundary-core rules only/);
+    assert.deepEqual(protocol.claim.includedRules, expectedRules);
+    const worklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
+    assert.deepEqual(worklist.filters.includedRules, expectedRules);
+    assert.equal(worklist.summary.selectedFindings, 1);
+    const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
+    assert.equal(preflight.valid, true);
+    assert.equal(preflight.claimReady, false);
+    assert.match(preflight.gateFailures.join("\n"), /external human\/organization independent label/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle rejects a claim profile with mismatched include rules", () => {
+  const result = runNextCycle([
+    "--study-id",
+    "precision-next-cycle-profile-mismatch-test",
+    "--corpus",
+    path.join(repoRoot, "tmp", "missing-corpus.json"),
+    "--report",
+    path.join(repoRoot, "tmp", "missing-report.json"),
+    "--out-dir",
+    path.join(repoRoot, "tmp", `precision-next-cycle-profile-mismatch-test-${crypto.randomBytes(6).toString("hex")}`),
+    "--raters",
+    "agent-a,agent-b",
+    "--rater-types",
+    "agent,agent",
+    "--claim-profile",
+    "ts-js-boundary-core-v1",
+    "--include-rules",
+    "CELLFENCE_PRIVATE_IMPORT",
+  ]);
+
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /--include-rules must match --claim-profile ts-js-boundary-core-v1/);
+});
+
+test("precision next cycle rejects unknown claim profiles", () => {
+  const result = runNextCycle([
+    "--study-id",
+    "precision-next-cycle-unknown-profile-test",
+    "--corpus",
+    path.join(repoRoot, "tmp", "missing-corpus.json"),
+    "--report",
+    path.join(repoRoot, "tmp", "missing-report.json"),
+    "--out-dir",
+    path.join(repoRoot, "tmp", `precision-next-cycle-unknown-profile-test-${crypto.randomBytes(6).toString("hex")}`),
+    "--raters",
+    "agent-a,agent-b",
+    "--rater-types",
+    "agent,agent",
+    "--claim-profile",
+    "unknown-profile",
+  ]);
+
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /unknown --claim-profile value: unknown-profile/);
+  assert.match(result.stderr, /ts-js-boundary-core-v1/);
+});
+
+test("precision next cycle rejects a claim profile with a conflicting target population", () => {
+  const result = runNextCycle([
+    "--study-id",
+    "precision-next-cycle-profile-population-test",
+    "--corpus",
+    path.join(repoRoot, "tmp", "missing-corpus.json"),
+    "--report",
+    path.join(repoRoot, "tmp", "missing-report.json"),
+    "--out-dir",
+    path.join(repoRoot, "tmp", `precision-next-cycle-profile-population-test-${crypto.randomBytes(6).toString("hex")}`),
+    "--raters",
+    "agent-a,agent-b",
+    "--rater-types",
+    "agent,agent",
+    "--claim-profile",
+    "ts-js-boundary-core-v1",
+    "--target-population",
+    "all CellFence findings",
+  ]);
+
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /--target-population must match --claim-profile ts-js-boundary-core-v1/);
 });
 
 test("precision next cycle rejects reports bound to a different corpus hash", () => {

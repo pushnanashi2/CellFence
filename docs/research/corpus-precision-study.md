@@ -44,6 +44,14 @@ Resource rules, Python framework adapters, inferred manifests, and public
 surface drift should be reported as separate studies until they have their own
 reviewed manifests, labels, and recall evidence.
 
+The next-cycle helper exposes this first narrow scope as the named profile
+`--claim-profile ts-js-boundary-core-v1`. Use the named profile for a public
+claim packet instead of hand-maintaining an ad hoc `--include-rules` list. The
+profile fixes the target population and included rules in the sealed worklist
+protocol. The helper rejects conflicting `--include-rules` or
+`--target-population` overrides. Loader-safety and static-resource detectors
+have separate profiles; they are not evidence for the boundary-core claim.
+
 Before a corpus can feed a blocking-precision claim, validate that it is a
 reviewed-manifest corpus:
 
@@ -306,6 +314,7 @@ npm run precision:next-cycle -- \
   --out-dir reports/corpus/ts-js-reviewed-pilot-52-2026-07-25-round19-cycle \
   --raters external-human-reviewer-1,external-org-reviewer-1 \
   --rater-types human,organization \
+  --claim-profile ts-js-boundary-core-v1 \
   --external-claim \
   --max-repository-contribution 0.1 \
   --force
@@ -361,10 +370,13 @@ npm run precision:next-cycle -- \
   --force
 ```
 
-The `--include-rules` value is part of the sealed worklist protocol. Use it only
-when the cycle is deliberately scoped to that rule family; it does not satisfy
-the all-rule claim and must not be merged into a broader denominator without a
-new protocol, worklist, labels, and preflight.
+The `--claim-profile` or `--include-rules` value is part of the sealed worklist
+protocol. Prefer `--claim-profile` for reusable finite public claims; it records
+`claim.scopeProfile`, the profile's target population, and the fixed included
+rules. Use raw `--include-rules` only for one-off supplemental packets. Either
+form deliberately scopes the cycle to that rule family; it does not satisfy an
+all-rule claim and must not be merged into a broader denominator without a new
+protocol, worklist, labels, and preflight.
 
 Turn those blockers into an explicit remaining-evidence worklist before starting
 the next round:
@@ -1076,6 +1088,20 @@ Round38 adds an explicit expected-worklist digest check to the manifest
 attestation validator, so the return gate can reject attestations validated
 against the wrong sealed reviewer packet even when the packet targets the same
 evidence bundle.
+Round40 cuts the first public precision attempt to the boundary-core profile
+instead of chasing an all-rule claim. Reusing the round33 105-subject reviewed
+TS/JS report, `--claim-profile ts-js-boundary-core-v1` selected 488 worklist
+findings and 976 blind assignments: 347 `CELLFENCE_PRIVATE_IMPORT` and 141
+`CELLFENCE_UNDECLARED_CONSUMER` findings. The pre-label bundle digest was
+`6e51bf0f7028b215f4f7c3894b479ac65a8f69ef28608c03da45a7ba56e3216d`; the
+blind worklist digest was
+`81299bf9e856db0cb0c1f81df94fe771bea9e37a63f006fffb60e773cece193b`. The packet
+is deliberately still not claim-ready: it needs returned external
+human/organization labels, external manifest attestations, 158 more
+`CELLFENCE_UNDECLARED_CONSUMER` selected findings under a zero-failure plan, and
+better repository balance because `Gitlawb/openclaude` and `rollup/rollup`
+exceed the 10% contribution cap. The effect of the profile is narrower evidence,
+not a shortcut around labels, attestations, sample size, or balance.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

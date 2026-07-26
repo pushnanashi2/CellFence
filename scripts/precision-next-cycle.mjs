@@ -19,16 +19,44 @@ const defaultIncludedRules = [
   "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
   "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
 ];
+const claimProfiles = {
+  "ts-js-boundary-core-v1": {
+    description: "Reviewed TS/JS boundary-core blocking precision: private imports and undeclared cell consumers only.",
+    targetPopulation: "reviewed TS/JS workspace repositories, boundary-core rules only",
+    includedRules: [
+      "CELLFENCE_PRIVATE_IMPORT",
+      "CELLFENCE_UNDECLARED_CONSUMER",
+    ],
+  },
+  "ts-js-loader-safety-v1": {
+    description: "Reviewed TS/JS loader-safety blocking precision: unsupported or unresolved dynamic module loading only.",
+    targetPopulation: "reviewed TS/JS workspace repositories, dynamic loader safety rules only",
+    includedRules: [
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+      "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
+      "CELLFENCE_UNRESOLVED_IMPORT",
+    ],
+  },
+  "ts-js-static-resource-v1": {
+    description: "Reviewed TS/JS static-resource blocking precision: selected static resource access detectors only.",
+    targetPopulation: "reviewed TS/JS workspace repositories, selected static resource access rules only",
+    includedRules: [
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+      "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+    ],
+  },
+};
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-next-cycle.mjs --study-id id --corpus corpus.json --report corpus-report.json --out-dir reports/corpus/id-cycle --raters reviewer-a,reviewer-b --rater-types human,organization [--include-rules rule-a,rule-b] [--force]
+  node scripts/precision-next-cycle.mjs --study-id id --corpus corpus.json --report corpus-report.json --out-dir reports/corpus/id-cycle --raters reviewer-a,reviewer-b --rater-types human,organization [--claim-profile ts-js-boundary-core-v1 | --include-rules rule-a,rule-b] [--force]
 
 Builds the next precision-study cycle from an already executed reviewed corpus
 report. It validates the reviewed corpus, freezes an unlabeled evidence bundle,
 creates a sealed blind-label worklist, runs claim preflight against the unlabeled
 bundle, and writes a summary with the remaining blockers. It never creates
 labels and therefore cannot satisfy the external human/org label gate by itself.
+--claim-profile applies a named finite claim scope with a fixed rule set.
 --include-rules narrows the claim protocol and worklist filters to a rule-scoped
 supplemental cycle while preserving the full sealed bundle.`);
 }
@@ -45,6 +73,7 @@ function parseArgs(argv) {
     maxRepositoryContribution: null,
     includeRules: [...defaultIncludedRules],
     includeRulesProvided: false,
+    claimProfile: "",
     force: false,
     externalClaim: false,
   };
@@ -97,6 +126,11 @@ function parseArgs(argv) {
     } else if (argument.startsWith("--include-rules=")) {
       parsed.includeRules = parseIncludedRules(requireInlineValue(argument, "--include-rules=", "--include-rules"));
       parsed.includeRulesProvided = true;
+    } else if (argument === "--claim-profile") {
+      parsed.claimProfile = requireValue(argv, index, "--claim-profile");
+      index += 1;
+    } else if (argument.startsWith("--claim-profile=")) {
+      parsed.claimProfile = requireInlineValue(argument, "--claim-profile=", "--claim-profile");
     } else if (argument === "--external-claim") {
       parsed.externalClaim = true;
     } else if (argument === "--force") {
@@ -123,6 +157,7 @@ function parseArgs(argv) {
       throw new Error(`unknown --rater-types value: ${raterType}`);
     }
   }
+  applyClaimProfile(parsed);
   return parsed;
 }
 
@@ -150,6 +185,30 @@ function parseIncludedRules(value) {
   if (unknownRules.length > 0) throw new Error(`unknown --include-rules value(s): ${unknownRules.join(", ")}`);
   if (new Set(rules).size !== rules.length) throw new Error("--include-rules must not contain duplicate rules");
   return rules;
+}
+
+function arraysEqual(left, right) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function applyClaimProfile(parsed) {
+  if (!parsed.claimProfile) return;
+  const profile = claimProfiles[parsed.claimProfile];
+  if (!profile) {
+    throw new Error(`unknown --claim-profile value: ${parsed.claimProfile}; expected one of ${Object.keys(claimProfiles).sort().join(", ")}`);
+  }
+  if (parsed.includeRulesProvided && !arraysEqual(parsed.includeRules, profile.includedRules)) {
+    throw new Error(`--include-rules must match --claim-profile ${parsed.claimProfile}: ${profile.includedRules.join(",")}`);
+  }
+  parsed.includeRules = [...profile.includedRules];
+  if (parsed.targetPopulation && parsed.targetPopulation !== profile.targetPopulation) {
+    throw new Error(`--target-population must match --claim-profile ${parsed.claimProfile}: ${profile.targetPopulation}`);
+  }
+  parsed.targetPopulation = profile.targetPopulation;
+}
+
+function claimProfile(options) {
+  return options.claimProfile ? claimProfiles[options.claimProfile] || null : null;
 }
 
 function parseUnitInterval(value, optionName) {
@@ -345,6 +404,7 @@ function writeWorklistProtocol(protocolPath, options, binding) {
       preLabelArtifactSetSha256: binding.preLabelArtifactSetSha256,
       targetPopulation: options.targetPopulation || `${options.studyId} reviewed TS/JS corpus precision cycle`,
       supportedSyntaxProfile: "ts-js-supported-v1",
+      scopeProfile: options.claimProfile || null,
       includedRules: options.includeRules,
       primaryMetric: "blocking_precision",
       minimumPrecision: 0.99,
@@ -443,6 +503,25 @@ function samplingSummaryFromBundle(bundleDir) {
   };
 }
 
+function worklistSelectionSummary(worklistDir) {
+  const worklist = readJson(path.join(worklistDir, "worklist.json"));
+  const selectedFindingIds = new Set();
+  const selectedByRule = {};
+  const selectedBySubject = {};
+  for (const assignment of worklist.assignments || []) {
+    if (selectedFindingIds.has(assignment.findingId)) continue;
+    selectedFindingIds.add(assignment.findingId);
+    increment(selectedByRule, assignment.ruleId || "unknown");
+    increment(selectedBySubject, assignment.subjectId || "unknown");
+  }
+  return {
+    selectedFindings: worklist.summary?.selectedFindings ?? selectedFindingIds.size,
+    assignments: worklist.summary?.assignments ?? (worklist.assignments || []).length,
+    selectedByRule: Object.fromEntries(Object.entries(selectedByRule).sort()),
+    selectedBySubject: Object.fromEntries(Object.entries(selectedBySubject).sort((left, right) => (right[1] - left[1]) || left[0].localeCompare(right[0]))),
+  };
+}
+
 function writeMarkdown(outPath, summary) {
   const lines = [
     `# ${summary.studyId} Precision Next Cycle`,
@@ -468,8 +547,14 @@ function writeMarkdown(outPath, summary) {
     "",
     "## Sampling",
     "",
+    `- claim profile: \`${summary.claimProfile || "custom"}\``,
+    ...(summary.claimProfileDescription ? [`- claim profile description: ${summary.claimProfileDescription}`] : []),
     `- included rules: \`${summary.includedRules.join(",")}\``,
-    `- sampled findings: ${summary.sampling?.sampledFindings ?? "n/a"}`,
+    `- worklist selected findings: ${summary.worklist?.selectedFindings ?? "n/a"}`,
+    `- worklist assignments: ${summary.worklist?.assignments ?? "n/a"}`,
+    `- worklist selected by rule: \`${JSON.stringify(summary.worklist?.selectedByRule || {})}\``,
+    `- full bundle sampled findings: ${summary.sampling?.sampledFindings ?? "n/a"}`,
+    `- full bundle sampled by rule: \`${JSON.stringify(summary.sampling?.sampledByRule || {})}\``,
     `- repository balance enabled: ${summary.sampling?.repositoryBalance?.enabled === true}`,
     `- repository balance feasible: ${summary.sampling?.repositoryBalance?.feasible ?? "n/a"}`,
     `- cap-pruned sampled findings: ${summary.sampling?.repositoryBalance?.removedFindingIds ?? 0}`,
@@ -632,6 +717,8 @@ function main() {
       schemaVersion: "cellfence.precision-next-cycle.v1",
       generatedAt: new Date().toISOString(),
       studyId: options.studyId,
+      claimProfile: options.claimProfile || null,
+      claimProfileDescription: claimProfile(options)?.description || null,
       corpusPath: portablePath(options.corpusPath),
       reportPath: portablePath(options.reportPath),
       outDir: portablePath(options.outDir),
@@ -658,8 +745,10 @@ function main() {
       samplingOptions: {
         maxRepositoryContribution: options.maxRepositoryContribution,
         includeRulesProvided: options.includeRulesProvided,
+        claimProfileProvided: Boolean(options.claimProfile),
       },
       sampling: samplingSummaryFromBundle(unlabeledBundleDir),
+      worklist: worklistSelectionSummary(blindWorklistDir),
       blockers: [...new Set([
         ...blockersFromPreflight(preflightPath),
         ...blockersFromExternalValidation(externalCorpusValidationPath),
@@ -677,6 +766,8 @@ function main() {
       preLabelArtifactSetSha256: summary.digests.preLabelArtifactSetSha256,
       blindWorklistArtifactSetSha256,
       includedRules: summary.includedRules,
+      claimProfile: summary.claimProfile,
+      worklistSelectedFindings: summary.worklist.selectedFindings,
       blockers: summary.blockers.length,
       summaryPath: portablePath(summaryJsonPath),
     }, null, 2));
