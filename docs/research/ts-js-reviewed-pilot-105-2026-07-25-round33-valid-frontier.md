@@ -83,6 +83,31 @@ External evidence gaps are now split by work type:
 - candidate subjects needing external manifest attestation: 97;
 - candidate findings blocked on external manifest attestation: 20,621.
 
+The candidate subject count is narrower than the claim-preflight manifest
+review gate. The frontier counts only subjects that currently contribute
+included candidate findings, while the preflight requires external manifest
+review attestations for every subject in the 105-subject claim corpus.
+
+## Round34 Gap Worklist Check
+
+```bash
+npm run precision:claim:gaps -- \
+  --preflight reports/corpus/ts-js-reviewed-pilot-105-2026-07-25-round33-preflight.json \
+  --bundle reports/corpus/ts-js-reviewed-pilot-105-2026-07-25-round33-bundle \
+  --out tmp/round33-gap-bundle.json \
+  --markdown tmp/round33-gap-bundle.md
+```
+
+After the gap-worklist repair, this reports:
+
+- task count: 9;
+- external manifest attestation subjects: 105;
+- manual label worklist:
+  `reports/corpus/ts-js-reviewed-pilot-105-2026-07-25-round33-external-worklist`
+  when rendered relative to the repository root;
+- manifest attestation rows include repository, exact commit, manifest copy
+  path, manifest copy SHA256, and an external review attestation template.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields

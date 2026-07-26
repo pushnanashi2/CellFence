@@ -17,6 +17,10 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function posixify(value) {
+  return String(value).replace(/\\/g, "/").split(path.sep).join("/");
+}
+
 function runGaps(args) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: repoRoot,
@@ -46,6 +50,11 @@ function createPreflight(tempDir) {
     summary: {
       selectedFindings: 4,
       missingLabels: 4,
+    },
+    worklist: {
+      paths: [
+        "/tmp/fixture-external-worklist",
+      ],
     },
     selectedByRule: {
       CELLFENCE_PRIVATE_IMPORT: {
@@ -95,9 +104,12 @@ function createPreflight(tempDir) {
     issues: [
       "subject-a external manifest review requires review.reviewerAttestations",
       "subject-a external manifest review requires review.reviewedAt",
-      "subject-b external manifest review requires review.reviewedManifestSha256",
     ],
     gateFailures: [
+      "subject-b external manifest review requires review.reviewedManifestSha256",
+      "subject-c external manifest review requires manifest.strategy=copy",
+      "subject-c external manifest review requires reviewStatus=reviewed",
+      "subject-c external manifest review requires a sealed manifest copy",
       "4 selected findings are not fully independently labeled",
     ],
   });
@@ -126,6 +138,60 @@ function createExpansionPlan(tempDir) {
     },
   });
   return planPath;
+}
+
+function createBundle(tempDir) {
+  const bundleDir = path.join(tempDir, "bundle");
+  writeJson(path.join(bundleDir, "corpus.json"), {
+    schemaVersion: "cellfence.corpus.v1",
+    subjects: [
+      {
+        id: "subject-a",
+        repository: "https://github.com/example/a.git",
+        commit: "a".repeat(40),
+        manifest: {
+          strategy: "copy",
+          source: "manifests/a.json",
+          reviewStatus: "reviewed",
+        },
+      },
+      {
+        id: "subject-b",
+        repository: "https://github.com/example/b.git",
+        commit: "b".repeat(40),
+        manifest: {
+          strategy: "copy",
+          source: "manifests/b.json",
+          reviewStatus: "reviewed",
+        },
+      },
+      {
+        id: "subject-c",
+        repository: "https://github.com/example/c.git",
+        commit: "c".repeat(40),
+        manifest: {
+          strategy: "infer",
+        },
+      },
+    ],
+  });
+  writeJson(path.join(bundleDir, "study.json"), {
+    schemaVersion: "cellfence.corpus-evidence-bundle.v1",
+    studyId: "fixture-round",
+    manifestCopies: [
+      {
+        subjectId: "subject-a",
+        path: "manifests/subject-a.json",
+        sha256: "a".repeat(64),
+      },
+      {
+        subjectId: "subject-b",
+        path: "manifests/subject-b.json",
+        sha256: "b".repeat(64),
+      },
+    ],
+  });
+  return bundleDir;
 }
 
 test("precision evidence gap worklist preserves blockers without claiming readiness", () => {
@@ -164,12 +230,72 @@ test("precision evidence gap worklist preserves blockers without claiming readin
       "repository_balance",
       "rule_sample_deficit",
     ]);
-    assert.equal(report.tasks.find((task) => task.type === "external_manifest_attestation").subjects.length, 2);
+    const manifestTask = report.tasks.find((task) => task.type === "external_manifest_attestation");
+    assert.equal(manifestTask.subjects.length, 3);
+    assert.deepEqual(manifestTask.subjects.find((subject) => subject.subjectId === "subject-c").missingFields, [
+      "manifest.strategy",
+      "reviewStatus",
+      "sealedManifestCopy",
+    ]);
     assert.equal(report.tasks.find((task) => task.type === "manual_label").worklist, "reports/corpus/fixture/blind-worklist");
+    assert.deepEqual(report.tasks.find((task) => task.type === "manual_label").worklists, ["/tmp/fixture-external-worklist"]);
     const publicSurfaceTask = report.tasks.find((task) => task.ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH");
     assert.equal(publicSurfaceTask.sampledCandidateFindings, 0);
     assert.match(publicSurfaceTask.action, /rule-specific reviewed holdout/);
     assert.match(fs.readFileSync(markdownPath, "utf8"), /Precision Evidence Gap Worklist/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision evidence gap worklist enriches manifest attestation tasks from the evidence bundle", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-gap-worklist-bundle-"));
+  try {
+    const preflightPath = createPreflight(tempDir);
+    const bundleDir = createBundle(tempDir);
+
+    const result = runGaps([
+      "--preflight",
+      preflightPath,
+      "--bundle",
+      bundleDir,
+    ]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.inputs.bundle, posixify(bundleDir));
+    const manifestTask = report.tasks.find((task) => task.type === "external_manifest_attestation");
+    const subjectA = manifestTask.subjects.find((subject) => subject.subjectId === "subject-a");
+    assert.equal(subjectA.repository, "https://github.com/example/a.git");
+    assert.equal(subjectA.commit, "a".repeat(40));
+    assert.deepEqual(subjectA.manifestCopy, {
+      path: "manifests/subject-a.json",
+      sha256: "a".repeat(64),
+    });
+    assert.equal(subjectA.attestationTemplate.review.reviewedManifestSha256, "a".repeat(64));
+    assert.equal(subjectA.attestationTemplate.review.reviewerAttestations[0].reviewerType, "human");
+    const subjectC = manifestTask.subjects.find((subject) => subject.subjectId === "subject-c");
+    assert.equal(subjectC.manifestStrategy, "infer");
+    assert.equal(subjectC.manifestCopy, null);
+    assert.equal(subjectC.attestationTemplate, null);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision evidence gap worklist carries preflight worklist paths when no next-cycle summary is present", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-gap-worklist-preflight-paths-"));
+  try {
+    const preflightPath = createPreflight(tempDir);
+
+    const result = runGaps(["--preflight", preflightPath]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    const manualTask = report.tasks.find((task) => task.type === "manual_label");
+    assert.equal(manualTask.worklist, "/tmp/fixture-external-worklist");
+    assert.deepEqual(manualTask.worklists, ["/tmp/fixture-external-worklist"]);
+    assert.equal(report.totals.externalManifestAttestationSubjects, 3);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

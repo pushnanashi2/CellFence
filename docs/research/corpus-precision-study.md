@@ -940,6 +940,22 @@ human/organization labels, and external manifest attestations remain before a
 new preflight can be attempted. Duplicate label rows from the same external
 rater do not count as multiple external raters.
 
+For handoff work, turn a failed preflight into an explicit gap worklist:
+
+```bash
+npm run precision:claim:gaps -- \
+  --preflight reports/corpus/ts-js-confirmation-v1-preflight.json \
+  --bundle reports/corpus/ts-js-confirmation-v1-bundle \
+  --out reports/corpus/ts-js-confirmation-v1-gaps.json \
+  --markdown reports/corpus/ts-js-confirmation-v1-gaps.md
+```
+
+The gap worklist consumes both malformed-input `issues` and claim-readiness
+`gateFailures`. When a bundle is supplied, external manifest attestation tasks
+include the repository, exact commit, manifest copy path, manifest copy SHA256,
+and a review attestation template. This is still not claim evidence; it is the
+handoff packet for external reviewers.
+
 After generating a sealed label worklist, bind its `SHA256SUMS` digest into the
 claim protocol with `precision:protocol:bind-worklists` before running
 preflight:
@@ -962,6 +978,10 @@ It reran the 105-subject reviewed work queue, sealed a 1,260-finding external
 label worklist, and produced a valid-but-not-ready preflight with zero input
 issues. It remains blocked on external human/organization labels, external
 manifest attestations, and rule-level sample gaps.
+Round34 repaired the gap-worklist projection for that preflight: the frontier
+candidate pool has 97 subjects blocked on manifest attestation, while the
+claim preflight requires external manifest review attestations for all 105
+corpus subjects before the corpus can be claim-ready.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299
