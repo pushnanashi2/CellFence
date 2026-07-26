@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { checkRepository } from "../packages/engine/dist/index.js";
 
@@ -1280,7 +1281,9 @@ function printHumanReport(report) {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(fileURLToPath(import.meta.url)).href
+  && process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     const options = parseArgs(process.argv);
     const report = runAdversarialValidation(options);

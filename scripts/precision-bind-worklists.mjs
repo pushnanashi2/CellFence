@@ -2,6 +2,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 function usage() {
   console.error(`Usage:
@@ -125,6 +126,8 @@ function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(fileURLToPath(import.meta.url)).href
+  && process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href) {
   process.exitCode = main();
 }
