@@ -982,6 +982,7 @@ against the sealed bundle before updating a claim corpus:
 npm run precision:manifest-attestations:validate -- \
   --bundle reports/corpus/ts-js-confirmation-v1-bundle \
   --attestations reports/corpus/ts-js-confirmation-v1-manifest-attestations.json \
+  --worklist reports/corpus/ts-js-confirmation-v1-manifest-review-worklist \
   --out reports/corpus/ts-js-confirmation-v1-manifest-attestations-validation.json \
   --out-corpus reports/corpus/ts-js-confirmation-v1-reviewed-corpus.json
 ```
@@ -989,9 +990,13 @@ npm run precision:manifest-attestations:validate -- \
 This accepts only human/organization external reviewer attestations, requires
 the reviewed manifest SHA-256 to match the sealed manifest copy, rejects
 agent/Codex-style reviewer identities, and writes `--out-corpus` only when every
-required subject is covered. Passing this validator does not create an external
-review; it only checks that returned external review evidence is bound to the
-frozen bundle before the next preflight.
+required subject is covered. With `--worklist`, every returned reviewer
+attestation must match the sealed per-subject assignment set: missing assigned
+reviewers, extra unassigned reviewers, unknown subjects, or a worklist bound to
+a different bundle keep the validation from passing. Passing this validator
+does not create an external review; it only checks that returned external review
+evidence is bound to the frozen bundle and sealed reviewer packet before the
+next preflight.
 
 After generating a sealed label worklist, bind its `SHA256SUMS` digest into the
 claim protocol with `precision:protocol:bind-worklists` before running
@@ -1028,6 +1033,11 @@ Round36 added a sealed manifest-attestation worklist generator so the external
 manifest review handoff has the same assignment-package discipline as label
 review. The generator writes templates and SHA-bound manifest evidence only; it
 does not create external attestations.
+Round37 binds the manifest-attestation validator to that sealed worklist: a
+returned attestation packet must include exactly the assigned human/organization
+reviewers for each subject before it can emit an updated reviewed corpus. This
+still does not satisfy missing external label rows or create external review
+evidence.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

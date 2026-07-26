@@ -8,6 +8,7 @@ import test from "node:test";
 
 const repoRoot = process.cwd();
 const scriptPath = path.join(repoRoot, "scripts", "precision-manifest-attestations-validate.mjs");
+const worklistScriptPath = path.join(repoRoot, "scripts", "precision-manifest-attestation-worklist.mjs");
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -63,6 +64,13 @@ function writeSha256Sums(baseDir) {
 
 function runValidator(args) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+}
+
+function runWorklist(args) {
+  return spawnSync(process.execPath, [worklistScriptPath, ...args], {
     cwd: repoRoot,
     encoding: "utf8",
   });
@@ -236,6 +244,25 @@ function validAttestations(bundle) {
   };
 }
 
+function worklistBoundAttestations(bundle) {
+  const attestations = validAttestations(bundle);
+  for (const entry of attestations.attestations) {
+    entry.review.reviewerAttestations = [
+      {
+        id: "external-reviewer-a",
+        reviewerType: "human",
+        independent: true,
+      },
+      {
+        id: "external-org-review",
+        reviewerType: "organization",
+        independent: true,
+      },
+    ];
+  }
+  return attestations;
+}
+
 test("manifest attestation validator accepts sealed external attestations and writes reviewed corpus", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-ok-"));
   try {
@@ -317,6 +344,206 @@ test("manifest attestation validator rejects missing subject attestations", () =
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.match(report.issues.join("\n"), /subject-b is missing an external manifest attestation/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator binds reviewers to a sealed worklist", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const accepted = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
+    const report = JSON.parse(accepted.stdout);
+    assert.equal(report.summary.worklistAssignments, 4);
+    assert.equal(report.worklist.assignments, 4);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects missing sealed worklist reviewers", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-missing-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestations = worklistBoundAttestations(bundle);
+    attestations.attestations[0].review.reviewerAttestations = attestations.attestations[0].review.reviewerAttestations
+      .filter((reviewer) => reviewer.id !== "external-org-review");
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, attestations);
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /missing sealed worklist reviewer external-org-review\/organization/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects unassigned worklist reviewers", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-extra-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestations = worklistBoundAttestations(bundle);
+    attestations.attestations[0].review.reviewerAttestations.push({
+      id: "unassigned-reviewer",
+      reviewerType: "human",
+      independent: true,
+    });
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, attestations);
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /includes reviewer unassigned-reviewer\/human not assigned in sealed worklist/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects empty worklist SHA256SUMS", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-empty-sums-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+    fs.writeFileSync(path.join(worklistDir, "SHA256SUMS"), "");
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /worklist SHA256SUMS must list sealed worklist files/);
+    assert.match(report.issues.join("\n"), /worklist declared file is missing from SHA256SUMS: worklist\.json/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects assignment packet drift from worklist index", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-packet-drift-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+    const worklistJson = readJson(path.join(worklistDir, "worklist.json"));
+    const assignmentPath = path.join(worklistDir, worklistJson.assignments[0].path);
+    const assignment = readJson(assignmentPath);
+    assignment.assignment.reviewer = "other-human-reviewer";
+    assignment.attestationTemplate.review.reviewerAttestations[0].id = "other-human-reviewer";
+    writeJson(assignmentPath, assignment);
+    writeSha256Sums(worklistDir);
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /assignment\.reviewer: expected external-reviewer-a, got other-human-reviewer/);
+    assert.match(report.issues.join("\n"), /reviewerAttestations\[0\]\.id: expected external-reviewer-a, got other-human-reviewer/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

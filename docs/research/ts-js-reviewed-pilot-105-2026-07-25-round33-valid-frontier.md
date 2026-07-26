@@ -131,6 +131,18 @@ and an empty attestation template for one declared human/organization reviewer.
 This improves the external handoff path, but it still does not create external
 review evidence or change the current precision numbers.
 
+## Round37 Worklist-Bound Manifest Attestation Validation
+
+`precision:manifest-attestations:validate --worklist` now binds returned
+manifest-review attestations back to the sealed per-subject assignment package.
+The validator rejects missing assigned reviewers, extra unassigned reviewers,
+unknown worklist subjects, worklists bound to another bundle, and agent/Codex
+reviewer identities before it can write an updated reviewed corpus.
+
+This tightens the return gate for external manifest review. It still does not
+add external human/organization labels, create external review evidence, or
+change the Round33 precision numbers.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields
