@@ -975,6 +975,10 @@ npm run --silent precision:manifest-attestations:worklist -- \
 
 The worklist contains manifest copy hashes and attestation templates only. It
 does not mark a manifest reviewed and it does not create reviewer evidence.
+Returned `cellfence.external-manifest-attestations.v1` files must include the
+worklist report's `artifactSetSha256` as `worklistArtifactSetSha256`, so the
+returned review packet itself states which sealed reviewer assignment set it
+answers.
 
 After external reviewers return manifest-review attestations, validate them
 against the sealed bundle before updating a claim corpus:
@@ -998,7 +1002,9 @@ reviewers, extra unassigned reviewers, unknown subjects, or a worklist bound to
 a different bundle keep the validation from passing. Passing the optional
 `--expected-worklist-artifact-set-sha256` digest additionally rejects a return
 packet validated against a different freshly generated worklist for the same
-bundle. Passing this validator does not create an external review; it only
+bundle. The returned attestation file must also include
+`worklistArtifactSetSha256`, and that digest must match the supplied sealed
+worklist. Passing this validator does not create an external review; it only
 checks that returned external review evidence is bound to the frozen bundle and
 sealed reviewer packet before the next preflight.
 

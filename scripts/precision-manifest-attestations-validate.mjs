@@ -13,7 +13,9 @@ function usage() {
 
 Validates externally returned manifest-review attestations against a sealed
 evidence bundle. It may write a reviewed corpus only when every required
-attestation is valid. It never creates reviewer attestations by itself.`);
+attestation is valid. When --worklist is supplied, attestations.json must include
+the returned worklistArtifactSetSha256 and it must match the sealed worklist
+SHA256SUMS digest. It never creates reviewer attestations by itself.`);
 }
 
 function parseArgs(argv) {
@@ -504,7 +506,7 @@ function validateAttestations(options) {
   const study = readJson(path.join(options.bundleDir, "study.json"));
   const corpus = readJson(path.join(options.bundleDir, "corpus.json"));
   const attestations = readJson(options.attestationsPath);
-  if (!rejectUnknownKeys(issues, attestations, ["schemaVersion", "studyId", "bundleArtifactSetSha256", "attestations"], "attestations.json")) {
+  if (!rejectUnknownKeys(issues, attestations, ["schemaVersion", "studyId", "bundleArtifactSetSha256", "worklistArtifactSetSha256", "attestations"], "attestations.json")) {
     return report(options, study, corpus, attestations, issues, null);
   }
   if (attestations.schemaVersion !== schemaVersion) issues.push("attestations.json has unexpected schemaVersion");
@@ -519,6 +521,7 @@ function validateAttestations(options) {
   if (!Array.isArray(attestations.attestations)) issues.push("attestations.attestations must be an array");
   const worklist = readWorklist(options.worklistDir, actualArtifactSetSha256, issues);
   validateExpectedWorklistArtifactSetSha256(options, worklist, issues);
+  validateReturnedWorklistArtifactSetSha256(attestations, worklist, issues);
 
   const copyBySubject = manifestCopies(study, options.bundleDir, issues);
   const expected = expectedSubjects(corpus);
@@ -562,6 +565,21 @@ function validateAttestations(options) {
   }
 
   return report(options, study, corpus, attestations, issues, accepted, worklist);
+}
+
+function validateReturnedWorklistArtifactSetSha256(attestations, worklist, issues) {
+  if (attestations.worklistArtifactSetSha256 === undefined) {
+    if (worklist) issues.push("attestations.worklistArtifactSetSha256 is required when --worklist is supplied");
+    return;
+  }
+  validateSha256(issues, attestations.worklistArtifactSetSha256, "attestations.worklistArtifactSetSha256");
+  if (!worklist) {
+    issues.push("attestations.worklistArtifactSetSha256 requires --worklist");
+    return;
+  }
+  if (worklist.artifactSetSha256 && attestations.worklistArtifactSetSha256 !== worklist.artifactSetSha256) {
+    issues.push("attestations.worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS");
+  }
 }
 
 function validateWorklistSubjectSet(worklist, expectedByKey, issues) {
@@ -610,6 +628,7 @@ function report(options, study, corpus, attestations, issues, accepted, worklist
       attestations: posixify(options.attestationsPath),
       worklist: options.worklistDir ? posixify(options.worklistDir) : null,
       expectedWorklistArtifactSetSha256: options.expectedWorklistArtifactSetSha256 || null,
+      returnedWorklistArtifactSetSha256: attestations?.worklistArtifactSetSha256 || null,
     },
     studyId: study?.studyId || null,
     summary: {

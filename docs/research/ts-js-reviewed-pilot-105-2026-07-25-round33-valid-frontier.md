@@ -155,6 +155,18 @@ selectively validated against a different freshly generated worklist for the
 same evidence bundle. It is still a validation guard only: it does not create
 external review evidence, external labels, or a 99% precision claim.
 
+## Round39 Returned Worklist Digest Binding
+
+Returned `cellfence.external-manifest-attestations.v1` files must now include
+`worklistArtifactSetSha256` when `--worklist` is supplied. The validator
+requires it to match the supplied sealed manifest-attestation worklist. This
+moves the intended reviewer-packet binding into the returned artifact itself,
+while retaining the `--expected-worklist-artifact-set-sha256` CLI pin as an
+operator-side guard.
+
+This is still evidence-chain hardening only. It does not add external
+human/organization labels or change the Round33 precision estimate.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields

@@ -368,7 +368,9 @@ test("manifest attestation validator binds reviewers to a sealed worklist", () =
     const worklistReport = JSON.parse(worklist.stdout);
 
     const attestationsPath = path.join(tempDir, "attestations.json");
-    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const attestations = worklistBoundAttestations(bundle);
+    attestations.worklistArtifactSetSha256 = worklistReport.artifactSetSha256;
+    writeJson(attestationsPath, attestations);
     const accepted = runValidator([
       "--bundle",
       bundle.bundleDir,
@@ -385,6 +387,143 @@ test("manifest attestation validator binds reviewers to a sealed worklist", () =
     assert.equal(report.summary.worklistAssignments, 4);
     assert.equal(report.worklist.assignments, 4);
     assert.equal(report.inputs.expectedWorklistArtifactSetSha256, worklistReport.artifactSetSha256);
+    assert.equal(report.inputs.returnedWorklistArtifactSetSha256, worklistReport.artifactSetSha256);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects returned worklist artifact set mismatches", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-returned-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestations = worklistBoundAttestations(bundle);
+    attestations.worklistArtifactSetSha256 = "0".repeat(64);
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, attestations);
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /attestations\.worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator requires returned worklist digests when a worklist is supplied", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-returned-required-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /attestations\.worklistArtifactSetSha256 is required when --worklist is supplied/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects malformed returned worklist digests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-returned-malformed-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestations = worklistBoundAttestations(bundle);
+    attestations.worklistArtifactSetSha256 = "NOT-A-SHA256";
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, attestations);
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /attestations\.worklistArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator requires a worklist for returned worklist digests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-returned-missing-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const attestations = validAttestations(bundle);
+    attestations.worklistArtifactSetSha256 = "0".repeat(64);
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, attestations);
+
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /attestations\.worklistArtifactSetSha256 requires --worklist/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
