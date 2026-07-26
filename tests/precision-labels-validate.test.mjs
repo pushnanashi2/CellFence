@@ -318,6 +318,33 @@ test("precision labels validator rejects unexpected fields in label rows", () =>
   }
 });
 
+test("precision labels validator rejects agent-only non-claim triage rows in claim bundles", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-agent-triage-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      {
+        ...label(findings[0].findingId, "claude-code-agent", "true_positive", {
+          raterType: "agent",
+          claimUse: "non_claim_triage",
+        }),
+        claimEligible: false,
+      },
+      label(findings[0].findingId, "reviewer-b", "true_positive"),
+      label(findings[1].findingId, "reviewer-a", "true_positive"),
+      label(findings[1].findingId, "reviewer-b", "true_positive"),
+    ]);
+
+    const result = runValidator(["--bundle", bundleDir]);
+
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /unexpected field claimEligible/);
+    assert.match(report.issues.join("\n"), /non_claim_triage/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision labels validator rejects two first-round labels for the same finding", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-two-first-"));
   try {

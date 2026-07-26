@@ -27,6 +27,128 @@ const claimProfiles = {
       "CELLFENCE_PRIVATE_IMPORT",
       "CELLFENCE_UNDECLARED_CONSUMER",
     ],
+    exclusionRules: [
+      {
+        field: "filePath",
+        pattern: "**/__fixtures__/**",
+        reason: "test and fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "__fixtures__/**",
+        reason: "test and fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/__generated__/**",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "__generated__/**",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/__tests__/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "__tests__/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/*.generated.*",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "*.generated.*",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/*.spec.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "*.spec.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/*.test.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "*.test.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/*_test.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/fixture/**",
+        reason: "fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "fixture/**",
+        reason: "fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/fixtures/**",
+        reason: "fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "fixtures/**",
+        reason: "fixture files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/generated/**",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "generated/**",
+        reason: "generated files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/test/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "test/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "**/tests/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "tests/**",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+      {
+        field: "filePath",
+        pattern: "*_test.*",
+        reason: "test files are outside the boundary-core production-source claim",
+      },
+    ],
   },
   "ts-js-loader-safety-v1": {
     description: "Reviewed TS/JS loader-safety blocking precision: unsupported or unresolved dynamic module loading only.",
@@ -403,6 +525,7 @@ function writeWorklistProtocol(protocolPath, options, binding) {
   const raterTypes = expandedRaterTypes(options);
   const diagnosticAgentCycle = raterTypes.includes("agent");
   const externalClaimCycle = isExternalClaimCycle(options);
+  const profile = claimProfile(options);
   writeJson(protocolPath, {
     schemaVersion: "cellfence.precision-claim-protocol.v1",
     studyId: options.studyId,
@@ -439,7 +562,7 @@ function writeWorklistProtocol(protocolPath, options, binding) {
       requireExternalAttestations: externalClaimCycle,
       allowedReviewerTypes: ["human", "organization"],
     },
-    exclusionRules: [],
+    exclusionRules: profile?.exclusionRules || [],
   });
 }
 

@@ -496,6 +496,45 @@ test("precision claim preflight is not claim-ready with only agent labels for an
   }
 });
 
+test("precision claim preflight rejects agent-only non-claim triage rows", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-agent-triage-"));
+  try {
+    const findings = [finding(1)];
+    const labels = [
+      {
+        ...label(findings[0].findingId, "claude-code-agent", "blind_first"),
+        raterType: "agent",
+        claimUse: "non_claim_triage",
+        claimEligible: false,
+      },
+      {
+        ...label(findings[0].findingId, "reviewer-b", "blind_second"),
+        raterType: "human",
+      },
+    ];
+    const bundleDir = createBundle(tempDir, findings, labels);
+    const protocolPath = path.join(tempDir, "protocol.json");
+    writeJson(protocolPath, protocol({
+      claim: claimBinding(bundleDir),
+      labelingPlan: {
+        requireKnownRaterType: true,
+        allowedRaterTypes: ["human", "organization"],
+        allowNonHumanRaters: false,
+      },
+    }));
+
+    const result = runPreflight(["--bundle", bundleDir, "--protocol", protocolPath]);
+
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.valid, false);
+    assert.match(report.issues.join("\n"), /unexpected field claimEligible/);
+    assert.match(report.issues.join("\n"), /non_claim_triage/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision claim preflight rejects post-worklist exclusion denominator shrinkage", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-preflight-exclusion-worklist-"));
   try {

@@ -86,6 +86,70 @@ still valuable for onboarding, robustness, and tuning, but their findings are
 not treated as evidence of real repository defects until the manifest is
 reviewed and frozen.
 
+## Reviewed Manifest Attestation Rubric
+
+External manifest attestations are scoped to production boundary semantics, not
+to every path that happens to contain JavaScript or TypeScript. A reviewer must
+record the exact scope they checked and must not silently convert unclear
+repository conventions into claim evidence.
+
+Use these rules when reviewing copied manifests:
+
+- Include workspace packages and source-bearing package roots when they expose
+  runtime or library code that normal repository consumers depend on.
+- Include package subpath roots only when the upstream package metadata,
+  exports map, or documented imports make them intentional public surfaces.
+- Exclude ordinary test, fixture, generated, vendored, and build-output paths
+  from the boundary-core production-source claim.
+- Treat examples, demos, benchmarks, e2e applications, documentation sites, and
+  nested `package.json` files as explicit scope decisions. They can be included
+  when the study is about those surfaces, but they must be named in the review
+  scope instead of inferred as production boundaries.
+- Mark the manifest `needs_scope_decision` when the repository intentionally
+  mixes source packages with examples, demos, benchmarks, e2e fixtures, or
+  nested subpackages and the current review scope does not say which of those
+  surfaces are in the claim population.
+
+This rubric intentionally does not decide `publicEntry` bypass cases. Those are
+rule-semantics questions, not manifest-scope questions.
+
+## Boundary-Core Rule Semantics
+
+For `CELLFENCE_PRIVATE_IMPORT`, the current CellFence schema already represents
+the relevant distinction. A `consumes` edge authorizes one cell to depend on
+another cell; it does not make every file under the producer's `ownedPaths`
+public. Cross-cell source imports must resolve to the producer cell's
+`publicEntry` or to a package import that CellFence resolves as a public package
+surface. Direct path, alias, or subpath imports into other producer-owned source
+files remain `CELLFENCE_PRIVATE_IMPORT` findings even when the consumer declares
+`consumes: [{ "cell": "<producer>" }]`.
+
+Therefore the r46 agent-triage `publicEntry` bypass pattern is classification
+(a): expressible by the current schema and enforcement model. An attested
+manifest that wants to allow those imports must either expose the symbol through
+the declared `publicEntry`/package surface or be handled by a separate future
+profile or schema extension for multi-entry public internals. The
+boundary-core-v1 claim must not relabel direct private source imports as
+allowed merely because a `consumes` edge exists.
+
+## Boundary-Core Production-Scope Filters
+
+The named `ts-js-boundary-core-v1` next-cycle profile excludes obvious
+non-production paths before sealed worklist generation: test directories,
+fixture directories, generated directories, and common `*.test.*`, `*.spec.*`,
+`*_test.*`, and `*.generated.*` file patterns. These structured exclusion rules
+are part of the claim protocol and are bound into the worklist filter hash.
+
+If production-scope filtering changes after a packet has been exported, do not
+overwrite that packet. Generate a new packet identifier, such as `r47-core`, and
+label the older packet as limited-use diagnostic evidence unless the old packet
+is invalid for a stronger reason.
+
+The r46-core packet remains sealed and useful for diagnostic triage, but after
+the boundary-core production-scope filter was hardened it should not be used as
+the public claim denominator. Its Ace `*_test.js` findings show that a new
+filtered packet is required before a 0.1.x boundary-core precision claim.
+
 ## Frozen Corpus Manifest
 
 Store the corpus manifest before running the study:

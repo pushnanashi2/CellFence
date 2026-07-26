@@ -82,6 +82,19 @@ claim profile is limited to boundary-core rules, any `out_of_scope` result is a
 packet or claim-profile bug candidate. The likely issue is that test-file
 filtering allowed sampled findings from test files into the external packet.
 
+After production-scope filtering was hardened for the named
+`ts-js-boundary-core-v1` profile, r46-core should be treated as `limited-use`:
+keep it sealed as diagnostic triage, but do not use it as the public claim
+denominator. A replacement packet, for example `r47-core`, must be regenerated
+under the hardened filter before any 0.1.x boundary-core precision claim.
+
+The `publicEntry` bypass pattern is not a schema expressiveness gap in the
+current engine. `consumes` authorizes the producer cell relationship, while
+`CELLFENCE_PRIVATE_IMPORT` still requires cross-cell source imports to use the
+producer `publicEntry` or a resolved public package surface. The 20
+`needs_policy` rows therefore need external reviewer confirmation under that
+rule semantic rather than a rubric-only allowance.
+
 Manifest triage found three scope decisions before external attestation:
 
 - `redux-toolkit`: docs, publish-ci examples, and nested toolkit subpackages need
@@ -104,6 +117,16 @@ Manifest triage found three scope decisions before external attestation:
    manifest attestation.
 4. Have external human/org reviewers relabel the same cases after the above
    policy decisions; these agent outputs must remain outside the claim lane.
+
+## Claim Status
+
+0.1.x boundary-core precision claim: `HOLD`.
+
+- external human/org finding labels: `0/650`
+- external manifest attestations: `0/160`
+- r46-core contains 3 test-file findings and is `limited-use` after filter
+  hardening
+- agent-only triage is not counted toward either external gate
 
 ## Validation
 

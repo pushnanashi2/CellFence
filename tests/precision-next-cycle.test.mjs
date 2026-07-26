@@ -65,7 +65,7 @@ function createFixture(rootDir, options = {}) {
   };
   writeJson(manifestPath, manifest);
   writeJson(reviewedManifestSourcePath, manifest);
-  writeJsonl(auditLogPath, [
+  const auditFindings = [
     {
       schemaVersion: "cellfence.audit-event.v1",
       runId: "precision-next-cycle-test",
@@ -83,7 +83,35 @@ function createFixture(rootDir, options = {}) {
       fingerprint: `precision-next-cycle-${ruleSlug}`,
       outcome: "rejected",
     },
-  ]);
+  ];
+  if (options.includeTestFinding) {
+    for (const [index, filePath] of [
+      "src/app/leak_test.js",
+      "leak.test.js",
+      "tests/leak.js",
+      "__generated__/leak.js",
+      "fixtures/leak.js",
+    ].entries()) {
+      auditFindings.push({
+        schemaVersion: "cellfence.audit-event.v1",
+        runId: "precision-next-cycle-test",
+        timestamp: "2026-07-25T00:00:00.000Z",
+        commit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        event: "finding.detected",
+        command: "check",
+        ruleId,
+        severity: "error",
+        cellId: "app",
+        producerCellId: "core",
+        filePath,
+        line: 1,
+        message: "private import from test or generated file",
+        fingerprint: `precision-next-cycle-${ruleSlug}-excluded-${index}`,
+        outcome: "rejected",
+      });
+    }
+  }
+  writeJsonl(auditLogPath, auditFindings);
   writeJson(corpusPath, {
     schemaVersion: "cellfence.corpus.v1",
     selectionPolicy: {
@@ -141,7 +169,7 @@ function createFixture(rootDir, options = {}) {
           status: "checked_findings",
           exitCode: 1,
           ok: false,
-          findings: 1,
+          findings: auditFindings.length,
           warnings: 0,
           auditLogPath,
           auditLogSha256: hashFile(auditLogPath),
@@ -152,7 +180,7 @@ function createFixture(rootDir, options = {}) {
       total: 1,
       completed: 1,
       failed: 0,
-      totalFindings: 1,
+      totalFindings: auditFindings.length,
     },
   });
   return { corpusPath, reportPath };
@@ -439,13 +467,72 @@ test("precision next cycle can freeze a named boundary-core claim profile", () =
     assert.equal(protocol.claim.scopeProfile, "ts-js-boundary-core-v1");
     assert.match(protocol.claim.targetPopulation, /boundary-core rules only/);
     assert.deepEqual(protocol.claim.includedRules, expectedRules);
+    assert.equal(protocol.exclusionRules.some((rule) => rule.field === "filePath" && rule.pattern === "**/*_test.*"), true);
+    assert.equal(protocol.exclusionRules.some((rule) => rule.field === "filePath" && rule.pattern === "*.test.*"), true);
+    assert.equal(protocol.exclusionRules.some((rule) => rule.field === "filePath" && rule.pattern === "tests/**"), true);
     const worklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
     assert.deepEqual(worklist.filters.includedRules, expectedRules);
+    assert.equal(worklist.filters.exclusionRules.some((rule) => rule.pattern === "**/*_test.*"), true);
+    assert.equal(worklist.filters.exclusionRules.some((rule) => rule.pattern === "*.test.*"), true);
+    assert.equal(worklist.filters.exclusionRules.some((rule) => rule.pattern === "tests/**"), true);
     assert.equal(worklist.summary.selectedFindings, 1);
     const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
     assert.equal(preflight.valid, true);
     assert.equal(preflight.claimReady, false);
     assert.match(preflight.gateFailures.join("\n"), /external human\/organization independent label/);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("precision next cycle boundary-core profile excludes test files from the sealed worklist", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-precision-next-cycle-boundary-core-tests-"));
+  const outDir = path.join(repoRoot, "tmp", `precision-next-cycle-boundary-core-tests-${crypto.randomBytes(6).toString("hex")}`);
+  try {
+    const { corpusPath, reportPath } = createFixture(rootDir, { includeTestFinding: true });
+    const result = runNextCycle([
+      "--study-id",
+      "precision-next-cycle-boundary-core-test-file",
+      "--corpus",
+      corpusPath,
+      "--report",
+      reportPath,
+      "--out-dir",
+      outDir,
+      "--raters",
+      "external-human-reviewer-1,external-org-reviewer-1",
+      "--rater-types",
+      "human,organization",
+      "--claim-profile",
+      "ts-js-boundary-core-v1",
+      "--external-claim",
+    ]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const summary = readJson(path.join(outDir, "summary.json"));
+    assert.equal(summary.sampling.sampledFindings, 6);
+    assert.equal(summary.worklist.selectedFindings, 1);
+    assert.deepEqual(summary.worklist.selectedByRule, {
+      CELLFENCE_PRIVATE_IMPORT: 1,
+    });
+    const worklist = readJson(path.join(outDir, "blind-worklist", "worklist.json"));
+    assert.equal(worklist.assignments.length, 2);
+    const assignedFindingPaths = worklist.assignments.map((assignment) => {
+      return readJson(path.join(outDir, "blind-worklist", assignment.path)).finding.filePath;
+    });
+    const excludedPaths = new Set([
+      "src/app/leak_test.js",
+      "leak.test.js",
+      "tests/leak.js",
+      "__generated__/leak.js",
+      "fixtures/leak.js",
+    ]);
+    assert.equal(assignedFindingPaths.some((filePath) => excludedPaths.has(filePath)), false);
+    const preflight = readJson(path.join(outDir, "claim-preflight.prelabel.json"));
+    assert.equal(preflight.summary.selectedFindingsBeforeExclusions, 6);
+    assert.equal(preflight.summary.selectedFindings, 1);
+    assert.equal(preflight.summary.excludedFindings, 5);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
     fs.rmSync(outDir, { recursive: true, force: true });
