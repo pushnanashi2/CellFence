@@ -583,9 +583,13 @@ separate raters. Independent label rows must declare `role: "independent"`,
 `claimUse: "blind_labeling"`. When `--worklist` is supplied, independent labels
 must match a sealed assignment's finding, rater, rater type, role, round,
 assignment ID, evidence package ID, and claim-use metadata. Sealed claim labels
-must use canonical `raterType`; `raterClass` is rejected to avoid contradictory
-provenance. If independent labels disagree, a separate adjudicator must resolve
-the final label with
+may also carry the returned worklist report's `artifactSetSha256` as
+`worklistArtifactSetSha256`; if present, that digest must match the supplied
+sealed worklist `SHA256SUMS`. This self-identifies the sealed assignment packet
+answered by the returned labels without embedding a circular digest in the
+assignment template. Sealed claim labels must use canonical `raterType`;
+`raterClass` is rejected to avoid contradictory provenance. If independent
+labels disagree, a separate adjudicator must resolve the final label with
 `round: "adjudication"`; adjudication by an independent rater, missing
 adjudication for a disagreement, or adjudication after unanimous independent
 labels is rejected. If adjudication labels exist and `--worklist` is supplied,

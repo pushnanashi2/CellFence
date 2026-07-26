@@ -433,6 +433,80 @@ test("precision labels validator binds independent labels to sealed worklist ass
   }
 });
 
+test("precision labels validator accepts returned labels bound to the sealed worklist digest", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-worklist-digest-"));
+  try {
+    const { bundleDir, findings } = createBundle(tempDir, (entries) => [
+      label(entries[0].findingId, "reviewer-a", "true_positive", { raterType: "human" }),
+      label(entries[0].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+      label(entries[1].findingId, "reviewer-a", "true_positive", { raterType: "human" }),
+      label(entries[1].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+    ]);
+    const labels = readJsonl(path.join(bundleDir, "labels.jsonl"));
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    const worklistArtifactSetSha256 = hashFile(path.join(worklistDir, "SHA256SUMS"));
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), labels.map((entry) => ({
+      ...entry,
+      worklistArtifactSetSha256,
+    })));
+
+    const result = runValidator(["--bundle", bundleDir, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.ok, true);
+    assert.equal(report.worklist.artifactSetSha256, worklistArtifactSetSha256);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision labels validator rejects returned labels bound to another worklist digest", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-worklist-digest-mismatch-"));
+  try {
+    const { bundleDir, findings } = createBundle(tempDir, (entries) => [
+      label(entries[0].findingId, "reviewer-a", "true_positive", { raterType: "human" }),
+      label(entries[0].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+      label(entries[1].findingId, "reviewer-a", "true_positive", { raterType: "human" }),
+      label(entries[1].findingId, "reviewer-b", "true_positive", { raterType: "human" }),
+    ]);
+    const labels = readJsonl(path.join(bundleDir, "labels.jsonl"));
+    const worklistDir = createWorklist(tempDir, bundleDir, findings, labels);
+    labels[0].worklistArtifactSetSha256 = "0".repeat(64);
+    writeJsonl(path.join(bundleDir, "labels.jsonl"), labels);
+
+    const result = runValidator(["--bundle", bundleDir, "--worklist", worklistDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("precision labels validator rejects malformed returned worklist digest", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-worklist-digest-malformed-"));
+  try {
+    const { bundleDir } = createBundle(tempDir, (findings) => [
+      label(findings[0].findingId, "reviewer-a", "true_positive", {
+        worklistArtifactSetSha256: "NOT-A-SHA256",
+      }),
+      label(findings[0].findingId, "reviewer-b", "true_positive"),
+      label(findings[1].findingId, "reviewer-a", "true_positive"),
+      label(findings[1].findingId, "reviewer-b", "true_positive"),
+    ]);
+
+    const result = runValidator(["--bundle", bundleDir]);
+
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.match(report.issues.join("\n"), /worklistArtifactSetSha256 must be a lowercase 64-hex SHA-256 digest/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("precision labels validator rejects prefilled sealed worklist label templates", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-labels-worklist-template-"));
   try {

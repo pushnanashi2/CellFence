@@ -28,6 +28,7 @@ const labelAllowedKeys = new Set([
   "round",
   "assignmentId",
   "evidencePackageId",
+  "worklistArtifactSetSha256",
   "sawPeerLabels",
   "sourceBundleContainsLabels",
   "claimUse",

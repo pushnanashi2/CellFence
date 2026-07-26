@@ -391,6 +391,7 @@ function sourceLabelSnapshot(label) {
     round: label.round,
     assignmentId: label.assignmentId,
     evidencePackageId: label.evidencePackageId,
+    worklistArtifactSetSha256: label.worklistArtifactSetSha256 || null,
     sawPeerLabels: label.sawPeerLabels,
     sourceBundleContainsLabels: label.sourceBundleContainsLabels,
     claimUse: label.claimUse,

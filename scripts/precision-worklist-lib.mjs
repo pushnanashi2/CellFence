@@ -92,6 +92,7 @@ export function validateClaimLabelMetadata(label, line, issues, options = {}) {
   if (Object.hasOwn(label, "adjudicated") && typeof label.adjudicated !== "boolean") {
     issues.push(`${location} adjudicated must be a boolean`);
   }
+  validateSha256(issues, label.worklistArtifactSetSha256, `${location}.worklistArtifactSetSha256`, { required: false });
 
   const adjudication = isAdjudication(label);
   if (adjudication) {
@@ -124,6 +125,7 @@ export function validateClaimLabelMetadata(label, line, issues, options = {}) {
     "round",
     "assignmentId",
     "evidencePackageId",
+    "worklistArtifactSetSha256",
     "claimUse",
   ];
   for (const key of metadataKeys) {
@@ -217,7 +219,7 @@ function validateProtocolBindingShape(issues, value, label) {
 }
 
 function validateSourceLabelShape(issues, value, label) {
-  rejectUnknownKeys(issues, value, ["schemaVersion", "studyId", "findingId", "rater", "raterType", "role", "round", "assignmentId", "evidencePackageId", "sawPeerLabels", "sourceBundleContainsLabels", "claimUse", "label", "rationale"], label);
+  rejectUnknownKeys(issues, value, ["schemaVersion", "studyId", "findingId", "rater", "raterType", "role", "round", "assignmentId", "evidencePackageId", "worklistArtifactSetSha256", "sawPeerLabels", "sourceBundleContainsLabels", "claimUse", "label", "rationale"], label);
 }
 
 function worklistMode(worklist) {
@@ -572,6 +574,7 @@ function sourceLabelSnapshot(label) {
     round: label.round,
     assignmentId: label.assignmentId,
     evidencePackageId: label.evidencePackageId,
+    worklistArtifactSetSha256: label.worklistArtifactSetSha256 || null,
     sawPeerLabels: label.sawPeerLabels,
     sourceBundleContainsLabels: label.sourceBundleContainsLabels,
     claimUse: label.claimUse,
@@ -938,6 +941,9 @@ export function verifyWorklistLabels(worklistDir, labels, options = {}) {
     if (!coveredRounds.has(label?.round)) continue;
     const line = index + 1;
     validateClaimLabelMetadata(label, line, issues, { sealedWorklist: true });
+    if (label.worklistArtifactSetSha256 !== undefined && label.worklistArtifactSetSha256 !== artifactSetSha256) {
+      issues.push(`labels.jsonl:${line} worklistArtifactSetSha256 does not match sealed worklist SHA256SUMS`);
+    }
     const adjudication = isAdjudication(label);
     if (!adjudication && label.claimUse && label.claimUse !== "blind_labeling") {
       issues.push(`labels.jsonl:${line} is marked ${label.claimUse} and cannot support a claim`);
