@@ -961,6 +961,20 @@ include the repository, exact commit, manifest copy path, manifest copy SHA256,
 and a review attestation template. This is still not claim evidence; it is the
 handoff packet for external reviewers.
 
+For a sealed per-subject reviewer packet, generate a manifest-attestation
+worklist from the same bundle:
+
+```bash
+npm run precision:manifest-attestations:worklist -- \
+  --bundle reports/corpus/ts-js-confirmation-v1-bundle \
+  --out-dir reports/corpus/ts-js-confirmation-v1-manifest-review-worklist \
+  --reviewers external-human-reviewer-1,external-org-reviewer-1 \
+  --reviewer-types human,organization
+```
+
+The worklist contains manifest copy hashes and attestation templates only. It
+does not mark a manifest reviewed and it does not create reviewer evidence.
+
 After external reviewers return manifest-review attestations, validate them
 against the sealed bundle before updating a claim corpus:
 
@@ -1010,6 +1024,10 @@ it validates human/organization reviewer attestations against sealed manifest
 copy hashes and can emit an updated reviewed corpus only after all required
 subject attestations are valid. It still does not satisfy the missing external
 human/organization label rows.
+Round36 added a sealed manifest-attestation worklist generator so the external
+manifest review handoff has the same assignment-package discipline as label
+review. The generator writes templates and SHA-bound manifest evidence only; it
+does not create external attestations.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

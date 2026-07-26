@@ -121,6 +121,16 @@ This closes the mechanical return path for manifest review attestations. It
 does not add external human/organization labels and does not make the Round33
 claim preflight pass by itself.
 
+## Round36 Manifest Attestation Worklist
+
+`precision:manifest-attestations:worklist` now creates sealed per-subject
+manifest-review assignment packages from the evidence bundle. Each assignment
+contains the repository, exact commit, sealed manifest copy path and SHA-256,
+and an empty attestation template for one declared human/organization reviewer.
+
+This improves the external handoff path, but it still does not create external
+review evidence or change the current precision numbers.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields
