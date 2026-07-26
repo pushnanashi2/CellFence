@@ -290,11 +290,21 @@ function copyCompactWorklist(srcDir, destDir, compactPathForAssignment) {
 }
 
 function redactLocalAbsolutePaths(baseDir) {
+  const redactionTargets = [
+    repoRoot,
+    posixify(repoRoot),
+    JSON.stringify(repoRoot).slice(1, -1),
+    JSON.stringify(posixify(repoRoot)).slice(1, -1),
+  ]
+    .filter(Boolean)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .sort((left, right) => right.length - left.length);
   for (const filePath of listFilesRecursive(baseDir)) {
     const extension = path.extname(filePath);
     if (!new Set([".json", ".jsonl", ".md", ".txt"]).has(extension) && path.basename(filePath) !== markerFileName) continue;
     const text = fs.readFileSync(filePath, "utf8");
-    const redacted = text.split(repoRoot).join("<cellfence-repo>");
+    let redacted = text;
+    for (const target of redactionTargets) redacted = redacted.split(target).join("<cellfence-repo>");
     if (redacted !== text) fs.writeFileSync(filePath, redacted);
   }
 }

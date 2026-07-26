@@ -200,6 +200,7 @@ test("precision review packet export writes a compact external review packet", (
     assert.ok(fs.existsSync(path.join(outDir, "cycle", "gap-worklist.md")));
     const exportedReport = fs.readFileSync(path.join(outDir, "source-bundle", "report.json"), "utf8");
     assert.doesNotMatch(exportedReport, new RegExp(root.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.doesNotMatch(exportedReport, new RegExp(JSON.stringify(root).slice(1, -1).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(exportedReport, /<cellfence-repo>\/tmp\/subject/);
     assert.match(exportedReport, /packages\/website\/src\/pages\/home\/HeroSection\.tsx/);
     assert.ok(!fs.existsSync(path.join(outDir, "source-bundle", "findings.raw.jsonl")));
