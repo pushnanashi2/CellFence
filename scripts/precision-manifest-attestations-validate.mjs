@@ -9,7 +9,7 @@ const allowedReviewerTypes = new Set(["human", "organization"]);
 
 function usage() {
   console.error(`Usage:
-  node scripts/precision-manifest-attestations-validate.mjs --bundle reports/corpus/id-bundle --attestations attestations.json [--worklist reports/corpus/id-manifest-review-worklist] [--out report.json] [--out-corpus reviewed-corpus.json]
+  node scripts/precision-manifest-attestations-validate.mjs --bundle reports/corpus/id-bundle --attestations attestations.json [--worklist reports/corpus/id-manifest-review-worklist] [--expected-worklist-artifact-set-sha256 sha256] [--out report.json] [--out-corpus reviewed-corpus.json]
 
 Validates externally returned manifest-review attestations against a sealed
 evidence bundle. It may write a reviewed corpus only when every required
@@ -21,6 +21,7 @@ function parseArgs(argv) {
     bundleDir: "",
     attestationsPath: "",
     worklistDir: "",
+    expectedWorklistArtifactSetSha256: "",
     outPath: "",
     outCorpusPath: "",
   };
@@ -41,6 +42,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--worklist=")) {
       parsed.worklistDir = path.resolve(requireInlineValue(argument, "--worklist=", "--worklist"));
+    } else if (argument === "--expected-worklist-artifact-set-sha256") {
+      parsed.expectedWorklistArtifactSetSha256 = requireValue(argv, index, "--expected-worklist-artifact-set-sha256");
+      index += 1;
+    } else if (argument.startsWith("--expected-worklist-artifact-set-sha256=")) {
+      parsed.expectedWorklistArtifactSetSha256 = requireInlineValue(argument, "--expected-worklist-artifact-set-sha256=", "--expected-worklist-artifact-set-sha256");
     } else if (argument === "--out") {
       parsed.outPath = path.resolve(requireValue(argv, index, "--out"));
       index += 1;
@@ -352,6 +358,18 @@ function readWorklist(worklistDir, bundleArtifactSetSha256, issues) {
   };
 }
 
+function validateExpectedWorklistArtifactSetSha256(options, worklist, issues) {
+  if (!options.expectedWorklistArtifactSetSha256) return;
+  validateSha256(issues, options.expectedWorklistArtifactSetSha256, "--expected-worklist-artifact-set-sha256");
+  if (!options.worklistDir) {
+    issues.push("--expected-worklist-artifact-set-sha256 requires --worklist");
+    return;
+  }
+  if (worklist?.artifactSetSha256 && worklist.artifactSetSha256 !== options.expectedWorklistArtifactSetSha256) {
+    issues.push("worklist artifactSetSha256 does not match --expected-worklist-artifact-set-sha256");
+  }
+}
+
 function validateDeclaredWorklistFiles(hashedFiles, assignments, issues) {
   const declaredFiles = new Set([".cellfence-manifest-attestation-worklist", "worklist.json"]);
   for (const assignment of assignments) {
@@ -500,6 +518,7 @@ function validateAttestations(options) {
   }
   if (!Array.isArray(attestations.attestations)) issues.push("attestations.attestations must be an array");
   const worklist = readWorklist(options.worklistDir, actualArtifactSetSha256, issues);
+  validateExpectedWorklistArtifactSetSha256(options, worklist, issues);
 
   const copyBySubject = manifestCopies(study, options.bundleDir, issues);
   const expected = expectedSubjects(corpus);
@@ -590,6 +609,7 @@ function report(options, study, corpus, attestations, issues, accepted, worklist
       bundle: posixify(options.bundleDir),
       attestations: posixify(options.attestationsPath),
       worklist: options.worklistDir ? posixify(options.worklistDir) : null,
+      expectedWorklistArtifactSetSha256: options.expectedWorklistArtifactSetSha256 || null,
     },
     studyId: study?.studyId || null,
     summary: {

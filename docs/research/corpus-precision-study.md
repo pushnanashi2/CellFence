@@ -965,11 +965,12 @@ For a sealed per-subject reviewer packet, generate a manifest-attestation
 worklist from the same bundle:
 
 ```bash
-npm run precision:manifest-attestations:worklist -- \
+npm run --silent precision:manifest-attestations:worklist -- \
   --bundle reports/corpus/ts-js-confirmation-v1-bundle \
   --out-dir reports/corpus/ts-js-confirmation-v1-manifest-review-worklist \
   --reviewers external-human-reviewer-1,external-org-reviewer-1 \
-  --reviewer-types human,organization
+  --reviewer-types human,organization \
+  | tee reports/corpus/ts-js-confirmation-v1-manifest-review-worklist.report.json
 ```
 
 The worklist contains manifest copy hashes and attestation templates only. It
@@ -983,6 +984,7 @@ npm run precision:manifest-attestations:validate -- \
   --bundle reports/corpus/ts-js-confirmation-v1-bundle \
   --attestations reports/corpus/ts-js-confirmation-v1-manifest-attestations.json \
   --worklist reports/corpus/ts-js-confirmation-v1-manifest-review-worklist \
+  --expected-worklist-artifact-set-sha256 "$(node -p 'require("./reports/corpus/ts-js-confirmation-v1-manifest-review-worklist.report.json").artifactSetSha256')" \
   --out reports/corpus/ts-js-confirmation-v1-manifest-attestations-validation.json \
   --out-corpus reports/corpus/ts-js-confirmation-v1-reviewed-corpus.json
 ```
@@ -993,10 +995,12 @@ agent/Codex-style reviewer identities, and writes `--out-corpus` only when every
 required subject is covered. With `--worklist`, every returned reviewer
 attestation must match the sealed per-subject assignment set: missing assigned
 reviewers, extra unassigned reviewers, unknown subjects, or a worklist bound to
-a different bundle keep the validation from passing. Passing this validator
-does not create an external review; it only checks that returned external review
-evidence is bound to the frozen bundle and sealed reviewer packet before the
-next preflight.
+a different bundle keep the validation from passing. Passing the optional
+`--expected-worklist-artifact-set-sha256` digest additionally rejects a return
+packet validated against a different freshly generated worklist for the same
+bundle. Passing this validator does not create an external review; it only
+checks that returned external review evidence is bound to the frozen bundle and
+sealed reviewer packet before the next preflight.
 
 After generating a sealed label worklist, bind its `SHA256SUMS` digest into the
 claim protocol with `precision:protocol:bind-worklists` before running
@@ -1038,6 +1042,10 @@ returned attestation packet must include exactly the assigned human/organization
 reviewers for each subject before it can emit an updated reviewed corpus. This
 still does not satisfy missing external label rows or create external review
 evidence.
+Round38 adds an explicit expected-worklist digest check to the manifest
+attestation validator, so the return gate can reject attestations validated
+against the wrong sealed reviewer packet even when the packet targets the same
+evidence bundle.
 
 For an exact binomial lower bound, 50 perfect labels only support a one-sided
 95% lower bound of about 94.2%. A 99% lower-bound claim needs at least 299

@@ -143,6 +143,18 @@ This tightens the return gate for external manifest review. It still does not
 add external human/organization labels, create external review evidence, or
 change the Round33 precision numbers.
 
+## Round38 Expected Worklist Digest Binding
+
+`precision:manifest-attestations:validate --worklist` now also accepts
+`--expected-worklist-artifact-set-sha256`. The digest should come from the
+sealed manifest-attestation worklist report and must match the worklist
+`SHA256SUMS` digest used during return validation.
+
+This prevents a returned attestation packet from being accidentally or
+selectively validated against a different freshly generated worklist for the
+same evidence bundle. It is still a validation guard only: it does not create
+external review evidence, external labels, or a 99% precision claim.
+
 ## Tooling Change
 
 `precision-claim-preflight` now treats missing external manifest review fields

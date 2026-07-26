@@ -365,6 +365,7 @@ test("manifest attestation validator binds reviewers to a sealed worklist", () =
       "human,organization",
     ]);
     assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+    const worklistReport = JSON.parse(worklist.stdout);
 
     const attestationsPath = path.join(tempDir, "attestations.json");
     writeJson(attestationsPath, worklistBoundAttestations(bundle));
@@ -375,12 +376,155 @@ test("manifest attestation validator binds reviewers to a sealed worklist", () =
       attestationsPath,
       "--worklist",
       worklistDir,
+      "--expected-worklist-artifact-set-sha256",
+      worklistReport.artifactSetSha256,
     ]);
 
     assert.equal(accepted.status, 0, accepted.stderr || accepted.stdout);
     const report = JSON.parse(accepted.stdout);
     assert.equal(report.summary.worklistAssignments, 4);
     assert.equal(report.worklist.assignments, 4);
+    assert.equal(report.inputs.expectedWorklistArtifactSetSha256, worklistReport.artifactSetSha256);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects a mismatched expected worklist artifact set", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-expected-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+      "--expected-worklist-artifact-set-sha256",
+      "0".repeat(64),
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /worklist artifactSetSha256 does not match --expected-worklist-artifact-set-sha256/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects malformed expected worklist artifact set digests", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-expected-malformed-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+      "--expected-worklist-artifact-set-sha256",
+      "NOT-A-SHA256",
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /--expected-worklist-artifact-set-sha256 must be a lowercase 64-hex SHA-256 digest/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator rejects SHA256SUMS drift from the expected worklist artifact set", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-sums-drift-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const worklistDir = path.join(tempDir, "manifest-worklist");
+    const worklist = runWorklist([
+      "--bundle",
+      bundle.bundleDir,
+      "--out-dir",
+      worklistDir,
+      "--reviewers",
+      "external-reviewer-a,external-org-review",
+      "--reviewer-types",
+      "human,organization",
+    ]);
+    assert.equal(worklist.status, 0, worklist.stderr || worklist.stdout);
+    const worklistReport = JSON.parse(worklist.stdout);
+    fs.appendFileSync(path.join(worklistDir, "SHA256SUMS"), "\n");
+
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, worklistBoundAttestations(bundle));
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--worklist",
+      worklistDir,
+      "--expected-worklist-artifact-set-sha256",
+      worklistReport.artifactSetSha256,
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /worklist artifactSetSha256 does not match --expected-worklist-artifact-set-sha256/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("manifest attestation validator requires a worklist when an expected worklist hash is supplied", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-attest-worklist-expected-missing-"));
+  try {
+    const bundle = createBundle(tempDir);
+    const attestationsPath = path.join(tempDir, "attestations.json");
+    writeJson(attestationsPath, validAttestations(bundle));
+
+    const rejected = runValidator([
+      "--bundle",
+      bundle.bundleDir,
+      "--attestations",
+      attestationsPath,
+      "--expected-worklist-artifact-set-sha256",
+      "0".repeat(64),
+    ]);
+
+    assert.equal(rejected.status, 1, rejected.stderr || rejected.stdout);
+    const report = JSON.parse(rejected.stdout);
+    assert.match(report.issues.join("\n"), /requires --worklist/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
