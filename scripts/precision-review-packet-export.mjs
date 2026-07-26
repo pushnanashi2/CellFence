@@ -305,6 +305,7 @@ function redactLocalAbsolutePaths(baseDir) {
     const text = fs.readFileSync(filePath, "utf8");
     let redacted = text;
     for (const target of redactionTargets) redacted = redacted.split(target).join("<cellfence-repo>");
+    redacted = redacted.replace(/<cellfence-repo>[^"'\r\n`]*/g, (match) => match.replace(/\\\\/g, "/").replace(/\\/g, "/"));
     if (redacted !== text) fs.writeFileSync(filePath, redacted);
   }
 }
