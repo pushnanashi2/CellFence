@@ -122,9 +122,9 @@ export function literalText(node: ts.Node | undefined): string | undefined {
   return undefined;
 }
 
-export function readPathAliases(rootDir: string): PathAlias[] {
+function readPathAliasesFromConfig(rootDir: string, configPath: string): PathAlias[] {
   const normalizedRootDir = normalizePath(rootDir);
-  const tsconfigPath = normalizePath(path.join(rootDir, "tsconfig.json"));
+  const tsconfigPath = normalizePath(configPath);
   // Stryker disable next-line ConditionalExpression: missing config and TypeScript parse failure both resolve to an empty alias set.
   if (!fs.existsSync(tsconfigPath)) return [];
   const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
@@ -144,6 +144,10 @@ export function readPathAliases(rootDir: string): PathAlias[] {
   return aliases;
 }
 
+export function readPathAliases(rootDir: string): PathAlias[] {
+  return readPathAliasesFromConfig(rootDir, path.join(rootDir, "tsconfig.json"));
+}
+
 export function readWorkspacePathAliases(rootDir: string): PathAlias[] {
   const aliases: PathAlias[] = [];
   const seen = new Set<string>();
@@ -159,8 +163,7 @@ export function readWorkspacePathAliases(rootDir: string): PathAlias[] {
   for (const filePath of listFiles(rootDir)) {
     const basename = path.basename(filePath);
     if (!/^tsconfig(?:\..+)?\.json$/.test(basename)) continue;
-    if (normalizePath(filePath) === normalizePath(path.join(rootDir, "tsconfig.json"))) continue;
-    addAliases(readPathAliases(path.dirname(filePath)));
+    addAliases(readPathAliasesFromConfig(path.dirname(filePath), filePath));
   }
   return aliases;
 }

@@ -14,6 +14,7 @@ import {
   literalText,
   publicSurfaceHash,
   readPathAliases,
+  readWorkspacePathAliases,
   resolvePackageExportTarget,
   resolvePathAliasTarget,
   resolvePythonImport,
@@ -216,6 +217,52 @@ test("module resolution reads alias edge cases without widening invalid config",
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@core/index.js"), "packages/core/src/index.ts");
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@feature/core/public"), "packages/features/core/index.ts");
     assert.equal(resolvePathAliasTarget({ rootDir, pathAliases: aliases }, "@feature/core/private"), undefined);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("workspace alias discovery reads exact tsconfig names and deduplicates aliases", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-workspace-aliases-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "packages/plain/src"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "packages/build/src"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "packages/ignored/src"), { recursive: true });
+    writeJson(path.join(rootDir, "tsconfig.json"), {
+      compilerOptions: { paths: { "@root/*": ["src/*"], "@collision/*": ["/a", "/b/c"] } },
+    });
+    writeJson(path.join(rootDir, "packages/plain/tsconfig.json"), {
+      compilerOptions: {
+        paths: {
+          "@plain/*": ["src/*"],
+          "@root/*": ["../../src/*"],
+          "@collision/*": ["/a/b", "/c"],
+        },
+      },
+    });
+    writeJson(path.join(rootDir, "packages/build/tsconfig.build.json"), {
+      compilerOptions: { paths: { "@build/*": ["src/*"] } },
+    });
+    for (const fileName of [
+      "x-tsconfig.json",
+      "tsconfigx.json",
+      "tsconfig.buildxjson",
+      "tsconfig.json.bak",
+    ]) {
+      writeJson(path.join(rootDir, "packages/ignored", fileName), {
+        compilerOptions: { paths: { "@ignored/*": ["src/*"] } },
+      });
+    }
+
+    const aliases = readWorkspacePathAliases(rootDir);
+    assert.deepEqual(
+      aliases.map((alias) => alias.pattern),
+      ["@root/*", "@collision/*", "@build/*", "@plain/*", "@collision/*"],
+    );
+    assert.equal(aliases.filter((alias) => alias.pattern === "@root/*").length, 1);
+    assert.equal(aliases.filter((alias) => alias.pattern === "@collision/*").length, 2);
+    assert.equal(aliases.some((alias) => alias.pattern === "@ignored/*"), false);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
