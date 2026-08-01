@@ -272,20 +272,27 @@ export function verifyManifestFromServiceManifests(options: { rootDir?: string; 
   };
 }
 
+function gitRaw(rootDir: string, args: string[]): string {
+  return execFileSync("git", ["-c", "core.quotepath=off", ...args], { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+}
+
 function git(rootDir: string, args: string[]): string {
-  return execFileSync("git", args, { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  return gitRaw(rootDir, args).trim();
 }
 
 function commitFiles(rootDir: string, commit: string): CommitFile[] {
-  const output = git(rootDir, ["show", "--name-status", "--format=", commit]);
-  return output.split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .flatMap((line) => {
-      const [status, firstPath, secondPath] = line.split(/\s+/);
-      const filePath = normalizePath(secondPath || firstPath || "");
-      return filePath ? [{ status, path: filePath }] : [];
-    });
+  const output = gitRaw(rootDir, ["show", "--name-status", "-z", "--format=", commit]);
+  const tokens = output.split("\0").filter(Boolean);
+  const files: CommitFile[] = [];
+  for (let index = 0; index < tokens.length;) {
+    const status = tokens[index++]?.trim();
+    if (!status) continue;
+    const firstPath = tokens[index++];
+    const secondPath = /^[RC]\d*/.test(status) ? tokens[index++] : undefined;
+    const filePath = normalizePath(secondPath || firstPath || "");
+    if (filePath) files.push({ status, path: filePath });
+  }
+  return files;
 }
 
 function commitsForRange(rootDir: string, baseRef?: string, headRef?: string, commit?: string, limit = 100): string[] {

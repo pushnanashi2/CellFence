@@ -7,7 +7,7 @@ import type { Finding, SuggestedResolution } from "./types.js";
 function normalizedFindingDetails(details: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
   if (!details) return undefined;
   const normalizedEntries = Object.entries(details)
-    .filter(([key]) => !["message", "currentHash", "nextHash"].includes(key))
+    .filter(([key]) => !["message", "currentHash", "nextHash", "line"].includes(key))
     .map(([key, value]) => [key, value] as const);
   return normalizedEntries.length > 0 ? Object.fromEntries(normalizedEntries) : undefined;
 }

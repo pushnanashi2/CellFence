@@ -290,6 +290,54 @@ test("commit evidence checks sections, trailers, changed cells, and test declara
   }
 });
 
+test("commit evidence parses git name-status paths with spaces and non-ascii", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-commit-evidence-paths-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "docs"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "docs/placeholder.md"), "base\n");
+    const manifest = {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{ id: "docs", ownedPaths: ["docs/**"], publicEntry: "docs/placeholder.md", publicSymbols: [], consumes: [], producesArtifacts: [] }],
+    };
+    initGit(rootDir);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.writeFileSync(path.join(rootDir, "docs/日本 語.md"), "updated\n");
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", [
+      "Add spaced unicode doc",
+      "",
+      "Problem:",
+      "Commit evidence path parsing must handle ordinary repository paths with spaces.",
+      "",
+      "Change:",
+      "Add a documentation file whose name includes a space and non-ascii characters.",
+      "",
+      "Behavior:",
+      "Changed cell evidence should still resolve the file to the docs cell.",
+      "",
+      "Tests:",
+      "Regression coverage exercises git name-status parsing for such paths.",
+      "",
+      "Known-Gaps:",
+      "No executable production behavior changes are included in this documentation-only commit.",
+      "",
+      "Change-Type: maintenance",
+      "Changed-Cells: docs",
+      "Test-Impact: documentation only",
+      "Agent-Run-Id: agent-run-123456",
+      "Agent-Task-Id: agent-task-123456",
+    ].join("\n")]);
+
+    const result = checkCommitEvidence({ rootDir, manifest, commit: "HEAD" });
+    assert.deepEqual(result.commits[0].changedCells, ["docs"]);
+    assert.ok(!result.findings.some((finding) => finding.ruleId === "CELLFENCE_COMMIT_CHANGED_CELLS_MISMATCH"), JSON.stringify(result.findings));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI exposes service-manifest import and verify commands", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-service-import-"));
   try {

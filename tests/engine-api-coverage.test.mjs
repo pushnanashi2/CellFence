@@ -1104,6 +1104,38 @@ test("engine changed check finding identity is stable across message wording cha
   }
 });
 
+test("engine changed check finding identity ignores line-only drift", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-line-fingerprint-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core", "export const core = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/core/private.ts"), "export const secret = 1;\n");
+    writeCell(rootDir, "app", "import { secret } from \"../core/private\";\nexport const app = secret;\n");
+    writeManifest(rootDir, [
+      baseCell("core"),
+      baseCell("app", { consumes: [{ cell: "core" }] }),
+    ]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.writeFileSync(path.join(rootDir, "src/app/public.ts"), "// unrelated line drift\nimport { secret } from \"../core/private\";\nexport const app = secret;\n");
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "head"]);
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+    });
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.deepEqual(result.findings, []);
+    assert.deepEqual(result.changedFiles, ["src/app/public.ts"]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed check cleanup does not hide a successful result when worktree removal fails", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-worktree-cleanup-"));
   const fakeBin = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-fake-git-"));
