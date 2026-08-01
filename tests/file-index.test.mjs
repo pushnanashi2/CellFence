@@ -260,10 +260,11 @@ test("file index inventories valid and broken symlinks while ignoring regular an
     fs.symlinkSync(path.join(rootDir, "src/missing.ts"), path.join(rootDir, "src/broken.ts"));
     fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "node_modules/pkg/ignored.ts"));
 
+    const realRootDir = fs.realpathSync(rootDir);
     const symlinks = listSymlinks(rootDir).map((entry) => ({
       ...entry,
       path: normalizePath(path.relative(rootDir, entry.path)),
-      targetPath: entry.targetPath ? normalizePath(path.relative(rootDir, entry.targetPath)) : undefined,
+      targetPath: entry.targetPath ? normalizePath(path.relative(realRootDir, entry.targetPath)) : undefined,
     }));
 
     assert.deepEqual(symlinks.map((entry) => entry.path), [
