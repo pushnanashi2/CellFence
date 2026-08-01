@@ -97,6 +97,29 @@ test("module resolution candidate paths preserve runtime and source extension or
   assert.deepEqual(candidateModulePaths(path.join(root, "file.json")).map((candidate) => candidate.slice(root.length + 1)), [
     "file.json",
   ]);
+  for (const extension of [
+    ".css",
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".json",
+    ".less",
+    ".node",
+    ".png",
+    ".sass",
+    ".scss",
+    ".styl",
+    ".svg",
+    ".txt",
+    ".wasm",
+    ".webp",
+  ]) {
+    assert.deepEqual(
+      candidateModulePaths(path.join(root, `asset${extension}`)).map((candidate) => candidate.slice(root.length + 1)),
+      [`asset${extension}`],
+      `expected ${extension} to remain an exact module specifier`,
+    );
+  }
   const dottedBasename = candidateModulePaths(path.join(root, "routes/posts.$postId")).map((candidate) => candidate.slice(root.length + 1));
   assert.deepEqual(dottedBasename.slice(0, 4), [
     "routes/posts.$postId",
