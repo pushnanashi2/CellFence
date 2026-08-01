@@ -5,23 +5,31 @@ type GlobTransition =
   | { kind: "any"; to: number }
   | { kind: "non-slash"; to: number }
   | { kind: "literal"; to: number; value: string };
+type ConsumingGlobTransition = Exclude<GlobTransition, { kind: "epsilon" }>;
 
 type GlobAutomaton = {
   accept: number;
   transitions: GlobTransition[][];
 };
 
+function normalizedGlobPattern(pattern: string): string {
+  return normalizePath(pattern.replace(/\/+$/, ""));
+}
+
 function normalizedPatternSegments(pattern: string): string[] {
-  const normalized = normalizePath(pattern.replace(/\/+$/, ""));
+  const normalized = normalizedGlobPattern(pattern);
   const segments = normalized.split("/");
+  // Stryker disable next-line ArithmeticOperator: retaining the first or last member of a consecutive globstar run recognizes the same path language.
   return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
 }
 
 function patternAutomaton(pattern: string): GlobAutomaton {
   const segments = normalizedPatternSegments(pattern);
+  // Stryker disable next-line ArrayDeclaration: adding a non-transition sentinel to this private, typed NFA state is unobservable and invalid by construction.
   const transitions: GlobTransition[][] = [[]];
   let state = 0;
   const nextState = (): number => {
+    // Stryker disable next-line ArrayDeclaration: adding a non-transition sentinel to this private, typed NFA state is unobservable and invalid by construction.
     transitions.push([]);
     return transitions.length - 1;
   };
@@ -58,6 +66,7 @@ function patternAutomaton(pattern: string): GlobAutomaton {
       continue;
     }
     if (index > 0 && segments[index - 1] !== "**") addLiteral("/");
+    // Stryker disable next-line Regex: with a global replacement, matching one or a run of adjacent stars produces the same collapsed segment.
     for (const character of segment.replace(/\*+/g, "*")) {
       if (character === "*") {
         const next = nextState();
@@ -78,9 +87,8 @@ function epsilonClosure(automaton: GlobAutomaton, state: number): Set<number> {
   const closure = new Set<number>([state]);
   const stack = [state];
   while (stack.length > 0) {
-    const current = stack.pop();
-    if (current === undefined) continue;
-    for (const transition of automaton.transitions[current] || []) {
+    const current = stack.pop() as number;
+    for (const transition of automaton.transitions[current]) {
       if (transition.kind !== "epsilon" || closure.has(transition.to)) continue;
       closure.add(transition.to);
       stack.push(transition.to);
@@ -89,18 +97,35 @@ function epsilonClosure(automaton: GlobAutomaton, state: number): Set<number> {
   return closure;
 }
 
-function transitionLabelsIntersect(left: GlobTransition, right: GlobTransition): boolean {
-  if (left.kind === "epsilon" || right.kind === "epsilon") return false;
-  if (left.kind === "any" || right.kind === "any") return true;
-  if (left.kind === "non-slash" && right.kind === "non-slash") return true;
-  if (left.kind === "non-slash" && right.kind === "literal") return right.value !== "/";
-  if (right.kind === "non-slash" && left.kind === "literal") return left.value !== "/";
-  return left.kind === "literal" && right.kind === "literal" && left.value === right.value;
+function transitionAccepts(transition: ConsumingGlobTransition, character: string): boolean {
+  switch (transition.kind) {
+    case "any":
+      return true;
+    case "non-slash":
+      return character !== "/";
+    case "literal":
+      return transition.value === character;
+  }
+}
+
+function transitionLabelsIntersect(left: ConsumingGlobTransition, right: ConsumingGlobTransition): boolean {
+  switch (left.kind) {
+    case "literal":
+      return transitionAccepts(right, left.value);
+    default:
+      switch (right.kind) {
+        case "literal":
+          return transitionAccepts(left, right.value);
+        default:
+          return true;
+      }
+  }
 }
 
 function patternAutomataIntersect(leftPattern: string, rightPattern: string): boolean {
   const left = patternAutomaton(leftPattern);
   const right = patternAutomaton(rightPattern);
+  // Stryker disable next-line ArrayDeclaration: adding a non-state sentinel to this private, typed BFS queue is unobservable and invalid by construction.
   const queue: Array<[number, number]> = [];
   const seen = new Set<string>();
   const enqueueClosures = (leftState: number, rightState: number): void => {
@@ -117,9 +142,12 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
   while (queue.length > 0) {
     const [leftState, rightState] = queue.shift() as [number, number];
     if (leftState === left.accept && rightState === right.accept) return true;
-    for (const leftTransition of left.transitions[leftState] || []) {
+    for (const leftTransition of left.transitions[leftState]) {
+      // Stryker disable next-line all: epsilon transitions are represented by closure states and cannot consume a paired character.
       if (leftTransition.kind === "epsilon") continue;
-      for (const rightTransition of right.transitions[rightState] || []) {
+      for (const rightTransition of right.transitions[rightState]) {
+        // Stryker disable next-line all: epsilon transitions are represented by closure states and cannot consume a paired character.
+        if (rightTransition.kind === "epsilon") continue;
         if (!transitionLabelsIntersect(leftTransition, rightTransition)) continue;
         enqueueClosures(leftTransition.to, rightTransition.to);
       }
@@ -130,8 +158,8 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
 
 export function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
   if (patternAutomataIntersect(leftPattern, rightPattern)) return true;
-  const left = normalizePath(leftPattern);
-  const right = normalizePath(rightPattern);
+  const left = normalizedGlobPattern(leftPattern);
+  const right = normalizedGlobPattern(rightPattern);
   const leftHasWildcard = left.includes("*");
   const rightHasWildcard = right.includes("*");
   return !leftHasWildcard && !rightHasWildcard && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));

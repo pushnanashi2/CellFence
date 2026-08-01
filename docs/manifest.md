@@ -81,5 +81,6 @@ CellFence path patterns are repository-relative and use this deliberately small 
 - A standalone `**` segment matches zero or more complete path segments. `src/**/*.ts` matches both `src/a.ts` and `src/x/a.ts`; `src/**` matches paths inside `src` but not `src` itself; and bare `**` matches any path.
 - `**` embedded inside a segment behaves as `*`, so `src/**.ts` does not cross a directory boundary.
 - `?`, `{}`, `}`, `[`, `]`, and extglob forms are literal text, not pattern syntax.
+- Trailing `/` characters are removed before matching, so `src/core/` is the canonical equivalent of `src/core`.
 
-The dialect is enforced against minimatch with `{ dot: true }` as the external oracle in `tests/conformance-glob-oracle.test.mjs`.
+The canonical dialect (after trailing-separator normalization) is enforced against minimatch with `{ dot: true }` as the external oracle in `tests/conformance-glob-oracle.test.mjs`.

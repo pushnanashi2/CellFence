@@ -23,6 +23,10 @@ import {
   sourceFilesForCell,
   sourceKindForPath,
 } from "../packages/engine/dist/file-index.js";
+import {
+  ownedPathPatternsOverlap,
+  pathPatternsOverlap,
+} from "../packages/engine/dist/glob-overlap.js";
 
 test("file index normalizes empty and Windows-style paths and resolves absolute paths", () => {
   assert.equal(normalizePath(""), "");
@@ -163,6 +167,75 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(literalPrefix("src/core///**"), "src/core");
   assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
   assert.equal(literalPrefix("src/core/file?.ts"), "src/core/file?.ts");
+});
+
+test("glob overlap follows matcher semantics and canonicalizes trailing separators", () => {
+  assert.equal(pathPatternsOverlap("src/core", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/core/", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/core////", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**/public.ts", "src/public.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**/**/public.ts", "src/public.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
+  assert.equal(pathPatternsOverlap("src/**.ts", "src/a.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**", "src"), false);
+  assert.equal(ownedPathPatternsOverlap("src/**", "src"), false);
+  assert.equal(ownedPathPatternsOverlap("src/**", "src/core"), true);
+  assert.equal(ownedPathPatternsOverlap("src/**/a", "src/a"), true);
+  assert.equal(ownedPathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
+  assert.equal(ownedPathPatternsOverlap("src/file?.ts", "src/file?.ts"), true);
+  assert.equal(ownedPathPatternsOverlap("src/file?.ts", "src/file1.ts"), false);
+});
+
+test("glob overlap agrees with concrete matcher witnesses across a bounded dialect corpus", () => {
+  const patterns = [
+    "a",
+    "b",
+    "src",
+    "src/a",
+    "src/b",
+    "src/*",
+    "src/*.ts",
+    "src/**.ts",
+    "src/**",
+    "src/**/a",
+    "src/**/**/a",
+    "**",
+    "**/a",
+    "**/test/**",
+    "test/**",
+    "*/a",
+    "a*",
+    "a/**/b",
+    "a/*/b",
+  ];
+  const pathSegments = ["a", "b", "src", "test", "x", "a.ts", "b.ts"];
+  const paths = [];
+  const appendPaths = (prefix, remaining) => {
+    if (prefix.length > 0) paths.push(prefix.join("/"));
+    if (remaining === 0) return;
+    for (const segment of pathSegments) appendPaths([...prefix, segment], remaining - 1);
+  };
+  appendPaths([], 4);
+
+  for (const left of patterns) {
+    for (const right of patterns) {
+      const concreteIntersection = paths.some((candidate) =>
+        matchesPattern(candidate, left) && matchesPattern(candidate, right));
+      assert.equal(
+        ownedPathPatternsOverlap(left, right),
+        concreteIntersection,
+        `owned overlap mismatch: left=${left} right=${right}`,
+      );
+      const literalAncestor = !left.includes("*")
+        && !right.includes("*")
+        && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));
+      assert.equal(
+        pathPatternsOverlap(left, right),
+        concreteIntersection || literalAncestor,
+        `claim overlap mismatch: left=${left} right=${right}`,
+      );
+    }
+  }
 });
 
 test("file index listFiles sorts results, ignores generated directories, and caches per context", () => {
