@@ -11,41 +11,61 @@ type GlobAutomaton = {
   transitions: GlobTransition[][];
 };
 
+function normalizedPatternSegments(pattern: string): string[] {
+  const normalized = normalizePath(pattern.replace(/\/+$/, ""));
+  const segments = normalized.split("/");
+  return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
+}
+
 function patternAutomaton(pattern: string): GlobAutomaton {
-  const normalized = normalizePath(pattern);
+  const segments = normalizedPatternSegments(pattern);
   const transitions: GlobTransition[][] = [[]];
   let state = 0;
   const nextState = (): number => {
     transitions.push([]);
     return transitions.length - 1;
   };
-  for (let index = 0; index < normalized.length; index += 1) {
-    const character = normalized[index];
-    const nextCharacter = normalized[index + 1];
-    if (character === "*" && nextCharacter === "*") {
-      if (normalized[index + 2] === "/") {
-        const globstarState = state;
-        const next = nextState();
-        const segment = nextState();
-        transitions[globstarState].push({ kind: "epsilon", to: next });
-        transitions[globstarState].push({ kind: "non-slash", to: segment });
-        transitions[segment].push({ kind: "non-slash", to: segment });
-        transitions[segment].push({ kind: "literal", value: "/", to: globstarState });
-        state = next;
-        index += 2;
-      } else {
+  const addLiteral = (value: string): void => {
+    const next = nextState();
+    transitions[state].push({ kind: "literal", value, to: next });
+    state = next;
+  };
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index];
+    if (segment === "**") {
+      if (segments.length === 1) {
         const next = nextState();
         transitions[state].push({ kind: "epsilon", to: next });
         transitions[state].push({ kind: "any", to: state });
         state = next;
-        index += 1;
+      } else if (index === segments.length - 1) {
+        addLiteral("/");
+        const next = nextState();
+        transitions[state].push({ kind: "any", to: next });
+        transitions[next].push({ kind: "any", to: next });
+        state = next;
+      } else {
+        if (index > 0) addLiteral("/");
+        const globstarState = state;
+        const next = nextState();
+        const segmentState = nextState();
+        transitions[globstarState].push({ kind: "epsilon", to: next });
+        transitions[globstarState].push({ kind: "non-slash", to: segmentState });
+        transitions[segmentState].push({ kind: "non-slash", to: segmentState });
+        transitions[segmentState].push({ kind: "literal", value: "/", to: globstarState });
+        state = next;
       }
-    } else if (character === "*") {
-      const next = nextState();
-      transitions[state].push({ kind: "epsilon", to: next });
-      transitions[state].push({ kind: "non-slash", to: state });
-      state = next;
-    } else {
+      continue;
+    }
+    if (index > 0 && segments[index - 1] !== "**") addLiteral("/");
+    for (const character of segment.replace(/\*+/g, "*")) {
+      if (character === "*") {
+        const next = nextState();
+        transitions[state].push({ kind: "epsilon", to: next });
+        transitions[state].push({ kind: "non-slash", to: state });
+        state = next;
+        continue;
+      }
       const next = nextState();
       transitions[state].push({ kind: "literal", value: character, to: next });
       state = next;

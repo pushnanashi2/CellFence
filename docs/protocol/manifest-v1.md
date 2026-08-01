@@ -100,7 +100,7 @@ Manifest, baseline, and resource evidence v1 objects are strict. Unknown fields 
 
 `publicEntry` must be covered by the declaring cell's `ownedPaths`. Each produced artifact lane path must also be covered by the producer's `ownedPaths`.
 
-Repo-relative path patterns use a deliberately small glob dialect: `*` matches within one path segment, `**` matches across path segments, and `**/` may match zero directory segments. Other familiar glob operators such as `?`, `{}`, and `[]` are literals in CellFence v0.x.
+Repo-relative path patterns use a deliberately small glob dialect: `*` matches within one path segment, while a standalone `**` segment matches zero or more complete path segments. An embedded `**` behaves as `*`, and familiar operators such as `?`, `{}`, `}`, `[`, `]`, and extglob forms are literals.
 
 `locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires a configured baseline verifier (`CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY`) when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 

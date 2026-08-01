@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 0.2.0 - 2026-08-01
+
+- Align path matching and owned-path overlap analysis with minimatch semantics for standalone and embedded globstars, and enforce the dialect with exhaustive and seeded external-oracle conformance tests.
+- Keep `check --changed` finding identity stable when unchanged violations move to a different source line.
+- Parse git name-status output without corrupting paths containing spaces or non-ASCII characters.
+- Recover claim operations from stale lock files while preserving live-lock exclusion.
 - Add built-in Python framework resource adapters for selected FastAPI route decorators, Django URLConf/model-manager patterns, SQLAlchemy declarative/Table/query/text calls, and Celery task/publish calls.
 - Close TypeScript/CommonJS boundary bypasses by extracting `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases.
 - Report TypeScript/JavaScript parser diagnostics as `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` fail-closed findings under the built-in required-rule profile.

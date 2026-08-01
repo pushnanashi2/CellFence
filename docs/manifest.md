@@ -51,13 +51,6 @@
 
 Manifest v1 rejects unknown object fields instead of ignoring them. A misspelled policy field such as `requireOwnershp` or `consume` is a configuration error, not a no-op. Duplicate package names, duplicate consumer edges, duplicate artifact lane IDs, duplicate resource contract IDs, and duplicate path class IDs are also rejected where they would make policy ambiguous.
 
-Path patterns use CellFence's small repo-relative glob dialect:
-
-- `*` matches zero or more characters within one path segment;
-- `**` matches zero or more characters across path segments;
-- `**/` matches zero or more complete directory segments, so `src/**/*.ts` matches both `src/a.ts` and `src/nested/a.ts`;
-- `?`, `{}`, and `[]` are treated as literal path characters, not glob operators.
-
 `governance.requireOwnership` is optional for legacy adoption, but `cellfence init` enables it. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`. When omitted or false, CellFence emits `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` as a warning.
 
 `locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
@@ -79,3 +72,14 @@ rule default
 `governance.requiredRules` prevents a repository, cell, path override, or CLI caller from weakening selected rules below `error`.
 
 See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
+
+## Path pattern dialect
+
+CellFence path patterns are repository-relative and use this deliberately small dialect:
+
+- `*` matches any sequence of characters within one path segment.
+- A standalone `**` segment matches zero or more complete path segments. `src/**/*.ts` matches both `src/a.ts` and `src/x/a.ts`; `src/**` matches paths inside `src` but not `src` itself; and bare `**` matches any path.
+- `**` embedded inside a segment behaves as `*`, so `src/**.ts` does not cross a directory boundary.
+- `?`, `{}`, `}`, `[`, `]`, and extglob forms are literal text, not pattern syntax.
+
+The dialect is enforced against minimatch with `{ dot: true }` as the external oracle in `tests/conformance-glob-oracle.test.mjs`.

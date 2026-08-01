@@ -215,6 +215,30 @@ test("engine treats globstar-slash as matching zero path segments for ownership 
   }
 });
 
+test("engine governance includes top-level source files through a globstar directory segment", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-globstar-governance-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const core = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/rogue.ts"), "export const rogue = true;\n");
+    writeManifest(rootDir, [baseCell("core")], {
+      governance: {
+        requireOwnership: true,
+        include: ["src/**/*.ts"],
+        exclude: [],
+      },
+    });
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_UNOWNED_SOURCE" && finding.filePath === "src/rogue.ts"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine does not treat a root file glob as owning nested directory files", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-root-file-glob-"));
   try {
