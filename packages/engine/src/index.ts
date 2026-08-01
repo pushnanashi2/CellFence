@@ -1969,3 +1969,5 @@ export function formatHumanResult(result: CheckResult): string {
   }
   return lines.join("\n");
 }
+
+export { findingFingerprint } from "./findings.js";

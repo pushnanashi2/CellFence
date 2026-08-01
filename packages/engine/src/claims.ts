@@ -165,22 +165,113 @@ function sleepSync(ms: number): void {
   Atomics.wait(view, 0, 0, ms);
 }
 
-function acquireClaimStoreLock(filePath: string): () => void {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  const lockPath = `${filePath}.lock`;
-  const deadline = Date.now() + 5_000;
-  while (true) {
-    try {
-      const fd = fs.openSync(lockPath, "wx");
-      fs.writeFileSync(fd, `${process.pid}\n${new Date().toISOString()}\n`);
-      return () => {
+const CLAIM_LOCK_STALE_AFTER_MS = 30_000;
+
+type ClaimLockFile = {
+  fd: number;
+  path: string;
+  release(): void;
+};
+
+type ClaimLockSnapshot = {
+  content: string;
+  stat: fs.Stats;
+  pid?: number;
+  createdAtMs?: number;
+};
+
+function processIsRunning(pid: number): boolean {
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    return code === "EPERM";
+  }
+}
+
+function tryAcquireClaimLockFile(lockPath: string, content?: string): ClaimLockFile | undefined {
+  try {
+    const fd = fs.openSync(lockPath, "wx");
+    fs.writeFileSync(fd, content ?? `${process.pid}\n${new Date().toISOString()}\n${crypto.randomUUID()}\n`);
+    return {
+      fd,
+      path: lockPath,
+      release() {
         fs.closeSync(fd);
         try {
           fs.unlinkSync(lockPath);
         } catch {
           // The lock is already gone; release stays idempotent for process cleanup races.
         }
-      };
+      },
+    };
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    if (code === "EEXIST" || code === "EPERM" || code === "EACCES" || code === "EBUSY") return undefined;
+    throw error;
+  }
+}
+
+function readClaimLockSnapshot(lockPath: string): ClaimLockSnapshot | undefined {
+  try {
+    const stat = fs.statSync(lockPath);
+    const content = fs.readFileSync(lockPath, "utf8");
+    const [pidLine, createdAtLine] = content.split(/\r?\n/);
+    const parsedPid = Number(pidLine);
+    const snapshot: ClaimLockSnapshot = { content, stat };
+    const parsedCreatedAt = Date.parse(createdAtLine || "");
+    if (!Number.isNaN(parsedCreatedAt)) snapshot.createdAtMs = parsedCreatedAt;
+    if (Number.isSafeInteger(parsedPid) && parsedPid > 0) snapshot.pid = parsedPid;
+    return snapshot;
+  } catch {
+    return undefined;
+  }
+}
+
+function claimLockSnapshotIsStale(snapshot: ClaimLockSnapshot, now = Date.now()): boolean {
+  const referenceTimeMs = snapshot.createdAtMs !== undefined && snapshot.createdAtMs <= now
+    ? snapshot.createdAtMs
+    : snapshot.stat.mtimeMs;
+  const lockAgeMs = now - referenceTimeMs;
+  if (lockAgeMs < CLAIM_LOCK_STALE_AFTER_MS) return false;
+  return snapshot.pid === undefined || !processIsRunning(snapshot.pid);
+}
+
+function removeStaleClaimLockFile(lockPath: string): boolean {
+  const snapshot = readClaimLockSnapshot(lockPath);
+  if (!snapshot || !claimLockSnapshotIsStale(snapshot)) return false;
+  const tokenDigest = crypto.createHash("sha256").update(snapshot.content).digest("hex").slice(0, 16);
+  const tokenPath = `${lockPath}.reclaim-${tokenDigest}`;
+  let token = tryAcquireClaimLockFile(tokenPath, `${process.pid}\n${new Date().toISOString()}\n`);
+  if (!token && removeStaleClaimLockFile(tokenPath)) {
+    token = tryAcquireClaimLockFile(tokenPath, `${process.pid}\n${new Date().toISOString()}\n`);
+  }
+  if (!token) return false;
+  try {
+    const current = readClaimLockSnapshot(lockPath);
+    if (!current || current.content !== snapshot.content || !claimLockSnapshotIsStale(current)) return false;
+    fs.unlinkSync(lockPath);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    token.release();
+  }
+}
+
+function acquireClaimStoreLock(filePath: string): () => void {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const lockPath = `${filePath}.lock`;
+  const deadline = Date.now() + 5_000;
+  while (true) {
+    try {
+      const lock = tryAcquireClaimLockFile(lockPath);
+      if (lock) return () => lock.release();
+      if (removeStaleClaimLockFile(lockPath)) continue;
+      if (Date.now() >= deadline) throw new Error(`failed to acquire claim store lock ${lockPath}: lock is held by another process`);
+      sleepSync(25);
     } catch (error) {
       const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
       const lockIsBusy = code === "EEXIST" || code === "EPERM" || code === "EACCES" || code === "EBUSY";

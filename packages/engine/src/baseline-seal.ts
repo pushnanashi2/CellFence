@@ -26,6 +26,13 @@ function baselineHmacDigest(baseline: CellFenceBaseline | Omit<CellFenceBaseline
     .digest("hex");
 }
 
+function timingSafeHexEqual(left: string, right: string): boolean {
+  if (!/^[a-f0-9]{64}$/.test(left) || !/^[a-f0-9]{64}$/.test(right)) return false;
+  const leftBuffer = Buffer.from(left, "hex");
+  const rightBuffer = Buffer.from(right, "hex");
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
 function baselineSealPayload(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">): Buffer {
   return Buffer.from(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline), "utf8");
 }
@@ -169,7 +176,7 @@ export function validateBaselineSealFindings(
     return findings;
   }
   const expectedDigest = baselineHmacDigest(baseline, secret as string);
-  if (baseline.seal.digest !== expectedDigest) {
+  if (!timingSafeHexEqual(baseline.seal.digest, expectedDigest)) {
     findings.push({
       ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
       severity: "error",

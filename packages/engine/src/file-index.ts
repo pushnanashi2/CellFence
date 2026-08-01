@@ -52,9 +52,15 @@ function patternToRegExp(pattern: string): RegExp {
     const character = normalized[index];
     const nextCharacter = normalized[index + 1];
     if (character === "*" && nextCharacter === "*") {
-      expression += ".*";
-      // Stryker disable next-line AssignmentOperator: reversing the double-star skip makes the tokenizer non-terminating; ** semantics are covered by glob matching tests.
-      index += 1;
+      if (normalized[index + 2] === "/") {
+        expression += "(?:[^/]+/)*";
+        // Stryker disable next-line AssignmentOperator: the globstar-slash token must consume both stars and the slash.
+        index += 2;
+      } else {
+        expression += ".*";
+        // Stryker disable next-line AssignmentOperator: reversing the double-star skip makes the tokenizer non-terminating; ** semantics are covered by glob matching tests.
+        index += 1;
+      }
     } else if (character === "*") {
       expression += "[^/]*";
     } else {
@@ -72,7 +78,7 @@ export function matchesPattern(relativePath: string, pattern: string): boolean {
 
 export function literalPrefix(pattern: string): string {
   const normalized = normalizePath(pattern);
-  const wildcardIndex = normalized.search(/[*?]/);
+  const wildcardIndex = normalized.search(/[*]/);
   const prefix = wildcardIndex === -1 ? normalized : normalized.slice(0, wildcardIndex);
   return prefix.replace(/\/+$/, "");
 }

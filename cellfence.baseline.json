@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-07-19T17:14:06.464Z",
+  "generatedAt": "2026-08-01T15:27:29.462Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -114,8 +114,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 85,
-      "publicSurfaceLines": 1972,
+      "publicSymbols": 86,
+      "publicSurfaceLines": 1974,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -173,6 +173,7 @@
         "EvidenceGraphNode",
         "EvidenceGraphNodeKind",
         "Finding",
+        "findingFingerprint",
         "findingWitness",
         "FindingWitness",
         "FindingWitnessSubject",
@@ -208,7 +209,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "45c287c09deba524b04474d27ff167ed1134aca6cd958148931d01b46c34dc03",
+      "publicSurfaceHash": "987678b90be3c34176aab057347e8e911b774e09b3190ac26a30064944078c1d",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -394,7 +395,7 @@
     "plugin-agent-budget": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 141,
+      "publicSurfaceLines": 149,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-agent-budget/**"
@@ -414,7 +415,7 @@
     "plugin-blast-radius": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 111,
+      "publicSurfaceLines": 119,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-blast-radius/**"

@@ -1,6 +1,5 @@
-import crypto from "node:crypto";
-
 import {
+  findingFingerprint as engineFindingFingerprint,
   formatHumanResult,
   type CheckResult,
   type Finding,
@@ -22,24 +21,10 @@ type CheckOutputOptions = {
   format?: string;
 };
 
-function stableJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(",")}}`;
-}
-
 export function findingFingerprint(finding: Finding): string {
   /* c8 ignore next -- CLI cannot currently load plugins that emit precomputed finding fingerprints. */
   if (finding.fingerprint) return finding.fingerprint;
-  return crypto.createHash("sha256").update(stableJson({
-    ruleId: finding.ruleId,
-    severity: finding.severity,
-    filePath: finding.filePath,
-    cellId: finding.cellId,
-    producerCellId: finding.producerCellId,
-    details: finding.details,
-  })).digest("hex");
+  return engineFindingFingerprint(finding);
 }
 
 function countBy<T extends string>(values: T[]): Record<string, number> {

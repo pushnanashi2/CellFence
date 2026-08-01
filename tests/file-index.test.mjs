@@ -130,10 +130,13 @@ test("file index exposes the full supported source extension set", () => {
 
 test("file index glob matching distinguishes single-star, double-star, and literals", () => {
   assert.equal(matchesPattern("src/core/public.ts", "src/*/public.ts"), true);
-  assert.equal(matchesPattern("src/public.ts", "src/**/public.ts"), false);
+  assert.equal(matchesPattern("src/public.ts", "src/**/public.ts"), true);
   assert.equal(matchesPattern("src/core/nested/public.ts", "src/*/public.ts"), false);
   assert.equal(matchesPattern("src/core/nested/public.ts", "src/**/public.ts"), true);
+  assert.equal(matchesPattern("src/a.ts", "src/**/*.ts"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/**/*.ts"), true);
+  assert.equal(matchesPattern("test/a.ts", "**/test/**"), true);
+  assert.equal(matchesPattern("src/test/a.ts", "**/test/**"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/**/private.ts"), false);
   assert.equal(matchesPattern("src/core/public.ts", "src/core/public.ts"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/core/public.js"), false);
@@ -141,6 +144,7 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(literalPrefix("src/core/*.ts"), "src/core");
   assert.equal(literalPrefix("src/core///**"), "src/core");
   assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
+  assert.equal(literalPrefix("src/core/file?.ts"), "src/core/file?.ts");
 });
 
 test("file index listFiles sorts results, ignores generated directories, and caches per context", () => {

@@ -1339,6 +1339,23 @@ test("CLI baseline HMAC seal rejects hand-edited baseline expansion", () => {
     const cleanCheck = runCliWithEnv(["baseline", "check", "--json"], tempDir, env);
     assert.equal(cleanCheck.status, 0, cleanCheck.stderr || cleanCheck.stdout);
 
+    const validDigest = baseline.seal.digest;
+    for (const malformedDigest of [validDigest.toUpperCase(), `${validDigest}0`, validDigest.slice(1), "not-hex"]) {
+      const malformedBaseline = {
+        ...baseline,
+        seal: {
+          ...baseline.seal,
+          digest: malformedDigest,
+        },
+      };
+      writeJson(baselinePath, malformedBaseline);
+      const malformed = runCliWithEnv(["baseline", "check", "--json"], tempDir, env);
+      assert.notEqual(malformed.status, 0);
+      const parsedMalformed = JSON.parse(malformed.stdout);
+      assert.ok(parsedMalformed.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID" || finding.ruleId === "CELLFENCE_MANIFEST_INVALID"));
+    }
+    writeJson(baselinePath, baseline);
+
     baseline.cells.core.publicSymbolSet.push("backdoor");
     baseline.cells.core.publicSymbols += 1;
     writeJson(baselinePath, baseline);

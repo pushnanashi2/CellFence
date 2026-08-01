@@ -166,6 +166,7 @@
         "EvidenceGraphNode",
         "EvidenceGraphNodeKind",
         "Finding",
+        "findingFingerprint",
         "findingWitness",
         "FindingWitness",
         "FindingWitnessSubject",

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -169,6 +170,40 @@ test("engine rejects wildcard owned path overlap with a concrete witness path", 
         publicEntry: "src/a/feature.ts",
         publicSymbols: ["featureApi"],
       }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_OWNERSHIP_OVERLAP"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine treats globstar-slash as matching zero path segments for ownership overlap", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-globstar-owned-paths-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/public.ts"), "export const rootApi = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/a.ts"), "export const leafApi = true;\n");
+    writeManifest(rootDir, [
+      {
+        id: "root",
+        ownedPaths: ["src/**/*.ts"],
+        publicEntry: "src/public.ts",
+        publicSymbols: ["rootApi"],
+        consumes: [],
+        producesArtifacts: [],
+      },
+      {
+        id: "leaf",
+        ownedPaths: ["src/a.ts"],
+        publicEntry: "src/a.ts",
+        publicSymbols: ["leafApi"],
+        consumes: [],
+        producesArtifacts: [],
+      },
     ]);
 
     const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
@@ -1287,6 +1322,48 @@ test("engine claim APIs fail closed for malformed stores, bad surfaces, and conf
     const missingCellCoverage = checkClaims({ rootDir, claimsPath: ".cellfence/missing-cell-claims.json", agent: "other-agent" });
     assert.equal(missingCellCoverage.exitCode, 1);
     assert.ok(missingCellCoverage.findings.some((finding) => /references unknown cells: missing/.test(finding.message)));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine claim creation recovers from stale claim store locks", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-stale-claim-lock-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    const claimsPath = path.join(rootDir, ".cellfence/claims.json");
+    fs.mkdirSync(path.dirname(claimsPath), { recursive: true });
+    const staleLockContent = "999999999\n1970-01-01T00:00:00.000Z\n";
+    fs.writeFileSync(`${claimsPath}.lock`, staleLockContent);
+    const tokenDigest = crypto.createHash("sha256").update(staleLockContent).digest("hex").slice(0, 16);
+    fs.writeFileSync(`${claimsPath}.lock.reclaim-${tokenDigest}`, "999999999\n1970-01-01T00:00:00.000Z\n");
+
+    const result = createClaim({ rootDir, agent: "codex-a", cells: ["core"], ttl: "2h", claimId: "claim-a" });
+
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.equal(fs.existsSync(`${claimsPath}.lock`), false);
+    assert.equal(fs.readdirSync(path.dirname(claimsPath)).some((entry) => entry.includes(".reclaim-")), false);
+    assert.equal(result.createdClaim?.id, "claim-a");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine claim creation does not steal fresh or live claim store locks", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-live-claim-lock-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    const claimsPath = path.join(rootDir, ".cellfence/claims.json");
+    fs.mkdirSync(path.dirname(claimsPath), { recursive: true });
+    fs.writeFileSync(`${claimsPath}.lock`, `${process.pid}\n1970-01-01T00:00:00.000Z\n`);
+
+    const result = createClaim({ rootDir, agent: "codex-a", cells: ["core"], ttl: "2h", claimId: "claim-a" });
+
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.findings.some((finding) => /failed to acquire claim store lock/.test(finding.message)));
+    assert.equal(fs.existsSync(`${claimsPath}.lock`), true);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

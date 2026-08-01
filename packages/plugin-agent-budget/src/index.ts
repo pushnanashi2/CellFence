@@ -16,19 +16,27 @@ export type AgentBudgetOptions = {
   severity?: "warning" | "error";
 };
 
-// Stryker disable next-line Regex: non-star chunk splitting preserves the same token stream for supported * and ** globs.
-const GLOB_TOKEN_PATTERN = /([*]{1,2})/g;
-
 function patternToRegExp(pattern: string): RegExp {
-  const escaped = pattern
-    .split(GLOB_TOKEN_PATTERN)
-    .map((part) => {
-      if (part === "**") return ".*";
-      if (part === "*") return "[^/]*";
-      return part.replace(/[\\^$.+?()[\]{}|]/g, "\\$&");
-    })
-    .join("");
-  return new RegExp(`^${escaped}$`);
+  const normalized = pattern.split("\\").join("/");
+  let expression = "";
+  for (let index = 0; index < normalized.length; index += 1) {
+    const character = normalized[index];
+    const nextCharacter = normalized[index + 1];
+    if (character === "*" && nextCharacter === "*") {
+      if (normalized[index + 2] === "/") {
+        expression += "(?:[^/]+/)*";
+        index += 2;
+      } else {
+        expression += ".*";
+        index += 1;
+      }
+    } else if (character === "*") {
+      expression += "[^/]*";
+    } else {
+      expression += character.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+    }
+  }
+  return new RegExp(`^${expression}$`);
 }
 
 function matchesPattern(filePath: string, pattern: string): boolean {

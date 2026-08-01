@@ -23,11 +23,23 @@ function patternAutomaton(pattern: string): GlobAutomaton {
     const character = normalized[index];
     const nextCharacter = normalized[index + 1];
     if (character === "*" && nextCharacter === "*") {
-      const next = nextState();
-      transitions[state].push({ kind: "epsilon", to: next });
-      transitions[state].push({ kind: "any", to: state });
-      state = next;
-      index += 1;
+      if (normalized[index + 2] === "/") {
+        const globstarState = state;
+        const next = nextState();
+        const segment = nextState();
+        transitions[globstarState].push({ kind: "epsilon", to: next });
+        transitions[globstarState].push({ kind: "non-slash", to: segment });
+        transitions[segment].push({ kind: "non-slash", to: segment });
+        transitions[segment].push({ kind: "literal", value: "/", to: globstarState });
+        state = next;
+        index += 2;
+      } else {
+        const next = nextState();
+        transitions[state].push({ kind: "epsilon", to: next });
+        transitions[state].push({ kind: "any", to: state });
+        state = next;
+        index += 1;
+      }
     } else if (character === "*") {
       const next = nextState();
       transitions[state].push({ kind: "epsilon", to: next });

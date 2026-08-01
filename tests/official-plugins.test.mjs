@@ -682,6 +682,11 @@ test("agent budget plugin handles isolated glob and default-array edge cases", (
     ["agent-budget/forbidden-path"],
   );
   assert.deepEqual(
+    directRule(agentBudgetPlugin({ forbiddenPaths: ["**/test/**"] }), "agent-budget/change-budget")
+      .run(exactContext(["test/a.ts"])).map((finding) => finding.ruleId),
+    ["agent-budget/forbidden-path"],
+  );
+  assert.deepEqual(
     directRule(agentBudgetPlugin(), "agent-budget/change-budget")
       .run(exactContext(["Stryker was here"])),
     [],
@@ -755,16 +760,22 @@ test("blast radius plugin covers glob, self-edge, and threshold boundaries", () 
         publicEntry: "src/beta/public.ts",
         publicSymbols: [],
       }, {
+        id: "root",
+        ownedPaths: ["src/**/*.ts"],
+        publicEntry: "src/public.ts",
+        publicSymbols: [],
+      }, {
         id: "app",
         ownedPaths: ["src/app/**"],
         publicEntry: "src/app/public.ts",
         publicSymbols: [],
       }],
     },
-    changedFiles: new Set(["src/beta/deep/nested.ts", "src/alpha/public.ts"]),
+    changedFiles: new Set(["src/beta/deep/nested.ts", "src/alpha/public.ts", "src/public.ts"]),
     imports: [
       { importerCellId: "app", targetCellId: "alpha" },
       { importerCellId: "app", targetCellId: "beta" },
+      { importerCellId: "app", targetCellId: "root" },
     ],
   });
   assert.deepEqual(directRule(blastRadiusPlugin({ maxAffectedCells: 0, severity: "error" }), "blast-radius/affected-cells")
@@ -773,7 +784,7 @@ test("blast radius plugin covers glob, self-edge, and threshold boundaries", () 
     severity: "error",
     message: "change affects 1 downstream cells, exceeding budget 0",
     details: {
-      changedCells: ["alpha", "beta"],
+      changedCells: ["alpha", "beta", "root"],
       affectedCells: ["app"],
       maxAffectedCells: 0,
     },
