@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Read discovered `tsconfig.*.json` files directly when collecting workspace path aliases instead of falling back to a neighboring `tsconfig.json`.
 - Add built-in Python framework resource adapters for selected FastAPI route decorators, Django URLConf/model-manager patterns, SQLAlchemy declarative/Table/query/text calls, and Celery task/publish calls.
 - Close TypeScript/CommonJS boundary bypasses by extracting `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases.
 - Report TypeScript/JavaScript parser diagnostics as `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` fail-closed findings under the built-in required-rule profile.
