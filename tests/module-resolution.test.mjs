@@ -3023,7 +3023,7 @@ test("module resolution declaration compiler options preserve project settings a
       skipLibCheck: false,
     });
     assert.equal(options.incremental, true);
-    assert.equal(options.baseUrl, path.join(rootDir, "types"));
+    assert.equal(path.normalize(options.baseUrl), path.normalize(path.join(rootDir, "types")));
     assert.deepEqual(Object.fromEntries(Object.keys(forced).map((key) => [key, options[key]])), forced);
 
     const boundaryRoot = path.join(rootDir, "boundary");
