@@ -54,6 +54,7 @@ export default {
   tempDirName: ".stryker-tmp",
   ignorePatterns: [
     "/coverage",
+    "/reports/corpus",
     "/reports/mutation",
     "cellfence-*.tgz",
   ],
