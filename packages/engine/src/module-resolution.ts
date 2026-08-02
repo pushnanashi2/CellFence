@@ -68,7 +68,7 @@ type PathAliasContext = {
   pathAliases: PathAlias[];
 };
 
-type ImportBindingKind = "require" | "createRequire" | "moduleNamespace" | "nodeModule" | "shadow";
+type ImportBindingKind = "require" | "createRequire" | "moduleNamespace" | "nodeModule" | null;
 
 type ImportScope = {
   bindings: Map<string, ImportBindingKind>;
@@ -122,14 +122,10 @@ export function literalText(node: ts.Node | undefined): string | undefined {
   return undefined;
 }
 
-export function readPathAliases(rootDir: string): PathAlias[] {
+function readPathAliasesFromConfig(rootDir: string, configPath: string): PathAlias[] {
   const normalizedRootDir = normalizePath(rootDir);
-  const tsconfigPath = normalizePath(path.join(rootDir, "tsconfig.json"));
-  // Stryker disable next-line ConditionalExpression: missing config and TypeScript parse failure both resolve to an empty alias set.
-  if (!fs.existsSync(tsconfigPath)) return [];
+  const tsconfigPath = normalizePath(configPath);
   const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
-  // Stryker disable next-line ConditionalExpression: invalid config is fail-closed to an empty alias set, matching absent paths.
-  if (configFile.error) return [];
   const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, normalizedRootDir);
   const paths = parsedConfig.options.paths;
   if (!paths) return [];
@@ -142,6 +138,10 @@ export function readPathAliases(rootDir: string): PathAlias[] {
     if (normalizedTargets.length > 0) aliases.push({ pattern, targets: normalizedTargets });
   }
   return aliases;
+}
+
+export function readPathAliases(rootDir: string): PathAlias[] {
+  return readPathAliasesFromConfig(rootDir, path.join(rootDir, "tsconfig.json"));
 }
 
 export function readWorkspacePathAliases(rootDir: string): PathAlias[] {
@@ -159,8 +159,7 @@ export function readWorkspacePathAliases(rootDir: string): PathAlias[] {
   for (const filePath of listFiles(rootDir)) {
     const basename = path.basename(filePath);
     if (!/^tsconfig(?:\..+)?\.json$/.test(basename)) continue;
-    if (normalizePath(filePath) === normalizePath(path.join(rootDir, "tsconfig.json"))) continue;
-    addAliases(readPathAliases(path.dirname(filePath)));
+    addAliases(readPathAliasesFromConfig(path.dirname(filePath), filePath));
   }
   return aliases;
 }
@@ -196,21 +195,15 @@ export function candidateModulePaths(basePath: string): string[] {
     }
     return candidates;
   }
-  if (extension) {
-    const sourceExtensions = sourceExtensionsForRuntimeSpecifier(extension);
-    if (sourceExtensions.length === 0 && EXACT_SPECIFIER_EXTENSIONS.has(extension)) return candidates;
-    const basePathWithoutExtension = sourceExtensions.length > 0
-      ? normalizedBasePath.slice(0, -extension.length)
-      : normalizedBasePath;
-    for (const sourceExtension of sourceExtensions.length > 0 ? sourceExtensions : [...SOURCE_EXTENSIONS, ...DECLARATION_EXTENSIONS]) {
+  const runtimeSourceExtensions = sourceExtensionsForRuntimeSpecifier(extension);
+  if (runtimeSourceExtensions.length > 0) {
+    const basePathWithoutExtension = normalizedBasePath.slice(0, -extension.length);
+    for (const sourceExtension of runtimeSourceExtensions) {
       addUniquePath(candidates, `${basePathWithoutExtension}${sourceExtension}`);
-    }
-    if (sourceExtensions.length > 0) return candidates;
-    for (const sourceExtension of [...SOURCE_EXTENSIONS, ...DECLARATION_EXTENSIONS]) {
-      addUniquePath(candidates, `${normalizedBasePath}/index${sourceExtension}`);
     }
     return candidates;
   }
+  if (extension && EXACT_SPECIFIER_EXTENSIONS.has(extension)) return candidates;
   for (const sourceExtension of SOURCE_EXTENSIONS) {
     addUniquePath(candidates, `${normalizedBasePath}${sourceExtension}`);
   }
@@ -248,25 +241,24 @@ function isPythonPath(filePath: string): boolean {
 }
 
 function resolvePythonRelativeModule(rootDir: string, importerPath: string, specifier: string): string | undefined {
-  const match = specifier.match(/^(\.+)(.*)$/);
-  if (!match) return undefined;
-  const dotCount = match[1].length;
-  const moduleName = match[2].replace(/^\./, "");
+  let dotCount = 0;
+  while (specifier[dotCount] === ".") dotCount += 1;
   let baseDir = path.dirname(absolutePath(rootDir, importerPath));
   for (let index = 1; index < dotCount; index += 1) baseDir = path.dirname(baseDir);
-  const modulePath = moduleName.length > 0
-    ? path.join(baseDir, ...moduleName.split(".").filter(Boolean))
-    : baseDir;
+  const modulePath = path.join(baseDir, ...specifier.split("."));
   const target = existingFileFromCandidates(candidatePythonModulePaths(modulePath));
   return target ? repoPath(rootDir, target) : undefined;
 }
 
-export function resolvePythonImport(rootDir: string, importerPath: string, specifier: string, sourceRoots: string[] = []): string | undefined {
+export function resolvePythonImport(rootDir: string, importerPath: string, specifier: string, sourceRoots?: string[]): string | undefined {
   if (!isPythonPath(importerPath)) return undefined;
   if (specifier.startsWith(".")) return resolvePythonRelativeModule(rootDir, importerPath, specifier);
   const moduleParts = specifier.split(".").filter(Boolean);
   if (moduleParts.length === 0) return undefined;
-  for (const sourceRoot of ["", ...sourceRoots]) {
+  const rootTarget = existingFileFromCandidates(candidatePythonModulePaths(path.resolve(rootDir, ...moduleParts)));
+  if (rootTarget) return repoPath(rootDir, rootTarget);
+  if (!sourceRoots) return undefined;
+  for (const sourceRoot of sourceRoots) {
     const basePath = path.resolve(rootDir, sourceRoot, ...moduleParts);
     const target = existingFileFromCandidates(candidatePythonModulePaths(basePath));
     if (target) return repoPath(rootDir, target);
@@ -287,11 +279,8 @@ export function resolveRelativeImport(rootDir: string, importerPath: string, spe
 export function resolvePathAliasTarget(context: PathAliasContext, specifier: string): string | undefined {
   for (const alias of context.pathAliases) {
     const wildcardIndex = alias.pattern.indexOf("*");
-    // Stryker disable next-line StringLiteral: exact aliases never consume wildcardValue; wildcard aliases overwrite it before target interpolation.
     let wildcardValue = "";
-    // Stryker disable next-line ConditionalExpression,UnaryOperator,BlockStatement: exact and wildcard alias behavior is covered by direct resolver tests; remaining mutants are equivalent for normalized tsconfig paths.
     if (wildcardIndex === -1) {
-      // Stryker disable next-line ConditionalExpression: exact alias mismatch falls through to undefined; matched aliases are covered by resolver tests.
       if (alias.pattern !== specifier) continue;
     } else {
       const prefix = alias.pattern.slice(0, wildcardIndex);
@@ -316,11 +305,12 @@ export function resolvePathAliasTarget(context: PathAliasContext, specifier: str
 
 function readJsonRecord(filePath: string): Record<string, unknown> | undefined {
   try {
-    const value = JSON.parse(fs.readFileSync(filePath, "utf8")) as unknown;
+    const value = JSON.parse(fs.readFileSync(filePath).toString()) as unknown;
     return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
   } catch {
-    return undefined;
+    // Invalid package metadata is treated as absent.
   }
+  return undefined;
 }
 
 function nearestPackageInfo(fromFilePath: string): { rootDir: string; name?: string; imports?: unknown; exports?: unknown } | undefined {
@@ -331,7 +321,7 @@ function nearestPackageInfo(fromFilePath: string): { rootDir: string; name?: str
       const packageJson = readJsonRecord(packageJsonPath) || {};
       return {
         rootDir: directoryPath,
-        name: typeof packageJson.name === "string" ? packageJson.name : undefined,
+        name: packageJson.name as string | undefined,
         imports: packageJson.imports,
         exports: packageJson.exports,
       };
@@ -342,13 +332,13 @@ function nearestPackageInfo(fromFilePath: string): { rootDir: string; name?: str
   }
 }
 
-function packageConditionOrder(mode: PackageConditionMode): string[] {
+function packageConditionOrder(mode?: PackageConditionMode): string[] {
   if (mode === "types") return ["types", "import", "node", "default", "require"];
   if (mode === "require") return ["require", "node", "default", "import", "types"];
   return ["import", "node", "default", "require", "types"];
 }
 
-function packageMapEntryTarget(entry: unknown, mode: PackageConditionMode): string | null | undefined {
+function packageMapEntryTarget(entry: unknown, mode?: PackageConditionMode): string | null | undefined {
   if (entry === null) return null;
   if (typeof entry === "string") return entry;
   if (Array.isArray(entry)) {
@@ -363,20 +353,15 @@ function packageMapEntryTarget(entry: unknown, mode: PackageConditionMode): stri
     }
     return sawNullTarget ? null : undefined;
   }
-  if (entry && typeof entry === "object") {
-    const record = entry as Record<string, unknown>;
-    const seenConditions = new Set<string>();
-    for (const condition of packageConditionOrder(mode)) {
-      seenConditions.add(condition);
-      if (!Object.prototype.hasOwnProperty.call(record, condition)) continue;
-      const target = packageMapEntryTarget(record[condition], mode);
-      if (target !== undefined) return target;
-    }
-    for (const [condition, value] of Object.entries(record)) {
-      if (seenConditions.has(condition)) continue;
-      const target = packageMapEntryTarget(value, mode);
-      if (target !== undefined) return target;
-    }
+  const record = entry as Record<string, unknown>;
+  for (const condition of packageConditionOrder(mode)) {
+    if (!Object.prototype.hasOwnProperty.call(record, condition)) continue;
+    const target = packageMapEntryTarget(record[condition], mode);
+    if (target !== undefined) return target;
+  }
+  for (const value of Object.values(record)) {
+    const target = packageMapEntryTarget(value, mode);
+    if (target !== undefined) return target;
   }
   return undefined;
 }
@@ -385,33 +370,28 @@ function packageMapLooksSubpathMap(record: Record<string, unknown>): boolean {
   return Object.keys(record).some((key) => key === "." || key.startsWith("./"));
 }
 
-function packageMapTarget(map: unknown, specifier: string, mode: PackageConditionMode): string | null | undefined {
-  if (specifier === "." && (!map || typeof map !== "object" || Array.isArray(map))) {
-    return packageMapEntryTarget(map, mode);
-  }
-  if (!map || typeof map !== "object" || Array.isArray(map)) return undefined;
+function packageMapTarget(map: unknown, specifier: string, mode?: PackageConditionMode): string | null | undefined {
+  if (map === null || map === undefined) return undefined;
   const record = map as Record<string, unknown>;
   if (specifier === "." && !packageMapLooksSubpathMap(record)) return packageMapEntryTarget(record, mode);
   if (Object.prototype.hasOwnProperty.call(record, specifier)) {
     return packageMapEntryTarget(record[specifier], mode);
   }
   const wildcardEntries = Object.entries(record)
-    .map(([pattern, entry], index) => {
+    .map(([pattern, entry]) => {
       const wildcardIndex = pattern.indexOf("*");
       if (wildcardIndex === -1) return undefined;
       return {
         pattern,
         entry,
-        index,
         prefix: pattern.slice(0, wildcardIndex),
         suffix: pattern.slice(wildcardIndex + 1),
       };
     })
-    .filter((entry): entry is { pattern: string; entry: unknown; index: number; prefix: string; suffix: string } => Boolean(entry))
+    .filter((entry): entry is { pattern: string; entry: unknown; prefix: string; suffix: string } => Boolean(entry))
     .sort((left, right) =>
       right.prefix.length - left.prefix.length
       || right.suffix.length - left.suffix.length
-      || left.index - right.index
     );
   for (const { entry, prefix, suffix } of wildcardEntries) {
     if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue;
@@ -425,7 +405,7 @@ function packageMapTarget(map: unknown, specifier: string, mode: PackageConditio
 
 function targetInsideDirectory(directoryPath: string, targetPath: string): boolean {
   const relative = path.relative(directoryPath, targetPath);
-  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+  return !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
 function resolvePackageTargetFile(packageRoot: string, target: string): string | undefined {
@@ -438,7 +418,7 @@ function resolvePackageTargetFile(packageRoot: string, target: string): string |
   return undefined;
 }
 
-function resolvePackageImportsFile(fromFilePath: string, specifier: string, mode: PackageConditionMode = "import"): string | undefined {
+function resolvePackageImportsFile(fromFilePath: string, specifier: string, mode?: PackageConditionMode): string | undefined {
   if (!specifier.startsWith("#")) return undefined;
   const packageInfo = nearestPackageInfo(fromFilePath);
   if (!packageInfo) return undefined;
@@ -451,7 +431,7 @@ function packageNameFromSpecifier(specifier: string): string {
   return specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0];
 }
 
-function resolvePackageSelfSubpathFile(fromFilePath: string, specifier: string, mode: PackageConditionMode = "import"): string | undefined {
+function resolvePackageSelfSubpathFile(fromFilePath: string, specifier: string, mode: PackageConditionMode): string | undefined {
   const packageInfo = nearestPackageInfo(fromFilePath);
   if (!packageInfo || !packageInfo.name) return undefined;
   const packageName = packageNameFromSpecifier(specifier);
@@ -471,7 +451,7 @@ export function resolvePackageExportTarget(
   packageRoot: string,
   packageName: string,
   specifier: string,
-  mode: PackageConditionMode = "import",
+  mode?: PackageConditionMode,
 ): PackageExportTarget {
   const packageSpecifier = packageNameFromSpecifier(specifier);
   if (packageSpecifier !== packageName) {
@@ -527,7 +507,7 @@ export function resolvePackageExportTarget(
   };
 }
 
-export function resolvePackageImportsTarget(rootDir: string, importerPath: string, specifier: string, mode: PackageConditionMode = "import"): string | undefined {
+export function resolvePackageImportsTarget(rootDir: string, importerPath: string, specifier: string, mode?: PackageConditionMode): string | undefined {
   const target = resolvePackageImportsFile(absolutePath(rootDir, importerPath), specifier, mode);
   return target ? repoPath(rootDir, target) : undefined;
 }
@@ -548,8 +528,7 @@ function resolveProjectModuleFile(fromFilePath: string, specifier: string): stri
   if (selfSubpathTarget) return selfSubpathTarget;
   const tsconfigPath = findNearestTsConfig(fromFilePath);
   if (tsconfigPath) {
-    const aliasTarget = resolvePathAliasTarget({ pathAliases: readPathAliases(path.dirname(tsconfigPath)) }, specifier);
-    if (aliasTarget) return aliasTarget;
+    return resolvePathAliasTarget({ pathAliases: readPathAliases(path.dirname(tsconfigPath)) }, specifier);
   }
   return undefined;
 }
@@ -557,7 +536,7 @@ function resolveProjectModuleFile(fromFilePath: string, specifier: string): stri
 function extractPythonImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
   const importerPath = repoPath(context.rootDir, filePath);
   const inspection = inspectPythonSource(filePath);
-  for (const error of inspection.errors || []) {
+  for (const error of inspection.errors) {
     warnings.push({
       ruleId: "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
       severity: "warning",
@@ -570,17 +549,19 @@ function extractPythonImports(context: ImportScanContext, filePath: string, warn
       },
     });
   }
-  for (const warning of inspection.warnings || []) {
-    warnings.push({
-      ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
-      severity: "warning",
-      filePath: importerPath,
-      message: warning.message,
-      details: {
-        kind: warning.kind,
-        ...(warning.line ? { line: warning.line } : {}),
-      },
-    });
+  if (inspection.warnings) {
+    for (const warning of inspection.warnings) {
+      warnings.push({
+        ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
+        severity: "warning",
+        filePath: importerPath,
+        message: warning.message,
+        details: {
+          kind: warning.kind,
+          ...(warning.line ? { line: warning.line } : {}),
+        },
+      });
+    }
   }
   return inspection.imports.map((reference) => ({
     importerPath,
@@ -596,7 +577,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   const sourceText = readSourceText(context, filePath);
   if (isPythonPath(filePath)) return extractPythonImports(context, filePath, warnings);
   const sourceFile = parseSourceFile(context, filePath);
-  const parseDiagnostics = (sourceFile as { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics || [];
+  const parseDiagnostics = (sourceFile as unknown as { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics;
   for (const diagnostic of parseDiagnostics) {
     const position = sourceFile.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
     warnings.push({
@@ -607,11 +588,9 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       details: { line: position.line + 1, offset: position.character + 1 },
     });
   }
-  // Stryker disable next-line ConditionalExpression,ArrayDeclaration: the hint is a performance prefilter; parsing no-import files still returns no references.
-  if (!IMPORT_SCAN_HINT.test(sourceText)) return [];
   const references: ImportReference[] = [];
   const importerPath = repoPath(context.rootDir, filePath);
-  const rootScope = createImportScope(undefined, true);
+  const rootScope = createRootImportScope();
   rootScope.bindings.set("require", "require");
 
   function addReference(specifier: string, kind: ImportKind, node: ts.Node, typeOnly: boolean): void {
@@ -624,11 +603,21 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     });
   }
 
-  function isModulePackageSpecifier(specifier: string): boolean {
+  function isModulePackageSpecifier(specifier: unknown): boolean {
     return specifier === "module" || specifier === "node:module";
   }
 
-  function createImportScope(parent?: ImportScope, isVarScope = false): ImportScope {
+  function createRootImportScope(): ImportScope {
+    const scope = {
+      bindings: new Map<string, ImportBindingKind>(),
+      stringConstants: new Map<string, string>(),
+      singletonStringSets: new Map<string, string>(),
+    } as ImportScope;
+    scope.varScope = scope;
+    return scope;
+  }
+
+  function createImportScope(parent: ImportScope, isVarScope: boolean): ImportScope {
     const scope = {
       bindings: new Map<string, ImportBindingKind>(),
       stringConstants: new Map<string, string>(),
@@ -636,37 +625,39 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       parent,
       varScope: undefined as unknown as ImportScope,
     };
-    scope.varScope = isVarScope || !parent ? scope : parent.varScope;
+    scope.varScope = isVarScope ? scope : parent.varScope;
     return scope;
   }
 
   function bindingFor(scope: ImportScope, name: string): ImportBindingKind | undefined {
     let current: ImportScope | undefined = scope;
     while (current) {
-      const binding = current.bindings.get(name);
-      if (binding) return binding;
+      if (current.bindings.has(name)) return current.bindings.get(name);
       current = current.parent;
     }
-    return undefined;
   }
 
-  function bindName(scope: ImportScope, name: string, kind: ImportBindingKind, varScoped = false): void {
+  function bindName(scope: ImportScope, name: string, kind: ImportBindingKind, varScoped: boolean): void {
     const targetScope = varScoped ? scope.varScope : scope;
     targetScope.bindings.set(name, kind);
     targetScope.stringConstants.delete(name);
     targetScope.singletonStringSets.delete(name);
   }
 
-  function bindStringConstant(scope: ImportScope, name: string, value: string, varScoped = false): void {
+  function bindLexicalName(scope: ImportScope, name: string, kind: ImportBindingKind): void {
+    bindName(scope, name, kind, false);
+  }
+
+  function bindStringConstant(scope: ImportScope, name: string, value: string, varScoped: boolean): void {
     const targetScope = varScoped ? scope.varScope : scope;
-    targetScope.bindings.set(name, "shadow");
+    targetScope.bindings.set(name, null);
     targetScope.stringConstants.set(name, value);
     targetScope.singletonStringSets.delete(name);
   }
 
-  function bindSingletonStringSet(scope: ImportScope, name: string, value: string, varScoped = false): void {
+  function bindSingletonStringSet(scope: ImportScope, name: string, value: string, varScoped: boolean): void {
     const targetScope = varScoped ? scope.varScope : scope;
-    targetScope.bindings.set(name, "shadow");
+    targetScope.bindings.set(name, null);
     targetScope.stringConstants.delete(name);
     targetScope.singletonStringSets.set(name, value);
   }
@@ -678,14 +669,12 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       if (current.bindings.has(name)) return undefined;
       current = current.parent;
     }
-    return undefined;
   }
 
   function singletonStringSetFor(scope: ImportScope, name: string): string | undefined {
     let current: ImportScope | undefined = scope;
     while (current) {
       if (current.singletonStringSets.has(name)) return current.singletonStringSets.get(name);
-      if (current.bindings.has(name)) return undefined;
       current = current.parent;
     }
     return undefined;
@@ -696,9 +685,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     const unwrapped = unwrapExpression(node);
     if (!ts.isNewExpression(unwrapped)) return undefined;
     const constructorExpression = unwrapExpression(unwrapped.expression);
-    if (!ts.isIdentifier(constructorExpression) || constructorExpression.text !== "Set") return undefined;
-    const [argument] = unwrapped.arguments || [];
-    if (!argument) return undefined;
+    if (!ts.isIdentifier(constructorExpression)) return undefined;
+    if (constructorExpression.text !== "Set") return undefined;
+    if (!unwrapped.arguments || unwrapped.arguments.length === 0) return undefined;
+    const argument = unwrapped.arguments[0];
     const setElements = unwrapExpression(argument);
     if (!ts.isArrayLiteralExpression(setElements)) return undefined;
     const elements = setElements.elements;
@@ -714,9 +704,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     if (!ts.isPropertyAccessExpression(node.parent) || node.parent.expression !== node || node.parent.name.text !== "has") return false;
     const callExpression = node.parent.parent;
     if (!ts.isCallExpression(callExpression) || callExpression.expression !== node.parent) return false;
-    const guardExpression = unwrapExpression(callExpression);
-    const ifStatement = callExpression.parent;
-    return ts.isIfStatement(ifStatement) && unwrapExpression(ifStatement.expression) === guardExpression;
+    return ts.isIfStatement(callExpression.parent);
   }
 
   function isAssignmentOperatorKind(kind: ts.SyntaxKind): boolean {
@@ -740,11 +728,31 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 
   function staticMemberAccess(expression: ts.Expression): { receiver: ts.Expression; name: string } | undefined {
     const unwrapped = unwrapExpression(expression);
-    if (ts.isPropertyAccessExpression(unwrapped)) return { receiver: unwrapped.expression, name: unwrapped.name.text };
-    if (ts.isElementAccessExpression(unwrapped)) {
-      const name = literalText(unwrapped.argumentExpression);
-      return name ? { receiver: unwrapped.expression, name } : undefined;
+    switch (unwrapped.kind) {
+      case ts.SyntaxKind.PropertyAccessExpression: {
+        const propertyAccess = unwrapped as ts.PropertyAccessExpression;
+        return { receiver: propertyAccess.expression, name: propertyAccess.name.text };
+      }
+      case ts.SyntaxKind.ElementAccessExpression: {
+        const elementAccess = unwrapped as ts.ElementAccessExpression;
+        const name = literalText(elementAccess.argumentExpression);
+        return name ? { receiver: elementAccess.expression, name } : undefined;
+      }
     }
+    // Stryker disable next-line ConditionalExpression: falling through and an explicit undefined return are equivalent for non-member expressions.
+    return undefined;
+  }
+
+  function staticDeclarationName(name: ts.PropertyName | undefined): string | undefined {
+    switch (name?.kind) {
+      case ts.SyntaxKind.Identifier:
+      case ts.SyntaxKind.StringLiteral:
+      case ts.SyntaxKind.NumericLiteral:
+        return (name as ts.Identifier | ts.StringLiteral | ts.NumericLiteral).text;
+      case ts.SyntaxKind.ComputedPropertyName:
+        return literalText((name as ts.ComputedPropertyName).expression);
+    }
+    // Stryker disable next-line ConditionalExpression: unsupported or absent property names have no static declaration name.
     return undefined;
   }
 
@@ -763,7 +771,6 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function mutatesSetPrototypeHas(): boolean {
     let mutated = false;
     function visit(node: ts.Node): void {
-      if (mutated) return;
       if (
         ts.isBinaryExpression(node)
         && isAssignmentOperatorKind(node.operatorToken.kind)
@@ -773,20 +780,39 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         return;
       }
       if (ts.isCallExpression(node)) {
-        const callee = unwrapExpression(node.expression);
-        const calleeReceiver = ts.isPropertyAccessExpression(callee) ? unwrapExpression(callee.expression) : undefined;
+        const callee = staticMemberAccess(node.expression);
+        const calleeReceiver = callee ? unwrapExpression(callee.receiver) : undefined;
+        const receiverName = calleeReceiver && ts.isIdentifier(calleeReceiver) ? calleeReceiver.text : undefined;
         if (
-          ts.isPropertyAccessExpression(callee)
-          && calleeReceiver
-          && ts.isIdentifier(calleeReceiver)
-          && calleeReceiver.text === "Object"
-          && callee.name.text === "defineProperty"
+          callee
+          && (receiverName === "Object" || receiverName === "Reflect")
+          && callee.name === "defineProperty"
           && node.arguments.length >= 2
           && isSetPrototypeExpression(node.arguments[0])
-          && literalText(node.arguments[1]) === "has"
         ) {
-          mutated = true;
-          return;
+          const propertyName = literalText(node.arguments[1]);
+          if (propertyName === undefined || propertyName === "has") {
+            mutated = true;
+            return;
+          }
+        }
+        if (
+          callee
+          && receiverName === "Object"
+          && callee.name === "defineProperties"
+          && node.arguments.length >= 2
+          && isSetPrototypeExpression(node.arguments[0])
+        ) {
+          const descriptors = unwrapExpression(node.arguments[1]);
+          const definitelyOmitsHas = ts.isObjectLiteralExpression(descriptors)
+            && descriptors.properties.every((property) => {
+              const propertyName = staticDeclarationName(property.name);
+              return propertyName !== undefined && propertyName !== "has";
+            });
+          if (!definitelyOmitsHas) {
+            mutated = true;
+            return;
+          }
         }
       }
       ts.forEachChild(node, visit);
@@ -813,13 +839,17 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     }
     function countDeclaredNames(node: ts.Node): void {
       if (ts.isVariableDeclaration(node)) countBindingName(node.name);
-      else if (ts.isParameter(node)) countBindingName(node.name);
-      else if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) && node.name) countDeclaration(node.name.text);
-      else if (ts.isImportClause(node) && node.name) countDeclaration(node.name.text);
-      else if (ts.isNamespaceImport(node)) countDeclaration(node.name.text);
-      else if (ts.isImportSpecifier(node)) countDeclaration(node.name.text);
-      else if (ts.isImportEqualsDeclaration(node)) countDeclaration(node.name.text);
-      else if (ts.isCatchClause(node) && node.variableDeclaration) countBindingName(node.variableDeclaration.name);
+      if (ts.isParameter(node)) countBindingName(node.name);
+      if (ts.isFunctionDeclaration(node)) {
+        if (node.name) countDeclaration(node.name.text);
+      }
+      if (ts.isClassDeclaration(node)) {
+        if (node.name) countDeclaration(node.name.text);
+      }
+      if (ts.isImportClause(node) && node.name) countDeclaration(node.name.text);
+      if (ts.isNamespaceImport(node)) countDeclaration(node.name.text);
+      if (ts.isImportSpecifier(node)) countDeclaration(node.name.text);
+      if (ts.isImportEqualsDeclaration(node)) countDeclaration(node.name.text);
       ts.forEachChild(node, countDeclaredNames);
     }
     countDeclaredNames(sourceFile);
@@ -828,16 +858,20 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     for (const statement of sourceFile.statements) {
       if (!ts.isVariableStatement(statement) || !isConstDeclarationList(statement.declarationList)) continue;
       for (const declaration of statement.declarationList.declarations) {
+        // Stryker disable next-line ConditionalExpression: non-Identifier binding names have no stable text key that an Identifier use can retrieve.
         if (!ts.isIdentifier(declaration.name)) continue;
         const value = singletonStringSetInitializer(declaration.initializer);
+        // Stryker disable next-line ConditionalExpression: an undefined initializer value cannot produce a resolvable static module specifier.
         if (value === undefined) continue;
         candidates.set(declaration.name.text, { declarationStart: declaration.name.getStart(sourceFile), value });
       }
     }
-    if (candidates.size === 0) return new Map();
     function visitCandidateUse(node: ts.Node): void {
-      if (ts.isIdentifier(node) && candidates.has(node.text)) {
-        if (!isDeclarationIdentifier(node) && !isAllowedSingletonSetReference(node)) unsafeNames.add(node.text);
+      if (node.kind === ts.SyntaxKind.Identifier) {
+        const identifier = node as ts.Identifier;
+        if (candidates.has(identifier.text) && !isDeclarationIdentifier(identifier) && !isAllowedSingletonSetReference(identifier)) {
+          unsafeNames.add(identifier.text);
+        }
       }
       ts.forEachChild(node, visitCandidateUse);
     }
@@ -853,7 +887,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 
   const safeSingletonStringSets = collectSafeSingletonStringSets();
 
-  function bindPattern(scope: ImportScope, name: ts.BindingName, kind: ImportBindingKind, varScoped = false): void {
+  function bindPattern(scope: ImportScope, name: ts.BindingName, kind: ImportBindingKind, varScoped: boolean): void {
     if (ts.isIdentifier(name)) {
       bindName(scope, name.text, kind, varScoped);
       return;
@@ -895,16 +929,11 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   }
 
   function staticPropertyName(expression: ts.Expression): string | undefined {
-    const unwrapped = unwrapExpression(expression);
-    if (ts.isPropertyAccessExpression(unwrapped)) return unwrapped.name.text;
-    if (ts.isElementAccessExpression(unwrapped)) return literalText(unwrapped.argumentExpression);
-    return undefined;
+    return staticMemberAccess(expression)?.name;
   }
 
   function staticPropertyReceiver(expression: ts.Expression): ts.Expression | undefined {
-    const unwrapped = unwrapExpression(expression);
-    if (ts.isPropertyAccessExpression(unwrapped) || ts.isElementAccessExpression(unwrapped)) return unwrapped.expression;
-    return undefined;
+    return staticMemberAccess(expression)?.receiver;
   }
 
   function staticModuleSpecifier(scope: ImportScope, node: ts.Node | undefined): string | undefined {
@@ -918,7 +947,6 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       && staticPropertyName(unwrapped.expression) === "resolve"
       && Boolean(staticPropertyReceiver(unwrapped.expression))
       && isRequireLikeExpression(scope, staticPropertyReceiver(unwrapped.expression)!)
-      && unwrapped.arguments.length >= 1
     ) {
       return staticModuleSpecifier(scope, unwrapped.arguments[0]);
     }
@@ -936,37 +964,32 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   }
 
   function isGlobalRequireProperty(scope: ImportScope, expression: ts.Expression): boolean {
-    const receiver = staticPropertyReceiver(expression);
-    return staticPropertyName(expression) === "require"
-      && Boolean(receiver)
-      && (
-        (
-          ts.isIdentifier(unwrapExpression(receiver!))
-          && ["global", "globalThis"].includes(unwrapExpression(receiver!).getText(sourceFile))
-          && bindingFor(scope, unwrapExpression(receiver!).getText(sourceFile)) === undefined
-        )
-        || (unwrapExpression(receiver!).kind === ts.SyntaxKind.ThisKeyword && scopeAllowsTopLevelThis(scope))
-      );
+    if (staticPropertyName(expression) !== "require") return false;
+    const unwrappedReceiver = unwrapExpression(staticPropertyReceiver(expression)!);
+    if (ts.isIdentifier(unwrappedReceiver)) {
+      const receiverName = unwrappedReceiver.getText(sourceFile);
+      return ["global", "globalThis"].includes(receiverName) && bindingFor(scope, receiverName) === undefined;
+    }
+    return unwrappedReceiver.kind === ts.SyntaxKind.ThisKeyword && scopeAllowsTopLevelThis(scope);
   }
 
   function isModuleRequireProperty(scope: ImportScope, expression: ts.Expression): boolean {
-    return staticPropertyName(expression) === "require"
-      && Boolean(staticPropertyReceiver(expression))
-      && isNodeModuleObject(scope, staticPropertyReceiver(expression)!);
+    if (staticPropertyName(expression) !== "require") return false;
+    return isNodeModuleObject(scope, staticPropertyReceiver(expression)!);
   }
 
   function isProcessMainModuleRequireProperty(scope: ImportScope, expression: ts.Expression): boolean {
-    if (staticPropertyName(expression) !== "require" || !staticPropertyReceiver(expression)) return false;
+    if (staticPropertyName(expression) !== "require") return false;
     const receiver = unwrapExpression(staticPropertyReceiver(expression)!);
-    if (staticPropertyName(receiver) !== "mainModule" || !staticPropertyReceiver(receiver)) return false;
+    if (staticPropertyName(receiver) !== "mainModule") return false;
     const root = unwrapExpression(staticPropertyReceiver(receiver)!);
     return ts.isIdentifier(root) && root.text === "process" && bindingFor(scope, "process") === undefined;
   }
 
   function isModuleConstructorLoadProperty(scope: ImportScope, expression: ts.Expression): boolean {
-    if (staticPropertyName(expression) !== "_load" || !staticPropertyReceiver(expression)) return false;
+    if (staticPropertyName(expression) !== "_load") return false;
     const receiver = unwrapExpression(staticPropertyReceiver(expression)!);
-    if (staticPropertyName(receiver) !== "constructor" || !staticPropertyReceiver(receiver)) return false;
+    if (staticPropertyName(receiver) !== "constructor") return false;
     return isNodeModuleObject(scope, staticPropertyReceiver(receiver)!);
   }
 
@@ -980,18 +1003,14 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   }
 
   function literalRequireLikeSpecifier(scope: ImportScope, node: ts.Node | undefined): string | undefined {
-    if (!node || !ts.isCallExpression(node) || !isRequireLikeExpression(scope, node.expression) || node.arguments.length < 1) return undefined;
+    if (!node || !ts.isCallExpression(node) || !isRequireLikeExpression(scope, node.expression)) return undefined;
     return staticModuleSpecifier(scope, node.arguments[0]);
   }
 
   function isModuleNamespaceExpression(scope: ImportScope, expression: ts.Expression): boolean {
     const unwrapped = unwrapExpression(expression);
     if (ts.isIdentifier(unwrapped) && bindingFor(scope, unwrapped.text) === "moduleNamespace") return true;
-    if (ts.isCallExpression(unwrapped)) {
-      const moduleSpecifier = literalRequireLikeSpecifier(scope, unwrapped);
-      return Boolean(moduleSpecifier && isModulePackageSpecifier(moduleSpecifier));
-    }
-    return false;
+    return isModulePackageSpecifier(literalRequireLikeSpecifier(scope, unwrapped));
   }
 
   function createRequireKind(scope: ImportScope, expression: ts.Expression): ImportBindingKind | undefined {
@@ -1028,7 +1047,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     if (isProcessMainModuleRequireProperty(scope, unwrapped)) return "process.mainModule.require";
     if (isModuleConstructorLoadProperty(scope, unwrapped)) return "module.constructor._load";
     if (isGlobalRequireProperty(scope, unwrapped)) {
-      const receiverName = staticPropertyReceiver(unwrapped)?.getText(sourceFile);
+      const receiverName = staticPropertyReceiver(unwrapped)!.getText(sourceFile);
       if (receiverName === "global") return "global.require";
       if (receiverName === "this") return "this.require";
       return "globalThis.require";
@@ -1039,27 +1058,28 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function literalFromApplyArray(scope: ImportScope, node: ts.Expression | undefined): string | undefined {
     if (!node) return undefined;
     const unwrapped = unwrapExpression(node);
-    if (!ts.isArrayLiteralExpression(unwrapped) || unwrapped.elements.length < 1) return undefined;
+    if (!ts.isArrayLiteralExpression(unwrapped)) return undefined;
     return staticModuleSpecifier(scope, unwrapped.elements[0]);
   }
 
-  function requireCallArgument(scope: ImportScope, node: ts.CallExpression): { sourceName: string; specifier?: string; dynamic: boolean } | undefined {
+  function requireCallArgument(scope: ImportScope, node: ts.CallExpression): { sourceName: string; specifier?: string } | undefined {
     const directName = requireLikeName(scope, node.expression);
     if (directName) {
       if (node.arguments.length < 1) return undefined;
       const specifier = staticModuleSpecifier(scope, node.arguments[0]);
-      return { sourceName: directName, specifier, dynamic: !specifier };
+      return { sourceName: directName, specifier };
     }
 
     const propertyName = staticPropertyName(node.expression);
     const receiver = staticPropertyReceiver(node.expression);
     if ((propertyName === "call" || propertyName === "apply") && receiver && isRequireLikeExpression(scope, receiver)) {
+      const receiverName = requireLikeName(scope, receiver)!;
       if (propertyName === "call") {
-        const specifier = node.arguments.length >= 2 ? staticModuleSpecifier(scope, node.arguments[1]) : undefined;
-        return { sourceName: `${requireLikeName(scope, receiver) || "require"}.call`, specifier, dynamic: !specifier };
+        const specifier = staticModuleSpecifier(scope, node.arguments[1]);
+        return { sourceName: `${receiverName}.call`, specifier };
       }
-      const specifier = node.arguments.length >= 2 ? literalFromApplyArray(scope, node.arguments[1]) : undefined;
-      return { sourceName: `${requireLikeName(scope, receiver) || "require"}.apply`, specifier, dynamic: !specifier };
+      const specifier = literalFromApplyArray(scope, node.arguments[1]);
+      return { sourceName: `${receiverName}.apply`, specifier };
     }
 
     if (
@@ -1072,23 +1092,24 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       && isRequireLikeExpression(scope, node.arguments[0])
     ) {
       const specifier = literalFromApplyArray(scope, node.arguments[2]);
-      return { sourceName: "Reflect.apply(require)", specifier, dynamic: !specifier };
+      return { sourceName: "Reflect.apply(require)", specifier };
     }
     return undefined;
   }
 
   function readonlySetHasGuard(scope: ImportScope, node: ts.Expression): { identifier: string; specifier: string } | undefined {
     const unwrapped = unwrapExpression(node);
-    if (!ts.isCallExpression(unwrapped)) return undefined;
-    if (staticPropertyName(unwrapped.expression) !== "has") return undefined;
-    const receiver = staticPropertyReceiver(unwrapped.expression);
-    if (!receiver) return undefined;
-    const receiverName = unwrapExpression(receiver);
+    if (unwrapped.kind !== ts.SyntaxKind.CallExpression) return undefined;
+    const callExpression = unwrapped as ts.CallExpression;
+    if (callExpression.arguments.length !== 1) return undefined;
+    const access = staticMemberAccess(callExpression.expression);
+    // Stryker disable next-line ConditionalExpression: safe singleton candidates are invalidated by every non-`has` member use before guard recognition.
+    if (access?.name !== "has") return undefined;
+    const receiverName = unwrapExpression(access.receiver);
     if (!ts.isIdentifier(receiverName)) return undefined;
     const specifier = singletonStringSetFor(scope, receiverName.text);
     if (specifier === undefined) return undefined;
-    const [argument] = unwrapped.arguments;
-    if (!argument) return undefined;
+    const argument = callExpression.arguments[0];
     const argumentName = unwrapExpression(argument);
     if (!ts.isIdentifier(argumentName)) return undefined;
     return { identifier: argumentName.text, specifier };
@@ -1119,10 +1140,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     return true;
   }
 
-  function addRequireCallReference(node: ts.CallExpression, sourceName: string, specifier: string | undefined, dynamic: boolean): void {
+  function addRequireCallReference(node: ts.CallExpression, sourceName: string, specifier: string | undefined): void {
     if (specifier) {
       addReference(specifier, "require", node, false);
-    } else if (dynamic) {
+    } else {
       warnings.push({
         ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
         severity: "warning",
@@ -1139,11 +1160,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     return expression.text === "eval" || expression.text === "Function" ? expression.text : undefined;
   }
 
-  function addDynamicExecutionRequireReferences(scope: ImportScope, node: ts.CallExpression): boolean {
+  function addDynamicExecutionRequireReferences(scope: ImportScope, node: ts.CallExpression): void {
     const sourceName = dynamicExecutionSourceName(scope, node);
-    if (!sourceName) return false;
+    if (!sourceName) return;
     const modulePattern = /\brequire\s*\(\s*(["'`])([^"'`]+)\1/g;
-    let addedReference = false;
     let hasComputedArgument = false;
     for (const argument of node.arguments) {
       const sourceText = literalText(argument);
@@ -1152,10 +1172,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         continue;
       }
       for (const match of sourceText.matchAll(modulePattern)) {
-        const specifier = match[2];
-        if (!specifier) continue;
-        addReference(specifier, "require", node, false);
-        addedReference = true;
+        addReference(match[2]!, "require", node, false);
       }
     }
     if (hasComputedArgument) {
@@ -1166,9 +1183,7 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         message: `computed ${sourceName}() source cannot be resolved statically at line ${getLineNumber(sourceFile, node)}`,
         details: { line: getLineNumber(sourceFile, node) },
       });
-      return true;
     }
-    return addedReference;
   }
 
   function importTypeSpecifier(node: ts.ImportTypeNode): string | undefined {
@@ -1180,23 +1195,23 @@ export function extractImports(context: ImportScanContext, filePath: string, war
   function predeclareStatement(scope: ImportScope, node: ts.Node): void {
     if (ts.isVariableStatement(node)) {
       const varScoped = isVarScopedDeclarationList(node.declarationList);
-      for (const declaration of node.declarationList.declarations) bindPattern(scope, declaration.name, "shadow", varScoped);
+      for (const declaration of node.declarationList.declarations) bindPattern(scope, declaration.name, null, varScoped);
     } else if (ts.isFunctionDeclaration(node) && node.name) {
-      bindName(scope, node.name.text, "shadow");
+      bindLexicalName(scope, node.name.text, null);
     } else if (ts.isClassDeclaration(node) && node.name) {
-      bindName(scope, node.name.text, "shadow");
+      bindLexicalName(scope, node.name.text, null);
     } else if (ts.isImportDeclaration(node)) {
       const clause = node.importClause;
       if (!clause) return;
-      if (clause.name) bindName(scope, clause.name.text, "shadow");
+      if (clause.name) bindLexicalName(scope, clause.name.text, null);
       const namedBindings = clause.namedBindings;
       if (namedBindings && ts.isNamespaceImport(namedBindings)) {
-        bindName(scope, namedBindings.name.text, "shadow");
+        bindLexicalName(scope, namedBindings.name.text, null);
       } else if (namedBindings && ts.isNamedImports(namedBindings)) {
-        for (const element of namedBindings.elements) bindName(scope, element.name.text, "shadow");
+        for (const element of namedBindings.elements) bindLexicalName(scope, element.name.text, null);
       }
     } else if (ts.isImportEqualsDeclaration(node)) {
-      bindName(scope, node.name.text, "shadow");
+      bindLexicalName(scope, node.name.text, null);
     }
   }
 
@@ -1208,22 +1223,23 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     if (!ts.isStringLiteral(node.moduleSpecifier) || !isModulePackageSpecifier(node.moduleSpecifier.text)) return;
     const clause = node.importClause;
     if (!clause || clause.isTypeOnly) return;
-    if (clause.name) bindName(scope, clause.name.text, "moduleNamespace");
+    if (clause.name) bindLexicalName(scope, clause.name.text, "moduleNamespace");
     const namedBindings = clause.namedBindings;
     if (namedBindings && ts.isNamedImports(namedBindings)) {
       for (const element of namedBindings.elements) {
         if (element.isTypeOnly) continue;
-        if ((element.propertyName?.text || element.name.text) === "createRequire") bindName(scope, element.name.text, "createRequire");
+        if ((element.propertyName?.text || element.name.text) === "createRequire") bindLexicalName(scope, element.name.text, "createRequire");
       }
     } else if (namedBindings && ts.isNamespaceImport(namedBindings)) {
-      bindName(scope, namedBindings.name.text, "moduleNamespace");
+      bindLexicalName(scope, namedBindings.name.text, "moduleNamespace");
     }
   }
 
   function visitVariableDeclaration(scope: ImportScope, node: ts.VariableDeclaration): void {
     if (node.initializer) visit(scope, node.initializer);
-    const varScoped = node.parent && ts.isVariableDeclarationList(node.parent) ? isVarScopedDeclarationList(node.parent) : false;
-    const constScoped = node.parent && ts.isVariableDeclarationList(node.parent) ? isConstDeclarationList(node.parent) : false;
+    const declarationList = node.parent as ts.VariableDeclarationList;
+    const varScoped = isVarScopedDeclarationList(declarationList);
+    const constScoped = isConstDeclarationList(declarationList);
     if (node.initializer && ts.isIdentifier(node.name)) {
       const kind = bindingKindFromInitializer(scope, node.initializer);
       const stringValue = constScoped ? staticModuleSpecifier(scope, node.initializer) : undefined;
@@ -1231,26 +1247,28 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       if (kind) bindName(scope, node.name.text, kind, varScoped);
       else if (stringValue !== undefined) bindStringConstant(scope, node.name.text, stringValue, varScoped);
       else if (singletonSet) bindSingletonStringSet(scope, singletonSet.name, singletonSet.value, varScoped);
-      else bindName(scope, node.name.text, "shadow", varScoped);
+      else bindName(scope, node.name.text, null, varScoped);
     } else if (node.initializer && ts.isObjectBindingPattern(node.name)) {
       const moduleSpecifier = literalRequireLikeSpecifier(scope, node.initializer);
       if (moduleSpecifier && isModulePackageSpecifier(moduleSpecifier)) {
         for (const element of node.name.elements) {
+          // Stryker disable next-line ConditionalExpression: nested binding patterns do not expose a retrievable local Identifier key.
           if (!ts.isIdentifier(element.name)) continue;
           const propertyName = element.propertyName && ts.isIdentifier(element.propertyName) ? element.propertyName.text : element.name.text;
-          bindName(scope, element.name.text, propertyName === "createRequire" ? "createRequire" : "shadow", varScoped);
+          bindName(scope, element.name.text, propertyName === "createRequire" ? "createRequire" : null, varScoped);
         }
       } else if (isNodeModuleObject(scope, node.initializer)) {
         for (const element of node.name.elements) {
+          // Stryker disable next-line ConditionalExpression: nested binding patterns do not expose a retrievable local Identifier key.
           if (!ts.isIdentifier(element.name)) continue;
           const propertyName = element.propertyName && ts.isIdentifier(element.propertyName) ? element.propertyName.text : element.name.text;
-          bindName(scope, element.name.text, propertyName === "require" ? "require" : "shadow", varScoped);
+          bindName(scope, element.name.text, propertyName === "require" ? "require" : null, varScoped);
         }
       } else {
-        bindPattern(scope, node.name, "shadow", varScoped);
+        bindPattern(scope, node.name, null, varScoped);
       }
     } else {
-      bindPattern(scope, node.name, "shadow", varScoped);
+      bindPattern(scope, node.name, null, varScoped);
     }
   }
 
@@ -1266,7 +1284,10 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 
   function visitFunctionLike(scope: ImportScope, node: FunctionLikeWithBody): void {
     const childScope = createImportScope(scope, true);
-    for (const parameter of node.parameters) bindPattern(childScope, parameter.name, "shadow");
+    for (const parameter of node.parameters) {
+      // Stryker disable next-line BooleanLiteral: childScope is itself the function var-scope, so either routing choice selects the same map.
+      bindPattern(childScope, parameter.name, null, false);
+    }
     if (node.body) visit(childScope, node.body);
   }
 
@@ -1286,8 +1307,11 @@ export function extractImports(context: ImportScanContext, filePath: string, war
     ) {
       const specifier = literalText(node.moduleReference.expression);
       if (specifier) addReference(specifier, "require", node, Boolean((node as { isTypeOnly?: boolean }).isTypeOnly));
-    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-      addReference(node.moduleSpecifier.text, "export-from", node, Boolean(node.isTypeOnly));
+    } else if (ts.isExportDeclaration(node)) {
+      const moduleSpecifier = node.moduleSpecifier;
+      if (moduleSpecifier && ts.isStringLiteral(moduleSpecifier)) {
+        addReference(moduleSpecifier.text, "export-from", node, Boolean(node.isTypeOnly));
+      }
     } else if (ts.isImportTypeNode(node)) {
       const specifier = importTypeSpecifier(node);
       if (specifier) addReference(specifier, "import", node, true);
@@ -1311,27 +1335,27 @@ export function extractImports(context: ImportScanContext, filePath: string, war
         }
       } else {
         const requireCall = requireCallArgument(scope, node);
-        if (requireCall) addRequireCallReference(node, requireCall.sourceName, requireCall.specifier, requireCall.dynamic);
+        if (requireCall) addRequireCallReference(node, requireCall.sourceName, requireCall.specifier);
         addDynamicExecutionRequireReferences(scope, node);
       }
     } else if (ts.isIfStatement(node)) {
       if (addReadonlySetGuardedRequireIfSafe(scope, node)) return;
     } else if (ts.isForStatement(node)) {
-      const loopScope = createImportScope(scope);
+      const loopScope = createImportScope(scope, false);
       if (node.initializer) visit(loopScope, node.initializer);
       if (node.condition) visit(loopScope, node.condition);
       if (node.incrementor) visit(loopScope, node.incrementor);
       visit(loopScope, node.statement);
       return;
     } else if (ts.isForInStatement(node) || ts.isForOfStatement(node)) {
-      const loopScope = createImportScope(scope);
+      const loopScope = createImportScope(scope, false);
       visit(loopScope, node.initializer);
       visit(loopScope, node.expression);
       visit(loopScope, node.statement);
       return;
     } else if (ts.isSwitchStatement(node)) {
       visit(scope, node.expression);
-      const switchScope = createImportScope(scope);
+      const switchScope = createImportScope(scope, false);
       for (const clause of node.caseBlock.clauses) {
         if (ts.isCaseClause(clause)) visit(scope, clause.expression);
       }
@@ -1343,15 +1367,15 @@ export function extractImports(context: ImportScanContext, filePath: string, war
       }
       return;
     } else if (ts.isCatchClause(node)) {
-      const catchScope = createImportScope(scope);
-      if (node.variableDeclaration) bindPattern(catchScope, node.variableDeclaration.name, "shadow");
+      const catchScope = createImportScope(scope, false);
+      if (node.variableDeclaration) bindPattern(catchScope, node.variableDeclaration.name, null, false);
       visit(catchScope, node.block);
       return;
     } else if (ts.isSourceFile(node)) {
       visitStatementList(scope, node.statements);
       return;
     } else if (ts.isBlock(node) || ts.isModuleBlock(node)) {
-      visitStatementList(createImportScope(scope), node.statements);
+      visitStatementList(createImportScope(scope, false), node.statements);
       return;
     } else if (isFunctionLikeWithBody(node)) {
       visitFunctionLike(scope, node);
@@ -1365,8 +1389,12 @@ export function extractImports(context: ImportScanContext, filePath: string, war
 }
 
 function exportedNameFromDeclarationName(name: ts.DeclarationName): string | undefined {
-  // Stryker disable next-line ConditionalExpression: supported declaration names are identifiers/string/numeric literals; other node kinds are invalid export names here.
-  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text || undefined;
+  switch (name.kind) {
+    case ts.SyntaxKind.Identifier:
+    case ts.SyntaxKind.StringLiteral:
+    case ts.SyntaxKind.NumericLiteral:
+      return (name as ts.Identifier | ts.StringLiteral | ts.NumericLiteral).text || undefined;
+  }
   return undefined;
 }
 
@@ -1380,7 +1408,6 @@ function bindingNames(name: ts.BindingName): string[] {
 }
 
 function resolveLocalModuleFile(fromFilePath: string, specifier: string): string | undefined {
-  // Stryker disable next-line MethodExpression: package specifiers are rejected by the leading-dot check; changing the secondary absolute-path guard is equivalent for non-local specifiers.
   if (!specifier.startsWith(".") && !specifier.startsWith("/")) return undefined;
   const basePath = path.resolve(path.dirname(fromFilePath), stripResourceQuery(specifier));
   for (const candidatePath of candidateModulePaths(basePath)) {
@@ -1409,13 +1436,11 @@ export function extractPublicSymbols(filePath: string, visitedFiles = new Set<st
       if (exportedName) symbols.add(exportedName);
       return;
     }
-    // Stryker disable next-line ConditionalExpression: broadening this to arbitrary exported nodes is equivalent for valid TypeScript declarations exercised here.
     if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
       if (ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Default) {
         symbols.add("default");
       } else {
         const exportedName = exportedNameFromDeclarationName(node.name!);
-        // Stryker disable next-line ConditionalExpression: exported declaration names are guaranteed for valid non-default declarations.
         if (exportedName) symbols.add(exportedName);
       }
     } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
@@ -1426,26 +1451,23 @@ export function extractPublicSymbols(filePath: string, visitedFiles = new Set<st
       symbols.add(node.name.text);
     } else if (ts.isExportAssignment(node)) {
       symbols.add("default");
-    } else {
-      // Stryker disable next-line ConditionalExpression: non-export nodes have no public-symbol effect and are covered by exact symbol tests.
-      if (ts.isExportDeclaration(node)) {
-        // Stryker disable all: export-clause branch selection is asserted through named, namespace, package, and star re-export symbol tests.
-        if (node.exportClause && ts.isNamedExports(node.exportClause)) {
-          for (const element of node.exportClause.elements) {
-            symbols.add(element.name.text);
-          }
-        } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
-          symbols.add(node.exportClause.name.text);
-        } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-          const targetFilePath = resolveProjectModuleFile(filePath, node.moduleSpecifier.text);
-          if (targetFilePath) {
-            for (const exportedSymbol of extractPublicSymbols(targetFilePath, visitedFiles)) {
-              if (exportedSymbol !== "default") symbols.add(exportedSymbol);
-            }
+    } else if (ts.isExportDeclaration(node)) {
+      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        for (const element of node.exportClause.elements) {
+          symbols.add(element.name.text);
+        }
+      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
+        symbols.add(node.exportClause.name.text);
+      } else {
+        const moduleSpecifier = node.moduleSpecifier as ts.StringLiteral;
+        const targetFilePath = resolveProjectModuleFile(filePath, moduleSpecifier.text);
+        if (targetFilePath) {
+          for (const exportedSymbol of extractPublicSymbols(targetFilePath, visitedFiles)) {
+            if (exportedSymbol !== "default") symbols.add(exportedSymbol);
           }
         }
-        // Stryker restore all
       }
+      return;
     }
     ts.forEachChild(node, visit);
   }
@@ -1455,11 +1477,11 @@ export function extractPublicSymbols(filePath: string, visitedFiles = new Set<st
 }
 
 function normalizeWhitespace(text: string): string {
-  // Stryker disable next-line MethodExpression: TypeScript node text used here has no leading/trailing whitespace; regex collapse is tested by exact digest cases.
-  return text.replace(/\s+/g, " ").trim();
+  return text.replace(/\s+/g, " ");
 }
 
-function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
+/** @internal */
+export function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
   if (!fs.existsSync(filePath)) return [];
   const sourceText = fs.readFileSync(filePath, "utf8");
   if (isPythonPath(filePath)) return inspectPythonSource(filePath).surfaceParts;
@@ -1482,15 +1504,17 @@ function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
       return;
     }
     if (ts.isFunctionDeclaration(node) && hasExportModifier(node)) {
-      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name!);
-      // Stryker disable next-line ConditionalExpression: valid exported function declarations are named unless default.
+      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default
+        ? "default"
+        : node.name ? exportedNameFromDeclarationName(node.name) : undefined;
       if (name) {
         const params = node.parameters.map((parameter) => `${typeText(parameter.name)}:${typeText(parameter.type)}`).join(",");
         parts.push(`function:${name}(${params}):${typeText(node.type)}`);
       }
     } else if ((ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && hasExportModifier(node)) {
-      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default ? "default" : exportedNameFromDeclarationName(node.name!);
-      // Stryker disable next-line ConditionalExpression: valid exported type/class declarations are named unless default.
+      const name = ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Default
+        ? "default"
+        : node.name ? exportedNameFromDeclarationName(node.name) : undefined;
       if (name) parts.push(`${ts.SyntaxKind[node.kind]}:${name}:${normalizeWhitespace(node.getText(sourceFile))}`);
     } else if (ts.isVariableStatement(node) && hasExportModifier(node)) {
       for (const declaration of node.declarationList.declarations) {
@@ -1500,19 +1524,15 @@ function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
       parts.push(`export-import:${node.name.text}:${typeText(node.moduleReference)}`);
     } else if (ts.isExportAssignment(node)) {
       parts.push("export:default");
-    } else {
-      // Stryker disable next-line ConditionalExpression: non-export nodes have no public-surface effect and are covered by exact digest tests.
-      if (ts.isExportDeclaration(node)) {
-        // Stryker disable all: export-clause branch selection is asserted by the exact public-surface digest test.
-        if (node.exportClause && ts.isNamedExports(node.exportClause)) {
-          for (const element of node.exportClause.elements) parts.push(`export:${element.name.text}`);
-        } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
-          parts.push(`namespace:${node.exportClause.name.text}`);
-        } else if (!node.exportClause && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-          parts.push(`export-star:${node.moduleSpecifier.text}`);
-        }
-        // Stryker restore all
+    } else if (ts.isExportDeclaration(node)) {
+      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        for (const element of node.exportClause.elements) parts.push(`export:${element.name.text}`);
+      } else if (node.exportClause && ts.isNamespaceExport(node.exportClause)) {
+        parts.push(`namespace:${node.exportClause.name.text}`);
+      } else {
+        parts.push(`export-star:${(node.moduleSpecifier as ts.StringLiteral).text}`);
       }
+      return;
     }
     ts.forEachChild(node, visit);
   }
@@ -1523,17 +1543,19 @@ function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
 
 function findNearestTsConfig(filePath: string): string | undefined {
   let directoryPath = path.dirname(path.resolve(filePath));
-  for (;;) {
+  const visited = new Set<string>();
+  while (!visited.has(directoryPath)) {
+    visited.add(directoryPath);
     const tsconfigPath = path.join(directoryPath, "tsconfig.json");
     if (fs.existsSync(tsconfigPath)) return tsconfigPath;
     if (fs.existsSync(path.join(directoryPath, ".git"))) return undefined;
-    const parentDirectoryPath = path.dirname(directoryPath);
-    if (parentDirectoryPath === directoryPath) return undefined;
-    directoryPath = parentDirectoryPath;
+    directoryPath = path.dirname(directoryPath);
   }
+  return undefined;
 }
 
-function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
+/** @internal */
+export function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
   const defaultOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.NodeNext,
@@ -1547,10 +1569,8 @@ function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
   if (tsconfigPath) {
     const normalizedTsconfigPath = normalizePath(tsconfigPath);
     const configFile = ts.readConfigFile(normalizedTsconfigPath, ts.sys.readFile);
-    if (!configFile.error) {
-      const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(normalizedTsconfigPath), defaultOptions, normalizedTsconfigPath);
-      options = parsedConfig.options;
-    }
+    const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(normalizedTsconfigPath), undefined, normalizedTsconfigPath);
+    options = { ...defaultOptions, ...parsedConfig.options };
   }
   return {
     ...options,
@@ -1562,6 +1582,7 @@ function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
     inlineSourceMap: false,
     noEmit: false,
     noEmitOnError: false,
+    newLine: ts.NewLineKind.LineFeed,
     removeComments: true,
     sourceMap: false,
     stripInternal: true,
@@ -1569,12 +1590,14 @@ function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
   };
 }
 
-function collectPublicDeclarationRoots(filePath: string, visitedFiles = new Set<string>()): string[] {
+/** @internal */
+export function collectPublicDeclarationRoots(filePath: string, visitedFiles = new Set<string>()): string[] {
   const normalizedFilePath = path.resolve(filePath);
   if (visitedFiles.has(normalizedFilePath) || !fs.existsSync(normalizedFilePath)) return [];
   visitedFiles.add(normalizedFilePath);
   const roots = [normalizedFilePath];
   const sourceText = fs.readFileSync(normalizedFilePath, "utf8");
+  // Stryker disable next-line BooleanLiteral: parent pointers are not used while collecting declaration roots.
   const sourceFile = ts.createSourceFile(normalizedFilePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(normalizedFilePath));
 
   function importDeclarationIsTypeSurface(node: ts.ImportDeclaration): boolean {
@@ -1601,7 +1624,7 @@ function collectPublicDeclarationRoots(filePath: string, visitedFiles = new Set<
 }
 
 function normalizeDeclarationText(text: string): string {
-  return text.replace(/\r\n/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
+  return text.split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
 }
 
 function hasInternalTag(node: ts.Node): boolean {
@@ -1619,14 +1642,16 @@ function normalizedDeclarationSourceText(filePath: string): string {
     return (root) => ts.visitNode(root, visit) as ts.SourceFile;
   };
   const result = ts.transform(sourceFile, [transformer]);
-  try {
-    return ts.createPrinter({ removeComments: true }).printFile(result.transformed[0] as ts.SourceFile);
-  } finally {
-    result.dispose();
-  }
+  const declarationText = ts.createPrinter({
+    newLine: ts.NewLineKind.LineFeed,
+    removeComments: true,
+  }).printFile(result.transformed[0] as ts.SourceFile);
+  result.dispose();
+  return declarationText;
 }
 
-function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): string | undefined {
+/** @internal */
+export function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): string {
   if (isDeclarationPath(rootFile)) return normalizedDeclarationSourceText(rootFile);
   try {
     return ts.transpileDeclaration(fs.readFileSync(rootFile, "utf8"), {
@@ -1634,19 +1659,19 @@ function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): 
       fileName: rootFile,
     }).outputText;
   } catch {
-    return undefined;
+    // Declaration emit failures fall back to the syntax surface.
   }
+  return "";
 }
 
-function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
-  if (!fs.existsSync(filePath) || isPythonPath(filePath)) return [];
+/** @internal */
+export function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
+  if (isPythonPath(filePath)) return [];
   const rootFiles = collectPublicDeclarationRoots(filePath);
-  if (rootFiles.length === 0) return [];
   const options = declarationEmitCompilerOptions(filePath);
   const declarations: { orderKey: string; text: string }[] = [];
-  for (const rootFile of [...new Set(rootFiles)].sort((left, right) => left.localeCompare(right))) {
+  for (const rootFile of rootFiles) {
     const outputText = declarationTextForRoot(rootFile, options);
-    if (!outputText) continue;
     const normalizedText = normalizeDeclarationText(outputText);
     if (normalizedText.length === 0) continue;
     declarations.push({
@@ -1660,7 +1685,6 @@ function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
 }
 
 function publicSurfaceSignatureParts(filePath: string): string[] {
-  if (isPythonPath(filePath)) return syntaxPublicSurfaceSignatureParts(filePath);
   const declarationParts = declarationPublicSurfaceSignatureParts(filePath);
   return declarationParts.length > 0 ? declarationParts : syntaxPublicSurfaceSignatureParts(filePath);
 }
