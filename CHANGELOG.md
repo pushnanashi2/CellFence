@@ -8,6 +8,7 @@
 
 - Align path matching and owned-path overlap analysis with minimatch semantics for standalone and embedded globstars, and enforce the dialect with exhaustive and seeded external-oracle conformance tests.
 - Read discovered `tsconfig.*.json` files directly when collecting workspace path aliases instead of falling back to a neighboring `tsconfig.json`.
+- Harden package-map, CommonJS alias, readonly `Set`, Python diagnostic, and public-surface resolution against ambiguous or adversarial syntax while preserving fail-closed behavior.
 - Keep `check --changed` finding identity stable when unchanged violations move to a different source line.
 - Parse git name-status output without corrupting paths containing spaces or non-ASCII characters.
 - Recover claim operations from stale lock files while preserving live-lock exclusion.

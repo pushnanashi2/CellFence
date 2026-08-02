@@ -20,7 +20,7 @@ export type PythonInspection = {
   publicSymbols: string[];
   surfaceParts: string[];
   resources: PythonResourceAccess[];
-  errors?: PythonInspectionError[];
+  errors: PythonInspectionError[];
   warnings?: PythonInspectionWarning[];
 };
 
