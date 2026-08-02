@@ -79,6 +79,22 @@ test("path matcher agrees with the minimatch oracle across seeded random inputs"
   }
 });
 
+test("path matcher agrees with the oracle for line terminators in legal path segments", () => {
+  for (const relativePath of [
+    "line\nfeed.ts",
+    "src/line\nfeed.ts",
+    "src/deep/line\rfeed.ts",
+    "src/a.ts\n",
+    "src/a.ts\r",
+    "src/a.ts\u2028",
+    "src/a.ts\u2029",
+  ]) {
+    for (const pattern of ["**", "src/**", "src/**/*.ts"]) {
+      assert.equal(matchesPattern(relativePath, pattern), oracle(relativePath, pattern), `${pattern} ${JSON.stringify(relativePath)}`);
+    }
+  }
+});
+
 // One-sided (metamorphic) oracle for the overlap automaton: no complete external
 // oracle exists for glob intersection, but any concrete path matched by both
 // patterns is a witness, so pathPatternsOverlap must return true for it.

@@ -67,7 +67,7 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-agent-budget",
-    version: "0.1.8",
+    version: "0.2.0",
     capabilities: { needsGitDiff: true },
     rules: {
       "agent-budget/change-budget": defineRule({

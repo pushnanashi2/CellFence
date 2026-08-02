@@ -45,6 +45,8 @@ test("file index matches single-star patterns and scans a cell without a context
 
     assert.equal(matchesPattern("src/core/public.ts", "src/*/public.ts"), true);
     assert.equal(matchesPattern("src/core/nested/private.ts", "src/*/public.ts"), false);
+    assert.equal(matchesPattern("src/core", "src\\core\\"), true);
+    assert.equal(pathPatternsOverlap("src\\core\\", "src/core"), true);
     assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
 
     const files = sourceFilesForCell(rootDir, {
@@ -167,6 +169,33 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(literalPrefix("src/core///**"), "src/core");
   assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
   assert.equal(literalPrefix("src/core/file?.ts"), "src/core/file?.ts");
+});
+
+test("file index treats unsupported glob operators as literal text", () => {
+  for (const [pattern, expandedPath] of [
+    ["src/file?.ts", "src/file1.ts"],
+    ["src/{a,b}.ts", "src/a.ts"],
+    ["src/[ab].ts", "src/a.ts"],
+    ["src/!(a).ts", "src/b.ts"],
+    ["src/+(a).ts", "src/a.ts"],
+    ["src/@(a).ts", "src/a.ts"],
+  ]) {
+    assert.equal(matchesPattern(pattern, pattern), true);
+    assert.equal(matchesPattern(expandedPath, pattern), false);
+    assert.equal(pathPatternsOverlap(pattern, pattern), true);
+    assert.equal(pathPatternsOverlap(pattern, expandedPath), false);
+  }
+
+  assert.equal(matchesPattern("src/prefix(a).ts", "src/*(a).ts"), true);
+  assert.equal(matchesPattern("src/aaa.ts", "src/*(a).ts"), false);
+  assert.equal(pathPatternsOverlap("src/*(a).ts", "src/prefix(a).ts"), true);
+  assert.equal(pathPatternsOverlap("src/*(a).ts", "src/aaa.ts"), false);
+});
+
+test("file index removes every trailing Windows path separator from patterns", () => {
+  const windowsPattern = `src\\core${"\\".repeat(3)}`;
+  assert.equal(matchesPattern("src/core", windowsPattern), true);
+  assert.equal(pathPatternsOverlap(windowsPattern, "src/core/file.ts"), true);
 });
 
 test("glob overlap follows matcher semantics and canonicalizes trailing separators", () => {

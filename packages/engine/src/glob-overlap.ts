@@ -13,7 +13,7 @@ type GlobAutomaton = {
 };
 
 function normalizedGlobPattern(pattern: string): string {
-  return normalizePath(pattern.replace(/\/+$/, ""));
+  return normalizePath(pattern).replace(/\/$/, "");
 }
 
 function normalizedPatternSegments(pattern: string): string[] {

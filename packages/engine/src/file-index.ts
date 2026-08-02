@@ -43,7 +43,7 @@ function escapeRegExp(text: string): string {
 }
 
 function normalizedPatternSegments(pattern: string): string[] {
-  const normalized = normalizePath(pattern.replace(/\/+$/, ""));
+  const normalized = normalizePath(pattern).replace(/\/$/, "");
   const segments = normalized.split("/");
   // Stryker disable next-line ArithmeticOperator: retaining the first or last member of a consecutive globstar run recognizes the same path language.
   return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
@@ -68,15 +68,15 @@ function patternToRegExp(pattern: string): RegExp {
   for (let index = 0; index < segments.length; index += 1) {
     const segment = segments[index];
     if (segment === "**") {
-      if (segments.length === 1) expression += ".*";
-      else if (index === segments.length - 1) expression += "/.+";
+      if (segments.length === 1) expression += "[\\s\\S]*";
+      else if (index === segments.length - 1) expression += "/[\\s\\S]+";
       else expression += `${index > 0 ? "/" : ""}(?:[^/]+/)*`;
       continue;
     }
     if (index > 0 && segments[index - 1] !== "**") expression += "/";
     expression += compilePatternSegment(segment);
   }
-  const regexp = new RegExp(`^${expression}$`);
+  const regexp = new RegExp(`^${expression}(?![\\s\\S])`);
   PATTERN_REGEXP_CACHE.set(pattern, regexp);
   return regexp;
 }
