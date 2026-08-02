@@ -592,3 +592,141 @@ test("schema validation accepts and rejects resource evidence", () => {
     /observedAt must be an ISO 8601 date-time string/,
   );
 });
+
+test("schema validation keeps manifest identity, profile, and cell reference boundaries exact", () => {
+  assert.deepEqual(validateManifest(validManifest({ governance: {}, rules: {}, cells: [validCell] })).errors, []);
+  assert.deepEqual(validateManifest(validManifest({ extends: ["./base.json"] })).errors, [
+    "extends is reserved for a future manifest loader and is not supported in manifest v1",
+  ]);
+  assert.deepEqual(validateManifest(validManifest({ plugins: [{ package: "example-plugin" }] })).errors, [
+    "plugins is reserved for a future trusted plugin loader and is not supported in manifest v1; pass plugins programmatically",
+  ]);
+  assert.deepEqual(validateManifest(validManifest({ profiles: { ci: {} } })).errors, []);
+  assertInvalidContaining(validateManifest(validManifest({ profiles: [] })), [
+    "profiles must be an object when present",
+  ]);
+  assertInvalidContaining(validateManifest(validManifest({ profiles: { "   ": {} } })), [
+    "profiles contains an empty profile name",
+  ]);
+
+  const invalidCells = validateManifest(validManifest({
+    cells: [{
+      ...validCell,
+      id: "   ",
+      packageName: "   ",
+      consumes: [{ cell: "Stryker was here" }, { cell: "   " }],
+    }],
+  }));
+  assertInvalidContaining(invalidCells, [
+    "cells[0].id must be a non-empty string",
+    "cells[0].consumes[1].cell must be a non-empty string",
+    "cells[0].consumes[0].cell references unknown cell Stryker was here",
+  ]);
+  assert.deepEqual(validateManifest(validManifest({
+    cells: [{ ...validCell, packageName: "Stryker was here" }],
+  })).errors, []);
+  assert.doesNotThrow(() => validateManifest(validManifest({ cells: [null] })));
+  assert.doesNotThrow(() => validateManifest(validManifest({ cells: [{ ...validCell, id: 1 }] })));
+  assert.doesNotThrow(() => validateManifest(validManifest({ cells: [{ ...validCell, packageName: 1 }] })));
+  assert.doesNotThrow(() => validateManifest(validManifest({ cells: [{ ...validCell, consumes: [null, { cell: 1 }] }] })));
+
+  const blankIdCell = (ownedRoot) => ({
+    ...validCell,
+    id: "   ",
+    ownedPaths: [`src/${ownedRoot}/**`],
+    publicEntry: `src/${ownedRoot}/public.ts`,
+  });
+  assert.deepEqual(validateManifest(validManifest({
+    cells: [blankIdCell("one"), blankIdCell("two")],
+  })).errors, [
+    "cells[0].id must be a non-empty string",
+    "cells[1].id must be a non-empty string",
+  ]);
+  assert.deepEqual(validateManifest(validManifest({
+    cells: [{ ...validCell, packageName: "   " }, {
+      ...validCell,
+      id: "other",
+      ownedPaths: ["src/other/**"],
+      publicEntry: "src/other/public.ts",
+      packageName: "   ",
+    }],
+  })).errors, []);
+  assert.deepEqual(validateManifest(validManifest({
+    cells: [{ ...validCell, consumes: [{ cell: "   " }] }],
+  })).errors, ["cells[0].consumes[0].cell must be a non-empty string"]);
+
+  const duplicateIds = validateManifest(validManifest({
+    cells: [validCell, {
+      ...validCell,
+      ownedPaths: ["src/other/**"],
+      publicEntry: "src/other/public.ts",
+      packageName: "@example/shared",
+    }, {
+      ...validCell,
+      id: "other",
+      ownedPaths: ["src/third/**"],
+      publicEntry: "src/third/public.ts",
+      packageName: "@example/shared",
+    }],
+  }));
+  assertInvalidContaining(duplicateIds, [
+    "cells[].id contains duplicate entry core",
+    "cells[].packageName contains duplicate entry @example/shared",
+  ]);
+});
+
+test("schema validation distinguishes baseline seal algorithms and encoding boundaries", () => {
+  const digest = "a".repeat(64);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "hmac-sha256", keyId: "release", digest },
+  })).errors, []);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "ed25519", keyId: "release", signature: "YWJjZA==" },
+  })).errors, []);
+
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "hmac-sha256", digest, signature: "YWJjZA==" },
+  })).errors, ["seal.signature is not a supported field"]);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "ed25519", signature: "YWJjZA==", digest },
+  })).errors, ["seal.digest is not a supported field"]);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "unknown", keyId: "release", digest, signature: "YWJjZA==", extra: true },
+  })).errors, [
+    "seal.extra is not a supported field",
+    "seal.algorithm must be hmac-sha256 or ed25519",
+  ]);
+
+  for (const badDigest of [`x${digest}`, `${digest}x`, "A".repeat(64), "a".repeat(63)]) {
+    assertInvalidContaining(validateBaseline(validBaseline({
+      seal: { algorithm: "hmac-sha256", digest: badDigest },
+    })), ["seal.digest must be a 64-character lowercase hex string"]);
+  }
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "ed25519", signature: "    " },
+  })).errors, ["seal.signature must be a non-empty base64 string"]);
+  for (const badSignature of ["_WJjZA==", "YWJjZA=_", "=YWJjZA==", "YWJjZA==x", "YWJjZA=", "YW JjZA=="]) {
+    const result = validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: badSignature } }));
+    assert.equal(result.ok, false, badSignature);
+    assert.ok(result.errors.some((error) => error.startsWith("seal.signature must be")), badSignature);
+  }
+  const digestLikeObject = { toString: () => digest };
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "hmac-sha256", digest: digestLikeObject },
+  })).errors, ["seal.digest must be a 64-character lowercase hex string"]);
+  const signatureLikeObject = {
+    length: 8,
+    trim: () => "YWJjZA==",
+    toString: () => "YWJjZA==",
+  };
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "ed25519", signature: signatureLikeObject },
+  })).errors, ["seal.signature must be a non-empty base64 string"]);
+
+  assertInvalidContaining(validateBaseline(validBaseline({ cells: { "   ": validBaseline().cells.core } })), [
+    "cells contains an empty cell id",
+  ]);
+  assertInvalidContaining(validateResourceEvidence(validEvidence({ cellId: "   " })), [
+    "cellId must be a non-empty string when present",
+  ]);
+});

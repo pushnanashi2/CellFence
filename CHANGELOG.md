@@ -6,7 +6,7 @@
 
 ## 0.2.0 - 2026-08-01
 
-- Align path matching and owned-path overlap analysis with minimatch semantics for standalone and embedded globstars, and enforce the dialect with exhaustive and seeded external-oracle conformance tests.
+- Align engine and official-plugin path matching plus owned-path overlap analysis with minimatch semantics for standalone and embedded globstars, and enforce the dialect with exhaustive and seeded external-oracle conformance tests.
 - Read discovered `tsconfig.*.json` files directly when collecting workspace path aliases instead of falling back to a neighboring `tsconfig.json`.
 - Harden package-map, CommonJS alias, readonly `Set`, Python diagnostic, and public-surface resolution against ambiguous or adversarial syntax while preserving fail-closed behavior.
 - Keep `check --changed` finding identity stable when unchanged violations move to a different source line.

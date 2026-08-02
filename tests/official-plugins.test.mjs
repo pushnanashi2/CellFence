@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import { minimatch } from "minimatch";
 import ts from "typescript";
 
 import { checkRepository } from "../packages/engine/dist/index.js";
@@ -713,6 +714,29 @@ test("agent budget plugin handles isolated glob and default-array edge cases", (
   }))), []);
 });
 
+test("agent budget path patterns use the documented standalone-globstar dialect", () => {
+  const repositoryFor = (changedFile) => baseRepository({
+    changedFiles: new Set([changedFile]),
+    baseline: null,
+    metrics: {},
+    files: { ...baseRepository().files, byCell: {} },
+  });
+  const findingPaths = (pattern, changedFile) => directRule(
+    agentBudgetPlugin({ forbiddenPaths: [pattern] }),
+    "agent-budget/change-budget",
+  ).run(directContext(repositoryFor(changedFile))).map((finding) => finding.filePath);
+
+  assert.deepEqual(findingPaths("src/**/*.ts", "src/a.ts"), ["src/a.ts"]);
+  assert.deepEqual(findingPaths("src/**/*.ts", "src/deep/a.ts"), ["src/deep/a.ts"]);
+  assert.deepEqual(findingPaths("src/**.ts", "src/a.ts"), ["src/a.ts"]);
+  assert.deepEqual(findingPaths("src/**.ts", "src/deep/a.ts"), []);
+  assert.deepEqual(findingPaths("src/**", "src"), []);
+  assert.deepEqual(findingPaths("src/**", "src/deep/a.ts"), ["src/deep/a.ts"]);
+  assert.deepEqual(findingPaths("**", "README.md"), ["README.md"]);
+  assert.deepEqual(findingPaths("src\\**\\*.ts", "src\\deep\\a.ts"), ["src\\deep\\a.ts"]);
+  assert.deepEqual(findingPaths("src/core/", "src/core"), ["src/core"]);
+});
+
 test("blast radius plugin emits exact downstream impact findings", () => {
   const rule = directRule(blastRadiusPlugin({ maxAffectedCells: 1, severity: "error" }), "blast-radius/affected-cells");
   const repository = baseRepository({
@@ -857,6 +881,90 @@ test("blast radius plugin covers glob, self-edge, and threshold boundaries", () 
       maxAffectedCells: 0,
     },
   }]);
+});
+
+test("blast radius ownership patterns use the documented standalone-globstar dialect", () => {
+  const rule = directRule(blastRadiusPlugin({ maxAffectedCells: 0 }), "blast-radius/affected-cells");
+  const affectedFor = (ownedPath, changedFile) => rule.run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "producer",
+        ownedPaths: [ownedPath],
+        publicEntry: "src/public.ts",
+        publicSymbols: [],
+      }],
+    },
+    changedFiles: new Set([changedFile]),
+    imports: [{ importerCellId: "consumer", targetCellId: "producer" }],
+  })));
+
+  assert.equal(affectedFor("src/**/*.ts", "src/a.ts").length, 1);
+  assert.equal(affectedFor("src/**/*.ts", "src/deep/a.ts").length, 1);
+  assert.equal(affectedFor("src/**.ts", "src/a.ts").length, 1);
+  assert.deepEqual(affectedFor("src/**.ts", "src/deep/a.ts"), []);
+  assert.deepEqual(affectedFor("src/**", "src"), []);
+  assert.equal(affectedFor("src/**", "src/deep/a.ts").length, 1);
+  assert.equal(affectedFor("src\\**\\*.ts", "src\\deep\\a.ts").length, 1);
+  assert.equal(affectedFor("src/core/", "src/core").length, 1);
+});
+
+function seededRandom(seed) {
+  return function next() {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+test("official plugin path matchers agree with the minimatch dialect oracle", () => {
+  const random = seededRandom(0xc311);
+  const patternTokens = ["src", "core", "*", "**", "*.ts", "**.ts", "a*", "x.y"];
+  const pathTokens = ["src", "core", "a", "deep", "a.ts", "ab", "x.y"];
+  const pick = (values) => values[Math.floor(random() * values.length)];
+  const generate = (tokens, maxSegments) => Array.from(
+    { length: 1 + Math.floor(random() * maxSegments) },
+    () => pick(tokens),
+  ).join("/");
+
+  for (let iteration = 0; iteration < 1_000; iteration += 1) {
+    const pattern = generate(patternTokens, 4);
+    const relativePath = generate(pathTokens, 5);
+    const expected = minimatch(relativePath, pattern, { dot: true });
+    const agentRule = directRule(agentBudgetPlugin({ forbiddenPaths: [pattern] }), "agent-budget/change-budget");
+    const agentRepository = baseRepository({
+      changedFiles: new Set([relativePath]),
+      baseline: null,
+      metrics: {},
+      files: { ...baseRepository().files, byCell: {} },
+    });
+    assert.equal(
+      agentRule.run(directContext(agentRepository)).some((finding) => finding.ruleId === "agent-budget/forbidden-path"),
+      expected,
+      `agent-budget pattern=${pattern} path=${relativePath}`,
+    );
+
+    const blastRule = directRule(blastRadiusPlugin({ maxAffectedCells: 0 }), "blast-radius/affected-cells");
+    const blastRepository = baseRepository({
+      manifest: {
+        schemaVersion: "cellfence.manifest.v1",
+        cells: [{
+          id: "producer",
+          ownedPaths: [pattern],
+          publicEntry: "src/public.ts",
+          publicSymbols: [],
+        }],
+      },
+      changedFiles: new Set([relativePath]),
+      imports: [{ importerCellId: "consumer", targetCellId: "producer" }],
+    });
+    assert.equal(
+      blastRule.run(directContext(blastRepository)).length > 0,
+      expected,
+      `blast-radius pattern=${pattern} path=${relativePath}`,
+    );
+  }
 });
 
 test("dependency sovereignty plugin emits exact approval findings", () => {
