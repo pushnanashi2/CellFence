@@ -1480,6 +1480,7 @@ function normalizeWhitespace(text: string): string {
   return text.replace(/\s+/g, " ");
 }
 
+/** @internal */
 export function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
   if (!fs.existsSync(filePath)) return [];
   const sourceText = fs.readFileSync(filePath, "utf8");
@@ -1553,6 +1554,7 @@ function findNearestTsConfig(filePath: string): string | undefined {
   return undefined;
 }
 
+/** @internal */
 export function declarationEmitCompilerOptions(filePath: string): ts.CompilerOptions {
   const defaultOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2022,
@@ -1588,6 +1590,7 @@ export function declarationEmitCompilerOptions(filePath: string): ts.CompilerOpt
   };
 }
 
+/** @internal */
 export function collectPublicDeclarationRoots(filePath: string, visitedFiles = new Set<string>()): string[] {
   const normalizedFilePath = path.resolve(filePath);
   if (visitedFiles.has(normalizedFilePath) || !fs.existsSync(normalizedFilePath)) return [];
@@ -1647,6 +1650,7 @@ function normalizedDeclarationSourceText(filePath: string): string {
   return declarationText;
 }
 
+/** @internal */
 export function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): string {
   if (isDeclarationPath(rootFile)) return normalizedDeclarationSourceText(rootFile);
   try {
@@ -1660,6 +1664,7 @@ export function declarationTextForRoot(rootFile: string, options: ts.CompilerOpt
   return "";
 }
 
+/** @internal */
 export function declarationPublicSurfaceSignatureParts(filePath: string): string[] {
   if (isPythonPath(filePath)) return [];
   const rootFiles = collectPublicDeclarationRoots(filePath);
