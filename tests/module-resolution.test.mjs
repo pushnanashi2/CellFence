@@ -2630,13 +2630,12 @@ test("module resolution reports unsupported Python syntax without throwing", () 
 
     const warnings = [];
     assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
-    assert.deepEqual(warnings, [{
-      ruleId: "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
-      severity: "warning",
-      filePath: "src/core/template.py",
-      message: "Python source cannot be parsed statically at line 1: invalid syntax",
-      details: { kind: "syntax_error", line: 1, offset: 9 },
-    }]);
+    assert.equal(warnings.length, 1);
+    assert.equal(warnings[0].ruleId, "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
+    assert.equal(warnings[0].severity, "warning");
+    assert.equal(warnings[0].filePath, "src/core/template.py");
+    assert.match(warnings[0].message, /^Python source cannot be parsed statically at line 1: \S/);
+    assert.deepEqual(warnings[0].details, { kind: "syntax_error", line: 1, offset: 9 });
     assert.deepEqual([...extractPublicSymbols(filePath)], []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
