@@ -1160,6 +1160,43 @@ test("engine changed check finding identity ignores line-only drift", () => {
   }
 });
 
+test("engine changed check reports a newly introduced private import", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-new-private-import-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core", "export const core = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/core/private.ts"), "export const secret = 1;\n");
+    writeCell(rootDir, "app", "export const app = true;\n");
+    writeManifest(rootDir, [
+      baseCell("core"),
+      baseCell("app", { consumes: [{ cell: "core" }] }),
+    ]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.writeFileSync(
+      path.join(rootDir, "src/app/public.ts"),
+      "import { secret } from \"../core/private\";\nexport const app = secret;\n",
+    );
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "introduce private import"]);
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+    });
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PRIVATE_IMPORT" && finding.filePath === "src/app/public.ts"
+    ), JSON.stringify(result.findings));
+    assert.deepEqual(result.changedFiles, ["src/app/public.ts"]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed check cleanup does not hide a successful result when worktree removal fails", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-worktree-cleanup-"));
   const fakeBin = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-fake-git-"));
