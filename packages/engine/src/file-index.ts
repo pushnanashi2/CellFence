@@ -42,32 +42,41 @@ function escapeRegExp(text: string): string {
   return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
 
+function normalizedPatternSegments(pattern: string): string[] {
+  const normalized = normalizePath(pattern).replace(/\/$/, "");
+  const segments = normalized.split("/");
+  // Stryker disable next-line ArithmeticOperator: retaining the first or last member of a consecutive globstar run recognizes the same path language.
+  return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
+}
+
+function compilePatternSegment(segment: string): string {
+  // Stryker disable next-line Regex: with a global replacement, matching one or a run of adjacent stars produces the same collapsed segment.
+  const collapsedStars = segment.replace(/\*+/g, "*");
+  let expression = "";
+  for (const character of collapsedStars) {
+    expression += character === "*" ? "[^/]*" : escapeRegExp(character);
+  }
+  return expression;
+}
+
 function patternToRegExp(pattern: string): RegExp {
   const cachedPattern = PATTERN_REGEXP_CACHE.get(pattern);
   // Stryker disable next-line ConditionalExpression: cache-hit removal only changes performance, not matcher semantics.
   if (cachedPattern) return cachedPattern;
-  const normalized = normalizePath(pattern);
+  const segments = normalizedPatternSegments(pattern);
   let expression = "";
-  for (let index = 0; index < normalized.length; index += 1) {
-    const character = normalized[index];
-    const nextCharacter = normalized[index + 1];
-    if (character === "*" && nextCharacter === "*") {
-      if (normalized[index + 2] === "/") {
-        expression += "(?:[^/]+/)*";
-        // Stryker disable next-line AssignmentOperator: the globstar-slash token must consume both stars and the slash.
-        index += 2;
-      } else {
-        expression += ".*";
-        // Stryker disable next-line AssignmentOperator: reversing the double-star skip makes the tokenizer non-terminating; ** semantics are covered by glob matching tests.
-        index += 1;
-      }
-    } else if (character === "*") {
-      expression += "[^/]*";
-    } else {
-      expression += escapeRegExp(character);
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index];
+    if (segment === "**") {
+      if (segments.length === 1) expression += "[\\s\\S]*";
+      else if (index === segments.length - 1) expression += "/[\\s\\S]+";
+      else expression += `${index > 0 ? "/" : ""}(?:[^/]+/)*`;
+      continue;
     }
+    if (index > 0 && segments[index - 1] !== "**") expression += "/";
+    expression += compilePatternSegment(segment);
   }
-  const regexp = new RegExp(`^${expression}$`);
+  const regexp = new RegExp(`^${expression}(?![\\s\\S])`);
   PATTERN_REGEXP_CACHE.set(pattern, regexp);
   return regexp;
 }
@@ -80,6 +89,7 @@ export function literalPrefix(pattern: string): string {
   const normalized = normalizePath(pattern);
   const wildcardIndex = normalized.search(/[*]/);
   const prefix = wildcardIndex === -1 ? normalized : normalized.slice(0, wildcardIndex);
+  // Stryker disable next-line Regex: normalizePath collapses trailing separators, so one-or-more and one recognize the same prefix language here.
   return prefix.replace(/\/+$/, "");
 }
 
@@ -162,6 +172,7 @@ export function sourceFilesForCell(rootDir: string, cell: CellManifest, context?
 }
 
 function pathExcludedByGovernance(manifest: CellFenceManifest, relativePath: string): boolean {
+  // Stryker disable next-line ArrayDeclaration: the synthetic exact fallback has no supported source extension and cannot exclude an indexed source file.
   return (manifest.governance?.exclude || []).some((pattern) => matchesPattern(relativePath, pattern));
 }
 

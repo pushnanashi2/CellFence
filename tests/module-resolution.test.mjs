@@ -27,6 +27,7 @@ import {
   resolveRelativeImport,
   syntaxPublicSurfaceSignatureParts,
 } from "../packages/engine/dist/module-resolution.js";
+import { inspectPythonSource } from "../packages/engine/dist/python-analysis.js";
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -2630,11 +2631,16 @@ test("module resolution reports unsupported Python syntax without throwing", () 
 
     const warnings = [];
     assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
+    const [syntaxError] = inspectPythonSource(filePath).errors;
+    assert.deepEqual(
+      { kind: syntaxError.kind, line: syntaxError.line, offset: syntaxError.offset },
+      { kind: "syntax_error", line: 1, offset: 9 },
+    );
     assert.equal(warnings.length, 1);
     assert.equal(warnings[0].ruleId, "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
     assert.equal(warnings[0].severity, "warning");
     assert.equal(warnings[0].filePath, "src/core/template.py");
-    assert.match(warnings[0].message, /^Python source cannot be parsed statically at line 1: \S/);
+    assert.equal(warnings[0].message, `Python source cannot be parsed statically at line 1: ${syntaxError.message}`);
     assert.deepEqual(warnings[0].details, { kind: "syntax_error", line: 1, offset: 9 });
     assert.deepEqual([...extractPublicSymbols(filePath)], []);
   } finally {

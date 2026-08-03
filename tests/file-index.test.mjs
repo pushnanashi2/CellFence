@@ -8,8 +8,10 @@ import ts from "typescript";
 
 import {
   SOURCE_EXTENSIONS,
+  absolutePath,
   literalPrefix,
   listFiles,
+  listSymlinks,
   matchesPattern,
   normalizePath,
   parseSourceFile,
@@ -21,6 +23,16 @@ import {
   sourceFilesForCell,
   sourceKindForPath,
 } from "../packages/engine/dist/file-index.js";
+import {
+  ownedPathPatternsOverlap,
+  pathPatternsOverlap,
+} from "../packages/engine/dist/glob-overlap.js";
+
+test("file index normalizes empty and Windows-style paths and resolves absolute paths", () => {
+  assert.equal(normalizePath(""), "");
+  assert.equal(normalizePath("src\\core\\public.ts"), "src/core/public.ts");
+  assert.equal(absolutePath("/repo", "src\\core\\public.ts"), path.resolve("/repo/src/core/public.ts"));
+});
 
 test("file index matches single-star patterns and scans a cell without a context cache", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-file-index-"));
@@ -33,6 +45,8 @@ test("file index matches single-star patterns and scans a cell without a context
 
     assert.equal(matchesPattern("src/core/public.ts", "src/*/public.ts"), true);
     assert.equal(matchesPattern("src/core/nested/private.ts", "src/*/public.ts"), false);
+    assert.equal(matchesPattern("src/core", "src\\core\\"), true);
+    assert.equal(pathPatternsOverlap("src\\core\\", "src/core"), true);
     assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
 
     const files = sourceFilesForCell(rootDir, {
@@ -135,6 +149,16 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(matchesPattern("src/core/nested/public.ts", "src/**/public.ts"), true);
   assert.equal(matchesPattern("src/a.ts", "src/**/*.ts"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/**/*.ts"), true);
+  assert.equal(matchesPattern("src/a.ts", "src/**.ts"), true);
+  assert.equal(matchesPattern("src/core/a.ts", "src/**.ts"), false);
+  assert.equal(matchesPattern("src/a", "src/**/**/a"), true);
+  assert.equal(matchesPattern("src/core/a", "src/**/**/a"), true);
+  assert.equal(matchesPattern("src/core/a.ts", "**"), true);
+  assert.equal(matchesPattern("src", "src/**"), false);
+  assert.equal(matchesPattern("src/core", "src/**"), true);
+  assert.equal(matchesPattern("src/core", "src/core///"), true);
+  assert.equal(matchesPattern("src/file?.ts", "src/file?.ts"), true);
+  assert.equal(matchesPattern("src/file1.ts", "src/file?.ts"), false);
   assert.equal(matchesPattern("test/a.ts", "**/test/**"), true);
   assert.equal(matchesPattern("src/test/a.ts", "**/test/**"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/**/private.ts"), false);
@@ -145,6 +169,102 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(literalPrefix("src/core///**"), "src/core");
   assert.equal(literalPrefix("src/core/public.ts"), "src/core/public.ts");
   assert.equal(literalPrefix("src/core/file?.ts"), "src/core/file?.ts");
+});
+
+test("file index treats unsupported glob operators as literal text", () => {
+  for (const [pattern, expandedPath] of [
+    ["src/file?.ts", "src/file1.ts"],
+    ["src/{a,b}.ts", "src/a.ts"],
+    ["src/[ab].ts", "src/a.ts"],
+    ["src/!(a).ts", "src/b.ts"],
+    ["src/+(a).ts", "src/a.ts"],
+    ["src/@(a).ts", "src/a.ts"],
+  ]) {
+    assert.equal(matchesPattern(pattern, pattern), true);
+    assert.equal(matchesPattern(expandedPath, pattern), false);
+    assert.equal(pathPatternsOverlap(pattern, pattern), true);
+    assert.equal(pathPatternsOverlap(pattern, expandedPath), false);
+  }
+
+  assert.equal(matchesPattern("src/prefix(a).ts", "src/*(a).ts"), true);
+  assert.equal(matchesPattern("src/aaa.ts", "src/*(a).ts"), false);
+  assert.equal(pathPatternsOverlap("src/*(a).ts", "src/prefix(a).ts"), true);
+  assert.equal(pathPatternsOverlap("src/*(a).ts", "src/aaa.ts"), false);
+});
+
+test("file index removes every trailing Windows path separator from patterns", () => {
+  const windowsPattern = `src\\core${"\\".repeat(3)}`;
+  assert.equal(matchesPattern("src/core", windowsPattern), true);
+  assert.equal(pathPatternsOverlap(windowsPattern, "src/core/file.ts"), true);
+});
+
+test("glob overlap follows matcher semantics and canonicalizes trailing separators", () => {
+  assert.equal(pathPatternsOverlap("src/core", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/core/", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/core////", "src/core/file.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**/public.ts", "src/public.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**/**/public.ts", "src/public.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
+  assert.equal(pathPatternsOverlap("src/**.ts", "src/a.ts"), true);
+  assert.equal(pathPatternsOverlap("src/**", "src"), false);
+  assert.equal(ownedPathPatternsOverlap("src/**", "src"), false);
+  assert.equal(ownedPathPatternsOverlap("src/**", "src/core"), true);
+  assert.equal(ownedPathPatternsOverlap("src/**/a", "src/a"), true);
+  assert.equal(ownedPathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
+  assert.equal(ownedPathPatternsOverlap("src/file?.ts", "src/file?.ts"), true);
+  assert.equal(ownedPathPatternsOverlap("src/file?.ts", "src/file1.ts"), false);
+});
+
+test("glob overlap agrees with concrete matcher witnesses across a bounded dialect corpus", () => {
+  const patterns = [
+    "a",
+    "b",
+    "src",
+    "src/a",
+    "src/b",
+    "src/*",
+    "src/*.ts",
+    "src/**.ts",
+    "src/**",
+    "src/**/a",
+    "src/**/**/a",
+    "**",
+    "**/a",
+    "**/test/**",
+    "test/**",
+    "*/a",
+    "a*",
+    "a/**/b",
+    "a/*/b",
+  ];
+  const pathSegments = ["a", "b", "src", "test", "x", "a.ts", "b.ts"];
+  const paths = [];
+  const appendPaths = (prefix, remaining) => {
+    if (prefix.length > 0) paths.push(prefix.join("/"));
+    if (remaining === 0) return;
+    for (const segment of pathSegments) appendPaths([...prefix, segment], remaining - 1);
+  };
+  appendPaths([], 4);
+
+  for (const left of patterns) {
+    for (const right of patterns) {
+      const concreteIntersection = paths.some((candidate) =>
+        matchesPattern(candidate, left) && matchesPattern(candidate, right));
+      assert.equal(
+        ownedPathPatternsOverlap(left, right),
+        concreteIntersection,
+        `owned overlap mismatch: left=${left} right=${right}`,
+      );
+      const literalAncestor = !left.includes("*")
+        && !right.includes("*")
+        && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));
+      assert.equal(
+        pathPatternsOverlap(left, right),
+        concreteIntersection || literalAncestor,
+        `claim overlap mismatch: left=${left} right=${right}`,
+      );
+    }
+  }
 });
 
 test("file index listFiles sorts results, ignores generated directories, and caches per context", () => {
@@ -168,6 +288,8 @@ test("file index listFiles sorts results, ignores generated directories, and cac
     fs.writeFileSync(path.join(rootDir, "coverage/out.ts"), "export const ignored = true;\n");
     fs.writeFileSync(path.join(rootDir, ".turbo/out.ts"), "export const ignored = true;\n");
     fs.symlinkSync(path.join(rootDir, "src/core/a.ts"), path.join(rootDir, "src/core/link.ts"));
+    fs.symlinkSync(path.join(rootDir, "src/core"), path.join(rootDir, "src/core-link"));
+    fs.symlinkSync(path.join(rootDir, "src/core/missing.ts"), path.join(rootDir, "src/core/broken.ts"));
 
     const context = {
       rootDir,
@@ -196,6 +318,7 @@ test("file index listFiles sorts results, ignores generated directories, and cac
 
 test("file index sorting is deterministic even when filesystem order is not", () => {
   const originalReaddirSync = fs.readdirSync;
+  const originalStatSync = fs.statSync;
   try {
     fs.readdirSync = () => [
       {
@@ -208,11 +331,83 @@ test("file index sorting is deterministic even when filesystem order is not", ()
         isDirectory: () => false,
         isFile: () => true,
       },
+      {
+        name: "ignored-special",
+        isDirectory: () => false,
+        isFile: () => false,
+        isSymbolicLink: () => false,
+      },
     ];
+    fs.statSync = (filePath) => {
+      assert.equal(normalizePath(String(filePath)), "/repo/ignored-special");
+      return { isFile: () => true };
+    };
 
     assert.deepEqual(listFiles("/repo").map(normalizePath), ["/repo/a.ts", "/repo/z.ts"]);
   } finally {
     fs.readdirSync = originalReaddirSync;
+    fs.statSync = originalStatSync;
+  }
+});
+
+test("file index inventories valid and broken symlinks while ignoring regular and generated entries", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-list-symlinks-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/nested"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "node_modules/pkg"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/target.ts"), "export const target = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/regular.ts"), "export const regular = true;\n");
+    fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "src/z-link.ts"));
+    fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "src/nested/a-link.ts"));
+    fs.symlinkSync(path.join(rootDir, "src/missing.ts"), path.join(rootDir, "src/broken.ts"));
+    fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "node_modules/pkg/ignored.ts"));
+
+    const realRootDir = fs.realpathSync(rootDir);
+    const symlinks = listSymlinks(rootDir).map((entry) => ({
+      ...entry,
+      path: normalizePath(path.relative(rootDir, entry.path)),
+      targetPath: entry.targetPath ? normalizePath(path.relative(realRootDir, entry.targetPath)) : undefined,
+    }));
+
+    assert.deepEqual(symlinks.map((entry) => entry.path), [
+      "src/broken.ts",
+      "src/nested/a-link.ts",
+      "src/z-link.ts",
+    ]);
+    assert.equal(typeof symlinks[0].error, "string");
+    assert.equal(symlinks[0].targetPath, undefined);
+    assert.equal(symlinks[1].targetPath, "src/target.ts");
+    assert.equal(symlinks[2].targetPath, "src/target.ts");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("file index symlink inventory sorting does not depend on directory iteration order", () => {
+  const originalReaddirSync = fs.readdirSync;
+  const originalRealpathSync = fs.realpathSync;
+  try {
+    fs.readdirSync = () => [
+      {
+        name: "z-link.ts",
+        isDirectory: () => false,
+        isSymbolicLink: () => true,
+      },
+      {
+        name: "a-link.ts",
+        isDirectory: () => false,
+        isSymbolicLink: () => true,
+      },
+    ];
+    fs.realpathSync = (filePath) => filePath;
+
+    assert.deepEqual(listSymlinks("/repo").map((entry) => normalizePath(entry.path)), [
+      "/repo/a-link.ts",
+      "/repo/z-link.ts",
+    ]);
+  } finally {
+    fs.readdirSync = originalReaddirSync;
+    fs.realpathSync = originalRealpathSync;
   }
 });
 
@@ -265,6 +460,16 @@ test("file index source files are indexed by any owned path and cached per conte
     const noContext = sourceFilesForCell(rootDir, cell)
       .map((filePath) => normalizePath(path.relative(rootDir, filePath)));
     assert.deepEqual(noContext, ["src/addon/x.ts", "src/core/a.ts", "src/core/b.ts"]);
+
+    const excludedContext = {
+      ...context,
+      manifest: { ...manifest, governance: { exclude: ["src/core/b.ts"] } },
+      sourceFilesByCellIndex: undefined,
+      listFilesCache: undefined,
+    };
+    const excludingGovernance = sourceFilesForCell(rootDir, cell, excludedContext)
+      .map((filePath) => normalizePath(path.relative(rootDir, filePath)));
+    assert.deepEqual(excludingGovernance, ["src/addon/x.ts", "src/core/a.ts"]);
 
     context.sourceFilesByCellIndex = new Map([
       ["core", [path.join(rootDir, "src/core/manual.ts")]],
@@ -325,6 +530,11 @@ test("file index governance include and exclude rules are enforced for paths and
     const governed = sourceFilesUnderGovernance(rootDir, manifest)
       .map((filePath) => normalizePath(path.relative(rootDir, filePath)));
     assert.deepEqual(governed, ["src/core/public.ts", "src/core/view.tsx"]);
+    assert.deepEqual(sourceFilesUnderGovernance(rootDir, { ...manifest, governance: undefined }), []);
+    assert.deepEqual(sourceFilesUnderGovernance(rootDir, {
+      ...manifest,
+      governance: { requireOwnership: false, include: ["src/**"] },
+    }), []);
 
     assert.equal(pathIsGoverned(manifest, "src/core/public.ts"), true);
     assert.equal(pathIsGoverned(manifest, "src/core/public.test.ts"), false);
@@ -374,6 +584,7 @@ test("file index source kind mapping covers all JS and TS extensions", () => {
   assert.equal(sourceKindForPath("src/core/file.js"), ts.ScriptKind.JS);
   assert.equal(sourceKindForPath("src/core/file.mjs"), ts.ScriptKind.JS);
   assert.equal(sourceKindForPath("src/core/file.cjs"), ts.ScriptKind.JS);
+  assert.equal(sourceKindForPath("src/core/file.py"), ts.ScriptKind.Unknown);
 });
 
 test("file index source text and AST parsing cache file contents with parent links", () => {

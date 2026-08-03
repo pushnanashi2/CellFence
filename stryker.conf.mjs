@@ -30,6 +30,7 @@ export default {
     "packages/trace/dist/index.js",
     "packages/engine/dist/module-resolution.js",
     "packages/engine/dist/file-index.js",
+    "packages/engine/dist/glob-overlap.js",
     "packages/engine/dist/resource-access.js",
     "packages/github-action/dist/index.js",
   ],
@@ -53,6 +54,7 @@ export default {
   tempDirName: ".stryker-tmp",
   ignorePatterns: [
     "/coverage",
+    "/reports/corpus",
     "/reports/mutation",
     "cellfence-*.tgz",
   ],

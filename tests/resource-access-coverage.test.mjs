@@ -4,8 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import ts from "typescript";
+
 import { checkRepository } from "../packages/engine/dist/index.js";
-import { addResourceAccess, collectResourceAccesses } from "../packages/engine/dist/resource-access.js";
+import {
+  addResourceAccess,
+  collectResourceAccesses,
+  resourceAccessTestHooks,
+} from "../packages/engine/dist/resource-access.js";
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
@@ -113,6 +119,323 @@ test("addResourceAccess only suppresses exact duplicate resource observations", 
     "read:app_users:src/runtime/other.ts:10",
     "read:app_users:src/runtime/public.ts:11",
   ]);
+});
+
+function parseTypeScript(sourceText) {
+  return ts.createSourceFile("fixture.ts", sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+}
+
+function expressionFrom(sourceText) {
+  const sourceFile = parseTypeScript(`${sourceText};`);
+  const statement = sourceFile.statements[0];
+  assert.ok(ts.isExpressionStatement(statement));
+  return statement.expression;
+}
+
+function callArgument(sourceFile, callName) {
+  let argument;
+  function visit(node) {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === callName) {
+      argument = node.arguments[0];
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  assert.ok(argument, `missing ${callName} argument`);
+  return argument;
+}
+
+test("resource AST helpers preserve wrappers, properties, bindings, and assignment semantics", () => {
+  const {
+    unwrapExpression,
+    objectHasProperty,
+    expressionContainsSqlLiteral,
+    bindingIdentifiers,
+    assignedIdentifier,
+    isAssignmentOperatorKind,
+    emptyStaticStringResolution,
+    sqlIdentifierName,
+    textLooksSql,
+  } = resourceAccessTestHooks;
+
+  for (const wrapped of ["(target)", "target as string", "<string>target", "target!", "(ignored, target)"]) {
+    assert.equal(unwrapExpression(expressionFrom(wrapped)).getText(), "target", wrapped);
+    assert.equal(assignedIdentifier(expressionFrom(wrapped))?.toString(), "target", wrapped);
+  }
+  assert.equal(assignedIdentifier(expressionFrom("holder.target")), undefined);
+
+  const object = expressionFrom("({ fd: 1, 'path': 'x', shorthand, method() {} })");
+  assert.ok(ts.isParenthesizedExpression(object));
+  const objectLiteral = unwrapExpression(object);
+  assert.ok(ts.isObjectLiteralExpression(objectLiteral));
+  assert.equal(objectHasProperty(objectLiteral, "fd"), true);
+  assert.equal(objectHasProperty(objectLiteral, "path"), true);
+  assert.equal(objectHasProperty(objectLiteral, "shorthand"), true);
+  assert.equal(objectHasProperty(objectLiteral, "method"), false);
+  assert.equal(objectHasProperty(objectLiteral, "missing"), false);
+  assert.equal(objectHasProperty(expressionFrom("target"), "fd"), false);
+
+  assert.equal(expressionContainsSqlLiteral(undefined), false);
+  assert.equal(expressionContainsSqlLiteral(expressionFrom("wrapper({ text: 'select * from users' })")), true);
+  assert.equal(expressionContainsSqlLiteral(expressionFrom("wrapper({ text: 'plain text' })")), false);
+
+  const bindingSource = parseTypeScript("const { alpha, renamed: beta, ...rest } = input; const [first, , third] = list;");
+  const bindingNames = bindingSource.statements.flatMap((statement) => {
+    assert.ok(ts.isVariableStatement(statement));
+    return bindingIdentifiers(statement.declarationList.declarations[0].name);
+  });
+  assert.deepEqual(bindingNames, ["alpha", "beta", "rest", "first", "third"]);
+
+  const assignmentKinds = [
+    ts.SyntaxKind.EqualsToken,
+    ts.SyntaxKind.PlusEqualsToken,
+    ts.SyntaxKind.MinusEqualsToken,
+    ts.SyntaxKind.AsteriskEqualsToken,
+    ts.SyntaxKind.AsteriskAsteriskEqualsToken,
+    ts.SyntaxKind.SlashEqualsToken,
+    ts.SyntaxKind.PercentEqualsToken,
+    ts.SyntaxKind.LessThanLessThanEqualsToken,
+    ts.SyntaxKind.GreaterThanGreaterThanEqualsToken,
+    ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken,
+    ts.SyntaxKind.AmpersandEqualsToken,
+    ts.SyntaxKind.BarEqualsToken,
+    ts.SyntaxKind.CaretEqualsToken,
+    ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+    ts.SyntaxKind.BarBarEqualsToken,
+    ts.SyntaxKind.QuestionQuestionEqualsToken,
+  ];
+  assert.ok(assignmentKinds.every((kind) => isAssignmentOperatorKind(kind)));
+  assert.equal(isAssignmentOperatorKind(ts.SyntaxKind.PlusToken), false);
+  assert.deepEqual(emptyStaticStringResolution(), { values: [], dynamicSql: false, localBinding: false });
+  for (const name of ["sql", "SQLTEXT", "query", "queryText", "queryString"]) assert.equal(sqlIdentifierName(name), true, name);
+  for (const name of ["sqlSuffix", "prefixQuery", "queries", "text"]) assert.equal(sqlIdentifierName(name), false, name);
+  for (const sql of ["SELECT 1", "insert into users", "update users", "delete from users", "join roles"]) assert.equal(textLooksSql(sql), true, sql);
+  assert.equal(textLooksSql("plain application text"), false);
+});
+
+test("resource static string resolution handles aliases, branches, concatenation, scopes, and mutation", () => {
+  const {
+    collectStaticStringConstants,
+    staticStringValues,
+    collectLocalStaticStringResolution,
+    staticStringResolutionAt,
+    isStatementContainer,
+    statementsForContainer,
+    nearestStatementContainer,
+  } = resourceAccessTestHooks;
+  const constantsSource = parseTypeScript([
+    "const BASE = '/api';",
+    "const COPY = BASE;",
+    "const CONDITIONAL = flag ? '/one' : '/two';",
+    "const JOINED = BASE + '/users';",
+    "const TEMPLATE = `literal`;",
+    "const CYCLE_A = CYCLE_B;",
+    "const CYCLE_B = CYCLE_A;",
+    "let MUTABLE = '/ignored';",
+    "const DYNAMIC = makePath();",
+  ].join("\n"));
+  const constants = collectStaticStringConstants(constantsSource);
+  assert.deepEqual(Object.fromEntries(constants), {
+    BASE: ["/api"],
+    COPY: ["/api"],
+    CONDITIONAL: ["/one", "/two"],
+    JOINED: ["/api/users"],
+    TEMPLATE: ["literal"],
+  });
+  assert.deepEqual(staticStringValues(undefined, constants), []);
+  assert.deepEqual(staticStringValues(expressionFrom("'/literal'"), constants), ["/literal"]);
+  assert.deepEqual(staticStringValues(expressionFrom("COPY"), constants), ["/api"]);
+  assert.deepEqual(staticStringValues(expressionFrom("MISSING"), constants), []);
+  assert.deepEqual(staticStringValues(expressionFrom("BASE + '/x'"), constants), []);
+
+  const localSource = parseTypeScript([
+    "const GLOBAL = '/global';",
+    "function run(flag: boolean, parameter: string) {",
+    "  const literal = '/literal';",
+    "  const alias = literal;",
+    "  const conditional = flag ? '/one' : '/two';",
+    "  const joined = literal + '/child';",
+    "  let reassigned = 'select * from users';",
+    "  reassigned += ' where active = true';",
+    "  sinkAlias(alias);",
+    "  sinkConditional(conditional);",
+    "  sinkJoined(joined);",
+    "  sinkReassigned(reassigned);",
+    "  sinkParameter(parameter);",
+    "  sinkGlobal(GLOBAL);",
+    "}",
+  ].join("\n"));
+  const globalConstants = collectStaticStringConstants(localSource);
+  const resolutions = {
+    alias: collectLocalStaticStringResolution(localSource, callArgument(localSource, "sinkAlias"), "alias", globalConstants),
+    conditional: collectLocalStaticStringResolution(localSource, callArgument(localSource, "sinkConditional"), "conditional", globalConstants),
+    joined: collectLocalStaticStringResolution(localSource, callArgument(localSource, "sinkJoined"), "joined", globalConstants),
+    reassigned: collectLocalStaticStringResolution(localSource, callArgument(localSource, "sinkReassigned"), "reassigned", globalConstants),
+    parameter: collectLocalStaticStringResolution(localSource, callArgument(localSource, "sinkParameter"), "parameter", globalConstants),
+  };
+  assert.deepEqual(resolutions.alias, { values: ["/literal"], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolutions.conditional, { values: ["/one", "/two"], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolutions.joined, { values: ["/literal/child"], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolutions.reassigned, { values: [], dynamicSql: true, localBinding: true });
+  assert.deepEqual(resolutions.parameter, { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(
+    staticStringResolutionAt(localSource, callArgument(localSource, "sinkGlobal"), callArgument(localSource, "sinkGlobal"), globalConstants),
+    { values: ["/global"], dynamicSql: false, localBinding: false },
+  );
+  assert.deepEqual(staticStringResolutionAt(localSource, localSource, undefined, globalConstants), emptyResolution());
+
+  assert.equal(isStatementContainer(localSource), true);
+  const run = localSource.statements.find(ts.isFunctionDeclaration);
+  assert.ok(run?.body);
+  assert.equal(isStatementContainer(run.body), true);
+  assert.equal(isStatementContainer(run), false);
+  assert.equal(statementsForContainer(run.body).length, 12);
+  assert.equal(nearestStatementContainer(callArgument(localSource, "sinkAlias")), run.body);
+});
+
+test("resource local resolution fails closed across shadowing and control-flow boundaries", () => {
+  const {
+    collectStaticStringConstants,
+    collectLocalStaticStringResolution,
+    staticStringResolutionAt,
+    isStatementContainer,
+    statementsForContainer,
+    nearestStatementContainer,
+  } = resourceAccessTestHooks;
+  const sourceFile = parseTypeScript([
+    "const FORWARD = LATER;",
+    "const LATER = '/later';",
+    "const DUPLICATE = flag ? '/same' : '/same';",
+    "function run(query: string) {",
+    "  let incremented = '/count';",
+    "  incremented++;",
+    "  const dynamic = wrapper('select * from users', value);",
+    "  const unresolvedBranch = flag ? '/known' : makePath();",
+    "  const unresolvedJoin = '/known' + makePath();",
+    "  let nestedSafe = '/safe';",
+    "  function nested() { nestedSafe = '/changed'; }",
+    "  let arrowSafe = '/arrow-safe';",
+    "  const mutateLater = () => { arrowSafe = '/changed'; };",
+    "  sinkIncremented(incremented);",
+    "  sinkDynamic(dynamic);",
+    "  sinkBranch(unresolvedBranch);",
+    "  sinkJoin(unresolvedJoin);",
+    "  sinkNested(nestedSafe);",
+    "  sinkArrow(arrowSafe);",
+    "  sinkParameter(query);",
+    "  sinkBefore(laterLocal);",
+    "  const laterLocal = '/too-late';",
+    "}",
+    "try { throw new Error(); } catch (query) { sinkCatch(query); }",
+    "switch (kind) { case 'one': sinkCase(FORWARD); break; default: sinkDefault(DUPLICATE); }",
+    "namespace Scope { export const value = '/module'; sinkModule(value); }",
+  ].join("\n"));
+  const constants = collectStaticStringConstants(sourceFile);
+  assert.deepEqual(constants.get("FORWARD"), ["/later"]);
+  assert.deepEqual(constants.get("DUPLICATE"), ["/same"]);
+
+  const resolve = (callName, targetName) => collectLocalStaticStringResolution(
+    sourceFile,
+    callArgument(sourceFile, callName),
+    targetName,
+    constants,
+  );
+  assert.deepEqual(resolve("sinkIncremented", "incremented"), { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkDynamic", "dynamic"), { values: [], dynamicSql: true, localBinding: true });
+  assert.deepEqual(resolve("sinkBranch", "unresolvedBranch"), { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkJoin", "unresolvedJoin"), { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkNested", "nestedSafe"), { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkArrow", "arrowSafe"), { values: ["/arrow-safe"], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkParameter", "query"), { values: [], dynamicSql: true, localBinding: true });
+  assert.deepEqual(resolve("sinkBefore", "laterLocal"), { values: [], dynamicSql: false, localBinding: true });
+  assert.deepEqual(resolve("sinkCatch", "query"), { values: [], dynamicSql: true, localBinding: true });
+
+  assert.deepEqual(
+    staticStringResolutionAt(sourceFile, callArgument(sourceFile, "sinkCase"), callArgument(sourceFile, "sinkCase"), constants),
+    { values: ["/later"], dynamicSql: false, localBinding: false },
+  );
+  const switchStatement = sourceFile.statements.find(ts.isSwitchStatement);
+  assert.ok(switchStatement);
+  const [caseClause, defaultClause] = switchStatement.caseBlock.clauses;
+  assert.equal(isStatementContainer(caseClause), true);
+  assert.equal(isStatementContainer(defaultClause), true);
+  assert.equal(statementsForContainer(caseClause).length, 2);
+  assert.equal(statementsForContainer(defaultClause).length, 1);
+  assert.equal(nearestStatementContainer(callArgument(sourceFile, "sinkCase")), caseClause);
+
+  const moduleDeclaration = sourceFile.statements.find(ts.isModuleDeclaration);
+  assert.ok(moduleDeclaration?.body && ts.isModuleBlock(moduleDeclaration.body));
+  assert.equal(isStatementContainer(moduleDeclaration.body), true);
+  assert.equal(statementsForContainer(moduleDeclaration.body).length, 2);
+  assert.equal(nearestStatementContainer(callArgument(sourceFile, "sinkModule")), moduleDeclaration.body);
+});
+
+function emptyResolution() {
+  return { values: [], dynamicSql: false, localBinding: false };
+}
+
+test("resource detector vocabularies and receiver heuristics reject near misses", () => {
+  const hooks = resourceAccessTestHooks;
+  assert.deepEqual([...hooks.prismaReadMethods], ["findMany", "findFirst", "findUnique", "count", "aggregate", "groupBy"]);
+  assert.deepEqual([...hooks.prismaWriteMethods], ["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
+  assert.deepEqual([...hooks.typeOrmReadMethods], ["find", "findBy", "findOne", "findOneBy", "count", "countBy", "exist"]);
+  assert.deepEqual([...hooks.typeOrmWriteMethods], ["save", "insert", "update", "upsert", "delete", "remove", "softDelete", "restore"]);
+  assert.deepEqual([...hooks.queryBuilderReadMethods], ["selectFrom", "from"]);
+  assert.deepEqual([...hooks.queryBuilderWriteMethods], ["insertInto", "updateTable", "deleteFrom", "into", "update"]);
+  assert.deepEqual([...hooks.fsModuleSpecifiers], ["fs", "node:fs", "fs/promises", "node:fs/promises"]);
+  assert.deepEqual([...hooks.pythonResourceAdapters], [
+    ["django-adapter", "django"],
+    ["fastapi-adapter", "fastapi"],
+    ["sqlalchemy-adapter", "sqlalchemy"],
+    ["celery-adapter", "celery"],
+  ]);
+  for (const text of ["PrismaClient", "readFileSync", "$queryRaw", "route", "subscribe"]) assert.equal(hooks.resourceScanHint.test(text), true, text);
+  for (const text of ["FastAPI", "models.Model", "__tablename__", "apply_async"]) assert.equal(hooks.pythonResourceScanHint.test(text), true, text);
+  assert.equal(hooks.resourceScanHint.test("ordinary business logic"), false);
+  assert.equal(hooks.pythonResourceScanHint.test("ordinary python logic"), false);
+
+  const receiver = (text) => expressionFrom(`${text}.get`);
+  for (const name of ["app", "api", "router", "server", "fastify", "adminApp", "nestedRouter", "httpServer"]) {
+    assert.equal(hooks.routeReceiverLooksHttp(receiver(name)), true, name);
+  }
+  for (const name of ["map", "application", "routerState", "serverValue", "client"]) {
+    assert.equal(hooks.routeReceiverLooksHttp(receiver(name)), false, name);
+  }
+  assert.equal(hooks.routeReceiverLooksHttp(expressionFrom("factory().get")), false);
+  for (const name of ["bus", "eventBroker", "channel", "consumer", "messageClient", "producer", "pubsub", "queue", "topicStore"]) {
+    assert.equal(hooks.queueReceiverLooksExternal(expressionFrom(`${name}.subscribe`)), true, name);
+  }
+  for (const name of ["router", "state", "subscription", "client"]) {
+    assert.equal(hooks.queueReceiverLooksExternal(expressionFrom(`${name}.subscribe`)), false, name);
+  }
+  assert.equal(hooks.queueReceiverLooksExternal(expressionFrom("factory().subscribe")), false);
+  for (const selector of ["orders.created", "queue-name", "lowercase"]) assert.equal(hooks.selectorLooksQueueTopic(selector), true, selector);
+  for (const selector of ["/route", "http://example.test", "https://example.test", "onResolved"]) assert.equal(hooks.selectorLooksQueueTopic(selector), false, selector);
+  for (const selector of ["prefixhttp://example.test", "prefixhttps://example.test", "prefixonResolved"]) {
+    assert.equal(hooks.selectorLooksQueueTopic(selector), true, selector);
+  }
+});
+
+test("collectResourceAccesses returns no observations for source without resource hints", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-no-hints-"));
+  try {
+    const typeScriptPath = writeRuntimeSource(rootDir, [
+      "export function runRuntime(): number {",
+      "  const value = 42;",
+      "  return value;",
+      "}",
+    ]);
+    assert.deepEqual(collectResourceAccesses(createResourceContext(rootDir), typeScriptPath), []);
+
+    const pythonPath = writePythonSource(rootDir, [
+      "def run_runtime():",
+      "    value = 42",
+      "    return value",
+    ]);
+    assert.deepEqual(collectResourceAccesses(createResourceContext(rootDir), pythonPath), []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("collectResourceAccesses detects FastAPI route decorators in Python source", () => {
@@ -581,6 +904,54 @@ test("collectResourceAccesses covers file, HTTP, and generic queue call vocabula
     assert.equal(accesses.find((access) => access.selector === "data/read.txt")?.detectedBy, "readFile");
     assert.equal(accesses.find((access) => access.selector === "GET /get")?.line, lineOf(lines, "router.get"));
     assert.equal(accesses.find((access) => access.selector === "unresolved:dynamic-file-path")?.reason, "file path argument is not a static literal");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses handles dynamic fs paths and descriptor-backed streams exactly", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-fs-dynamic-"));
+  try {
+    const lines = [
+      "import * as fs from 'node:fs';",
+      "declare const dynamicPath: string;",
+      "declare const fd: number;",
+      "export function runRuntime(): void {",
+      "  fs.createReadStream(dynamicPath, { fd });",
+      "  fs.createWriteStream(dynamicPath, { fd });",
+      "  fs.readFileSync();",
+      "  fs.readFile(dynamicPath, { fd });",
+      "  fs.readFileSync(dynamicPath);",
+      "}",
+    ];
+    const filePath = writeRuntimeSource(rootDir, lines);
+    assert.deepEqual(summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath)), [
+      {
+        kind: "file",
+        access: "read",
+        selector: "unresolved:dynamic-file-path",
+        source: "readFile",
+        detectedBy: "file-call",
+        confidence: "low",
+        unresolved: true,
+        reason: "file path argument is not a static literal",
+        line: lineOf(lines, "fs.readFile(dynamicPath"),
+      },
+      {
+        kind: "file",
+        access: "read",
+        selector: "unresolved:dynamic-file-path",
+        source: "readFileSync",
+        detectedBy: "file-call",
+        confidence: "low",
+        unresolved: true,
+        reason: "file path argument is not a static literal",
+        line: lineOf(lines, "fs.readFileSync(dynamicPath)"),
+      },
+    ]);
+
+    const disabledContext = createResourceContext(rootDir, { resourceAdapters: { file: "off" } });
+    assert.deepEqual(collectResourceAccesses(disabledContext, filePath), []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

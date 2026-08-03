@@ -1,6 +1,6 @@
 {
   "name": "cellfence-workspace",
-  "version": "0.1.14",
+  "version": "0.2.0",
   "private": true,
   "description": "Manifest-driven repository governance for parallel coding agents.",
   "license": "Apache-2.0",
@@ -23,7 +23,8 @@
     "conformance:resources": "npm run build && node --test tests/conformance-resources.test.mjs",
     "conformance:ratchet": "npm run build && node --test tests/conformance-ratchet.test.mjs",
     "conformance:malformed": "npm run build && node --test tests/conformance-malformed.test.mjs",
-    "conformance:all": "npm run build && node --test tests/conformance-imports.test.mjs tests/conformance-resolution.test.mjs tests/conformance-ownership.test.mjs tests/conformance-public-surface.test.mjs tests/conformance-resources.test.mjs tests/conformance-ratchet.test.mjs tests/conformance-malformed.test.mjs",
+    "conformance:glob-oracle": "npm run build && node --test tests/conformance-glob-oracle.test.mjs",
+    "conformance:all": "npm run build && node --test tests/conformance-imports.test.mjs tests/conformance-resolution.test.mjs tests/conformance-ownership.test.mjs tests/conformance-public-surface.test.mjs tests/conformance-resources.test.mjs tests/conformance-ratchet.test.mjs tests/conformance-malformed.test.mjs tests/conformance-glob-oracle.test.mjs",
     "mutation": "npm run build && stryker run stryker.conf.mjs",
     "mutation:dry": "npm run build && stryker run stryker.conf.mjs --dryRunOnly",
     "mutation:injection": "npm run build && node scripts/mutation-injection-study.mjs",
@@ -69,6 +70,7 @@
     "@types/node": "^20.14.15",
     "c8": "^11.0.0",
     "eslint": "^10.7.0",
+    "minimatch": "^10.0.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.63.0"
   },
