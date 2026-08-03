@@ -1073,6 +1073,38 @@ test("engine changed checks include untracked files in working tree mode", () =>
   }
 });
 
+test("engine changed checks preserve paths containing spaces and non-ascii characters", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-path-encoding-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "app");
+    writeManifest(rootDir, [baseCell("app")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    const changedPaths = ["src/app/my file.ts", "src/app/日本語.ts"];
+    for (const relativePath of changedPaths) {
+      fs.writeFileSync(path.join(rootDir, relativePath), "export const value = true;\n");
+    }
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "add ordinary unicode paths"]);
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+    });
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.deepEqual(
+      result.changedFiles,
+      changedPaths.sort((left, right) => left.localeCompare(right)),
+    );
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed check finding identity is stable across message wording changes", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-fingerprint-"));
   try {

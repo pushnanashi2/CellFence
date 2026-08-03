@@ -1650,7 +1650,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
 
 function gitCommand(rootDir: string, args: string[]): string {
   try {
-    return execCommandSync("git", args, {
+    return execCommandSync("git", ["-c", "core.quotepath=off", ...args], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
