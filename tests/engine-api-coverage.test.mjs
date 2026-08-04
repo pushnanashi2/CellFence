@@ -1475,6 +1475,29 @@ test("engine claim creation recovers from stale claim store locks", () => {
   }
 });
 
+test("engine claim creation falls back to lock mtime when lock metadata is malformed", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-mtime-claim-lock-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    const claimsPath = path.join(rootDir, ".cellfence/claims.json");
+    const lockPath = `${claimsPath}.lock`;
+    fs.mkdirSync(path.dirname(claimsPath), { recursive: true });
+    fs.writeFileSync(lockPath, "not-a-pid\nnot-a-timestamp\n");
+    const staleTime = new Date(Date.now() - 120_000);
+    fs.utimesSync(lockPath, staleTime, staleTime);
+
+    const result = createClaim({ rootDir, agent: "codex-a", cells: ["core"], ttl: "2h", claimId: "claim-a" });
+
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.equal(result.createdClaim?.id, "claim-a");
+    assert.equal(fs.existsSync(lockPath), false);
+    assert.equal(fs.readdirSync(path.dirname(claimsPath)).some((entry) => entry.includes(".reclaim-")), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine claim creation does not steal fresh or live claim store locks", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-live-claim-lock-"));
   try {
