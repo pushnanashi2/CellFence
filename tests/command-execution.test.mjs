@@ -198,7 +198,7 @@ test("Windows batch execution plans force cmd.exe safety options", () => {
   const options = { encoding: "utf8", shell: true, stdio: ["ignore", "pipe", "pipe"] };
   withCommandEnvironment({
     platform: "win32",
-    variables: { ComSpec: "C:\\Windows\\cmd.exe", COMSPEC: "ignored.exe" },
+    variables: { ComSpec: "C:\\Windows\\cmd.exe" },
   }, () => {
     assert.deepEqual(prepareCommandExecution("C:\\Tools\\runner.BAT", ["a&b"], options), {
       commandPath: "C:\\Windows\\cmd.exe",

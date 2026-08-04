@@ -1723,7 +1723,7 @@ function movementEntriesForRefs(rootDir: string, baseRef: string, headRef?: stri
       movements.set(`${movement.status}:${movement.fromPath}:${movement.toPath}`, movement);
     }
   };
-  const diffArgs = ["diff", "--find-renames=50%", "--find-copies=50%", "--name-status", "--diff-filter=RC"];
+  const diffArgs = ["diff", "--find-renames=50", "--find-copies=50", "--name-status", "--diff-filter=RC"];
   if (headRef) {
     addDiff([...diffArgs, `${baseRef}...${headRef}`]);
   } else {
