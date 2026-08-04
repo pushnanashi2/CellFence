@@ -54,7 +54,7 @@ type ToolDecision = {
   access?: WriteAccessResult;
 };
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 
 const DEFAULT_WRITE_TOOLS: WriteToolConfig = {
   apply_patch: ["path", "file_path", "filename"],

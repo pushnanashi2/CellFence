@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/trace",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Runtime resource evidence tracing hook for CellFence.",
   "license": "Apache-2.0",
   "type": "module",
@@ -40,6 +40,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/schema": "0.2.0"
+    "@cellfence/schema": "0.2.1"
   }
 }

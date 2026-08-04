@@ -2,7 +2,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
-import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 import {
@@ -82,6 +81,7 @@ import {
 } from "./findings.js";
 import { ownedPathPatternsOverlap, pathPatternsOverlap } from "./glob-overlap.js";
 import { errorMessage } from "./errors.js";
+import { execCommandSync } from "./command-execution.js";
 import {
   validateBaselineSealFindings,
 } from "./baseline-seal.js";
@@ -167,6 +167,12 @@ import type {
 } from "./types.js";
 
 export { inferManifest, type InferManifestOptions } from "./manifest-inference.js";
+export {
+  buildCmdCommandLine,
+  execCommandSync,
+  resolveCommand,
+  type ExecCommandOptions,
+} from "./command-execution.js";
 export {
   checkCommitEvidence,
   checkDesignDocs,
@@ -1483,36 +1489,6 @@ function resourceEntrySet(accesses: ResourceAccessReference[] = []): Set<string>
 
 function countPruneCandidates(candidates: PruneCandidate[], kind: PruneCandidateKind): number {
   return candidates.filter((candidate) => candidate.kind === kind).length;
-}
-
-function resolveCommand(commandName: string): string {
-  if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
-  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
-  const extensions = process.platform === "win32" && !path.extname(commandName)
-    ? [...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean), ""]
-    : [""];
-  for (const directory of pathEntries) {
-    for (const extension of extensions) {
-      const candidate = path.join(directory, `${commandName}${extension}`);
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  }
-  return commandName;
-}
-
-type ExecCommandOptions = NonNullable<Parameters<typeof execFileSync>[2]>;
-
-function escapeWindowsShellArgument(argument: string): string {
-  return argument.replace(/\^/g, "^^");
-}
-
-function execCommandSync(commandName: string, args: string[], options: ExecCommandOptions): string {
-  const commandPath = resolveCommand(commandName);
-  const extension = path.extname(commandPath).toLowerCase();
-  if (process.platform === "win32" && (extension === ".cmd" || extension === ".bat")) {
-    return execFileSync(commandPath, args.map(escapeWindowsShellArgument), { ...options, shell: true }) as string;
-  }
-  return execFileSync(commandPath, args, options) as string;
 }
 
 /* c8 ignore next 3 -- Optional fields only make prune output ordering deterministic; rule behavior is asserted through candidate contents. */

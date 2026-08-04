@@ -1,5 +1,6 @@
 const mutationTestFiles = [
   "tests/file-index.test.mjs",
+  "tests/command-execution.test.mjs",
   "tests/module-resolution.test.mjs",
   "tests/resource-access-coverage.test.mjs",
   "tests/schema-validation.test.mjs",
@@ -29,6 +30,7 @@ export default {
     "packages/reporter-economy-matrix/dist/index.js",
     "packages/trace/dist/index.js",
     "packages/engine/dist/module-resolution.js",
+    "packages/engine/dist/command-execution.js",
     "packages/engine/dist/file-index.js",
     "packages/engine/dist/glob-overlap.js",
     "packages/engine/dist/resource-access.js",

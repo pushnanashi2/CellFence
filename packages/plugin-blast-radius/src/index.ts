@@ -88,7 +88,7 @@ export function blastRadiusPlugin(options: BlastRadiusOptions = {}): CellFencePl
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-blast-radius",
-    version: "0.2.0",
+    version: "0.2.1",
     capabilities: { needsGitDiff: true },
     rules: {
       "blast-radius/affected-cells": defineRule({
