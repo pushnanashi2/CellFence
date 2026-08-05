@@ -26,6 +26,7 @@
     "conformance:glob-oracle": "npm run build && node --test tests/conformance-glob-oracle.test.mjs",
     "conformance:all": "npm run build && node --test tests/conformance-imports.test.mjs tests/conformance-resolution.test.mjs tests/conformance-ownership.test.mjs tests/conformance-public-surface.test.mjs tests/conformance-resources.test.mjs tests/conformance-ratchet.test.mjs tests/conformance-malformed.test.mjs tests/conformance-glob-oracle.test.mjs",
     "mutation": "npm run build && stryker run stryker.conf.mjs",
+    "mutation:changed": "npm run build && node scripts/mutation-changed.mjs",
     "mutation:dry": "npm run build && stryker run stryker.conf.mjs --dryRunOnly",
     "mutation:injection": "npm run build && node scripts/mutation-injection-study.mjs",
     "history:replay:smoke": "npm run build && node scripts/history-replay-smoke.mjs",
