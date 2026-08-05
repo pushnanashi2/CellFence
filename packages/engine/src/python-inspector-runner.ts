@@ -18,6 +18,11 @@ import io
 import json
 import sys
 
+if hasattr(sys.stdin, "reconfigure"):
+    sys.stdin.reconfigure(encoding="utf-8")
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 inspector_path = sys.argv[1]
 
 with open(inspector_path, "r", encoding="utf-8") as handle:

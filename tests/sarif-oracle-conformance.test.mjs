@@ -24,7 +24,8 @@ test("SARIF oracle harness compares JSON semantics and runs a pre-provisioned ex
     const result = spawnSync(process.execPath, [
       scriptPath,
       "--root", path.join(repoRoot, "fixtures", "invalid", "private-cross-cell-import"),
-      "--oracle-command", validatorPath,
+      "--oracle-command", process.execPath,
+      "--oracle-arg", validatorPath,
       "--oracle-arg", "{sarif}",
       "--require-external",
       "--sarif-out", sarifPath,
