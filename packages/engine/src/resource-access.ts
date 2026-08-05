@@ -10,7 +10,6 @@ import {
   parseSourceFile,
   readSourceText,
   repoPath,
-  sourceFilesForCell,
   type FileIndexContext,
 } from "./file-index.js";
 import { inspectPythonSource } from "./python-analysis.js";
@@ -317,7 +316,6 @@ function collectLocalStaticStringResolution(
   targetName: string,
   constants: Map<string, string[]>,
 ): StaticStringResolution {
-  const usageStart = usageNode.getStart(sourceFile);
   const values = new Map<string, string[]>();
   const unsafe = new Set<string>();
   const dynamicSqlNames = new Set<string>();

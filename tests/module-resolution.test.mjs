@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -2630,7 +2631,8 @@ test("module resolution reports unsupported Python syntax without throwing", () 
     fs.writeFileSync(filePath, "def get_{{ cookiecutter.name }}():\n    return True\n");
 
     const warnings = [];
-    assert.deepEqual(extractImports(context(rootDir), filePath, warnings), []);
+    const errors = [];
+    assert.deepEqual(extractImports(context(rootDir), filePath, warnings, errors), []);
     const [syntaxError] = inspectPythonSource(filePath).errors;
     assert.deepEqual(
       { kind: syntaxError.kind, line: syntaxError.line, offset: syntaxError.offset },
@@ -2642,6 +2644,7 @@ test("module resolution reports unsupported Python syntax without throwing", () 
     assert.equal(warnings[0].filePath, "src/core/template.py");
     assert.equal(warnings[0].message, `Python source cannot be parsed statically at line 1: ${syntaxError.message}`);
     assert.deepEqual(warnings[0].details, { kind: "syntax_error", line: 1, offset: 9 });
+    assert.deepEqual(errors, []);
     assert.deepEqual([...extractPublicSymbols(filePath)], []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -2663,6 +2666,46 @@ test("module resolution preserves Python read errors without inventing source po
     assert.equal(warnings[0].filePath, "src/core/invalid-encoding.py");
     assert.deepEqual(warnings[0].details, { kind: "read_error" });
     assert.match(warnings[0].message, /^Python source cannot be parsed statically: /);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("module resolution routes Python inspector failures to the error lane", { skip: process.platform === "win32" }, () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-inspector-error-"));
+  try {
+    const filePath = path.join(rootDir, "src/core/public.py");
+    const emptyBin = path.join(rootDir, "bin");
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.mkdirSync(emptyBin);
+    fs.writeFileSync(filePath, "PUBLIC = True\n");
+
+    const moduleUrl = new URL("../packages/engine/dist/module-resolution.js", import.meta.url).href;
+    const script = [
+      `import { extractImports } from ${JSON.stringify(moduleUrl)};`,
+      `const rootDir = ${JSON.stringify(rootDir)};`,
+      `const filePath = ${JSON.stringify(filePath)};`,
+      "const warnings = [];",
+      "const errors = [];",
+      "const references = extractImports({ rootDir, manifest: { schemaVersion: 'cellfence.manifest.v1', cells: [] }, sourceFilesForCellCache: new Map(), sourceTextCache: new Map(), sourceFileCache: new Map() }, filePath, warnings, errors);",
+      "console.log(JSON.stringify({ references, warnings, errors }));",
+    ].join("\n");
+    const result = spawnSync(process.execPath, ["--input-type=module", "--eval", script], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: { ...process.env, PATH: emptyBin },
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.deepEqual(output.references, []);
+    assert.deepEqual(output.warnings, []);
+    assert.equal(output.errors.length, 1);
+    assert.equal(output.errors[0].ruleId, "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
+    assert.equal(output.errors[0].severity, "error");
+    assert.equal(output.errors[0].filePath, "src/core/public.py");
+    assert.equal(output.errors[0].details.kind, "inspector_error");
+    assert.match(output.errors[0].message, /^Python source cannot be parsed statically: /);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

@@ -1025,6 +1025,158 @@ test("engine changed checks cover explicit head refs and base-check failure path
   }
 });
 
+test("engine changed checks cache deterministic base analysis outside the worktree", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-cache-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    const first = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    const second = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    assert.equal(first.exitCode, 0, JSON.stringify(first.findings));
+    assert.equal(first.baseCacheHit, false);
+    assert.equal(second.baseCacheHit, true);
+    assert.deepEqual(second.changedFiles, []);
+
+    const cacheDirectory = path.join(git(rootDir, ["rev-parse", "--git-common-dir"]), "cellfence-cache", "changed-base");
+    assert.equal(fs.readdirSync(path.resolve(rootDir, cacheDirectory)).filter((name) => name.endsWith(".json")).length, 1);
+
+    const severityChanged = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      ruleSeverities: { CELLFENCE_UNOWNED_SOURCE: "warning" },
+    });
+    assert.equal(severityChanged.baseCacheHit, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks require an explicit plugin cache identity", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-plugin-cache-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+    const plugin = { apiVersion: 1, name: "cache-test", version: "1", rules: {} };
+
+    const uncached = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      plugins: [plugin],
+    });
+    assert.equal(uncached.baseCacheHit, false);
+    const seeded = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      plugins: [plugin],
+      pluginCacheKey: "cache-test@1",
+    });
+    const cached = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      plugins: [plugin],
+      pluginCacheKey: "cache-test@1",
+    });
+    assert.equal(seeded.baseCacheHit, false);
+    assert.equal(cached.baseCacheHit, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks treat cache write failures as best-effort", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-cache-failure-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+    const cacheFile = path.join(rootDir, "not-a-directory");
+    fs.writeFileSync(cacheFile, "occupied\n");
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+      baseCacheDir: cacheFile,
+    });
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.equal(result.baseCacheHit, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks disable caching for relative policy paths outside the repository", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-external-policy-"));
+  const externalDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-external-policy-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(externalDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+    const relativeManifest = path.relative(rootDir, path.join(externalDir, "cellfence.manifest.json"));
+
+    const first = checkChangedRepository({ rootDir, manifestPath: relativeManifest, baseRef: "HEAD" });
+    const second = checkChangedRepository({ rootDir, manifestPath: relativeManifest, baseRef: "HEAD" });
+    assert.equal(first.baseCacheHit, false);
+    assert.equal(second.baseCacheHit, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(externalDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks reject cache entries containing suppressible findings", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-cache-poison-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "producer", "export const publicValue = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/private.ts"), "export const secret = true;\n");
+    writeCell(rootDir, "consumer", "export const consumer = true;\n");
+    writeManifest(rootDir, [
+      baseCell("producer", { publicSymbols: ["publicValue"] }),
+      baseCell("consumer", { consumes: [{ cell: "producer" }] }),
+    ]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "clean base"]);
+    fs.writeFileSync(
+      path.join(rootDir, "src/consumer/public.ts"),
+      'import { secret } from "../producer/private.js";\nexport const consumer = secret;\n',
+    );
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "new violation"]);
+
+    const first = checkChangedRepository({ rootDir, baseRef: "HEAD~1" });
+    assert.equal(first.exitCode, 1);
+    const cacheDirectory = path.resolve(rootDir, git(rootDir, ["rev-parse", "--git-common-dir"]), "cellfence-cache", "changed-base");
+    const [cacheName] = fs.readdirSync(cacheDirectory).filter((name) => name.endsWith(".json"));
+    const cachePath = path.join(cacheDirectory, cacheName);
+    const poisoned = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+    poisoned.result.findings = [first.findings[0]];
+    fs.writeFileSync(cachePath, `${JSON.stringify(poisoned)}\n`);
+
+    const second = checkChangedRepository({ rootDir, baseRef: "HEAD~1" });
+    assert.equal(second.exitCode, 1);
+    assert.equal(second.baseCacheHit, false);
+    assert.ok(second.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed checks return the current manifest error before base diffing", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-current-error-"));
   try {

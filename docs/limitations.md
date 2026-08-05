@@ -16,7 +16,7 @@ Version 0.x is deliberately narrow:
 - public symbol analysis supports common TypeScript forms, exported namespaces, and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern;
 - TypeScript/JavaScript public surface hashes use isolated normalized declaration output when available and remain contract fingerprints, not full API-compatibility proofs; imported implementation details can still collapse to broad declaration types without a separate typecheck;
 - computed dynamic imports and computed CommonJS `require()` calls cannot be resolved statically;
-- `check --changed` still performs full head/base repository analysis in v0.x, then compares stable finding fingerprints to report only newly introduced findings;
+- `check --changed` performs full head analysis, then compares stable finding fingerprints to report only newly introduced findings. Only clean base results without findings are cacheable; the key binds the base commit, engine and schema implementation, Node/TypeScript/Python runtime, policy inputs, and severity configuration. Absolute or repository-escaping policy paths and plugins without an explicit `pluginCacheKey` remain uncached;
 - Markdown and SARIF output are report formats over the same deterministic findings, not separate analyzers;
 - the reusable GitHub Action is pre-release and invokes the published CLI through a `version` input; the default follows npm `latest`, while required checks should set an exact published version;
 - CellFence does not identify which particular agent wrote a changed file;

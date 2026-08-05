@@ -2,7 +2,16 @@
 
 ## Unreleased
 
-- Add a fail-closed `mutation:changed` runner that maps changed mutation targets to dedicated tests and stable per-target incremental caches while retaining the full `break: 100` audit.
+- Add a fail-closed `mutation:changed` pull-request gate with test/config change detection, isolated incremental caches, machine-readable evidence, and a daily non-incremental full-scope matrix audit while retaining `break: 100` throughout.
+- Cache deterministic `check --changed` base analysis outside the worktree using a key bound to the base commit, analyzer implementation, runtime, policy inputs, severity configuration, and explicit plugin identity.
+- Keep arbitrary plugin loading out of manifest and CLI configuration, support explicit programmatic plugin cache identity, and remove the research ablation switch from public help.
+- Publish Draft 2020-12 JSON Schema subpaths for manifests, baselines, and resource evidence with runtime-validator parity tests for structural contracts.
+- Batch Python AST inspection through a bounded, memoized interpreter runner and add a 1,000-file Python scale scenario.
+- Add official TypeScript, Python importlib, and OASIS SARIF conformance oracles plus safe exact-commit corpus, competitor-comparison, GitHub collection, and adversarial-evidence harnesses.
+- Add closed-surface MCP proxy policy, nested array path extraction, and resource, prompt, completion, subscription, and list-change bridging while preserving the backward-compatible default.
+- Turn on explicit-any, unused TypeScript binding, and JavaScript undefined-name linting, and generate the README CLI help block from the built CLI with a drift test.
+- Close independent-review gaps by making Python inspector failures fail closed with batch bisection, limiting changed-result cache reuse to non-suppressing base results with complete runtime identity, rejecting empty and prototype-named MCP tool policy inputs, and binding adversarial stdout claims to pinned artifacts.
+- Tie release dispatches to the exact-ref full mutation matrix, retain oracle reports on failure, harden action pin verification, and make changed-scope selection preserve deleted and both renamed paths.
 
 ## 0.2.1 - 2026-08-04
 

@@ -265,7 +265,7 @@ flowchart LR
 | 50,000 | 100 | ~37 s |
 | 100,000 | 300 | ~3.5 min |
 
-Measured with `npm run benchmark:scale` on a single container-class vCPU; reproduce on your own hardware. `check --changed --base origin/main` reports only newly introduced findings, so full-repository cost applies mainly to scheduled runs, not to pull requests.
+Measured with `npm run benchmark:scale` on a single container-class vCPU; reproduce on your own hardware. `check --changed --base origin/main` reports only newly introduced findings and reuses only clean deterministic base analysis keyed to the exact analyzer, schema, Python runtime, and policy inputs, while still analyzing the current tree in full. Base results containing findings are never cacheable because cached findings must not suppress current findings.
 
 ## CI
 
@@ -302,7 +302,51 @@ Threat model: [docs/threat-model.md](docs/threat-model.md).
 
 ## CLI at a glance
 
-<!-- TODO: generate this block from `cellfence --help` in CI and fail on drift (docs ratchet) -->
+<!-- BEGIN GENERATED CLI HELP -->
+
+```text
+CellFence
+
+Usage:
+  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
+  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
+  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
+  cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
+  cellfence manifest verify --from systems/*/service.json [--json]
+  cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
+  cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
+  cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
+  cellfence serve --mcp
+  cellfence graph [--json|--format mermaid]
+  cellfence prune [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json]
+  cellfence doctor [--repo owner/name] [--branch main] [--required-check "CellFence"] [--json]
+  cellfence lab [--json]
+  cellfence claim create --agent agent-id --cell cell-id [--path glob] [--ttl 2h] [--claims .cellfence/claims.json] [--json]
+  cellfence claim check [--agent agent-id] [--base origin/main] [--head HEAD] [--claims .cellfence/claims.json] [--json]
+  cellfence claim list [--claims .cellfence/claims.json] [--json]
+  cellfence task check --task .cellfence/tasks/task.json [--base origin/main] [--head HEAD] [--json]
+  cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
+  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
+  cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
+  cellfence baseline sign [--baseline cellfence.baseline.json]
+  cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
+  cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
+  cellfence docs check [--file docs/design/cell.md] [--json]
+  cellfence docs stamp --cell cell-id --file docs/design/cell.md [--json]
+  cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
+  cellfence waivers list [--manifest cellfence.manifest.json] [--json]
+  cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
+
+Exit codes:
+  0  no violations
+  1  governance violations
+  2  configuration or manifest error
+  3  internal tool error
+```
+
+<!-- END GENERATED CLI HELP -->
 
 | Command | Purpose |
 |---|---|
@@ -336,6 +380,7 @@ Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; r
 | Ratchets and baselines | [docs/ratchets.md](docs/ratchets.md) |
 | Artifact contracts | [docs/artifacts.md](docs/artifacts.md) |
 | Plugin API v1 | [docs/plugin-api.md](docs/plugin-api.md) |
+| Product evidence harnesses | [docs/evidence-harnesses.md](docs/evidence-harnesses.md) |
 | CI recipes | [docs/ci.md](docs/ci.md) |
 | Threat model | [docs/threat-model.md](docs/threat-model.md) |
 | Root of trust | [docs/root-of-trust.md](docs/root-of-trust.md) |

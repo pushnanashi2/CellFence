@@ -1104,6 +1104,12 @@ test("CLI rejects manifest plugins and extends instead of silently ignoring them
   }
 });
 
+test("CLI public help hides research-only init switches", () => {
+  const result = runCli(["--help"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stdout, /research-ablate-package-policy-hints/);
+});
+
 test("CLI rejects attempts to disable core boundary rules even without manifest requiredRules", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-core-rule-off-"));
   try {

@@ -228,6 +228,7 @@ export type CheckResult = {
   metrics: Record<string, CellBaselineRecord>;
   changedFiles?: string[];
   baseFindingCount?: number;
+  baseCacheHit?: boolean;
   evidenceGraph?: EvidenceGraph;
 };
 
@@ -269,6 +270,8 @@ export type PruneReport = {
 export type ChangedCheckOptions = Omit<CheckOptions, "includeEvidenceGraph"> & {
   baseRef?: string;
   headRef?: string;
+  baseCacheDir?: string | false;
+  pluginCacheKey?: string;
 };
 
 export type ContextBudgetEntry = {

@@ -31,11 +31,15 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./manifest.schema.json": "./schemas/manifest.schema.json",
+    "./baseline.schema.json": "./schemas/baseline.schema.json",
+    "./resource-evidence.schema.json": "./schemas/resource-evidence.schema.json"
   },
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
+    "schemas/*.schema.json",
     "LICENSE",
     "README.md"
   ]

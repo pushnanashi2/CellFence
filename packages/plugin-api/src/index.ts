@@ -8,7 +8,6 @@ import type {
   ResourceAccessConfidence,
   ResourceAccessMode,
   ResourceContractKind,
-  ResourceContractManifest,
 } from "@cellfence/schema";
 
 export const CELLFENCE_PLUGIN_API_VERSION = 1;

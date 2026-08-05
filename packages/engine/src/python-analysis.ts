@@ -1,7 +1,12 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
+import {
+  PYTHON_INSPECTOR_BATCH_SIZE,
+  recoverPythonInspectorBatch,
+  runPythonInspectorBatch,
+} from "./python-inspector-runner.js";
 
 export type PythonImportReference = {
   specifier: string;
@@ -47,6 +52,12 @@ type CachedPythonInspection = {
   mtimeMs: number;
   size: number;
   result: PythonInspection;
+};
+
+type PendingPythonInspection = {
+  filePath: string;
+  mtimeMs: number;
+  size: number;
 };
 
 const inspectionCache = new Map<string, CachedPythonInspection>();
@@ -876,41 +887,53 @@ export function inspectPythonSource(filePath: string): PythonInspection {
   const cached = inspectionCache.get(filePath);
   if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) return cached.result;
 
-  let lastError: unknown;
-  const inspectorPath = writeInspectorScript();
-  const pythonCommands: Array<{ command: string; args: string[] }> = process.platform === "win32"
-    ? [
-      { command: "py", args: ["-3"] },
-      { command: "python", args: [] },
-      { command: "python3", args: [] },
-    ]
-    : [
-      { command: "python3", args: [] },
-      { command: "python", args: [] },
-    ];
-  for (const pythonCommand of pythonCommands) {
-    try {
-      const output = execFileSync(pythonCommand.command, [...pythonCommand.args, "-I", "-B", inspectorPath, filePath], {
-        encoding: "utf8",
-        maxBuffer: 1024 * 1024,
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-      const result = JSON.parse(output) as PythonInspection;
-      inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
-      return result;
-    } catch (error) {
-      lastError = error;
-    }
-  }
+  inspectPendingPythonSources([{ filePath, mtimeMs: stat.mtimeMs, size: stat.size }]);
+  return inspectionCache.get(filePath)?.result || inspectorError(new Error(`Python inspector returned no result for ${filePath}`));
+}
 
-  const message = lastError instanceof Error ? lastError.message : String(lastError);
-  const result: PythonInspection = {
+function inspectorError(error: unknown): PythonInspection {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
     imports: [],
     publicSymbols: [],
     surfaceParts: [],
     resources: [],
     errors: [{ kind: "inspector_error", message }],
   };
-  inspectionCache.set(filePath, { mtimeMs: stat.mtimeMs, size: stat.size, result });
-  return result;
+}
+
+export function prewarmPythonInspections(filePaths: readonly string[]): void {
+  const pending: PendingPythonInspection[] = [];
+  const seen = new Set<string>();
+  for (const filePath of filePaths) {
+    if (seen.has(filePath)) continue;
+    seen.add(filePath);
+    const stat = fs.statSync(filePath);
+    const cached = inspectionCache.get(filePath);
+    if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) continue;
+    pending.push({ filePath, mtimeMs: stat.mtimeMs, size: stat.size });
+  }
+  inspectPendingPythonSources(pending);
+}
+
+function inspectPendingPythonSources(pending: readonly PendingPythonInspection[]): void {
+  if (pending.length === 0) return;
+
+  const inspectorPath = writeInspectorScript();
+  for (let offset = 0; offset < pending.length; offset += PYTHON_INSPECTOR_BATCH_SIZE) {
+    const batch = pending.slice(offset, offset + PYTHON_INSPECTOR_BATCH_SIZE);
+    const results = recoverPythonInspectorBatch(
+      batch.map((entry) => entry.filePath),
+      (filePaths) => runPythonInspectorBatch<PythonInspection>(inspectorPath, filePaths),
+      inspectorError,
+    );
+    for (let index = 0; index < batch.length; index += 1) {
+      const entry = batch[index];
+      inspectionCache.set(entry.filePath, {
+        mtimeMs: entry.mtimeMs,
+        size: entry.size,
+        result: results[index] || inspectorError(new Error(`Python inspector returned no result for ${entry.filePath}`)),
+      });
+    }
+  }
 }

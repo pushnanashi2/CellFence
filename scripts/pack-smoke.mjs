@@ -85,6 +85,22 @@ try {
   });
   run("npm", ["install", "--save-dev", ...tarballs], { cwd: consumerDir, stdio: "inherit" });
 
+  const schemaSmokePath = path.join(consumerDir, "schema-smoke.mjs");
+  fs.writeFileSync(schemaSmokePath, `import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+for (const [specifier, schemaVersion] of [
+  ["@cellfence/schema/manifest.schema.json", "cellfence.manifest.v1"],
+  ["@cellfence/schema/baseline.schema.json", "cellfence.baseline.v1"],
+  ["@cellfence/schema/resource-evidence.schema.json", "cellfence.resource-evidence.v1"],
+]) {
+  const schema = require(specifier);
+  assert.equal(schema.properties.schemaVersion.const, schemaVersion, specifier);
+}
+`);
+  run(process.execPath, [schemaSmokePath], { cwd: consumerDir });
+
   fs.mkdirSync(path.join(consumerDir, "src/core"), { recursive: true });
   fs.writeFileSync(path.join(consumerDir, "src/core/public.ts"), "export const coreValue = 'core';\n");
   writeJson(path.join(consumerDir, "cellfence.manifest.json"), {

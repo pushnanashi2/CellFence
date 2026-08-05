@@ -24,6 +24,7 @@ import {
   resolvePathAliasTarget,
   resolveRelativeImport,
 } from "./module-resolution.js";
+import { prewarmPythonInspections } from "./python-analysis.js";
 
 type CellCandidate = {
   id: string;
@@ -861,6 +862,11 @@ function manifestFromCandidatesWithOptions(rootDir: string, candidates: readonly
     if (ownedPath.startsWith("src/")) return "src/**";
     return ownedPath;
   })))].sort((left, right) => left.localeCompare(right));
+  prewarmPythonInspections(candidates.flatMap((candidate) =>
+    sourceFilesOwnedByCandidate(rootDir, candidate, options.scope)
+      .filter((relativePath) => path.extname(relativePath) === ".py")
+      .map((relativePath) => path.join(rootDir, relativePath))
+  ));
   return {
     schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION,
     governance: {

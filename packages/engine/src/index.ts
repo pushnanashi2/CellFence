@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import crypto from "node:crypto";
 import ts from "typescript";
 
 import {
@@ -9,10 +8,6 @@ import {
   type CellFenceManifest,
   type CellManifest,
   type CellConsumerManifest,
-  type ResourceBaselineEntry,
-  type ResourceAccessConfidence,
-  type ResourceContractKind,
-  type ResourceContractManifest,
   validateBaseline,
   validateManifest,
   type RuleSeverity as ConfiguredRuleSeverity,
@@ -20,7 +15,6 @@ import {
 import {
   absolutePath,
   listSymlinks,
-  literalPrefix,
   matchesPattern,
   normalizePath,
   pathIsGoverned,
@@ -29,7 +23,6 @@ import {
   readSourceText,
   repoPath,
   SOURCE_EXTENSIONS,
-  type FileIndexContext,
   type SymlinkEntry,
   sourceFilesForCell,
   sourceFilesUnderGovernance,
@@ -47,11 +40,8 @@ import {
   resolvePathAliasTarget,
   resolveRelativeImport,
   type ImportReference,
-  type ImportWarning,
-  type PathAlias,
 } from "./module-resolution.js";
 import {
-  addResourceAccess,
   collectResourceAccesses,
   type ResourceAccessMode,
   type ResourceAccessReference,
@@ -64,22 +54,20 @@ import {
 } from "./resource-evidence.js";
 import { createEvidenceGraph } from "./governance/evidence-graph.js";
 import { governanceEvidenceEnvelopeForCheck } from "./governance/evidence-envelope.js";
-import type { SubjectSnapshotInputFile } from "./governance/subject-snapshot.js";
 import { evaluateGovernance } from "./governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
-import { CORE_REQUIRED_RULES, DEFAULT_BASELINE_PATH, DEFAULT_CLAIMS_PATH, DEFAULT_MANIFEST_PATH } from "./constants.js";
+import { CORE_REQUIRED_RULES, DEFAULT_MANIFEST_PATH } from "./constants.js";
 import { readJsonFile } from "./json-file.js";
 import {
   addFinding,
-  baselineResolution,
   codeResolution,
   findingFingerprint,
   humanResolution,
   manifestResolution,
   withFindingFingerprint,
 } from "./findings.js";
-import { ownedPathPatternsOverlap, pathPatternsOverlap } from "./glob-overlap.js";
+import { ownedPathPatternsOverlap } from "./glob-overlap.js";
 import { errorMessage } from "./errors.js";
 import { execCommandSync } from "./command-execution.js";
 import {
@@ -97,9 +85,7 @@ import {
   defaultBaselinePath,
   guardBaselineUpdate as guardBaselineUpdateOperation,
   loadBaselineFromFile,
-  sealBaselineWithConfiguredKey,
   verifyBaselineSeal as verifyBaselineSealOperation,
-  writeBaselineFile,
 } from "./baseline.js";
 import {
   checkClaims as checkClaimsOperation,
@@ -113,6 +99,11 @@ import {
   createCouplingGraph as createCouplingGraphOperation,
 } from "./graph.js";
 import { createRepositoryModel } from "./repository-model.js";
+import {
+  changedBaseCacheKey,
+  readChangedBaseCache,
+  writeChangedBaseCache,
+} from "./changed-cache.js";
 import { createContext, findOwningCell, owningCells } from "./analysis-context.js";
 import {
   applyWaiversToFindings,
@@ -121,14 +112,14 @@ import {
   waiverMatchesFinding,
 } from "./waivers.js";
 import { pythonSourceRoots } from "./python-roots.js";
+import { prewarmPythonInspections } from "./python-analysis.js";
+import { pythonInspectorRuntimeIdentity } from "./python-inspector-runner.js";
 import type {
   AnalysisContext,
   AutoAllocation,
   AutoAllocateOptions,
   BaselineUpdateGuardOptions,
   BaselineUpdateGuardResult,
-  CellFenceClaim,
-  CellFenceClaimStore,
   CellFenceContext,
   CellFenceWaiver,
   ChangedCheckOptions,
@@ -138,15 +129,11 @@ import type {
   ClaimCheckResult,
   ClaimCreateOptions,
   ClaimCreateResult,
-  ContextAllowedImport,
-  ContextBudgetEntry,
   ContextOptions,
   CouplingGraph,
-  CouplingGraphEdge,
-  CouplingGraphNode,
   Finding,
-  PluginAdapterHelpers,
   PluginDefinition,
+  PluginAdapterHelpers,
   PluginFinding,
   PluginImportReference,
   PluginRepositoryModel,
@@ -156,13 +143,8 @@ import type {
   PruneCandidateKind,
   PruneReport,
   ResolvedImport,
-  RuleId,
   Severity,
-  SuggestedResolution,
-  WaiverRequest,
-  WaiverRequestOptions,
   WriteAccessOptions,
-  WriteAccessPathDecision,
   WriteAccessResult,
 } from "./types.js";
 
@@ -1021,6 +1003,18 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
   }
 }
 
+function prewarmRepositoryPythonInspections(context: AnalysisContext): void {
+  const pythonFilePaths = new Set<string>();
+  for (const cell of context.manifest.cells) {
+    for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
+      if (path.extname(sourceFilePath) === ".py") pythonFilePaths.add(sourceFilePath);
+    }
+    const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
+    if (path.extname(publicEntryPath) === ".py" && fs.existsSync(publicEntryPath)) pythonFilePaths.add(publicEntryPath);
+  }
+  prewarmPythonInspections([...pythonFilePaths]);
+}
+
 function validateImports(
   context: AnalysisContext,
   findings: Finding[],
@@ -1030,7 +1024,7 @@ function validateImports(
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell, context)) {
-      const references = extractImports(context, sourceFilePath, warnings);
+      const references = extractImports(context, sourceFilePath, warnings, findings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
         const specifier = resolvedSpecifier(reference, resolvedImport);
@@ -1320,6 +1314,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   warnWhenOwnershipCoverageDisabled(context, warnings);
   validateOwnershipCoverage(context, findings);
   validateSymlinkTargets(context, findings);
+  prewarmRepositoryPythonInspections(context);
   validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
   const observedImports: PluginImportReference[] = [];
@@ -1819,6 +1814,62 @@ function findingKey(finding: Finding): string {
   return finding.fingerprint || findingFingerprint(finding);
 }
 
+function changedBaseCacheDirectory(rootDir: string, options: ChangedCheckOptions): string | undefined {
+  if (options.baseCacheDir === false) return undefined;
+  if (typeof options.baseCacheDir === "string") return path.resolve(rootDir, options.baseCacheDir);
+  const gitCommonDirectory = gitCommand(rootDir, ["rev-parse", "--git-common-dir"]);
+  return path.join(path.resolve(rootDir, gitCommonDirectory), "cellfence-cache", "changed-base");
+}
+
+function hasExternalPolicyPath(rootDir: string, options: ChangedCheckOptions): boolean {
+  return [options.manifestPath, options.baselinePath, ...(options.evidencePaths || [])]
+    .filter((candidate): candidate is string => typeof candidate === "string")
+    .some((candidate) => {
+      if (path.isAbsolute(candidate)) return true;
+      const resolved = path.resolve(rootDir, candidate);
+      const relative = path.relative(rootDir, resolved);
+      return relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative);
+    });
+}
+
+function changedBaseCacheIdentity(rootDir: string, baseCommit: string, options: ChangedCheckOptions): string | undefined {
+  if (hasExternalPolicyPath(rootDir, options)) return undefined;
+  if ((options.plugins?.length || 0) > 0 && !options.pluginCacheKey) return undefined;
+  return changedBaseCacheKey({
+    baseCommit,
+    manifestPath: options.manifestPath || DEFAULT_MANIFEST_PATH,
+    baselinePath: options.baselinePath,
+    evidencePaths: [...(options.evidencePaths || [])].sort(),
+    ruleSeverities: options.ruleSeverities,
+    pluginCacheKey: options.pluginCacheKey,
+    runtime: {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      typescript: ts.version,
+      pythonInspector: pythonInspectorRuntimeIdentity(),
+    },
+  });
+}
+
+function checkChangedBase(rootDir: string, baseCommit: string, options: ChangedCheckOptions): {
+  result: CheckResult;
+  cacheHit: boolean;
+} {
+  const cacheDirectory = changedBaseCacheDirectory(rootDir, options);
+  const cacheKey = changedBaseCacheIdentity(rootDir, baseCommit, options);
+  if (cacheDirectory && cacheKey) {
+    const cached = readChangedBaseCache(cacheDirectory, cacheKey);
+    if (cached) return { result: cached, cacheHit: true };
+  }
+  const result = withBaseWorktree(rootDir, baseCommit, (baseRootDir) =>
+    checkRepository(checkOptionsForBase(baseRootDir, options)));
+  if (cacheDirectory && cacheKey && result.exitCode !== 3) {
+    writeChangedBaseCache(cacheDirectory, cacheKey, result);
+  }
+  return { result, cacheHit: false };
+}
+
 export function checkChangedRepository(options: ChangedCheckOptions = {}): CheckResult {
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const baseRef = options.baseRef || "origin/main";
@@ -1832,7 +1883,8 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
     if (currentResult.exitCode === 2 || currentResult.exitCode === 3) {
       return { ...currentResult, changedFiles };
     }
-    const baseResult = withBaseWorktree(rootDir, baseCommit, (baseRootDir) => checkRepository(checkOptionsForBase(baseRootDir, options)));
+    const baseCheck = checkChangedBase(rootDir, baseCommit, options);
+    const baseResult = baseCheck.result;
     if (baseResult.exitCode === 2 || baseResult.exitCode === 3) {
       return {
         ...baseResult,
@@ -1841,6 +1893,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
           message: `base check failed before changed-finding diff could be computed: ${finding.message}`,
         })),
         changedFiles,
+        baseCacheHit: baseCheck.cacheHit,
       };
     }
     const baseFindingKeys = new Set(baseResult.findings.map(findingKey));
@@ -1861,6 +1914,7 @@ export function checkChangedRepository(options: ChangedCheckOptions = {}): Check
       warnings,
       changedFiles,
       baseFindingCount: baseResult.findings.length,
+      baseCacheHit: baseCheck.cacheHit,
     };
   } catch (error) {
     return gitMetadataFailure(`changed check requires git metadata and a valid base ref: ${errorMessage(error)}`);

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cellfence.dev/schema/baseline-v1.json",
+  "title": "CellFence Baseline v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "cells"],
+  "properties": {
+    "schemaVersion": { "const": "cellfence.baseline.v1" },
+    "generatedAt": { "type": "string", "minLength": 1, "format": "date-time" },
+    "cellIds": { "$ref": "#/$defs/stringArray" },
+    "seal": { "$ref": "#/$defs/seal" },
+    "cells": {
+      "type": "object",
+      "propertyNames": { "minLength": 1, "pattern": "\\S" },
+      "additionalProperties": { "$ref": "#/$defs/cell" }
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "pattern": "\\S" },
+      "uniqueItems": true
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "access", "selector"],
+      "properties": {
+        "kind": { "enum": ["file", "database", "queue", "http"] },
+        "access": { "enum": ["read", "write", "publish", "subscribe", "call", "serve"] },
+        "selector": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "detectedBy": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low", "runtime"] }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"],
+      "properties": {
+        "ownedPathPatterns": { "type": "integer", "minimum": 0 },
+        "publicSymbols": { "type": "integer", "minimum": 0 },
+        "publicSurfaceLines": { "type": "integer", "minimum": 0 },
+        "crossCellDependencies": { "type": "integer", "minimum": 0 },
+        "ownedPathSet": { "$ref": "#/$defs/stringArray" },
+        "publicEntryPath": { "type": "string" },
+        "publicSymbolSet": { "$ref": "#/$defs/stringArray" },
+        "publicSurfaceHash": { "type": "string" },
+        "dependencyEdges": { "$ref": "#/$defs/stringArray" },
+        "artifactContracts": { "$ref": "#/$defs/stringArray" },
+        "resourceAccesses": { "type": "array", "items": { "$ref": "#/$defs/resource" } }
+      }
+    },
+    "seal": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "digest"],
+          "properties": {
+            "algorithm": { "const": "hmac-sha256" },
+            "keyId": { "type": "string" },
+            "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "signature"],
+          "properties": {
+            "algorithm": { "const": "ed25519" },
+            "keyId": { "type": "string" },
+            "signature": { "type": "string", "minLength": 4, "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$" }
+          }
+        }
+      ]
+    }
+  }
+}

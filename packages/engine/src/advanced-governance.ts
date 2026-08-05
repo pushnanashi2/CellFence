@@ -341,7 +341,6 @@ export function createBaselineAudit(options: { rootDir?: string; baselinePath?: 
 function parseSections(message: string): Record<string, string> {
   const sections: Record<string, string> = {};
   const names = ["Problem", "Change", "Behavior", "Tests", "Known-Gaps"];
-  const pattern = new RegExp(`^(${names.join("|")}):\\s*$`, "m");
   const lines = message.split(/\r?\n/);
   let current: string | undefined;
   for (const line of lines) {

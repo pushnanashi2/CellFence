@@ -110,7 +110,7 @@ function printUsage(): void {
   console.log(`CellFence
 
 Usage:
-  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope] [--research-ablate-package-policy-hints]
+  cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
   cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
   cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
@@ -1796,14 +1796,7 @@ function commandServe(parsed: ParsedArgs): number {
   return 0;
 }
 
-export function main(argv = process.argv.slice(2)): number {
-  let parsed: ParsedArgs;
-  try {
-    parsed = parseArgs(argv);
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
-    return 2;
-  }
+function dispatchParsedArgs(parsed: ParsedArgs): number {
   try {
     if (parsed.command.length === 0 || parsed.command.includes("--help") || parsed.command.includes("-h")) {
       printUsage();
@@ -1843,6 +1836,21 @@ export function main(argv = process.argv.slice(2)): number {
     console.error(error instanceof Error ? error.message : String(error));
     return 3;
   }
+}
+
+function parseCliArgs(argv: string[]): ParsedArgs | undefined {
+  try {
+    return parseArgs(argv);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return undefined;
+  }
+}
+
+export function main(argv = process.argv.slice(2)): number {
+  const parsed = parseCliArgs(argv);
+  if (!parsed) return 2;
+  return dispatchParsedArgs(parsed);
 }
 
 function isDirectCliExecution(): boolean {

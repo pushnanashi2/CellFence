@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cellfence.dev/schema/manifest-v1.json",
+  "title": "CellFence Manifest v1",
+  "$comment": "JSON Schema validates document shape. Cross-item uniqueness of cells[].id is additionally enforced by validateManifest().",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "cells"],
+  "properties": {
+    "schemaVersion": { "const": "cellfence.manifest.v1" },
+    "governance": { "$ref": "#/$defs/governance" },
+    "rules": { "$ref": "#/$defs/rules" },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["files", "rules"],
+        "properties": {
+          "files": { "$ref": "#/$defs/pathArray" },
+          "rules": { "$ref": "#/$defs/rules" }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "propertyNames": { "minLength": 1, "pattern": "\\S" },
+      "additionalProperties": { "$ref": "#/$defs/profile" }
+    },
+    "cells": { "type": "array", "items": { "$ref": "#/$defs/cell" } }
+  },
+  "$defs": {
+    "string": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?=.*\\S)(?![/\\\\])(?![A-Za-z]:[/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$))[^\\u0000-\\u001f]+$"
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/string" },
+      "uniqueItems": true
+    },
+    "pathArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/path" },
+      "uniqueItems": true
+    },
+    "rules": {
+      "type": "object",
+      "propertyNames": { "minLength": 1, "pattern": "\\S" },
+      "additionalProperties": { "enum": ["off", "warning", "error"] }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "rules": { "$ref": "#/$defs/rules" },
+        "changedOnly": { "type": "boolean" },
+        "reportOnly": { "type": "boolean" },
+        "requireEvidenceWithinCommits": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "pathClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "paths"],
+      "properties": {
+        "id": { "$ref": "#/$defs/string" },
+        "kind": { "enum": ["source", "runtime", "generated", "testFixture", "locked"] },
+        "paths": { "$ref": "#/$defs/pathArray" },
+        "description": { "type": "string" },
+        "commitPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowMixedWith": {
+              "type": "array",
+              "items": { "enum": ["source", "runtime", "generated", "testFixture", "locked"] }
+            },
+            "requireTrailer": { "type": "string" },
+            "generatedRequiresProvenance": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requireOwnership": { "type": "boolean" },
+        "include": { "$ref": "#/$defs/pathArray" },
+        "exclude": { "$ref": "#/$defs/pathArray" },
+        "requiredRules": { "$ref": "#/$defs/stringArray" },
+        "resourceAdapters": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": { "enum": ["on", "off"] },
+            "http": { "enum": ["on", "off"] },
+            "queue": { "enum": ["on", "off"] },
+            "sql-literal": { "enum": ["on", "off"] },
+            "prisma": { "enum": ["on", "off"] },
+            "typeorm": { "enum": ["on", "off"] },
+            "drizzle": { "enum": ["on", "off"] },
+            "query-builder": { "enum": ["on", "off"] },
+            "bullmq": { "enum": ["on", "off"] },
+            "kafkajs": { "enum": ["on", "off"] },
+            "nestjs": { "enum": ["on", "off"] },
+            "fastify": { "enum": ["on", "off"] },
+            "django": { "enum": ["on", "off"] },
+            "fastapi": { "enum": ["on", "off"] },
+            "sqlalchemy": { "enum": ["on", "off"] },
+            "celery": { "enum": ["on", "off"] }
+          }
+        },
+        "pathClasses": { "type": "array", "items": { "$ref": "#/$defs/pathClass" } }
+      },
+      "allOf": [{
+        "if": { "required": ["requireOwnership"], "properties": { "requireOwnership": { "const": true } } },
+        "then": { "required": ["include"], "properties": { "include": { "type": "array", "minItems": 1 } } }
+      }]
+    },
+    "resourceContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "access", "selectors"],
+      "properties": {
+        "id": { "$ref": "#/$defs/string" },
+        "kind": { "enum": ["file", "database", "queue", "http"] },
+        "access": {
+          "type": "array",
+          "items": { "enum": ["read", "write", "publish", "subscribe", "call", "serve"] }
+        },
+        "selectors": { "$ref": "#/$defs/stringArray" },
+        "locked": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ownedPaths", "publicEntry", "publicSymbols"],
+      "properties": {
+        "id": { "$ref": "#/$defs/string" },
+        "ownedPaths": { "$ref": "#/$defs/pathArray" },
+        "publicEntry": { "$ref": "#/$defs/path" },
+        "publicSymbols": { "$ref": "#/$defs/stringArray" },
+        "packageName": { "type": "string" },
+        "locked": { "type": "boolean" },
+        "consumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["cell"],
+            "properties": {
+              "cell": { "$ref": "#/$defs/string" },
+              "artifactLanes": { "$ref": "#/$defs/stringArray" }
+            }
+          }
+        },
+        "producesArtifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "paths"],
+            "properties": {
+              "id": { "$ref": "#/$defs/string" },
+              "paths": { "$ref": "#/$defs/pathArray" },
+              "description": { "type": "string" },
+              "locked": { "type": "boolean" }
+            }
+          }
+        },
+        "resourceContracts": { "type": "array", "items": { "$ref": "#/$defs/resourceContract" } },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ownedPathPatterns": { "type": "integer", "minimum": 0 },
+            "publicSymbols": { "type": "integer", "minimum": 0 },
+            "publicSurfaceLines": { "type": "integer", "minimum": 0 },
+            "crossCellDependencies": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rules": { "$ref": "#/$defs/rules" }
+      }
+    }
+  }
+}

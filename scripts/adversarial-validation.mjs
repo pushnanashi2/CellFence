@@ -122,10 +122,6 @@ function writeTsPublic(rootDir, cellId, body = "") {
   write(path.join(rootDir, "src", cellId, "public.ts"), body || `export const ${symbolName(cellId, 0)} = true;\n`);
 }
 
-function writePyPublic(rootDir, cellId, body = "") {
-  write(path.join(rootDir, "src", cellId, "public.py"), body || `${symbolName(cellId, 0)} = True\n`);
-}
-
 function writeTsTwoCellRepo(rootDir, index, options = {}) {
   const producer = options.producer || `producer${index}`;
   const consumer = options.consumer || `consumer${index}`;

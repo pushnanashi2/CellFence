@@ -28,6 +28,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -38,14 +39,40 @@ export default tseslint.config(
         fetch: "readonly",
         process: "readonly",
         setTimeout: "readonly",
+        structuredClone: "readonly",
+        performance: "readonly",
         URL: "readonly",
       },
     },
     rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
+      "no-restricted-syntax": ["error", ...focusedTestSelectors],
+      "no-undef": "error",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx,mts,cts}"],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": ["error", {
+        argsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      }],
       "no-restricted-syntax": ["error", ...focusedTestSelectors],
       "no-undef": "off",
+    },
+  },
+  {
+    files: ["cellfence-friction-study/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
     },
   },
 );
