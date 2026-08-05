@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-01T15:27:29.462Z",
+  "generatedAt": "2026-08-04T07:12:02.516Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -114,8 +114,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 86,
-      "publicSurfaceLines": 1974,
+      "publicSymbols": 90,
+      "publicSurfaceLines": 1950,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -127,6 +127,7 @@
         "BaselineAuditResult",
         "BaselineUpdateGuardOptions",
         "BaselineUpdateGuardResult",
+        "buildCmdCommandLine",
         "CellFenceClaim",
         "CellFenceClaimStore",
         "CellFenceContext",
@@ -172,6 +173,8 @@
         "EvidenceGraphInput",
         "EvidenceGraphNode",
         "EvidenceGraphNodeKind",
+        "ExecCommandOptions",
+        "execCommandSync",
         "Finding",
         "findingFingerprint",
         "findingWitness",
@@ -192,6 +195,7 @@
         "PruneCandidate",
         "PruneCandidateKind",
         "PruneReport",
+        "resolveCommand",
         "RuleId",
         "sealBaselineWithConfiguredKey",
         "ServiceManifestImportResult",
@@ -209,7 +213,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "987678b90be3c34176aab057347e8e911b774e09b3190ac26a30064944078c1d",
+      "publicSurfaceHash": "8b05cf7c1078cd9214d3f717eec57c767478e175a4bfa5bcd3e2a2aef5ecd385",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -276,7 +280,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 1890,
+      "publicSurfaceLines": 1860,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"
@@ -395,7 +399,7 @@
     "plugin-agent-budget": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 149,
+      "publicSurfaceLines": 153,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-agent-budget/**"
@@ -415,7 +419,7 @@
     "plugin-blast-radius": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 119,
+      "publicSurfaceLines": 123,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-blast-radius/**"

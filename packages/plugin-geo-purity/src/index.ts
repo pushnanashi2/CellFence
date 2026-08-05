@@ -32,7 +32,7 @@ export function geoPurityPlugin(options: GeoPurityOptions = {}): CellFencePlugin
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-geo-purity",
-    version: "0.2.0",
+    version: "0.2.1",
     rules: {
       "geo-purity/context-shape": defineRule({
         id: "geo-purity/context-shape",

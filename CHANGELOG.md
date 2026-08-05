@@ -4,14 +4,19 @@
 
 - No unreleased changes.
 
+## 0.2.1 - 2026-08-04
+
+- Keep `check --changed` finding identity stable when unchanged violations move to a different source line, while preserving detection of genuinely new violations.
+- Parse git paths without corrupting spaces or non-ASCII characters in both changed-file and commit-evidence checks.
+- Recover claim operations from stale lock files using validated PID/timestamp metadata or a filesystem-mtime fallback while preserving live-lock exclusion.
+- Prefer native Windows executables over batch shims and invoke `.cmd`/`.bat` commands through an explicitly quoted `cmd.exe` command line without `shell: true`, rejecting percent expansion and newline injection.
+- Refresh transitive dependencies to patched `brace-expansion`, `fast-uri`, `hono`, and `ip-address` releases after new registry advisories were published.
+
 ## 0.2.0 - 2026-08-01
 
 - Align engine and official-plugin path matching plus owned-path overlap analysis with minimatch semantics for standalone and embedded globstars, and enforce the dialect with exhaustive and seeded external-oracle conformance tests.
 - Read discovered `tsconfig.*.json` files directly when collecting workspace path aliases instead of falling back to a neighboring `tsconfig.json`.
 - Harden package-map, CommonJS alias, readonly `Set`, Python diagnostic, and public-surface resolution against ambiguous or adversarial syntax while preserving fail-closed behavior.
-- Keep `check --changed` finding identity stable when unchanged violations move to a different source line.
-- Parse git name-status output without corrupting paths containing spaces or non-ASCII characters.
-- Recover claim operations from stale lock files while preserving live-lock exclusion.
 - Add built-in Python framework resource adapters for selected FastAPI route decorators, Django URLConf/model-manager patterns, SQLAlchemy declarative/Table/query/text calls, and Celery task/publish calls.
 - Close TypeScript/CommonJS boundary bypasses by extracting `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases.
 - Report TypeScript/JavaScript parser diagnostics as `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` fail-closed findings under the built-in required-rule profile.

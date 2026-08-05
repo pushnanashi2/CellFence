@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -28,6 +27,7 @@ import {
   createBaseline,
   createManifestFromServiceManifests,
   defaultBaselinePath,
+  execCommandSync,
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
@@ -415,36 +415,6 @@ type AuditEvent = {
   command: string;
   [key: string]: unknown;
 };
-
-function resolveCommand(commandName: string): string {
-  if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
-  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
-  const extensions = process.platform === "win32" && !path.extname(commandName)
-    ? [...(process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";").filter(Boolean), ""]
-    : [""];
-  for (const directory of pathEntries) {
-    for (const extension of extensions) {
-      const candidate = path.join(directory, `${commandName}${extension}`);
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  }
-  return commandName;
-}
-
-type ExecCommandOptions = NonNullable<Parameters<typeof execFileSync>[2]>;
-
-function escapeWindowsShellArgument(argument: string): string {
-  return argument.replace(/\^/g, "^^");
-}
-
-function execCommandSync(commandName: string, args: string[], options: ExecCommandOptions): string {
-  const commandPath = resolveCommand(commandName);
-  const extension = path.extname(commandPath).toLowerCase();
-  if (process.platform === "win32" && (extension === ".cmd" || extension === ".bat")) {
-    return execFileSync(commandPath, args.map(escapeWindowsShellArgument), { ...options, shell: true }) as string;
-  }
-  return execFileSync(commandPath, args, options) as string;
-}
 
 function currentCommit(rootDir: string): string | null {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
@@ -1785,7 +1755,7 @@ function handleMcpRequest(request: JsonRpcRequest, defaultRootDir: string): stri
     return mcpResponse(request.id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "cellfence", version: "0.2.0" },
+      serverInfo: { name: "cellfence", version: "0.2.1" },
     });
   }
   if (request.method === "tools/list") {

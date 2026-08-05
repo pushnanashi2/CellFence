@@ -48,7 +48,7 @@ export function legacyStranglerPlugin(options: LegacyStranglerOptions): CellFenc
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-legacy-strangler",
-    version: "0.2.0",
+    version: "0.2.1",
     rules: {
       "legacy-strangler/no-new-legacy-dependency": defineRule({
         id: "legacy-strangler/no-new-legacy-dependency",
