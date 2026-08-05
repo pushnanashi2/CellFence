@@ -108,9 +108,9 @@ function specifierForCase(conformanceCase) {
 
 function normalizeTarget(rootDir, targetPath) {
   if (!targetPath) return null;
-  const absoluteRoot = fs.existsSync(rootDir) ? fs.realpathSync(rootDir) : path.resolve(rootDir);
+  const absoluteRoot = fs.existsSync(rootDir) ? fs.realpathSync.native(rootDir) : path.resolve(rootDir);
   const unresolved = path.isAbsolute(targetPath) ? targetPath : path.resolve(absoluteRoot, targetPath);
-  const absolute = fs.existsSync(unresolved) ? fs.realpathSync(unresolved) : unresolved;
+  const absolute = fs.existsSync(unresolved) ? fs.realpathSync.native(unresolved) : unresolved;
   const relative = path.relative(absoluteRoot, absolute);
   if (relative === "" || relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
     return absolute.replaceAll("\\", "/");
