@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Add a fail-closed `mutation:changed` runner that maps changed mutation targets to dedicated tests and stable per-target incremental caches while retaining the full `break: 100` audit.
 
 ## 0.2.1 - 2026-08-04
 
