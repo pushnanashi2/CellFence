@@ -8,7 +8,7 @@ const ledgerPath = path.resolve("tests/conformance/resolution/resolution-cases.j
 
 test("resolution oracle harness agrees with TypeScript for comparable resolver families", () => {
   const { report, exitCode } = runResolutionOracleConformance({ ledgerPath, keepFixtures: false });
-  assert.equal(exitCode, 0);
+  assert.equal(exitCode, 0, JSON.stringify(report, null, 2));
   assert.equal(report.schemaVersion, "cellfence.resolution-oracle-conformance.v1");
   assert.match(report.oracle, /^typescript@/);
   assert.equal(report.summary.statuses.conformant, 13);
