@@ -243,6 +243,7 @@
         "ProxyMode",
         "ProxyOptions",
         "runProxy",
+        "UnknownToolPolicy",
         "WriteToolConfig"
       ],
       "resourceContracts": [

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-04T07:12:02.516Z",
+  "generatedAt": "2026-08-05T14:07:32.678Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,7 +23,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 35,
-      "publicSurfaceLines": 866,
+      "publicSurfaceLines": 869,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -66,7 +66,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "c5e1bdca486cd8716b4b4b20d0391fc92beeb2fbf81c28e94a4465240d7ce6dc",
+      "publicSurfaceHash": "f40c59e15f64dc8d249c72994064b4e64e0dc0ddfcbfaba51b12ab37cf5179ac",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -74,7 +74,7 @@
     "plugin-api": {
       "ownedPathPatterns": 1,
       "publicSymbols": 23,
-      "publicSurfaceLines": 176,
+      "publicSurfaceLines": 175,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-api/**"
@@ -115,7 +115,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 90,
-      "publicSurfaceLines": 1950,
+      "publicSurfaceLines": 1999,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -213,7 +213,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "8b05cf7c1078cd9214d3f717eec57c767478e175a4bfa5bcd3e2a2aef5ecd385",
+      "publicSurfaceHash": "e958e794d2a807bb57713eb6f55181811f53013af0c2b45f7ea8736353c6edfd",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -237,8 +237,8 @@
     },
     "mcp-proxy": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 9,
-      "publicSurfaceLines": 426,
+      "publicSymbols": 10,
+      "publicSurfaceLines": 588,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -253,9 +253,10 @@
         "ProxyMode",
         "ProxyOptions",
         "runProxy",
+        "UnknownToolPolicy",
         "WriteToolConfig"
       ],
-      "publicSurfaceHash": "7f0aafbda2561d172847c057238ce671a7e41907e40df93bf8a914649aeae481",
+      "publicSurfaceHash": "5424e61bc855985d7e5fc9ff9a4c4b6334ef1a7915001d4d0ab0189b28b0abf1",
       "dependencyEdges": [
         "mcp-proxy->engine"
       ],
@@ -280,7 +281,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 1,
-      "publicSurfaceLines": 1860,
+      "publicSurfaceLines": 1868,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/cli/**"

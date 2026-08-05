@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
+
+import Ajv2020 from "ajv/dist/2020.js";
+import addFormats from "ajv-formats";
 
 import {
   CELLFENCE_BASELINE_SCHEMA_VERSION,
@@ -72,6 +77,61 @@ function assertInvalidContaining(result, expectedErrors) {
     );
   }
 }
+
+const schemaRoot = path.resolve(import.meta.dirname, "../packages/schema/schemas");
+const ajv = new Ajv2020({ allErrors: true, strict: true });
+addFormats(ajv);
+const jsonSchemaValidators = {
+  manifest: ajv.compile(JSON.parse(fs.readFileSync(path.join(schemaRoot, "manifest.schema.json"), "utf8"))),
+  baseline: ajv.compile(JSON.parse(fs.readFileSync(path.join(schemaRoot, "baseline.schema.json"), "utf8"))),
+  evidence: ajv.compile(JSON.parse(fs.readFileSync(path.join(schemaRoot, "resource-evidence.schema.json"), "utf8"))),
+};
+
+test("published JSON Schemas agree with runtime validators on structural fixtures", () => {
+  const fixtures = [
+    ["manifest", validManifest(), validateManifest],
+    ["manifest", validManifest({ unknown: true }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "../escape.ts" }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "C:\\escape.ts" }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "src\\..\\escape.ts" }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
+    ["manifest", validManifest({ overrides: [{ files: ["..\\escape.ts"], rules: {} }] }), validateManifest],
+    ["baseline", validBaseline(), validateBaseline],
+    ["baseline", validBaseline({ generatedAt: "not-a-date" }), validateBaseline],
+    ["baseline", validBaseline({ generatedAt: "2026-99-99T99:99:99Z" }), validateBaseline],
+    ["baseline", validBaseline({ cellIds: ["   "] }), validateBaseline],
+    ["baseline", validBaseline({ seal: { algorithm: "ed25519", signature: "abcde" } }), validateBaseline],
+    ["evidence", validEvidence(), validateResourceEvidence],
+    ["evidence", validEvidence({ accesses: [{ kind: "database", access: "execute", selector: "users" }] }), validateResourceEvidence],
+    ["evidence", validEvidence({ cellId: "   " }), validateResourceEvidence],
+    ["evidence", validEvidence({ accesses: [{ kind: "database", access: "read", selector: "   " }] }), validateResourceEvidence],
+    ["evidence", validEvidence({ generatedAt: "2026-99-99T99:99:99Z" }), validateResourceEvidence],
+  ];
+  for (const [schemaName, value, runtimeValidator] of fixtures) {
+    const schemaValid = jsonSchemaValidators[schemaName](value);
+    const runtimeValid = runtimeValidator(value).ok;
+    assert.equal(schemaValid, runtimeValid, `${schemaName}: ${ajv.errorsText(jsonSchemaValidators[schemaName].errors)}`);
+  }
+});
+
+test("published manifest schema delegates cross-cell id uniqueness to runtime validation", () => {
+  const duplicateIds = validManifest({ cells: [validCell, { ...validCell }] });
+  assert.equal(jsonSchemaValidators.manifest(duplicateIds), true);
+  assert.equal(validateManifest(duplicateIds).ok, false);
+  assert.match(
+    JSON.parse(fs.readFileSync(path.join(schemaRoot, "manifest.schema.json"), "utf8")).$comment,
+    /uniqueness.*validateManifest/,
+  );
+});
+
+test("published JSON Schemas are package subpath exports", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(schemaRoot, "../package.json"), "utf8"));
+  for (const schemaName of ["manifest", "baseline", "resource-evidence"]) {
+    assert.equal(packageJson.exports[`./${schemaName}.schema.json`], `./schemas/${schemaName}.schema.json`);
+  }
+  assert.ok(packageJson.files.includes("schemas/*.schema.json"));
+});
 
 test("schema validation accepts maximal valid manifests", () => {
   assert.equal(CELLFENCE_MANIFEST_SCHEMA_VERSION, "cellfence.manifest.v1");
@@ -155,6 +215,11 @@ test("schema validation accepts maximal valid manifests", () => {
 
   const result = validateManifest(manifest);
   assert.equal(result.ok, true, result.errors.join("\n"));
+  assert.equal(
+    jsonSchemaValidators.manifest(manifest),
+    true,
+    ajv.errorsText(jsonSchemaValidators.manifest.errors),
+  );
   assert.deepEqual(result.errors, []);
   assert.equal(result.value.cells[0].id, "core");
 });

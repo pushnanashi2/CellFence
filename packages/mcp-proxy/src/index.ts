@@ -11,13 +11,27 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
+  CompleteRequestSchema,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
   type CallToolRequest,
   type CallToolResult,
   ListToolsRequestSchema,
+  PromptListChangedNotificationSchema,
+  ReadResourceRequestSchema,
+  ResourceListChangedNotificationSchema,
+  ResourceUpdatedNotificationSchema,
+  type ServerCapabilities,
+  SubscribeRequestSchema,
+  ToolListChangedNotificationSchema,
+  UnsubscribeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
 export type ProxyMode = "enforce" | "dry-run" | "off";
 export type FailMode = "closed" | "open";
+export type UnknownToolPolicy = "allow" | "deny";
 
 export type WriteToolConfig = Record<string, string[]>;
 
@@ -33,6 +47,14 @@ export type ProxyOptions = {
   downstreamArgs: string[];
   downstreamCwd?: string;
   writeTools: WriteToolConfig;
+  readTools?: string[];
+  unknownToolPolicy?: UnknownToolPolicy;
+};
+
+type ToolConfigPatch = {
+  writeTools: WriteToolConfig;
+  readTools: string[];
+  unknownToolPolicy?: UnknownToolPolicy;
 };
 
 type AuditDecision = "allow" | "deny" | "dry-run-deny" | "off";
@@ -79,8 +101,10 @@ Options:
   --mode enforce|dry-run|off    Guard mode. Defaults to enforce.
   --fail-mode closed|open       Policy failure behavior for writes. Defaults to closed.
   --audit-log PATH              Append one JSONL decision event per tool call.
-  --tool-config PATH            JSON file with { "writeTools": { "tool": ["pathKey"] } }.
+  --unknown-tool-policy POLICY  allow or deny unconfigured tools. Defaults to allow.
+  --tool-config PATH            JSON file with writeTools, readTools, and/or unknownToolPolicy.
   --write-tool NAME=KEYS        Override one write tool. KEYS is comma-separated.
+  --read-tool NAME              Allowlist a read-only tool. Repeatable.
   --downstream-command CMD      MCP server command to wrap.
   --downstream-arg ARG          Repeatable downstream argument.
   --downstream-cwd DIR          Working directory for the downstream server.
@@ -88,6 +112,7 @@ Options:
 
 Environment:
   CELLFENCE_AGENT, CELLFENCE_MCP_MODE, CELLFENCE_MCP_FAIL_MODE,
+  CELLFENCE_MCP_UNKNOWN_TOOL_POLICY, CELLFENCE_MCP_READ_TOOLS,
   CELLFENCE_MCP_AUDIT_LOG, CELLFENCE_MCP_DOWNSTREAM_COMMAND
 `;
 }
@@ -102,11 +127,24 @@ function stringsFromValue(value: unknown): string[] {
   return [];
 }
 
-function getNestedValue(value: unknown, keyPath: string): unknown {
-  return keyPath.split(".").reduce<unknown>((current, key) => {
-    if (!isRecord(current)) return undefined;
-    return current[key];
-  }, value);
+function getNestedValues(value: unknown, keyPath: string): unknown[] {
+  let current = [value];
+  for (const segment of keyPath.split(".")) {
+    const expandsArray = segment.endsWith("[]");
+    const key = expandsArray ? segment.slice(0, -2) : segment;
+    const next: unknown[] = [];
+    for (const entry of current) {
+      if (!isRecord(entry)) continue;
+      const nested = entry[key];
+      if (expandsArray) {
+        if (Array.isArray(nested)) next.push(...nested);
+      } else {
+        next.push(nested);
+      }
+    }
+    current = next;
+  }
+  return current;
 }
 
 function mergeWriteToolConfig(base: WriteToolConfig, patch: WriteToolConfig): WriteToolConfig {
@@ -119,18 +157,41 @@ function mergeWriteToolConfig(base: WriteToolConfig, patch: WriteToolConfig): Wr
   };
 }
 
-function readToolConfig(filePath: string): WriteToolConfig {
+function mergeReadTools(base: string[], patch: string[]): string[] {
+  return [...new Set([...base, ...patch].map((tool) => tool.trim()).filter(Boolean))];
+}
+
+function readToolConfig(filePath: string): ToolConfigPatch {
   const raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  if (!isRecord(raw) || !isRecord(raw.writeTools)) {
-    throw new Error("tool config must be an object with writeTools");
+  if (!isRecord(raw)) {
+    throw new Error("tool config must be an object with writeTools, readTools, or unknownToolPolicy");
+  }
+  if (raw.writeTools === undefined && raw.readTools === undefined && raw.unknownToolPolicy === undefined) {
+    throw new Error("tool config must be an object with writeTools, readTools, or unknownToolPolicy");
   }
   const writeTools: WriteToolConfig = {};
-  for (const [tool, value] of Object.entries(raw.writeTools)) {
-    const keys = stringsFromValue(value);
-    if (keys.length === 0) throw new Error(`tool config for ${tool} must list at least one path key`);
-    writeTools[tool] = keys;
+  if (raw.writeTools !== undefined) {
+    if (!isRecord(raw.writeTools)) throw new Error("tool config writeTools must be an object");
+    for (const [tool, value] of Object.entries(raw.writeTools)) {
+      const keys = stringsFromValue(value);
+      if (keys.length === 0) throw new Error(`tool config for ${tool} must list at least one path key`);
+      writeTools[tool] = keys;
+    }
   }
-  return writeTools;
+  let readTools: string[] = [];
+  if (raw.readTools !== undefined) {
+    if (!Array.isArray(raw.readTools) || raw.readTools.some((tool) => typeof tool !== "string" || !tool.trim())) {
+      throw new Error("tool config readTools must be an array of non-empty tool names");
+    }
+    readTools = mergeReadTools([], raw.readTools);
+  }
+  return {
+    writeTools,
+    readTools,
+    unknownToolPolicy: raw.unknownToolPolicy === undefined
+      ? undefined
+      : parseUnknownToolPolicy(typeof raw.unknownToolPolicy === "string" ? raw.unknownToolPolicy : String(raw.unknownToolPolicy)),
+  };
 }
 
 function parseWriteToolOverride(value: string): WriteToolConfig {
@@ -154,6 +215,17 @@ function parseFailMode(value: string | undefined): FailMode {
   return "closed";
 }
 
+function parseUnknownToolPolicy(value: string | undefined): UnknownToolPolicy {
+  if (value === "allow" || value === "deny") return value;
+  throw new Error(`invalid unknown tool policy ${value === undefined || value === "" ? "(empty)" : value}`);
+}
+
+function parseReadTool(value: string | undefined): string {
+  const tool = value?.trim() || "";
+  if (!tool) throw new Error("--read-tool must include a tool name");
+  return tool;
+}
+
 export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.env): ProxyOptions {
   let rootDir = process.cwd();
   let manifestPath: string | undefined;
@@ -161,6 +233,10 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   let agent = env.CELLFENCE_AGENT || "";
   let mode = parseMode(env.CELLFENCE_MCP_MODE);
   let failMode = parseFailMode(env.CELLFENCE_MCP_FAIL_MODE);
+  let unknownToolPolicy: UnknownToolPolicy = env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY === undefined
+    ? "allow"
+    : parseUnknownToolPolicy(env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY);
+  let readTools = mergeReadTools([], (env.CELLFENCE_MCP_READ_TOOLS || "").split(","));
   let auditLogPath = env.CELLFENCE_MCP_AUDIT_LOG;
   let downstreamCommand = env.CELLFENCE_MCP_DOWNSTREAM_COMMAND || "";
   let downstreamArgs: string[] = [];
@@ -205,21 +281,38 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
       index += 1;
     } else if (argument.startsWith("--fail-mode=")) {
       failMode = parseFailMode(argument.slice("--fail-mode=".length));
+    } else if (argument === "--unknown-tool-policy") {
+      const value = argv[index + 1];
+      unknownToolPolicy = parseUnknownToolPolicy(value && !value.startsWith("--") ? value : undefined);
+      index += 1;
+    } else if (argument.startsWith("--unknown-tool-policy=")) {
+      unknownToolPolicy = parseUnknownToolPolicy(argument.slice("--unknown-tool-policy=".length));
     } else if (argument === "--audit-log") {
       auditLogPath = argv[index + 1];
       index += 1;
     } else if (argument.startsWith("--audit-log=")) {
       auditLogPath = argument.slice("--audit-log=".length);
     } else if (argument === "--tool-config") {
-      writeTools = mergeWriteToolConfig(writeTools, readToolConfig(argv[index + 1] || ""));
+      const config = readToolConfig(argv[index + 1] || "");
+      writeTools = mergeWriteToolConfig(writeTools, config.writeTools);
+      readTools = mergeReadTools(readTools, config.readTools);
+      unknownToolPolicy = config.unknownToolPolicy ?? unknownToolPolicy;
       index += 1;
     } else if (argument.startsWith("--tool-config=")) {
-      writeTools = mergeWriteToolConfig(writeTools, readToolConfig(argument.slice("--tool-config=".length)));
+      const config = readToolConfig(argument.slice("--tool-config=".length));
+      writeTools = mergeWriteToolConfig(writeTools, config.writeTools);
+      readTools = mergeReadTools(readTools, config.readTools);
+      unknownToolPolicy = config.unknownToolPolicy ?? unknownToolPolicy;
     } else if (argument === "--write-tool") {
       writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(argv[index + 1] || ""));
       index += 1;
     } else if (argument.startsWith("--write-tool=")) {
       writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(argument.slice("--write-tool=".length)));
+    } else if (argument === "--read-tool") {
+      readTools = mergeReadTools(readTools, [parseReadTool(argv[index + 1])]);
+      index += 1;
+    } else if (argument.startsWith("--read-tool=")) {
+      readTools = mergeReadTools(readTools, [parseReadTool(argument.slice("--read-tool=".length))]);
     } else if (argument === "--downstream-command") {
       downstreamCommand = argv[index + 1] || "";
       index += 1;
@@ -254,14 +347,19 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     downstreamArgs: downstreamArgs.filter((entry) => entry.length > 0),
     downstreamCwd,
     writeTools,
+    readTools,
+    unknownToolPolicy,
   };
 }
 
 export function pathsForToolCall(toolName: string, args: unknown, writeTools: WriteToolConfig): string[] | undefined {
+  if (!Object.hasOwn(writeTools, toolName)) return undefined;
   const keys = writeTools[toolName];
   if (!keys) return undefined;
   const paths: string[] = [];
-  for (const key of keys) paths.push(...stringsFromValue(getNestedValue(args, key)));
+  for (const key of keys) {
+    for (const value of getNestedValues(args, key)) paths.push(...stringsFromValue(value));
+  }
   return [...new Set(paths)];
 }
 
@@ -293,6 +391,16 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
     return { shouldForward: true, auditDecision: "off", paths: paths || [], reason: "guard disabled" };
   }
   if (paths === undefined) {
+    if (options.readTools?.includes(toolName)) {
+      return { shouldForward: true, auditDecision: "allow", paths: [], reason: "configured read tool" };
+    }
+    if ((options.unknownToolPolicy ?? "allow") === "deny") {
+      const reason = `unknown tool ${toolName} is not configured as a read or write tool`;
+      if (options.mode === "dry-run") {
+        return { shouldForward: true, auditDecision: "dry-run-deny", paths: [], reason };
+      }
+      return { shouldForward: false, auditDecision: "deny", paths: [], reason };
+    }
     return { shouldForward: true, auditDecision: "allow", paths: [], reason: "read-only or unconfigured tool" };
   }
   if (paths.length === 0) {
@@ -352,6 +460,11 @@ function audit(options: ProxyOptions, toolName: string, decision: ToolDecision):
   });
 }
 
+function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
+  if (options.mode !== "enforce" || (options.unknownToolPolicy ?? "allow") === "allow") return true;
+  return Boolean(options.writeTools[toolName]) || Boolean(options.readTools?.includes(toolName));
+}
+
 export async function runProxy(options: ProxyOptions): Promise<void> {
   const downstreamTransport = new StdioClientTransport({
     command: options.downstreamCommand,
@@ -368,14 +481,28 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
   });
   await downstream.connect(downstreamTransport);
 
+  const downstreamCapabilities = downstream.getServerCapabilities() || {};
+  const capabilities: ServerCapabilities = {
+    tools: downstreamCapabilities.tools || {},
+    ...(downstreamCapabilities.resources ? { resources: downstreamCapabilities.resources } : {}),
+    ...(downstreamCapabilities.prompts ? { prompts: downstreamCapabilities.prompts } : {}),
+    ...(downstreamCapabilities.completions ? { completions: downstreamCapabilities.completions } : {}),
+  };
+
   const server = new Server({
     name: "cellfence-mcp-proxy",
     version: VERSION,
   }, {
-    capabilities: { tools: {} },
+    capabilities,
   });
 
-  server.setRequestHandler(ListToolsRequestSchema, async (request) => downstream.listTools(request.params));
+  server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+    const result = await downstream.listTools(request.params);
+    return {
+      ...result,
+      tools: result.tools.filter((tool) => shouldExposeTool(options, tool.name)),
+    };
+  });
   server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
     const toolName = request.params.name;
     const toolArgs = request.params.arguments;
@@ -384,6 +511,44 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     if (!decision.shouldForward) return deniedToolResult(toolName, decision);
     return downstream.callTool(request.params);
   });
+
+  if (downstreamCapabilities.resources) {
+    server.setRequestHandler(ListResourcesRequestSchema, async (request) => downstream.listResources(request.params));
+    server.setRequestHandler(ListResourceTemplatesRequestSchema, async (request) => downstream.listResourceTemplates(request.params));
+    server.setRequestHandler(ReadResourceRequestSchema, async (request) => downstream.readResource(request.params));
+    if (downstreamCapabilities.resources.subscribe) {
+      server.setRequestHandler(SubscribeRequestSchema, async (request) => downstream.subscribeResource(request.params));
+      server.setRequestHandler(UnsubscribeRequestSchema, async (request) => downstream.unsubscribeResource(request.params));
+      downstream.setNotificationHandler(ResourceUpdatedNotificationSchema, async (notification) => {
+        await server.sendResourceUpdated(notification.params);
+      });
+    }
+    if (downstreamCapabilities.resources.listChanged) {
+      downstream.setNotificationHandler(ResourceListChangedNotificationSchema, async () => {
+        await server.sendResourceListChanged();
+      });
+    }
+  }
+
+  if (downstreamCapabilities.prompts) {
+    server.setRequestHandler(ListPromptsRequestSchema, async (request) => downstream.listPrompts(request.params));
+    server.setRequestHandler(GetPromptRequestSchema, async (request) => downstream.getPrompt(request.params));
+    if (downstreamCapabilities.prompts.listChanged) {
+      downstream.setNotificationHandler(PromptListChangedNotificationSchema, async () => {
+        await server.sendPromptListChanged();
+      });
+    }
+  }
+
+  if (downstreamCapabilities.completions) {
+    server.setRequestHandler(CompleteRequestSchema, async (request) => downstream.complete(request.params));
+  }
+
+  if (downstreamCapabilities.tools?.listChanged) {
+    downstream.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
+      await server.sendToolListChanged();
+    });
+  }
 
   const upstreamTransport = new StdioServerTransport();
   await server.connect(upstreamTransport);

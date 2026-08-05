@@ -94,6 +94,8 @@ jobs:
 
 The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release and runs the published npm CLI, not the source tree from the Action ref.
 
+Pull requests also run the `mutation changed` check. It selects mutation scopes from the merge-base diff, preserves a pull-request-local incremental cache, and uploads its machine-readable plan and summary on success or failure. The separate `Full Mutation Audit` workflow runs every scope without incremental reuse on a daily schedule, by manual dispatch, and as a required reusable job before npm publishing. The changed check is fast feedback; only the full audit is repository-wide mutation evidence. Configure `mutation changed` and `external-oracles` as required status checks on `main` so repository workflow changes cannot bypass them by convention alone.
+
 For PR discussion, post or summarize `tmp/cellfence/comment.md`; it is generated from the same findings as JSON and SARIF.
 
 The reusable Action wrapper accepts a `version` input. Its default is npm `latest` so the `main` branch does not point at an unpublished pre-release CLI. For required checks, set an exact published version:

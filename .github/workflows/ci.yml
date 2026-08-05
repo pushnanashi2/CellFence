@@ -46,6 +46,36 @@ jobs:
       - run: npm ci
       - run: npm test
 
+  external-oracles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: npm run build --silent
+      - name: Run TypeScript resolution oracle
+        run: node scripts/resolution-oracle-conformance.mjs
+      - name: Run Python resolution oracle
+        if: always()
+        run: node scripts/python-resolution-oracle-conformance.mjs
+      - name: Run SARIF official-schema oracle
+        if: always()
+        run: node scripts/sarif-oracle-conformance.mjs --root fixtures/invalid/private-cross-cell-import
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        if: always()
+        with:
+          name: external-oracle-reports-${{ github.run_attempt }}
+          path: reports/*-oracle-conformance.json
+          if-no-files-found: error
+
   cross-platform-smoke:
     name: cross-platform smoke (${{ matrix.os }}, node ${{ matrix.node }})
     runs-on: ${{ matrix.os }}
@@ -177,3 +207,37 @@ jobs:
         with:
           name: ci-counts
           path: tmp/ci-counts
+
+  mutation-changed:
+    name: mutation changed
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: |
+            reports/mutation/incremental
+            .git/cellfence-cache/changed-base
+          key: mutation-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ hashFiles('package-lock.json', 'stryker.conf.mjs', 'stryker.changed.conf.mjs', 'scripts/mutation-*.mjs') }}
+          restore-keys: |
+            mutation-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-
+      - run: npm ci
+      - name: Run mutation testing for changed scopes
+        run: npm run mutation:changed -- --base "${{ github.event.pull_request.base.sha }}" --head HEAD
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        if: always()
+        with:
+          name: mutation-changed-${{ github.event.pull_request.number }}
+          path: reports/mutation/changed
+          if-no-files-found: warn

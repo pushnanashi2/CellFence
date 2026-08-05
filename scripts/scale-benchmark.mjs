@@ -4,11 +4,13 @@ import path from "node:path";
 import { performance } from "node:perf_hooks";
 
 import { checkRepository } from "../packages/engine/dist/index.js";
+import { pythonInspectorProcessCount } from "../packages/engine/dist/python-inspector-runner.js";
 
 const scenarios = [
   { files: 10_000, cells: 20 },
   { files: 50_000, cells: 100 },
   { files: 100_000, cells: 300 },
+  { files: 1_000, cells: 20, language: "python" },
 ];
 
 function writeJson(filePath, value) {
@@ -20,6 +22,7 @@ function cellName(index) {
 }
 
 function createScenario(rootDir, scenario) {
+  const python = scenario.language === "python";
   const cells = [];
   const publicFiles = scenario.cells;
   const extraFiles = Math.max(0, scenario.files - publicFiles);
@@ -27,15 +30,21 @@ function createScenario(rootDir, scenario) {
   for (let index = 0; index < scenario.cells; index += 1) {
     const id = cellName(index);
     const templatePath = path.join(rootDir, `${id}.template`);
-    fs.writeFileSync(templatePath, "const value = 1;\nvoid value;\n");
+    fs.writeFileSync(templatePath, python ? "VALUE = 1\n" : "const value = 1;\nvoid value;\n");
     templatePaths.set(id, templatePath);
     const cellRoot = path.join(rootDir, "src", id);
     fs.mkdirSync(cellRoot, { recursive: true });
-    fs.writeFileSync(path.join(cellRoot, "public.ts"), `export const ${id}Public = ${index};\n`);
+    const publicEntry = `public.${python ? "py" : "ts"}`;
+    fs.writeFileSync(
+      path.join(cellRoot, publicEntry),
+      python
+        ? `__all__ = ["${id}Public"]\n${id}Public = ${index}\n`
+        : `export const ${id}Public = ${index};\n`,
+    );
     cells.push({
       id,
       ownedPaths: [`src/${id}/**`],
-      publicEntry: `src/${id}/public.ts`,
+      publicEntry: `src/${id}/${publicEntry}`,
       publicSymbols: [`${id}Public`],
       consumes: [],
       producesArtifacts: [],
@@ -47,7 +56,7 @@ function createScenario(rootDir, scenario) {
     const shard = Math.floor(index / scenario.cells);
     const directory = path.join(rootDir, "src", owner, `shard-${String(shard % 100).padStart(3, "0")}`);
     fs.mkdirSync(directory, { recursive: true });
-    fs.linkSync(templatePaths.get(owner), path.join(directory, `file-${index}.ts`));
+    fs.linkSync(templatePaths.get(owner), path.join(directory, `file-${index}.${python ? "py" : "ts"}`));
   }
 
   writeJson(path.join(rootDir, "cellfence.manifest.json"), {
@@ -65,17 +74,26 @@ function runScenario(scenario) {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-scale-"));
   try {
     createScenario(tempRoot, scenario);
+    const pythonProcessesBefore = pythonInspectorProcessCount();
     const startedAt = performance.now();
     const result = checkRepository({ rootDir: tempRoot, manifestPath: "cellfence.manifest.json" });
     const durationMs = Math.round(performance.now() - startedAt);
     if (!result.ok) {
       throw new Error(`scale benchmark failed for ${scenario.files} files/${scenario.cells} cells: ${result.findings.map((finding) => finding.ruleId).join(", ")}`);
     }
+    const pythonInspectorProcesses = pythonInspectorProcessCount() - pythonProcessesBefore;
+    if (scenario.language === "python") {
+      const interpreterCandidates = process.platform === "win32" ? 3 : 2;
+      if (pythonInspectorProcesses < 1 || pythonInspectorProcesses > interpreterCandidates) {
+        throw new Error(`Python scale benchmark launched ${pythonInspectorProcesses} inspector processes for ${scenario.files} files; expected one batch and at most ${interpreterCandidates} interpreter attempts`);
+      }
+    }
     return {
       ...scenario,
       durationMs,
       findings: result.findings.length,
       warnings: result.warnings.length,
+      ...(scenario.language === "python" ? { pythonInspectorProcesses } : {}),
     };
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });

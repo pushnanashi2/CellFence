@@ -38,6 +38,8 @@ Environment variables:
 - `CELLFENCE_AGENT`
 - `CELLFENCE_MCP_MODE`
 - `CELLFENCE_MCP_FAIL_MODE`
+- `CELLFENCE_MCP_UNKNOWN_TOOL_POLICY`
+- `CELLFENCE_MCP_READ_TOOLS` (comma-separated tool names)
 - `CELLFENCE_MCP_AUDIT_LOG`
 - `CELLFENCE_MCP_DOWNSTREAM_COMMAND`
 
@@ -48,6 +50,8 @@ Environment variables:
 - `--mode off`: forward everything.
 
 If policy cannot be evaluated, writes fail closed by default. Use `--fail-mode open` only for local experiments where availability is more important than containment.
+
+Unconfigured tools remain allowed by default for backward compatibility. For a closed tool surface, use `--unknown-tool-policy deny` and explicitly allowlist read-only tools with repeatable `--read-tool NAME` flags. Configured write tools continue through CellFence write checks; tools in neither list are hidden from `tools/list` and denied in `enforce` mode. In `dry-run` mode, unknown tools are audited as `dry-run-deny` and forwarded.
 
 ## Write Tool Mapping
 
@@ -64,16 +68,25 @@ Default path keys are `path`, `file_path`, and `filename`.
 Override a tool on the command line:
 
 ```bash
-cellfence-mcp-proxy --agent codex-1 --write-tool write_file=target.path -- node server.js
+cellfence-mcp-proxy \
+  --agent codex-1 \
+  --unknown-tool-policy deny \
+  --read-tool read_file \
+  --write-tool apply_edits=edits[].path \
+  -- node server.js
 ```
+
+Path keys use dot traversal for nested objects and `[]` for arrays. For example, `edits[].path` extracts every non-empty string path from `{ "edits": [{ "path": "src/a.ts" }, { "path": "src/b.ts" }] }`.
 
 Or use a JSON config:
 
 ```json
 {
+  "unknownToolPolicy": "deny",
+  "readTools": ["workspace.read", "workspace.search"],
   "writeTools": {
     "workspace.write": ["file_path"],
-    "editor.replace": ["target.path"]
+    "editor.applyEdits": ["edits[].path"]
   }
 }
 ```
@@ -82,7 +95,11 @@ Or use a JSON config:
 cellfence-mcp-proxy --agent codex-1 --tool-config cellfence-mcp-tools.json -- node server.js
 ```
 
-Unconfigured tools are treated as read-only and forwarded unchanged. Configured write tools that do not expose a path argument are denied in `enforce` mode when `--fail-mode closed` is active.
+With the default `allow` unknown-tool policy, unconfigured tools are treated as read-only and forwarded unchanged. Configured write tools that do not expose a path argument are denied in `enforce` mode when `--fail-mode closed` is active.
+
+## MCP Feature Bridging
+
+The proxy mirrors downstream resource, prompt, and completion capabilities when the installed MCP SDK and downstream server expose them. Resource listing, template listing, reads, subscriptions, prompt listing/retrieval, and completion requests are forwarded unchanged. Resource updates and resource, prompt, and tool list-change notifications are also relayed when the downstream server advertises those capabilities.
 
 ## Audit Log
 

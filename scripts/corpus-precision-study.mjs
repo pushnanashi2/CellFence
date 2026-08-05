@@ -1,10 +1,15 @@
-import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
+
+import {
+  isExactCommit,
+  runEvidenceCommand,
+  summarizeCommandFailure,
+} from "./evidence-harness-lib.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const defaultWorkDir = path.join(repoRoot, "tmp", "corpus-precision-study");
@@ -54,7 +59,7 @@ it also emits a per-subject evidence graph and verifies it with the standalone
 graph verifier.`);
 }
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const parsed = {
     corpusPath: "",
     workDir: defaultWorkDir,
@@ -184,41 +189,8 @@ function subjectDirectory(workDir, id) {
   return resolveWithin(workDir, `${slug}-${digest}`, "subject id");
 }
 
-function isExactCommit(value) {
-  return /^[a-f0-9]{40}$/i.test(String(value || ""));
-}
-
-function run(command, args, options) {
-  const startedAt = performance.now();
-  const result = spawnSync(command, args, {
-    cwd: options.cwd,
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      ...options.env,
-      GIT_TERMINAL_PROMPT: "0",
-      GIT_LFS_SKIP_SMUDGE: "1",
-      LC_ALL: "C",
-      TZ: "UTC",
-    },
-    maxBuffer: 100 * 1024 * 1024,
-    timeout: options.timeoutMs,
-  });
-  const errorCode = result.error && typeof result.error === "object" && "code" in result.error
-    ? String(result.error.code)
-    : undefined;
-  const timedOut = errorCode === "ETIMEDOUT";
-  return {
-    command: [command, ...args].join(" "),
-    status: result.status ?? (timedOut ? 124 : 1),
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-    error: result.error ? String(result.error.message || result.error) : undefined,
-    errorCode,
-    timedOut,
-    timeoutMs: options.timeoutMs,
-    durationMs: Math.round(performance.now() - startedAt),
-  };
+export function run(command, args, options) {
+  return runEvidenceCommand(command, args, options);
 }
 
 function writeCommandLogs(subjectDir, name, result) {
@@ -229,7 +201,7 @@ function writeCommandLogs(subjectDir, name, result) {
 }
 
 function summarizeFailure(result) {
-  return result.error || result.stderr.trim().split(/\r?\n/).filter(Boolean).slice(-3).join("\n") || result.stdout.trim().split(/\r?\n/).filter(Boolean).slice(-3).join("\n") || `exit ${result.status}`;
+  return summarizeCommandFailure(result);
 }
 
 function commandFailure(stage, result) {
@@ -281,7 +253,7 @@ function gitWorktreeStatus(checkoutDir, subjectDir, name) {
   };
 }
 
-function validateCorpus(corpus, options, corpusDir) {
+export function validateCorpus(corpus, options, corpusDir) {
   if (corpus.schemaVersion !== "cellfence.corpus.v1") {
     throw new Error("corpus schemaVersion must be cellfence.corpus.v1");
   }
@@ -564,7 +536,7 @@ function runCheck(subject, checkoutDir, subjectDir, manifestPath, options) {
   };
 }
 
-function summarize(subjects) {
+export function summarize(subjects) {
   const summary = {
     total: subjects.length,
     completed: 0,
@@ -628,7 +600,7 @@ function summarize(subjects) {
   return summary;
 }
 
-function runSubject(subject, corpusDir, options) {
+export function runSubject(subject, corpusDir, options) {
   const subjectDir = subjectDirectory(options.workDir, subject.id);
   fs.rmSync(subjectDir, { recursive: true, force: true });
   fs.mkdirSync(subjectDir, { recursive: true });
@@ -719,7 +691,7 @@ function readTextIfOk(command, args) {
   return result.status === 0 ? result.stdout.trim() : null;
 }
 
-function environmentMetadata(corpusPath) {
+export function environmentMetadata(corpusPath) {
   const packageJson = readJson(path.join(repoRoot, "package.json"));
   const harnessCommit = readTextIfOk("git", ["rev-parse", "HEAD"]);
   const gitVersion = readTextIfOk("git", ["--version"]);
@@ -740,7 +712,7 @@ function environmentMetadata(corpusPath) {
   };
 }
 
-function main() {
+export function main() {
   let options;
   try {
     options = parseArgs(process.argv.slice(2));
@@ -799,4 +771,7 @@ function main() {
   return 0;
 }
 
-process.exitCode = main();
+const scriptPath = path.resolve(fileURLToPath(import.meta.url));
+if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
+  process.exitCode = main();
+}

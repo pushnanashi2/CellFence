@@ -1,0 +1,54 @@
+name: Full Mutation Audit
+
+on:
+  workflow_call:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+      - id: matrix
+        name: Build authoritative mutation matrix
+        shell: bash
+        run: echo "matrix=$(npm run --silent mutation:matrix)" >> "$GITHUB_OUTPUT"
+
+  audit:
+    name: mutation audit (${{ matrix.id }})
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Run one authoritative mutation scope without cache
+        run: npm run mutation:changed -- --scope "${{ matrix.id }}" --force --no-incremental
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        if: always()
+        with:
+          name: mutation-audit-${{ matrix.id }}-${{ github.run_attempt }}
+          path: reports/mutation/changed
+          if-no-files-found: warn

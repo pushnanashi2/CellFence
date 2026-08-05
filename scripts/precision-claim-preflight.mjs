@@ -312,14 +312,6 @@ function normalizeWorklistArtifactSetSha256s(protocol, claim, labelingPlan, issu
   return digests.map(String);
 }
 
-function rejectUnknownKeys(issues, value, allowedKeys, label) {
-  if (!isRecord(value)) return;
-  const allowed = new Set(allowedKeys);
-  for (const key of Object.keys(value)) {
-    if (!allowed.has(key)) issues.push(`${label} has unexpected field ${key}`);
-  }
-}
-
 function normalizeProtocol(protocol, issues) {
   if (protocol.schemaVersion !== protocolSchemaVersion) issues.push(`protocol schemaVersion must be ${protocolSchemaVersion}`);
   const claim = protocolClaim(protocol);

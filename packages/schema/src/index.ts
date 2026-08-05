@@ -8,6 +8,7 @@ export type ArtifactLaneManifest = {
   id: string;
   paths: string[];
   description?: string;
+  locked?: boolean;
 };
 
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
@@ -557,6 +558,8 @@ function validateRuleOverride(value: unknown, location: string, errors: string[]
   validateKnownKeys(value, location, ["files", "rules"], errors);
   if (!isStringArray(value.files)) {
     errors.push(`${location}.files must be an array of non-empty strings`);
+  } else {
+    validateRepoRelativePathLikeArray(value.files, `${location}.files`, errors);
   }
   if (value.rules === undefined) {
     errors.push(`${location}.rules is required`);

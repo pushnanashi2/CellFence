@@ -109,12 +109,22 @@ if (!mcpProxyVersionMatch) {
   findings.push(`packages/mcp-proxy/src/index.ts exposes VERSION ${mcpProxyVersionMatch[1]}, expected ${packageJson.version}`);
 }
 
+const expectedActionPins = new Map([
+  ["actions/checkout", "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"],
+  ["actions/setup-node", "249970729cb0ef3589644e2896645e5dc5ba9c38"],
+  ["actions/setup-python", "ece7cb06caefa5fff74198d8649806c4678c61a1"],
+  ["actions/cache", "caa296126883cff596d87d8935842f9db880ef25"],
+  ["actions/upload-artifact", "330a01c490aca151604b8cf639adc76d48f6c5d4"],
+]);
+
 for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {
   const text = fs.readFileSync(workflowPath, "utf8");
   for (const [index, line] of text.split(/\r?\n/).entries()) {
-    const match = line.match(/uses:\s*actions\/[^@\s]+@([^\s#]+)/);
-    if (match && !/^[a-f0-9]{40}$/.test(match[1])) {
+    const match = line.match(/uses:\s*(actions\/[^@\s]+)@([^\s#]+)/);
+    if (match && !/^[a-f0-9]{40}$/.test(match[2])) {
       findings.push(`${workflowPath}:${index + 1} action is not pinned to a commit SHA: ${line.trim()}`);
+    } else if (match && expectedActionPins.has(match[1]) && expectedActionPins.get(match[1]) !== match[2]) {
+      findings.push(`${workflowPath}:${index + 1} ${match[1]} must use audited pin ${expectedActionPins.get(match[1])}`);
     }
   }
 }

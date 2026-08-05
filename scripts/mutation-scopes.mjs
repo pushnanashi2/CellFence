@@ -111,19 +111,40 @@ export const MUTATION_SCOPES = Object.freeze([
   },
 ].map((scope) => Object.freeze({ ...scope, tests: Object.freeze([...scope.tests]) })));
 
+export const MUTATION_INFRASTRUCTURE_FILES = Object.freeze([
+  "package.json",
+  "package-lock.json",
+  "stryker.conf.mjs",
+  "stryker.changed.conf.mjs",
+  "scripts/mutation-changed.mjs",
+  "scripts/mutation-matrix.mjs",
+  "scripts/mutation-scopes.mjs",
+  ".github/workflows/ci.yml",
+  ".github/workflows/mutation-audit.yml",
+]);
+
 export function normalizeRepositoryPath(filePath) {
   return filePath.replaceAll("\\", "/").replace(/^\.\//, "");
 }
 
 export function mutationScopesForFiles(filePaths) {
   const normalizedFiles = new Set(filePaths.map(normalizeRepositoryPath));
+  if (MUTATION_INFRASTRUCTURE_FILES.some((filePath) => normalizedFiles.has(filePath))) {
+    return [...MUTATION_SCOPES];
+  }
   return MUTATION_SCOPES.filter(
-    (scope) => normalizedFiles.has(scope.source) || normalizedFiles.has(scope.mutate),
+    (scope) => normalizedFiles.has(scope.source)
+      || normalizedFiles.has(scope.mutate)
+      || scope.tests.some((testPath) => normalizedFiles.has(testPath)),
   );
 }
 
 export function mutationScopeById(scopeId) {
   return MUTATION_SCOPES.find((scope) => scope.id === scopeId);
+}
+
+export function mutationScopeMatrix() {
+  return MUTATION_SCOPES.map((scope) => ({ id: scope.id, source: scope.source }));
 }
 
 function duplicateValues(values) {

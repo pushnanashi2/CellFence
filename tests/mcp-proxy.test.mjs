@@ -81,10 +81,84 @@ function writeProject(rootDir) {
   });
 }
 
+function writeFeatureServer(rootDir) {
+  const serverPath = path.join(rootDir, "feature-mcp-server.mjs");
+  fs.writeFileSync(serverPath, `import readline from "node:readline";
+
+function respond(id, result) {
+  process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id, result }) + "\\n");
+}
+
+function notify(method, params) {
+  process.stdout.write(JSON.stringify({ jsonrpc: "2.0", method, params }) + "\\n");
+}
+
+const input = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+input.on("line", (line) => {
+  if (!line.trim()) return;
+  const request = JSON.parse(line);
+  if (!("id" in request)) return;
+  if (request.method === "initialize") {
+    respond(request.id, {
+      protocolVersion: request.params.protocolVersion,
+      capabilities: {
+        tools: { listChanged: true },
+        resources: { subscribe: true, listChanged: true },
+        prompts: { listChanged: true },
+        completions: {},
+      },
+      serverInfo: { name: "feature-mcp", version: "1.0.0" },
+    });
+  } else if (request.method === "tools/list") {
+    respond(request.id, {
+      tools: [
+        { name: "read_file", inputSchema: { type: "object" } },
+        { name: "write_file", inputSchema: { type: "object" } },
+        { name: "run_command", inputSchema: { type: "object" } },
+      ],
+    });
+    notify("notifications/tools/list_changed");
+  } else if (request.method === "tools/call") {
+    respond(request.id, { content: [{ type: "text", text: "called " + request.params.name }] });
+  } else if (request.method === "resources/list") {
+    respond(request.id, { resources: [{ uri: "memory://guide", name: "Guide" }] });
+    notify("notifications/resources/list_changed");
+  } else if (request.method === "resources/templates/list") {
+    respond(request.id, { resourceTemplates: [{ uriTemplate: "memory://{name}", name: "Memory" }] });
+  } else if (request.method === "resources/read") {
+    respond(request.id, { contents: [{ uri: request.params.uri, text: "resource body" }] });
+  } else if (request.method === "resources/subscribe") {
+    respond(request.id, {});
+    notify("notifications/resources/updated", { uri: request.params.uri });
+  } else if (request.method === "resources/unsubscribe") {
+    respond(request.id, {});
+  } else if (request.method === "prompts/list") {
+    respond(request.id, { prompts: [{ name: "greet", arguments: [{ name: "name" }] }] });
+    notify("notifications/prompts/list_changed");
+  } else if (request.method === "prompts/get") {
+    respond(request.id, {
+      description: "Greeting",
+      messages: [{ role: "user", content: { type: "text", text: "Hello " + request.params.arguments.name } }],
+    });
+  } else if (request.method === "completion/complete") {
+    respond(request.id, { completion: { values: [request.params.argument.value + "lice"] } });
+  } else {
+    process.stdout.write(JSON.stringify({
+      jsonrpc: "2.0",
+      id: request.id,
+      error: { code: -32601, message: "unknown method " + request.method },
+    }) + "\\n");
+  }
+});
+`);
+  return serverPath;
+}
+
 function createRpcClient(child) {
   let nextId = 1;
   let buffer = "";
   const pending = new Map();
+  const notifications = [];
   child.stdout.on("data", (chunk) => {
     buffer += chunk.toString("utf8");
     let newlineIndex = buffer.indexOf("\n");
@@ -93,6 +167,7 @@ function createRpcClient(child) {
       buffer = buffer.slice(newlineIndex + 1);
       if (line) {
         const message = JSON.parse(line);
+        if (!("id" in message)) notifications.push(message);
         const waiting = pending.get(message.id);
         if (waiting) {
           pending.delete(message.id);
@@ -103,6 +178,7 @@ function createRpcClient(child) {
     }
   });
   return {
+    notifications,
     send(method, params = {}) {
       const id = nextId;
       nextId += 1;
@@ -123,7 +199,7 @@ function createRpcClient(child) {
   };
 }
 
-async function withProxy(rootDir, mode, fn) {
+async function withProxy(rootDir, mode, fn, { proxyArgs = [], serverPath = mockServerPath } = {}) {
   const mockLog = path.join(rootDir, `mock-${mode}.jsonl`);
   const auditLog = path.join(rootDir, `audit-${mode}.jsonl`);
   const child = spawn(process.execPath, [
@@ -132,9 +208,10 @@ async function withProxy(rootDir, mode, fn) {
     "--root", rootDir,
     "--mode", mode,
     "--audit-log", auditLog,
+    ...proxyArgs,
     "--",
     process.execPath,
-    mockServerPath,
+    serverPath,
   ], {
     cwd: root,
     env: {
@@ -149,12 +226,12 @@ async function withProxy(rootDir, mode, fn) {
   });
   const rpc = createRpcClient(child);
   try {
-    await rpc.send("initialize", {
+    const initialization = await rpc.send("initialize", {
       protocolVersion: "2024-11-05",
       capabilities: {},
       clientInfo: { name: "cellfence-test", version: "1.0.0" },
     });
-    await fn(rpc, { mockLog, auditLog });
+    await fn(rpc, { mockLog, auditLog, initialization });
   } finally {
     child.kill();
     await new Promise((resolve) => child.once("close", resolve));
@@ -309,6 +386,12 @@ test("proxy path extraction supports configured write tools", () => {
   assert.deepEqual(pathsForToolCall("write_file", { path: "src/a.ts" }, { write_file: ["path"] }), ["src/a.ts"]);
   assert.deepEqual(pathsForToolCall("write_file", { target: { file_path: "src/a.ts" } }, { write_file: ["target.file_path"] }), ["src/a.ts"]);
   assert.deepEqual(pathsForToolCall("write_file", { paths: ["src/a.ts", "", "src/a.ts", 7] }, { write_file: ["paths"] }), ["src/a.ts"]);
+  assert.deepEqual(pathsForToolCall("apply_edits", {
+    edits: [{ path: "src/a.ts" }, { path: "src/b.ts" }, { path: "src/a.ts" }, { nope: true }],
+  }, { apply_edits: ["edits[].path"] }), ["src/a.ts", "src/b.ts"]);
+  assert.deepEqual(pathsForToolCall("apply_edits", {
+    batches: [{ edits: [{ target: { path: "src/a.ts" } }] }, { edits: [{ target: { path: "src/b.ts" } }] }],
+  }, { apply_edits: ["batches[].edits[].target.path"] }), ["src/a.ts", "src/b.ts"]);
   assert.deepEqual(pathsForToolCall("write_file", 7, { write_file: ["path"] }), []);
 });
 
@@ -316,6 +399,8 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-parse-"));
   try {
     writeJson(path.join(rootDir, "tools.json"), {
+      unknownToolPolicy: "deny",
+      readTools: ["custom_read", "custom_read"],
       writeTools: {
         custom_write: ["payload.file", "path"],
       },
@@ -349,6 +434,8 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(options.agent, "env-agent");
     assert.equal(options.mode, "dry-run");
     assert.equal(options.failMode, "open");
+    assert.equal(options.unknownToolPolicy, "deny");
+    assert.deepEqual(options.readTools, ["custom_read"]);
     assert.equal(options.auditLogPath, "audit.jsonl");
     assert.equal(options.downstreamCommand, process.execPath);
     assert.deepEqual(options.downstreamArgs, ["-e", "setTimeout(()=>{}, 1)"]);
@@ -385,6 +472,9 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
       "--agent", "cli-agent",
       "--mode", "enforce",
       "--fail-mode", "closed",
+      "--unknown-tool-policy", "deny",
+      "--read-tool", "read_file",
+      "--read-tool=inspect_file",
       "--audit-log", "audit.jsonl",
       "--downstream-command", "node",
       "--downstream-cwd", rootDir,
@@ -393,6 +483,17 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(separatedOptions.manifestPath, "manifest.json");
     assert.equal(separatedOptions.claimsPath, "claims.json");
     assert.equal(separatedOptions.downstreamCommand, "node");
+    assert.equal(separatedOptions.unknownToolPolicy, "deny");
+    assert.deepEqual(separatedOptions.readTools, ["read_file", "inspect_file"]);
+
+    const envOptions = parseProxyArgs([], {
+      CELLFENCE_AGENT: "env-agent",
+      CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "deny",
+      CELLFENCE_MCP_READ_TOOLS: "read_file, inspect_file,read_file",
+      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node",
+    });
+    assert.equal(envOptions.unknownToolPolicy, "deny");
+    assert.deepEqual(envOptions.readTools, ["read_file", "inspect_file"]);
 
     const separatorFallback = parseProxyArgs(["--"], {
       CELLFENCE_AGENT: "fallback-agent",
@@ -424,15 +525,25 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
   try {
     writeJson(path.join(rootDir, "bad-tools.json"), { writeTools: { write_file: [] } });
     writeJson(path.join(rootDir, "not-tools.json"), { nope: true });
+    writeJson(path.join(rootDir, "bad-read-tools.json"), { readTools: ["read_file", 7] });
+    writeJson(path.join(rootDir, "bad-policy.json"), { unknownToolPolicy: "maybe" });
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_MODE: "bad" }), /invalid mode bad/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_FAIL_MODE: "maybe" }), /invalid fail mode maybe/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "maybe" }), /invalid unknown tool policy maybe/);
     assert.throws(() => parseProxyArgs(["--write-tool", "broken", "--agent=a", "--downstream-command=node"], {}), /NAME=path/);
     assert.throws(() => parseProxyArgs(["--write-tool", "=path", "--agent=a", "--downstream-command=node"], {}), /tool name/);
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-tools.json"), "--agent=a", "--downstream-command=node"], {}), /must list at least one path key/);
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "not-tools.json"), "--agent=a", "--downstream-command=node"], {}), /tool config must be an object/);
+    assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-read-tools.json"), "--agent=a", "--downstream-command=node"], {}), /readTools must be an array/);
+    assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-policy.json"), "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy maybe/);
     assert.throws(() => parseProxyArgs(["--tool-config", "--agent=a", "--downstream-command=node"], {}), /ENOENT|no such file/i);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--tool-config"], {}), /ENOENT|no such file/i);
     assert.throws(() => parseProxyArgs(["--write-tool", "", "--agent=a", "--downstream-command=node"], {}), /NAME=path|tool name/);
+    assert.throws(() => parseProxyArgs(["--read-tool", "", "--agent=a", "--downstream-command=node"], {}), /must include a tool name/);
+    assert.throws(() => parseProxyArgs(["--unknown-tool-policy=maybe", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy maybe/);
+    assert.throws(() => parseProxyArgs(["--unknown-tool-policy", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
+    assert.throws(() => parseProxyArgs(["--unknown-tool-policy=", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "" }), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--agent"], { CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node" }), /missing --agent/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command"], {}), /missing --downstream-command/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--unknown"], {}), /unknown argument --unknown/);
@@ -441,6 +552,11 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
+});
+
+test("proxy path extraction treats prototype names as unknown tools", () => {
+  assert.equal(pathsForToolCall("constructor", { path: "src/private.ts" }, { write_file: ["path"] }), undefined);
+  assert.equal(pathsForToolCall("toString", { path: "src/private.ts" }, { write_file: ["path"] }), undefined);
 });
 
 test("proxy decision defaults to fail-closed for write tools with no path argument", () => {
@@ -517,6 +633,48 @@ test("proxy decision defaults to fail-closed for write tools with no path argume
     }, "read_file", { path: "src/other/new.ts" });
     assert.equal(readDecision.shouldForward, true);
     assert.equal(readDecision.reason, "read-only or unconfigured tool");
+
+    const secureUnknownDecision = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "enforce",
+      failMode: "open",
+      downstreamCommand: process.execPath,
+      downstreamArgs: [],
+      writeTools: { write_file: ["path"] },
+      readTools: ["read_file"],
+      unknownToolPolicy: "deny",
+    }, "run_command", { command: "echo unsafe" });
+    assert.equal(secureUnknownDecision.shouldForward, false);
+    assert.equal(secureUnknownDecision.auditDecision, "deny");
+    assert.match(secureUnknownDecision.reason, /not configured as a read or write tool/);
+
+    const secureReadDecision = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "enforce",
+      failMode: "closed",
+      downstreamCommand: process.execPath,
+      downstreamArgs: [],
+      writeTools: { write_file: ["path"] },
+      readTools: ["read_file"],
+      unknownToolPolicy: "deny",
+    }, "read_file", { path: "src/other/new.ts" });
+    assert.equal(secureReadDecision.shouldForward, true);
+    assert.equal(secureReadDecision.reason, "configured read tool");
+
+    const dryRunUnknownDecision = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "dry-run",
+      failMode: "closed",
+      downstreamCommand: process.execPath,
+      downstreamArgs: [],
+      writeTools: { write_file: ["path"] },
+      unknownToolPolicy: "deny",
+    }, "run_command", {});
+    assert.equal(dryRunUnknownDecision.shouldForward, true);
+    assert.equal(dryRunUnknownDecision.auditDecision, "dry-run-deny");
 
     const allowedDecision = decideToolCall({
       rootDir,
@@ -675,6 +833,82 @@ test("MCP proxy dry-run logs denied writes but still forwards them", async () =>
       assert.equal(auditEvents[0].decision, "dry-run-deny");
       assert.equal(auditEvents[0].paths[0], "src/other/new.ts");
     });
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("MCP proxy deny policy exposes configured tools and blocks unknown calls", async () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-unknown-deny-"));
+  try {
+    writeProject(rootDir);
+    const serverPath = writeFeatureServer(rootDir);
+    await withProxy(rootDir, "enforce", async (rpc, logs) => {
+      const tools = await rpc.send("tools/list");
+      assert.deepEqual(tools.result.tools.map((tool) => tool.name), ["read_file", "write_file"]);
+
+      const read = await rpc.send("tools/call", { name: "read_file", arguments: { path: "src/other/public.ts" } });
+      assert.equal(read.result.content[0].text, "called read_file");
+
+      const beforeDenied = readJsonLines(logs.mockLog).length;
+      const denied = await rpc.send("tools/call", { name: "run_command", arguments: { command: "echo unsafe" } });
+      assert.equal(denied.result.isError, true);
+      assert.match(denied.result.content[0].text, /CellFence denied run_command/);
+      assert.equal(readJsonLines(logs.mockLog).length, beforeDenied);
+      assert.deepEqual(readJsonLines(logs.auditLog).map((event) => event.decision), ["allow", "deny"]);
+    }, {
+      proxyArgs: ["--unknown-tool-policy", "deny", "--read-tool", "read_file"],
+      serverPath,
+    });
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("MCP proxy bridges downstream resources, prompts, and completion", async () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-features-"));
+  try {
+    writeProject(rootDir);
+    const serverPath = writeFeatureServer(rootDir);
+    await withProxy(rootDir, "enforce", async (rpc, { initialization }) => {
+      assert.deepEqual(initialization.result.capabilities.resources, { subscribe: true, listChanged: true });
+      assert.deepEqual(initialization.result.capabilities.prompts, { listChanged: true });
+      assert.deepEqual(initialization.result.capabilities.completions, {});
+      assert.deepEqual(initialization.result.capabilities.tools, { listChanged: true });
+
+      const tools = await rpc.send("tools/list");
+      assert.deepEqual(tools.result.tools.map((tool) => tool.name), ["read_file", "write_file", "run_command"]);
+
+      const resources = await rpc.send("resources/list");
+      assert.deepEqual(resources.result.resources, [{ uri: "memory://guide", name: "Guide" }]);
+
+      const templates = await rpc.send("resources/templates/list");
+      assert.deepEqual(templates.result.resourceTemplates, [{ uriTemplate: "memory://{name}", name: "Memory" }]);
+
+      const resource = await rpc.send("resources/read", { uri: "memory://guide" });
+      assert.equal(resource.result.contents[0].text, "resource body");
+      assert.deepEqual((await rpc.send("resources/subscribe", { uri: "memory://guide" })).result, {});
+      assert.deepEqual((await rpc.send("resources/unsubscribe", { uri: "memory://guide" })).result, {});
+
+      const prompts = await rpc.send("prompts/list");
+      assert.equal(prompts.result.prompts[0].name, "greet");
+      const prompt = await rpc.send("prompts/get", { name: "greet", arguments: { name: "Ada" } });
+      assert.equal(prompt.result.messages[0].content.text, "Hello Ada");
+
+      const completion = await rpc.send("completion/complete", {
+        ref: { type: "ref/prompt", name: "greet" },
+        argument: { name: "name", value: "A" },
+      });
+      assert.deepEqual(completion.result.completion.values, ["Alice"]);
+
+      await waitFor(() => rpc.notifications.length === 4, "bridged MCP notifications");
+      assert.deepEqual(rpc.notifications.map((notification) => notification.method).sort(), [
+        "notifications/prompts/list_changed",
+        "notifications/resources/list_changed",
+        "notifications/resources/updated",
+        "notifications/tools/list_changed",
+      ]);
+    }, { serverPath });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

@@ -8,7 +8,6 @@ import {
   listFiles,
   normalizePath,
   parseSourceFile,
-  readSourceText,
   repoPath,
   SOURCE_EXTENSIONS,
   sourceKindForPath,
@@ -38,7 +37,7 @@ export type ImportWarning = {
     | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
     | "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX"
     | "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX";
-  severity: "warning";
+  severity: "warning" | "error";
   filePath: string;
   message: string;
   details: { line?: number; offset?: number; kind?: string };
@@ -87,7 +86,6 @@ type FunctionLikeWithBody =
   | ts.SetAccessorDeclaration
   | ts.ConstructorDeclaration;
 
-const IMPORT_SCAN_HINT = /\b(?:from|import|export|require)\b/;
 const EXACT_SPECIFIER_EXTENSIONS = new Set([
   ...SOURCE_EXTENSIONS,
   ".css",
@@ -533,13 +531,19 @@ function resolveProjectModuleFile(fromFilePath: string, specifier: string): stri
   return undefined;
 }
 
-function extractPythonImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
+function extractPythonImports(
+  context: ImportScanContext,
+  filePath: string,
+  warnings: { push(warning: ImportWarning): void },
+  errors?: { push(error: ImportWarning): void },
+): ImportReference[] {
   const importerPath = repoPath(context.rootDir, filePath);
   const inspection = inspectPythonSource(filePath);
   for (const error of inspection.errors) {
-    warnings.push({
+    const destination = error.kind === "inspector_error" && errors ? errors : warnings;
+    destination.push({
       ruleId: "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
-      severity: "warning",
+      severity: error.kind === "inspector_error" ? "error" : "warning",
       filePath: importerPath,
       message: `Python source cannot be parsed statically${error.line ? ` at line ${error.line}` : ""}: ${error.message}`,
       details: {
@@ -573,9 +577,13 @@ function extractPythonImports(context: ImportScanContext, filePath: string, warn
   }));
 }
 
-export function extractImports(context: ImportScanContext, filePath: string, warnings: { push(warning: ImportWarning): void }): ImportReference[] {
-  const sourceText = readSourceText(context, filePath);
-  if (isPythonPath(filePath)) return extractPythonImports(context, filePath, warnings);
+export function extractImports(
+  context: ImportScanContext,
+  filePath: string,
+  warnings: { push(warning: ImportWarning): void },
+  errors?: { push(error: ImportWarning): void },
+): ImportReference[] {
+  if (isPythonPath(filePath)) return extractPythonImports(context, filePath, warnings, errors);
   const sourceFile = parseSourceFile(context, filePath);
   const parseDiagnostics = (sourceFile as unknown as { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics;
   for (const diagnostic of parseDiagnostics) {
