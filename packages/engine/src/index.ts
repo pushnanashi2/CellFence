@@ -28,6 +28,10 @@ import {
   sourceFilesUnderGovernance,
   sourceKindForPath,
 } from "./file-index.js";
+
+// C-5: re-export the glob matcher so plugins can share a single, linear-time
+// implementation instead of maintaining their own patternToRegExp copies.
+export { matchesPattern } from "./file-index.js";
 import {
   extractImports,
   extractPublicSymbols,

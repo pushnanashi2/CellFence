@@ -16,36 +16,7 @@ export type AgentBudgetOptions = {
   severity?: "warning" | "error";
 };
 
-function patternToRegExp(pattern: string): RegExp {
-  const normalized = pattern.split("\\").join("/").replace(/\/$/, "");
-  // Stryker disable all: retaining the first or last member of a consecutive globstar run recognizes the same path language.
-  const segments = normalized
-    .split("/")
-    .filter((segment, index, all) => segment !== "**" || all[index - 1] !== "**");
-  // Stryker restore all
-  let expression = "";
-  for (let index = 0; index < segments.length; index += 1) {
-    const segment = segments[index];
-    if (segment === "**") {
-      if (segments.length === 1) expression += "[\\s\\S]*";
-      else if (index === segments.length - 1) expression += "/[\\s\\S]+";
-      else expression += `${index > 0 ? "/" : ""}(?:[^/]+/)*`;
-      continue;
-    }
-    if (index > 0 && segments[index - 1] !== "**") expression += "/";
-    // Stryker disable next-line Regex: globally replacing adjacent stars one-at-a-time or as a run recognizes the same segment language.
-    for (const character of segment.replace(/\*+/g, "*")) {
-      expression += character === "*"
-        ? "[^/]*"
-        : character.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-    }
-  }
-  return new RegExp(`^${expression}(?![\\s\\S])`);
-}
-
-function matchesPattern(filePath: string, pattern: string): boolean {
-  return patternToRegExp(pattern).test(filePath.split("\\").join("/"));
-}
+import { matchesGlobPattern as matchesPattern } from "./glob.js";
 
 function cellForFile(repository: CellFenceRepositoryModel, filePath: string): string | undefined {
   for (const [cellId, files] of Object.entries(repository.files.byCell)) {

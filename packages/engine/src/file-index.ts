@@ -4,10 +4,11 @@ import ts from "typescript";
 
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
 
+import { matchesGlobPattern } from "./glob.js";
+
 export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
 
 const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
-const PATTERN_REGEXP_CACHE = new Map<string, RegExp>();
 
 export type FileIndexContext = {
   rootDir: string;
@@ -42,47 +43,8 @@ function escapeRegExp(text: string): string {
   return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
 
-function normalizedPatternSegments(pattern: string): string[] {
-  const normalized = normalizePath(pattern).replace(/\/$/, "");
-  const segments = normalized.split("/");
-  // Stryker disable next-line ArithmeticOperator: retaining the first or last member of a consecutive globstar run recognizes the same path language.
-  return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
-}
-
-function compilePatternSegment(segment: string): string {
-  // Stryker disable next-line Regex: with a global replacement, matching one or a run of adjacent stars produces the same collapsed segment.
-  const collapsedStars = segment.replace(/\*+/g, "*");
-  let expression = "";
-  for (const character of collapsedStars) {
-    expression += character === "*" ? "[^/]*" : escapeRegExp(character);
-  }
-  return expression;
-}
-
-function patternToRegExp(pattern: string): RegExp {
-  const cachedPattern = PATTERN_REGEXP_CACHE.get(pattern);
-  // Stryker disable next-line ConditionalExpression: cache-hit removal only changes performance, not matcher semantics.
-  if (cachedPattern) return cachedPattern;
-  const segments = normalizedPatternSegments(pattern);
-  let expression = "";
-  for (let index = 0; index < segments.length; index += 1) {
-    const segment = segments[index];
-    if (segment === "**") {
-      if (segments.length === 1) expression += "[\\s\\S]*";
-      else if (index === segments.length - 1) expression += "/[\\s\\S]+";
-      else expression += `${index > 0 ? "/" : ""}(?:[^/]+/)*`;
-      continue;
-    }
-    if (index > 0 && segments[index - 1] !== "**") expression += "/";
-    expression += compilePatternSegment(segment);
-  }
-  const regexp = new RegExp(`^${expression}(?![\\s\\S])`);
-  PATTERN_REGEXP_CACHE.set(pattern, regexp);
-  return regexp;
-}
-
 export function matchesPattern(relativePath: string, pattern: string): boolean {
-  return patternToRegExp(pattern).test(normalizePath(relativePath));
+  return matchesGlobPattern(normalizePath(relativePath), pattern);
 }
 
 export function literalPrefix(pattern: string): string {
