@@ -5,3 +5,12 @@ export function todayIsoDate(): string {
 export function isIsoDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
 }
+
+export function daysBetween(startIso: string, endIso: string): number {
+  const start = Date.parse(`${startIso}T00:00:00.000Z`);
+  const end = Date.parse(`${endIso}T00:00:00.000Z`);
+  if (Number.isNaN(start) || Number.isNaN(end)) {
+    throw new Error(`daysBetween: invalid date input (${startIso} -> ${endIso})`);
+  }
+  return Math.round((end - start) / 86_400_000);
+}

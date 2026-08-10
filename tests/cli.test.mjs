@@ -73,7 +73,7 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function writePrivateImportProject(tempDir, { withWaiver = false, waiverExpires = "2099-01-01" } = {}) {
+function writePrivateImportProject(tempDir, { withWaiver = false, waiverExpires = "2026-10-09" } = {}) {
   fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
   fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
   fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const exposed = true;\n");
@@ -704,7 +704,7 @@ test("CLI waiver request creates an approval-oriented directive without editing 
     "--line",
     "7",
     "--expires",
-    "2099-01-01",
+    "2026-10-09",
     "--reason",
     "temporary architecture migration while public API is extracted",
     "--approved-by",
@@ -715,7 +715,7 @@ test("CLI waiver request creates an approval-oriented directive without editing 
   const request = JSON.parse(result.stdout);
   assert.equal(request.schemaVersion, "cellfence.waiver-request.v1");
   assert.equal(request.approvalRequired, true);
-  assert.equal(request.directive, "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:owner reason:temporary architecture migration while public API is extracted");
+  assert.equal(request.directive, "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:owner reason:temporary architecture migration while public API is extracted");
   assert.match(request.markdown, /CellFence Waiver Request/);
 });
 
@@ -1475,7 +1475,7 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   fs.writeFileSync(
     path.join(tempDir, "src/core/public.ts"),
     [
-      "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2099-01-01 approved-by:test-owner reason:temporary public surface mismatch fixture",
+      "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner reason:temporary public surface mismatch fixture",
       "export const extra = true;",
       "",
     ].join("\n"),
@@ -1586,7 +1586,7 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     fs.writeFileSync(
       path.join(tempDir, "src/consumer/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:test-owner reason:temporary stale prune fixture",
+        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary stale prune fixture",
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",

@@ -18,7 +18,12 @@
       "query-builder": "off",
       "sql-literal": "off",
       "typeorm": "off"
-    }
+    },
+    "requiredRules": [
+      "CELLFENCE_UNDECLARED_CONSUMER",
+      "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
+    ]
   },
   "cells": [
     {
@@ -66,7 +71,8 @@
         "validateResourceEvidence"
       ],
       "consumes": [],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-api",
@@ -105,7 +111,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "engine",
@@ -225,7 +232,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "mcp-proxy",
@@ -265,7 +273,8 @@
           "cell": "engine"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "cli",
@@ -296,7 +305,8 @@
           "cell": "engine"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "github-action",
@@ -313,7 +323,8 @@
           "cell": "engine"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "trace",
@@ -335,7 +346,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "adapter-call-pattern",
@@ -357,7 +369,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "adapter-opentelemetry",
@@ -375,7 +388,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-agent-budget",
@@ -393,7 +407,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-blast-radius",
@@ -411,7 +426,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-dependency-sovereignty",
@@ -429,7 +445,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-geo-purity",
@@ -447,7 +464,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-legacy-strangler",
@@ -465,7 +483,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "plugin-quants-trend",
@@ -487,7 +506,8 @@
           "cell": "schema"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     },
     {
       "id": "reporter-economy-matrix",
@@ -507,7 +527,8 @@
           "cell": "plugin-api"
         }
       ],
-      "producesArtifacts": []
+      "producesArtifacts": [],
+      "locked": true
     }
   ]
 }

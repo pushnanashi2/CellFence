@@ -457,7 +457,7 @@ function languageIndependentTemplates() {
     setup(rootDir, index) {
       const producer = `producer${index}`;
       const source = [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:PENDING reason:temporary request",
+        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:PENDING reason:temporary request",
         `import { secret${index} } from "../${producer}/internal";`,
         `export const ${symbolName(`consumer${index}`, 0)} = secret${index};`,
         "",
@@ -471,7 +471,7 @@ function languageIndependentTemplates() {
     setup(rootDir, index) {
       const producer = `producer${index}`;
       const source = [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2099-01-01 approved-by:test-owner reason:temporary adversarial required-rule fixture",
+        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary adversarial required-rule fixture",
         `import { secret${index} } from "../${producer}/internal";`,
         `export const ${symbolName(`consumer${index}`, 0)} = secret${index};`,
         "",
