@@ -1,0 +1,28 @@
+name: "CellFence Baseline Gate"
+description: "Detect CellFence baseline changes in a pull request and require an explicit governance-change approval before merge."
+branding:
+  icon: shield
+  color: blue
+inputs:
+  cellfence-version:
+    description: "CellFence CLI version to install. Pin to a release tag."
+    required: false
+    default: "0.2.1"
+  baseline-codeowners:
+    description: "Comma-separated list of GitHub usernames or teams who can approve a baseline change. Defaults to the repo's CODEOWNERS entries under .cellfence/baselines/."
+    required: false
+  require-separate-pr:
+    description: "Warn (and optionally fail) when a baseline change is mixed with implementation changes in the same pull request."
+    required: false
+    default: "true"
+  comment-mode:
+    description: "How to surface the governance change report. One of `update`, `create`, `disabled`."
+    required: false
+    default: "update"
+  fail-on-mixed-pr:
+    description: "When `require-separate-pr` is true, exit non-zero if the PR mixes baseline and implementation changes."
+    required: false
+    default: "false"
+runs:
+  using: "node20"
+  main: "dist/index.js"

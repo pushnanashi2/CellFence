@@ -1,0 +1,21 @@
+{
+  "name": "@cellfence/github-action-baseline-gate",
+  "version": "0.0.1",
+  "description": "GitHub Action that gates CellFence baseline changes on a CODEOWNER approval (0.4.0 prototype).",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^6.0.0",
+    "@cellfence/engine": "file:../engine",
+    "@cellfence/cli": "file:../cli"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}
