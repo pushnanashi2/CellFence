@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cellfence.dev/schema/resource-evidence-v1.json",
-  "title": "CellFence Resource Evidence v1",
+  "$id": "https://cellfence.dev/schema/resource-evidence-v2.json",
+  "title": "CellFence Resource Evidence v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "accesses"],
+  "required": ["schemaVersion", "commitSha", "accesses"],
   "properties": {
-    "schemaVersion": { "const": "cellfence.resource-evidence.v1" },
-    "commitSha": { "type": "string" },
+    "schemaVersion": { "const": "cellfence.resource-evidence.v2" },
+    "commitSha": { "type": "string", "minLength": 1, "pattern": "\\S" },
     "generatedAt": {
       "anyOf": [
         { "const": "" },

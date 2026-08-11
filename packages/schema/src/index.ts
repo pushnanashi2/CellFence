@@ -1,6 +1,6 @@
 export const CELLFENCE_MANIFEST_SCHEMA_VERSION = "cellfence.manifest.v1";
 export const CELLFENCE_BASELINE_SCHEMA_VERSION = "cellfence.baseline.v1";
-export const CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION = "cellfence.resource-evidence.v1";
+export const CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION = "cellfence.resource-evidence.v2";
 
 export type EnforcementStatus = "enforced" | "partially_enforced" | "documented" | "planned";
 
@@ -98,7 +98,15 @@ export type ResourceEvidenceAccess = ResourceBaselineEntry & {
 
 export type CellFenceResourceEvidence = {
   schemaVersion: typeof CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION;
-  commitSha?: string;
+  // H-4 (0.3.0): commitSha is now required and must match the
+  // repository HEAD at validation time. The previous optional shape
+  // let evidence without a commit binding pass the freshness check
+  // (the engine's `evidence.commitSha && ...` opt-in), and the trace
+  // package was free to omit it whenever the env vars it consulted
+  // were not set. v2 evidence must carry a non-empty commit sha so
+  // a runtime trace cannot be replayed against a different snapshot
+  // of the source tree.
+  commitSha: string;
   generatedAt?: string;
   cellId?: string;
   accesses: ResourceEvidenceAccess[];
@@ -841,8 +849,8 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   if (value.schemaVersion !== CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION}`);
   }
-  if (!optionalString(value.commitSha)) {
-    errors.push("commitSha must be a string when present");
+  if (typeof value.commitSha !== "string" || value.commitSha.trim().length === 0) {
+    errors.push("commitSha is required and must be a non-empty string");
   }
   if (!optionalString(value.generatedAt)) {
     errors.push("generatedAt must be a string when present");

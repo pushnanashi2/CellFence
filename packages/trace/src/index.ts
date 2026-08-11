@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
@@ -36,6 +37,32 @@ function defaultCellId(): string | undefined {
 
 function evidencePath(): string {
   return path.resolve(process.cwd(), process.env.CELLFENCE_TRACE_OUT || "cellfence.resource-evidence.json");
+}
+
+// H-4 (0.3.0): resource evidence must bind to the commit it was
+// captured against, so the engine can reject replays against a
+// different snapshot. The previous implementation read GITHUB_SHA
+// (set in CI) or CELLFENCE_TRACE_COMMIT_SHA (opt-in), which made
+// the binding opt-in: a local trace without env vars would simply
+// omit commitSha, and the engine's `evidence.commitSha && ...`
+// freshness check would skip the comparison. Read the current
+// repository HEAD directly instead and let the engine surface the
+// failure if the binding is missing or mismatched. GITHUB_SHA /
+// CELLFENCE_TRACE_COMMIT_SHA remain as fallbacks for shallow
+// checkouts where `git rev-parse HEAD` returns the merge ref rather
+// than the actual commit.
+function readCommitSha(): string {
+  const envFallback = process.env.CELLFENCE_TRACE_COMMIT_SHA || process.env.GITHUB_SHA;
+  if (envFallback && envFallback.trim().length > 0) return envFallback.trim();
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
 }
 
 function accessKey(access: ResourceEvidenceAccess): string {
@@ -106,7 +133,7 @@ export function flushEvidence(): void {
   const evidence = {
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
-    commitSha: process.env.GITHUB_SHA || process.env.CELLFENCE_TRACE_COMMIT_SHA,
+    commitSha: readCommitSha(),
     cellId: defaultCellId(),
     accesses: [...accesses.values()].sort((left, right) => accessKey(left).localeCompare(accessKey(right))),
   };

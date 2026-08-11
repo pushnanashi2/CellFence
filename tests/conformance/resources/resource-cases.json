@@ -274,7 +274,8 @@
       },
       "evidence": {
         "cellfence.resource-evidence.json": {
-          "schemaVersion": "cellfence.resource-evidence.v1",
+          "schemaVersion": "cellfence.resource-evidence.v2",
+          "commitSha": "HEAD",
           "cellId": "runtime",
           "accesses": [
             { "kind": "file", "access": "write", "selector": "data/output.json", "detectedBy": "trace-hook", "confidence": "runtime" }

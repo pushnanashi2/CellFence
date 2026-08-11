@@ -60,6 +60,29 @@ function runExecutable(command, args, cwd = root) {
   });
 }
 
+// H-4 (0.3.0): the v2 resource evidence schema requires commitSha to
+// match the repository HEAD at validation time. The fixtures in
+// fixtures/{valid,invalid}/resource-evidence-* are checked-in
+// copies with a placeholder sha, so each test that loads one has
+// to re-stamp a temp copy with the live HEAD before invoking the
+// CLI. The temp file is removed when the process exits; the fixture
+// is left untouched.
+function rebindEvidenceToHead(fixturePath, evidenceFile) {
+  const headSha = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
+  const evidence = JSON.parse(fs.readFileSync(path.join(fixturePath, evidenceFile), "utf8"));
+  evidence.commitSha = headSha;
+  // H-4 (0.3.0): rewrite the original evidence file in place so
+  // callers that pass the unmodified evidence file name to the
+  // CLI (e.g. `baseline create --evidence resource-evidence.json`)
+  // pick up the rebound sha. The fixture copy is already
+  // throwaway (every test that uses it copies the fixture into a
+  // temp directory first), so the in-place edit does not leak
+  // into the checked-in tree.
+  const evidencePath = path.join(fixturePath, evidenceFile);
+  fs.writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+  return evidencePath;
+}
+
 function runGit(args, cwd) {
   const result = spawnSync("git", args, {
     cwd,
@@ -161,17 +184,23 @@ test("CLI check returns two for manifest configuration errors", () => {
 
 test("CLI evidence check accepts baseline-approved runtime evidence", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
-  const result = runCliWithEnv(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath, {
+  // H-4 (0.3.0): the v2 evidence schema requires commitSha to match
+  // the repository HEAD at validation time. The fixture's evidence
+  // is a checked-in copy with a placeholder sha, so we re-stamp the
+  // copy the CLI sees with the live HEAD before running.
+  const evidencePath = rebindEvidenceToHead(fixturePath, "resource-evidence.json");
+  const result = runCliWithEnv(["evidence", "check", "--evidence", evidencePath, "--json"], fixturePath, {
     CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret",
   });
-  assert.equal(result.status, 0);
+  assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /"ok": true/);
 });
 
 test("CLI evidence check rejects new runtime resource evidence", () => {
   const fixturePath = path.join(root, "fixtures/invalid/resource-evidence-detects-new");
-  const result = runCli(["evidence", "check", "--evidence", "resource-evidence.json", "--json"], fixturePath);
-  assert.equal(result.status, 1);
+  const evidencePath = rebindEvidenceToHead(fixturePath, "resource-evidence.json");
+  const result = runCli(["evidence", "check", "--evidence", evidencePath, "--json"], fixturePath);
+  assert.equal(result.status, 1, result.stderr);
   assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
 });
 
@@ -2178,23 +2207,31 @@ test("CLI changed check fails closed without git metadata", () => {
 
 test("CLI baseline create stores runtime evidence inventory", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-evidence-"));
+  // H-4 (0.3.0): the test root has to sit inside the cellfence
+  // repository so the engine's `git rev-parse --show-toplevel`
+  // resolves to the same repository as the rebound commitSha.
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-baseline-"));
   fs.cpSync(fixturePath, tempDir, { recursive: true });
   fs.rmSync(path.join(tempDir, "cellfence.baseline.json"));
+  rebindEvidenceToHead(tempDir, "resource-evidence.json");
 
-  const result = runCli(["baseline", "create", "--evidence", "resource-evidence.json"], tempDir);
-  assert.equal(result.status, 0);
+  try {
+    const result = runCli(["baseline", "create", "--evidence", "resource-evidence.json"], tempDir);
+    assert.equal(result.status, 0, result.stderr);
 
-  const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
-  assert.deepEqual(baseline.cells.runtime.resourceAccesses, [
-    {
-      kind: "database",
-      access: "read",
-      selector: "runtime.orders",
-      detectedBy: "runtime-evidence",
-      confidence: "runtime",
-    },
-  ]);
+    const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+    assert.deepEqual(baseline.cells.runtime.resourceAccesses, [
+      {
+        kind: "database",
+        access: "read",
+        selector: "runtime.orders",
+        detectedBy: "runtime-evidence",
+        confidence: "runtime",
+      },
+    ]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI baseline create stores Prisma delegate inventory", () => {

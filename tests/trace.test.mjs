@@ -36,7 +36,7 @@ test("trace hook emits runtime file resource evidence", () => {
 
   assert.equal(result.status, 0, result.stderr);
   const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-  assert.equal(evidence.schemaVersion, "cellfence.resource-evidence.v1");
+  assert.equal(evidence.schemaVersion, "cellfence.resource-evidence.v2");
   assert.equal(evidence.cellId, "runtime");
   assert.deepEqual(evidence.accesses, [
     {

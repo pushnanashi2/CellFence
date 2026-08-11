@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -25,12 +26,29 @@ function writeJson(filePath, value) {
   writeFile(filePath, JSON.stringify(value, null, 2));
 }
 
+// H-4 (0.3.0): see the matching helper in
+// tests/conformance-malformed.test.mjs; substitute the live HEAD
+// for the literal "HEAD" placeholder in evidence fixtures so the
+// v2 freshness check has a real value to compare against.
+const headSha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+
+function substituteHead(value) {
+  if (typeof value === "string") return value === "HEAD" ? headSha : value;
+  if (Array.isArray(value)) return value.map(substituteHead);
+  if (value && typeof value === "object") {
+    const result = {};
+    for (const [k, v] of Object.entries(value)) result[k] = substituteHead(v);
+    return result;
+  }
+  return value;
+}
+
 function renderCase(testRoot, conformanceCase) {
   for (const [relativePath, contents] of Object.entries(conformanceCase.files || {})) {
     writeFile(path.join(testRoot, relativePath), contents);
   }
   for (const [relativePath, contents] of Object.entries(conformanceCase.evidence || {})) {
-    writeJson(path.join(testRoot, relativePath), contents);
+    writeJson(path.join(testRoot, relativePath), substituteHead(contents));
   }
   writeJson(path.join(testRoot, "cellfence.manifest.json"), conformanceCase.manifest);
 }
@@ -58,7 +76,12 @@ function normalizeFindings(findings) {
 }
 
 function runCase(conformanceCase) {
-  const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), `cellfence-resource-conformance-${conformanceCase.id}-`));
+  // H-4 (0.3.0): the v2 freshness check requires the evidence to bind
+  // to the live HEAD of the repository the test root sits inside.
+  // Create the test root under the cellfence repo (not under
+  // os.tmpdir) so the engine's `git rev-parse --show-toplevel`
+  // resolves to the same repository as the substituted commitSha.
+  const testRoot = fs.mkdtempSync(path.join(rootDir, `.cellfence-resource-${conformanceCase.id}-`));
   try {
     renderCase(testRoot, conformanceCase);
     return checkRepository({

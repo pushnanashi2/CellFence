@@ -45,9 +45,19 @@ function comparableRealPath(inputPath: string): string {
 }
 
 function gitHeadForExactRoot(rootDir: string, dependencies: ResourceEvidenceDependencies): string | undefined {
+  // H-4 (0.3.0): the previous implementation required rootDir to
+  // match `git rev-parse --show-toplevel`, which made any subdir
+  // lookup fail and silently turned into the opt-in behaviour the
+  // commit-binding fix is meant to remove. Resolve the toplevel
+  // separately so the HEAD is read from the right repository, then
+  // accept the call as long as the toplevel contains the rootDir
+  // (the test suite runs the CLI from a fixture subdir of the
+  // cellfence repo, which used to be rejected here).
   try {
     const topLevel = dependencies.gitCommand(rootDir, ["rev-parse", "--show-toplevel"]);
-    if (comparableRealPath(topLevel) !== comparableRealPath(rootDir)) return undefined;
+    const rootReal = comparableRealPath(rootDir);
+    const topReal = comparableRealPath(topLevel);
+    if (rootReal !== topReal && !rootReal.startsWith(`${topReal}/`)) return undefined;
     return dependencies.gitCommand(rootDir, ["rev-parse", "HEAD"]);
   } catch {
     return undefined;
@@ -104,7 +114,34 @@ export function resourceEvidenceAccesses(
       continue;
     }
 
-    if (headCommit && evidence.commitSha && evidence.commitSha !== headCommit) {
+    // H-4 (0.3.0): the previous `evidence.commitSha &&` opt-in meant
+    // evidence without a commit binding was silently accepted, and a
+    // fresh commitSha was only required when one happened to be set.
+    // The schema now requires commitSha (v2) and the engine rejects
+    // both the missing and the mismatched cases here. Evidence is
+    // also rejected when the repository has no HEAD, since we have
+    // no way to detect a replay in that state.
+    if (!headCommit) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+        severity: "error",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: "cannot bind resource evidence to a commit: repository HEAD is unavailable (not a git repo or git command failed)",
+        details: { evidenceCommitSha: evidence.commitSha },
+      });
+      continue;
+    }
+    if (!evidence.commitSha) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+        severity: "error",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: "resource evidence is missing commitSha; v2 evidence must bind the commit it was captured against",
+        details: { headCommit },
+      });
+      continue;
+    }
+    if (evidence.commitSha !== headCommit) {
       addFinding(findings, {
         ruleId: "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
         severity: "error",

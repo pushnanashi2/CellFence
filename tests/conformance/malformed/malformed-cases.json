@@ -171,7 +171,8 @@
       },
       "evidence": {
         "cellfence.resource-evidence.json": {
-          "schemaVersion": "cellfence.resource-evidence.v1",
+          "schemaVersion": "cellfence.resource-evidence.v2",
+          "commitSha": "HEAD",
           "cellId": "missing",
           "accesses": [
             { "kind": "file", "access": "read", "selector": "data/input.json" }
