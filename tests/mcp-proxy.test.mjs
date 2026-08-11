@@ -630,9 +630,10 @@ test("proxy decision defaults to fail-closed for write tools with no path argume
       downstreamCommand: process.execPath,
       downstreamArgs: [],
       writeTools: { write_file: ["path"] },
+      readTools: ["read_file"],
     }, "read_file", { path: "src/other/new.ts" });
     assert.equal(readDecision.shouldForward, true);
-    assert.equal(readDecision.reason, "read-only or unconfigured tool");
+    assert.equal(readDecision.reason, "configured read tool");
 
     const secureUnknownDecision = decideToolCall({
       rootDir,
@@ -814,7 +815,7 @@ test("MCP proxy forwards reads and claimed writes, but denies unclaimed writes b
       const auditEvents = readJsonLines(logs.auditLog);
       assert.deepEqual(auditEvents.map((event) => event.decision), ["allow", "allow", "deny"]);
       assert.equal(auditEvents[2].paths[0], "src/other/new.ts");
-    });
+    }, { proxyArgs: ["--read-tool", "read_file"] });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -908,7 +909,7 @@ test("MCP proxy bridges downstream resources, prompts, and completion", async ()
         "notifications/resources/updated",
         "notifications/tools/list_changed",
       ]);
-    }, { serverPath });
+    }, { serverPath, proxyArgs: ["--read-tool", "read_file", "--read-tool", "run_command"] });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

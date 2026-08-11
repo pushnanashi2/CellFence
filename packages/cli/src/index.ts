@@ -1689,14 +1689,37 @@ function mcpToolDefinitions(): Record<string, unknown>[] {
 }
 
 function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootDir: string): unknown {
-  const rootDir = path.resolve(stringParam(params, "rootDir") || defaultRootDir);
+  // C-4 (0.3.0): every per-call rootDir / manifestPath / claimsPath /
+  // baselinePath must be confined to the server's working directory.
+  // Without this guard a remote caller can read or overwrite any
+  // file the server process can reach by passing absolute paths.
+  const requestedRoot = stringParam(params, "rootDir") || defaultRootDir;
+  const absoluteRoot = path.resolve(requestedRoot);
+  const serverRoot = path.resolve(defaultRootDir);
+  const relativeRoot = path.relative(serverRoot, absoluteRoot);
+  if (relativeRoot.startsWith("..") || path.isAbsolute(relativeRoot)) {
+    throw new Error(`rootDir must be inside ${serverRoot}; got ${absoluteRoot}`);
+  }
+  const rootDir = absoluteRoot;
+  const confinePath = (rawPath: string | undefined, label: string): string | undefined => {
+    if (rawPath === undefined) return rawPath;
+    const resolved = path.isAbsolute(rawPath) ? path.resolve(rawPath) : path.resolve(rootDir, rawPath);
+    const relative = path.relative(rootDir, resolved);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+      throw new Error(`${label} must be inside ${rootDir}; got ${resolved}`);
+    }
+    return resolved;
+  };
+  const manifestPath = confinePath(stringParam(params, "manifestPath"), "manifestPath");
+  const claimsPath = confinePath(stringParam(params, "claimsPath"), "claimsPath");
+  const baselinePath = confinePath(stringParam(params, "baselinePath"), "baselinePath");
   if (name === "get_cell_context") {
     const cellId = stringParam(params, "cellId");
     if (!cellId) throw new Error("get_cell_context requires cellId");
     const context = createCellContext({
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      baselinePath: stringParam(params, "baselinePath"),
+      manifestPath,
+      baselinePath,
       cellId,
     });
     return mcpTextResult(params.format === "agents-md" ? formatContextAsAgentsMarkdown(context) : context);
@@ -1705,8 +1728,8 @@ function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootD
     const changed = booleanParam(params, "changed") === true;
     const options = {
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      baselinePath: stringParam(params, "baselinePath"),
+      manifestPath,
+      baselinePath,
     };
     return mcpTextResult(changed
       ? checkChangedRepository({
@@ -1722,8 +1745,8 @@ function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootD
     if (!agent || !cellId) throw new Error("create_claim requires agent and cellId");
     return mcpTextResult(createClaim({
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      claimsPath: stringParam(params, "claimsPath"),
+      manifestPath,
+      claimsPath,
       agent,
       ttl: stringParam(params, "ttl"),
       cells: [cellId],

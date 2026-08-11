@@ -78,12 +78,23 @@ type ToolDecision = {
 
 const VERSION = "0.2.1";
 
+// H-5 (0.3.0): the previous default only knew about the original
+// five tool names. Real agent harnesses use Write/Edit/NotebookEdit/
+// MultiEdit/patch/fs_write/edit. Tool matching is now case-insensitive
+// (see shouldExposeTool) so the additional names are picked up.
 const DEFAULT_WRITE_TOOLS: WriteToolConfig = {
   apply_patch: ["path", "file_path", "filename"],
   create_file: ["path", "file_path", "filename"],
   edit_file: ["path", "file_path", "filename"],
   str_replace: ["path", "file_path", "filename"],
   write_file: ["path", "file_path", "filename"],
+  Write: ["file_path", "path", "filepath", "filename"],
+  Edit: ["file_path", "path", "filepath", "filename"],
+  NotebookEdit: ["file_path", "path", "filepath", "filename"],
+  MultiEdit: ["file_path", "path", "filepath", "filename"],
+  patch: ["file_path", "path", "filepath", "filename"],
+  fs_write: ["file_path", "path", "filepath", "filename"],
+  edit: ["file_path", "path", "filepath", "filename"],
 };
 
 function usage(): string {
@@ -233,8 +244,12 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   let agent = env.CELLFENCE_AGENT || "";
   let mode = parseMode(env.CELLFENCE_MCP_MODE);
   let failMode = parseFailMode(env.CELLFENCE_MCP_FAIL_MODE);
+  // H-5 (0.3.0): the previous default was "allow", which let any tool
+  // through unless explicitly listed. The new default is "deny" so an
+  // unrecognized tool name never bypasses the runtime guard. Operators
+  // can opt back into "allow" with CELLFENCE_MCP_UNKNOWN_TOOL_POLICY=allow.
   let unknownToolPolicy: UnknownToolPolicy = env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY === undefined
-    ? "allow"
+    ? "deny"
     : parseUnknownToolPolicy(env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY);
   let readTools = mergeReadTools([], (env.CELLFENCE_MCP_READ_TOOLS || "").split(","));
   let auditLogPath = env.CELLFENCE_MCP_AUDIT_LOG;
@@ -353,8 +368,14 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
 }
 
 export function pathsForToolCall(toolName: string, args: unknown, writeTools: WriteToolConfig): string[] | undefined {
-  if (!Object.hasOwn(writeTools, toolName)) return undefined;
-  const keys = writeTools[toolName];
+  // H-5: real clients (Claude Code, Cursor) often capitalise tool
+  // names (Write, Edit). The previous exact-match lookup let
+  // case-mismatched calls bypass path extraction. Look up the keys
+  // case-insensitively while preserving the original config casing.
+  const wanted = toolName.toLowerCase();
+  const matchKey = Object.keys(writeTools).find((key) => key.toLowerCase() === wanted);
+  if (!matchKey) return undefined;
+  const keys = writeTools[matchKey];
   if (!keys) return undefined;
   const paths: string[] = [];
   for (const key of keys) {
@@ -394,7 +415,7 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
     if (options.readTools?.includes(toolName)) {
       return { shouldForward: true, auditDecision: "allow", paths: [], reason: "configured read tool" };
     }
-    if ((options.unknownToolPolicy ?? "allow") === "deny") {
+    if ((options.unknownToolPolicy ?? "deny") === "deny") {
       const reason = `unknown tool ${toolName} is not configured as a read or write tool`;
       if (options.mode === "dry-run") {
         return { shouldForward: true, auditDecision: "dry-run-deny", paths: [], reason };
@@ -461,8 +482,17 @@ function audit(options: ProxyOptions, toolName: string, decision: ToolDecision):
 }
 
 function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
-  if (options.mode !== "enforce" || (options.unknownToolPolicy ?? "allow") === "allow") return true;
-  return Boolean(options.writeTools[toolName]) || Boolean(options.readTools?.includes(toolName));
+  // H-5 (0.3.0): the fallback is "deny" so an unrecognised tool never
+  // bypasses the runtime guard, and the case-insensitive lookup keeps
+  // Claude Code / Cursor clients aligned with the documented dialect.
+  if (options.mode !== "enforce") return true;
+  const policy = options.unknownToolPolicy ?? "deny";
+  if (policy === "allow") return true;
+  const wanted = toolName.toLowerCase();
+  const hasWrite = Object.keys(options.writeTools).some((key) => key.toLowerCase() === wanted);
+  if (hasWrite) return true;
+  const readTools = options.readTools ?? [];
+  return readTools.some((tool) => tool.toLowerCase() === wanted);
 }
 
 export async function runProxy(options: ProxyOptions): Promise<void> {
