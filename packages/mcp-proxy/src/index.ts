@@ -46,6 +46,12 @@ export type ProxyOptions = {
   downstreamCommand: string;
   downstreamArgs: string[];
   downstreamCwd?: string;
+  // H-6 (0.3.0): opt-in escape hatch for the --downstream-cwd
+  // containment check. By default the cwd must sit inside rootDir;
+  // setting this to true lets advanced deployments point the
+  // downstream server at a sibling directory (e.g. a shared cache)
+  // without disabling the safety net for everyone else.
+  allowCwdMismatch?: boolean;
   writeTools: WriteToolConfig;
   readTools?: string[];
   unknownToolPolicy?: UnknownToolPolicy;
@@ -78,12 +84,23 @@ type ToolDecision = {
 
 const VERSION = "0.2.1";
 
+// H-5 (0.3.0): the previous default only knew about the original
+// five tool names. Real agent harnesses use Write/Edit/NotebookEdit/
+// MultiEdit/patch/fs_write/edit. Tool matching is now case-insensitive
+// (see shouldExposeTool) so the additional names are picked up.
 const DEFAULT_WRITE_TOOLS: WriteToolConfig = {
   apply_patch: ["path", "file_path", "filename"],
   create_file: ["path", "file_path", "filename"],
   edit_file: ["path", "file_path", "filename"],
   str_replace: ["path", "file_path", "filename"],
   write_file: ["path", "file_path", "filename"],
+  Write: ["file_path", "path", "filepath", "filename"],
+  Edit: ["file_path", "path", "filepath", "filename"],
+  NotebookEdit: ["file_path", "path", "filepath", "filename"],
+  MultiEdit: ["file_path", "path", "filepath", "filename"],
+  patch: ["file_path", "path", "filepath", "filename"],
+  fs_write: ["file_path", "path", "filepath", "filename"],
+  edit: ["file_path", "path", "filepath", "filename"],
 };
 
 function usage(): string {
@@ -107,7 +124,9 @@ Options:
   --read-tool NAME              Allowlist a read-only tool. Repeatable.
   --downstream-command CMD      MCP server command to wrap.
   --downstream-arg ARG          Repeatable downstream argument.
-  --downstream-cwd DIR          Working directory for the downstream server.
+  --downstream-cwd DIR          Working directory for the downstream server. Must be inside --root unless --allow-cwd-mismatch is set.
+  --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch). Must be inside --root unless --allow-cwd-mismatch is set.
+  --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch).
   --help                        Show this help.
 
 Environment:
@@ -233,14 +252,19 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   let agent = env.CELLFENCE_AGENT || "";
   let mode = parseMode(env.CELLFENCE_MCP_MODE);
   let failMode = parseFailMode(env.CELLFENCE_MCP_FAIL_MODE);
+  // H-5 (0.3.0): the previous default was "allow", which let any tool
+  // through unless explicitly listed. The new default is "deny" so an
+  // unrecognized tool name never bypasses the runtime guard. Operators
+  // can opt back into "allow" with CELLFENCE_MCP_UNKNOWN_TOOL_POLICY=allow.
   let unknownToolPolicy: UnknownToolPolicy = env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY === undefined
-    ? "allow"
+    ? "deny"
     : parseUnknownToolPolicy(env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY);
   let readTools = mergeReadTools([], (env.CELLFENCE_MCP_READ_TOOLS || "").split(","));
   let auditLogPath = env.CELLFENCE_MCP_AUDIT_LOG;
   let downstreamCommand = env.CELLFENCE_MCP_DOWNSTREAM_COMMAND || "";
   let downstreamArgs: string[] = [];
   let downstreamCwd: string | undefined;
+  let allowCwdMismatch = false;
   let writeTools = { ...DEFAULT_WRITE_TOOLS };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -328,6 +352,8 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
       index += 1;
     } else if (argument.startsWith("--downstream-cwd=")) {
       downstreamCwd = argument.slice("--downstream-cwd=".length);
+    } else if (argument === "--allow-cwd-mismatch") {
+      allowCwdMismatch = true;
     } else {
       throw new Error(`unknown argument ${argument}`);
     }
@@ -346,6 +372,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     downstreamCommand,
     downstreamArgs: downstreamArgs.filter((entry) => entry.length > 0),
     downstreamCwd,
+    allowCwdMismatch,
     writeTools,
     readTools,
     unknownToolPolicy,
@@ -353,8 +380,14 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
 }
 
 export function pathsForToolCall(toolName: string, args: unknown, writeTools: WriteToolConfig): string[] | undefined {
-  if (!Object.hasOwn(writeTools, toolName)) return undefined;
-  const keys = writeTools[toolName];
+  // H-5: real clients (Claude Code, Cursor) often capitalise tool
+  // names (Write, Edit). The previous exact-match lookup let
+  // case-mismatched calls bypass path extraction. Look up the keys
+  // case-insensitively while preserving the original config casing.
+  const wanted = toolName.toLowerCase();
+  const matchKey = Object.keys(writeTools).find((key) => key.toLowerCase() === wanted);
+  if (!matchKey) return undefined;
+  const keys = writeTools[matchKey];
   if (!keys) return undefined;
   const paths: string[] = [];
   for (const key of keys) {
@@ -394,7 +427,7 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
     if (options.readTools?.includes(toolName)) {
       return { shouldForward: true, auditDecision: "allow", paths: [], reason: "configured read tool" };
     }
-    if ((options.unknownToolPolicy ?? "allow") === "deny") {
+    if ((options.unknownToolPolicy ?? "deny") === "deny") {
       const reason = `unknown tool ${toolName} is not configured as a read or write tool`;
       if (options.mode === "dry-run") {
         return { shouldForward: true, auditDecision: "dry-run-deny", paths: [], reason };
@@ -449,6 +482,66 @@ function inheritedEnvironment(): Record<string, string> {
   return Object.fromEntries(Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
 }
 
+// H-3 (0.3.0): the previous inheritedEnvironment() forwarded every
+// process.env entry to the downstream MCP server. That leaked operator
+// secrets (CELLFENCE_BASELINE_HMAC_KEY, CELLFENCE_BASELINE_ED25519_*
+// private keys, NPM_TOKEN, GITHUB_TOKEN, AWS_*, ...) into an
+// attacker-controlled process: any tool call the downstream advertises
+// can read the proxy's own environment. Build the downstream env
+// from an explicit allowlist instead. The downstream keeps what it
+// actually needs to start (PATH, HOME, USER, locale, TMPDIR, TZ) and
+// the proxy's own CELLFENCE_MCP_* configuration knobs. Every other
+// variable is dropped, including the baseline signing material that
+// should never leave the verifier.
+const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
+  "PATH",
+  "Path",
+  "HOME",
+  "USER",
+  "USERNAME",
+  "USERPROFILE",
+  "HOMEDRIVE",
+  "HOMEPATH",
+  "TMPDIR",
+  "TMP",
+  "TEMP",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "LC_MESSAGES",
+  "LC_COLLATE",
+  "LC_NUMERIC",
+  "LC_TIME",
+  "TZ",
+  "SHELL",
+  "LANGUAGE",
+  "TERM",
+  "PWD",
+  "MOCK_MCP_LOG",
+]);
+
+const SAFE_DOWNSTREAM_ENV_PREFIXES = [
+  "CELLFENCE_MCP_",
+  "LC_",
+];
+
+function safeDownstreamEnvironment(env: NodeJS.ProcessEnv): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [name, value] of Object.entries(env)) {
+    if (typeof value !== "string") continue;
+    if (SAFE_DOWNSTREAM_ENV_NAMES.has(name)) {
+      result[name] = value;
+      continue;
+    }
+    if (SAFE_DOWNSTREAM_ENV_PREFIXES.some((prefix) => name.startsWith(prefix))) {
+      result[name] = value;
+    }
+  }
+  return result;
+}
+
+export const __testing = { safeDownstreamEnvironment, resolveAndValidateDownstreamCwd };
+
 function audit(options: ProxyOptions, toolName: string, decision: ToolDecision): void {
   appendAuditEvent(options, {
     timestamp: new Date().toISOString(),
@@ -461,16 +554,52 @@ function audit(options: ProxyOptions, toolName: string, decision: ToolDecision):
 }
 
 function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
-  if (options.mode !== "enforce" || (options.unknownToolPolicy ?? "allow") === "allow") return true;
-  return Boolean(options.writeTools[toolName]) || Boolean(options.readTools?.includes(toolName));
+  // H-5 (0.3.0): the fallback is "deny" so an unrecognised tool never
+  // bypasses the runtime guard, and the case-insensitive lookup keeps
+  // Claude Code / Cursor clients aligned with the documented dialect.
+  if (options.mode !== "enforce") return true;
+  const policy = options.unknownToolPolicy ?? "deny";
+  if (policy === "allow") return true;
+  const wanted = toolName.toLowerCase();
+  const hasWrite = Object.keys(options.writeTools).some((key) => key.toLowerCase() === wanted);
+  if (hasWrite) return true;
+  const readTools = options.readTools ?? [];
+  return readTools.some((tool) => tool.toLowerCase() === wanted);
+}
+
+// H-6 (0.3.0): --downstream-cwd is the working directory of the
+// spawned MCP server. Without this guard a confused-deputy attack
+// (or a plain misconfiguration) could redirect the server's
+// filesystem access to anywhere the cellfence-mcp-proxy process can
+// reach, so the cwd must sit inside --root unless the operator
+// explicitly opts in with allowCwdMismatch. The default cwd is
+// --root so the safe option is also the convenient one.
+export function resolveAndValidateDownstreamCwd(rootDir: string, downstreamCwd: string | undefined, allowCwdMismatch: boolean): string {
+  const absoluteRoot = path.resolve(rootDir);
+  if (!downstreamCwd) return absoluteRoot;
+  const absoluteCwd = path.resolve(downstreamCwd);
+  if (allowCwdMismatch) return absoluteCwd;
+  const relativeCwd = path.relative(absoluteRoot, absoluteCwd);
+  if (relativeCwd.startsWith("..") || path.isAbsolute(relativeCwd)) {
+    throw new Error(
+      `--downstream-cwd must be inside --root (${absoluteRoot}); got ${absoluteCwd}. ` +
+      `Pass --allow-cwd-mismatch to override.`,
+    );
+  }
+  return absoluteCwd;
 }
 
 export async function runProxy(options: ProxyOptions): Promise<void> {
+  const validatedCwd = resolveAndValidateDownstreamCwd(
+    options.rootDir,
+    options.downstreamCwd,
+    options.allowCwdMismatch === true,
+  );
   const downstreamTransport = new StdioClientTransport({
     command: options.downstreamCommand,
     args: options.downstreamArgs,
-    cwd: options.downstreamCwd,
-    env: inheritedEnvironment(),
+    cwd: validatedCwd,
+    env: safeDownstreamEnvironment(process.env),
     stderr: "inherit",
   });
   const downstream = new Client({

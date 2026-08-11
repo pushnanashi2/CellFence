@@ -6,7 +6,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { checkWriteAccess } from "../packages/engine/dist/index.js";
-import { decideToolCall, main, parseProxyArgs, pathsForToolCall } from "../packages/mcp-proxy/dist/index.js";
+import { __testing, decideToolCall, main, parseProxyArgs, pathsForToolCall } from "../packages/mcp-proxy/dist/index.js";
 
 const root = process.cwd();
 const proxyPath = path.join(root, "packages/mcp-proxy/dist/index.js");
@@ -559,6 +559,56 @@ test("proxy path extraction treats prototype names as unknown tools", () => {
   assert.equal(pathsForToolCall("toString", { path: "src/private.ts" }, { write_file: ["path"] }), undefined);
 });
 
+test("proxy downstream environment is filtered to an explicit allowlist (H-3)", () => {
+  const safeEnv = __testing.safeDownstreamEnvironment({
+    PATH: "/usr/bin:/bin",
+    HOME: "/home/test",
+    USER: "test",
+    LANG: "C.UTF-8",
+    LC_ALL: "C.UTF-8",
+    TZ: "UTC",
+    MOCK_MCP_LOG: "/tmp/log",
+    // Operator secrets that must never leak to the downstream.
+    CELLFENCE_BASELINE_HMAC_KEY: "super-secret-hmac",
+    CELLFENCE_BASELINE_HMAC_KEY_ID: "operator-1",
+    CELLFENCE_BASELINE_ED25519_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\n...",
+    CELLFENCE_BASELINE_ED25519_KEY_ID: "operator-1",
+    NPM_TOKEN: "npm-secret",
+    GITHUB_TOKEN: "ghp_secret",
+    AWS_SECRET_ACCESS_KEY: "aws-secret",
+    // Proxy configuration that the downstream legitimately needs.
+    CELLFENCE_MCP_MODE: "enforce",
+    CELLFENCE_MCP_AUDIT_LOG: "/tmp/audit",
+    // Unrelated env that should be dropped.
+    RANDOM_NOISE: "drop me",
+    DATABASE_URL: "postgres://user:pass@host/db",
+  });
+  // Allowed names come through verbatim.
+  assert.equal(safeEnv.PATH, "/usr/bin:/bin");
+  assert.equal(safeEnv.HOME, "/home/test");
+  assert.equal(safeEnv.USER, "test");
+  assert.equal(safeEnv.LANG, "C.UTF-8");
+  assert.equal(safeEnv.LC_ALL, "C.UTF-8");
+  assert.equal(safeEnv.TZ, "UTC");
+  assert.equal(safeEnv.MOCK_MCP_LOG, "/tmp/log");
+  // The proxy's own config is forwarded.
+  assert.equal(safeEnv.CELLFENCE_MCP_MODE, "enforce");
+  assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, "/tmp/audit");
+  // Secrets and unrelated env are dropped.
+  assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY, undefined);
+  assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY_ID, undefined);
+  assert.equal(safeEnv.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY, undefined);
+  assert.equal(safeEnv.CELLFENCE_BASELINE_ED25519_KEY_ID, undefined);
+  assert.equal(safeEnv.NPM_TOKEN, undefined);
+  assert.equal(safeEnv.GITHUB_TOKEN, undefined);
+  assert.equal(safeEnv.AWS_SECRET_ACCESS_KEY, undefined);
+  assert.equal(safeEnv.RANDOM_NOISE, undefined);
+  assert.equal(safeEnv.DATABASE_URL, undefined);
+  // The output must be a plain object (not process.env) so callers
+  // can't mutate the parent's environment by accident.
+  assert.equal(Object.getPrototypeOf(safeEnv), Object.prototype);
+});
+
 test("proxy decision defaults to fail-closed for write tools with no path argument", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-decision-"));
   try {
@@ -630,9 +680,10 @@ test("proxy decision defaults to fail-closed for write tools with no path argume
       downstreamCommand: process.execPath,
       downstreamArgs: [],
       writeTools: { write_file: ["path"] },
+      readTools: ["read_file"],
     }, "read_file", { path: "src/other/new.ts" });
     assert.equal(readDecision.shouldForward, true);
-    assert.equal(readDecision.reason, "read-only or unconfigured tool");
+    assert.equal(readDecision.reason, "configured read tool");
 
     const secureUnknownDecision = decideToolCall({
       rootDir,
@@ -814,7 +865,7 @@ test("MCP proxy forwards reads and claimed writes, but denies unclaimed writes b
       const auditEvents = readJsonLines(logs.auditLog);
       assert.deepEqual(auditEvents.map((event) => event.decision), ["allow", "allow", "deny"]);
       assert.equal(auditEvents[2].paths[0], "src/other/new.ts");
-    });
+    }, { proxyArgs: ["--read-tool", "read_file"] });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -908,7 +959,7 @@ test("MCP proxy bridges downstream resources, prompts, and completion", async ()
         "notifications/resources/updated",
         "notifications/tools/list_changed",
       ]);
-    }, { serverPath });
+    }, { serverPath, proxyArgs: ["--read-tool", "read_file", "--read-tool", "run_command"] });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

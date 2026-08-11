@@ -36,7 +36,8 @@ test("trace hook emits runtime file resource evidence", () => {
 
   assert.equal(result.status, 0, result.stderr);
   const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-  assert.equal(evidence.schemaVersion, "cellfence.resource-evidence.v1");
+  assert.equal(evidence.schemaVersion, "cellfence.resource-evidence.v2");
+  assert.equal(evidence.transcriptStatus, "active");
   assert.equal(evidence.cellId, "runtime");
   assert.deepEqual(evidence.accesses, [
     {
@@ -45,7 +46,7 @@ test("trace hook emits runtime file resource evidence", () => {
       selector: "data/input.json",
       cellId: "runtime",
       detectedBy: "cellfence-trace",
-      confidence: "runtime",
+      confidence: "transient",
     },
     {
       kind: "file",
@@ -53,7 +54,7 @@ test("trace hook emits runtime file resource evidence", () => {
       selector: "data/output.json",
       cellId: "runtime",
       detectedBy: "cellfence-trace",
-      confidence: "runtime",
+      confidence: "transient",
     },
   ]);
 });
@@ -136,7 +137,7 @@ test("trace hook labels appendFileSync accesses as writes", () => {
     selector: "append-only.dat",
     cellId: "runtime",
     detectedBy: "cellfence-trace",
-    confidence: "runtime",
+    confidence: "transient",
   }]);
 });
 
@@ -242,7 +243,7 @@ test("trace hook records fetch calls without requiring successful network respon
       selector: "https://example.invalid/cellfence",
       cellId: "runtime",
       detectedBy: "cellfence-trace",
-      confidence: "runtime",
+      confidence: "transient",
     },
   ]);
 });
@@ -356,7 +357,7 @@ test("trace hook covers default cell/output and fd based skips", () => {
     selector: "app_defaults",
     cellId: "fallback-runtime",
     detectedBy: "cellfence-trace",
-    confidence: "runtime",
+    confidence: "transient",
   }]);
 });
 
@@ -385,7 +386,7 @@ test("trace hook can emit evidence without a cell id", () => {
     access: "read",
     selector: "app_no_cell",
     detectedBy: "cellfence-trace",
-    confidence: "runtime",
+    confidence: "transient",
   }]);
 });
 

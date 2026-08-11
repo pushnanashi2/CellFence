@@ -53,6 +53,10 @@ import {
   type CheckRunMetadata,
 } from "./check-output.js";
 import { manifestFromPreset } from "./init-presets.js";
+import { runCoverageCommand } from "./coverage-command.js";
+import { runBaselineGateCommand, type BaselineGateResult } from "./baseline-gate-command.js";
+import { runBaselineGateFull } from "./baseline-gate-full.js";
+import { readJsonFile } from "@cellfence/engine";
 
 type ParsedArgs = {
   command: string[];
@@ -100,6 +104,12 @@ type ParsedArgs = {
   approvedBy?: string;
   checkInstall: boolean;
   uninstall: boolean;
+  baselineGateBase?: string;
+  baselineGateHead?: string;
+  baselineGateBaseRef?: string;
+  baselineGateHeadRef?: string;
+  failUnder?: number;
+  coverageOutputPath?: string;
   noScaffold: boolean;
   initProductionScope: boolean;
   initResearchAblatePackagePolicyHints: boolean;
@@ -361,6 +371,16 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.reportPath = argument.slice("--report=".length);
     } else if (argument === "--min-score") {
       parsed.minScore = Number(argv[index + 1]);
+    } else if (argument === "--fail-under") {
+      const value = Number(argv[index + 1]);
+      if (Number.isFinite(value)) parsed.failUnder = value;
+    } else if (argument.startsWith("--fail-under=")) {
+      const value = Number(argument.slice("--fail-under=".length));
+      if (Number.isFinite(value)) parsed.failUnder = value;
+    } else if (argument === "--coverage-output") {
+      parsed.coverageOutputPath = requireOptionValue(argv, index, "--coverage-output");
+    } else if (argument.startsWith("--coverage-output=")) {
+      parsed.coverageOutputPath = argument.slice("--coverage-output=".length);
       index += 1;
     } else if (argument.startsWith("--min-score=")) {
       parsed.minScore = Number(argument.slice("--min-score=".length));
@@ -1689,14 +1709,37 @@ function mcpToolDefinitions(): Record<string, unknown>[] {
 }
 
 function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootDir: string): unknown {
-  const rootDir = path.resolve(stringParam(params, "rootDir") || defaultRootDir);
+  // C-4 (0.3.0): every per-call rootDir / manifestPath / claimsPath /
+  // baselinePath must be confined to the server's working directory.
+  // Without this guard a remote caller can read or overwrite any
+  // file the server process can reach by passing absolute paths.
+  const requestedRoot = stringParam(params, "rootDir") || defaultRootDir;
+  const absoluteRoot = path.resolve(requestedRoot);
+  const serverRoot = path.resolve(defaultRootDir);
+  const relativeRoot = path.relative(serverRoot, absoluteRoot);
+  if (relativeRoot.startsWith("..") || path.isAbsolute(relativeRoot)) {
+    throw new Error(`rootDir must be inside ${serverRoot}; got ${absoluteRoot}`);
+  }
+  const rootDir = absoluteRoot;
+  const confinePath = (rawPath: string | undefined, label: string): string | undefined => {
+    if (rawPath === undefined) return rawPath;
+    const resolved = path.isAbsolute(rawPath) ? path.resolve(rawPath) : path.resolve(rootDir, rawPath);
+    const relative = path.relative(rootDir, resolved);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+      throw new Error(`${label} must be inside ${rootDir}; got ${resolved}`);
+    }
+    return resolved;
+  };
+  const manifestPath = confinePath(stringParam(params, "manifestPath"), "manifestPath");
+  const claimsPath = confinePath(stringParam(params, "claimsPath"), "claimsPath");
+  const baselinePath = confinePath(stringParam(params, "baselinePath"), "baselinePath");
   if (name === "get_cell_context") {
     const cellId = stringParam(params, "cellId");
     if (!cellId) throw new Error("get_cell_context requires cellId");
     const context = createCellContext({
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      baselinePath: stringParam(params, "baselinePath"),
+      manifestPath,
+      baselinePath,
       cellId,
     });
     return mcpTextResult(params.format === "agents-md" ? formatContextAsAgentsMarkdown(context) : context);
@@ -1705,8 +1748,8 @@ function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootD
     const changed = booleanParam(params, "changed") === true;
     const options = {
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      baselinePath: stringParam(params, "baselinePath"),
+      manifestPath,
+      baselinePath,
     };
     return mcpTextResult(changed
       ? checkChangedRepository({
@@ -1722,8 +1765,8 @@ function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootD
     if (!agent || !cellId) throw new Error("create_claim requires agent and cellId");
     return mcpTextResult(createClaim({
       rootDir,
-      manifestPath: stringParam(params, "manifestPath"),
-      claimsPath: stringParam(params, "claimsPath"),
+      manifestPath,
+      claimsPath,
       agent,
       ttl: stringParam(params, "ttl"),
       cells: [cellId],
@@ -1796,6 +1839,89 @@ function commandServe(parsed: ParsedArgs): number {
   return 0;
 }
 
+function commandBaselineGate(parsed: ParsedArgs): number {
+  // 0.4.0: full baseline update gate. Accepts either two paths
+  // (--baseline-base / --baseline-head) or two git refs
+  // (--base-ref / --head-ref). The git-ref form is what the
+  // cellfence-baseline-gate action uses; the path form is what
+  // humans and one-off scripts use.
+  const basePath = parsed.baselineGateBase || process.env.CELLFENCE_BASELINE_GATE_BASE;
+  const headPath = parsed.baselineGateHead || process.env.CELLFENCE_BASELINE_GATE_HEAD;
+  const baseRef = parsed.baselineGateBaseRef || process.env.CELLFENCE_BASELINE_GATE_BASE_REF;
+  const headRef = parsed.baselineGateHeadRef || process.env.CELLFENCE_BASELINE_GATE_HEAD_REF;
+  if (!basePath && !baseRef) {
+    console.error("cellfence baseline gate requires --baseline-base or --base-ref");
+    return 2;
+  }
+  if (!headPath && !headRef) {
+    console.error("cellfence baseline gate requires --baseline-head or --head-ref");
+    return 2;
+  }
+  try {
+    const { report, exitCode, warnings } = runBaselineGateFull({
+      rootDir: parsed.rootDir,
+      baselineFile: parsed.baselinePath || ".cellfence/baselines/cellfence.baseline.json",
+      basePath,
+      headPath,
+      baseRef,
+      headRef,
+      format: parsed.format === "human" ? "human" : "json",
+      hasImplementationChanges: false,
+    });
+    for (const warning of warnings) console.warn(`warning: ${warning}`);
+    if (parsed.format !== "human") {
+      writeJson(report);
+    }
+    return exitCode;
+  } catch (error) {
+    console.error(`cellfence baseline gate: ${errorMessage(error)}`);
+    return 3;
+  }
+}
+
+function commandCoverage(parsed: ParsedArgs): number {
+  // 0.4.0: the coverage command walks the repository through the
+  // same engine pipeline as `cellfence check` and buckets every
+  // finding the existing rules raise into import / resource /
+  // public-surface unresolved observations. The format and
+  // fail-under are wired into the CLI; SARIF output is queued for
+  // 0.4.1.
+  const rootDir = parsed.rootDir;
+  const format: "json" | "human" = parsed.format === "human" ? "human" : "json";
+  const failUnder = readFailUnder(parsed);
+  const { report, exitCode } = runCoverageCommand({
+    rootDir,
+    format,
+    failUnder,
+    outputPath: parsed.coverageOutputPath,
+    check: {
+      manifestPath: parsed.manifestPath,
+      baselinePath: parsed.baselinePath,
+    },
+  });
+  if (format === "json") {
+    writeJson(report);
+  }
+  return exitCode;
+}
+
+function readFailUnder(parsed: ParsedArgs): number | undefined {
+  if (typeof parsed.failUnder === "number" && Number.isFinite(parsed.failUnder)) {
+    return parsed.failUnder;
+  }
+  const envValue = process.env.CELLFENCE_COVERAGE_FAIL_UNDER;
+  if (envValue && envValue.trim().length > 0) {
+    const parsedNumber = Number(envValue);
+    if (Number.isFinite(parsedNumber)) return parsedNumber;
+  }
+  return undefined;
+}
+
+// 0.4.0: re-export the baseline gate helpers for the
+// cellfence-baseline-gate GitHub Action.
+export { runBaselineGateFull };
+export type { BaselineGateResult };
+
 function dispatchParsedArgs(parsed: ParsedArgs): number {
   try {
     if (parsed.command.length === 0 || parsed.command.includes("--help") || parsed.command.includes("-h")) {
@@ -1807,6 +1933,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "manifest" && secondaryCommand === "verify") return commandManifestVerify(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
+  if (primaryCommand === "coverage") return commandCoverage(parsed);
     if (primaryCommand === "install") return commandInstall(parsed);
     if (primaryCommand === "serve") return commandServe(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
@@ -1822,6 +1949,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "sign") return commandBaselineSign(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "verify") return commandBaselineVerify(parsed);
+  if (primaryCommand === "baseline" && secondaryCommand === "gate") return commandBaselineGate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "audit") return commandBaselineAudit(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "commit") return commandEvidenceCommit(parsed);

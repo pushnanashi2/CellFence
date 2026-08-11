@@ -16,6 +16,13 @@ import {
 } from "./file-index.js";
 import { pathPatternsOverlap } from "./glob-overlap.js";
 import { readJsonFile } from "./json-file.js";
+import {
+  type ClaimStoreBackend,
+  type ClaimStoreState,
+  LocalFileClaimStore,
+  CellFenceClaimCasConflict,
+  emptyClaimStoreState,
+} from "./claims/index.js";
 import type {
   AnalysisContext,
   CellFenceClaim,
@@ -130,9 +137,20 @@ function validateClaimShape(claim: unknown, index: number, findings: Finding[], 
   return true;
 }
 
-function readClaimStore(rootDir: string, claimsPathOption: string | undefined, findings: Finding[]): { path: string; claims: CellFenceClaim[] } {
+function readClaimStore(
+  rootDir: string,
+  claimsPathOption: string | undefined,
+  findings: Finding[],
+  backend?: ClaimStoreBackend,
+): { path: string; claims: CellFenceClaim[] } {
   const resolvedPath = claimStorePath(rootDir, claimsPathOption);
   const relativePath = repoPath(rootDir, resolvedPath);
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below so
+  // existing callers that do not opt in keep working unchanged.
+  if (backend) {
+    return readClaimStoreFromBackend(backend, resolvedPath, relativePath, findings);
+  }
   if (!fs.existsSync(resolvedPath)) return { path: resolvedPath, claims: [] };
   let raw: unknown;
   try {
@@ -156,6 +174,42 @@ function readClaimStore(rootDir: string, claimsPathOption: string | undefined, f
     return { path: resolvedPath, claims: [] };
   }
   const claims = (raw as CellFenceClaimStore).claims.filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
+  return { path: resolvedPath, claims };
+}
+
+function isThenable(value: unknown): boolean {
+  return Boolean(value) && typeof value === "object" && typeof (value as { then?: unknown }).then === "function";
+}
+
+function readClaimStoreFromBackend(
+  backend: ClaimStoreBackend,
+  resolvedPath: string,
+  relativePath: string,
+  findings: Finding[],
+): { path: string; claims: CellFenceClaim[] } {
+  let state: ClaimStoreState;
+  try {
+    const result = backend.read();
+    if (isThenable(result)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: relativePath,
+        message: `claim backend ${backend.id} returned a Promise; use the async read path`,
+      });
+      return { path: resolvedPath, claims: [] };
+    }
+    state = result as unknown as ClaimStoreState;
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: relativePath,
+      message: `failed to read claim store via ${backend.id}: ${errorMessage(error)}`,
+    });
+    return { path: resolvedPath, claims: [] };
+  }
+  const claims = (state.claims as unknown as CellFenceClaim[]).filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
   return { path: resolvedPath, claims };
 }
 
@@ -283,7 +337,13 @@ function acquireClaimStoreLock(filePath: string): () => void {
   }
 }
 
-function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
+function writeClaimStore(filePath: string, claims: CellFenceClaim[], backend?: ClaimStoreBackend, previous?: CellFenceClaim[]): void {
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below.
+  if (backend) {
+    writeClaimStoreToBackend(backend, filePath, claims, previous ?? []);
+    return;
+  }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const store: CellFenceClaimStore = {
     schemaVersion: "cellfence.claims.v1",
@@ -294,12 +354,27 @@ function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
   fs.renameSync(temporaryPath, filePath);
 }
 
+function writeClaimStoreToBackend(backend: ClaimStoreBackend, filePath: string, claims: CellFenceClaim[], previous: CellFenceClaim[]): void {
+  const prevState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: previous as unknown as ClaimStoreState["claims"],
+  };
+  const nextState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: claims as unknown as ClaimStoreState["claims"],
+  };
+  const result = backend.write(nextState, prevState);
+  if (isThenable(result)) {
+    throw new CellFenceClaimCasConflict(`claim backend ${backend.id} returned a Promise; use the async write path`);
+  }
+}
+
 function intersectingValues(left: readonly string[], right: readonly string[]): string[] {
   const rightSet = new Set(right);
   return left.filter((value) => rightSet.has(value));
 }
 
-function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim): string[] {
+function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim, context: AnalysisContext): string[] {
   const surfaces: string[] = [];
   for (const cell of intersectingValues(left.cells, right.cells)) surfaces.push(`cell:${cell}`);
   for (const symbol of intersectingValues(left.symbols, right.symbols)) surfaces.push(`symbol:${symbol}`);
@@ -310,7 +385,44 @@ function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim): str
       if (pathPatternsOverlap(leftPath, rightPath)) surfaces.push(`path:${leftPath}<->${rightPath}`);
     }
   }
+  // H-1: a cells-scoped claim and a paths-scoped claim still conflict
+  // when the cells' owned paths overlap the other claim's paths. The
+  // previous implementation only compared same-shape surfaces (cells vs
+  // cells, paths vs paths), so two claims could each "own" the same
+  // file from different angles and never report a conflict. Cross-check
+  // the cells of each side against the paths of the other.
+  const leftOwnedPathPrefixes = ownedPathPrefixesFor(context, left.cells);
+  const rightOwnedPathPrefixes = ownedPathPrefixesFor(context, right.cells);
+  for (const leftPath of left.paths) {
+    for (const rightOwned of rightOwnedPathPrefixes) {
+      if (pathPatternsOverlap(leftPath, rightOwned.pattern)) {
+        surfaces.push(`path:${leftPath}<->cell:${rightOwned.cellId}`);
+      }
+    }
+  }
+  for (const rightPath of right.paths) {
+    for (const leftOwned of leftOwnedPathPrefixes) {
+      if (pathPatternsOverlap(rightPath, leftOwned.pattern)) {
+        surfaces.push(`path:${rightPath}<->cell:${leftOwned.cellId}`);
+      }
+    }
+  }
   return [...new Set(surfaces)].sort((first, second) => first.localeCompare(second));
+}
+
+function ownedPathPrefixesFor(
+  context: AnalysisContext,
+  cellIds: readonly string[],
+): { cellId: string; pattern: string }[] {
+  const result: { cellId: string; pattern: string }[] = [];
+  for (const cellId of cellIds) {
+    const cell = context.cellsById.get(cellId);
+    if (!cell) continue;
+    for (const pattern of cell.ownedPaths) {
+      result.push({ cellId, pattern });
+    }
+  }
+  return result;
 }
 
 function validateClaimCells(context: AnalysisContext, claim: CellFenceClaim, findings: Finding[], claimsPath: string): void {
@@ -337,6 +449,24 @@ function validateClaimCells(context: AnalysisContext, claim: CellFenceClaim, fin
         });
       }
     }
+  } else if (claim.paths.length > 0) {
+    // C-3: a cells-empty claim carries path ownership that the
+    // engine cannot attribute to any cell. Without a guard an agent
+    // can write a single claim with `paths: ["**"]` and effectively
+    // own the whole repository. Require the path patterns to fall
+    // inside the manifest's declared governance include set.
+    const includePatterns = context.manifest.governance?.include ?? [];
+    for (const claimedPath of claim.paths) {
+      if (!includePatterns.some((pattern) => patternCoveredByOwnedPaths(claimedPath, [pattern]))) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_CLAIM_INVALID",
+          severity: "error",
+          filePath: claimsPath,
+          message: `claim ${claim.id} path ${claimedPath} is not declared in the manifest governance include set (cells must be specified for paths outside governance.include)`,
+          details: { claimId: claim.id, path: claimedPath, include: includePatterns },
+        });
+      }
+    }
   }
 }
 
@@ -360,13 +490,13 @@ function addClaimConflictFinding(findings: Finding[], left: CellFenceClaim, righ
   });
 }
 
-function validateActiveClaimConflicts(activeClaims: CellFenceClaim[], findings: Finding[]): void {
+function validateActiveClaimConflicts(activeClaims: CellFenceClaim[], findings: Finding[], context: AnalysisContext): void {
   for (let leftIndex = 0; leftIndex < activeClaims.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < activeClaims.length; rightIndex += 1) {
       const left = activeClaims[leftIndex];
       const right = activeClaims[rightIndex];
       if (left.id === right.id) continue;
-      const surfaces = claimConflictSurfaces(left, right);
+      const surfaces = claimConflictSurfaces(left, right, context);
       if (surfaces.length > 0) addClaimConflictFinding(findings, left, right, surfaces);
     }
   }
@@ -677,7 +807,7 @@ export function checkClaims(options: ClaimCheckOptions = {}, dependencies: Claim
   const now = options.now || new Date();
   for (const claim of store.claims) validateClaimCells(context, claim, findings, claimsPath);
   const activeClaims = store.claims.filter((claim) => claimIsActive(claim, now));
-  validateActiveClaimConflicts(activeClaims, findings);
+  validateActiveClaimConflicts(activeClaims, findings, context);
 
   let changedFiles: string[] | undefined;
   if (options.agent) {
@@ -772,14 +902,54 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
         message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
       });
     }
+    const requestedId = options.claimId?.trim();
     const claim: CellFenceClaim = {
       ...draft,
-      id: options.claimId?.trim() || claimIdFor(draft),
+      id: requestedId || claimIdFor(draft),
     };
+    // C-2: a caller-specified claim id may only replace an existing
+    // claim owned by the same agent. A different agent reusing the
+    // id would silently steal (or be stolen from) without this check.
+    if (requestedId) {
+      const collision = store.claims.find((candidate) => candidate.id === requestedId);
+      if (collision && collision.agent !== agent) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_CLAIM_INVALID",
+          severity: "error",
+          filePath: claimsPath,
+          message: `claim id ${requestedId} is held by another agent (${collision.agent}) and cannot be replaced`,
+          details: { claimId: requestedId, holder: collision.agent, requester: agent },
+        });
+        return {
+          ...claimResult(findings, warnings, store.claims, store.claims.filter((candidate) => claimIsActive(candidate, now))),
+          claimsPath: store.path,
+        };
+      }
+    }
+    // H-2: claim ids must be unique across the store. The previous
+    // implementation's `if (left.id === right.id) continue;` skip in
+    // the conflict checker meant a duplicate id silently disabled the
+    // overlap check. Reject any new claim whose id is already present
+    // (different agent was already covered above; same-agent duplicates
+    // are an authoring mistake and should also be rejected).
+    const existingWithId = store.claims.find((candidate) => candidate.id === claim.id);
+    if (existingWithId && existingWithId.agent === agent) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: `claim id ${claim.id} already exists for agent ${agent}; re-create with a new id or release the existing one`,
+        details: { claimId: claim.id, agent },
+      });
+      return {
+        ...claimResult(findings, warnings, store.claims, store.claims.filter((candidate) => claimIsActive(candidate, now))),
+        claimsPath: store.path,
+      };
+    }
     validateClaimCells(context, claim, findings, claimsPath);
     const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
     for (const existingClaim of activeClaims) {
-      const surfaces = claimConflictSurfaces(existingClaim, claim);
+      const surfaces = claimConflictSurfaces(existingClaim, claim, context);
       if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
     }
     if (findings.some((finding) => finding.severity === "error")) {

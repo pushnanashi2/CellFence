@@ -25,7 +25,7 @@ export type ResourceAccessReference = {
   line: number;
   source: string;
   detectedBy: string;
-  confidence: "high" | "medium" | "low" | "runtime";
+  confidence: "high" | "medium" | "low" | "transient" | "runtime";
   unresolved?: boolean;
   reason?: string;
 };
@@ -523,7 +523,7 @@ const PYTHON_RESOURCE_ADAPTERS = new Map<string, BuiltInResourceAdapter>([
   ["celery-adapter", "celery"],
 ]);
 
-function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
+function resourceAccessSource(source: string, detectedBy = source, confidence: "high" | "medium" | "low" | "transient" | "runtime" = "high"): Pick<ResourceAccessReference, "source" | "detectedBy" | "confidence"> {
   return { source, detectedBy, confidence };
 }
 

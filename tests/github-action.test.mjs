@@ -41,14 +41,29 @@ test("GitHub Action wrapper does not assume CellFence source checkout in consume
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
   assert.match(actionYaml, /^\s{2}version:\r?\n/m);
-  assert.match(actionYaml, /^\s{4}default:\s*latest\s*$/m);
+  // H-7 (0.3.0): the action now defaults to a pinned release, not the
+  // moving "latest" tag, so a malicious or accidental publish cannot
+  // swap the binary under required checks. Operators can still pass an
+  // override through the `version` input.
+  assert.doesNotMatch(actionYaml, /^\s{4}default:\s*latest\s*$/m);
+  assert.match(actionYaml, /^\s{4}default:\s*0\.2\.1\s*$/m);
   assert.match(actionYaml, /cli_package="cellfence@\$\{cli_version\}"/);
+  assert.match(actionYaml, /cli_version="0\.2\.1"/);
   assert.doesNotMatch(actionYaml, new RegExp(`cellfence@${packageJson.version.replaceAll(".", "\\.")}`));
   assert.match(actionYaml, /CELLFENCE_ACTION_VERSION:\s*\$\{\{ inputs\.version \}\}/);
   assert.match(actionYaml, /CELLFENCE_ACTION_MANIFEST:\s*\$\{\{ inputs\.manifest \}\}/);
   assert.match(actionYaml, /npx --yes "\$\{cli_package\}" baseline check/);
   assert.match(actionYaml, /npx --yes "\$\{cli_package\}" check/);
-  assert.match(actionYaml, /check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}" "\$\{evidence_args\[@\]\}"/);
+  // H-7 (0.3.0): the bash script no longer builds an evidence_args
+  // array because bash 3.2 (macOS default) mishandles empty array
+  // expansion under `set -u`. The script branches on the boolean
+  // inputs instead. Ensure the old form is gone and the new one is
+  // present.
+  assert.doesNotMatch(actionYaml, /\$\{evidence_args\[@\]\}/);
+  assert.match(actionYaml, /baseline check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}" --baseline "\$\{CELLFENCE_ACTION_BASELINE\}" --evidence "\$\{CELLFENCE_ACTION_EVIDENCE\}"/);
+  assert.match(actionYaml, /baseline check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}" --baseline "\$\{CELLFENCE_ACTION_BASELINE\}"/);
+  assert.match(actionYaml, /check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}" --evidence "\$\{CELLFENCE_ACTION_EVIDENCE\}"/);
+  assert.match(actionYaml, /check --manifest "\$\{CELLFENCE_ACTION_MANIFEST\}"/);
   assert.doesNotMatch(actionYaml, /--manifest "\$\{\{ inputs\.manifest \}\}"/);
 });
 

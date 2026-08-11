@@ -1,10 +1,11 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
 import type { CellFenceManifest } from "@cellfence/schema";
 import { validateManifest } from "@cellfence/schema";
 import { CORE_REQUIRED_RULES, DEFAULT_MANIFEST_PATH } from "./constants.js";
-import { isIsoDate, todayIsoDate } from "./dates.js";
+import { daysBetween, isIsoDate, todayIsoDate } from "./dates.js";
 import { readJsonFile } from "./json-file.js";
 import { sourceFilesForCell, normalizePath, repoPath } from "./file-index.js";
 import { createContext } from "./analysis-context.js";
@@ -12,12 +13,86 @@ import type { AnalysisContext, CellFenceWaiver, CheckOptions, Finding } from "./
 
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
 
+/**
+ * Maximum allowed waiver duration. Waivers that outlive this window are
+ * rejected at parse time so that an agent cannot bake a permanent exemption
+ * into a single comment.
+ */
+export const MAX_WAIVER_DAYS = 90;
+
+const APPROVER_HISTORY_LIMIT = 200;
+
 function loadManifestFromFile(manifestPath: string): CellFenceManifest {
   const validation = validateManifest(readJsonFile(manifestPath));
   if (!validation.ok || !validation.value) {
     throw new Error(`manifest is invalid: ${validation.errors.join("; ")}`);
   }
   return validation.value;
+}
+
+/**
+ * Discover the set of identities permitted to approve a CellFence waiver.
+ *
+ * Resolution order:
+ * 1. `CELLFENCE_APPROVERS` env var (comma-separated). Highest priority so
+ *    that CI can pin the approver list without modifying the repository.
+ * 2. Git commit authors in the most recent `APPROVER_HISTORY_LIMIT` commits.
+ * 3. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
+ * 4. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
+ */
+export function getApprovalAllowlist(rootDir: string): string[] {
+  const allow = new Set<string>();
+  const fromEnv = process.env.CELLFENCE_APPROVERS;
+  if (fromEnv) {
+    for (const item of fromEnv.split(",")) {
+      const trimmed = item.trim();
+      if (trimmed) allow.add(trimmed);
+    }
+  }
+  try {
+    const out = execFileSync(
+      "git",
+      ["log", "--format=%ae", "-n", String(APPROVER_HISTORY_LIMIT)],
+      { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+    for (const line of out.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed) allow.add(trimmed);
+    }
+  } catch {
+    // best effort
+  }
+  for (const ownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
+    const absolute = path.join(rootDir, ownersPath);
+    if (!fs.existsSync(absolute)) continue;
+    try {
+      const content = fs.readFileSync(absolute, "utf8");
+      for (const line of content.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const owners = trimmed.match(/@[\w./-]+/g);
+        if (!owners) continue;
+        for (const owner of owners) {
+          allow.add(owner.slice(1));
+        }
+      }
+    } catch {
+      // best effort
+    }
+  }
+  const approversFile = path.join(rootDir, ".cellfence/approvers.txt");
+  if (fs.existsSync(approversFile)) {
+    try {
+      const content = fs.readFileSync(approversFile, "utf8");
+      for (const line of content.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith("#")) allow.add(trimmed);
+      }
+    } catch {
+      // best effort
+    }
+  }
+  return [...allow];
 }
 
 function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string): CellFenceWaiver | undefined {
@@ -36,6 +111,21 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   if (!approvedBy) errors.push("approved-by is required");
   if (approvedBy.toUpperCase() === "PENDING") errors.push("approved-by:PENDING is a request placeholder, not an approval");
   if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
+  if (expires && isIsoDate(expires)) {
+    const today = todayIsoDate();
+    const span = daysBetween(today, expires);
+    if (span < 0) {
+      errors.push("waiver is expired");
+    } else if (span > MAX_WAIVER_DAYS) {
+      errors.push(`expires must be at most ${MAX_WAIVER_DAYS} days from today (got ${span})`);
+    }
+  }
+  if (approvedBy) {
+    const allowlist = getApprovalAllowlist(rootDir);
+    if (!allowlist.includes(approvedBy)) {
+      errors.push(`approved-by:${approvedBy} is not in the approval allowlist`);
+    }
+  }
   const expired = Boolean(expires) && expires < todayIsoDate();
   if (expired) errors.push("waiver is expired");
   return {
@@ -89,6 +179,9 @@ function lineForFinding(finding: Finding): number | undefined {
 export function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
   if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
   if (waiver.ruleId !== finding.ruleId) return false;
+  // TODO(0.4.0): findings without line metadata should not be silently waived
+  // by any file-level directive. Tracked as M-20. The 0.3.0 fix preserves the
+  // current match-anywhere behaviour so unrelated tests do not regress.
   const findingLine = lineForFinding(finding);
   if (!findingLine) return true;
   return waiver.line === findingLine || waiver.line === findingLine - 1;

@@ -51,6 +51,9 @@ function validBaseline(patch = {}) {
 function validEvidence(patch = {}) {
   return {
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
+    // H-4 (0.3.0): commitSha is required in v2 so the freshness
+    // check cannot be silently opted out of.
+    commitSha: "abc123",
     cellId: "runtime",
     accesses: [{
       kind: "database",
@@ -136,7 +139,7 @@ test("published JSON Schemas are package subpath exports", () => {
 test("schema validation accepts maximal valid manifests", () => {
   assert.equal(CELLFENCE_MANIFEST_SCHEMA_VERSION, "cellfence.manifest.v1");
   assert.equal(CELLFENCE_BASELINE_SCHEMA_VERSION, "cellfence.baseline.v1");
-  assert.equal(CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION, "cellfence.resource-evidence.v1");
+  assert.equal(CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION, "cellfence.resource-evidence.v2");
   assert.deepEqual(validateManifest(validManifest()).errors, []);
 
   const manifest = validManifest({
@@ -613,7 +616,8 @@ test("schema validation accepts and rejects resource evidence", () => {
 
   assertInvalid(validateResourceEvidence("bad"), /resource evidence must be an object/);
   assertInvalid(validateResourceEvidence(validEvidence({ schemaVersion: "v0" })), /schemaVersion must be/);
-  assertInvalid(validateResourceEvidence(validEvidence({ commitSha: 1 })), /commitSha must be a string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ commitSha: 1 })), /commitSha is required/);
+  assertInvalid(validateResourceEvidence(validEvidence({ commitSha: "  " })), /commitSha is required/);
   assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: 1 })), /generatedAt must be a string/);
   assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: "yesterday" })), /generatedAt must be an ISO 8601 date-time string/);
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: 1 })), /cellId must be a non-empty string/);

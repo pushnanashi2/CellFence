@@ -28,6 +28,10 @@ import {
   sourceFilesUnderGovernance,
   sourceKindForPath,
 } from "./file-index.js";
+
+// C-5: re-export the glob matcher so plugins can share a single, linear-time
+// implementation instead of maintaining their own patternToRegExp copies.
+export { matchesPattern } from "./file-index.js";
 import {
   extractImports,
   extractPublicSymbols,
@@ -2001,3 +2005,64 @@ export function formatHumanResult(result: CheckResult): string {
 }
 
 export { findingFingerprint } from "./findings.js";
+
+// 0.4.0 (prototype): coverage collector used by the `cellfence coverage`
+// subcommand. See packages/engine/src/analysis/coverage-collector.ts for
+// the rationale. Re-exported here so the CLI can import it through
+// `@cellfence/engine` without reaching into the package internals.
+export {
+  buildCoverageReport,
+  recordUnresolved,
+  type CoverageInput,
+  type CoverageKind,
+  type CoverageReport,
+  type CoverageSummary,
+  type CoverageUnresolved,
+} from "./analysis/coverage-collector.js";
+
+// 0.4.0 (prototype): baseline change detector used by the
+// `cellfence baseline gate` subcommand and the cellfence-baseline-gate
+// GitHub Action. See packages/engine/src/baseline-change-detector.ts
+// for the rationale. Re-exported here so the CLI and the action can
+// import through `@cellfence/engine` without reaching into the
+// package internals.
+export {
+  detectBaselineChanges,
+  type BaselineDimension,
+  type BaselineDimensionDelta,
+  type GovernanceChangeReport,
+} from "./baseline-change-detector.js";
+
+export { readJsonFile } from "./json-file.js";
+
+// 0.4.0 (prototype): distributed claim backend interface and
+// reference implementations. The 0.4.0 refactor of
+// packages/engine/src/claims.ts will route all claim reads and
+// writes through these types. Re-exported here so downstream
+// packages (CLI, GitHub Action, MCP proxy) can build against the
+// same surface.
+export {
+  CellFenceClaimCasConflict,
+  emptyClaimStoreState,
+  type ClaimStoreBackend,
+  type ClaimStoreEntry,
+  type ClaimStoreState,
+} from "./claims/backend.js";
+export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
+export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
+export { RedisClaimStore, type RedisClaimStoreOptions } from "./claims/backends/redis.js";
+
+// 0.4.0: claim backend selector. The 0.3.0 prototype shipped the
+// `ClaimStoreBackend` interface and two reference implementations;
+// the 0.4.0 selector reads `governance.claimBackend` from the
+// manifest (or `CELLFENCE_CLAIM_BACKEND` from the environment) and
+// returns the matching backend. The full migration of
+// `packages/engine/src/claims.ts` to call through this interface
+// is queued for a follow-up commit; this lands just the selector
+// so a repository can configure a backend today.
+export {
+  resolveClaimBackend,
+  type ClaimBackendType,
+  type ResolvedClaimBackend,
+  type ResolveOptions,
+} from "./claims/selector.js";

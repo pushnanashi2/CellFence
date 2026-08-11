@@ -2,27 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { inferManifest } from "@cellfence/engine";
+import { CORE_REQUIRED_RULES } from "@cellfence/engine/constants.js";
 
 type InferredManifest = ReturnType<typeof inferManifest>;
 type InitPreset = "python-service" | "polyglot-monorepo";
 
 const MANIFEST_SCHEMA_VERSION: InferredManifest["schemaVersion"] = "cellfence.manifest.v1";
 const INIT_PRESETS = new Set<InitPreset>(["python-service", "polyglot-monorepo"]);
-const INIT_REQUIRED_RULES = [
-  "CELLFENCE_OWNERSHIP_OVERLAP",
-  "CELLFENCE_UNOWNED_SOURCE",
-  "CELLFENCE_UNOWNED_IMPORT_TARGET",
-  "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
-  "CELLFENCE_PRIVATE_IMPORT",
-  "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT",
-  "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
-  "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX",
-  "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX",
-  "CELLFENCE_REQUIRED_RULE_DISABLED",
-  "CELLFENCE_WAIVER_INVALID",
-];
+const INIT_REQUIRED_RULES = [...CORE_REQUIRED_RULES];
 
 function writeStarterFile(rootDir: string, relativePath: string, contents: string): void {
   const absolutePath = path.join(rootDir, relativePath);

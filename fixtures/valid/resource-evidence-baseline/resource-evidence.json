@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "cellfence.resource-evidence.v1",
-  "commitSha": "0000000000000000000000000000000000000000",
+  "schemaVersion": "cellfence.resource-evidence.v2",
+  "commitSha": "52087c50d9b382fa181f21d24bbbf4f8bb261fb6",
   "cellId": "runtime",
   "accesses": [
     {

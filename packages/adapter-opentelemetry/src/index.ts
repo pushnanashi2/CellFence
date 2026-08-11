@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+
 import {
   CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
   type CellFenceResourceEvidence,
@@ -106,6 +108,26 @@ function accessFromSpan(span: SpanLike, options: OpenTelemetryEvidenceOptions): 
   };
 }
 
+// H-4 (0.3.0): resource evidence must bind to the commit it was
+// captured against. Mirrors packages/trace/src/index.ts so the
+// OpenTelemetry adapter and the trace hook produce comparable
+// evidence files. CELLFENCE_OPENTELEMETRY_COMMIT_SHA / GITHUB_SHA
+// remain as fallbacks for shallow checkouts where `git rev-parse
+// HEAD` returns the merge ref rather than the actual commit.
+function readCommitSha(): string {
+  const envFallback = process.env.CELLFENCE_OPENTELEMETRY_COMMIT_SHA || process.env.GITHUB_SHA;
+  if (envFallback && envFallback.trim().length > 0) return envFallback.trim();
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
 export function openTelemetryToResourceEvidence(input: unknown, options: OpenTelemetryEvidenceOptions = {}): CellFenceResourceEvidence {
   const generatedAt = options.generatedAt || new Date().toISOString();
   const accesses = flattenSpans(input)
@@ -113,7 +135,7 @@ export function openTelemetryToResourceEvidence(input: unknown, options: OpenTel
     .filter((access): access is ResourceEvidenceAccess => Boolean(access));
   return {
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
-    commitSha: options.commitSha,
+    commitSha: options.commitSha ?? readCommitSha(),
     generatedAt,
     accesses,
   };

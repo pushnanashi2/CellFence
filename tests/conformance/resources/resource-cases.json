@@ -38,23 +38,54 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
           {
             "id": "runtime",
-            "ownedPaths": ["src/runtime/**"],
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
             "publicEntry": "src/runtime/public.ts",
-            "publicSymbols": ["runRuntime"],
+            "publicSymbols": [
+              "runRuntime"
+            ],
             "consumes": [],
             "producesArtifacts": [],
             "resourceContracts": [
-              { "id": "files", "kind": "file", "access": ["read"], "selectors": ["data/input.json"] },
-              { "id": "http", "kind": "http", "access": ["call"], "selectors": ["https://api.example.test/v1"] }
+              {
+                "id": "files",
+                "kind": "file",
+                "access": [
+                  "read"
+                ],
+                "selectors": [
+                  "data/input.json"
+                ]
+              },
+              {
+                "id": "http",
+                "kind": "http",
+                "access": [
+                  "call"
+                ],
+                "selectors": [
+                  "https://api.example.test/v1"
+                ]
+              }
             ]
           }
         ]
       },
-      "expected": { "findings": [], "warnings": [] }
+      "expected": {
+        "findings": [],
+        "warnings": []
+      }
     },
     {
       "id": "undeclared-file-read",
@@ -70,14 +101,40 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "runtime", "ownedPaths": ["src/runtime/**"], "publicEntry": "src/runtime/public.ts", "publicSymbols": ["runRuntime"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "runtime",
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
+            "publicEntry": "src/runtime/public.ts",
+            "publicSymbols": [
+              "runRuntime"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS", "severity": "error", "cellId": "runtime", "filePath": "src/runtime/public.ts", "kind": "file", "access": "read", "selector": "data/input.json", "detectedBy": "readFileSync" }
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+            "severity": "error",
+            "cellId": "runtime",
+            "filePath": "src/runtime/public.ts",
+            "kind": "file",
+            "access": "read",
+            "selector": "data/input.json",
+            "detectedBy": "readFileSync"
+          }
         ],
         "warnings": []
       }
@@ -96,15 +153,41 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "runtime", "ownedPaths": ["src/runtime/**"], "publicEntry": "src/runtime/public.ts", "publicSymbols": ["runRuntime"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "runtime",
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
+            "publicEntry": "src/runtime/public.ts",
+            "publicSymbols": [
+              "runRuntime"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "findings": [],
         "warnings": [
-          { "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS", "severity": "warning", "cellId": "runtime", "filePath": "src/runtime/public.ts", "kind": "file", "access": "read", "selector": "unresolved:dynamic-file-path", "detectedBy": "file-call" }
+          {
+            "ruleId": "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS",
+            "severity": "warning",
+            "cellId": "runtime",
+            "filePath": "src/runtime/public.ts",
+            "kind": "file",
+            "access": "read",
+            "selector": "unresolved:dynamic-file-path",
+            "detectedBy": "file-call"
+          }
         ]
       }
     },
@@ -122,14 +205,40 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "runtime", "ownedPaths": ["src/runtime/**"], "publicEntry": "src/runtime/public.ts", "publicSymbols": ["runRuntime"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "runtime",
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
+            "publicEntry": "src/runtime/public.ts",
+            "publicSymbols": [
+              "runRuntime"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS", "severity": "error", "cellId": "runtime", "filePath": "src/runtime/public.ts", "kind": "database", "access": "read", "selector": "app_users", "detectedBy": "prisma-adapter" }
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+            "severity": "error",
+            "cellId": "runtime",
+            "filePath": "src/runtime/public.ts",
+            "kind": "database",
+            "access": "read",
+            "selector": "app_users",
+            "detectedBy": "prisma-adapter"
+          }
         ],
         "warnings": []
       }
@@ -150,22 +259,44 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
           {
             "id": "runtime",
-            "ownedPaths": ["src/runtime/**"],
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
             "publicEntry": "src/runtime/public.py",
-            "publicSymbols": ["health"],
+            "publicSymbols": [
+              "health"
+            ],
             "consumes": [],
             "producesArtifacts": [],
             "resourceContracts": [
-              { "id": "http-routes", "kind": "http", "access": ["serve"], "selectors": ["GET /health"] }
+              {
+                "id": "http-routes",
+                "kind": "http",
+                "access": [
+                  "serve"
+                ],
+                "selectors": [
+                  "GET /health"
+                ]
+              }
             ]
           }
         ]
       },
-      "expected": { "findings": [], "warnings": [] }
+      "expected": {
+        "findings": [],
+        "warnings": []
+      }
     },
     {
       "id": "undeclared-fastapi-route",
@@ -183,14 +314,40 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "runtime", "ownedPaths": ["src/runtime/**"], "publicEntry": "src/runtime/public.py", "publicSymbols": ["health"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "runtime",
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
+            "publicEntry": "src/runtime/public.py",
+            "publicSymbols": [
+              "health"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS", "severity": "error", "cellId": "runtime", "filePath": "src/runtime/public.py", "kind": "http", "access": "serve", "selector": "GET /health", "detectedBy": "fastapi-adapter" }
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+            "severity": "error",
+            "cellId": "runtime",
+            "filePath": "src/runtime/public.py",
+            "kind": "http",
+            "access": "serve",
+            "selector": "GET /health",
+            "detectedBy": "fastapi-adapter"
+          }
         ],
         "warnings": []
       }
@@ -211,22 +368,45 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
           {
             "id": "runtime",
-            "ownedPaths": ["src/runtime/**"],
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
             "publicEntry": "src/runtime/public.py",
-            "publicSymbols": ["run"],
+            "publicSymbols": [
+              "run"
+            ],
             "consumes": [],
             "producesArtifacts": [],
             "resourceContracts": [
-              { "id": "tables", "kind": "database", "access": ["read", "write"], "selectors": ["app_users"] }
+              {
+                "id": "tables",
+                "kind": "database",
+                "access": [
+                  "read",
+                  "write"
+                ],
+                "selectors": [
+                  "app_users"
+                ]
+              }
             ]
           }
         ]
       },
-      "expected": { "findings": [], "warnings": [] }
+      "expected": {
+        "findings": [],
+        "warnings": []
+      }
     },
     {
       "id": "declared-celery-task-clean",
@@ -246,22 +426,45 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
           {
             "id": "runtime",
-            "ownedPaths": ["src/runtime/**"],
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
             "publicEntry": "src/runtime/public.py",
-            "publicSymbols": ["run"],
+            "publicSymbols": [
+              "run"
+            ],
             "consumes": [],
             "producesArtifacts": [],
             "resourceContracts": [
-              { "id": "tasks", "kind": "queue", "access": ["publish", "subscribe"], "selectors": ["celery:orders.rebuild"] }
+              {
+                "id": "tasks",
+                "kind": "queue",
+                "access": [
+                  "publish",
+                  "subscribe"
+                ],
+                "selectors": [
+                  "celery:orders.rebuild"
+                ]
+              }
             ]
           }
         ]
       },
-      "expected": { "findings": [], "warnings": [] }
+      "expected": {
+        "findings": [],
+        "warnings": []
+      }
     },
     {
       "id": "runtime-evidence-undeclared-file-write",
@@ -274,23 +477,57 @@
       },
       "evidence": {
         "cellfence.resource-evidence.json": {
-          "schemaVersion": "cellfence.resource-evidence.v1",
+          "schemaVersion": "cellfence.resource-evidence.v2",
+          "commitSha": "HEAD",
           "cellId": "runtime",
           "accesses": [
-            { "kind": "file", "access": "write", "selector": "data/output.json", "detectedBy": "trace-hook", "confidence": "runtime" }
-          ]
+            {
+              "kind": "file",
+              "access": "write",
+              "selector": "data/output.json",
+              "detectedBy": "trace-hook",
+              "confidence": "runtime"
+            }
+          ],
+          "transcriptStatus": "active"
         }
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "runtime", "ownedPaths": ["src/runtime/**"], "publicEntry": "src/runtime/public.ts", "publicSymbols": ["runRuntime"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "runtime",
+            "ownedPaths": [
+              "src/runtime/**"
+            ],
+            "publicEntry": "src/runtime/public.ts",
+            "publicSymbols": [
+              "runRuntime"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS", "severity": "error", "cellId": "runtime", "filePath": "cellfence.resource-evidence.json", "kind": "file", "access": "write", "selector": "data/output.json", "detectedBy": "trace-hook" }
+          {
+            "ruleId": "CELLFENCE_UNDECLARED_RESOURCE_ACCESS",
+            "severity": "error",
+            "cellId": "runtime",
+            "filePath": "cellfence.resource-evidence.json",
+            "kind": "file",
+            "access": "write",
+            "selector": "data/output.json",
+            "detectedBy": "trace-hook"
+          }
         ],
         "warnings": []
       }
