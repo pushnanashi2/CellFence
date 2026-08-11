@@ -14,7 +14,17 @@ export type ArtifactLaneManifest = {
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
 
 export type ResourceAccessMode = "read" | "write" | "publish" | "subscribe" | "call" | "serve";
-export type ResourceAccessConfidence = "high" | "medium" | "low" | "runtime";
+export type ResourceAccessConfidence = "high" | "medium" | "low" | "transient" | "runtime";
+// H-3 (0.3.0): "transient" replaces "runtime" as the default
+// label for evidence produced by the trace hook. "runtime" is
+// kept for backwards compatibility but new trace / OpenTelemetry
+// outputs prefer "transient" because the runtime hook only sees
+// what its monkey-patched wrappers can intercept; ESM named
+// imports of `node:fs` and friends bypass the patch entirely.
+// Consumers should treat "transient" as "best effort, possibly
+// incomplete" and check `transcriptStatus` before relying on an
+// empty `accesses` array as proof that no accesses happened.
+export type ResourceEvidenceTranscriptStatus = "active" | "inactive" | "incomplete";
 export type BuiltInResourceAdapter =
   | "file"
   | "http"
@@ -110,6 +120,15 @@ export type CellFenceResourceEvidence = {
   generatedAt?: string;
   cellId?: string;
   accesses: ResourceEvidenceAccess[];
+  // H-3 (0.3.0): distinguishes an evidence file that says "I
+  // observed nothing" (active, accesses is empty by design) from one
+  // that says "the hook did not run" (inactive, disable env var) or
+  // "the hook ran but the source code under test used ESM named
+  // imports that bypassed monkey-patching" (incomplete). Optional
+  // for backwards compatibility; the validator defaults missing
+  // values to "incomplete" so older evidence files do not silently
+  // pass as authoritative.
+  transcriptStatus?: ResourceEvidenceTranscriptStatus;
 };
 
 export type CellConsumerManifest = {
@@ -408,7 +427,7 @@ function validateResourceBaselineEntry(value: unknown, location: string, errors:
   if (!optionalString(value.detectedBy)) {
     errors.push(`${location}.detectedBy must be a string when present`);
   }
-  if (value.confidence !== undefined && !["high", "medium", "low", "runtime"].includes(String(value.confidence))) {
+  if (value.confidence !== undefined && !["high", "medium", "low", "transient", "runtime"].includes(String(value.confidence))) {
     errors.push(`${location}.confidence must be high|medium|low|runtime when present`);
   }
   return true;
@@ -845,7 +864,7 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   if (!isRecord(value)) {
     return { ok: false, errors: ["resource evidence must be an object"] };
   }
-  validateKnownKeys(value, "resource evidence", ["schemaVersion", "commitSha", "generatedAt", "cellId", "accesses"], errors);
+  validateKnownKeys(value, "resource evidence", ["schemaVersion", "commitSha", "generatedAt", "cellId", "accesses", "transcriptStatus"], errors);
   if (value.schemaVersion !== CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION}`);
   }
@@ -859,6 +878,9 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   }
   if (value.cellId !== undefined && (typeof value.cellId !== "string" || value.cellId.trim().length === 0)) {
     errors.push("cellId must be a non-empty string when present");
+  }
+  if (value.transcriptStatus !== undefined && !["active", "inactive", "incomplete"].includes(value.transcriptStatus as string)) {
+    errors.push("transcriptStatus must be one of active, inactive, incomplete when present");
   }
   if (!Array.isArray(value.accesses)) {
     errors.push("accesses must be an array");

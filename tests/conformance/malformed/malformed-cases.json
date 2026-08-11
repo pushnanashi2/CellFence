@@ -27,7 +27,10 @@
         "ok": false,
         "exitCode": 2,
         "findings": [
-          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+          {
+            "ruleId": "CELLFENCE_MANIFEST_INVALID",
+            "severity": "error"
+          }
         ],
         "warnings": []
       }
@@ -44,7 +47,10 @@
         "ok": false,
         "exitCode": 2,
         "findings": [
-          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+          {
+            "ruleId": "CELLFENCE_MANIFEST_INVALID",
+            "severity": "error"
+          }
         ],
         "warnings": []
       }
@@ -54,13 +60,32 @@
       "status": "supported-and-tested",
       "malformedFamily": "baseline-json",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baselineText": "{not-json",
@@ -68,7 +93,10 @@
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+          {
+            "ruleId": "CELLFENCE_MANIFEST_INVALID",
+            "severity": "error"
+          }
         ],
         "warnings": []
       }
@@ -78,13 +106,32 @@
       "status": "supported-and-tested",
       "malformedFamily": "baseline-schema",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -95,7 +142,10 @@
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_MANIFEST_INVALID", "severity": "error" }
+          {
+            "ruleId": "CELLFENCE_MANIFEST_INVALID",
+            "severity": "error"
+          }
         ],
         "warnings": []
       }
@@ -105,13 +155,32 @@
       "status": "supported-and-tested",
       "malformedFamily": "resource-evidence-json",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "evidenceText": {
@@ -121,7 +190,11 @@
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json" }
+          {
+            "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+            "severity": "error",
+            "filePath": "cellfence.resource-evidence.json"
+          }
         ],
         "warnings": []
       }
@@ -131,26 +204,50 @@
       "status": "supported-and-tested",
       "malformedFamily": "resource-evidence-schema",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "evidence": {
         "cellfence.resource-evidence.json": {
           "schemaVersion": "wrong",
-          "accesses": []
+          "accesses": [],
+          "transcriptStatus": "active"
         }
       },
       "expected": {
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json" }
+          {
+            "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+            "severity": "error",
+            "filePath": "cellfence.resource-evidence.json"
+          }
         ],
         "warnings": []
       }
@@ -160,13 +257,32 @@
       "status": "supported-and-tested",
       "malformedFamily": "resource-evidence-cell-reference",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "evidence": {
@@ -175,15 +291,25 @@
           "commitSha": "HEAD",
           "cellId": "missing",
           "accesses": [
-            { "kind": "file", "access": "read", "selector": "data/input.json" }
-          ]
+            {
+              "kind": "file",
+              "access": "read",
+              "selector": "data/input.json"
+            }
+          ],
+          "transcriptStatus": "active"
         }
       },
       "expected": {
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID", "severity": "error", "filePath": "cellfence.resource-evidence.json", "cellId": "missing" }
+          {
+            "ruleId": "CELLFENCE_RESOURCE_EVIDENCE_INVALID",
+            "severity": "error",
+            "filePath": "cellfence.resource-evidence.json",
+            "cellId": "missing"
+          }
         ],
         "warnings": []
       }
@@ -200,16 +326,37 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "expected": {
         "ok": false,
         "exitCode": 1,
         "findings": [
-          { "ruleId": "CELLFENCE_WAIVER_INVALID", "severity": "error", "filePath": "src/core/public.ts" }
+          {
+            "ruleId": "CELLFENCE_WAIVER_INVALID",
+            "severity": "error",
+            "filePath": "src/core/public.ts"
+          }
         ],
         "warnings": []
       }

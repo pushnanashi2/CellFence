@@ -2050,3 +2050,18 @@ export {
 } from "./claims/backend.js";
 export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
 export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
+
+// 0.4.0: claim backend selector. The 0.3.0 prototype shipped the
+// `ClaimStoreBackend` interface and two reference implementations;
+// the 0.4.0 selector reads `governance.claimBackend` from the
+// manifest (or `CELLFENCE_CLAIM_BACKEND` from the environment) and
+// returns the matching backend. The full migration of
+// `packages/engine/src/claims.ts` to call through this interface
+// is queued for a follow-up commit; this lands just the selector
+// so a repository can configure a backend today.
+export {
+  resolveClaimBackend,
+  type ClaimBackendType,
+  type ResolvedClaimBackend,
+  type ResolveOptions,
+} from "./claims/selector.js";

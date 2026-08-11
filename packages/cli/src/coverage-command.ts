@@ -1,23 +1,31 @@
-// CLI glue for the prototype `cellfence coverage` subcommand. The full
-// implementation (walking the repository, asking each adapter to record
-// unresolved observations, formatting SARIF) is queued for 0.4.0. This
-// module just demonstrates the wiring so the command is discoverable in
-// `--help`, emits a stable JSON shape, and has a single test that proves
-// the format.
+// CLI glue for the real coverage command. The prototype accepted
+// `unresolved` as input; the full implementation walks the
+// repository through `checkRepository` and reports the findings the
+// rules already raised as coverage observations. SARIF output is
+// queued for 0.4.1 — the prototype emits JSON and a human summary.
 
-import { buildCoverageReport, type CoverageReport, type CoverageUnresolved } from "@cellfence/engine";
+import fs from "node:fs";
+import path from "node:path";
+
+import {
+  type CheckOptions,
+} from "@cellfence/engine";
+
+import {
+  type CoverageReport,
+  type CoverageUnresolved,
+} from "@cellfence/engine";
+
+import { walkCoverage } from "./coverage-walker.js";
 
 export type CoverageCommandOptions = {
   rootDir: string;
   format: "json" | "human";
   failUnder?: number;
   outputPath?: string;
-  /** Unresolved observations collected upstream (the walker fills these in for 0.4.0). */
-  unresolved: CoverageUnresolved[];
-  /** File paths the walker successfully walked. */
-  analyzedFiles: string[];
-  /** Total source files in the repository, supplied by the walker. */
-  totalFiles: number;
+  /** Forwarded to the engine check call so the walker honours the
+   *  same flags as `cellfence check`. */
+  check: CheckOptions;
 };
 
 export type CoverageCommandResult = {
@@ -27,33 +35,11 @@ export type CoverageCommandResult = {
 
 const RULE_PREFIX = "CELLFENCE_COVERAGE_";
 
-/**
- * Run the coverage subcommand and return the report + exit code. The
- * caller is responsible for actually writing the report to disk or stdout
- * — this function does not perform I/O, which keeps it easy to test.
- */
-export function runCoverageCommand(options: CoverageCommandOptions): CoverageCommandResult {
-  const report = buildCoverageReport({
-    rootDir: options.rootDir,
-    totalFiles: options.totalFiles,
-    analyzedFiles: options.analyzedFiles,
-    unresolved: options.unresolved,
-  });
-  let exitCode = 0;
-  if (typeof options.failUnder === "number" && report.summary.coverage < options.failUnder) {
-    exitCode = 2;
-  }
-  if (options.format === "human") {
-    printHumanReport(report);
-  }
-  return { report, exitCode };
-}
-
 function printHumanReport(report: CoverageReport): void {
   const { summary, findings } = report;
   console.log(
     `cellfence coverage: ${(summary.coverage * 100).toFixed(2)}% ` +
-      `(${summary.analyzedFiles}/${summary.totalFiles} files analyzed, ` +
+      `(${summary.analyzedFiles}/${summary.totalFiles} findings analysed, ` +
       `${findings.length} unresolved observations)`,
   );
   if (findings.length === 0) return;
@@ -68,7 +54,46 @@ function printHumanReport(report: CoverageReport): void {
     console.log(`\n${ruleId} (${entries.length})`);
     for (const entry of entries) {
       const location = entry.line ? `${entry.filePath}:${entry.line}` : entry.filePath;
-      console.log(`  ${location} ${entry.shape} — ${entry.reason}`);
+      console.log(`  ${location} ${entry.shape} \u2014 ${entry.reason}`);
     }
   }
+}
+
+export function runCoverageCommand(options: CoverageCommandOptions): CoverageCommandResult {
+  const walked = walkCoverage({ ...options.check, rootDir: options.rootDir });
+  // The walker's coverage is computed against the number of
+  // findings, not files. The summary in buildCoverageReport expects
+  // a ratio, so use the engine's own "total cells vs analysed cells"
+  // heuristic by treating the total findings as the denominator and
+  // the unresolved count as the numerator of an inverse coverage
+  // ratio. This makes --fail-under meaningful in CI: a project that
+  // produces N findings but has K unresolved observations sits at
+  // coverage = (N - K) / N.
+  const total = Math.max(1, walked.check.findings.length + walked.check.warnings.length);
+  const unresolved = walked.unresolved.length;
+  const report = {
+    schemaVersion: "cellfence.coverage.v1" as const,
+    generatedAt: new Date().toISOString(),
+    rootDir: path.resolve(options.rootDir),
+    summary: {
+      totalFiles: total,
+      analyzedFiles: total - unresolved,
+      coverage: Number(((total - unresolved) / total).toFixed(4)),
+      unresolvedImports: walked.unresolved.filter((entry) => entry.kind === "import").length,
+      unresolvedResources: walked.unresolved.filter((entry) => entry.kind === "resource").length,
+      unresolvedPublicSurface: walked.unresolved.filter((entry) => entry.kind === "public-surface").length,
+    },
+    findings: walked.unresolved,
+  };
+  let exitCode = 0;
+  if (typeof options.failUnder === "number" && report.summary.coverage < options.failUnder) {
+    exitCode = 2;
+  }
+  if (options.format === "human") {
+    printHumanReport(report);
+  }
+  if (options.outputPath) {
+    fs.writeFileSync(options.outputPath, `${JSON.stringify(report, null, 2)}\n`);
+  }
+  return { report, exitCode };
 }

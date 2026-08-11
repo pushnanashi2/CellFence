@@ -46,6 +46,12 @@ export type ProxyOptions = {
   downstreamCommand: string;
   downstreamArgs: string[];
   downstreamCwd?: string;
+  // H-6 (0.3.0): opt-in escape hatch for the --downstream-cwd
+  // containment check. By default the cwd must sit inside rootDir;
+  // setting this to true lets advanced deployments point the
+  // downstream server at a sibling directory (e.g. a shared cache)
+  // without disabling the safety net for everyone else.
+  allowCwdMismatch?: boolean;
   writeTools: WriteToolConfig;
   readTools?: string[];
   unknownToolPolicy?: UnknownToolPolicy;
@@ -118,7 +124,9 @@ Options:
   --read-tool NAME              Allowlist a read-only tool. Repeatable.
   --downstream-command CMD      MCP server command to wrap.
   --downstream-arg ARG          Repeatable downstream argument.
-  --downstream-cwd DIR          Working directory for the downstream server.
+  --downstream-cwd DIR          Working directory for the downstream server. Must be inside --root unless --allow-cwd-mismatch is set.
+  --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch). Must be inside --root unless --allow-cwd-mismatch is set.
+  --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch).
   --help                        Show this help.
 
 Environment:
@@ -256,6 +264,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   let downstreamCommand = env.CELLFENCE_MCP_DOWNSTREAM_COMMAND || "";
   let downstreamArgs: string[] = [];
   let downstreamCwd: string | undefined;
+  let allowCwdMismatch = false;
   let writeTools = { ...DEFAULT_WRITE_TOOLS };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -343,6 +352,8 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
       index += 1;
     } else if (argument.startsWith("--downstream-cwd=")) {
       downstreamCwd = argument.slice("--downstream-cwd=".length);
+    } else if (argument === "--allow-cwd-mismatch") {
+      allowCwdMismatch = true;
     } else {
       throw new Error(`unknown argument ${argument}`);
     }
@@ -361,6 +372,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     downstreamCommand,
     downstreamArgs: downstreamArgs.filter((entry) => entry.length > 0),
     downstreamCwd,
+    allowCwdMismatch,
     writeTools,
     readTools,
     unknownToolPolicy,
@@ -528,7 +540,7 @@ function safeDownstreamEnvironment(env: NodeJS.ProcessEnv): Record<string, strin
   return result;
 }
 
-export const __testing = { safeDownstreamEnvironment };
+export const __testing = { safeDownstreamEnvironment, resolveAndValidateDownstreamCwd };
 
 function audit(options: ProxyOptions, toolName: string, decision: ToolDecision): void {
   appendAuditEvent(options, {
@@ -555,11 +567,38 @@ function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
   return readTools.some((tool) => tool.toLowerCase() === wanted);
 }
 
+// H-6 (0.3.0): --downstream-cwd is the working directory of the
+// spawned MCP server. Without this guard a confused-deputy attack
+// (or a plain misconfiguration) could redirect the server's
+// filesystem access to anywhere the cellfence-mcp-proxy process can
+// reach, so the cwd must sit inside --root unless the operator
+// explicitly opts in with allowCwdMismatch. The default cwd is
+// --root so the safe option is also the convenient one.
+export function resolveAndValidateDownstreamCwd(rootDir: string, downstreamCwd: string | undefined, allowCwdMismatch: boolean): string {
+  const absoluteRoot = path.resolve(rootDir);
+  if (!downstreamCwd) return absoluteRoot;
+  const absoluteCwd = path.resolve(downstreamCwd);
+  if (allowCwdMismatch) return absoluteCwd;
+  const relativeCwd = path.relative(absoluteRoot, absoluteCwd);
+  if (relativeCwd.startsWith("..") || path.isAbsolute(relativeCwd)) {
+    throw new Error(
+      `--downstream-cwd must be inside --root (${absoluteRoot}); got ${absoluteCwd}. ` +
+      `Pass --allow-cwd-mismatch to override.`,
+    );
+  }
+  return absoluteCwd;
+}
+
 export async function runProxy(options: ProxyOptions): Promise<void> {
+  const validatedCwd = resolveAndValidateDownstreamCwd(
+    options.rootDir,
+    options.downstreamCwd,
+    options.allowCwdMismatch === true,
+  );
   const downstreamTransport = new StdioClientTransport({
     command: options.downstreamCommand,
     args: options.downstreamArgs,
-    cwd: options.downstreamCwd,
+    cwd: validatedCwd,
     env: safeDownstreamEnvironment(process.env),
     stderr: "inherit",
   });

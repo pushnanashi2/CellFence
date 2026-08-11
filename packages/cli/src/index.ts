@@ -55,6 +55,7 @@ import {
 import { manifestFromPreset } from "./init-presets.js";
 import { runCoverageCommand } from "./coverage-command.js";
 import { runBaselineGateCommand } from "./baseline-gate-command.js";
+import { runBaselineGateFull } from "./baseline-gate-full.js";
 import { readJsonFile } from "@cellfence/engine";
 
 type ParsedArgs = {
@@ -105,6 +106,10 @@ type ParsedArgs = {
   uninstall: boolean;
   baselineGateBase?: string;
   baselineGateHead?: string;
+  baselineGateBaseRef?: string;
+  baselineGateHeadRef?: string;
+  failUnder?: number;
+  coverageOutputPath?: string;
   noScaffold: boolean;
   initProductionScope: boolean;
   initResearchAblatePackagePolicyHints: boolean;
@@ -366,6 +371,16 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.reportPath = argument.slice("--report=".length);
     } else if (argument === "--min-score") {
       parsed.minScore = Number(argv[index + 1]);
+    } else if (argument === "--fail-under") {
+      const value = Number(argv[index + 1]);
+      if (Number.isFinite(value)) parsed.failUnder = value;
+    } else if (argument.startsWith("--fail-under=")) {
+      const value = Number(argument.slice("--fail-under=".length));
+      if (Number.isFinite(value)) parsed.failUnder = value;
+    } else if (argument === "--coverage-output") {
+      parsed.coverageOutputPath = requireOptionValue(argv, index, "--coverage-output");
+    } else if (argument.startsWith("--coverage-output=")) {
+      parsed.coverageOutputPath = argument.slice("--coverage-output=".length);
       index += 1;
     } else if (argument.startsWith("--min-score=")) {
       parsed.minScore = Number(argument.slice("--min-score=".length));
@@ -1825,70 +1840,81 @@ function commandServe(parsed: ParsedArgs): number {
 }
 
 function commandBaselineGate(parsed: ParsedArgs): number {
-  // 0.4.0 (prototype): compare two baseline files and emit a
-  // governance change report. The full integration (git diff --base /
-  // --head, GitHub Action glue, CODEOWNER approval enforcement) is
-  // queued for 0.4.0. The prototype accepts two paths via
-  // --baseline-base / --baseline-head or the matching env vars so CI
-  // can wire it up today without parser surgery.
+  // 0.4.0: full baseline update gate. Accepts either two paths
+  // (--baseline-base / --baseline-head) or two git refs
+  // (--base-ref / --head-ref). The git-ref form is what the
+  // cellfence-baseline-gate action uses; the path form is what
+  // humans and one-off scripts use.
   const basePath = parsed.baselineGateBase || process.env.CELLFENCE_BASELINE_GATE_BASE;
   const headPath = parsed.baselineGateHead || process.env.CELLFENCE_BASELINE_GATE_HEAD;
-  if (!basePath || !headPath) {
-    console.error("cellfence baseline gate requires --baseline-base and --baseline-head (or CELLFENCE_BASELINE_GATE_{BASE,HEAD})");
+  const baseRef = parsed.baselineGateBaseRef || process.env.CELLFENCE_BASELINE_GATE_BASE_REF;
+  const headRef = parsed.baselineGateHeadRef || process.env.CELLFENCE_BASELINE_GATE_HEAD_REF;
+  if (!basePath && !baseRef) {
+    console.error("cellfence baseline gate requires --baseline-base or --base-ref");
     return 2;
   }
-  let baseBaseline: unknown;
-  let headBaseline: unknown;
-  try {
-    baseBaseline = readJsonFile(basePath);
-  } catch (error) {
-    console.error(`failed to read base baseline ${basePath}: ${errorMessage(error)}`);
-    return 3;
+  if (!headPath && !headRef) {
+    console.error("cellfence baseline gate requires --baseline-head or --head-ref");
+    return 2;
   }
   try {
-    headBaseline = readJsonFile(headPath);
+    const { report, exitCode, warnings } = runBaselineGateFull({
+      rootDir: parsed.rootDir,
+      baselineFile: parsed.baselinePath || ".cellfence/baselines/cellfence.baseline.json",
+      basePath,
+      headPath,
+      baseRef,
+      headRef,
+      format: parsed.format === "human" ? "human" : "json",
+      hasImplementationChanges: false,
+    });
+    for (const warning of warnings) console.warn(`warning: ${warning}`);
+    if (parsed.format !== "human") {
+      writeJson(report);
+    }
+    return exitCode;
   } catch (error) {
-    console.error(`failed to read head baseline ${headPath}: ${errorMessage(error)}`);
+    console.error(`cellfence baseline gate: ${errorMessage(error)}`);
     return 3;
   }
-  const { report, exitCode, warnings } = runBaselineGateCommand({
-    baseBaseline: baseBaseline as never,
-    headBaseline: headBaseline as never,
-    baseBaselinePath: basePath,
-    headBaselinePath: headPath,
-    format: parsed.format === "human" ? "human" : "json",
-    hasImplementationChanges: false,
-  });
-  for (const warning of warnings) console.warn(`warning: ${warning}`);
-  if (parsed.format !== "human") {
-    writeJson(report);
-  }
-  return exitCode;
 }
 
 function commandCoverage(parsed: ParsedArgs): number {
-  // 0.4.0 (prototype): the real walker that asks each analyzer to
-  // record unresolved observations is queued for 0.4.0. For the
-  // prototype the command emits an empty coverage report so the
-  // subcommand is discoverable in --help and the JSON shape is
-  // pinned down. CELLFENCE_COVERAGE_FAIL_UNDER lets CI gate on
-  // coverage without adding a new CLI flag in the prototype.
+  // 0.4.0: the coverage command walks the repository through the
+  // same engine pipeline as `cellfence check` and buckets every
+  // finding the existing rules raise into import / resource /
+  // public-surface unresolved observations. The format and
+  // fail-under are wired into the CLI; SARIF output is queued for
+  // 0.4.1.
   const rootDir = parsed.rootDir;
   const format: "json" | "human" = parsed.format === "human" ? "human" : "json";
-  const envFailUnder = process.env.CELLFENCE_COVERAGE_FAIL_UNDER;
-  const failUnder = envFailUnder && envFailUnder.trim().length > 0 ? Number(envFailUnder) : undefined;
+  const failUnder = readFailUnder(parsed);
   const { report, exitCode } = runCoverageCommand({
     rootDir,
     format,
-    failUnder: Number.isFinite(failUnder) ? failUnder : undefined,
-    unresolved: [],
-    analyzedFiles: [],
-    totalFiles: 0,
+    failUnder,
+    outputPath: parsed.coverageOutputPath,
+    check: {
+      manifestPath: parsed.manifestPath,
+      baselinePath: parsed.baselinePath,
+    },
   });
   if (format === "json") {
     writeJson(report);
   }
   return exitCode;
+}
+
+function readFailUnder(parsed: ParsedArgs): number | undefined {
+  if (typeof parsed.failUnder === "number" && Number.isFinite(parsed.failUnder)) {
+    return parsed.failUnder;
+  }
+  const envValue = process.env.CELLFENCE_COVERAGE_FAIL_UNDER;
+  if (envValue && envValue.trim().length > 0) {
+    const parsedNumber = Number(envValue);
+    if (Number.isFinite(parsedNumber)) return parsedNumber;
+  }
+  return undefined;
 }
 
 function dispatchParsedArgs(parsed: ParsedArgs): number {

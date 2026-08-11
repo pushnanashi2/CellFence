@@ -4,46 +4,139 @@
   "title": "CellFence Resource Evidence v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "commitSha", "accesses"],
+  "required": [
+    "schemaVersion",
+    "commitSha",
+    "accesses"
+  ],
   "properties": {
-    "schemaVersion": { "const": "cellfence.resource-evidence.v2" },
-    "commitSha": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "schemaVersion": {
+      "const": "cellfence.resource-evidence.v2"
+    },
+    "commitSha": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
     "generatedAt": {
       "anyOf": [
-        { "const": "" },
-        { "type": "string", "format": "date-time" }
+        {
+          "const": ""
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        }
       ]
     },
-    "cellId": { "type": "string", "minLength": 1, "pattern": "\\S" },
-    "accesses": { "type": "array", "items": { "$ref": "#/$defs/access" } }
+    "cellId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "accesses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/access"
+      }
+    },
+    "transcriptStatus": {
+      "enum": [
+        "active",
+        "inactive",
+        "incomplete"
+      ]
+    }
   },
-  "allOf": [{
-    "if": { "not": { "properties": { "cellId": {} }, "required": ["cellId"] } },
-    "then": {
-      "properties": {
-        "accesses": {
-          "type": "array",
-          "items": { "type": "object", "properties": { "cellId": {} }, "required": ["cellId"] }
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "cellId": {}
+          },
+          "required": [
+            "cellId"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "accesses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cellId": {}
+              },
+              "required": [
+                "cellId"
+              ]
+            }
+          }
         }
       }
     }
-  }],
+  ],
   "$defs": {
     "access": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "access", "selector"],
+      "required": [
+        "kind",
+        "access",
+        "selector"
+      ],
       "properties": {
-        "kind": { "enum": ["file", "database", "queue", "http"] },
-        "access": { "enum": ["read", "write", "publish", "subscribe", "call", "serve"] },
-        "selector": { "type": "string", "minLength": 1, "pattern": "\\S" },
-        "detectedBy": { "type": "string" },
-        "confidence": { "enum": ["high", "medium", "low", "runtime"] },
-        "cellId": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "kind": {
+          "enum": [
+            "file",
+            "database",
+            "queue",
+            "http"
+          ]
+        },
+        "access": {
+          "enum": [
+            "read",
+            "write",
+            "publish",
+            "subscribe",
+            "call",
+            "serve"
+          ]
+        },
+        "selector": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "detectedBy": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "transient",
+            "runtime"
+          ]
+        },
+        "cellId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
         "observedAt": {
           "anyOf": [
-            { "const": "" },
-            { "type": "string", "format": "date-time" }
+            {
+              "const": ""
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
           ]
         }
       }

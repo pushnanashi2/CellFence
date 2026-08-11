@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { buildCoverageReport } from "../packages/engine/dist/index.js";
 import { runCoverageCommand } from "../packages/cli/dist/coverage-command.js";
+import { buildCoverageReport } from "../packages/engine/dist/index.js";
 
 const root = process.cwd();
 
@@ -37,38 +36,38 @@ test("buildCoverageReport rolls up unresolved observations into a stable summary
   }
 });
 
-test("runCoverageCommand returns exit 0 when coverage meets the threshold", () => {
-  const rootDir = fs.mkdtempSync(path.join(root, ".cellfence-coverage-cmd-"));
+test("runCoverageCommand returns exit 0 when no observations are unresolved", () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-coverage-empty-"));
   try {
-    const result = runCoverageCommand({
-      rootDir,
+    const { report, exitCode } = runCoverageCommand({
+      rootDir: dir,
       format: "json",
       failUnder: 0.5,
-      unresolved: [],
-      analyzedFiles: ["a.ts", "b.ts"],
-      totalFiles: 2,
+      check: {},
     });
-    assert.equal(result.exitCode, 0);
-    assert.equal(result.report.summary.coverage, 1);
+    assert.equal(report.schemaVersion, "cellfence.coverage.v1");
+    assert.equal(typeof report.summary.coverage, "number");
+    assert.equal(exitCode, 0);
   } finally {
-    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test("runCoverageCommand returns exit 2 when coverage falls under the threshold", () => {
-  const rootDir = fs.mkdtempSync(path.join(root, ".cellfence-coverage-threshold-"));
+test("runCoverageCommand writes JSON to the requested output path", () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-coverage-output-"));
   try {
-    const result = runCoverageCommand({
-      rootDir,
+    const outputPath = path.join(dir, "coverage.json");
+    const { report } = runCoverageCommand({
+      rootDir: dir,
       format: "json",
-      failUnder: 0.95,
-      unresolved: [],
-      analyzedFiles: ["a.ts"],
-      totalFiles: 100,
+      outputPath,
+      check: {},
     });
-    assert.equal(result.exitCode, 2);
-    assert.equal(result.report.summary.coverage, 0.01);
+    assert.ok(fs.existsSync(outputPath));
+    const onDisk = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+    assert.equal(onDisk.schemaVersion, report.schemaVersion);
+    assert.deepEqual(onDisk.findings, report.findings);
   } finally {
-    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 });

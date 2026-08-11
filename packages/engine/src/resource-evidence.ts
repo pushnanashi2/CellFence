@@ -152,6 +152,32 @@ export function resourceEvidenceAccesses(
       continue;
     }
 
+    // H-3 (0.3.0): the previous evidence shape had no way to
+    // distinguish "the trace hook ran and saw nothing" from "the
+    // trace hook never installed because the disable env var was
+    // set" from "the trace hook ran but ESM named imports of
+    // `node:fs` and `globalThis.fetch` bypassed the monkey-patch".
+    // Surface the three cases as warnings so an empty `accesses`
+    // array cannot be mistaken for proof that no accesses happened.
+    const transcriptStatus = evidence.transcriptStatus ?? "incomplete";
+    if (transcriptStatus === "inactive") {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INACTIVE",
+        severity: "warning",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: "resource evidence was captured with the trace hook disabled (CELLFENCE_TRACE_DISABLE=1); an empty `accesses` array here does not prove the cell made no resource accesses",
+        details: { transcriptStatus, accessesObserved: evidence.accesses.length },
+      });
+    } else if (transcriptStatus === "incomplete") {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INCOMPLETE",
+        severity: "warning",
+        filePath: repoPath(context.rootDir, evidencePath),
+        message: "resource evidence is missing `transcriptStatus` or the trace hook may have missed accesses (ESM named imports of `node:fs` and `globalThis.fetch` bypass the monkey-patch); the 0.4.0 rewrite will replace the patch with `node --import` + diagnostics_channel",
+        details: { transcriptStatus, accessesObserved: evidence.accesses.length },
+      });
+    }
+
     for (const [entryIndex, entry] of evidence.accesses.entries()) {
       const cellId = entry.cellId || evidence.cellId;
       if (!cellId || !context.cellsById.has(cellId)) {

@@ -1,3 +1,22 @@
+// H-3 (0.3.0): the trace hook monkey-patches `node:fs` and
+// `globalThis.fetch` after import. ESM named imports of the same
+// modules (e.g. `import { readFileSync } from "node:fs"`) are bound
+// at module-load time and bypass the patch entirely, so the trace
+// can miss real accesses. The previous implementation labelled
+// everything it caught as `confidence: "runtime"`, which falsely
+// implied the evidence was authoritative. The hook now labels its
+// outputs as `confidence: "transient"` and writes a
+// `transcriptStatus` field that distinguishes:
+//
+//   * `active`     — the patch installed and the process ran long
+//                    enough for any intercepted calls to land
+//   * `inactive`   — `CELLFENCE_TRACE_DISABLE=1` was set, the
+//                    install was skipped
+//
+// The engine surfaces both as findings so a PR cannot accidentally
+// pass with an empty `accesses` array that was really "the hook
+// did not run".
+
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import type { FileHandle } from "node:fs/promises";
@@ -6,11 +25,12 @@ import path from "node:path";
 import {
   CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
   type ResourceEvidenceAccess,
+  type ResourceEvidenceTranscriptStatus,
 } from "@cellfence/schema";
 
 type TraceAccessInput = Omit<ResourceEvidenceAccess, "detectedBy" | "confidence"> & {
   detectedBy?: string;
-  confidence?: "runtime";
+  confidence?: "transient" | "runtime";
 };
 
 const originalReadFileSync = fs.readFileSync.bind(fs);
@@ -74,7 +94,7 @@ export function recordResourceAccess(access: TraceAccessInput): void {
     ...access,
     cellId: access.cellId || defaultCellId(),
     detectedBy: access.detectedBy || "cellfence-trace",
-    confidence: access.confidence || "runtime",
+    confidence: access.confidence || "transient",
   };
   accesses.set(accessKey(resolvedAccess), resolvedAccess);
 }
@@ -125,7 +145,23 @@ function fetchSelector(input: Parameters<typeof fetch>[0]): string | undefined {
   return undefined;
 }
 
+export function transcriptStatus(): ResourceEvidenceTranscriptStatus {
+  // H-3 (0.3.0): a fresh process that has the disable env var set
+  // never installs the patch, so its evidence is structurally
+  // "inactive" rather than "active with no accesses".
+  if (process.env.CELLFENCE_TRACE_DISABLE === "1") return "inactive";
+  return installed ? "active" : "inactive";
+}
+
 export function flushEvidence(): void {
+  // H-3 (0.3.0): the previous implementation bailed when
+  // `accesses.size === 0`, which silently merged three different
+  // states ("disabled", "active but observed nothing", "active and
+  // observed things"). Keep the early-return so an unused hook
+  // does not write an empty file, but make sure the
+  // `transcriptStatus` field is written alongside any evidence we
+  // do emit, so consumers can still distinguish the cases where a
+  // file is present.
   if (flushed || accesses.size === 0) return;
   flushed = true;
   const outputPath = evidencePath();
@@ -135,6 +171,7 @@ export function flushEvidence(): void {
     generatedAt: new Date().toISOString(),
     commitSha: readCommitSha(),
     cellId: defaultCellId(),
+    transcriptStatus: transcriptStatus(),
     accesses: [...accesses.values()].sort((left, right) => accessKey(left).localeCompare(accessKey(right))),
   };
   originalWriteFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);
