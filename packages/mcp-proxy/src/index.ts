@@ -470,6 +470,66 @@ function inheritedEnvironment(): Record<string, string> {
   return Object.fromEntries(Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
 }
 
+// H-3 (0.3.0): the previous inheritedEnvironment() forwarded every
+// process.env entry to the downstream MCP server. That leaked operator
+// secrets (CELLFENCE_BASELINE_HMAC_KEY, CELLFENCE_BASELINE_ED25519_*
+// private keys, NPM_TOKEN, GITHUB_TOKEN, AWS_*, ...) into an
+// attacker-controlled process: any tool call the downstream advertises
+// can read the proxy's own environment. Build the downstream env
+// from an explicit allowlist instead. The downstream keeps what it
+// actually needs to start (PATH, HOME, USER, locale, TMPDIR, TZ) and
+// the proxy's own CELLFENCE_MCP_* configuration knobs. Every other
+// variable is dropped, including the baseline signing material that
+// should never leave the verifier.
+const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
+  "PATH",
+  "Path",
+  "HOME",
+  "USER",
+  "USERNAME",
+  "USERPROFILE",
+  "HOMEDRIVE",
+  "HOMEPATH",
+  "TMPDIR",
+  "TMP",
+  "TEMP",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "LC_MESSAGES",
+  "LC_COLLATE",
+  "LC_NUMERIC",
+  "LC_TIME",
+  "TZ",
+  "SHELL",
+  "LANGUAGE",
+  "TERM",
+  "PWD",
+  "MOCK_MCP_LOG",
+]);
+
+const SAFE_DOWNSTREAM_ENV_PREFIXES = [
+  "CELLFENCE_MCP_",
+  "LC_",
+];
+
+function safeDownstreamEnvironment(env: NodeJS.ProcessEnv): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [name, value] of Object.entries(env)) {
+    if (typeof value !== "string") continue;
+    if (SAFE_DOWNSTREAM_ENV_NAMES.has(name)) {
+      result[name] = value;
+      continue;
+    }
+    if (SAFE_DOWNSTREAM_ENV_PREFIXES.some((prefix) => name.startsWith(prefix))) {
+      result[name] = value;
+    }
+  }
+  return result;
+}
+
+export const __testing = { safeDownstreamEnvironment };
+
 function audit(options: ProxyOptions, toolName: string, decision: ToolDecision): void {
   appendAuditEvent(options, {
     timestamp: new Date().toISOString(),
@@ -500,7 +560,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     command: options.downstreamCommand,
     args: options.downstreamArgs,
     cwd: options.downstreamCwd,
-    env: inheritedEnvironment(),
+    env: safeDownstreamEnvironment(process.env),
     stderr: "inherit",
   });
   const downstream = new Client({
