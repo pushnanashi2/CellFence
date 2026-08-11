@@ -1,7 +1,7 @@
 # CellFence 0.2.1 → 0.3.0 Security Hardening — Progress
 
 **Branch:** `fix/mavis` in `~/agents/mavis/work`
-**Test result:** 947/947 passing (zero failures)
+**Test result:** 956/956 passing (zero failures)
 
 ## Commits on `fix/mavis`
 
@@ -20,6 +20,7 @@
 | `d5a6503` | add coverage command prototype | 0.4.0 (prototype) |
 | `f32c975` | add baseline update gate prototype | 0.4.0 (prototype) |
 | `95eea9b` | add distributed claim backend prototype | 0.4.0 (prototype) |
+| `47c7855` | land H-3 and H-6 plus 0.4.0 feature full implementations | H-3, H-6, 0.4.0 (full) |
 
 ## Issue coverage
 
@@ -30,7 +31,7 @@
 - **C-4** — `16b3524`: `mcpToolCall` confines `rootDir`, `manifestPath`, `claimsPath`, `baselinePath` to the server's working directory. Absolute escape attempts and `..` traversal return a hard error before the engine is invoked.
 - **C-5** — `1b6bfcf` + `52087c5`: ReDoS-vulnerable `(?:[^/]+/)*` replaced with a linear-time DP-based glob matcher in `packages/engine/src/glob.ts` (and duplicated into the two plugin packages that can't import cross-package source under project references). Worst case 0 ms (was 6+ s). The followup in `52087c5` aligns the `**` semantics with the previous regex form so `**/src` matches `src` and `src/**` does not match `src`; the matcher also normalises backslash paths. Conformance tests against the minimatch oracle now pass.
 
-### High — 6 of 7 done
+### High — all 7 done
 - **H-1** — `9239a19`: `claimConflictSurfaces` now cross-checks cell ownership against path ownership with the full context, so two claims whose `cells` arrays don't overlap can still conflict when their paths do.
 - **H-2** — `9239a19`: `validateClaimCells` enforces unique claim ids per agent — no more silent dedup of two different agents racing to the same id.
 - **H-4** — d2f1db3: Resource evidence is now bound to the commit it was captured against. The previous `evidence.commitSha && ...` opt-in made missing bindings silently accepted; the schema is bumped to v2 with `commitSha` required, the engine hard-errors on missing / mismatched / no-HEAD evidence, and the trace + OpenTelemetry adapters now read the live `git rev-parse HEAD` (with `GITHUB_SHA` / `CELLFENCE_TRACE_COMMIT_SHA` / `CELLFENCE_OPENTELEMETRY_COMMIT_SHA` retained as fallbacks for shallow checkouts). `gitHeadForExactRoot` accepts subdirs of the toplevel so fixture tests run from subdirectories still bind.
@@ -41,8 +42,8 @@
 - **M-15** — `0348d9e`: `safeDownstreamEnvironment` replaces `inheritedEnvironment()` so the proxy no longer hands `CELLFENCE_BASELINE_HMAC_KEY`, `CELLFENCE_BASELINE_ED25519_PRIVATE_KEY`, `NPM_TOKEN`, `GITHUB_TOKEN`, `AWS_*`, `DATABASE_URL`, etc. to the downstream MCP server. The allowlist is unit-tested via the `__testing` export. (Earlier session mislabelled this as H-3; the real H-3 — incomplete trace patching — is a different issue, see below.)
 
 ### Pending / deferred
-- **H-3** (trace evidence structurally incomplete) — the `cellfence-trace` hook uses runtime monkey-patching that misses ESM named imports of `node:fs` / `node:http`; an evidence file that says "no accesses" is not equivalent to "the hook observed no accesses". Options under discussion: (a) downgrade the `confidence: "runtime"` label to `confidence: "transient"`, (b) replace monkey-patching with `node --import` + `diagnostics_channel`, (c) split the two cases in the report. Deferred to a follow-up session per scope.
-- **H-6** (downstream-cwd validation) — `--downstream-cwd` is passed straight to the spawned MCP server without verifying it sits inside `rootDir`, so a confused-deputy symlink or a parent-directory escape could redirect the server's filesystem. Deferred; needs design discussion on whether the default should be `rootDir` (hard) or `--allow-cwd-mismatch` (explicit opt-in).
+- **H-3** — `47c7855`: Trace evidence now distinguishes an active hook from an inactive one. The schema accepts a new `transcriptStatus` field (`active` / `inactive` / `incomplete`) and the new `confidence: "transient"` value alongside the existing `runtime` label. The trace hook flips its default to `transient` and writes `transcriptStatus: active` when it ran and `inactive` when `CELLFENCE_TRACE_DISABLE=1` was set. The engine surfaces missing or `incomplete` evidence as `CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INACTIVE` / `_INCOMPLETE` warnings so an empty `accesses` array cannot be mistaken for proof that no accesses happened. The full monkey-patching rewrite (`node --import` + `diagnostics_channel`) is still queued for 0.4.1.
+- **H-6** — `47c7855`: `--downstream-cwd` is now validated to sit inside `--root` by default. The cellfence-mcp-proxy resolves the spawned MCP server's working directory and rejects any cwd that escapes `--root` with a hard error. A new `--allow-cwd-mismatch` opt-in escape hatch lets advanced deployments point the downstream at a sibling directory without disabling the safety net for everyone else. Five unit tests cover the default, in-tree, parent-escape, outside-tree, and `allowCwdMismatch=true` cases.
 
 ## Test environment
 
@@ -90,3 +91,33 @@ Action enforcement, distributed backends) are still pending.
   full wiring queued for 0.4.0). The 0.4.0 refactor of
   `packages/engine/src/claims.ts` will route all claim reads and
   writes through the same interface.
+
+## 0.4.0 full implementations
+
+The prototype commits (`d5a6503`, `f32c975`, `95eea9b`) shipped the
+shape, the tests, and the docs. `47c7855` ships the wiring so the
+prototype stops being a stub:
+
+- **Coverage walker** — `47c7855`. `runCoverageCommand` now runs
+  `checkRepository` under the hood and buckets every finding the
+  existing rules raise into import / resource / public-surface
+  unresolved observations. CLI accepts `--fail-under` and
+  `--coverage-output` directly; the `CELLFENCE_COVERAGE_FAIL_UNDER`
+  env var still works for backward compatibility. SARIF output is
+  queued for 0.4.1.
+- **Baseline update gate (git-ref form)** — `47c7855`. The CLI
+  accepts two git refs (`--base-ref` / `--head-ref`) in addition
+  to the prototype's path-based form, reading the baseline from
+  each ref via `git show <ref>:<path>`. Used by the
+  `cellfence-baseline-gate` action in CI. The companion
+  `@cellfence/github-action-baseline-gate` package is still a
+  skeleton; the 0.4.1 commit will wire octokit, the CODEOWNER
+  lookup, the label upsert, and the sticky comment.
+- **Distributed claim backend selector** — `47c7855`. The new
+  `resolveClaimBackend` helper reads `governance.claimBackend` from
+  the manifest (or `CELLFENCE_CLAIM_BACKEND` from the environment)
+  and returns the matching `ClaimStoreBackend`. The default stays
+  `local-file`; the existing JSON-file code path in
+  `packages/engine/src/claims.ts` is preserved unchanged until the
+  follow-up migration lands. Four unit tests cover the default,
+  manifest, env override, and unknown-type fallback.
