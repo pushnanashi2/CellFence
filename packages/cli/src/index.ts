@@ -53,6 +53,9 @@ import {
   type CheckRunMetadata,
 } from "./check-output.js";
 import { manifestFromPreset } from "./init-presets.js";
+import { runCoverageCommand } from "./coverage-command.js";
+import { runBaselineGateCommand } from "./baseline-gate-command.js";
+import { readJsonFile } from "@cellfence/engine";
 
 type ParsedArgs = {
   command: string[];
@@ -100,6 +103,8 @@ type ParsedArgs = {
   approvedBy?: string;
   checkInstall: boolean;
   uninstall: boolean;
+  baselineGateBase?: string;
+  baselineGateHead?: string;
   noScaffold: boolean;
   initProductionScope: boolean;
   initResearchAblatePackagePolicyHints: boolean;
@@ -1819,6 +1824,73 @@ function commandServe(parsed: ParsedArgs): number {
   return 0;
 }
 
+function commandBaselineGate(parsed: ParsedArgs): number {
+  // 0.4.0 (prototype): compare two baseline files and emit a
+  // governance change report. The full integration (git diff --base /
+  // --head, GitHub Action glue, CODEOWNER approval enforcement) is
+  // queued for 0.4.0. The prototype accepts two paths via
+  // --baseline-base / --baseline-head or the matching env vars so CI
+  // can wire it up today without parser surgery.
+  const basePath = parsed.baselineGateBase || process.env.CELLFENCE_BASELINE_GATE_BASE;
+  const headPath = parsed.baselineGateHead || process.env.CELLFENCE_BASELINE_GATE_HEAD;
+  if (!basePath || !headPath) {
+    console.error("cellfence baseline gate requires --baseline-base and --baseline-head (or CELLFENCE_BASELINE_GATE_{BASE,HEAD})");
+    return 2;
+  }
+  let baseBaseline: unknown;
+  let headBaseline: unknown;
+  try {
+    baseBaseline = readJsonFile(basePath);
+  } catch (error) {
+    console.error(`failed to read base baseline ${basePath}: ${errorMessage(error)}`);
+    return 3;
+  }
+  try {
+    headBaseline = readJsonFile(headPath);
+  } catch (error) {
+    console.error(`failed to read head baseline ${headPath}: ${errorMessage(error)}`);
+    return 3;
+  }
+  const { report, exitCode, warnings } = runBaselineGateCommand({
+    baseBaseline: baseBaseline as never,
+    headBaseline: headBaseline as never,
+    baseBaselinePath: basePath,
+    headBaselinePath: headPath,
+    format: parsed.format === "human" ? "human" : "json",
+    hasImplementationChanges: false,
+  });
+  for (const warning of warnings) console.warn(`warning: ${warning}`);
+  if (parsed.format !== "human") {
+    writeJson(report);
+  }
+  return exitCode;
+}
+
+function commandCoverage(parsed: ParsedArgs): number {
+  // 0.4.0 (prototype): the real walker that asks each analyzer to
+  // record unresolved observations is queued for 0.4.0. For the
+  // prototype the command emits an empty coverage report so the
+  // subcommand is discoverable in --help and the JSON shape is
+  // pinned down. CELLFENCE_COVERAGE_FAIL_UNDER lets CI gate on
+  // coverage without adding a new CLI flag in the prototype.
+  const rootDir = parsed.rootDir;
+  const format: "json" | "human" = parsed.format === "human" ? "human" : "json";
+  const envFailUnder = process.env.CELLFENCE_COVERAGE_FAIL_UNDER;
+  const failUnder = envFailUnder && envFailUnder.trim().length > 0 ? Number(envFailUnder) : undefined;
+  const { report, exitCode } = runCoverageCommand({
+    rootDir,
+    format,
+    failUnder: Number.isFinite(failUnder) ? failUnder : undefined,
+    unresolved: [],
+    analyzedFiles: [],
+    totalFiles: 0,
+  });
+  if (format === "json") {
+    writeJson(report);
+  }
+  return exitCode;
+}
+
 function dispatchParsedArgs(parsed: ParsedArgs): number {
   try {
     if (parsed.command.length === 0 || parsed.command.includes("--help") || parsed.command.includes("-h")) {
@@ -1830,6 +1902,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "manifest" && secondaryCommand === "verify") return commandManifestVerify(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
+  if (primaryCommand === "coverage") return commandCoverage(parsed);
     if (primaryCommand === "install") return commandInstall(parsed);
     if (primaryCommand === "serve") return commandServe(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
@@ -1845,6 +1918,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "sign") return commandBaselineSign(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "verify") return commandBaselineVerify(parsed);
+  if (primaryCommand === "baseline" && secondaryCommand === "gate") return commandBaselineGate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "audit") return commandBaselineAudit(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "commit") return commandEvidenceCommit(parsed);
