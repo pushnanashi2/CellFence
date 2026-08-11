@@ -54,7 +54,7 @@ import {
 } from "./check-output.js";
 import { manifestFromPreset } from "./init-presets.js";
 import { runCoverageCommand } from "./coverage-command.js";
-import { runBaselineGateCommand } from "./baseline-gate-command.js";
+import { runBaselineGateCommand, type BaselineGateResult } from "./baseline-gate-command.js";
 import { runBaselineGateFull } from "./baseline-gate-full.js";
 import { readJsonFile } from "@cellfence/engine";
 
@@ -1916,6 +1916,11 @@ function readFailUnder(parsed: ParsedArgs): number | undefined {
   }
   return undefined;
 }
+
+// 0.4.0: re-export the baseline gate helpers for the
+// cellfence-baseline-gate GitHub Action.
+export { runBaselineGateFull };
+export type { BaselineGateResult };
 
 function dispatchParsedArgs(parsed: ParsedArgs): number {
   try {

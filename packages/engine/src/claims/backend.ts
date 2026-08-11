@@ -24,14 +24,14 @@ export type ClaimStoreState = {
 export type ClaimStoreEntry = {
   id: string;
   agent: string;
-  cellId: string;
+  task?: string;
+  cells: string[];
   paths: string[];
   symbols: string[];
   resources: string[];
   artifactLanes: string[];
+  createdAt: string;
   expiresAt: string;
-  /** SHA-256 fingerprint of the canonical JSON of the claim, used for optimistic CAS. */
-  fingerprint: string;
 };
 
 export type ClaimStoreBackend = {

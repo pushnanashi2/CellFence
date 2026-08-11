@@ -16,6 +16,13 @@ import {
 } from "./file-index.js";
 import { pathPatternsOverlap } from "./glob-overlap.js";
 import { readJsonFile } from "./json-file.js";
+import {
+  type ClaimStoreBackend,
+  type ClaimStoreState,
+  LocalFileClaimStore,
+  CellFenceClaimCasConflict,
+  emptyClaimStoreState,
+} from "./claims/index.js";
 import type {
   AnalysisContext,
   CellFenceClaim,
@@ -130,9 +137,20 @@ function validateClaimShape(claim: unknown, index: number, findings: Finding[], 
   return true;
 }
 
-function readClaimStore(rootDir: string, claimsPathOption: string | undefined, findings: Finding[]): { path: string; claims: CellFenceClaim[] } {
+function readClaimStore(
+  rootDir: string,
+  claimsPathOption: string | undefined,
+  findings: Finding[],
+  backend?: ClaimStoreBackend,
+): { path: string; claims: CellFenceClaim[] } {
   const resolvedPath = claimStorePath(rootDir, claimsPathOption);
   const relativePath = repoPath(rootDir, resolvedPath);
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below so
+  // existing callers that do not opt in keep working unchanged.
+  if (backend) {
+    return readClaimStoreFromBackend(backend, resolvedPath, relativePath, findings);
+  }
   if (!fs.existsSync(resolvedPath)) return { path: resolvedPath, claims: [] };
   let raw: unknown;
   try {
@@ -156,6 +174,42 @@ function readClaimStore(rootDir: string, claimsPathOption: string | undefined, f
     return { path: resolvedPath, claims: [] };
   }
   const claims = (raw as CellFenceClaimStore).claims.filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
+  return { path: resolvedPath, claims };
+}
+
+function isThenable(value: unknown): boolean {
+  return Boolean(value) && typeof value === "object" && typeof (value as { then?: unknown }).then === "function";
+}
+
+function readClaimStoreFromBackend(
+  backend: ClaimStoreBackend,
+  resolvedPath: string,
+  relativePath: string,
+  findings: Finding[],
+): { path: string; claims: CellFenceClaim[] } {
+  let state: ClaimStoreState;
+  try {
+    const result = backend.read();
+    if (isThenable(result)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: relativePath,
+        message: `claim backend ${backend.id} returned a Promise; use the async read path`,
+      });
+      return { path: resolvedPath, claims: [] };
+    }
+    state = result as unknown as ClaimStoreState;
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: relativePath,
+      message: `failed to read claim store via ${backend.id}: ${errorMessage(error)}`,
+    });
+    return { path: resolvedPath, claims: [] };
+  }
+  const claims = (state.claims as unknown as CellFenceClaim[]).filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
   return { path: resolvedPath, claims };
 }
 
@@ -283,7 +337,13 @@ function acquireClaimStoreLock(filePath: string): () => void {
   }
 }
 
-function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
+function writeClaimStore(filePath: string, claims: CellFenceClaim[], backend?: ClaimStoreBackend, previous?: CellFenceClaim[]): void {
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below.
+  if (backend) {
+    writeClaimStoreToBackend(backend, filePath, claims, previous ?? []);
+    return;
+  }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const store: CellFenceClaimStore = {
     schemaVersion: "cellfence.claims.v1",
@@ -292,6 +352,21 @@ function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
   const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(temporaryPath, `${JSON.stringify(store, null, 2)}\n`, { flag: "wx" });
   fs.renameSync(temporaryPath, filePath);
+}
+
+function writeClaimStoreToBackend(backend: ClaimStoreBackend, filePath: string, claims: CellFenceClaim[], previous: CellFenceClaim[]): void {
+  const prevState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: previous as unknown as ClaimStoreState["claims"],
+  };
+  const nextState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: claims as unknown as ClaimStoreState["claims"],
+  };
+  const result = backend.write(nextState, prevState);
+  if (isThenable(result)) {
+    throw new CellFenceClaimCasConflict(`claim backend ${backend.id} returned a Promise; use the async write path`);
+  }
 }
 
 function intersectingValues(left: readonly string[], right: readonly string[]): string[] {

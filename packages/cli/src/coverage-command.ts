@@ -17,10 +17,11 @@ import {
 } from "@cellfence/engine";
 
 import { walkCoverage } from "./coverage-walker.js";
+import { coverageReportToSarif } from "./coverage-sarif.js";
 
 export type CoverageCommandOptions = {
   rootDir: string;
-  format: "json" | "human";
+  format: "json" | "human" | "sarif";
   failUnder?: number;
   outputPath?: string;
   /** Forwarded to the engine check call so the walker honours the
@@ -91,9 +92,12 @@ export function runCoverageCommand(options: CoverageCommandOptions): CoverageCom
   }
   if (options.format === "human") {
     printHumanReport(report);
+  } else if (options.format === "sarif") {
+    process.stdout.write(`${JSON.stringify(coverageReportToSarif(report), null, 2)}\n`);
   }
   if (options.outputPath) {
-    fs.writeFileSync(options.outputPath, `${JSON.stringify(report, null, 2)}\n`);
+    const payload = options.format === "sarif" ? coverageReportToSarif(report) : report;
+    fs.writeFileSync(options.outputPath, `${JSON.stringify(payload, null, 2)}\n`);
   }
   return { report, exitCode };
 }

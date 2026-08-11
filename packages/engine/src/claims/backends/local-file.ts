@@ -110,6 +110,10 @@ export function localFileClaimStoreFingerprint(state: ClaimStoreState): string {
   return fingerprintOf(state);
 }
 
-export function makeLocalFileClaimStoreEntry(input: Omit<ClaimStoreEntry, "fingerprint">, state: ClaimStoreState): ClaimStoreEntry {
-  return { ...input, fingerprint: fingerprintOf({ ...state, claims: [...state.claims, { ...input, fingerprint: "stub" }] }) };
+// export a stable serializer for the local-file backend so the
+// CAS fingerprint is comparable across processes pointing at the
+// same path. 0.4.0 callers should rely on LocalFileClaimStore.write
+// directly rather than reaching for the fingerprint.
+export function serializeLocalFileClaimStore(state: ClaimStoreState): string {
+  return JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) }, null, 2);
 }
