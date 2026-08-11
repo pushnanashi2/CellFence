@@ -1,7 +1,7 @@
 # CellFence 0.2.1 → 0.3.0 Security Hardening — Progress
 
 **Branch:** `fix/mavis` in `~/agents/mavis/work`
-**Test result:** 934/934 passing (zero failures)
+**Test result:** 947/947 passing (zero failures)
 
 ## Commits on `fix/mavis`
 
@@ -14,8 +14,12 @@
 | `0e67b54` | pin GitHub Action CLI version and avoid bash 3.2 array expansion | H-7 |
 | `0348d9e` | filter MCP proxy downstream env to an explicit allowlist | M-15 |
 | `52087c5` | align glob ** semantics with the previous regex dialect | C-5 (followup) |
+| d7d8110 | note H-4 commit in progress log | (docs) |
 | d2f1db3 | require commit binding on resource evidence | H-4 |
 | `8e91c97` | add PROGRESS.md for 0.3.0 security hardening | (docs) |
+| `d5a6503` | add coverage command prototype | 0.4.0 (prototype) |
+| `f32c975` | add baseline update gate prototype | 0.4.0 (prototype) |
+| `95eea9b` | add distributed claim backend prototype | 0.4.0 (prototype) |
 
 ## Issue coverage
 
@@ -52,3 +56,37 @@
 - **M-20 line-free waiver** — captured as `TODO(0.4.0)` in the C-1 commit. Fixing it now would require a new `CELLFENCE_WAIVER_INVALID` finding and a test change for the "required rule" branch, so it's queued for the 0.4.0 cleanup pass.
 - **Required-rule waiver invalid** — captured as `TODO(0.4.0)` in `tests/engine-api-coverage.test.mjs`. When a comment-style waiver targets a required rule, the current code silently no-ops; 0.4.0 should make it surface as `CELLFENCE_WAIVER_INVALID`.
 - **H-3 / H-6** — see above; queued for the next session.
+
+## 0.4.0 prototypes
+
+These three are 0.4.0 work prototypes — the shape, the test, and
+the documentation. The full implementations (real walkers, GitHub
+Action enforcement, distributed backends) are still pending.
+
+- **`cellfence coverage`** — `d5a6503`. The engine ships a
+  coverage collector that records unresolved import / resource /
+  public-surface observations, and the CLI rolls them into a
+  `cellfence.coverage.v1` report. `--fail-under` (or
+  `CELLFENCE_COVERAGE_FAIL_UNDER`) makes CI gate on coverage. The
+  real repository walker that asks each adapter to call into the
+  collector, and the SARIF reporter, are queued for 0.4.0.
+- **`cellfence baseline gate`** — `f32c975`. The engine ships a
+  `detectBaselineChanges` function (and the `GovernanceChangeReport`
+  schema) that compares two baselines on the
+  ownedPaths / publicSymbols / crossCellEdges / resourceAccesses
+  dimensions. The CLI exposes a `baseline gate` subcommand that
+  takes `--baseline-base` / `--baseline-head` (or the matching env
+  vars) and exits 0 on a governance change, 1 otherwise. The
+  companion `@cellfence/github-action-baseline-gate` action ships
+  as a skeleton (action.yml + src/index.ts + README) so workflows
+  can be drafted against it today; the enforcement code path
+  (CODEOWNER lookup, label upsert, sticky comment, mixed-PR
+  warning) is queued for 0.4.0.
+- **Distributed claim backend** — `95eea9b`. A `ClaimStoreBackend`
+  interface plus two reference implementations:
+  `LocalFileClaimStore` (re-reads from disk before compare-and-swap,
+  throws `CellFenceClaimCasConflict` on lost updates) and
+  `GitHubArtifactClaimStore` (no native lock, optimistic-CAS only,
+  full wiring queued for 0.4.0). The 0.4.0 refactor of
+  `packages/engine/src/claims.ts` will route all claim reads and
+  writes through the same interface.
