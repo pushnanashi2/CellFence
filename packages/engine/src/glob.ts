@@ -9,10 +9,14 @@
  * dynamic-programming matcher over the path segments. It recognises
  * the same dialect as the previous regex, including:
  *
- *   - `*`  matches zero or more characters within a single segment
- *   - `**` matches one or more whole path segments when it is adjacent
- *          to other segments, and matches anything when it stands alone
- *   - all other characters are matched literally (with `\\` and `/`
+ *   - star matches zero or more characters within a single segment
+ *   - double-star matches anything when it stands alone; matches zero or
+ *          more whole path segments when it is not the last segment
+ *          (so double-star/src matches src, just like the old
+ *          (?:[^/]+/)* regex form); matches one or more whole path
+ *          segments when it is the last segment (so src/** does not
+ *          match src, matching the old /[\s\S]+ regex form)
+ *   - all other characters are matched literally (with backslash and slash
  *          still treated as path separators)
  *
  * The match runs in O(p * s) time, where p is the number of pattern
@@ -22,9 +26,9 @@
  * This module is duplicated across packages/engine, packages/plugin-agent-budget,
  * and packages/plugin-blast-radius. The TypeScript project reference setup
  * does not allow a child package to import source files from a sibling
- * package when the child has its own `rootDir: "src"` constraint, so the
+ * package when the child has its own rootDir: "src" constraint, so the
  * modules are kept in lock-step. A future refactor could move this into
- * a shared `packages/glob` package.
+ * a shared packages/glob workspace.
  */
 import path from "node:path";
 
@@ -67,6 +71,14 @@ function buildMatcher(pattern: string): (pathSegments: string[]) => boolean {
     return () => true;
   }
 
+  // When ** appears anywhere except the last position, it matches zero
+  // or more whole path segments (so **/src matches src just like the
+  // old (?:[^/]+/)* regex form). When ** is the last pattern segment
+  // it requires at least one trailing path segment (so src/** does
+  // not match src, matching the old /[\s\S]+ form).
+  const lastCompiled = compiled[compiled.length - 1];
+  const trailingGlobstar = lastCompiled?.raw === "**";
+
   return (pathSegments: string[]) => {
     const M = compiled.length;
     const N = pathSegments.length;
@@ -79,11 +91,24 @@ function buildMatcher(pattern: string): (pathSegments: string[]) => boolean {
     for (let i = 1; i <= M; i += 1) {
       const seg = compiled[i - 1];
       if (seg.raw === "**") {
-        // ** consumes one or more whole path segments when adjacent to
-        // other pattern segments. The transition `dp[i][j] = dp[i][j-1]`
-        // matches the regex's `(?:[^/]+/)+` form: at least one segment.
-        for (let j = 1; j <= N; j += 1) {
-          if (at(i, j - 1) === 1 || at(i - 1, j) === 1) set(i, j);
+        if (i === M && trailingGlobstar) {
+          // Trailing ** consumes one or more whole path segments
+          // (so src/** does not match src). The transition
+          // dp[i][j] = dp[i][j-1] || dp[i-1][j-1] mirrors the
+          // (?:[\s\S]+/?) form: the previous pattern segment must
+          // have matched at j-1, then ** may keep consuming more.
+          for (let j = 1; j <= N; j += 1) {
+            if (at(i, j - 1) === 1 || at(i - 1, j - 1) === 1) set(i, j);
+          }
+        } else {
+          // Non-trailing ** consumes zero or more whole path segments
+          // (so **/src matches src). The first transition lets **
+          // consume nothing; the inner loop then expands the match
+          // to consume one or more segments afterwards.
+          if (at(i - 1, 0) === 1) set(i, 0);
+          for (let j = 1; j <= N; j += 1) {
+            if (at(i, j - 1) === 1 || at(i - 1, j) === 1) set(i, j);
+          }
         }
       } else {
         for (let j = 1; j <= N; j += 1) {
@@ -106,7 +131,10 @@ function compilePattern(pattern: string): (pathSegments: string[]) => boolean {
 }
 
 export function matchesGlobPattern(relativePath: string, pattern: string): boolean {
-  const normalizedPath = relativePath.split(path.sep).join("/");
+  // Normalise both backslashes and the platform separator so Windows
+  // style paths ("src\\core\\a.ts") and POSIX style paths match the
+  // same set of patterns.
+  const normalizedPath = relativePath.split("\\").join("/").split(path.sep).join("/");
   return compilePattern(pattern)(normalizedPath.split("/"));
 }
 
