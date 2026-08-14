@@ -47,6 +47,7 @@ const result = spawnSync("npx", [
   "--format=cjs",
   `--outfile=${outDir}/index.js`,
   "--sourcemap=external",
+  "--minify",
 ], { stdio: "inherit" });
 if (result.status !== 0) {
   process.exit(result.status ?? 1);
