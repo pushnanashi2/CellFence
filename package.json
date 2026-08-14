@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/mcp-proxy packages/cli packages/github-action packages/trace",
+    "build": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/mcp-proxy packages/cli packages/github-action packages/github-action-baseline-gate packages/trace && node scripts/copy-non-ts-build-artifacts.mjs && node scripts/bundle-github-action.mjs",
     "clean": "node scripts/clean.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -b packages/schema packages/plugin-api packages/adapter-call-pattern packages/adapter-opentelemetry packages/plugin-agent-budget packages/plugin-blast-radius packages/plugin-dependency-sovereignty packages/plugin-geo-purity packages/plugin-legacy-strangler packages/plugin-quants-trend packages/reporter-economy-matrix packages/engine packages/mcp-proxy packages/cli packages/github-action packages/trace --pretty false",
@@ -80,6 +80,7 @@
     "@eslint/js": "^10.0.1",
     "@stryker-mutator/core": "^9.6.1",
     "@types/node": "^20.14.15",
+    "@vercel/ncc": "^0.45.0",
     "ajv": "^8.20.0",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^3.0.1",

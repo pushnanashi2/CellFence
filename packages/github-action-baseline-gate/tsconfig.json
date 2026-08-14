@@ -1,26 +1,16 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "declaration": false,
-    "sourceMap": false,
-    "skipLibCheck": true,
+    "rootDir": "src",
     "outDir": "dist",
-    "noEmit": false,
-    "composite": false,
-    "paths": {
-      "@cellfence/schema": ["../schema/src/index.ts"],
-      "@cellfence/engine": ["../engine/src/index.ts"],
-      "@cellfence/cli": ["../cli/src/index.ts"]
-    }
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": [
-    "src/**/*.ts",
-    "../schema/src/**/*.ts",
-    "../engine/src/**/*.ts",
-    "../cli/src/**/*.ts",
-    "../cli/dist/**/*.d.ts"
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../schema"
+    }
   ]
 }

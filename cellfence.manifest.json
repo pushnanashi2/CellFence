@@ -3,7 +3,9 @@
   "governance": {
     "requireOwnership": true,
     "include": [
-      "packages/**"
+      "packages/**",
+      "scripts/**",
+      "tests/**"
     ],
     "exclude": [],
     "resourceAdapters": {
@@ -68,7 +70,8 @@
         "ValidationResult",
         "validateBaseline",
         "validateManifest",
-        "validateResourceEvidence"
+        "validateResourceEvidence",
+        "ResourceEvidenceTranscriptStatus"
       ],
       "consumes": [],
       "producesArtifacts": [],
@@ -124,29 +127,28 @@
       "publicSymbols": [
         "AutoAllocateOptions",
         "AutoAllocation",
+        "BaselineAuditResult",
+        "BaselineDimension",
+        "BaselineDimensionDelta",
         "BaselineUpdateGuardOptions",
         "BaselineUpdateGuardResult",
-        "BaselineAuditResult",
-        "buildCmdCommandLine",
         "CellFenceClaim",
+        "CellFenceClaimCasConflict",
         "CellFenceClaimStore",
         "CellFenceContext",
+        "CellFenceManifest",
         "CellFenceWaiver",
         "ChangedCheckOptions",
-        "checkChangedRepository",
-        "checkClaims",
-        "checkCommitEvidence",
-        "checkDesignDocs",
-        "checkMutationReport",
         "CheckOptions",
-        "checkRepository",
-        "checkTaskManifest",
         "CheckResult",
-        "checkWriteAccess",
+        "ClaimBackendType",
         "ClaimCheckOptions",
         "ClaimCheckResult",
         "ClaimCreateOptions",
         "ClaimCreateResult",
+        "ClaimStoreBackend",
+        "ClaimStoreEntry",
+        "ClaimStoreState",
         "CommitEvidenceResult",
         "ContextAllowedImport",
         "ContextBudgetEntry",
@@ -155,6 +157,58 @@
         "CouplingGraphEdge",
         "CouplingGraphEdgeKind",
         "CouplingGraphNode",
+        "CoverageInput",
+        "CoverageKind",
+        "CoverageReport",
+        "CoverageSummary",
+        "CoverageUnresolved",
+        "DocsCheckResult",
+        "EvidenceGraph",
+        "EvidenceGraphEdge",
+        "EvidenceGraphEdgeKind",
+        "EvidenceGraphInput",
+        "EvidenceGraphNode",
+        "EvidenceGraphNodeKind",
+        "ExecCommandOptions",
+        "FileIndexContext",
+        "Finding",
+        "FindingWitness",
+        "FindingWitnessSubject",
+        "GitHubArtifactClaimStore",
+        "GitHubArtifactClaimStoreOptions",
+        "GovernanceChangeReport",
+        "InferManifestOptions",
+        "LocalFileClaimStore",
+        "LocalFileClaimStoreOptions",
+        "MutationCheckResult",
+        "PruneCandidate",
+        "PruneCandidateKind",
+        "PruneReport",
+        "RedisClaimStore",
+        "RedisClaimStoreOptions",
+        "ResolveOptions",
+        "ResolvedClaimBackend",
+        "RuleId",
+        "ServiceManifestImportResult",
+        "ServiceManifestVerifyResult",
+        "Severity",
+        "SuggestedResolution",
+        "TaskCheckResult",
+        "WaiverRequest",
+        "WaiverRequestOptions",
+        "WriteAccessOptions",
+        "WriteAccessPathDecision",
+        "WriteAccessResult",
+        "buildCmdCommandLine",
+        "buildCoverageReport",
+        "checkChangedRepository",
+        "checkClaims",
+        "checkCommitEvidence",
+        "checkDesignDocs",
+        "checkMutationReport",
+        "checkRepository",
+        "checkTaskManifest",
+        "checkWriteAccess",
         "createAutoAllocation",
         "createBaseline",
         "createBaselineAudit",
@@ -166,51 +220,32 @@
         "createPruneReport",
         "createWaiverRequest",
         "defaultBaselinePath",
-        "DocsCheckResult",
-        "EvidenceGraph",
-        "EvidenceGraphEdge",
-        "EvidenceGraphEdgeKind",
-        "EvidenceGraphInput",
-        "EvidenceGraphNode",
-        "EvidenceGraphNodeKind",
-        "ExecCommandOptions",
+        "detectBaselineChanges",
+        "emptyClaimStoreState",
         "execCommandSync",
-        "Finding",
         "findingFingerprint",
         "findingWitness",
-        "FindingWitness",
-        "FindingWitnessSubject",
         "formatCouplingGraphMermaid",
         "formatHumanResult",
         "guardBaselineUpdate",
         "inferManifest",
-        "InferManifestOptions",
         "listClaims",
         "listWaivers",
         "loadBaselineFromFile",
         "loadManifestFromFile",
-        "MutationCheckResult",
+        "localFileClaimStoreFingerprint",
+        "matchesPattern",
         "profileConfig",
         "profileRuleSeverities",
-        "PruneCandidate",
-        "PruneCandidateKind",
-        "PruneReport",
-        "RuleId",
+        "readJsonFile",
+        "recordUnresolved",
+        "resolveClaimBackend",
         "resolveCommand",
-        "ServiceManifestImportResult",
-        "ServiceManifestVerifyResult",
         "sealBaselineWithConfiguredKey",
-        "Severity",
+        "sourceFilesUnderGovernance",
         "stampDesignDoc",
-        "SuggestedResolution",
-        "TaskCheckResult",
-        "WaiverRequest",
-        "WaiverRequestOptions",
-        "verifyManifestFromServiceManifests",
         "verifyBaselineSeal",
-        "WriteAccessOptions",
-        "WriteAccessPathDecision",
-        "WriteAccessResult",
+        "verifyManifestFromServiceManifests",
         "writeBaselineFile"
       ],
       "resourceContracts": [
@@ -252,7 +287,9 @@
         "ProxyOptions",
         "runProxy",
         "UnknownToolPolicy",
-        "WriteToolConfig"
+        "WriteToolConfig",
+        "__testing",
+        "resolveAndValidateDownstreamCwd"
       ],
       "resourceContracts": [
         {
@@ -284,7 +321,9 @@
       ],
       "publicEntry": "packages/cli/src/index.ts",
       "publicSymbols": [
-        "main"
+        "main",
+        "runBaselineGateFull",
+        "BaselineGateResult"
       ],
       "resourceContracts": [
         {
@@ -303,6 +342,9 @@
       "consumes": [
         {
           "cell": "engine"
+        },
+        {
+          "cell": "schema"
         }
       ],
       "producesArtifacts": [],
@@ -339,7 +381,8 @@
         "recordDatabaseAccess",
         "recordHttpAccess",
         "recordQueueAccess",
-        "recordResourceAccess"
+        "recordResourceAccess",
+        "transcriptStatus"
       ],
       "consumes": [
         {
@@ -529,6 +572,60 @@
       ],
       "producesArtifacts": [],
       "locked": true
+    },
+    {
+      "id": "github-action-baseline-gate",
+      "packageName": "@cellfence/github-action-baseline-gate",
+      "ownedPaths": [
+        "packages/github-action-baseline-gate/**"
+      ],
+      "publicEntry": "packages/github-action-baseline-gate/src/index.ts",
+      "publicSymbols": [
+        "runAction",
+        "ACTION_INPUT_NAMES"
+      ],
+      "consumes": [
+        {
+          "cell": "engine"
+        },
+        {
+          "cell": "cli"
+        }
+      ],
+      "producesArtifacts": [],
+      "locked": true
+    },
+    {
+      "id": "repo-tooling",
+      "packageName": "@cellfence/repo-tooling",
+      "ownedPaths": [
+        "scripts/**",
+        "tests/**"
+      ],
+      "publicEntry": "scripts/clean.mjs",
+      "publicSymbols": [],
+      "consumes": [
+        {
+          "cell": "schema"
+        },
+        {
+          "cell": "engine"
+        },
+        {
+          "cell": "cli"
+        },
+        {
+          "cell": "mcp-proxy"
+        },
+        {
+          "cell": "trace"
+        }
+      ],
+      "producesArtifacts": [],
+      "locked": true,
+      "waiverParsing": false,
+      "importAnalysis": false,
+      "resourceAnalysis": false
     }
   ]
 }
