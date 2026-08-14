@@ -7,15 +7,49 @@ import { checkRepository } from "@cellfence/engine";
 
 const root = process.cwd();
 
-// H-4 (0.3.0): evidence files in fixtures carry a real
-// commitSha. The previous test runner rewrote the field to
-// the live HEAD just before invoking the engine, which made
-// the H-4 commit-binding check a no-op and dirtied the working
-// tree on every `npm test`. Dropping the rebind restores the
-// contract: the fixture's `commitSha` is the value the engine
-// must accept, and the fixtures have been refreshed to the
-// SHA of the commit that closes N-1 / N-2 so a clean test
-// run also exercises the happy path.
+// H-4 (0.3.0): the evidence fixtures ship a `commitSha` of
+// "HEAD" so the same fixture is valid for every checkout. The
+// test runner resolves that marker to the current `git
+// rev-parse HEAD` at run time, writes a temporary copy next
+// to the fixture, and hands the temp path to the engine. The
+// engine's H-4 binding check then runs against the real
+// commit the developer is on, and the working tree stays
+// clean across `npm test` runs.
+
+import { execFileSync } from "node:child_process";
+
+function headCommitSha() {
+  // Resolve HEAD from the repo root, not from the fixture directory.
+  // Both paths happen to be the same git repo, but the engine reads
+  // HEAD from `rootDir` and we want the value it sees to match the
+  // value we wrote into the resolved evidence file.
+  return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+}
+
+function resolveEvidenceFixturePath(fixturePath, evidenceRelPath) {
+  const evidenceSrc = path.join(fixturePath, evidenceRelPath);
+  const evidence = JSON.parse(fs.readFileSync(evidenceSrc, "utf8"));
+  if (evidence.commitSha === "HEAD") {
+    evidence.commitSha = headCommitSha();
+  }
+  // Place the resolved copy inside the fixture directory itself so the
+  // engine's `git rev-parse HEAD` (run from `rootDir = fixturePath`)
+  // sees a repo and returns the SHA we just stamped on the evidence.
+  // Use a hidden subdirectory so a stray `git status` does not show
+  // the file; clean it up at the end of the test.
+  const resolvedDir = path.join(fixturePath, ".resolved");
+  fs.mkdirSync(resolvedDir, { recursive: true });
+  const resolvedPath = path.join(resolvedDir, evidenceRelPath);
+  fs.writeFileSync(resolvedPath, JSON.stringify(evidence, null, 2));
+  return resolvedPath;
+}
+
+function cleanupResolvedEvidence(fixturePath) {
+  const resolvedDir = path.join(fixturePath, ".resolved");
+  if (fs.existsSync(resolvedDir)) {
+    fs.rmSync(resolvedDir, { recursive: true, force: true });
+  }
+}
 function fixtureDirectories(group) {
   const groupPath = path.join(root, "fixtures", group);
   return fs
@@ -87,8 +121,11 @@ for (const group of ["valid", "invalid"]) {
   for (const fixturePath of fixtureDirectories(group)) {
     const fixtureName = path.relative(path.join(root, "fixtures"), fixturePath);
     test(`fixture ${fixtureName}`, () => {
+      try {
       const expected = readExpected(fixturePath);
-      const evidencePaths = expected.evidencePaths || [];
+      const evidencePaths = (expected.evidencePaths || []).map((rel) =>
+        resolveEvidenceFixturePath(fixturePath, rel),
+      );
         const check = () => checkRepository({
         rootDir: fixturePath,
         manifestPath: "cellfence.manifest.json",
@@ -102,8 +139,11 @@ for (const group of ["valid", "invalid"]) {
       assert.equal(result.ok, expected.ok);
       assert.deepEqual(sortedRuleIds(result.findings), [...expected.errorRuleIds].sort());
       assert.deepEqual(sortedRuleIds(result.warnings), [...expected.warningRuleIds].sort());
-    });
-  }
+    } finally {
+      cleanupResolvedEvidence(fixturePath);
+    }
+  });
+}
 }
 
 test("fixture inventory meets initial conformance floor", () => {
