@@ -164,6 +164,10 @@ export type CellManifest = {
   packageName?: string;
   locked?: boolean;
   waiverParsing?: boolean;
+  // Optional human-readable explanation of why the
+  // escape hatch is set. Surfaced by the engine as the
+  // `reason` field on the corresponding warning finding.
+  waiverParsingReason?: string;
   importAnalysis?: boolean;
   resourceAnalysis?: boolean;
   consumes?: CellConsumerManifest[];
@@ -615,6 +619,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "packageName",
     "locked",
     "waiverParsing",
+    "waiverParsingReason",
     "importAnalysis",
     "resourceAnalysis",
     "consumes",
@@ -650,6 +655,9 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (!optionalBoolean(value.waiverParsing)) {
     errors.push(`${location}.waiverParsing must be a boolean when present`);
+  }
+  if (!optionalString(value.waiverParsingReason)) {
+    errors.push(`${location}.waiverParsingReason must be a string when present`);
   }
   if (!optionalBoolean(value.importAnalysis)) {
     errors.push(`${location}.importAnalysis must be a boolean when present`);
