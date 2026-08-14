@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { checkRepository } from "../packages/engine/dist/index.js";
+import { checkRepository } from "@cellfence/engine";
 
 const root = process.cwd();
 
@@ -67,6 +67,12 @@ function baselineHasSeal(fixturePath) {
 }
 
 function withBaselineVerifier(callback) {
+  // The fixture runner is hermetic: a developer's shell can carry a real
+  // CELLFENCE_BASELINE_HMAC_KEY that would otherwise make every
+  // unsigned fixture fail with CELLFENCE_BASELINE_SEAL_INVALID.
+  // Save the existing env, then explicitly decide whether the case
+  // is a sealed-baseline check (set a test key) or a plain check
+  // (clear the env so the unsigned fixture does not surprise us).
   const previous = process.env.CELLFENCE_BASELINE_HMAC_KEY;
   process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
   try {
@@ -74,6 +80,31 @@ function withBaselineVerifier(callback) {
   } finally {
     if (previous === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
     else process.env.CELLFENCE_BASELINE_HMAC_KEY = previous;
+  }
+}
+
+function withoutBaselineVerifier(callback) {
+  // The inverse of withBaselineVerifier: clear all seal env vars so
+  // the unsigned fixture is checked under "no verifier" semantics.
+  const saved = {};
+  for (const name of [
+    "CELLFENCE_BASELINE_HMAC_KEY",
+    "CELLFENCE_BASELINE_HMAC_KEY_ID",
+    "CELLFENCE_BASELINE_ED25519_PRIVATE_KEY",
+    "CELLFENCE_BASELINE_ED25519_PUBLIC_KEY",
+    "CELLFENCE_BASELINE_ED25519_KEY_ID",
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(process.env, name)) {
+      saved[name] = process.env[name];
+      delete process.env[name];
+    }
+  }
+  try {
+    return callback();
+  } finally {
+    for (const name of Object.keys(saved)) {
+      process.env[name] = saved[name];
+    }
   }
 }
 
@@ -90,7 +121,9 @@ for (const group of ["valid", "invalid"]) {
         baselinePath: expected.mode === "baseline-check" ? "cellfence.baseline.json" : undefined,
         evidencePaths,
       });
-      const result = expected.mode === "baseline-check" && baselineHasSeal(fixturePath) ? withBaselineVerifier(check) : check();
+      const result = expected.mode === "baseline-check" && baselineHasSeal(fixturePath)
+        ? withBaselineVerifier(check)
+        : withoutBaselineVerifier(check);
 
       assert.equal(result.ok, expected.ok);
       assert.deepEqual(sortedRuleIds(result.findings), [...expected.errorRuleIds].sort());

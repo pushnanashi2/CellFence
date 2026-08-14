@@ -56,11 +56,16 @@ function writeJson(filePath, value) {
 
 function writeFakeNodeCommand(binDir, commandName, script) {
   fs.mkdirSync(binDir, { recursive: true });
+  // The fake script uses CommonJS (`require`); on POSIX we must give the
+  // file a `.cjs` extension so Node 24's ESM loader does not refuse
+  // `require` and so the shebang does not look like an extensionless
+  // ESM entry. The Windows `.cmd` shim keeps pointing at the .cjs file.
   const scriptPath = path.join(binDir, `${commandName}-fake.cjs`);
-  fs.writeFileSync(scriptPath, script);
+  fs.writeFileSync(scriptPath, `#!/usr/bin/env node\n${script}`);
+  fs.chmodSync(scriptPath, 0o755);
   const posixPath = path.join(binDir, commandName);
-  fs.writeFileSync(posixPath, `#!/usr/bin/env node\n${script}`);
-  fs.chmodSync(posixPath, 0o755);
+  if (fs.existsSync(posixPath)) fs.unlinkSync(posixPath);
+  fs.symlinkSync(path.basename(scriptPath), posixPath);
   fs.writeFileSync(path.join(binDir, `${commandName}.cmd`), `@echo off\r\n"${process.execPath}" "%~dp0${commandName}-fake.cjs" %*\r\n`);
 }
 

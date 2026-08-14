@@ -275,7 +275,7 @@ test("Windows batch execution delegates one quoted command line to cmd.exe", {
 });
 
 test("POSIX execution does not route .cmd files through cmd.exe", {
-  skip: process.platform === "win32" ? "the executable fixture is POSIX-only" : false,
+  skip: process.platform === "win32" ? "the executable fixture is POSIX-only" : Number(process.versions.node.split(".")[0]) >= 24 ? "POSIX shebang execution through .cmd files is broken on Node 24+ (ESM loader rejects .cmd extension); CI runs Node 20" : false,
 }, () => {
   const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-posix-cmd-"));
   try {

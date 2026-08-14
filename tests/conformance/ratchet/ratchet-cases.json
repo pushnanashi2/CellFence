@@ -27,13 +27,32 @@
       "mode": "check",
       "ratchetFamily": "matching-baseline",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -45,16 +64,26 @@
             "publicSymbols": 1,
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/core/**"],
+            "ownedPathSet": [
+              "src/core/**"
+            ],
             "publicEntryPath": "src/core/public.ts",
-            "publicSymbolSet": ["core"],
+            "publicSymbolSet": [
+              "core"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "0e768ebabcb6f32f1321cbbb106815533b3f932714e6fdfeb88eafd1cef3cdf4"
         }
       },
-      "expected": { "findings": [] }
+      "expected": {
+        "findings": []
+      }
     },
     {
       "id": "new-cell-outside-baseline",
@@ -62,34 +91,76 @@
       "mode": "check",
       "ratchetFamily": "cell-set-growth",
       "files": {
-        "src/core/public.ts": ["export const core = true;"],
-        "src/newcell/public.ts": ["export const newcell = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ],
+        "src/newcell/public.ts": [
+          "export const newcell = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] },
-          { "id": "newcell", "ownedPaths": ["src/newcell/**"], "publicEntry": "src/newcell/public.ts", "publicSymbols": ["newcell"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          },
+          {
+            "id": "newcell",
+            "ownedPaths": [
+              "src/newcell/**"
+            ],
+            "publicEntry": "src/newcell/public.ts",
+            "publicSymbols": [
+              "newcell"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
         "schemaVersion": "cellfence.baseline.v1",
         "generatedAt": "2026-01-01T00:00:00.000Z",
-        "cellIds": ["core"],
+        "cellIds": [
+          "core"
+        ],
         "cells": {
           "core": {
             "ownedPathPatterns": 1,
             "publicSymbols": 1,
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/core/**"],
+            "ownedPathSet": [
+              "src/core/**"
+            ],
             "publicEntryPath": "src/core/public.ts",
-            "publicSymbolSet": ["core"],
+            "publicSymbolSet": [
+              "core"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "719bfca13e6a4f38748fe1b6f7fa04b604303c8769e34c57450e37de24eebd6b"
         }
       },
       "expected": {
@@ -98,8 +169,13 @@
             "ruleId": "CELLFENCE_RATCHET_CELL_SET_GROWTH",
             "severity": "error",
             "cellId": "newcell",
-            "baselineCellIds": ["core"],
-            "currentCellIds": ["core", "newcell"]
+            "baselineCellIds": [
+              "core"
+            ],
+            "currentCellIds": [
+              "core",
+              "newcell"
+            ]
           }
         ]
       }
@@ -110,13 +186,32 @@
       "mode": "check",
       "ratchetFamily": "public-entry-change",
       "files": {
-        "src/core/new-public.ts": ["export const core = true;"]
+        "src/core/new-public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/new-public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/new-public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -128,13 +223,21 @@
             "publicSymbols": 1,
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/core/**"],
+            "ownedPathSet": [
+              "src/core/**"
+            ],
             "publicEntryPath": "src/core/public.ts",
-            "publicSymbolSet": ["core"],
+            "publicSymbolSet": [
+              "core"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "0e768ebabcb6f32f1321cbbb106815533b3f932714e6fdfeb88eafd1cef3cdf4"
         }
       },
       "expected": {
@@ -162,9 +265,27 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core", "extra"], "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core",
+              "extra"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -176,13 +297,21 @@
             "publicSymbols": 1,
             "publicSurfaceLines": 3,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/core/**"],
+            "ownedPathSet": [
+              "src/core/**"
+            ],
             "publicEntryPath": "src/core/public.ts",
-            "publicSymbolSet": ["core"],
+            "publicSymbolSet": [
+              "core"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "32d4e94659870cb0af0300bba9bba8d7ed0316440eab9377e3eb495927bc92e2"
         }
       },
       "expected": {
@@ -199,9 +328,16 @@
             "ruleId": "CELLFENCE_RATCHET_PUBLIC_SYMBOL_SET_CHANGE",
             "severity": "error",
             "cellId": "core",
-            "previous": ["core"],
-            "current": ["core", "extra"],
-            "addedSymbols": ["extra"]
+            "previous": [
+              "core"
+            ],
+            "current": [
+              "core",
+              "extra"
+            ],
+            "addedSymbols": [
+              "extra"
+            ]
           }
         ]
       }
@@ -212,7 +348,9 @@
       "mode": "check",
       "ratchetFamily": "dependency-edge-growth",
       "files": {
-        "src/core/public.ts": ["export const core = true;"],
+        "src/core/public.ts": [
+          "export const core = true;"
+        ],
         "src/app/public.ts": [
           "import { core } from '../core/public';",
           "export const app = core;"
@@ -220,10 +358,42 @@
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "consumes": [], "producesArtifacts": [] },
-          { "id": "app", "ownedPaths": ["src/app/**"], "publicEntry": "src/app/public.ts", "publicSymbols": ["app"], "consumes": [{ "cell": "core" }], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "consumes": [],
+            "producesArtifacts": []
+          },
+          {
+            "id": "app",
+            "ownedPaths": [
+              "src/app/**"
+            ],
+            "publicEntry": "src/app/public.ts",
+            "publicSymbols": [
+              "app"
+            ],
+            "consumes": [
+              {
+                "cell": "core"
+              }
+            ],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -235,9 +405,13 @@
             "publicSymbols": 1,
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/core/**"],
+            "ownedPathSet": [
+              "src/core/**"
+            ],
             "publicEntryPath": "src/core/public.ts",
-            "publicSymbolSet": ["core"],
+            "publicSymbolSet": [
+              "core"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
@@ -247,13 +421,21 @@
             "publicSymbols": 1,
             "publicSurfaceLines": 3,
             "crossCellDependencies": 0,
-            "ownedPathSet": ["src/app/**"],
+            "ownedPathSet": [
+              "src/app/**"
+            ],
             "publicEntryPath": "src/app/public.ts",
-            "publicSymbolSet": ["app"],
+            "publicSymbolSet": [
+              "app"
+            ],
             "dependencyEdges": [],
             "artifactContracts": [],
             "resourceAccesses": []
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "186aa17c331182dc0738da7726a09d5362f6f89deb62050d06b38190afb00f74"
         }
       },
       "expected": {
@@ -271,8 +453,12 @@
             "severity": "error",
             "cellId": "app",
             "previous": [],
-            "current": ["app->core"],
-            "addedEdges": ["app->core"]
+            "current": [
+              "app->core"
+            ],
+            "addedEdges": [
+              "app->core"
+            ]
           }
         ]
       }
@@ -283,27 +469,72 @@
       "mode": "guard-update",
       "ratchetFamily": "locked-baseline-update",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "locked": true, "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "locked": true,
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
         "schemaVersion": "cellfence.baseline.v1",
         "generatedAt": "2026-01-01T00:00:00.000Z",
         "cells": {
-          "core": { "ownedPathPatterns": 1, "publicSymbols": 1, "publicSurfaceLines": 2, "crossCellDependencies": 0, "publicSymbolSet": ["core"] }
+          "core": {
+            "ownedPathPatterns": 1,
+            "publicSymbols": 1,
+            "publicSurfaceLines": 2,
+            "crossCellDependencies": 0,
+            "publicSymbolSet": [
+              "core"
+            ]
+          }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "32e0d13e440e05aac8b97428c6ce77619935c5e7f565e10495413f23ba164281"
         }
       },
       "nextBaseline": {
         "schemaVersion": "cellfence.baseline.v1",
         "generatedAt": "2026-01-02T00:00:00.000Z",
         "cells": {
-          "core": { "ownedPathPatterns": 1, "publicSymbols": 2, "publicSurfaceLines": 2, "crossCellDependencies": 0, "publicSymbolSet": ["core", "extra"] }
+          "core": {
+            "ownedPathPatterns": 1,
+            "publicSymbols": 2,
+            "publicSurfaceLines": 2,
+            "crossCellDependencies": 0,
+            "publicSymbolSet": [
+              "core",
+              "extra"
+            ]
+          }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "2809a9f600715e71919806297a099b41a7e12450dda7bc1379a8d263d70d7a85"
         }
       },
       "expected": {
@@ -316,7 +547,15 @@
             "previous": 1,
             "current": 2
           },
-          { "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION", "severity": "error", "cellId": "core", "metric": "publicSymbolSet", "addedPublicSymbols": ["extra"] }
+          {
+            "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION",
+            "severity": "error",
+            "cellId": "core",
+            "metric": "publicSymbolSet",
+            "addedPublicSymbols": [
+              "extra"
+            ]
+          }
         ]
       }
     },
@@ -326,13 +565,33 @@
       "mode": "guard-update",
       "ratchetFamily": "locked-resource-grandfathering",
       "files": {
-        "src/core/public.ts": ["export const core = true;"]
+        "src/core/public.ts": [
+          "export const core = true;"
+        ]
       },
       "manifest": {
         "schemaVersion": "cellfence.manifest.v1",
-        "governance": { "requireOwnership": true, "include": ["src/**"], "exclude": [] },
+        "governance": {
+          "requireOwnership": true,
+          "include": [
+            "src/**"
+          ],
+          "exclude": []
+        },
         "cells": [
-          { "id": "core", "ownedPaths": ["src/core/**"], "publicEntry": "src/core/public.ts", "publicSymbols": ["core"], "locked": true, "consumes": [], "producesArtifacts": [] }
+          {
+            "id": "core",
+            "ownedPaths": [
+              "src/core/**"
+            ],
+            "publicEntry": "src/core/public.ts",
+            "publicSymbols": [
+              "core"
+            ],
+            "locked": true,
+            "consumes": [],
+            "producesArtifacts": []
+          }
         ]
       },
       "baseline": {
@@ -345,9 +604,17 @@
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
             "resourceAccesses": [
-              { "kind": "database", "access": "read", "selector": "app.old" }
+              {
+                "kind": "database",
+                "access": "read",
+                "selector": "app.old"
+              }
             ]
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "c4f21d69b39a3637f51ae1d857ada65a47b93347a983ae211d68c3e4ff9936af"
         }
       },
       "nextBaseline": {
@@ -360,15 +627,36 @@
             "publicSurfaceLines": 2,
             "crossCellDependencies": 0,
             "resourceAccesses": [
-              { "kind": "database", "access": "read", "selector": "app.old" },
-              { "kind": "database", "access": "read", "selector": "app.users" }
+              {
+                "kind": "database",
+                "access": "read",
+                "selector": "app.old"
+              },
+              {
+                "kind": "database",
+                "access": "read",
+                "selector": "app.users"
+              }
             ]
           }
+        },
+        "seal": {
+          "algorithm": "hmac-sha256",
+          "digest": "42261e6987281d3349c9460997c93c78f2516d5b5423f486b6e793e0f95dabcc"
         }
       },
       "expected": {
         "findings": [
-          { "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION", "severity": "error", "cellId": "core", "resourceAccess": { "kind": "database", "access": "read", "selector": "app.users" } }
+          {
+            "ruleId": "CELLFENCE_LOCKED_BASELINE_EXPANSION",
+            "severity": "error",
+            "cellId": "core",
+            "resourceAccess": {
+              "kind": "database",
+              "access": "read",
+              "selector": "app.users"
+            }
+          }
         ]
       }
     }
