@@ -15,7 +15,6 @@ import path from "node:path";
 
 import {
   type ClaimStoreBackend,
-  type ClaimStoreEntry,
   type ClaimStoreState,
   CellFenceClaimCasConflict,
   emptyClaimStoreState,

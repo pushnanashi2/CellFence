@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import test from "node:test";
 
 import { detectBaselineChanges } from "../packages/engine/dist/index.js";
 import { runBaselineGateCommand } from "../packages/cli/dist/baseline-gate-command.js";
 
-const root = process.cwd();
 
 function makeBaseline(overrides = {}) {
   return {

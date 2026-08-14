@@ -57,6 +57,7 @@ export class RedisClaimStore implements ClaimStoreBackend {
     } catch (error) {
       throw new Error(
         `redis claim backend requires the optional 'redis' dependency: ${(error as Error).message}`,
+        { cause: error },
       );
     }
     const client = new mod.Redis(this.url);

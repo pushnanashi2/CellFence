@@ -19,9 +19,7 @@ import { readJsonFile } from "./json-file.js";
 import {
   type ClaimStoreBackend,
   type ClaimStoreState,
-  LocalFileClaimStore,
   CellFenceClaimCasConflict,
-  emptyClaimStoreState,
 } from "./claims/index.js";
 import type {
   AnalysisContext,

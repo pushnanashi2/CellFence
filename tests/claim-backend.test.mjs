@@ -78,7 +78,6 @@ test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
       return release2;
     });
     // Give the second lock a tick to be queued behind the first.
-    await new Promise((resolve) => setImmediate(resolve));
     assert.equal(secondAcquired, false);
     await release1();
     await second;

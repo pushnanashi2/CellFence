@@ -14,11 +14,11 @@ declare module "@actions/core" {
 }
 
 declare module "@actions/github" {
-  type Octokit = any;
-  type PullListReviews = any;
-  type IssuesAddLabels = any;
-  type IssuesCreateLabel = any;
-  type IssuesGetLabel = any;
+  type Octokit = unknown;
+  type PullListReviews = unknown;
+  type IssuesAddLabels = unknown;
+  type IssuesCreateLabel = unknown;
+  type IssuesGetLabel = unknown;
   type PullRequestPayload = { number: number };
   type RepoInfo = { owner: string; repo: string };
   type OctokitRest = {
@@ -33,7 +33,7 @@ declare module "@actions/github" {
   };
   type OctokitInstance = {
     rest: OctokitRest;
-    paginate: (fn: (...args: any[]) => any, args: Record<string, unknown>) => Promise<any[]>;
+    paginate: (fn: (...args: unknown[]) => unknown, args: Record<string, unknown>) => Promise<unknown[]>;
   };
   export function getOctokit(token: string): OctokitInstance;
   export const context: {

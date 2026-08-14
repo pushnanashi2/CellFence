@@ -55,9 +55,9 @@ import {
 } from "./check-output.js";
 import { manifestFromPreset } from "./init-presets.js";
 import { runCoverageCommand } from "./coverage-command.js";
-import { runBaselineGateCommand, type BaselineGateResult } from "./baseline-gate-command.js";
+import { type BaselineGateResult } from "./baseline-gate-command.js";
 import { runBaselineGateFull } from "./baseline-gate-full.js";
-import { readJsonFile } from "@cellfence/engine";
+
 
 type ParsedArgs = {
   command: string[];

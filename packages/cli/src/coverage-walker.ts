@@ -16,7 +16,6 @@ import {
 } from "@cellfence/engine";
 
 import {
-  buildCoverageReport,
   recordUnresolved,
   type CoverageKind,
   type CoverageUnresolved,

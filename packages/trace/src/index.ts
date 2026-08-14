@@ -153,12 +153,10 @@ function fetchSelector(input: Parameters<typeof fetch>[0]): string | undefined {
 // 'active' <-> 'inactive' mid-process. Capture the decision once
 // and trust it.
 const installTimeDisabled = process.env.CELLFENCE_TRACE_DISABLE === "1";
-const installTimeSucceeded = (() => {
-  // We run this IIFE inside the same module so the answer is
-  // settled before flushEvidence() ever reads it.
-  if (installTimeDisabled) return false;
-  return true;
-})();
+
+if (!installTimeDisabled) {
+  installTrace();
+}
 
 export function transcriptStatus(): ResourceEvidenceTranscriptStatus {
   // H-3 (0.3.0): a fresh process that has the disable env var set

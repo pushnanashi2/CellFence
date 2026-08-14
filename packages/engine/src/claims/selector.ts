@@ -8,7 +8,7 @@
 // existing JSON-file behaviour is still the default until that
 // migration lands.
 
-import path from "node:path";
+
 
 import type { CellFenceManifest } from "@cellfence/schema";
 

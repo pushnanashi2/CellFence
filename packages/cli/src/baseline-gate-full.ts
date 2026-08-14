@@ -41,6 +41,7 @@ function resolveBaselineAtRef(rootDir: string, ref: string, baselineFile: string
   } catch (error) {
     throw new Error(
       `cannot resolve baseline at git ref ${ref}: ${rootDir} is not inside a git repository (${(error as Error).message})`,
+      { cause: error as Error },
     );
   }
   // The ref is referenced in the error path so a misuse surfaces
@@ -63,6 +64,7 @@ function readBaselineFromGit(rootDir: string, ref: string, baselineFile: string)
   } catch (error) {
     throw new Error(
       `failed to read baseline at git ref ${ref} (${relative}): ${(error as Error).message}`,
+      { cause: error as Error },
     );
   }
 }
@@ -111,14 +113,14 @@ export function runBaselineGateFull(options: BaselineGateFullOptions): BaselineG
     baseBaseline = base.value;
     baseDisplay = base.displayPath;
   } catch (error) {
-    throw new Error(`base baseline: ${(error as Error).message}`);
+    throw new Error(`base baseline: ${(error as Error).message}`, { cause: error as Error });
   }
   try {
     const head = readBaselineAt(options.rootDir, { ref: options.headRef, filePath: options.headPath }, baselineFile);
     headBaseline = head.value;
     headDisplay = head.displayPath;
   } catch (error) {
-    throw new Error(`head baseline: ${(error as Error).message}`);
+    throw new Error(`head baseline: ${(error as Error).message}`, { cause: error as Error });
   }
 
   // 0.4.x (N-12): the previous code cast `unknown` to `never`

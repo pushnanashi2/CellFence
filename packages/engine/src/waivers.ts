@@ -168,8 +168,7 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
   // not surface an error.
   if (findings && skipCells.size > 0) {
     for (const cellId of skipCells) {
-      const cell = manifest.cells.find((c) => c.id === cellId);
-      findings.push({
+            findings.push({
         ruleId: "CELLFENCE_WAIVER_PARSING_DISABLED",
         severity: "warning",
         message: `${cellId} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,

@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  CellFenceClaimCasConflict,
-  RedisClaimStore,
-  emptyClaimStoreState,
-} from "../packages/engine/dist/index.js";
+import {RedisClaimStore, emptyClaimStoreState} from "../packages/engine/dist/index.js";
 
 test("RedisClaimStore reports the redis id and a default key", () => {
   const store = new RedisClaimStore({ url: "redis://localhost:6379/0" });

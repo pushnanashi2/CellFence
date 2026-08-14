@@ -40,10 +40,6 @@ export function absolutePath(rootDir: string, relativePath: string): string {
   return path.resolve(rootDir, normalizePath(relativePath));
 }
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-}
-
 export function matchesPattern(relativePath: string, pattern: string): boolean {
   return matchesGlobPattern(normalizePath(relativePath), pattern);
 }
