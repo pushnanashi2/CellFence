@@ -21,13 +21,6 @@ const STICKY_COMMENT_MARKER = "<!-- cellfence-baseline-gate -->";
 const STICKY_COMMENT_RESOLVED_MARKER = "<!-- cellfence-baseline-gate:resolved -->";
 const DEFAULT_BASELINE_PATH = ".cellfence/baselines/cellfence.baseline.json";
 
-// The @actions/github type is narrowed to the methods already referenced
-// in this file, which makes it impossible to call any new octokit
-// method without a type error. The runtime value is a full Octokit
-// instance, so we type the helper with `any` at the boundary. The
-// typings are verified at runtime by the E2E action contract test
-// in `tests/github-action.test.mjs`; if a refactor swaps octokit
-// for a different SDK, that test will catch the regression.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Octokit = any;
 
