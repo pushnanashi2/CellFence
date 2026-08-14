@@ -12,6 +12,7 @@ import {
   validateManifest,
   type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
+export type { CellFenceBaseline } from "@cellfence/schema";
 import {
   absolutePath,
   listSymlinks,

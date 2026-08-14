@@ -23,6 +23,10 @@ export default tseslint.config(
       "**/.turbo/**",
       "fixtures/**",
       "**/*.tsbuildinfo",
+      // M-5: tsc -b emits compiled .js next to each .ts in
+      // packages/*/src/. Those .js files are build artifacts;
+      // the .ts source is the linted source of truth.
+      "packages/*/src/**/*.js",
     ],
   },
   js.configs.recommended,
