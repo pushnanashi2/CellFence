@@ -143,11 +143,11 @@ async function loadCodeownersFromRepo(
 function formatGateComment(input: {
   headSha: string;
   baseSha: string;
-  report: { hasChange: boolean; dimensions?: { kind: string; changed: boolean }[]; summary?: string };
+  report: { hasChange: boolean; deltas: { dimension: string; added: string[]; removed: string[]; skippedCells?: string[] }[] };
   approved: boolean;
   codeowners: string[];
 }): string {
-  const dims = input.report.dimensions ?? [];
+  const dims = input.report.deltas ?? [];
   const lines: string[] = [
     STICKY_COMMENT_MARKER,
     "## CellFence baseline gate",
@@ -156,13 +156,15 @@ function formatGateComment(input: {
     `- Head SHA: \`${input.headSha}\``,
     `- Status: ${input.approved ? "approved" : "pending approval"}`,
   ];
-  if (input.report.summary) {
-    lines.push("", input.report.summary);
+  const changedDims = dims.filter((dim) => dim.added.length > 0 || dim.removed.length > 0);
+  if (changedDims.length > 0) {
+    lines.push("", `Governance changes: ${changedDims.map((dim) => dim.dimension).join(", ")}`);
   }
   if (dims.length > 0) {
-    lines.push("", "| Dimension | Changed |", "| --- | --- |");
+    lines.push("", "| Dimension | Added | Removed |", "| --- | --- | --- |");
     for (const dim of dims) {
-      lines.push(`| ${dim.kind} | ${dim.changed ? "yes" : "no"} |`);
+      const changed = dim.added.length > 0 || dim.removed.length > 0;
+      lines.push(`| ${dim.dimension} | ${dim.added.length} | ${dim.removed.length}${changed ? " ⚠️" : ""} |`);
     }
   }
   if (!input.approved) {
