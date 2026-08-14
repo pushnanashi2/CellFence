@@ -9,7 +9,6 @@ export type ArtifactLaneManifest = {
   paths: string[];
   description?: string;
   locked?: boolean;
-  waiverParsing?: boolean;
   importAnalysis?: boolean;
   resourceAnalysis?: boolean;
 };
@@ -54,7 +53,6 @@ export type ResourceContractManifest = {
   access: ResourceAccessMode[];
   selectors: string[];
   locked?: boolean;
-  waiverParsing?: boolean;
   importAnalysis?: boolean;
   resourceAnalysis?: boolean;
   description?: string;
