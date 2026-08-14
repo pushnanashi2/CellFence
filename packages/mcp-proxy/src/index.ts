@@ -561,6 +561,12 @@ const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
 
 const SAFE_DOWNSTREAM_ENV_PREFIXES = [
   "LC_",
+  // MOCK_ is the test-harness namespace used by the mock MCP
+  // server that the mcp-proxy test suite spawns. No operator
+  // or production MCP server sets MOCK_* variables, so the
+  // prefix keeps the mock surface segregated from the
+  // CELLFENCE_* / LC_* / PATH / HOME production allowlist.
+  "MOCK_",
 ];
 
 function safeDownstreamEnvironment(env: NodeJS.ProcessEnv): Record<string, string> {

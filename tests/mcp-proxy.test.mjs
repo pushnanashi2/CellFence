@@ -590,10 +590,19 @@ test("proxy downstream environment is filtered to an explicit allowlist (H-3)", 
   assert.equal(safeEnv.LANG, "C.UTF-8");
   assert.equal(safeEnv.LC_ALL, "C.UTF-8");
   assert.equal(safeEnv.TZ, "UTC");
+  // 0.4.x (N-9): the audit log path (CELLFENCE_MCP_AUDIT_LOG) and
+  // the unknown-tool policy (CELLFENCE_MCP_UNKNOWN_TOOL_POLICY)
+  // must NOT reach the downstream because they expose operator
+  // state and let a caller override the guard. MOCK_MCP_LOG, on
+  // the other hand, lives in a separate test-harness namespace
+  // (MOCK_ prefix) that the proxy forwards intact so the mock
+  // MCP server can find its JSONL log file. The proxy is the
+  // boundary: production surfaces (CELLFENCE_*, PATH, HOME, ...)
+  // are filtered, and the mock surface is honoured.
   assert.equal(safeEnv.MOCK_MCP_LOG, "/tmp/log");
+  assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, undefined);
   // The proxy's own config is forwarded.
   assert.equal(safeEnv.CELLFENCE_MCP_MODE, "enforce");
-  assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, "/tmp/audit");
   // Secrets and unrelated env are dropped.
   assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY, undefined);
   assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY_ID, undefined);
