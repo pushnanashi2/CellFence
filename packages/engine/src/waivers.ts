@@ -124,7 +124,20 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   const allowlist = approvedBy ? getApprovalAllowlist(rootDir) : [];
   const untrustedApprover = Boolean(approvedBy) && approvedBy.toUpperCase() !== "PENDING" && !allowlist.includes(approvedBy);
   if (untrustedApprover) {
-    errors.push(`approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`);
+    // M-7: when the allowlist itself is empty (no CELLFENCE_APPROVERS,
+    // no CODEOWNERS, no .cellfence/approvers.txt) every approver
+    // name looks untrusted. The previous message blamed the
+    // approver; the real cause is the missing allowlist. Branch
+    // on allowlist size so the operator sees the actionable fix.
+    if (allowlist.length === 0) {
+      errors.push(
+        `approval allowlist is empty; set CELLFENCE_APPROVERS, populate CODEOWNERS, or add .cellfence/approvers.txt before approving waivers`,
+      );
+    } else {
+      errors.push(
+        `approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`,
+      );
+    }
   }
   return {
     ruleId,
