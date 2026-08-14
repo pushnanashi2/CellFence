@@ -113,7 +113,7 @@ import {
   applyWaiversToFindings,
   collectWaiversForManifest,
   listWaivers as listWaiversOperation,
-  MAX_WAIVER_DAYS,
+
   waiverMatchesFinding,
 } from "./waivers.js";
 import { pythonSourceRoots } from "./python-roots.js";
@@ -185,6 +185,9 @@ export {
   sealBaselineWithConfiguredKey,
   writeBaselineFile,
 } from "./baseline.js";
+export {
+  sealBaselineIfConfigured,
+} from "./baseline-seal.js";
 export {
   createWaiverRequest,
   formatCouplingGraphMermaid,

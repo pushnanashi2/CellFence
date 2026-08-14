@@ -75,10 +75,6 @@
             "artifactContracts": [],
             "resourceAccesses": []
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "0e768ebabcb6f32f1321cbbb106815533b3f932714e6fdfeb88eafd1cef3cdf4"
         }
       },
       "expected": {
@@ -157,10 +153,6 @@
             "artifactContracts": [],
             "resourceAccesses": []
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "719bfca13e6a4f38748fe1b6f7fa04b604303c8769e34c57450e37de24eebd6b"
         }
       },
       "expected": {
@@ -234,10 +226,6 @@
             "artifactContracts": [],
             "resourceAccesses": []
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "0e768ebabcb6f32f1321cbbb106815533b3f932714e6fdfeb88eafd1cef3cdf4"
         }
       },
       "expected": {
@@ -308,10 +296,6 @@
             "artifactContracts": [],
             "resourceAccesses": []
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "32d4e94659870cb0af0300bba9bba8d7ed0316440eab9377e3eb495927bc92e2"
         }
       },
       "expected": {
@@ -432,10 +416,6 @@
             "artifactContracts": [],
             "resourceAccesses": []
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "186aa17c331182dc0738da7726a09d5362f6f89deb62050d06b38190afb00f74"
         }
       },
       "expected": {
@@ -511,10 +491,6 @@
               "core"
             ]
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "32e0d13e440e05aac8b97428c6ce77619935c5e7f565e10495413f23ba164281"
         }
       },
       "nextBaseline": {
@@ -611,10 +587,6 @@
               }
             ]
           }
-        },
-        "seal": {
-          "algorithm": "hmac-sha256",
-          "digest": "c4f21d69b39a3637f51ae1d857ada65a47b93347a983ae211d68c3e4ff9936af"
         }
       },
       "nextBaseline": {
