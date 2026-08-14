@@ -158,15 +158,17 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
 
 
 // B-04 review fix: the previous `patternCoveredByOwnedPaths`
-// only used a literal-prefix heuristic, which produced
-// false-positive containment (e.g. "src/api/v1*" reported
-// as covered by "src/api/**" even though "src/api/v1" is
-// not a member of L("src/api/**")). The 0.4.x fix replaces
-// the heuristic with a formal language-containment check:
-// build two DFAs from the NFA, walk the product automaton,
-// and report false the first time a state is reached where
-// the inner DFA is in an accept state and the outer DFA is
-// not.
+// only used a literal-prefix heuristic, which could not
+// distinguish a directory pattern from a leaf pattern -
+// `src/api` (the bare directory, no segment after it) was
+// reported as covered by `src/api/**` even though the
+// directory itself is not in L(`src/api/**`) (trailing `**`
+// requires one or more whole path segments). The 0.4.x fix
+// replaces the heuristic with a formal language-containment
+// check: build two DFAs from the NFA, walk the product
+// automaton, and report false the first time a state is
+// reached where the inner DFA is in an accept state and
+// the outer DFA is not.
 //
 // The DFA stores only REAL transitions (those that come
 // from the NFA->DFA subset construction). The trap state
