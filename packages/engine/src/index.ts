@@ -113,6 +113,7 @@ import {
   applyWaiversToFindings,
   collectWaiversForManifest,
   listWaivers as listWaiversOperation,
+  MAX_WAIVER_DAYS,
   waiverMatchesFinding,
 } from "./waivers.js";
 import { pythonSourceRoots } from "./python-roots.js";
@@ -239,6 +240,7 @@ export type {
   WriteAccessResult,
 } from "./types.js";
 
+export { MAX_WAIVER_DAYS } from "./waivers.js";
 export function listWaivers(options: CheckOptions = {}): CellFenceWaiver[] {
   return listWaiversOperation(options);
 }

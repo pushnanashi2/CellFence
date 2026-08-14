@@ -125,7 +125,6 @@ Options:
   --downstream-command CMD      MCP server command to wrap.
   --downstream-arg ARG          Repeatable downstream argument.
   --downstream-cwd DIR          Working directory for the downstream server. Must be inside --root unless --allow-cwd-mismatch is set.
-  --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch). Must be inside --root unless --allow-cwd-mismatch is set.
   --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch).
   --help                        Show this help.
 
@@ -385,7 +384,17 @@ export function pathsForToolCall(toolName: string, args: unknown, writeTools: Wr
   // case-mismatched calls bypass path extraction. Look up the keys
   // case-insensitively while preserving the original config casing.
   const wanted = toolName.toLowerCase();
-  const matchKey = Object.keys(writeTools).find((key) => key.toLowerCase() === wanted);
+  // 0.4.x (N-10): the previous lookup iterated DEFAULT_WRITE_TOOLS
+  // in declaration order, where 'Edit' precedes 'edit'. A caller
+  // that passed --write-tool edit=... added a lowercase override
+  // key, but the case-insensitive find stopped at the first hit
+  // (the capitalised 'Edit' built into the defaults) and silently
+  // ignored the override. Reverse the search so the last
+  // declared matching key wins — overrides sit on top of the
+  // defaults because they were merged in after the spread.
+  const matchKey = Object.keys(writeTools)
+    .reverse()
+    .find((key) => key.toLowerCase() === wanted);
   if (!matchKey) return undefined;
   const keys = writeTools[matchKey];
   if (!keys) return undefined;
@@ -493,7 +502,24 @@ function inheritedEnvironment(): Record<string, string> {
 // the proxy's own CELLFENCE_MCP_* configuration knobs. Every other
 // variable is dropped, including the baseline signing material that
 // should never leave the verifier.
+// 0.4.x (N-9): the previous allowlist whitelisted every
+// CELLFENCE_MCP_* prefix, which let through knob names that
+// should not have left the proxy (CELLFENCE_MCP_AUDIT_LOG exposes
+// the audit log path; CELLFENCE_MCP_UNKNOWN_TOOL_POLICY lets a
+// caller override the gate). It also shipped MOCK_MCP_LOG, a
+// test-only fixture that had no business in production. Replace
+// the CELLFENCE_MCP_ prefix with an explicit set of the
+// configuration knobs the downstream MCP server genuinely needs
+// to honour, and add the missing cross-platform variables
+// (NODE_EXTRA_CA_CERTS for TLS interception, the standard
+// HTTP(S)_PROXY / NO_PROXY trio, and the Windows SystemRoot /
+// ComSpec / PATHEXT / APPDATA entries that downstream servers
+// spawned from cmd.exe need to bootstrap). LC_ stays as a prefix
+// because every LC_* locale variable is needed by the downstream
+// for the same reason LANG is; pinning the eight explicit names
+// would be fragile.
 const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
+  // Process / shell environment
   "PATH",
   "Path",
   "HOME",
@@ -506,22 +532,34 @@ const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
   "TMP",
   "TEMP",
   "LANG",
-  "LC_ALL",
-  "LC_CTYPE",
-  "LC_MESSAGES",
-  "LC_COLLATE",
-  "LC_NUMERIC",
-  "LC_TIME",
   "TZ",
   "SHELL",
   "LANGUAGE",
   "TERM",
   "PWD",
-  "MOCK_MCP_LOG",
+  // Proxy / TLS interception
+  "NODE_EXTRA_CA_CERTS",
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "NO_PROXY",
+  "http_proxy",
+  "https_proxy",
+  "no_proxy",
+  // Windows-specific bootstrap
+  "SystemRoot",
+  "ComSpec",
+  "PATHEXT",
+  "APPDATA",
+  "LOCALAPPDATA",
+  // The proxy's own MCP knobs the downstream is allowed to read.
+  // Audit / unknown-tool knobs are intentionally NOT included.
+  "CELLFENCE_MCP_MODE",
+  "CELLFENCE_MCP_FAIL_MODE",
+  "CELLFENCE_MCP_READ_TOOLS",
+  "CELLFENCE_MCP_DOWNSTREAM_COMMAND",
 ]);
 
 const SAFE_DOWNSTREAM_ENV_PREFIXES = [
-  "CELLFENCE_MCP_",
   "LC_",
 ];
 

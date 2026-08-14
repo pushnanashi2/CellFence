@@ -34,6 +34,7 @@ import {
   inferManifest,
   listClaims,
   listWaivers,
+  MAX_WAIVER_DAYS,
   loadBaselineFromFile,
   loadManifestFromFile,
   profileConfig,
@@ -1150,9 +1151,38 @@ function commandWaiversList(parsed: ParsedArgs): number {
   return waivers.some((waiver) => !waiver.valid) ? 1 : 0;
 }
 
+
+// 0.4.x (N-7): validate the expiry against MAX_WAIVER_DAYS before
+// rendering a directive. The engine's parseWaiverDirective enforces
+// the same cap at parse time, but pasting a too-far-future
+// directive means a CI run later red-discovers the violation;
+// better to fail loudly at request time with a clear message.
+function validateWaiverExpiry(expires: string, now: Date = new Date()): { ok: true } | { ok: false; reason: string } {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expires);
+  if (!match) return { ok: false, reason: `expires must be YYYY-MM-DD (got ${JSON.stringify(expires)})` };
+  const [, y, m, d] = match;
+  const target = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+  if (Number.isNaN(target.getTime())) return { ok: false, reason: `expires is not a valid calendar date: ${expires}` };
+  const span = Math.floor((target.getTime() - now.getTime()) / 86400000);
+  if (span > MAX_WAIVER_DAYS) return { ok: false, reason: `expires is ${span} days from today; the cap is ${MAX_WAIVER_DAYS} days. Use a closer date or split the work.` };
+  if (span < 0) return { ok: false, reason: `expires is in the past (${span} days from today); pick a future date.` };
+  return { ok: true };
+}
+
 function commandWaiversRequest(parsed: ParsedArgs): number {
   if (!parsed.ruleId || !parsed.targetFilePath || !parsed.line || !parsed.expires || !parsed.reason) {
     console.error("cellfence waivers request requires --rule, --file, --line, --expires, and --reason");
+    return 2;
+  }
+  // 0.4.x (N-7): the generator must respect MAX_WAIVER_DAYS so
+  // the directive it produces isn't rejected by the engine as
+  // CELLFENCE_WAIVER_INVALID. The engine's parseWaiverDirective
+  // also enforces the cap at parse time, but a request that
+  // knows it cannot ship is much more useful than one that
+  // silently looks valid until CI runs.
+  const expiryCheck = validateWaiverExpiry(parsed.expires);
+  if (!expiryCheck.ok) {
+    console.error(`cellfence waivers request: ${expiryCheck.reason}`);
     return 2;
   }
   const request = createWaiverRequest({

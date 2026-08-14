@@ -1,5 +1,28 @@
 # Changelog
 
+- Breaking changes since 0.2.1 (migration steps below):
+  - Evidence schema v1 -> v2 with `commitSha` required. Run
+    `npx cellfence evidence rewrite --cell <id>` against existing
+    v1 evidence files; the rewrite reads `git rev-parse HEAD`
+    and writes a v2 file alongside the original. v1 evidence
+    is no longer accepted by the engine. Re-bind every cell
+    before running `cellfence check` in CI.
+  - Manifest paths now reject glob metacharacters
+    (`{...}`, extglob `!`, single-`?`, character classes `[...]`,
+    leading `./`, embedded `//`). Manifests that relied on
+    `src/**/*.{ts,tsx}` style patterns must be rewritten with
+    an explicit alternation in the source. The error message
+    names the offending metacharacters.
+  - `cellfence-mcp-proxy`'s `--unknown-tool-policy` default is
+    now `deny` (was `allow`). Existing deployments that did not
+    set the flag now reject previously-allowed tools; pass
+    `--unknown-tool-policy=allow` to opt back into the old
+    behaviour for the transition period.
+  - `cellfence waivers request` now validates the `--expires`
+    date against the 90-day cap before rendering a directive.
+    Scripts that generated waivers with a longer horizon
+    must split the work into multiple waivers within the cap.
+
 ## Unreleased
 
 - Add a fail-closed `mutation:changed` pull-request gate with test/config change detection, isolated incremental caches, machine-readable evidence, and a daily non-incremental full-scope matrix audit while retaining `break: 100` throughout.

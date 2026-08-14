@@ -2334,7 +2334,12 @@ test("CLI human output covers check, baseline, evidence, and waiver error paths"
   assert.equal(missingWaiverArgs.status, 2);
   assert.match(missingWaiverArgs.stderr, /requires --rule, --file, --line, --expires, and --reason/);
 
-  const waiverMarkdown = runCli([
+  // 0.4.x (N-7): the generator must reject expires values that
+  // exceed MAX_WAIVER_DAYS, otherwise the directive it produces
+  // would fail the engine's parseWaiverDirective check at
+  // runtime with CELLFENCE_WAIVER_INVALID. The previous test
+  // asserted the inverse; it now asserts the cap.
+  const waiverTooFar = runCli([
     "waivers",
     "request",
     "--rule=CELLFENCE_PRIVATE_IMPORT",
@@ -2343,8 +2348,23 @@ test("CLI human output covers check, baseline, evidence, and waiver error paths"
     "--expires=2099-01-01",
     "--reason=temporary architecture migration while public API is extracted",
   ]);
-  assert.equal(waiverMarkdown.status, 0);
-  assert.match(waiverMarkdown.stdout, /CellFence Waiver Request/);
+  assert.equal(waiverTooFar.status, 2);
+  assert.match(waiverTooFar.stderr, /expires is \d+ days from today; the cap is 90 days/);
+
+  // The cap is honoured: a directive at +30 days still renders
+  // and is labelled as the engine would label it.
+  const validFuture = new Date(Date.now() + 30 * 86400 * 1000).toISOString().slice(0, 10);
+  const waiverWithin = runCli([
+    "waivers",
+    "request",
+    "--rule=CELLFENCE_PRIVATE_IMPORT",
+    "--file=src/consumer/public.ts",
+    "--line=7",
+    "--expires=" + validFuture,
+    "--reason=temporary architecture migration while public API is extracted",
+  ]);
+  assert.equal(waiverWithin.status, 0);
+  assert.match(waiverWithin.stdout, /CellFence Waiver Request/);
 });
 
 test("CLI baseline update succeeds when no locked expansion is present", () => {
