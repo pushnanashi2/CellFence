@@ -16,8 +16,7 @@ import type { EvidenceGraph, FindingWitness } from "./governance/model.js";
 import type { PackageExportResolutionState, PathAlias } from "./module-resolution.js";
 import type { ResourceAccessMode } from "./resource-access.js";
 
-export type RuleId =
-  | "CELLFENCE_MANIFEST_INVALID"
+export type RuleId = | "CELLFENCE_MANIFEST_INVALID"
   | "CELLFENCE_DUPLICATE_CELL_ID"
   | "CELLFENCE_OWNERSHIP_OVERLAP"
   | "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
@@ -80,7 +79,7 @@ export type RuleId =
   | "CELLFENCE_DOC_UNKNOWN_CELL"
   | "CELLFENCE_DOC_SURFACE_STALE"
   | "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD"
-  | "CELLFENCE_PATTERN_MATCHES_NOTHING";
+  | "CELLFENCE_PATTERN_MATCHES_NOTHING" | "CELLFENCE_WAIVER_PARSING_DISABLED" | "CELLFENCE_IMPORT_ANALYSIS_DISABLED" | "CELLFENCE_RESOURCE_ANALYSIS_DISABLED";
 
 export type Severity = "error" | "warning";
 

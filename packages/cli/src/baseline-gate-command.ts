@@ -44,7 +44,9 @@ export function runBaselineGateCommand(options: BaselineGateOptions): BaselineGa
   }
   // exit 0: governance change present (action continues to enforce
   // approval before merge). exit 1: no change (action can short-circuit).
-  const exitCode = report.hasChange ? 0 : 1;
+  // 0.4.x: CLI help declares '0 no violations / 1 governance violations';
+  // `hasChange: true` is a violation, so it must surface as exit 1.
+  const exitCode = report.hasChange ? 1 : 0;
   return { report, exitCode, warnings };
 }
 

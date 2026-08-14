@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
@@ -8,39 +7,15 @@ import { checkRepository } from "@cellfence/engine";
 
 const root = process.cwd();
 
-// H-4 (0.3.0): evidence files in fixtures carry a HEAD placeholder
-// commitSha so the repository can be checked in cleanly. Resolve the
-// live repository HEAD here so the engine's commit-binding check has
-// a chance to pass when the fixture is exercised.
-function resolveRepositoryHead() {
-  try {
-    return execFileSync("git", ["rev-parse", "HEAD"], {
-      cwd: root,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch {
-    return "";
-  }
-}
-
-const repositoryHead = resolveRepositoryHead();
-
-function rebindEvidenceCommitShas(fixturePath, evidencePaths) {
-  if (!repositoryHead) return;
-  for (const relative of evidencePaths) {
-    const evidencePath = path.join(fixturePath, relative);
-    if (!fs.existsSync(evidencePath)) continue;
-    const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-    if (typeof evidence !== "object" || evidence === null) continue;
-    if (typeof evidence.commitSha !== "string") continue;
-    if (evidence.commitSha === repositoryHead) continue;
-    evidence.commitSha = repositoryHead;
-    fs.writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}
-`);
-  }
-}
-
+// H-4 (0.3.0): evidence files in fixtures carry a real
+// commitSha. The previous test runner rewrote the field to
+// the live HEAD just before invoking the engine, which made
+// the H-4 commit-binding check a no-op and dirtied the working
+// tree on every `npm test`. Dropping the rebind restores the
+// contract: the fixture's `commitSha` is the value the engine
+// must accept, and the fixtures have been refreshed to the
+// SHA of the commit that closes N-1 / N-2 so a clean test
+// run also exercises the happy path.
 function fixtureDirectories(group) {
   const groupPath = path.join(root, "fixtures", group);
   return fs
@@ -114,8 +89,7 @@ for (const group of ["valid", "invalid"]) {
     test(`fixture ${fixtureName}`, () => {
       const expected = readExpected(fixturePath);
       const evidencePaths = expected.evidencePaths || [];
-      rebindEvidenceCommitShas(fixturePath, evidencePaths);
-      const check = () => checkRepository({
+        const check = () => checkRepository({
         rootDir: fixturePath,
         manifestPath: "cellfence.manifest.json",
         baselinePath: expected.mode === "baseline-check" ? "cellfence.baseline.json" : undefined,

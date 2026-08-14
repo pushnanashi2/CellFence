@@ -1,4 +1,14 @@
 import assert from "node:assert/strict";
+
+// N-6: ${WAVING_INTO_THE_FUTURE} was a 90-day-ahead literal that
+// expired 2026-10-10 and broke the suite. Use a
+// date relative to module load so the test stays
+// inside the 90-day waiver window forever.
+const WAVING_INTO_THE_FUTURE = (() => {
+  const d = new Date(Date.now() + 89 * 86400 * 1000);
+  return d.toISOString().slice(0, 10);
+})();
+
 import { execFileSync, spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -837,9 +847,9 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(invalidRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore * expires:2026-10-09 approved-by:test-owner reason:temporary invalid wildcard waiver",
+        `// cellfence-ignore * expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary invalid wildcard waiver`,
         "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH reason:short",
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner`,
         "export const core = true;",
         "",
       ].join("\n"),
@@ -864,7 +874,7 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(mismatchRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary unrelated waiver fixture",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary unrelated waiver fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),
@@ -888,7 +898,7 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(waivedRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner reason:temporary public surface mismatch fixture",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public surface mismatch fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),
@@ -1993,7 +2003,7 @@ test("engine prune report detects dead manifest declarations and stale governanc
     fs.writeFileSync(
       path.join(rootDir, "src/consumer/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary stale waiver fixture",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale waiver fixture`,
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",
@@ -2097,7 +2107,7 @@ test("engine prune report keeps active waivers out of stale-waiver candidates", 
     fs.writeFileSync(
       path.join(rootDir, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner reason:temporary public symbol mismatch fixture",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public symbol mismatch fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),

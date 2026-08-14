@@ -61,7 +61,11 @@ test("detectBaselineChanges flags public symbol additions", () => {
   assert.deepEqual(publicSymbols.added, ["api.stream"]);
 });
 
-test("runBaselineGateCommand returns exit 0 when governance changed", () => {
+test("runBaselineGateCommand returns exit 1 when governance changed", () => {
+  // 0.4.x: CLI help declares '0 no violations / 1 governance violations';
+  // governance change IS the violation the gate exists to surface, so
+  // the gate must exit 1 when hasChange is true (the previous
+  // implementation inverted the codes and tests followed suit).
   const baseBaseline = makeBaseline();
   const headBaseline = makeBaseline();
   headBaseline.cells.worker.ownedPathSet = ["src/worker/**", "src/worker/integration/**"];
@@ -73,12 +77,15 @@ test("runBaselineGateCommand returns exit 0 when governance changed", () => {
     format: "json",
     hasImplementationChanges: false,
   });
-  assert.equal(result.exitCode, 0);
+  assert.equal(result.exitCode, 1);
   assert.equal(result.report.hasChange, true);
   assert.equal(result.warnings.length, 0);
 });
 
-test("runBaselineGateCommand returns exit 1 when nothing changed", () => {
+test("runBaselineGateCommand returns exit 0 when nothing changed", () => {
+  // 0.4.x: counterpart to the governance-changed test above. The
+  // gate exits 0 only when the two baselines are byte-equivalent
+  // across the dimensions detectBaselineChanges inspects.
   const baseBaseline = makeBaseline();
   const headBaseline = makeBaseline();
   const result = runBaselineGateCommand({
@@ -89,7 +96,7 @@ test("runBaselineGateCommand returns exit 1 when nothing changed", () => {
     format: "json",
     hasImplementationChanges: false,
   });
-  assert.equal(result.exitCode, 1);
+  assert.equal(result.exitCode, 0);
   assert.equal(result.report.hasChange, false);
 });
 

@@ -624,8 +624,7 @@
       "producesArtifacts": [],
       "locked": true,
       "waiverParsing": false,
-      "importAnalysis": false,
-      "resourceAnalysis": false
+      "waiverParsingReason": "scripts/** and tests/** host intentionally invalid waiver fixtures and the engine's own harness; the escape hatch keeps the cell locked while keeping the rest of the manifest enforceable."
     }
   ]
 }

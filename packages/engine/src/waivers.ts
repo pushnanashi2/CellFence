@@ -160,6 +160,49 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
   const skipCells = new Set(
     manifest.cells.filter((cell) => cell.waiverParsing === false).map((cell) => cell.id),
   );
+  // 0.4.x (N-5): surface a warning per cell that opts out of
+  // waiver parsing so the exemption shows up in the same log as
+  // the rest of the findings. Without this, a deliberately
+  // invalid directive in scripts/ or tests/ looks identical
+  // to a clean cell, and CI cannot tell why the engine did
+  // not surface an error.
+  if (findings && skipCells.size > 0) {
+    for (const cellId of skipCells) {
+      const cell = manifest.cells.find((c) => c.id === cellId);
+      findings.push({
+        ruleId: "CELLFENCE_WAIVER_PARSING_DISABLED",
+        severity: "warning",
+        message: `${cellId} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,
+        details: { cellId },
+      });
+    }
+  }
+  // 0.4.x (N-5): the importAnalysis / resourceAnalysis flags
+  // are accepted by the schema but not enforced by the
+  // engine. Surface a warning for every cell that sets them
+  // so the manifest cannot claim an exemption the engine
+  // can't honour.
+  if (findings) {
+    for (const cell of manifest.cells) {
+      if (cell.importAnalysis === false) {
+        findings.push({
+          ruleId: "CELLFENCE_IMPORT_ANALYSIS_DISABLED",
+          severity: "warning",
+          cellId: cell.id,
+          message: `${cell.id} declared importAnalysis: false; the engine cannot honour this flag and continues to run import analysis. Drop the flag or implement the exemption.`,
+        });
+      }
+      if (cell.resourceAnalysis === false) {
+        findings.push({
+          ruleId: "CELLFENCE_RESOURCE_ANALYSIS_DISABLED",
+          severity: "warning",
+          cellId: cell.id,
+          message: `${cell.id} declared resourceAnalysis: false; the engine cannot honour this flag and continues to run resource analysis. Drop the flag or implement the exemption.`,
+        });
+      }
+    }
+  }
+
   const skipFiles = new Set<string>();
   if (skipCells.size > 0) {
     const ctx = createContext(rootDir, manifest);
