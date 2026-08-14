@@ -57,6 +57,7 @@ export type RuleId =
   | "CELLFENCE_CROSS_CELL_MOVE"
   | "CELLFENCE_LOCKED_BASELINE_EXPANSION"
   | "CELLFENCE_WAIVER_INVALID"
+  | "CELLFENCE_WAIVER_UNTRUSTED_APPROVER"
   | "CELLFENCE_GIT_METADATA_UNAVAILABLE"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
   | "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
@@ -78,7 +79,8 @@ export type RuleId =
   | "CELLFENCE_TASK_CHANGE_BUDGET_EXCEEDED"
   | "CELLFENCE_DOC_UNKNOWN_CELL"
   | "CELLFENCE_DOC_SURFACE_STALE"
-  | "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD";
+  | "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD"
+  | "CELLFENCE_PATTERN_MATCHES_NOTHING";
 
 export type Severity = "error" | "warning";
 
@@ -483,6 +485,14 @@ export type CellFenceWaiver = {
   expired: boolean;
   valid: boolean;
   errors: string[];
+  // 0.4.x: true when the waiver's approved-by identity is not in the
+  // approval allowlist (CELLFENCE_APPROVERS / CODEOWNERS /
+  // .cellfence/approvers.txt). The mismatch is now a hard parse
+  // error (see waivers.ts); the waiver is marked invalid and
+  // does not suppress findings. A separate
+  // CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still emitted
+  // by collectWaiversForManifest for observability.
+  untrustedApprover?: boolean;
 };
 
 export type ResolvedImport = {

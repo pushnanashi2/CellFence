@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -20,7 +19,6 @@ const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
  */
 export const MAX_WAIVER_DAYS = 90;
 
-const APPROVER_HISTORY_LIMIT = 200;
 
 function loadManifestFromFile(manifestPath: string): CellFenceManifest {
   const validation = validateManifest(readJsonFile(manifestPath));
@@ -49,19 +47,11 @@ export function getApprovalAllowlist(rootDir: string): string[] {
       if (trimmed) allow.add(trimmed);
     }
   }
-  try {
-    const out = execFileSync(
-      "git",
-      ["log", "--format=%ae", "-n", String(APPROVER_HISTORY_LIMIT)],
-      { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
-    );
-    for (const line of out.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed) allow.add(trimmed);
-    }
-  } catch {
-    // best effort
-  }
+  // 0.4.0: do not derive the allowlist from git history. A
+  // malicious or careless agent can self-approve by simply
+  // committing, which would silently invert the trust model.
+  // External review surfaces (CI env, CODEOWNERS, repo-local
+  // approvers file) are the only authorities.
   for (const ownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
     const absolute = path.join(rootDir, ownersPath);
     if (!fs.existsSync(absolute)) continue;
@@ -120,14 +110,22 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
       errors.push(`expires must be at most ${MAX_WAIVER_DAYS} days from today (got ${span})`);
     }
   }
-  if (approvedBy) {
-    const allowlist = getApprovalAllowlist(rootDir);
-    if (!allowlist.includes(approvedBy)) {
-      errors.push(`approved-by:${approvedBy} is not in the approval allowlist`);
-    }
-  }
   const expired = Boolean(expires) && expires < todayIsoDate();
   if (expired) errors.push("waiver is expired");
+  // 0.4.x: the allowlist mismatch is a hard parse error.
+  // A waiver whose approved-by identity is not in the approval
+  // allowlist (CELLFENCE_APPROVERS / CODEOWNERS / .cellfence/approvers.txt)
+  // is marked invalid so the rest of the pipeline (list, prune,
+  // change check) will NOT use it to suppress findings. The
+  // separate CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still
+  // emitted by collectWaiversForManifest for observability, but
+  // it is now an error code, not a soft warning: the waiver
+  // cannot grant a bypass.
+  const allowlist = approvedBy ? getApprovalAllowlist(rootDir) : [];
+  const untrustedApprover = Boolean(approvedBy) && approvedBy.toUpperCase() !== "PENDING" && !allowlist.includes(approvedBy);
+  if (untrustedApprover) {
+    errors.push(`approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`);
+  }
   return {
     ruleId,
     filePath: repoPath(rootDir, filePath),
@@ -137,6 +135,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
     reason,
     expired,
     valid: errors.length === 0,
+    untrustedApprover,
     errors,
   };
 }
@@ -152,13 +151,42 @@ function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): s
   return [...files].sort((left, right) => left.localeCompare(right));
 }
 
-export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest): CellFenceWaiver[] {
+export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest, findings?: Finding[]): CellFenceWaiver[] {
+  // 0.4.0: cells that opt out of waiver parsing (waiverParsing === false)
+  // keep ownership of their files but their // cellfence-ignore directives
+  // are not interpreted as waivers. This is the escape hatch for cells that
+  // contain deliberately invalid waiver test fixtures (CellFence's own
+  // scripts/ and tests/ trees, for example).
+  const skipCells = new Set(
+    manifest.cells.filter((cell) => cell.waiverParsing === false).map((cell) => cell.id),
+  );
+  const skipFiles = new Set<string>();
+  if (skipCells.size > 0) {
+    const ctx = createContext(rootDir, manifest);
+    for (const cell of manifest.cells) {
+      if (!skipCells.has(cell.id)) continue;
+      for (const file of sourceFilesForCell(rootDir, cell, ctx)) {
+        skipFiles.add(file);
+      }
+    }
+  }
   const waivers: CellFenceWaiver[] = [];
   for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
+    if (skipFiles.has(sourceFile)) continue;
     const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
     for (const [index, line] of lines.entries()) {
       const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line);
-      if (waiver) waivers.push(waiver);
+      if (!waiver) continue;
+      waivers.push(waiver);
+      if (waiver.untrustedApprover && findings) {
+        findings.push({
+          ruleId: "CELLFENCE_WAIVER_UNTRUSTED_APPROVER",
+          severity: "warning",
+          filePath: waiver.filePath,
+          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, git history, CODEOWNERS, or .cellfence/approvers.txt)`,
+          details: { approvedBy: waiver.approvedBy, ruleId: waiver.ruleId, line: waiver.line },
+        });
+      }
     }
   }
   return waivers;
