@@ -9,6 +9,9 @@ export type ArtifactLaneManifest = {
   paths: string[];
   description?: string;
   locked?: boolean;
+  waiverParsing?: boolean;
+  importAnalysis?: boolean;
+  resourceAnalysis?: boolean;
 };
 
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
@@ -24,7 +27,7 @@ export type ResourceAccessConfidence = "high" | "medium" | "low" | "transient" |
 // Consumers should treat "transient" as "best effort, possibly
 // incomplete" and check `transcriptStatus` before relying on an
 // empty `accesses` array as proof that no accesses happened.
-export type ResourceEvidenceTranscriptStatus = "active" | "inactive" | "incomplete";
+export type ResourceEvidenceTranscriptStatus = "complete" | "active" | "inactive" | "incomplete";
 export type BuiltInResourceAdapter =
   | "file"
   | "http"
@@ -51,6 +54,9 @@ export type ResourceContractManifest = {
   access: ResourceAccessMode[];
   selectors: string[];
   locked?: boolean;
+  waiverParsing?: boolean;
+  importAnalysis?: boolean;
+  resourceAnalysis?: boolean;
   description?: string;
 };
 
@@ -159,6 +165,9 @@ export type CellManifest = {
   publicSymbols: string[];
   packageName?: string;
   locked?: boolean;
+  waiverParsing?: boolean;
+  importAnalysis?: boolean;
+  resourceAnalysis?: boolean;
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
@@ -607,6 +616,9 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "publicSymbols",
     "packageName",
     "locked",
+    "waiverParsing",
+    "importAnalysis",
+    "resourceAnalysis",
     "consumes",
     "producesArtifacts",
     "resourceContracts",
@@ -637,6 +649,15 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (!optionalBoolean(value.locked)) {
     errors.push(`${location}.locked must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.waiverParsing)) {
+    errors.push(`${location}.waiverParsing must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.importAnalysis)) {
+    errors.push(`${location}.importAnalysis must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.resourceAnalysis)) {
+    errors.push(`${location}.resourceAnalysis must be a boolean when present`);
   }
   if (value.consumes !== undefined) {
     if (!Array.isArray(value.consumes)) {
