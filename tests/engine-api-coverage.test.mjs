@@ -16,6 +16,14 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+// M-3: B-02 (allowlist hard error) requires an approver
+// allowlist to evaluate any waiver. Set a sentinel so
+// `npm test` is hermetic without exporting
+// CELLFENCE_APPROVERS=test-owner in the developer's shell.
+if (!process.env.CELLFENCE_APPROVERS) {
+  process.env.CELLFENCE_APPROVERS = "test-owner";
+}
+
 import {
   checkChangedRepository,
   checkClaims,

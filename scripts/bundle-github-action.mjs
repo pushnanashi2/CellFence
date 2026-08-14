@@ -46,6 +46,7 @@ const result = spawnSync("npx", [
   // supported by the GitHub Actions node20 runner.
   "--format=cjs",
   `--outfile=${outDir}/index.js`,
+  "--sourcemap=external",
 ], { stdio: "inherit" });
 if (result.status !== 0) {
   process.exit(result.status ?? 1);
