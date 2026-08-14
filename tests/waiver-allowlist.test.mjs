@@ -1,3 +1,8 @@
+const WAVING_INTO_THE_FUTURE = (() => {
+  const d = new Date(Date.now() + 89 * 86400 * 1000);
+  return d.toISOString().slice(0, 10);
+})();
+
 // New test file for B-02: strict allowlist enforcement on waivers
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -17,7 +22,7 @@ function writeProject(rootDir, approver, includeCell = true) {
   };
   fs.writeFileSync(path.join(rootDir, "cellfence.manifest.json"), JSON.stringify(manifest));
   // waiver with an approver NOT in the allowlist
-  const waiverText = `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:${approver} reason:temporary strict allowlist test fixture\n`;
+  const waiverText = `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:${approver} reason:temporary strict allowlist test fixture\n`;
   fs.writeFileSync(path.join(rootDir, "src/a/public.ts"), `export const a = 1;\n${waiverText}`);
 }
 

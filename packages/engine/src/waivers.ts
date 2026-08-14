@@ -238,7 +238,7 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
           ruleId: "CELLFENCE_WAIVER_UNTRUSTED_APPROVER",
           severity: "warning",
           filePath: waiver.filePath,
-          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, git history, CODEOWNERS, or .cellfence/approvers.txt)`,
+          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`,
           details: { approvedBy: waiver.approvedBy, ruleId: waiver.ruleId, line: waiver.line },
         });
       }
