@@ -5,6 +5,7 @@ import ts from "typescript";
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
 
 import { matchesGlobPattern } from "./glob.js";
+import { pathPatternSubset } from "./glob-overlap.js";
 
 export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
 
@@ -167,17 +168,31 @@ export function pathOwnedByCell(cell: CellManifest, relativePath: string): boole
 }
 
 export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {
-  const normalizedPattern = normalizePath(pattern);
-  const targetPrefix = literalPrefix(pattern) || normalizePath(pattern);
-  return ownedPaths.some((ownedPath) => {
-    if (matchesPattern(targetPrefix, ownedPath)) return true;
-    const ownedPrefix = literalPrefix(ownedPath);
-    // Stryker disable next-line ConditionalExpression: prefix-less owner patterns fall through to the same false containment result below.
-    if (!ownedPrefix) return false;
-    if (targetPrefix.startsWith(`${ownedPrefix}/`)) return true;
-    // Stryker disable next-line ConditionalExpression: previous exact/prefix guards make the remaining boolean reductions equivalent for supported ownership globs.
-    return targetPrefix === ownedPrefix && (normalizedPattern === ownedPrefix || normalizedPattern.startsWith(`${ownedPrefix}/`));
-  });
+  // B-04 review fix: the previous implementation used a
+  // literal-prefix heuristic, which produced false-positive
+  // containment. The 0.4.1 implementation delegates the
+  // containment test to `pathPatternSubset`, which is a
+  // proper NFA->DFA subset check: L(pattern) is contained
+  // in L(ownedPath) iff the product DFA of `pattern` and
+  // `complement(ownedPath)` has no accept state reachable
+  // from the start state. This catches cases like
+  // `src/api/v1*` not being covered by `src/api/**`, which
+  // the prefix heuristic would have reported as covered.
+  //
+  // A bare owned path such as `src/core` is treated as a
+  // directory ownership: it covers `src/core` and all of
+  // its descendants, i.e. its language is L(`src/core/**`).
+  // This matches the previous prefix heuristic for the
+  // "directory" cases (e.g. `src/core/nested/**` is covered
+  // by `src/core`) without re-introducing the false
+  // positives for sibling directories (e.g. `src/corex/**`
+  // is still NOT covered by `src/core/**`).
+  return ownedPaths.some((ownedPath) => pathPatternSubset(pattern, expandOwnedPath(ownedPath)));
+}
+
+function expandOwnedPath(ownedPath: string): string {
+  if (ownedPath.includes("*")) return ownedPath;
+  return `${ownedPath.replace(/\/$/, "")}/**`;
 }
 
 export function sourceKindForPath(filePath: string): ts.ScriptKind {
