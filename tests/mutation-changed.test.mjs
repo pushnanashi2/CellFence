@@ -222,13 +222,22 @@ test("mutation changed plan reports the exact target and dedicated tests", () =>
   assert.doesNotMatch(result.stdout, /tests\/module-resolution\.test\.mjs/);
 });
 
-test("mutation scopes rerun for dedicated tests and all mutation infrastructure changes", () => {
+test("mutation scopes rerun for dedicated source and test changes only", () => {
   assert.deepEqual(
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],
   );
-  assert.equal(mutationScopesForFiles(["stryker.conf.mjs"]).length, MUTATION_SCOPES.length);
-  assert.equal(mutationScopesForFiles(["package-lock.json"]).length, MUTATION_SCOPES.length);
+  assert.deepEqual(
+    mutationScopesForFiles([
+      "package-lock.json",
+      "stryker.conf.mjs",
+      "stryker.changed.conf.mjs",
+      "scripts/mutation-changed.mjs",
+      "scripts/mutation-scopes.mjs",
+      ".github/workflows/ci.yml",
+    ]),
+    [],
+  );
   assert.deepEqual(
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],

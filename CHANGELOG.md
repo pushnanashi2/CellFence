@@ -36,6 +36,7 @@
 - Turn on explicit-any, unused TypeScript binding, and JavaScript undefined-name linting, and generate the README CLI help block from the built CLI with a drift test.
 - Close independent-review gaps by making Python inspector failures fail closed with batch bisection, limiting changed-result cache reuse to non-suppressing base results with complete runtime identity, rejecting empty and prototype-named MCP tool policy inputs, and binding adversarial stdout claims to pinned artifacts.
 - Tie release dispatches to the exact-ref full mutation matrix, retain oracle reports on failure, harden action pin verification, and make changed-scope selection preserve deleted and both renamed paths.
+- Keep changed-scope mutation testing focused on production/test scope changes instead of widening to every scope for package lock, CI, or mutation runner support-file edits.
 
 ## 0.2.1 - 2026-08-04
 
