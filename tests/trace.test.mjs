@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,6 +8,14 @@ import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
 const tracePath = path.join(root, "packages/trace/dist/index.js");
+
+function withoutTraceCommitEnv(extra = {}) {
+  return {
+    ...Object.fromEntries(Object.entries(process.env).filter(([name]) =>
+      name !== "CELLFENCE_TRACE_COMMIT_SHA" && name !== "GITHUB_SHA")),
+    ...extra,
+  };
+}
 
 test("trace hook emits runtime file resource evidence", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-"));
@@ -475,6 +483,174 @@ test("trace hook writes commit fallback and flushes only once", () => {
   const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   assert.equal(evidence.commitSha, "trace-fallback-sha");
   assert.deepEqual(evidence.accesses.map((access) => access.selector), ["first_flush"]);
+});
+
+test("trace hook trims env commit fallback before writing evidence", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-commit-env-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("commit_env");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({
+      CELLFENCE_TRACE_COMMIT_SHA: "  trace-env-sha  ",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    }),
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.commitSha, "trace-env-sha");
+});
+
+test("trace hook ignores blank commit env fallbacks", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-blank-commit-env-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("blank_commit_env");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({
+      GIT_CONFIG_NOSYSTEM: "1",
+      HOME: tempDir,
+      CELLFENCE_TRACE_COMMIT_SHA: "   ",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    }),
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.commitSha, "");
+});
+
+test("trace hook falls back to git HEAD and then to an empty commit outside git", () => {
+  const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-git-commit-"));
+  execFileSync("git", ["init"], { cwd: gitDir, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "trace@example.invalid"], { cwd: gitDir });
+  execFileSync("git", ["config", "user.name", "Trace Test"], { cwd: gitDir });
+  fs.writeFileSync(path.join(gitDir, "tracked.txt"), "tracked\n");
+  execFileSync("git", ["add", "tracked.txt"], { cwd: gitDir });
+  execFileSync("git", ["commit", "-m", "trace fixture"], { cwd: gitDir, stdio: "ignore" });
+  const expectedSha = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: gitDir,
+    encoding: "utf8",
+  }).trim();
+  fs.writeFileSync(path.join(gitDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("commit_git");
+  `);
+  const gitEvidencePath = path.join(gitDir, "resource-evidence.json");
+  const gitResult = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: gitDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({ CELLFENCE_TRACE_OUT: gitEvidencePath }),
+  });
+
+  assert.equal(gitResult.status, 0, gitResult.stderr);
+  const gitEvidence = JSON.parse(fs.readFileSync(gitEvidencePath, "utf8"));
+  assert.equal(gitEvidence.commitSha, expectedSha);
+
+  fs.rmSync(gitEvidencePath, { force: true });
+  const blankEnvResult = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: gitDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({
+      CELLFENCE_TRACE_COMMIT_SHA: "   ",
+      CELLFENCE_TRACE_OUT: gitEvidencePath,
+    }),
+  });
+
+  assert.equal(blankEnvResult.status, 0, blankEnvResult.stderr);
+  const blankEnvEvidence = JSON.parse(fs.readFileSync(gitEvidencePath, "utf8"));
+  assert.equal(blankEnvEvidence.commitSha, expectedSha);
+
+  const nonGitDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-no-git-commit-"));
+  fs.writeFileSync(path.join(nonGitDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("commit_missing");
+  `);
+  const nonGitEvidencePath = path.join(nonGitDir, "resource-evidence.json");
+  const nonGitResult = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: nonGitDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({
+      GIT_CONFIG_NOSYSTEM: "1",
+      HOME: nonGitDir,
+      CELLFENCE_TRACE_OUT: nonGitEvidencePath,
+    }),
+  });
+
+  assert.equal(nonGitResult.status, 0, nonGitResult.stderr);
+  const nonGitEvidence = JSON.parse(fs.readFileSync(nonGitEvidencePath, "utf8"));
+  assert.equal(nonGitEvidence.commitSha, "");
+});
+
+test("trace disable flag is exact and transcript status uses the load-time decision", () => {
+  const activeDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-empty-disable-"));
+  fs.writeFileSync(path.join(activeDir, "app.mjs"), `
+    import fs from "node:fs";
+    fs.writeFileSync("active-output.json", "{}\\n");
+  `);
+  const activeEvidencePath = path.join(activeDir, "resource-evidence.json");
+  const active = spawnSync(process.execPath, [
+    "--import",
+    pathToFileURL(tracePath).href,
+    "app.mjs",
+  ], {
+    cwd: activeDir,
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({
+      CELLFENCE_TRACE_DISABLE: "",
+      CELLFENCE_TRACE_OUT: activeEvidencePath,
+    }),
+  });
+
+  assert.equal(active.status, 0, active.stderr);
+  const activeEvidence = JSON.parse(fs.readFileSync(activeEvidencePath, "utf8"));
+  assert.equal(activeEvidence.transcriptStatus, "active");
+
+  const disabledScript = `
+    import assert from "node:assert/strict";
+    const { transcriptStatus } = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?disabled-status`)});
+    assert.equal(transcriptStatus(), "inactive");
+  `;
+  const disabled = spawnSync(process.execPath, ["--input-type=module", "-e", disabledScript], {
+    cwd: fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-disabled-status-")),
+    encoding: "utf8",
+    env: withoutTraceCommitEnv({ CELLFENCE_TRACE_DISABLE: "1" }),
+  });
+
+  assert.equal(disabled.status, 0, disabled.stderr);
+});
+
+test("trace transcript derivation rejects inactive, incomplete, and spoofed evidence states", () => {
+  const script = `
+    import assert from "node:assert/strict";
+    const { deriveTranscriptStatus } = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?derive-status`)});
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "active", accesses: [{ selector: "x" }] }, { disabled: true, hookInstalled: true }), "inactive");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "active", accesses: [{ selector: "x" }] }, { disabled: false, hookInstalled: false }), "inactive");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "inactive", accesses: [{ selector: "x" }] }, { disabled: false, hookInstalled: true }), "inactive");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "active", accesses: [{ selector: "x" }] }, { disabled: false, hookInstalled: true }), "active");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "active", accesses: [] }, { disabled: false, hookInstalled: true }), "incomplete");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "active" }, { disabled: false, hookInstalled: true }), "incomplete");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "incomplete", accesses: [{ selector: "x" }] }, { disabled: false, hookInstalled: true }), "incomplete");
+    assert.equal(deriveTranscriptStatus({ transcriptStatus: "spoofed", accesses: [{ selector: "x" }] }, { disabled: false, hookInstalled: true }), "incomplete");
+  `;
+  const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
+    cwd: fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-derive-")),
+    encoding: "utf8",
+    env: withoutTraceCommitEnv(),
+  });
+
+  assert.equal(result.status, 0, result.stderr);
 });
 
 test("trace hook tolerates runtimes without fetch", () => {

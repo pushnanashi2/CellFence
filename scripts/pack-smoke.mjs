@@ -93,7 +93,7 @@ const require = createRequire(import.meta.url);
 for (const [specifier, schemaVersion] of [
   ["@cellfence/schema/manifest.schema.json", "cellfence.manifest.v1"],
   ["@cellfence/schema/baseline.schema.json", "cellfence.baseline.v1"],
-  ["@cellfence/schema/resource-evidence.schema.json", "cellfence.resource-evidence.v1"],
+  ["@cellfence/schema/resource-evidence.schema.json", "cellfence.resource-evidence.v2"],
 ]) {
   const schema = require(specifier);
   assert.equal(schema.properties.schemaVersion.const, schemaVersion, specifier);

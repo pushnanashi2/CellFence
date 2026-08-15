@@ -25,6 +25,7 @@ import {
 } from "../packages/engine/dist/file-index.js";
 import {
   ownedPathPatternsOverlap,
+  pathPatternSubset,
   pathPatternsOverlap,
 } from "../packages/engine/dist/glob-overlap.js";
 
@@ -265,6 +266,42 @@ test("glob overlap agrees with concrete matcher witnesses across a bounded diale
       );
     }
   }
+});
+
+test("glob subset distinguishes literal, slash, non-slash, and any transitions", () => {
+  const trueSubsets = [
+    ["src/a.ts", "src/*"],
+    ["src/a.ts", "src/**"],
+    ["src/a.ts", "**"],
+    ["src/**", "**"],
+    ["src/**/a.ts", "src/**"],
+    ["src/*/a.ts", "src/**/a.ts"],
+    ["src/*.ts", "src/**.ts"],
+    ["src/**.ts", "src/*.ts"],
+    ["*", "**"],
+    ["src/file?.ts", "src/file?.ts"],
+  ];
+  for (const [inner, outer] of trueSubsets) {
+    assert.equal(pathPatternSubset(inner, outer), true, `expected ${inner} subset ${outer}`);
+  }
+
+  const falseSubsets = [
+    ["src/**", "src/*"],
+    ["src/*", "src/*.ts"],
+    ["src/**", "src/**/a.ts"],
+    ["src/a/b.ts", "src/**.ts"],
+    ["src/a", "src/a/b"],
+    ["src/file1.ts", "src/file?.ts"],
+    ["src/a/b", "src/*/c"],
+    ["src/**/a", "src/*/a"],
+    ["**", "*"],
+    ["**", "src/**"],
+  ];
+  for (const [inner, outer] of falseSubsets) {
+    assert.equal(pathPatternSubset(inner, outer), false, `expected ${inner} not subset ${outer}`);
+  }
+
+  assert.equal(patternCoveredByOwnedPaths("src/core/a.ts", ["src/core/"]), true);
 });
 
 test("file index listFiles sorts results, ignores generated directories, and caches per context", () => {

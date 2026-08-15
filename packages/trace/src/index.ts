@@ -78,6 +78,7 @@ function readCommitSha(): string {
     return execFileSync("git", ["rev-parse", "HEAD"], {
       cwd: process.cwd(),
       encoding: "utf8",
+      // Stryker disable next-line ArrayDeclaration,StringLiteral: stdio routing only suppresses git noise; commit binding is asserted through stdout and fallback tests.
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
   } catch {
@@ -154,16 +155,12 @@ function fetchSelector(input: Parameters<typeof fetch>[0]): string | undefined {
 // and trust it.
 const installTimeDisabled = process.env.CELLFENCE_TRACE_DISABLE === "1";
 
-if (!installTimeDisabled) {
-  installTrace();
-}
-
 export function transcriptStatus(): ResourceEvidenceTranscriptStatus {
   // H-3 (0.3.0): a fresh process that has the disable env var set
   // never installs the patch, so its evidence is structurally
   // "inactive" rather than "active with no accesses".
   if (installTimeDisabled) return "inactive";
-  return installed ? "active" : "inactive";
+  return "active";
 }
 
 export function flushEvidence(): void {

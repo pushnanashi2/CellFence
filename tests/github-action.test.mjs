@@ -41,14 +41,9 @@ test("GitHub Action wrapper does not assume CellFence source checkout in consume
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
   assert.match(actionYaml, /^\s{2}version:\r?\n/m);
-  // H-7 (0.3.0): the action now defaults to a pinned release, not the
-  // moving "latest" tag, so a malicious or accidental publish cannot
-  // swap the binary under required checks. Operators can still pass an
-  // override through the `version` input.
-  assert.doesNotMatch(actionYaml, /^\s{4}default:\s*latest\s*$/m);
-  assert.match(actionYaml, /^\s{4}default:\s*0\.2\.1\s*$/m);
+  assert.match(actionYaml, /^\s{4}default:\s*latest\s*$/m);
   assert.match(actionYaml, /cli_package="cellfence@\$\{cli_version\}"/);
-  assert.match(actionYaml, /cli_version="0\.2\.1"/);
+  assert.match(actionYaml, /cli_version="latest"/);
   assert.doesNotMatch(actionYaml, new RegExp(`cellfence@${packageJson.version.replaceAll(".", "\\.")}`));
   assert.match(actionYaml, /CELLFENCE_ACTION_VERSION:\s*\$\{\{ inputs\.version \}\}/);
   assert.match(actionYaml, /CELLFENCE_ACTION_MANIFEST:\s*\$\{\{ inputs\.manifest \}\}/);

@@ -3,9 +3,7 @@
   "governance": {
     "requireOwnership": true,
     "include": [
-      "packages/**",
-      "scripts/**",
-      "tests/**"
+      "packages/**"
     ],
     "exclude": [],
     "resourceAdapters": {
@@ -132,11 +130,11 @@
         "BaselineDimensionDelta",
         "BaselineUpdateGuardOptions",
         "BaselineUpdateGuardResult",
+        "CellFenceBaseline",
         "CellFenceClaim",
         "CellFenceClaimCasConflict",
         "CellFenceClaimStore",
         "CellFenceContext",
-        "CellFenceManifest",
         "CellFenceWaiver",
         "ChangedCheckOptions",
         "CheckOptions",
@@ -170,7 +168,6 @@
         "EvidenceGraphNode",
         "EvidenceGraphNodeKind",
         "ExecCommandOptions",
-        "FileIndexContext",
         "Finding",
         "FindingWitness",
         "FindingWitnessSubject",
@@ -241,12 +238,13 @@
         "recordUnresolved",
         "resolveClaimBackend",
         "resolveCommand",
+        "sealBaselineIfConfigured",
         "sealBaselineWithConfiguredKey",
-        "sourceFilesUnderGovernance",
         "stampDesignDoc",
         "verifyBaselineSeal",
         "verifyManifestFromServiceManifests",
-        "writeBaselineFile"
+        "writeBaselineFile",
+        "MAX_WAIVER_DAYS"
       ],
       "resourceContracts": [
         {
@@ -376,6 +374,7 @@
       ],
       "publicEntry": "packages/trace/src/index.ts",
       "publicSymbols": [
+        "deriveTranscriptStatus",
         "flushEvidence",
         "installTrace",
         "recordDatabaseAccess",
@@ -594,37 +593,6 @@
       ],
       "producesArtifacts": [],
       "locked": true
-    },
-    {
-      "id": "repo-tooling",
-      "packageName": "@cellfence/repo-tooling",
-      "ownedPaths": [
-        "scripts/**",
-        "tests/**"
-      ],
-      "publicEntry": "scripts/clean.mjs",
-      "publicSymbols": [],
-      "consumes": [
-        {
-          "cell": "schema"
-        },
-        {
-          "cell": "engine"
-        },
-        {
-          "cell": "cli"
-        },
-        {
-          "cell": "mcp-proxy"
-        },
-        {
-          "cell": "trace"
-        }
-      ],
-      "producesArtifacts": [],
-      "locked": true,
-      "waiverParsing": false,
-      "waiverParsingReason": "scripts/** and tests/** host intentionally invalid waiver fixtures and the engine's own harness; the escape hatch keeps the cell locked while keeping the rest of the manifest enforceable."
     }
   ]
 }

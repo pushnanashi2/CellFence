@@ -562,7 +562,7 @@ test("proxy path extraction treats prototype names as unknown tools", () => {
 test("proxy downstream environment is filtered to an explicit allowlist (H-3)", () => {
   const safeEnv = __testing.safeDownstreamEnvironment({
     PATH: "/usr/bin:/bin",
-    HOME: "/home/test",
+    HOME: "/tmp/cellfence-home-test",
     USER: "test",
     LANG: "C.UTF-8",
     LC_ALL: "C.UTF-8",
@@ -585,7 +585,7 @@ test("proxy downstream environment is filtered to an explicit allowlist (H-3)", 
   });
   // Allowed names come through verbatim.
   assert.equal(safeEnv.PATH, "/usr/bin:/bin");
-  assert.equal(safeEnv.HOME, "/home/test");
+  assert.equal(safeEnv.HOME, "/tmp/cellfence-home-test");
   assert.equal(safeEnv.USER, "test");
   assert.equal(safeEnv.LANG, "C.UTF-8");
   assert.equal(safeEnv.LC_ALL, "C.UTF-8");

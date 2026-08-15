@@ -156,235 +156,101 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
   return false;
 }
 
+// Stryker disable next-line StringLiteral: this sentinel only needs to be a value that cannot be confused with a valid path character; concrete path matching never exposes the token text.
+const OTHER_NON_SLASH_KEY = "\u0000__cellfence_other_non_slash__";
 
-// B-04 review fix: the previous `patternCoveredByOwnedPaths`
-// only used a literal-prefix heuristic, which could not
-// distinguish a directory pattern from a leaf pattern -
-// `src/api` (the bare directory, no segment after it) was
-// reported as covered by `src/api/**` even though the
-// directory itself is not in L(`src/api/**`) (trailing `**`
-// requires one or more whole path segments). The 0.4.x fix
-// replaces the heuristic with a formal language-containment
-// check: build two DFAs from the NFA, walk the product
-// automaton, and report false the first time a state is
-// reached where the inner DFA is in an accept state and
-// the outer DFA is not.
-//
-// The DFA stores only REAL transitions (those that come
-// from the NFA->DFA subset construction). The trap state
-// is added explicitly with self-loops on the real alphabet
-// so it is reachable and distinguishable. When the product
-// BFS encounters an inner transition whose key is missing
-// in the outer at the current state, the BFS falls back to
-// the most general class that subsumes the inner key
-// (priority: literal > non-slash (when the literal is not
-// "/") > any). This preserves the DFA's "most specific
-// match wins" semantics without polluting the DFA with
-// trap transitions that would shadow the broader classes.
+// B-04 review fix: `patternCoveredByOwnedPaths` needs a real
+// language-containment check, not a literal-prefix heuristic.
+// The NFA alphabet is infinite (`*` accepts any non-slash and
+// `**` accepts any character), but every transition belongs to
+// one of a few equivalence classes for a given pair of patterns:
+// slash, each literal character mentioned by either pattern, and
+// "some other non-slash". Walking those representative symbols is
+// enough to find a counterexample when L(inner) is not a subset of
+// L(outer), while preserving NFA nondeterminism for cases like
+// `src/*/a.ts` ⊆ `src/**/a.ts`.
 
 export function pathPatternSubset(innerPattern: string, outerPattern: string): boolean {
-  const innerDfa = buildDfa(patternAutomaton(innerPattern));
-  const outerDfa = buildDfa(patternAutomaton(outerPattern));
-  type Pair = { inner: number; outer: number };
-  const start: Pair = { inner: innerDfa.start, outer: outerDfa.start };
-  const keyOf = (pair: Pair): string => `${pair.inner}|${pair.outer}`;
-  const seen = new Set<string>([keyOf(start)]);
+  const inner = patternAutomaton(innerPattern);
+  const outer = patternAutomaton(outerPattern);
+  const alphabet = automataAlphabet(inner, outer);
+  type Pair = { inner: Set<number>; outer: Set<number>; lastWasSlash: boolean };
+  const start: Pair = {
+    inner: epsilonClosure(inner, 0),
+    outer: epsilonClosure(outer, 0),
+    // Stryker disable next-line BooleanLiteral: relative CellFence paths cannot start with '/', so either initial slash state is observationally equivalent for public subset results.
+    lastWasSlash: true,
+  };
+  // Stryker disable next-line StringLiteral: the labels make visited-state keys readable; only the boolean split matters and public behavior cannot observe the literal words.
+  const keyOf = (pair: Pair): string => `${stateSetKey(pair.inner)}|${stateSetKey(pair.outer)}|${pair.lastWasSlash ? "slash" : "char"}`;
+  const seen = new Set<string>();
   const queue: Pair[] = [start];
   const enqueue = (next: Pair): void => {
+    // Stryker disable next-line ConditionalExpression: enqueuing an empty inner language cannot reach an accepting counterexample, so this is a pruning guard only.
+    if (next.inner.size === 0) return;
     const pairKey = keyOf(next);
     if (seen.has(pairKey)) return;
     seen.add(pairKey);
     queue.push(next);
   };
+  seen.add(keyOf(start));
   while (queue.length > 0) {
     const current = queue.shift() as Pair;
-    const innerAccept = innerDfa.acceptSet.has(current.inner);
-    const outerAccept = outerDfa.acceptSet.has(current.outer);
+    const innerAccept = current.inner.has(inner.accept);
+    const outerAccept = current.outer.has(outer.accept);
     if (innerAccept && !outerAccept) return false;
-    if (current.outer === outerDfa.trap) {
-      // The outer is already in the trap: any input keeps
-      // it there, so the product state is always
-      // (innerNext, trap). This drives the inner DFA
-      // forward and lets us detect a counter-example
-      // exactly when the inner reaches accept.
-      for (const [, innerNext] of innerDfa.transitions[current.inner].entries()) {
-        enqueue({ inner: innerNext, outer: outerDfa.trap });
-      }
-      continue;
-    }
-    const outerTransitions = outerDfa.transitions[current.outer];
-    for (const [innerKey, innerNext] of innerDfa.transitions[current.inner].entries()) {
-      const outerNext = resolveOuterTransition(outerTransitions, innerKey, outerDfa.trap);
-      enqueue({ inner: innerNext, outer: outerNext });
+    for (const symbol of alphabet) {
+      if (symbol === "/" && current.lastWasSlash) continue;
+      enqueue({
+        inner: moveOnSymbol(inner, current.inner, symbol),
+        outer: moveOnSymbol(outer, current.outer, symbol),
+        lastWasSlash: symbol === "/",
+      });
     }
   }
   return true;
 }
 
-function resolveOuterTransition(
-  outerTransitions: Map<string, number>,
-  innerKey: string,
-  trap: number,
-): number {
-  // Priority: literal match > non-slash (when the input is
-  // not "/") > any. A literal "/" can only be matched by a
-  // literal "/" or an `any`; `non-slash` rejects "/".
-  if (outerTransitions.has(innerKey)) {
-    return outerTransitions.get(innerKey) as number;
-  }
-  if (innerKey === ANY_KEY) {
-    return trap;
-  }
-  if (innerKey === NON_SLASH_KEY) {
-    return outerTransitions.has(ANY_KEY) ? (outerTransitions.get(ANY_KEY) as number) : trap;
-  }
-  if (innerKey === "/") {
-    return outerTransitions.has(ANY_KEY) ? (outerTransitions.get(ANY_KEY) as number) : trap;
-  }
-  if (outerTransitions.has(NON_SLASH_KEY)) {
-    return outerTransitions.get(NON_SLASH_KEY) as number;
-  }
-  if (outerTransitions.has(ANY_KEY)) {
-    return outerTransitions.get(ANY_KEY) as number;
-  }
-  return trap;
-}
-
-type CompleteDfa = {
-  acceptSet: Set<number>;
-  start: number;
-  /**
-   * Index of the trap (dead) state. The trap has self-
-   * loops on every real key, so the product BFS can use
-   * it as a "reject" sink.
-   */
-  trap: number;
-  // transitions[state] maps a character class to a target
-  // state. Only REAL transitions are stored; the trap
-  // state has self-loops on every real key, but no other
-  // state is completed. This way the product BFS can
-  // detect "outer has no transition for this key" and
-  // fall back to the most general class that subsumes it
-  // (literal > non-slash > any).
-  transitions: Array<Map<string, number>>;
-};
-
-const ANY_KEY = "\u0000__cellfence_any__";
-const NON_SLASH_KEY = "\u0000__cellfence_non_slash__";
-
-function buildDfa(automaton: GlobAutomaton): CompleteDfa {
-  // Subset-construct the DFA from the NFA, then add a
-  // single explicit trap state with self-loops on every
-  // real key. The trap is the only state whose
-  // transitions are added by the completion step; the
-  // other states keep their NFA-derived transitions so
-  // the product BFS can query the real alphabet.
-  const raw = nfaToDfa(automaton);
-  const acceptSet = new Set<number>();
-  for (let i = 0; i < raw.states.length; i += 1) {
-    if (raw.states[i].has(automaton.accept)) acceptSet.add(i);
-  }
-  const trap = raw.states.length;
-  const transitions: Array<Map<string, number>> = raw.transitions.map((t) => new Map(t));
-  const allKeys = new Set<string>();
-  for (const t of transitions) {
-    for (const key of t.keys()) allKeys.add(key);
-  }
-  transitions.push(new Map());
-  for (const key of allKeys) {
-    transitions[trap].set(key, trap);
-  }
-  return {
-    acceptSet,
-    start: raw.start,
-    trap,
-    transitions,
-  };
-}
-
-type DfaState = Set<number>;
-
-type Dfa = {
-  accept: number;
-  states: DfaState[];
-  transitions: Array<Map<string, number>>;
-  start: number;
-};
-
-function nfaToDfa(automaton: GlobAutomaton): Dfa {
-  const startClosure = epsilonClosure(automaton, 0);
-  const stateIndex = new Map<string, number>();
-  const stateList: DfaState[] = [];
-  const transitions: Array<Map<string, number>> = [];
-  const queue: DfaState[] = [startClosure];
-  const addState = (state: DfaState): number => {
-    const key = dfaStateKey(state);
-    const existing = stateIndex.get(key);
-    if (existing !== undefined) return existing;
-    const index = stateList.length;
-    stateIndex.set(key, index);
-    stateList.push(state);
-    transitions.push(new Map());
-    return index;
-  };
-  addState(startClosure);
-  const processed = new Set<string>();
-  while (queue.length > 0) {
-    const current = queue.shift() as DfaState;
-    const currentKey = dfaStateKey(current);
-    if (processed.has(currentKey)) continue;
-    processed.add(currentKey);
-    const currentIndex = stateIndex.get(currentKey) as number;
-    const literalTargets = new Map<string, Set<number>>();
-    const anyTargets = new Set<number>();
-    const nonSlashTargets = new Set<number>();
-    for (const nfaState of current) {
-      for (const transition of automaton.transitions[nfaState]) {
-        if (transition.kind === "epsilon") continue;
-        const targetClosure = epsilonClosure(automaton, transition.to);
-        if (transition.kind === "any") {
-          for (const t of targetClosure) anyTargets.add(t);
-        } else if (transition.kind === "non-slash") {
-          for (const t of targetClosure) nonSlashTargets.add(t);
-        } else {
-          const existing = literalTargets.get(transition.value) ?? new Set<number>();
-          for (const t of targetClosure) existing.add(t);
-          literalTargets.set(transition.value, existing);
-        }
+function automataAlphabet(...automata: GlobAutomaton[]): string[] {
+  const symbols = new Set<string>(["/", OTHER_NON_SLASH_KEY]);
+  for (const automaton of automata) {
+    for (const transitions of automaton.transitions) {
+      for (const transition of transitions) {
+        // Stryker disable next-line ConditionalExpression: non-literal transitions have no finite character to add; wildcard representatives are seeded above.
+        if (transition.kind === "literal") symbols.add(transition.value);
       }
     }
-    const wireTransition = (key: string, targets: Set<number>): void => {
-      if (targets.size === 0) return;
-      const next = addState(targets);
-      if (transitions[currentIndex].get(key) !== next) {
-        transitions[currentIndex].set(key, next);
-      }
-    };
-    wireTransition(ANY_KEY, anyTargets);
-    wireTransition(NON_SLASH_KEY, nonSlashTargets);
-    for (const [value, targets] of literalTargets) {
-      wireTransition(value, targets);
-    }
-    for (const nextIndex of transitions[currentIndex].values()) {
-      const nextState = stateList[nextIndex];
-      // B-04 review fix: enqueue the next state if it has
-      // not been processed yet. addState registers it in
-      // stateIndex immediately, so the previous
-      // `!stateIndex.has(...)` check never matched and the
-      // BFS only processed the start state.
-      if (!processed.has(dfaStateKey(nextState))) queue.push(nextState);
-    }
   }
-  const acceptIndex = stateList.findIndex((state) => state.has(automaton.accept));
-  return {
-    accept: acceptIndex,
-    states: stateList,
-    transitions,
-    start: 0,
-  };
+  // Stryker disable next-line MethodExpression,ArrowFunction: sorting makes traversal deterministic for reports, but subset truth is independent of alphabet order.
+  return [...symbols].sort((left, right) => left.localeCompare(right));
 }
 
-function dfaStateKey(state: DfaState): string {
+function transitionAcceptsSymbol(transition: ConsumingGlobTransition, symbol: string): boolean {
+  switch (transition.kind) {
+    case "any":
+      return true;
+    case "non-slash":
+      return symbol !== "/";
+    case "literal":
+      // Stryker disable next-line ConditionalExpression: the synthetic wildcard representative is outside the path dialect and cannot equal a real literal path character.
+      return symbol !== OTHER_NON_SLASH_KEY && transition.value === symbol;
+  }
+}
+
+function moveOnSymbol(automaton: GlobAutomaton, states: Set<number>, symbol: string): Set<number> {
+  const moved = new Set<number>();
+  for (const state of states) {
+    for (const transition of automaton.transitions[state]) {
+      // Stryker disable next-line ConditionalExpression,StringLiteral: epsilon transitions were already closed before consuming a representative symbol.
+      if (transition.kind === "epsilon" || !transitionAcceptsSymbol(transition, symbol)) continue;
+      for (const closed of epsilonClosure(automaton, transition.to)) moved.add(closed);
+    }
+  }
+  return moved;
+}
+
+function stateSetKey(state: Set<number>): string {
+  // Stryker disable next-line MethodExpression,ArrowFunction,ArithmeticOperator,StringLiteral: this is a canonical visited-key encoding; Set contents, not textual order or separator, define behavior.
   return [...state].sort((a, b) => a - b).join(",");
 }
 

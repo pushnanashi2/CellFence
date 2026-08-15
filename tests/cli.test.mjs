@@ -194,24 +194,35 @@ test("CLI check returns two for manifest configuration errors", () => {
 
 test("CLI evidence check accepts baseline-approved runtime evidence", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
-  // H-4 (0.3.0): the v2 evidence schema requires commitSha to match
-  // the repository HEAD at validation time. The fixture's evidence
-  // is a checked-in copy with a placeholder sha, so we re-stamp the
-  // copy the CLI sees with the live HEAD before running.
-  const evidencePath = rebindEvidenceToHead(fixturePath, "resource-evidence.json");
-  const result = runCliWithEnv(["evidence", "check", "--evidence", evidencePath, "--json"], fixturePath, {
-    CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret",
-  });
-  assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /"ok": true/);
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-evidence-valid-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+  try {
+    // H-4 (0.3.0): the v2 evidence schema requires commitSha to match
+    // the repository HEAD at validation time. Re-stamp only the temp copy
+    // the CLI sees so the checked-in fixture remains stable.
+    const evidencePath = rebindEvidenceToHead(tempDir, "resource-evidence.json");
+    const result = runCliWithEnv(["evidence", "check", "--evidence", evidencePath, "--json"], tempDir, {
+      CELLFENCE_BASELINE_HMAC_KEY: "test-baseline-secret",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /"ok": true/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI evidence check rejects new runtime resource evidence", () => {
   const fixturePath = path.join(root, "fixtures/invalid/resource-evidence-detects-new");
-  const evidencePath = rebindEvidenceToHead(fixturePath, "resource-evidence.json");
-  const result = runCli(["evidence", "check", "--evidence", evidencePath, "--json"], fixturePath);
-  assert.equal(result.status, 1, result.stderr);
-  assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-evidence-invalid-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+  try {
+    const evidencePath = rebindEvidenceToHead(tempDir, "resource-evidence.json");
+    const result = runCli(["evidence", "check", "--evidence", evidencePath, "--json"], tempDir);
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI context returns machine-readable cell fence before editing", () => {
@@ -1516,6 +1527,8 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   // the check result but the waiver itself is recognised as valid.
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-valid-"));
   fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+  fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "test-owner\n");
   fs.writeFileSync(
     path.join(tempDir, "src/core/public.ts"),
     [
@@ -1626,11 +1639,13 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
     fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
     fs.mkdirSync(path.join(tempDir, "src/unused"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "test-owner\n");
     fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const used = true;\nexport const unused = true;\n");
     fs.writeFileSync(
       path.join(tempDir, "src/consumer/public.ts"),
       [
-        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale prune fixture`,
+        `// cellfence-ignore CELLFENCE_PUBLIC_ENTRY_MISSING expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale prune fixture`,
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",

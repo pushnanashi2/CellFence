@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-14T11:26:59.933Z",
+  "generatedAt": "2026-08-15T03:47:57.645Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -16,7 +16,6 @@
     "plugin-geo-purity",
     "plugin-legacy-strangler",
     "plugin-quants-trend",
-    "repo-tooling",
     "reporter-economy-matrix",
     "schema",
     "trace"
@@ -25,7 +24,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 36,
-      "publicSurfaceLines": 920,
+      "publicSurfaceLines": 926,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -69,7 +68,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "4f1410ef3cceba7b9e8f462606e43ffe7fc95a1e8ba79e782dee4daa3e0c190d",
+      "publicSurfaceHash": "2f27b48926a3c98d4f63271642e39c9a3361fad92c585351be6dabca1721dc5b",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -118,7 +117,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 122,
-      "publicSurfaceLines": 2069,
+      "publicSurfaceLines": 2075,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -134,11 +133,11 @@
         "BaselineUpdateGuardResult",
         "buildCmdCommandLine",
         "buildCoverageReport",
+        "CellFenceBaseline",
         "CellFenceClaim",
         "CellFenceClaimCasConflict",
         "CellFenceClaimStore",
         "CellFenceContext",
-        "CellFenceManifest",
         "CellFenceWaiver",
         "ChangedCheckOptions",
         "checkChangedRepository",
@@ -194,7 +193,6 @@
         "EvidenceGraphNodeKind",
         "ExecCommandOptions",
         "execCommandSync",
-        "FileIndexContext",
         "Finding",
         "findingFingerprint",
         "findingWitness",
@@ -216,6 +214,7 @@
         "localFileClaimStoreFingerprint",
         "LocalFileClaimStoreOptions",
         "matchesPattern",
+        "MAX_WAIVER_DAYS",
         "MutationCheckResult",
         "profileConfig",
         "profileRuleSeverities",
@@ -231,11 +230,11 @@
         "ResolvedClaimBackend",
         "ResolveOptions",
         "RuleId",
+        "sealBaselineIfConfigured",
         "sealBaselineWithConfiguredKey",
         "ServiceManifestImportResult",
         "ServiceManifestVerifyResult",
         "Severity",
-        "sourceFilesUnderGovernance",
         "stampDesignDoc",
         "SuggestedResolution",
         "TaskCheckResult",
@@ -248,7 +247,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "f8f2d8ece95c7e0a162506ff7bd7599252a49371691f48dbe6128e493fbda606",
+      "publicSurfaceHash": "4115abff539295a78607d6e27a422437614ff23929b78678f750009dadac3c99",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -273,7 +272,7 @@
     "mcp-proxy": {
       "ownedPathPatterns": 1,
       "publicSymbols": 12,
-      "publicSurfaceLines": 720,
+      "publicSurfaceLines": 761,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -318,7 +317,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 3,
-      "publicSurfaceLines": 1996,
+      "publicSurfaceLines": 2026,
       "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/cli/**"
@@ -329,7 +328,7 @@
         "main",
         "runBaselineGateFull"
       ],
-      "publicSurfaceHash": "14f82210d6c7404854bd4094300636116552fb3f2845275e8be105104da58c6d",
+      "publicSurfaceHash": "f6d931b9c5788e08c2d6bb24062a80c67f63a6e3060c16a10a39f8901b22b1a9",
       "dependencyEdges": [
         "cli->engine",
         "cli->schema"
@@ -373,14 +372,15 @@
     },
     "trace": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 7,
-      "publicSurfaceLines": 227,
+      "publicSymbols": 8,
+      "publicSurfaceLines": 267,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/trace/**"
       ],
       "publicEntryPath": "packages/trace/src/index.ts",
       "publicSymbolSet": [
+        "deriveTranscriptStatus",
         "flushEvidence",
         "installTrace",
         "recordDatabaseAccess",
@@ -389,7 +389,7 @@
         "recordResourceAccess",
         "transcriptStatus"
       ],
-      "publicSurfaceHash": "606739928e03728164002618dd511e2fc75d28ff637b4b4c99fd5fce03cf8abb",
+      "publicSurfaceHash": "b8919d4acc833aad9ee16fcf8dbd566e414bbdba5612e6303c2eb962368e672c",
       "dependencyEdges": [
         "trace->schema"
       ],
@@ -585,8 +585,8 @@
     "github-action-baseline-gate": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 415,
-      "crossCellDependencies": 0,
+      "publicSurfaceLines": 410,
+      "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/github-action-baseline-gate/**"
       ],
@@ -595,95 +595,16 @@
         "ACTION_INPUT_NAMES",
         "runAction"
       ],
-      "publicSurfaceHash": "4c0821ffd888a9fe7266137324164dbb1bab023347b9a0aea6eb5c070db68485",
-      "dependencyEdges": [],
+      "publicSurfaceHash": "b8fb36c3ae3efdfc9dd35860e7a7c5a53b65b32cff3ecf45616dd1b3110959d4",
+      "dependencyEdges": [
+        "github-action-baseline-gate->engine"
+      ],
       "artifactContracts": [],
       "resourceAccesses": []
-    },
-    "repo-tooling": {
-      "ownedPathPatterns": 2,
-      "publicSymbols": 0,
-      "publicSurfaceLines": 16,
-      "crossCellDependencies": 14,
-      "ownedPathSet": [
-        "scripts/**",
-        "tests/**"
-      ],
-      "publicEntryPath": "scripts/clean.mjs",
-      "publicSymbolSet": [],
-      "publicSurfaceHash": "f9b0d415541eb8ec12f3501e0501e5ca445583266023aff866b729e6edca087a",
-      "dependencyEdges": [
-        "repo-tooling->adapter-call-pattern",
-        "repo-tooling->adapter-opentelemetry",
-        "repo-tooling->cli",
-        "repo-tooling->engine",
-        "repo-tooling->mcp-proxy",
-        "repo-tooling->plugin-agent-budget",
-        "repo-tooling->plugin-api",
-        "repo-tooling->plugin-blast-radius",
-        "repo-tooling->plugin-dependency-sovereignty",
-        "repo-tooling->plugin-geo-purity",
-        "repo-tooling->plugin-legacy-strangler",
-        "repo-tooling->plugin-quants-trend",
-        "repo-tooling->reporter-economy-matrix",
-        "repo-tooling->schema"
-      ],
-      "artifactContracts": [],
-      "resourceAccesses": [
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": ".github/workflows",
-          "detectedBy": "readdirSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "CHANGELOG.md",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "docs/implementation-status.md",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "package.json",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "packages/cli/src/index.ts",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "packages/github-action/action.yml",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        },
-        {
-          "kind": "file",
-          "access": "read",
-          "selector": "packages/mcp-proxy/src/index.ts",
-          "detectedBy": "readFileSync",
-          "confidence": "high"
-        }
-      ]
     }
   },
   "seal": {
     "algorithm": "hmac-sha256",
-    "digest": "13ce4b2d5e0655cf155b9e26cc23a26d83169a296212eeebed8c4d7376e244e8"
+    "digest": "493619278ed57d00559a180fba6f61da68e80caf67462f778aa50753ccffae6f"
   }
 }

@@ -34,7 +34,8 @@ if (!fs.existsSync(sourceEntry)) {
   process.exit(1);
 }
 
-const result = spawnSync("npx", [
+const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const result = spawnSync(npxCommand, [
   "esbuild", sourceEntry,
   "--bundle",
   "--platform=node",
@@ -49,6 +50,10 @@ const result = spawnSync("npx", [
   "--sourcemap=external",
   "--minify",
 ], { stdio: "inherit" });
+if (result.error) {
+  console.error(result.error.message);
+  process.exit(1);
+}
 if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }

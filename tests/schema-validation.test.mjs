@@ -110,6 +110,7 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["evidence", validEvidence({ cellId: "   " }), validateResourceEvidence],
     ["evidence", validEvidence({ accesses: [{ kind: "database", access: "read", selector: "   " }] }), validateResourceEvidence],
     ["evidence", validEvidence({ generatedAt: "2026-99-99T99:99:99Z" }), validateResourceEvidence],
+    ["evidence", validEvidence({ transcriptStatus: "invalid" }), validateResourceEvidence],
   ];
   for (const [schemaName, value, runtimeValidator] of fixtures) {
     const schemaValid = jsonSchemaValidators[schemaName](value);
@@ -613,6 +614,11 @@ test("schema validation accepts and rejects resource evidence", () => {
   }));
   assert.equal(richEvidence.ok, true);
   assert.deepEqual(richEvidence.errors, []);
+  for (const transcriptStatus of ["active", "inactive", "incomplete"]) {
+    const transcriptEvidence = validateResourceEvidence(validEvidence({ transcriptStatus }));
+    assert.equal(transcriptEvidence.ok, true, transcriptEvidence.errors.join("\n"));
+    assert.deepEqual(transcriptEvidence.errors, []);
+  }
 
   assertInvalid(validateResourceEvidence("bad"), /resource evidence must be an object/);
   assertInvalid(validateResourceEvidence(validEvidence({ schemaVersion: "v0" })), /schemaVersion must be/);
@@ -624,6 +630,14 @@ test("schema validation accepts and rejects resource evidence", () => {
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: "" })), /cellId must be a non-empty string/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: "bad" })), /accesses must be an array/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: [123] })), /accesses\[0\] must be an object/);
+  assertInvalidContaining(
+    validateResourceEvidence(validEvidence({ transcriptStatus: "complete" })),
+    ["transcriptStatus must be one of active, inactive, incomplete when present"],
+  );
+  assertInvalidContaining(
+    validateResourceEvidence(validEvidence({ transcriptStatu: "active" })),
+    ["resource evidence.transcriptStatu is not a supported field"],
+  );
   assertInvalid(
     validateResourceEvidence(validEvidence({
       extraEvidence: true,
