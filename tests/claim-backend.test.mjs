@@ -66,6 +66,35 @@ test("LocalFileClaimStore raises CellFenceClaimCasConflict when state moves unde
   }
 });
 
+test("LocalFileClaimStore rejects corrupt stores instead of treating them as empty", async () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-corrupt-"));
+  try {
+    const filePath = path.join(dir, "claims.json");
+    fs.writeFileSync(filePath, "{ not json");
+    assert.throws(
+      () => new LocalFileClaimStore({ filePath }),
+      /claim store is corrupt/,
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("LocalFileClaimStore rejects invalid store schemas instead of overwriting them", async () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-invalid-schema-"));
+  try {
+    const filePath = path.join(dir, "claims.json");
+    fs.writeFileSync(filePath, JSON.stringify({ schemaVersion: "wrong", claims: [] }));
+    assert.throws(
+      () => new LocalFileClaimStore({ filePath }),
+      /claim store is corrupt/,
+    );
+    assert.equal(JSON.parse(fs.readFileSync(filePath, "utf8")).schemaVersion, "wrong");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-lock-"));
   try {

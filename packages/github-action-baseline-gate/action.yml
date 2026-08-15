@@ -11,6 +11,16 @@ inputs:
   baseline-codeowners:
     description: "Comma-separated list of GitHub usernames or teams who can approve a baseline change. Defaults to the repo's CODEOWNERS entries under .cellfence/baselines/."
     required: false
+  baseline-file:
+    description: "Repo-relative path to the baseline JSON."
+    required: false
+    default: ".cellfence/baselines/cellfence.baseline.json"
+  base-ref:
+    description: "Git ref used to read the base baseline. Defaults to the PR base SHA."
+    required: false
+  head-ref:
+    description: "Git ref used to read the head baseline. Defaults to the PR head SHA."
+    required: false
   require-separate-pr:
     description: "Warn (and optionally fail) when a baseline change is mixed with implementation changes in the same pull request."
     required: false

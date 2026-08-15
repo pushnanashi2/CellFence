@@ -34,7 +34,7 @@ function withCommandEnvironment(environment, action) {
   }
 }
 
-test("Windows batch command lines quote cmd metacharacters and embedded quotes", () => {
+test("Windows batch command lines quote cmd metacharacters", () => {
   const commandLine = buildCmdCommandLine("C:\\Tools\\runner.cmd", [
     "plain",
     "a&b",
@@ -43,12 +43,11 @@ test("Windows batch command lines quote cmd metacharacters and embedded quotes",
     "x<y",
     "x^y",
     "x!y",
-    "say\"hi",
   ]);
 
   assert.equal(
     commandLine,
-    String.raw`""C:\Tools\runner.cmd" "plain" "a&b" "x|y" "x>y" "x<y" "x^y" "x!y" "say\"hi""`,
+    String.raw`""C:\Tools\runner.cmd" "plain" "a&b" "x|y" "x>y" "x<y" "x^y" "x!y""`,
   );
 });
 
@@ -68,6 +67,14 @@ test("Windows batch command lines reject expansion and line-breaking inputs", ()
   assert.throws(
     () => buildCmdCommandLine("C:\\Unsafe%Path\\runner.cmd", []),
     /path cannot contain %/,
+  );
+  assert.throws(
+    () => buildCmdCommandLine("C:\\Tools\\runner.cmd", ["say\"hi"]),
+    /argument cannot contain "/,
+  );
+  assert.throws(
+    () => buildCmdCommandLine("C:\\Tools\"Unsafe\\runner.cmd", []),
+    /path cannot contain "/,
   );
 });
 
@@ -242,6 +249,30 @@ test("non-batch execution plans preserve executable arguments and options", () =
   });
 });
 
+test("batch execution planning is Windows-only", () => {
+  const options = { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] };
+  withCommandEnvironment({
+    platform: "linux",
+    variables: { ComSpec: "C:\\Windows\\cmd.exe" },
+  }, () => {
+    assert.deepEqual(prepareCommandExecution("C:\\Tools\\runner.CMD", ["a&b"], options), {
+      commandPath: "C:\\Tools\\runner.CMD",
+      args: ["a&b"],
+      options,
+    });
+  });
+  withCommandEnvironment({
+    platform: "win32",
+    variables: { ComSpec: "C:\\Windows\\cmd.exe" },
+  }, () => {
+    assert.deepEqual(prepareCommandExecution("C:\\Tools\\runner.CMD", ["a&b"], options), {
+      commandPath: "C:\\Windows\\cmd.exe",
+      args: ["/d", "/s", "/c", String.raw`""C:\Tools\runner.CMD" "a&b""`],
+      options: { ...options, shell: false, windowsVerbatimArguments: true },
+    });
+  });
+});
+
 test("Windows batch execution delegates one quoted command line to cmd.exe", {
   skip: process.platform === "win32" ? "the fake cmd executable is a POSIX test fixture" : false,
 }, () => {
@@ -271,6 +302,26 @@ test("Windows batch execution delegates one quoted command line to cmd.exe", {
     ]));
   } finally {
     fs.rmSync(binDir, { recursive: true, force: true });
+  }
+});
+
+test("Windows batch execution preserves cmd metacharacter arguments through a real batch file", {
+  skip: process.platform !== "win32" ? "requires Windows cmd.exe" : false,
+}, () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-real-cmd-"));
+  try {
+    const scriptPath = path.join(rootDir, "argv.mjs");
+    const commandPath = path.join(rootDir, "runner.cmd");
+    fs.writeFileSync(scriptPath, "process.stdout.write(JSON.stringify(process.argv.slice(2)));");
+    fs.writeFileSync(commandPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`);
+    const args = ["a&b", "x|y", "x>y", "x<y", "x^y", "x!y"];
+    const output = execCommandSync(commandPath, args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    assert.deepEqual(JSON.parse(output), args);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
 

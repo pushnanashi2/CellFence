@@ -996,7 +996,7 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[]): v
         cellId: cell.id,
         filePath: cell.publicEntry,
         message: `public symbols for cell ${cell.id} do not match manifest (${mismatchParts.join("; ")})`,
-        details: { missingSymbols, undeclaredSymbols },
+        details: { missingSymbols, undeclaredSymbols, line: 1 },
         suggestedResolutions: [
           codeResolution("Change the public entry exports to match the manifest", {
             publicEntry: cell.publicEntry,
@@ -1630,12 +1630,16 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
 }
 
 function gitCommand(rootDir: string, args: string[]): string {
+  return gitCommandRaw(rootDir, args).trim();
+}
+
+function gitCommandRaw(rootDir: string, args: string[]): string {
   try {
     return execCommandSync("git", ["-c", "core.quotepath=off", ...args], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
-    }).trim();
+    });
   } catch (error) {
     const failure = error as { stderr?: unknown; message?: unknown };
     const stderr = typeof failure.stderr === "string" ? failure.stderr.trim() : "";
@@ -1669,19 +1673,19 @@ function assertGitCommit(rootDir: string, ref: string): string {
 function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
   const files = new Set<string>();
   const addDiff = (args: string[]): void => {
-    const output = gitCommand(rootDir, args);
-    for (const entry of output.split(/\r?\n/)) {
-      const normalized = normalizePath(entry.trim());
+    const output = gitCommandRaw(rootDir, args);
+    for (const entry of output.split("\0")) {
+      const normalized = normalizePath(entry);
       if (normalized) files.add(normalized);
     }
   };
   if (headRef) {
-    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...${headRef}`]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", `${baseRef}...${headRef}`]);
   } else {
-    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
-    addDiff(["diff", "--name-only", "--diff-filter=ACMR", "--cached"]);
-    addDiff(["diff", "--name-only", "--diff-filter=ACMR"]);
-    addDiff(["ls-files", "--others", "--exclude-standard"]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", "--cached"]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR"]);
+    addDiff(["ls-files", "--others", "--exclude-standard", "-z"]);
   }
   return [...files].sort((left, right) => left.localeCompare(right));
 }
@@ -1705,16 +1709,19 @@ function parseMovementStatus(status: string): Pick<OwnershipMovement, "status" |
 
 function movementEntriesFromDiff(output: string): OwnershipMovement[] {
   const movements: OwnershipMovement[] = [];
-  for (const line of output.split(/\r?\n/)) {
-    if (!line.trim()) continue;
-    const parts = line.split("\t");
-    if (parts.length < 3) continue;
-    const parsedStatus = parseMovementStatus(parts[0]);
+  const parts = output.split("\0").filter((part) => part.length > 0);
+  for (let index = 0; index < parts.length;) {
+    const parsedStatus = parseMovementStatus(parts[index] || "");
+    index += 1;
     if (!parsedStatus) continue;
+    const fromPath = parts[index];
+    const toPath = parts[index + 1];
+    index += 2;
+    if (!fromPath || !toPath) continue;
     movements.push({
       ...parsedStatus,
-      fromPath: normalizePath(parts[1]),
-      toPath: normalizePath(parts[2]),
+      fromPath: normalizePath(fromPath),
+      toPath: normalizePath(toPath),
     });
   }
   return movements;
@@ -1723,12 +1730,12 @@ function movementEntriesFromDiff(output: string): OwnershipMovement[] {
 function movementEntriesForRefs(rootDir: string, baseRef: string, headRef?: string): OwnershipMovement[] {
   const movements = new Map<string, OwnershipMovement>();
   const addDiff = (args: string[]): void => {
-    const output = gitCommand(rootDir, args);
+    const output = gitCommandRaw(rootDir, args);
     for (const movement of movementEntriesFromDiff(output)) {
       movements.set(`${movement.status}:${movement.fromPath}:${movement.toPath}`, movement);
     }
   };
-  const diffArgs = ["diff", "--find-renames=50", "--find-copies=50", "--name-status", "--diff-filter=RC"];
+  const diffArgs = ["diff", "--find-renames=50", "--find-copies=50", "--name-status", "-z", "--diff-filter=RC"];
   if (headRef) {
     addDiff([...diffArgs, `${baseRef}...${headRef}`]);
   } else {
@@ -2056,7 +2063,7 @@ export {
 } from "./claims/backend.js";
 export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
 export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
-export { RedisClaimStore, type RedisClaimStoreOptions } from "./claims/backends/redis.js";
+export { RedisClaimStore, type RedisClaimStoreOptions, type RedisLike } from "./claims/backends/redis.js";
 
 // 0.4.0: claim backend selector. The 0.3.0 prototype shipped the
 // `ClaimStoreBackend` interface and two reference implementations;

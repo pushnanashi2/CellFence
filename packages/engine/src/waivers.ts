@@ -262,11 +262,8 @@ function lineForFinding(finding: Finding): number | undefined {
 export function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
   if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
   if (waiver.ruleId !== finding.ruleId) return false;
-  // TODO(0.4.0): findings without line metadata should not be silently waived
-  // by any file-level directive. Tracked as M-20. The 0.3.0 fix preserves the
-  // current match-anywhere behaviour so unrelated tests do not regress.
   const findingLine = lineForFinding(finding);
-  if (!findingLine) return true;
+  if (!findingLine) return false;
   return waiver.line === findingLine || waiver.line === findingLine - 1;
 }
 

@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,10 +33,11 @@ export function parseMutationChangedArgs(args) {
     incremental: true,
     plan: false,
     dryRunOnly: false,
+    jobs: parseJobs(process.env.CELLFENCE_MUTATION_CHANGED_JOBS || "1"),
   };
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
-    if (argument === "--base" || argument === "--head" || argument === "--file" || argument === "--files" || argument === "--scope") {
+    if (argument === "--base" || argument === "--head" || argument === "--file" || argument === "--files" || argument === "--scope" || argument === "--jobs") {
       const value = args[index + 1];
       if (!value || value.startsWith("--")) throw new Error(`${argument} requires a value`);
       index += 1;
@@ -45,6 +46,7 @@ export function parseMutationChangedArgs(args) {
       if (argument === "--file") options.files.push(value);
       if (argument === "--files") options.files.push(...value.split(",").filter(Boolean));
       if (argument === "--scope") options.scopes.push(value);
+      if (argument === "--jobs") options.jobs = parseJobs(value);
       continue;
     }
     if (argument === "--force") options.force = true;
@@ -54,6 +56,13 @@ export function parseMutationChangedArgs(args) {
     else throw new Error(`Unknown option: ${argument}`);
   }
   return options;
+}
+
+function parseJobs(value) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) throw new Error(`--jobs must be a positive integer; got ${value}`);
+  if (parsed !== 1) throw new Error("changed mutation scopes must run serially; Stryker sandboxes are not safe to execute in parallel");
+  return parsed;
 }
 
 function gitRefExists(ref, rootDir = repositoryRoot) {
@@ -100,15 +109,22 @@ export function collectChangedFiles(baseRef, headRef = "HEAD", rootDir = reposit
   return [...changed].sort();
 }
 
+export function mutationScopesRequiringFreshRun(changedFiles, scopes = MUTATION_SCOPES) {
+  const changed = new Set(changedFiles.map(normalizeRepositoryPath));
+  return new Set(scopes
+    .filter((scope) => scope.tests.some((testPath) => changed.has(testPath)))
+    .map((scope) => scope.id));
+}
+
 function runScope(scope, options) {
   fs.mkdirSync(path.join(repositoryRoot, "reports/mutation/changed"), { recursive: true });
   fs.mkdirSync(path.join(repositoryRoot, "reports/mutation/incremental"), { recursive: true });
   const strykerPath = path.join(repositoryRoot, "node_modules/@stryker-mutator/core/bin/stryker.js");
   const args = [strykerPath, "run", "stryker.changed.conf.mjs"];
-  if (options.force) args.push("--force");
+  if (options.force || options.forceScopes?.has(scope.id)) args.push("--force");
   if (options.dryRunOnly) args.push("--dryRunOnly");
   const startedAt = performance.now();
-  const result = spawnSync(process.execPath, args, {
+  const child = spawn(process.execPath, args, {
     cwd: repositoryRoot,
     env: {
       ...process.env,
@@ -117,19 +133,53 @@ function runScope(scope, options) {
     },
     stdio: "inherit",
   });
-  const elapsedSeconds = ((performance.now() - startedAt) / 1000).toFixed(1);
-  const execution = {
-    id: scope.id,
-    mutate: scope.mutate,
-    tests: scope.tests,
-    elapsedMs: Math.round(Number(elapsedSeconds) * 1000),
-    exitCode: result.status,
-    signal: result.signal,
-    error: result.error?.message,
-    status: !result.error && result.status === 0 ? "passed" : "failed",
-  };
-  console.log(`Mutation scope ${scope.id} ${execution.status} in ${elapsedSeconds}s`);
-  return execution;
+  return new Promise((resolve) => {
+    child.on("error", (error) => {
+      const elapsedSeconds = ((performance.now() - startedAt) / 1000).toFixed(1);
+      const execution = {
+        id: scope.id,
+        mutate: scope.mutate,
+        tests: scope.tests,
+        elapsedMs: Math.round(Number(elapsedSeconds) * 1000),
+        exitCode: null,
+        signal: null,
+        error: error.message,
+        status: "failed",
+      };
+      console.log(`Mutation scope ${scope.id} failed in ${elapsedSeconds}s`);
+      resolve(execution);
+    });
+    child.on("close", (code, signal) => {
+      const elapsedSeconds = ((performance.now() - startedAt) / 1000).toFixed(1);
+      const execution = {
+        id: scope.id,
+        mutate: scope.mutate,
+        tests: scope.tests,
+        elapsedMs: Math.round(Number(elapsedSeconds) * 1000),
+        exitCode: code,
+        signal,
+        status: code === 0 ? "passed" : "failed",
+      };
+      console.log(`Mutation scope ${scope.id} ${execution.status} in ${elapsedSeconds}s`);
+      resolve(execution);
+    });
+  });
+}
+
+async function runScopes(scopes, options) {
+  const executions = [];
+  const workerCount = Math.min(Math.max(1, options.jobs), scopes.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < scopes.length) {
+      const scope = scopes[nextIndex];
+      nextIndex += 1;
+      executions.push(await runScope(scope, options));
+    }
+  }
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  const order = new Map(scopes.map((scope, index) => [scope.id, index]));
+  return executions.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));
 }
 
 function writeJsonAtomic(filePath, value) {
@@ -188,7 +238,7 @@ export function createMutationSummary(plan, executions, startedAt, completedAt =
   };
 }
 
-export function main(args = process.argv.slice(2)) {
+export async function main(args = process.argv.slice(2)) {
   const options = parseMutationChangedArgs(args);
   const plan = mutationChangedPlan(options);
   const reportRoot = path.join(repositoryRoot, "reports/mutation/changed");
@@ -212,8 +262,9 @@ export function main(args = process.argv.slice(2)) {
   }
   if (options.plan) return;
   const startedAt = new Date().toISOString();
-  const executions = [];
-  for (const scope of plan.scopes) executions.push(runScope(scope, options));
+  console.log(`Running mutation scopes with concurrency ${Math.min(Math.max(1, options.jobs), plan.scopes.length)}`);
+  const forceScopes = mutationScopesRequiringFreshRun(plan.changedFiles, plan.scopes);
+  const executions = await runScopes(plan.scopes, { ...options, forceScopes });
   const summary = createMutationSummary(plan, executions, startedAt);
   writeJsonAtomic(path.join(reportRoot, "summary.json"), summary);
   if (!summary.ok) {
@@ -224,7 +275,7 @@ export function main(args = process.argv.slice(2)) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
   try {
-    main();
+    await main();
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

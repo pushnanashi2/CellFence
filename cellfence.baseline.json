@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-15T03:47:57.645Z",
+  "generatedAt": "2026-08-15T10:30:54.464Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -68,7 +68,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "2f27b48926a3c98d4f63271642e39c9a3361fad92c585351be6dabca1721dc5b",
+      "publicSurfaceHash": "7874fecb69740e5d6153876cef013daf0451a256c094581f5c2d284f2b1707b5",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -116,8 +116,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 122,
-      "publicSurfaceLines": 2075,
+      "publicSymbols": 123,
+      "publicSurfaceLines": 2082,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -225,6 +225,7 @@
         "recordUnresolved",
         "RedisClaimStore",
         "RedisClaimStoreOptions",
+        "RedisLike",
         "resolveClaimBackend",
         "resolveCommand",
         "ResolvedClaimBackend",
@@ -247,7 +248,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "4115abff539295a78607d6e27a422437614ff23929b78678f750009dadac3c99",
+      "publicSurfaceHash": "1de10a21adc6c2ee73fc761cd3d9afacebf8ffdd96f5da63b94d2acd1547fb51",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -271,8 +272,8 @@
     },
     "mcp-proxy": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 12,
-      "publicSurfaceLines": 761,
+      "publicSymbols": 13,
+      "publicSurfaceLines": 781,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -281,6 +282,7 @@
       "publicSymbolSet": [
         "__testing",
         "decideToolCall",
+        "DownstreamFeaturePolicy",
         "FailMode",
         "main",
         "parseProxyArgs",
@@ -292,7 +294,7 @@
         "UnknownToolPolicy",
         "WriteToolConfig"
       ],
-      "publicSurfaceHash": "606894d1bee52ca5ad8a545e37c40342ef2e8be6ccc78b2526a52ecca53e7538",
+      "publicSurfaceHash": "d1e5f459f0b4944e31c5630d6ae35ff34c8418e41627ffcd9ef16540fb01854a",
       "dependencyEdges": [
         "mcp-proxy->engine"
       ],
@@ -373,7 +375,7 @@
     "trace": {
       "ownedPathPatterns": 1,
       "publicSymbols": 8,
-      "publicSurfaceLines": 267,
+      "publicSurfaceLines": 264,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/trace/**"
@@ -605,6 +607,6 @@
   },
   "seal": {
     "algorithm": "hmac-sha256",
-    "digest": "493619278ed57d00559a180fba6f61da68e80caf67462f778aa50753ccffae6f"
+    "digest": "32da8d86c19bb845c48e823a1f2c4cbb77399d0776eb81ca01f2a0370317e2a1"
   }
 }

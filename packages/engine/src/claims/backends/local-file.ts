@@ -11,6 +11,7 @@
 // interface.
 
 import fs from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 
 import {
@@ -29,11 +30,11 @@ function readState(filePath: string): ClaimStoreState {
   try {
     const raw = JSON.parse(fs.readFileSync(filePath, "utf8")) as ClaimStoreState;
     if (!raw || raw.schemaVersion !== "cellfence.claims.v1" || !Array.isArray(raw.claims)) {
-      return emptyClaimStoreState();
+      throw new Error("claim store must have schemaVersion cellfence.claims.v1 and claims array");
     }
     return raw;
-  } catch {
-    return emptyClaimStoreState();
+  } catch (error) {
+    throw new Error(`claim store is corrupt: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
   }
 }
 
@@ -43,11 +44,20 @@ function fingerprintOf(state: ClaimStoreState): string {
   // collide on the same fingerprint, and so callers can compute the
   // expected fingerprint without serialising twice.
   const canonical = JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) });
-  let hash = 0;
-  for (let i = 0; i < canonical.length; i += 1) {
-    hash = ((hash << 5) - hash + canonical.charCodeAt(i)) | 0;
+  return crypto.createHash("sha256").update(canonical).digest("hex");
+}
+
+function writeStateAtomic(filePath: string, state: ClaimStoreState): void {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  let temporaryPath: string | undefined;
+  try {
+    temporaryPath = `${filePath}.${process.pid}.${crypto.randomBytes(6).toString("hex")}.tmp`;
+    fs.writeFileSync(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
+    fs.renameSync(temporaryPath, filePath);
+    temporaryPath = undefined;
+  } finally {
+    if (temporaryPath) fs.rmSync(temporaryPath, { force: true });
   }
-  return (hash >>> 0).toString(16);
 }
 
 export class LocalFileClaimStore implements ClaimStoreBackend {
@@ -75,8 +85,7 @@ export class LocalFileClaimStore implements ClaimStoreBackend {
           "claim store state changed under us; reread and retry",
         );
       }
-      fs.mkdirSync(path.dirname(this.options.filePath), { recursive: true });
-      fs.writeFileSync(this.options.filePath, JSON.stringify(next, null, 2));
+      writeStateAtomic(this.options.filePath, next);
       this.current = next;
     } finally {
       await release();

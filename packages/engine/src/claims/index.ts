@@ -24,6 +24,7 @@ export {
 
 export {
   RedisClaimStore,
+  type RedisLike,
   type RedisClaimStoreOptions,
 } from "./backends/redis.js";
 

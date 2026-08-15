@@ -26,7 +26,7 @@ export type ResourceAccessConfidence = "high" | "medium" | "low" | "transient" |
 // Consumers should treat "transient" as "best effort, possibly
 // incomplete" and check `transcriptStatus` before relying on an
 // empty `accesses` array as proof that no accesses happened.
-export type ResourceEvidenceTranscriptStatus = "complete" | "active" | "inactive" | "incomplete";
+export type ResourceEvidenceTranscriptStatus = "active" | "inactive" | "incomplete";
 export type BuiltInResourceAdapter =
   | "file"
   | "http"

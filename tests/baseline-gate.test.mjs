@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import { detectBaselineChanges } from "../packages/engine/dist/index.js";
 import { runBaselineGateCommand } from "../packages/cli/dist/baseline-gate-command.js";
+
+const root = process.cwd();
 
 
 function makeBaseline(overrides = {}) {
@@ -110,4 +114,15 @@ test("runBaselineGateCommand warns when baseline and implementation changes are 
   });
   assert.equal(result.warnings.length, 1);
   assert.match(result.warnings[0], /baseline changes and implementation changes/);
+});
+
+test("baseline gate action metadata declares every source input", () => {
+  const source = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/src/index.ts"), "utf8");
+  const actionYaml = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/action.yml"), "utf8");
+  const sourceMatch = /export const ACTION_INPUT_NAMES = \[([\s\S]*?)\] as const;/m.exec(source);
+  assert.ok(sourceMatch, "ACTION_INPUT_NAMES missing");
+  const sourceInputs = [...sourceMatch[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]).sort();
+  const yamlInputs = [...actionYaml.matchAll(/^ {2}([a-z][a-z0-9-]*):$/gm)].map((match) => match[1]).sort();
+  assert.deepEqual(yamlInputs, sourceInputs);
+  assert.match(actionYaml, /baseline-file:\r?\n\s+description: "Repo-relative path to the baseline JSON\."\r?\n\s+required: false\r?\n\s+default: "\.cellfence\/baselines\/cellfence\.baseline\.json"/);
 });

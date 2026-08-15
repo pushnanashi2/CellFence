@@ -32,6 +32,7 @@ import {
 export type ProxyMode = "enforce" | "dry-run" | "off";
 export type FailMode = "closed" | "open";
 export type UnknownToolPolicy = "allow" | "deny";
+export type DownstreamFeaturePolicy = "allow" | "deny";
 
 export type WriteToolConfig = Record<string, string[]>;
 
@@ -55,6 +56,7 @@ export type ProxyOptions = {
   writeTools: WriteToolConfig;
   readTools?: string[];
   unknownToolPolicy?: UnknownToolPolicy;
+  downstreamFeaturePolicy?: DownstreamFeaturePolicy;
 };
 
 type ToolConfigPatch = {
@@ -118,7 +120,9 @@ Options:
   --mode enforce|dry-run|off    Guard mode. Defaults to enforce.
   --fail-mode closed|open       Policy failure behavior for writes. Defaults to closed.
   --audit-log PATH              Append one JSONL decision event per tool call.
-  --unknown-tool-policy POLICY  allow or deny unconfigured tools. Defaults to allow.
+  --unknown-tool-policy POLICY  allow or deny unconfigured tools. Defaults to deny.
+  --downstream-feature-policy POLICY
+                                allow or deny downstream resources, prompts, and completions. Defaults to deny.
   --tool-config PATH            JSON file with writeTools, readTools, and/or unknownToolPolicy.
   --write-tool NAME=KEYS        Override one write tool. KEYS is comma-separated.
   --read-tool NAME              Allowlist a read-only tool. Repeatable.
@@ -129,10 +133,11 @@ Options:
   --help                        Show this help.
 
 Environment:
-  CELLFENCE_AGENT, CELLFENCE_MCP_MODE, CELLFENCE_MCP_FAIL_MODE,
-  CELLFENCE_MCP_UNKNOWN_TOOL_POLICY, CELLFENCE_MCP_READ_TOOLS,
-  CELLFENCE_MCP_AUDIT_LOG, CELLFENCE_MCP_DOWNSTREAM_COMMAND
-`;
+	  CELLFENCE_AGENT, CELLFENCE_MCP_MODE, CELLFENCE_MCP_FAIL_MODE,
+	  CELLFENCE_MCP_UNKNOWN_TOOL_POLICY, CELLFENCE_MCP_READ_TOOLS,
+	  CELLFENCE_MCP_AUDIT_LOG, CELLFENCE_MCP_DOWNSTREAM_COMMAND,
+	  CELLFENCE_MCP_DOWNSTREAM_FEATURE_POLICY
+	`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -238,6 +243,11 @@ function parseUnknownToolPolicy(value: string | undefined): UnknownToolPolicy {
   throw new Error(`invalid unknown tool policy ${value === undefined || value === "" ? "(empty)" : value}`);
 }
 
+function parseDownstreamFeaturePolicy(value: string | undefined): DownstreamFeaturePolicy {
+  if (value === "allow" || value === "deny") return value;
+  throw new Error(`invalid downstream feature policy ${value === undefined || value === "" ? "(empty)" : value}`);
+}
+
 function parseReadTool(value: string | undefined): string {
   const tool = value?.trim() || "";
   if (!tool) throw new Error("--read-tool must include a tool name");
@@ -259,6 +269,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     ? "deny"
     : parseUnknownToolPolicy(env.CELLFENCE_MCP_UNKNOWN_TOOL_POLICY);
   let readTools = mergeReadTools([], (env.CELLFENCE_MCP_READ_TOOLS || "").split(","));
+  let downstreamFeaturePolicy = parseDownstreamFeaturePolicy(env.CELLFENCE_MCP_DOWNSTREAM_FEATURE_POLICY ?? "deny");
   let auditLogPath = env.CELLFENCE_MCP_AUDIT_LOG;
   let downstreamCommand = env.CELLFENCE_MCP_DOWNSTREAM_COMMAND || "";
   let downstreamArgs: string[] = [];
@@ -336,6 +347,13 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
       index += 1;
     } else if (argument.startsWith("--read-tool=")) {
       readTools = mergeReadTools(readTools, [parseReadTool(argument.slice("--read-tool=".length))]);
+    } else if (argument === "--downstream-feature-policy") {
+      const value = argv[index + 1];
+      if (!value || value.startsWith("--")) throw new Error("--downstream-feature-policy requires allow or deny");
+      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(value);
+      index += 1;
+    } else if (argument.startsWith("--downstream-feature-policy=")) {
+      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(argument.slice("--downstream-feature-policy=".length));
     } else if (argument === "--downstream-command") {
       downstreamCommand = argv[index + 1] || "";
       index += 1;
@@ -375,6 +393,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     writeTools,
     readTools,
     unknownToolPolicy,
+    downstreamFeaturePolicy,
   };
 }
 
@@ -652,11 +671,12 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
   await downstream.connect(downstreamTransport);
 
   const downstreamCapabilities = downstream.getServerCapabilities() || {};
+  const featurePolicy = options.downstreamFeaturePolicy ?? "deny";
   const capabilities: ServerCapabilities = {
     tools: downstreamCapabilities.tools || {},
-    ...(downstreamCapabilities.resources ? { resources: downstreamCapabilities.resources } : {}),
-    ...(downstreamCapabilities.prompts ? { prompts: downstreamCapabilities.prompts } : {}),
-    ...(downstreamCapabilities.completions ? { completions: downstreamCapabilities.completions } : {}),
+    ...(featurePolicy === "allow" && downstreamCapabilities.resources ? { resources: downstreamCapabilities.resources } : {}),
+    ...(featurePolicy === "allow" && downstreamCapabilities.prompts ? { prompts: downstreamCapabilities.prompts } : {}),
+    ...(featurePolicy === "allow" && downstreamCapabilities.completions ? { completions: downstreamCapabilities.completions } : {}),
   };
 
   const server = new Server({
@@ -682,7 +702,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     return downstream.callTool(request.params);
   });
 
-  if (downstreamCapabilities.resources) {
+  if (featurePolicy === "allow" && downstreamCapabilities.resources) {
     server.setRequestHandler(ListResourcesRequestSchema, async (request) => downstream.listResources(request.params));
     server.setRequestHandler(ListResourceTemplatesRequestSchema, async (request) => downstream.listResourceTemplates(request.params));
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => downstream.readResource(request.params));
@@ -700,7 +720,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     }
   }
 
-  if (downstreamCapabilities.prompts) {
+  if (featurePolicy === "allow" && downstreamCapabilities.prompts) {
     server.setRequestHandler(ListPromptsRequestSchema, async (request) => downstream.listPrompts(request.params));
     server.setRequestHandler(GetPromptRequestSchema, async (request) => downstream.getPrompt(request.params));
     if (downstreamCapabilities.prompts.listChanged) {
@@ -710,7 +730,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     }
   }
 
-  if (downstreamCapabilities.completions) {
+  if (featurePolicy === "allow" && downstreamCapabilities.completions) {
     server.setRequestHandler(CompleteRequestSchema, async (request) => downstream.complete(request.params));
   }
 

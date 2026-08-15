@@ -56,6 +56,7 @@ export default {
   tempDirName: ".stryker-tmp",
   ignorePatterns: [
     "/coverage",
+    "/.stryker-tmp",
     "/docs/research",
     "/reports/corpus",
     "/reports/mutation",

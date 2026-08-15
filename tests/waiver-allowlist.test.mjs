@@ -10,7 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { collectWaiversForManifest } from "../packages/engine/dist/waivers.js";
+import { collectWaiversForManifest, waiverMatchesFinding } from "../packages/engine/dist/waivers.js";
 
 function writeProject(rootDir, approver, includeCell = true) {
   fs.mkdirSync(path.join(rootDir, "src/a"), { recursive: true });
@@ -83,6 +83,34 @@ test("B-02: CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is emitted alongside the
     const warning = findings.find((f) => f.ruleId === "CELLFENCE_WAIVER_UNTRUSTED_APPROVER");
     assert.ok(warning, `expected warning in ${JSON.stringify(findings.map((f) => f.ruleId))}`);
     assert.equal(warning.severity, "warning");
+  } finally {
+    if (original === undefined) delete process.env.CELLFENCE_APPROVERS;
+    else process.env.CELLFENCE_APPROVERS = original;
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("waivers do not suppress findings that lack line metadata", () => {
+  const original = process.env.CELLFENCE_APPROVERS;
+  process.env.CELLFENCE_APPROVERS = "test-owner";
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-line-required-"));
+  try {
+    writeProject(tempDir, "test-owner");
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    const [waiver] = collectWaiversForManifest(tempDir, manifest);
+    assert.equal(waiverMatchesFinding(waiver, {
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      filePath: "src/a/public.ts",
+      message: "line-less finding fixture",
+    }), false);
+    assert.equal(waiverMatchesFinding(waiver, {
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      filePath: "src/a/public.ts",
+      message: "line finding fixture",
+      details: { line: waiver.line },
+    }), true);
   } finally {
     if (original === undefined) delete process.env.CELLFENCE_APPROVERS;
     else process.env.CELLFENCE_APPROVERS = original;

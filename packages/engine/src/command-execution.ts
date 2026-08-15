@@ -30,8 +30,9 @@ export function resolveCommand(commandName: string): string {
 
 function quoteCmdValue(value: string, description: string): string {
   if (value.includes("%")) throw new Error(`${description} cannot contain % when invoking a Windows batch command`);
+  if (value.includes("\"")) throw new Error(`${description} cannot contain " when invoking a Windows batch command`);
   if (/[\r\n]/.test(value)) throw new Error(`${description} cannot contain a newline when invoking a Windows batch command`);
-  return `"${value.replace(/"/g, '\\"')}"`;
+  return `"${value}"`;
 }
 
 export function buildCmdCommandLine(commandPath: string, args: readonly string[]): string {

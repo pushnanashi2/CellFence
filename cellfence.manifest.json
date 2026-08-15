@@ -183,6 +183,7 @@
         "PruneReport",
         "RedisClaimStore",
         "RedisClaimStoreOptions",
+        "RedisLike",
         "ResolveOptions",
         "ResolvedClaimBackend",
         "RuleId",
@@ -277,6 +278,7 @@
       "publicEntry": "packages/mcp-proxy/src/index.ts",
       "publicSymbols": [
         "decideToolCall",
+        "DownstreamFeaturePolicy",
         "FailMode",
         "main",
         "parseProxyArgs",

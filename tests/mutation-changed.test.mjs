@@ -17,6 +17,7 @@ import {
 import {
   collectChangedFiles,
   createMutationSummary,
+  mutationScopesRequiringFreshRun,
   parseMutationChangedArgs,
   resolveMutationBaseRef,
 } from "../scripts/mutation-changed.mjs";
@@ -90,6 +91,7 @@ test("changed mutation config keeps full thresholds and isolates tests and cache
   assert.equal(config.incremental, true);
   assert.equal(config.incrementalFile, "reports/mutation/incremental/engine-command-execution.json");
   assert.equal(config.jsonReporter.fileName, "reports/mutation/changed/engine-command-execution.json");
+  assert.ok(config.ignorePatterns.includes("/.stryker-tmp"));
 });
 
 test("changed file collection includes committed, staged, unstaged, and untracked paths", (context) => {
@@ -141,7 +143,7 @@ test("base ref resolution honors an explicit environment ref and falls back loca
 test("mutation changed argument parsing rejects missing and unknown options", () => {
   assert.deepEqual(parseMutationChangedArgs([
     "--base", "origin/main", "--head", "HEAD", "--files", "a.ts,b.ts", "--file", "c.ts",
-    "--force", "--no-incremental", "--plan", "--dry-run-only",
+    "--jobs", "1", "--force", "--no-incremental", "--plan", "--dry-run-only",
   ]), {
     baseRef: "origin/main",
     headRef: "HEAD",
@@ -151,8 +153,11 @@ test("mutation changed argument parsing rejects missing and unknown options", ()
     incremental: false,
     plan: true,
     dryRunOnly: true,
+    jobs: 1,
   });
   assert.throws(() => parseMutationChangedArgs(["--base"]), /--base requires a value/);
+  assert.throws(() => parseMutationChangedArgs(["--jobs", "0"]), /positive integer/);
+  assert.throws(() => parseMutationChangedArgs(["--jobs", "2"]), /must run serially/);
   assert.throws(() => parseMutationChangedArgs(["--unknown"]), /Unknown option/);
 });
 
@@ -228,6 +233,17 @@ test("mutation scopes rerun for dedicated tests and all mutation infrastructure 
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],
     "a deleted dedicated test path must continue to select its mutation scopes",
+  );
+});
+
+test("dedicated test changes force a fresh incremental mutation run for their scopes", () => {
+  assert.deepEqual(
+    [...mutationScopesRequiringFreshRun(["tests/module-resolution.test.mjs"])],
+    ["engine-module-resolution"],
+  );
+  assert.deepEqual(
+    [...mutationScopesRequiringFreshRun(["README.md"])],
+    [],
   );
 });
 
