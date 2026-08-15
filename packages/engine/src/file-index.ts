@@ -171,13 +171,14 @@ export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]
   // proper NFA->DFA subset check: L(pattern) is contained
   // in L(ownedPath) iff the product DFA of `pattern` and
   // `complement(ownedPath)` has no accept state reachable
-  // from the start state. This catches cases like
-  // `src/api/v1*` not being covered by `src/api/**`, which
-  // the prefix heuristic would have reported as covered.
+  // from the start state. This catches sibling-prefix cases
+  // such as `src/api-client/**` not being covered by
+  // `src/api/**`, which the prefix heuristic would have
+  // reported as covered.
   //
   // A bare owned path such as `src/core` is treated as a
   // directory ownership: it covers `src/core` and all of
-  // its descendants, i.e. its language is L(`src/core/**`).
+  // its descendants, i.e. L(`src/core`) union L(`src/core/**`).
   // This matches the previous prefix heuristic for the
   // "directory" cases (e.g. `src/core/nested/**` is covered
   // by `src/core`) without re-introducing the false
