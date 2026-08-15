@@ -128,7 +128,7 @@ export function governanceEvidenceEnvelopeForCheck(
       ];
     }
     if (file.role === "baseline") return [{ filePath: file.path, family: "baseline" as const, status: "processed" as const }];
-    if (file.role === "runtime-evidence") return [{ filePath: file.path, family: "resources" as const, status: "processed" as const }];
+    if (file.role === "runtime-evidence") return [observationStatusFor(file.path, "resources", diagnosticIndex)];
     if (file.role === "source") {
       return [
         observationStatusFor(file.path, "imports", diagnosticIndex),

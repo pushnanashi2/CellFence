@@ -8,11 +8,13 @@
 import type { CellFenceBaseline } from "@cellfence/schema";
 
 export type BaselineDimension =
+  | "cellIds"
   | "ownedPaths"
   | "publicSymbols"
   | "crossCellEdges"
   | "signatures"
   | "resourceAccesses"
+  | "artifactContracts"
   | "publicSurfaceMetadata"
   | "dependencyCounts";
 
@@ -46,6 +48,7 @@ export function detectBaselineChanges(
   baseBaselinePath: string,
   headBaselinePath: string,
 ): GovernanceChangeReport {
+  const cellIds = diffCellIds(baseBaseline, headBaseline);
   const ownedPaths = diffOwnedPaths(baseBaseline, headBaseline);
   const publicSymbols = diffPublicSymbols(baseBaseline, headBaseline);
   const crossCellEdges = diffCrossCellEdges(baseBaseline, headBaseline);
@@ -55,7 +58,7 @@ export function detectBaselineChanges(
   const publicSurfaceMetadata = diffPublicSurfaceMetadata(baseBaseline, headBaseline);
   const dependencyCounts = diffDependencyCounts(baseBaseline, headBaseline);
 
-  const deltas = [ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, publicSurfaceMetadata, dependencyCounts].filter(
+  const deltas = [cellIds, ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, publicSurfaceMetadata, dependencyCounts].filter(
     (delta) => delta.added.length > 0 || delta.removed.length > 0 || (delta.skippedCells?.length ?? 0) > 0,
   );
 
@@ -69,8 +72,30 @@ export function detectBaselineChanges(
   };
 }
 
+function acceptedCellIds(baseline: CellFenceBaseline): string[] {
+  return [...(baseline.cellIds ?? Object.keys(baseline.cells))].sort();
+}
+
+function acceptedCellRecord(baseline: CellFenceBaseline, cellId: string) {
+  return acceptedCellIds(baseline).includes(cellId) ? baseline.cells[cellId] : undefined;
+}
+
+function cellIdsForComparison(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): Set<string> {
+  return new Set<string>([...acceptedCellIds(baseBaseline), ...acceptedCellIds(headBaseline)]);
+}
+
+function diffCellIds(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
+  const added: string[] = [];
+  const removed: string[] = [];
+  const base = new Set(acceptedCellIds(baseBaseline));
+  const head = new Set(acceptedCellIds(headBaseline));
+  for (const cellId of head) if (!base.has(cellId)) added.push(cellId);
+  for (const cellId of base) if (!head.has(cellId)) removed.push(cellId);
+  return { dimension: "cellIds", added, removed };
+}
+
 function ownedPathSetForCell(baseline: CellFenceBaseline, cellId: string): { entries: string[]; skipped: boolean } {
-  const cell = baseline.cells[cellId];
+  const cell = acceptedCellRecord(baseline, cellId);
   if (!cell) return { entries: [], skipped: false };
   if (Array.isArray(cell.ownedPathSet)) {
     return { entries: [...cell.ownedPathSet], skipped: false };
@@ -87,7 +112,7 @@ function diffOwnedPaths(baseBaseline: CellFenceBaseline, headBaseline: CellFence
   const added: string[] = [];
   const removed: string[] = [];
   const skippedCells: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
     const base = ownedPathSetForCell(baseBaseline, cellId);
     const head = ownedPathSetForCell(headBaseline, cellId);
@@ -104,13 +129,13 @@ function diffOwnedPaths(baseBaseline: CellFenceBaseline, headBaseline: CellFence
 }
 
 function publicSymbolSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
-  return [...(baseline.cells[cellId]?.publicSymbolSet || [])];
+  return [...(acceptedCellRecord(baseline, cellId)?.publicSymbolSet || [])];
 }
 
 function diffPublicSymbols(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
     const base = new Set(publicSymbolSetForCell(baseBaseline, cellId));
     const head = new Set(publicSymbolSetForCell(headBaseline, cellId));
@@ -125,13 +150,13 @@ function crossCellEdgeSetForCell(baseline: CellFenceBaseline, cellId: string): s
   // string[] so callers can store whatever edge encoding is convenient
   // for the language ecosystem. We diff the raw representation here;
   // 0.4.0 may switch to a structured encoding.
-  return [...(baseline.cells[cellId]?.dependencyEdges || [])];
+  return [...(acceptedCellRecord(baseline, cellId)?.dependencyEdges || [])];
 }
 
 function diffCrossCellEdges(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
     const base = new Set(crossCellEdgeSetForCell(baseBaseline, cellId));
     const head = new Set(crossCellEdgeSetForCell(headBaseline, cellId));
@@ -176,13 +201,13 @@ function diffSignatures(baseBaseline: CellFenceBaseline, headBaseline: CellFence
 }
 
 function resourceAccessSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
-  return [...(baseline.cells[cellId]?.resourceAccesses || [])].map((entry) => `${entry.kind}:${entry.selector}:${entry.access}`);
+  return [...(acceptedCellRecord(baseline, cellId)?.resourceAccesses || [])].map((entry) => `${entry.kind}:${entry.selector}:${entry.access}`);
 }
 
 function diffResourceAccesses(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
     const base = new Set(resourceAccessSetForCell(baseBaseline, cellId));
     const head = new Set(resourceAccessSetForCell(headBaseline, cellId));
@@ -193,13 +218,13 @@ function diffResourceAccesses(baseBaseline: CellFenceBaseline, headBaseline: Cel
 }
 
 function artifactContractSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
-  return [...(baseline.cells[cellId]?.artifactContracts || [])];
+  return [...(acceptedCellRecord(baseline, cellId)?.artifactContracts || [])];
 }
 
 function diffArtifactContracts(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
     const base = new Set(artifactContractSetForCell(baseBaseline, cellId));
     const head = new Set(artifactContractSetForCell(headBaseline, cellId));
@@ -218,10 +243,10 @@ function diffArtifactContracts(baseBaseline: CellFenceBaseline, headBaseline: Ce
 function diffPublicSurfaceMetadata(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
-    const baseRecord = baseBaseline.cells[cellId];
-    const headRecord = headBaseline.cells[cellId];
+    const baseRecord = acceptedCellRecord(baseBaseline, cellId);
+    const headRecord = acceptedCellRecord(headBaseline, cellId);
     const baseMeta = baseRecord
       ? {
           publicSurfaceHash: baseRecord.publicSurfaceHash ?? null,
@@ -248,14 +273,16 @@ function diffPublicSurfaceMetadata(baseBaseline: CellFenceBaseline, headBaseline
 function diffDependencyCounts(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
   const added: string[] = [];
   const removed: string[] = [];
-  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
   for (const cellId of cellIds) {
-    const base = baseBaseline.cells[cellId]?.crossCellDependencies;
-    const head = headBaseline.cells[cellId]?.crossCellDependencies;
-    if (typeof base !== "number" || typeof head !== "number") continue;
+    const baseRecord = acceptedCellRecord(baseBaseline, cellId);
+    const headRecord = acceptedCellRecord(headBaseline, cellId);
+    const base = typeof baseRecord?.crossCellDependencies === "number" ? baseRecord.crossCellDependencies : null;
+    const head = typeof headRecord?.crossCellDependencies === "number" ? headRecord.crossCellDependencies : null;
+    if (base === null && head === null) continue;
     if (base === head) continue;
-    removed.push(`${cellId}: base=${base}`);
-    added.push(`${cellId}: head=${head}`);
+    if (base !== null) removed.push(`${cellId}: base=${base}`);
+    if (head !== null) added.push(`${cellId}: head=${head}`);
   }
   return { dimension: "dependencyCounts", added, removed };
 }

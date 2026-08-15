@@ -173,6 +173,8 @@
         "FindingWitness",
         "FindingWitnessSubject",
         "GovernanceChangeReport",
+        "GitHubArtifactClaimStore",
+        "GitHubArtifactClaimStoreOptions",
         "InferManifestOptions",
         "LocalFileClaimStore",
         "LocalFileClaimStoreOptions",
@@ -590,9 +592,6 @@
       "consumes": [
         {
           "cell": "engine"
-        },
-        {
-          "cell": "cli"
         }
       ],
       "producesArtifacts": [],

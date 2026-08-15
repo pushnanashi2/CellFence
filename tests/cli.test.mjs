@@ -1369,6 +1369,10 @@ test("CLI baseline update refuses to expand locked cell baselines", () => {
   const baselineSuggestion = ratchetFinding.suggestedResolutions.find((resolution) => resolution.kind === "update-baseline");
   assert.equal(baselineSuggestion.approvalRequired, true);
 
+  const createResult = runCli(["baseline", "create"], tempDir);
+  assert.equal(createResult.status, 2);
+  assert.match(createResult.stderr, /already exists; use cellfence baseline update/);
+
   const result = runCli(["baseline", "update"], tempDir);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /CELLFENCE_LOCKED_BASELINE_EXPANSION/);
@@ -1415,6 +1419,12 @@ test("CLI baseline update refuses to add a locked cell missing from the accepted
         publicSurfaceLines: 1,
         crossCellDependencies: 0,
       },
+      newcell: {
+        ownedPathPatterns: 1,
+        publicSymbols: 1,
+        publicSurfaceLines: 1,
+        crossCellDependencies: 0,
+      },
     },
   }, null, 2)}\n`);
 
@@ -1422,7 +1432,8 @@ test("CLI baseline update refuses to add a locked cell missing from the accepted
   assert.equal(result.status, 1);
   assert.match(result.stdout, /newcell is locked and is absent from the existing baseline/);
   const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
-  assert.equal(baseline.cells.newcell, undefined);
+  assert.deepEqual(baseline.cellIds, ["core"]);
+  assert.equal(baseline.cells.newcell.publicSymbols, 1);
 });
 
 test("CLI baseline HMAC seal rejects hand-edited baseline expansion", () => {
@@ -1540,6 +1551,51 @@ test("CLI baseline Ed25519 sign and verify separate baseline authorization from 
     assert.equal(tampered.status, 1);
     const parsed = JSON.parse(tampered.stdout);
     assert.ok(parsed.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI baseline update refuses unsealed locked baselines even when the next baseline can be signed", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-unsealed-update-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        locked: true,
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cellIds: ["core"],
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+        },
+      },
+    });
+    const { publicKey } = crypto.generateKeyPairSync("ed25519");
+    const publicPem = publicKey.export({ type: "spki", format: "pem" }).toString();
+
+    const result = runCliWithEnv(["baseline", "update"], tempDir, {
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: publicPem,
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.stdout, /CELLFENCE_BASELINE_SEAL_INVALID/);
+    const baseline = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.baseline.json"), "utf8"));
+    assert.equal(baseline.seal, undefined);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

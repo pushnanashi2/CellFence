@@ -111,13 +111,16 @@ export function walkCoverage(options: WalkOptions): WalkResult {
     // finding instead of masking it with an inventory failure.
   }
   const unresolvedFiles = new Set(unresolved.map((entry) => repoPath(options.rootDir, entry.filePath)));
+  const externalUnresolvedCount = unresolved
+    .map((entry) => repoPath(options.rootDir, entry.filePath))
+    .filter((filePath) => !sourceInventory.has(filePath)).length;
   const analyzedFiles = [...sourceInventory]
     .filter((filePath) => !unresolvedFiles.has(filePath))
     .sort((left, right) => left.localeCompare(right));
   return {
     unresolved,
     analyzedFiles,
-    totalFiles: sourceInventory.size,
+    totalFiles: sourceInventory.size + externalUnresolvedCount,
     check,
   };
 }

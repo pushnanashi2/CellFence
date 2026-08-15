@@ -82,7 +82,17 @@ async function approveFromCodeowner(
 
 function parseCodeowners(input: string | undefined): string[] {
   if (!input) return [];
-  return input.split(",").map((entry) => entry.trim()).filter(Boolean);
+  const codeowners = input.split(",").map((entry) => entry.trim()).filter(Boolean);
+  validateUsernameCodeowners(codeowners);
+  return codeowners;
+}
+
+function validateUsernameCodeowners(codeowners: string[]): void {
+  const teamEntries = codeowners.filter((entry) => /^@?[^/\s]+\/[^/\s]+$/.test(entry));
+  if (teamEntries.length === 0) return;
+  throw new Error(
+    `baseline-codeowners currently supports GitHub usernames only; team entries are not resolved: ${teamEntries.join(", ")}`,
+  );
 }
 
 // Minimal CODEOWNERS parser: only enough to pull out the entries
@@ -119,20 +129,24 @@ async function loadCodeownersFromRepo(
   repo: string,
   baselineFile: string,
 ): Promise<string[]> {
-  for (const path of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
+  for (const codeownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
+    let text: string;
     try {
-      const response = await octokit.rest.repos.getContent({ owner, repo, path });
+      const response = await octokit.rest.repos.getContent({ owner, repo, path: codeownersPath });
       const data = response.data;
       if (Array.isArray(data) || !("content" in data) || typeof data.content !== "string") continue;
-      const text = Buffer.from(data.content, "base64").toString("utf8");
-      const owners = codeownersForPath(text, baselineFile);
-      if (owners.length > 0) return owners;
+      text = Buffer.from(data.content, "base64").toString("utf8");
     } catch (error) {
       const status = typeof error === "object" && error !== null && "status" in error ? (error as { status: number }).status : 0;
       if (status !== 404) {
-        core.warning(`CODEOWNERS lookup at ${path} failed: ${error instanceof Error ? error.message : String(error)}`);
+        core.warning(`CODEOWNERS lookup at ${codeownersPath} failed: ${error instanceof Error ? error.message : String(error)}`);
       }
+      continue;
     }
+    const owners = codeownersForPath(text, baselineFile);
+    if (owners.length === 0) continue;
+    validateUsernameCodeowners(owners);
+    return owners;
   }
   return [];
 }
@@ -442,6 +456,7 @@ void ACTION_METADATA_INPUT_NAMES;
 export const ACTION_INPUT_NAMES = [
   "comment-mode",
   "fail-on-mixed-pr",
+  "github-token",
   "require-separate-pr",
   "baseline-codeowners",
   "baseline-file",

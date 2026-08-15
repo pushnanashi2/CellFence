@@ -8,9 +8,12 @@
 // synchronous today. Async/distributed backends remain internal until
 // the claim API itself grows an async path.
 //
-// The interface is intentionally minimal: read the current state and
-// compare-and-swap a new state in. Concrete backends exposed through
-// manifest configuration must implement this synchronous contract.
+// The public type accepts both the original async prototype surface
+// and the synchronous local-file runtime used by the shipped CLI.
+// Manifest-selected backends are still constrained by the resolver:
+// synchronous claim commands reject Promise-returning implementations
+// with a structured claim finding rather than awaiting arbitrary
+// distributed backends in a sync path.
 
 export type ClaimStoreState = {
   /** Schema version the state was serialised with. */
@@ -41,14 +44,20 @@ export type ClaimStoreBackend = {
    * artifact backend) MUST return the last-known state so the engine
    * can detect a lost update.
    */
-  read(): ClaimStoreState;
+  read(): ClaimStoreState | Promise<ClaimStoreState>;
   /**
    * Persist `next`, conditional on the previously observed state
    * being `previous`. The implementation MUST throw a
    * `CellFenceClaimCasConflict` if the current state no longer
    * matches `previous`.
    */
-  write(next: ClaimStoreState, previous: ClaimStoreState): void;
+  write(next: ClaimStoreState, previous: ClaimStoreState): void | Promise<void>;
+  /**
+   * Optional distributed lock retained for compatibility with the
+   * 0.4.0 prototype backend surface. Synchronous claim commands do
+   * not require it; CAS remains mandatory.
+   */
+  lock?(ttlMs: number): Promise<() => Promise<void>>;
 };
 
 export class CellFenceClaimCasConflict extends Error {

@@ -10,10 +10,11 @@ import {
 } from "./backend.js";
 import { LocalFileClaimStore } from "./backends/local-file.js";
 
-export type ClaimBackendType = "local-file";
+export type ClaimBackendType = "local-file" | "github-artifact";
+type ConfigurableClaimBackendType = "local-file";
 
 export type ResolvedClaimBackend = {
-  type: ClaimBackendType;
+  type: ConfigurableClaimBackendType;
   backend: ClaimStoreBackend;
   /** Source location the resolver found the configuration in. */
   source: "manifest" | "default" | "env";

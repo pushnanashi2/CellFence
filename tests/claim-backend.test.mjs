@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   CellFenceClaimCasConflict,
   LocalFileClaimStore,
+  createClaim,
   emptyClaimStoreState,
 } from "../packages/engine/dist/index.js";
 
@@ -111,6 +112,50 @@ test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
     await second;
     assert.equal(secondAcquired, true);
   } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("createClaim returns a structured failure when the backend CAS write conflicts", () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-create-cas-"));
+  const originalWrite = LocalFileClaimStore.prototype.write;
+  try {
+    fs.mkdirSync(path.join(dir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "src/core/public.ts"), "export const core = true;\n");
+    fs.writeFileSync(path.join(dir, "cellfence.manifest.json"), `${JSON.stringify({
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        claimBackend: { type: "local-file" },
+      },
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    }, null, 2)}\n`);
+    LocalFileClaimStore.prototype.write = function writeWithForcedConflict() {
+      throw new CellFenceClaimCasConflict("forced CAS conflict");
+    };
+
+    const result = createClaim({
+      rootDir: dir,
+      agent: "agent-a",
+      cells: ["core"],
+      claimId: "claim-core",
+      ttl: "30m",
+      now: new Date("2026-01-01T00:00:00.000Z"),
+    });
+    assert.equal(result.exitCode, 1);
+    assert.equal(result.createdClaim, undefined);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_CLAIM_INVALID"
+      && /refresh claims and retry/.test(finding.message)
+    ), JSON.stringify(result.findings));
+  } finally {
+    LocalFileClaimStore.prototype.write = originalWrite;
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });

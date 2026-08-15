@@ -434,6 +434,7 @@ test("engine rejects stale runtime evidence commit shas at the repository root",
       commitSha: head,
       cellId: "core",
       accesses: [{ kind: "database", access: "read", selector: "app.orders" }],
+      transcriptStatus: "active",
     });
     const current = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
     assert.equal(current.ok, true, JSON.stringify(current.findings));
@@ -991,6 +992,7 @@ test("engine covers tsconfig alias fallback and runtime evidence default fields"
       commitSha: headSha,
       cellId: "core",
       accesses: [{ kind: "file", access: "read", selector: "data/input.json" }],
+      transcriptStatus: "active",
     });
     const evidence = checkRepository({ rootDir: evidenceRoot, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
     assert.equal(evidence.ok, true, JSON.stringify(evidence.findings));

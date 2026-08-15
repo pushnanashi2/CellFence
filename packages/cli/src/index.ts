@@ -1044,12 +1044,16 @@ function commandClaimList(parsed: ParsedArgs): number {
 }
 
 function commandBaselineCreate(parsed: ParsedArgs): number {
+  const baselinePath = path.resolve(parsed.rootDir, parsed.baselinePath || defaultBaselinePath(parsed.rootDir));
+  if (fs.existsSync(baselinePath)) {
+    console.error(`${baselinePath} already exists; use cellfence baseline update so locked-cell ratchets are checked`);
+    return 2;
+  }
   const baseline = createBaseline({
     rootDir: parsed.rootDir,
     manifestPath: parsed.manifestPath,
     evidencePaths: parsed.evidencePaths,
   });
-  const baselinePath = path.resolve(parsed.rootDir, parsed.baselinePath || defaultBaselinePath(parsed.rootDir));
   writeBaselineFile(baselinePath, baseline);
   console.log(`created ${baselinePath}`);
   return 0;
@@ -1931,6 +1935,7 @@ function commandCoverage(parsed: ParsedArgs): number {
     check: {
       manifestPath: parsed.manifestPath,
       baselinePath: parsed.baselinePath,
+      evidencePaths: parsed.evidencePaths,
     },
   });
   if (format === "json") {

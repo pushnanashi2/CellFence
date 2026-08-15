@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-15T19:37:59.455Z",
+  "generatedAt": "2026-08-15T22:40:01.533Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -117,8 +117,8 @@
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 124,
-      "publicSurfaceLines": 2088,
+      "publicSymbols": 126,
+      "publicSurfaceLines": 2090,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -201,6 +201,8 @@
         "FindingWitnessSubject",
         "formatCouplingGraphMermaid",
         "formatHumanResult",
+        "GitHubArtifactClaimStore",
+        "GitHubArtifactClaimStoreOptions",
         "GovernanceChangeReport",
         "guardBaselineUpdate",
         "inferManifest",
@@ -250,7 +252,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "48aa40c9ca6d47db51073afcc5e41f3093ebbe8314449661792dcb1ec1f46ba1",
+      "publicSurfaceHash": "118860e4b37c93a35af2aca95d42e809f6283d90275c13140f759a68b4d10a87",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -321,7 +323,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 3,
-      "publicSurfaceLines": 2030,
+      "publicSurfaceLines": 2035,
       "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/cli/**"
@@ -589,7 +591,7 @@
     "github-action-baseline-gate": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 452,
+      "publicSurfaceLines": 467,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/github-action-baseline-gate/**"
@@ -599,7 +601,7 @@
         "ACTION_INPUT_NAMES",
         "runAction"
       ],
-      "publicSurfaceHash": "b8fb36c3ae3efdfc9dd35860e7a7c5a53b65b32cff3ecf45616dd1b3110959d4",
+      "publicSurfaceHash": "52077e78737681384436e38d878efe498682e556b5701a3e9261015aceae02c4",
       "dependencyEdges": [
         "github-action-baseline-gate->engine"
       ],
@@ -608,7 +610,8 @@
     }
   },
   "seal": {
-    "algorithm": "hmac-sha256",
-    "digest": "3d2e6937f4e801629ea973d0810458f95e3a266f7a05607189e633a973aca479"
+    "algorithm": "ed25519",
+    "keyId": "baseline-ed25519-2026-08-15",
+    "signature": "sfw4W5sXDxgdyCuJ7888YBc1dh99RihRTr9elnu8jKL7RqL23Uo5VfQVYtGO5QXAMgReWFDZwx1yzHYh9QivDQ=="
   }
 }

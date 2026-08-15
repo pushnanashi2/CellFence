@@ -56,6 +56,11 @@ export function writeBaselineFile(filePath: string, baseline: CellFenceBaseline)
   fs.writeFileSync(filePath, `${JSON.stringify(sealBaselineIfConfigured(baseline), null, 2)}\n`);
 }
 
+function acceptedBaselineRecord(baseline: CellFenceBaseline, cellId: string): CellFenceBaseline["cells"][string] | undefined {
+  if (baseline.cellIds && !baseline.cellIds.includes(cellId)) return undefined;
+  return baseline.cells[cellId];
+}
+
 export function createBaseline(
   options: CheckOptions = {},
   dependencies: BaselineOperationDependencies,
@@ -141,15 +146,13 @@ export function guardBaselineUpdate(
   }
 
   const existingBaseline = existingBaselineValidation.value;
-  if (existingBaseline.seal) {
-    for (const finding of validateBaselineSealFindings(manifest, existingBaseline, baselinePath, false)) {
-      addFinding(findings, finding);
-    }
+  for (const finding of validateBaselineSealFindings(manifest, existingBaseline, baselinePath, false)) {
+    addFinding(findings, finding);
   }
   for (const cell of manifest.cells) {
     if (!cell.locked) continue;
-    const current = options.nextBaseline.cells[cell.id];
-    const previous = existingBaseline.cells[cell.id];
+    const current = acceptedBaselineRecord(options.nextBaseline, cell.id);
+    const previous = acceptedBaselineRecord(existingBaseline, cell.id);
     if (!previous) {
       addLockedBaselineFinding(
         findings,

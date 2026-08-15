@@ -141,6 +141,14 @@ for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => 
   }
 }
 
+const ciWorkflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
+if (/CELLFENCE_BASELINE_HMAC_KEY/.test(ciWorkflow)) {
+  findings.push(".github/workflows/ci.yml must not expose CELLFENCE_BASELINE_HMAC_KEY to pull_request jobs; use the Ed25519 public verifier");
+}
+if (!/CELLFENCE_BASELINE_ED25519_PUBLIC_KEY/.test(ciWorkflow)) {
+  findings.push(".github/workflows/ci.yml must configure CELLFENCE_BASELINE_ED25519_PUBLIC_KEY for fork-safe baseline verification");
+}
+
 if (findings.length > 0) {
   console.error(findings.join("\n"));
   process.exitCode = 1;

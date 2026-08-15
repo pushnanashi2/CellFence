@@ -7,6 +7,11 @@ import { resolveClaimBackend } from "../packages/engine/dist/index.js";
 
 const root = process.cwd();
 
+test("public ClaimBackendType keeps the github-artifact backend name for API compatibility", () => {
+  const declaration = fs.readFileSync(path.join(root, "packages/engine/dist/claims/selector.d.ts"), "utf8");
+  assert.match(declaration, /export type ClaimBackendType = "local-file" \| "github-artifact";/);
+});
+
 test("resolveClaimBackend defaults to local-file when no manifest is given", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-selector-"));
   try {

@@ -124,26 +124,12 @@
       }]
     },
     "claimBackend": {
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["type"],
-          "properties": {
-            "type": { "const": "local-file" }
-          }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["type"],
-          "properties": {
-            "type": { "const": "github-artifact" },
-            "artifactName": { "type": "string" },
-            "retentionDays": { "type": "integer", "minimum": 1 }
-          }
-        }
-      ]
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "local-file" }
+      }
     },
     "resourceContract": {
       "type": "object",

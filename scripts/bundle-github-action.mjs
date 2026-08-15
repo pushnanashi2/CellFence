@@ -1,18 +1,15 @@
 // 0.4.x: bundle the github-action-baseline-gate action with
 // `esbuild` so the published action is a single self-contained
-// ESM file. esbuild follows the symlinked workspace packages and
+// CommonJS file. esbuild follows the symlinked workspace packages and
 // produces a single output without the chunked-asset pattern that
-// `@vercel/ncc` ESM output uses; the resulting file can be
+// `@vercel/ncc` output used; the resulting file can be
 // invoked directly by the GitHub Actions runner as `node
 // dist/index.js`.
 //
-// The action's source no longer imports `@cellfence/cli` or
-// `@cellfence/engine` at runtime; the baseline-gate comparison
-// logic is inlined in `packages/github-action-baseline-gate/src/baseline-gate.ts`
-// so the bundle only inlines `@actions/core` and
-// `@actions/github`. The output is a single ESM file at
-// `dist/index.js` plus a small `package.json` that pins the
-// ESM module type.
+// The action's source no longer imports `@cellfence/cli` at runtime.
+// The baseline-gate comparison glue delegates to `@cellfence/engine`
+// and esbuild inlines that dependency into `dist/index.js` alongside
+// `@actions/core` and `@actions/github`.
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -59,6 +56,29 @@ try {
 for (const generatedPath of [path.join(outDir, "index.js"), path.join(outDir, "index.js.map")]) {
   const generated = fs.readFileSync(generatedPath, "utf8");
   fs.writeFileSync(generatedPath, generated.replace(/[ \t]+$/gm, ""));
+}
+
+const baselineGateEntrypoint = path.join(outDir, "baseline-gate.js");
+if (fs.existsSync(baselineGateEntrypoint)) {
+  const generated = fs.readFileSync(baselineGateEntrypoint, "utf8")
+    .replace(/^\/\/ Stryker (?:disable|restore) all:.*\n/gm, "");
+  const prologueStart = generated.indexOf("Object.defineProperty(exports, \"__esModule\"");
+  const prologueEnd = generated.indexOf("function readBaselineFromGit");
+  if (prologueStart === -1 || prologueEnd === -1 || prologueStart >= prologueEnd) {
+    console.error("could not locate baseline-gate CommonJS prologue for mutation annotations");
+    process.exit(1);
+  }
+  const beforePrologue = generated.slice(0, prologueStart);
+  const prologue = generated.slice(prologueStart, prologueEnd);
+  const afterPrologue = generated.slice(prologueEnd);
+  fs.writeFileSync(
+    baselineGateEntrypoint,
+    `${beforePrologue}`
+      + "// Stryker disable all: generated CommonJS export/import prologue; gate policy logic starts below.\n"
+      + prologue
+      + "// Stryker restore all: resume mutation testing for baseline gate policy logic.\n"
+      + afterPrologue,
+  );
 }
 
 // The action is a single CommonJS file; remove the ESM type so

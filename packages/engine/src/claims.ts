@@ -981,7 +981,22 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
       ...store.claims.filter((candidate) => candidate.id !== claim.id),
       claim,
     ];
-    writeClaimStore(store.path, nextClaims, backend, store.claims);
+    try {
+      writeClaimStore(store.path, nextClaims, backend, store.claims);
+    } catch (error) {
+      if (!(error instanceof CellFenceClaimCasConflict)) throw error;
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: `claim store changed while creating ${claim.id}; refresh claims and retry`,
+        details: { claimId: claim.id, backend: backend.id },
+      });
+      return {
+        ...claimResult(findings, warnings, store.claims, activeClaims),
+        claimsPath: store.path,
+      };
+    }
     const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
     return {
       ...claimResult(findings, warnings, nextClaims, nextActiveClaims),

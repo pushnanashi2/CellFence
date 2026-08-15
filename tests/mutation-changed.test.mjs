@@ -76,9 +76,10 @@ test("mutation scopes select source and compiled paths with cross-platform norma
     mutationScopesForFiles([
       "packages/engine/src/file-index.ts",
       "packages\\schema\\dist\\index.js",
+      "packages/github-action-baseline-gate/src/baseline-gate.ts",
       "README.md",
     ]).map((scope) => scope.id),
-    ["schema", "engine-file-index"],
+    ["schema", "engine-file-index", "github-action-baseline-gate"],
   );
 });
 
@@ -242,6 +243,10 @@ test("mutation scopes rerun for dedicated source and test changes only", () => {
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],
     "a deleted dedicated test path must continue to select its mutation scopes",
+  );
+  assert.deepEqual(
+    mutationScopesForFiles(["packages/github-action-baseline-gate/src/baseline-gate.ts"]).map((scope) => scope.id),
+    ["github-action-baseline-gate"],
   );
 });
 

@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 env:
-  CELLFENCE_BASELINE_HMAC_KEY: ${{ secrets.CELLFENCE_BASELINE_HMAC_KEY }}
   CELLFENCE_REDIS_INTEGRATION: "1"
 
 jobs:
@@ -115,6 +114,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: git diff --exit-code -- packages/github-action-baseline-gate/dist/index.js
 
   self-check:
     runs-on: ubuntu-latest
@@ -125,7 +125,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run cellfence:self-check
+      - run: |
+          CELLFENCE_BASELINE_ED25519_PUBLIC_KEY='-----BEGIN PUBLIC KEY-----
+          MCowBQYDK2VwAyEANjtQ85FaSB/GOuAFydogMJJtJo5U9TH4saTWkrlnKvo=
+          -----END PUBLIC KEY-----' npm run cellfence:self-check
 
   provenance:
     runs-on: ubuntu-latest

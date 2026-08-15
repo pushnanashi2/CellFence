@@ -99,6 +99,7 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "src\\..\\escape.ts" }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
+    ["manifest", validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: "claims", retentionDays: 1 } } }), validateManifest],
     ["manifest", validManifest({ overrides: [{ files: ["..\\escape.ts"], rules: {} }] }), validateManifest],
     ["baseline", validBaseline(), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "not-a-date" }), validateBaseline],

@@ -109,7 +109,22 @@ export const MUTATION_SCOPES = Object.freeze([
     mutate: "packages/github-action/dist/index.js",
     tests: ["tests/github-action.test.mjs"],
   },
-].map((scope) => Object.freeze({ ...scope, tests: Object.freeze([...scope.tests]) })));
+  {
+    id: "github-action-baseline-gate",
+    source: "packages/github-action-baseline-gate/src/baseline-gate.ts",
+    sources: ["packages/github-action-baseline-gate/src/index.ts"],
+    mutate: "packages/github-action-baseline-gate/dist/baseline-gate.js",
+    tests: ["tests/baseline-gate.test.mjs"],
+  },
+].map((scope) => Object.freeze({
+  ...scope,
+  sources: Object.freeze(scope.sources ? [...scope.sources] : []),
+  tests: Object.freeze([...scope.tests]),
+})));
+
+function scopeSourcePaths(scope) {
+  return [scope.source, ...scope.sources];
+}
 
 export function normalizeRepositoryPath(filePath) {
   return filePath.replaceAll("\\", "/").replace(/^\.\//, "");
@@ -118,7 +133,7 @@ export function normalizeRepositoryPath(filePath) {
 export function mutationScopesForFiles(filePaths) {
   const normalizedFiles = new Set(filePaths.map(normalizeRepositoryPath));
   return MUTATION_SCOPES.filter(
-    (scope) => normalizedFiles.has(scope.source)
+    (scope) => scopeSourcePaths(scope).some((sourcePath) => normalizedFiles.has(sourcePath))
       || normalizedFiles.has(scope.mutate)
       || scope.tests.some((testPath) => normalizedFiles.has(testPath)),
   );
@@ -144,7 +159,7 @@ function duplicateValues(values) {
 
 export function validateMutationScopeCoverage(mutateTargets, scopes = MUTATION_SCOPES) {
   const duplicateScopeIds = duplicateValues(scopes.map((scope) => scope.id));
-  const duplicateSources = duplicateValues(scopes.map((scope) => scope.source));
+  const duplicateSources = duplicateValues(scopes.flatMap(scopeSourcePaths));
   const duplicateScopedTargets = duplicateValues(scopes.map((scope) => scope.mutate));
   const scopesWithoutTests = scopes.filter((scope) => scope.tests.length === 0).map((scope) => scope.id);
   const invalidScopes = [];

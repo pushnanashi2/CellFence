@@ -1378,6 +1378,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   runPluginRules(context, plugins, repositoryModel, findings);
 
+  const rawObservationDiagnostics = [...findings, ...warnings];
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const active = applyWaiversToFindings(context, severityAdjusted.findings, severityAdjusted.warnings);
   const evidenceEnvelope = governanceEvidenceEnvelopeForCheck(
@@ -1387,7 +1388,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     evidencePathsForOptions(rootDir, options.evidencePaths),
     observedImports,
     accessesByCell,
-    [...severityAdjusted.findings, ...severityAdjusted.warnings],
+    rawObservationDiagnostics,
   );
   const evaluation = evaluateGovernance({
     evidence: evidenceEnvelope.assessment,
@@ -2069,6 +2070,7 @@ export {
   type ClaimStoreState,
 } from "./claims/backend.js";
 export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
+export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
 export { RedisClaimStore, type RedisClaimStoreOptions, type RedisLike } from "./claims/backends/redis.js";
 
 // 0.4.0: claim backend selector. The 0.3.0 prototype shipped the

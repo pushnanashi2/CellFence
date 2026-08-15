@@ -10,8 +10,8 @@
 // in, GovernanceChangeReport on the way out.
 
 import { execFileSync } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync } from "node:fs";
+import { isAbsolute, relative, resolve } from "node:path";
 
 import { detectBaselineChanges, type CellFenceBaseline, type GovernanceChangeReport } from "@cellfence/engine";
 
@@ -32,28 +32,26 @@ export type BaselineGateOptions = {
 };
 
 function readBaselineFromGit(rootDir: string, ref: string, baselineFile: string): unknown {
-  const relative = path.isAbsolute(baselineFile)
-    ? path.relative(rootDir, baselineFile) || baselineFile
+  const relativeBaselineFile = isAbsolute(baselineFile)
+    ? relative(rootDir, baselineFile)
     : baselineFile;
-  const text = execFileSync("git", ["show", `${ref}:${relative}`], {
+  const text = String(execFileSync("git", ["show", `${ref}:${relativeBaselineFile}`], {
     cwd: rootDir,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
-  });
+  }));
   return JSON.parse(text);
 }
 
 function readBaselineFromPath(filePath: string): unknown {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return JSON.parse(String(readFileSync(filePath)));
 }
 
 export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateResult {
   if (!options.baseRef && !options.headRef) {
     throw new Error("either a base-ref or a head-ref is required to read the baseline");
   }
-  const baselineFile = path.isAbsolute(options.baselineFile)
+  const baselineFile = isAbsolute(options.baselineFile)
     ? options.baselineFile
-    : path.resolve(options.rootDir, options.baselineFile);
+    : resolve(options.rootDir, options.baselineFile);
   const baseValue = options.baseRef
     ? readBaselineFromGit(options.rootDir, options.baseRef, baselineFile)
     : readBaselineFromPath(baselineFile);
@@ -61,10 +59,10 @@ export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateR
     ? readBaselineFromGit(options.rootDir, options.headRef, baselineFile)
     : readBaselineFromPath(baselineFile);
   const baseDisplay = options.baseRef
-    ? `${options.baseRef}:${path.relative(options.rootDir, baselineFile) || baselineFile}`
+    ? `${options.baseRef}:${relative(options.rootDir, baselineFile)}`
     : baselineFile;
   const headDisplay = options.headRef
-    ? `${options.headRef}:${path.relative(options.rootDir, baselineFile) || baselineFile}`
+    ? `${options.headRef}:${relative(options.rootDir, baselineFile)}`
     : baselineFile;
   const report = detectBaselineChanges(
     baseValue as CellFenceBaseline,
@@ -80,9 +78,8 @@ export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateR
   }
   return {
     report,
-    // exit 0: governance change present (action continues to enforce
-    // approval before merge). exit 1: no change (action can short-circuit).
-    exitCode: report.hasChange ? 0 : 1,
+    // exit 1: governance change present. exit 0: no change.
+    exitCode: report.hasChange ? 1 : 0,
     warnings,
   };
 }

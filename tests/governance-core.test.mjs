@@ -18,6 +18,10 @@ import {
 
 const root = process.cwd();
 
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
 function completeSnapshot() {
   return createSubjectSnapshotFromFiles([
     { path: "./src/a/public.ts", role: "source", content: "export const a = 1;\n" },
@@ -257,6 +261,91 @@ test("check evidence graph records unsupported source observations as incomplete
     const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
     const defectNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "evidence-defect");
     assert.ok(defectNodes.some((node) => node.label === "UNSUPPORTED_OBSERVATION"));
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "src/app/public.ts"
+      && node.family === "imports"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("check evidence graph records unsupported runtime evidence observations as incomplete", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-runtime-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/runtime"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/runtime/public.ts"), "export const runRuntime = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "runtime",
+        ownedPaths: ["src/runtime/**"],
+        publicEntry: "src/runtime/public.ts",
+        publicSymbols: ["runRuntime"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "resource-evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v2",
+      commitSha: headCommitSha(),
+      cellId: "runtime",
+      accesses: [],
+      transcriptStatus: "inactive",
+    });
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      evidencePaths: ["resource-evidence.json"],
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
+    const defectNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "evidence-defect");
+    assert.ok(defectNodes.some((node) => node.label === "UNSUPPORTED_OBSERVATION"));
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "resource-evidence.json"
+      && node.family === "resources"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("check evidence graph keeps raw unresolved observations when the displayed rule is off", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-rule-off-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/app"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "src/app/public.ts"),
+      "import { missing } from './missing';\nexport const app = missing;\n",
+    );
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      rules: {
+        CELLFENCE_UNRESOLVED_IMPORT: "off",
+      },
+      cells: [{
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.findings.some((finding) => finding.ruleId === "CELLFENCE_UNRESOLVED_IMPORT"), false);
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
     assert.ok(observationNodes.some((node) =>
       node.filePath === "src/app/public.ts"
       && node.family === "imports"
