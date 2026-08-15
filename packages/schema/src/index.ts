@@ -9,8 +9,6 @@ export type ArtifactLaneManifest = {
   paths: string[];
   description?: string;
   locked?: boolean;
-  importAnalysis?: boolean;
-  resourceAnalysis?: boolean;
 };
 
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
@@ -53,8 +51,6 @@ export type ResourceContractManifest = {
   access: ResourceAccessMode[];
   selectors: string[];
   locked?: boolean;
-  importAnalysis?: boolean;
-  resourceAnalysis?: boolean;
   description?: string;
 };
 
@@ -154,7 +150,16 @@ export type ManifestGovernance = {
   requiredRules?: string[];
   resourceAdapters?: ResourceAdapterMap;
   pathClasses?: PathClassManifest[];
+  claimBackend?: ClaimBackendManifest;
 };
+
+export type ClaimBackendManifest =
+  | { type: "local-file" }
+  | {
+      type: "github-artifact";
+      artifactName?: string;
+      retentionDays?: number;
+    };
 
 export type CellManifest = {
   id: string;
@@ -480,7 +485,7 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
     errors.push(`${location} must be an object`);
     return false;
   }
-  validateKnownKeys(value, location, ["requireOwnership", "include", "exclude", "requiredRules", "resourceAdapters", "pathClasses"], errors);
+  validateKnownKeys(value, location, ["requireOwnership", "include", "exclude", "requiredRules", "resourceAdapters", "pathClasses", "claimBackend"], errors);
   if (!optionalBoolean(value.requireOwnership)) {
     errors.push(`${location}.requireOwnership must be a boolean when present`);
   }
@@ -527,8 +532,34 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
       validateUniqueNonEmptyStrings(pathClassIds, `${location}.pathClasses[].id`, errors);
     }
   }
+  validateClaimBackend(value.claimBackend, `${location}.claimBackend`, errors);
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
     errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);
+  }
+  return true;
+}
+
+function validateClaimBackend(value: unknown, location: string, errors: string[]): value is ClaimBackendManifest {
+  if (value === undefined) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object when present`);
+    return false;
+  }
+  validateKnownKeys(value, location, ["type", "artifactName", "retentionDays"], errors);
+  if (value.type !== "local-file" && value.type !== "github-artifact") {
+    errors.push(`${location}.type must be local-file|github-artifact`);
+    return false;
+  }
+  if (value.type === "local-file") {
+    if (value.artifactName !== undefined) errors.push(`${location}.artifactName is only supported for github-artifact`);
+    if (value.retentionDays !== undefined) errors.push(`${location}.retentionDays is only supported for github-artifact`);
+    return true;
+  }
+  if (!optionalString(value.artifactName)) {
+    errors.push(`${location}.artifactName must be a string when present`);
+  }
+  if (value.retentionDays !== undefined && (!Number.isInteger(value.retentionDays) || Number(value.retentionDays) < 1)) {
+    errors.push(`${location}.retentionDays must be a positive integer when present`);
   }
   return true;
 }

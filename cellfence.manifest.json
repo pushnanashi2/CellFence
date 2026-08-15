@@ -47,6 +47,7 @@
         "CellFenceManifest",
         "CellFenceResourceEvidence",
         "CellManifest",
+        "ClaimBackendManifest",
         "CheckProfileManifest",
         "EnforcementStatus",
         "ManifestGovernance",

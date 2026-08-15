@@ -167,6 +167,11 @@ test("schema validation accepts maximal valid manifests", () => {
         sqlalchemy: "on",
         celery: "off",
       },
+      claimBackend: {
+        type: "github-artifact",
+        artifactName: "cellfence-claims-staging",
+        retentionDays: 2,
+      },
     },
     rules: {
       "ownership/unowned-source": "error",
@@ -394,6 +399,16 @@ test("schema validation rejects malformed manifest governance and overrides", ()
     validateManifest(validManifest({ governance: { resourceAdapters: { unknown: "on", file: "maybe" } } })),
     /unknown must be a known built-in adapter[\s\S]*file must be on\|off/,
   );
+  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: "github-artifact" } })), /claimBackend must be an object/);
+  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: { type: "redis" } } })), /claimBackend\.type must be local-file\|github-artifact/);
+  assertInvalid(
+    validateManifest(validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: 1, retentionDays: 0 } } })),
+    /artifactName must be a string[\s\S]*retentionDays must be a positive integer/,
+  );
+  assertInvalid(
+    validateManifest(validManifest({ governance: { claimBackend: { type: "local-file", artifactName: "ignored" } } })),
+    /artifactName is only supported for github-artifact/,
+  );
 
   assertInvalid(validateManifest(validManifest({ overrides: "bad" })), /overrides must be an array/);
   assertInvalid(validateManifest(validManifest({ overrides: [null] })), /overrides\[0\] must be an object/);
@@ -427,8 +442,8 @@ test("schema validation rejects malformed cells and nested contracts", () => {
       cells: [{
         ...validCell,
         consumes: [null, { cell: "", artifactLanes: [1] }],
-        producesArtifacts: [null, { id: "", paths: [""], description: 1, locked: "yes" }],
-        resourceContracts: [null, { id: "", kind: "socket", access: ["execute"], selectors: [""], description: 1 }],
+        producesArtifacts: [null, { id: "", paths: [""], description: 1, locked: "yes", importAnalysis: false }],
+        resourceContracts: [null, { id: "", kind: "socket", access: ["execute"], selectors: [""], description: 1, resourceAnalysis: false }],
         budgets: {
           ownedPathPatterns: -1,
           publicSymbols: 1.2,
@@ -437,7 +452,7 @@ test("schema validation rejects malformed cells and nested contracts", () => {
         },
       }],
     })),
-    /consumes\[0\] must be an object[\s\S]*consumes\[1\]\.cell[\s\S]*artifactLanes[\s\S]*producesArtifacts\[0\] must be an object[\s\S]*producesArtifacts\[1\]\.id[\s\S]*producesArtifacts\[1\]\.paths[\s\S]*description must be a string[\s\S]*locked must be a boolean[\s\S]*resourceContracts\[0\] must be an object[\s\S]*kind must be file\|database\|queue\|http[\s\S]*access must contain[\s\S]*selectors must be an array[\s\S]*ownedPathPatterns must be a non-negative integer/,
+    /consumes\[0\] must be an object[\s\S]*consumes\[1\]\.cell[\s\S]*artifactLanes[\s\S]*producesArtifacts\[0\] must be an object[\s\S]*importAnalysis is not a supported field[\s\S]*producesArtifacts\[1\]\.id[\s\S]*producesArtifacts\[1\]\.paths[\s\S]*description must be a string[\s\S]*locked must be a boolean[\s\S]*resourceContracts\[0\] must be an object[\s\S]*resourceAnalysis is not a supported field[\s\S]*kind must be file\|database\|queue\|http[\s\S]*access must contain[\s\S]*selectors must be an array[\s\S]*ownedPathPatterns must be a non-negative integer/,
   );
 });
 

@@ -61,4 +61,7 @@ try {
 const pkgPath = path.join(actionRoot, "package.json");
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
 delete pkg.type;
-fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+const nextPkg = JSON.stringify(pkg, null, 2) + "\n";
+if (fs.readFileSync(pkgPath, "utf8") !== nextPkg) {
+  fs.writeFileSync(pkgPath, nextPkg);
+}

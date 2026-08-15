@@ -25,6 +25,7 @@
 
 ## Unreleased
 
+- Align `governance.claimBackend` with manifest validation and published JSON Schema, remove validator-blind nested analysis flags from artifact/resource contract types, make bare owned paths cover the directory itself and descendants, and avoid unnecessary GitHub Action package metadata rewrites during bundling.
 - Add a fail-closed `mutation:changed` pull-request gate with test/config change detection, isolated incremental caches, machine-readable evidence, and a daily non-incremental full-scope matrix audit while retaining `break: 100` throughout.
 - Cache deterministic `check --changed` base analysis outside the worktree using a key bound to the base commit, analyzer implementation, runtime, policy inputs, severity configuration, and explicit plugin identity.
 - Keep arbitrary plugin loading out of manifest and CLI configuration, support explicit programmatic plugin cache identity, and remove the research ablation switch from public help.

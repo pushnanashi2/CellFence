@@ -183,12 +183,13 @@ export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]
   // by `src/core`) without re-introducing the false
   // positives for sibling directories (e.g. `src/corex/**`
   // is still NOT covered by `src/core/**`).
-  return ownedPaths.some((ownedPath) => pathPatternSubset(pattern, expandOwnedPath(ownedPath)));
+  return ownedPaths.some((ownedPath) => expandOwnedPath(ownedPath).some((expanded) => pathPatternSubset(pattern, expanded)));
 }
 
-function expandOwnedPath(ownedPath: string): string {
-  if (ownedPath.includes("*")) return ownedPath;
-  return `${ownedPath.replace(/\/$/, "")}/**`;
+function expandOwnedPath(ownedPath: string): string[] {
+  if (ownedPath.includes("*")) return [ownedPath];
+  const trimmed = ownedPath.replace(/\/$/, "");
+  return [trimmed, `${trimmed}/**`];
 }
 
 export function sourceKindForPath(filePath: string): ts.ScriptKind {

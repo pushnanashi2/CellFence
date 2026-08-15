@@ -115,12 +115,35 @@
             "celery": { "enum": ["on", "off"] }
           }
         },
-        "pathClasses": { "type": "array", "items": { "$ref": "#/$defs/pathClass" } }
+        "pathClasses": { "type": "array", "items": { "$ref": "#/$defs/pathClass" } },
+        "claimBackend": { "$ref": "#/$defs/claimBackend" }
       },
       "allOf": [{
         "if": { "required": ["requireOwnership"], "properties": { "requireOwnership": { "const": true } } },
         "then": { "required": ["include"], "properties": { "include": { "type": "array", "minItems": 1 } } }
       }]
+    },
+    "claimBackend": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "local-file" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "github-artifact" },
+            "artifactName": { "type": "string" },
+            "retentionDays": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
     },
     "resourceContract": {
       "type": "object",

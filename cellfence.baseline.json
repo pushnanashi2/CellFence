@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-15T10:30:54.464Z",
+  "generatedAt": "2026-08-15T12:16:44.700Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,8 +23,8 @@
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 36,
-      "publicSurfaceLines": 926,
+      "publicSymbols": 37,
+      "publicSurfaceLines": 957,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -45,6 +45,7 @@
         "CellFenceResourceEvidence",
         "CellManifest",
         "CheckProfileManifest",
+        "ClaimBackendManifest",
         "EnforcementStatus",
         "ManifestGovernance",
         "PathClassCommitPolicy",
@@ -68,7 +69,7 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "7874fecb69740e5d6153876cef013daf0451a256c094581f5c2d284f2b1707b5",
+      "publicSurfaceHash": "cf1a57c70ba05e9fc6dd7daa2d160b5fc052b44f214d58ea84bb97af4416519d",
       "dependencyEdges": [],
       "artifactContracts": [],
       "resourceAccesses": []
@@ -607,6 +608,6 @@
   },
   "seal": {
     "algorithm": "hmac-sha256",
-    "digest": "32da8d86c19bb845c48e823a1f2c4cbb77399d0776eb81ca01f2a0370317e2a1"
+    "digest": "c164cb4e952f1fcaffec6f3219a048f1e6d9a81e2fb3b2cac2f91ceb09315a8c"
   }
 }

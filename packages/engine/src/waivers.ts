@@ -34,9 +34,8 @@ function loadManifestFromFile(manifestPath: string): CellFenceManifest {
  * Resolution order:
  * 1. `CELLFENCE_APPROVERS` env var (comma-separated). Highest priority so
  *    that CI can pin the approver list without modifying the repository.
- * 2. Git commit authors in the most recent `APPROVER_HISTORY_LIMIT` commits.
- * 3. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
- * 4. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
+ * 2. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
+ * 3. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
  */
 export function getApprovalAllowlist(rootDir: string): string[] {
   const allow = new Set<string>();
