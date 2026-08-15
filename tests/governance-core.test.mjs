@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
@@ -60,18 +61,48 @@ function summarizeCheck(result) {
   };
 }
 
+function headCommitSha() {
+  return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+}
+
+function resolveEvidenceFixturePath(fixtureRoot, evidenceRelPath) {
+  const evidenceSrc = path.join(fixtureRoot, evidenceRelPath);
+  const evidence = JSON.parse(fs.readFileSync(evidenceSrc, "utf8"));
+  if (evidence.commitSha === "HEAD") {
+    evidence.commitSha = headCommitSha();
+  }
+  const resolvedDir = path.join(fixtureRoot, ".resolved");
+  const resolvedPath = path.join(resolvedDir, evidenceRelPath);
+  fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+  fs.writeFileSync(resolvedPath, JSON.stringify(evidence, null, 2));
+  return resolvedPath;
+}
+
+function cleanupResolvedEvidence(fixtureRoot) {
+  const resolvedDir = path.join(fixtureRoot, ".resolved");
+  if (fs.existsSync(resolvedDir)) {
+    fs.rmSync(resolvedDir, { recursive: true, force: true });
+  }
+}
+
 function checkFixture(relativePath, options = {}) {
   const previous = process.env.CELLFENCE_BASELINE_HMAC_KEY;
-  const baselinePath = options.baselinePath ? path.join(root, "fixtures", relativePath, options.baselinePath) : "";
+  const fixtureRoot = path.join(root, "fixtures", relativePath);
+  const evidencePaths = (options.evidencePaths || []).map((evidencePath) =>
+    resolveEvidenceFixturePath(fixtureRoot, evidencePath),
+  );
+  const baselinePath = options.baselinePath ? path.join(fixtureRoot, options.baselinePath) : "";
   const baselineHasSeal = baselinePath && JSON.parse(fs.readFileSync(baselinePath, "utf8")).seal;
   if (baselineHasSeal) process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
   try {
     return checkRepository({
-      rootDir: path.join(root, "fixtures", relativePath),
+      rootDir: fixtureRoot,
       manifestPath: "cellfence.manifest.json",
       ...options,
+      evidencePaths,
     });
   } finally {
+    cleanupResolvedEvidence(fixtureRoot);
     if (baselineHasSeal) {
       if (previous === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
       else process.env.CELLFENCE_BASELINE_HMAC_KEY = previous;

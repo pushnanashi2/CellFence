@@ -14,10 +14,10 @@
 // `dist/index.js` plus a small `package.json` that pins the
 // ESM module type.
 
-import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
+import { build } from "esbuild";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const actionRoot = path.join(repoRoot, "packages/github-action-baseline-gate");
@@ -34,28 +34,26 @@ if (!fs.existsSync(sourceEntry)) {
   process.exit(1);
 }
 
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
-const result = spawnSync(npxCommand, [
-  "esbuild", sourceEntry,
-  "--bundle",
-  "--platform=node",
-  "--target=node20",
-  // CommonJS is the format `@actions/core` ships in; ESM output
-  // wraps its `require("os")` calls in a dynamic-require shim
-  // that fails at runtime in pure ESM mode. CJS lets the bundle
-  // resolve Node.js built-ins via standard `require` and is
-  // supported by the GitHub Actions node20 runner.
-  "--format=cjs",
-  `--outfile=${outDir}/index.js`,
-  "--sourcemap=external",
-  "--minify",
-], { stdio: "inherit" });
-if (result.error) {
-  console.error(result.error.message);
+try {
+  await build({
+    entryPoints: [sourceEntry],
+    bundle: true,
+    platform: "node",
+    target: "node20",
+    // CommonJS is the format `@actions/core` ships in; ESM output
+    // wraps its `require("os")` calls in a dynamic-require shim
+    // that fails at runtime in pure ESM mode. CJS lets the bundle
+    // resolve Node.js built-ins via standard `require` and is
+    // supported by the GitHub Actions node20 runner.
+    format: "cjs",
+    outfile: path.join(outDir, "index.js"),
+    sourcemap: "external",
+    minify: true,
+    logLevel: "info",
+  });
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
   process.exit(1);
-}
-if (result.status !== 0) {
-  process.exit(result.status ?? 1);
 }
 
 // The action is a single CommonJS file; remove the ESM type so

@@ -84,6 +84,7 @@
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^3.0.1",
     "c8": "^11.0.0",
+    "esbuild": "^0.28.2",
     "eslint": "^10.7.0",
     "minimatch": "^10.0.0",
     "typescript": "^5.5.4",
