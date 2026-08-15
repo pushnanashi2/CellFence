@@ -38,6 +38,8 @@
 - Tie release dispatches to the exact-ref full mutation matrix, retain oracle reports on failure, harden action pin verification, and make changed-scope selection preserve deleted and both renamed paths.
 - Keep changed-scope mutation testing focused on production/test scope changes instead of widening to every scope for package lock, CI, or mutation runner support-file edits.
 - Harden baseline governance gates by preserving skipped-cell fail-closed deltas, diffing artifact contracts, treating CI waiver approvers as an override, binding GitHub Action approvals to the current head commit, requiring an explicit token input, and confining MCP downstream cwd through real paths.
+- Remove public baseline HMAC and test waiver identities from workflows, cover every workspace in root typecheck, and harden CLI value parsing plus normal-check baseline/evidence forwarding.
+- Refuse baselines that would grandfather active findings, fail closed on missing or tampered locked baselines, make claim backend configuration match the shipped synchronous local-file implementation, and mark unresolved or unsupported source observations as incomplete evidence.
 
 ## 0.2.1 - 2026-08-04
 

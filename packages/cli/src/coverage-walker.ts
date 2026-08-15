@@ -11,6 +11,10 @@ import path from "node:path";
 
 import {
   checkRepository,
+  loadManifestFromFile,
+  repoPath,
+  sourceFilesForCell,
+  sourceFilesUnderGovernance,
   type CheckOptions,
   type CheckResult,
 } from "@cellfence/engine";
@@ -89,10 +93,31 @@ export function walkCoverage(options: WalkOptions): WalkResult {
       suggestion: undefined,
     });
   }
+  const manifestPath = path.resolve(options.rootDir, options.manifestPath || "cellfence.manifest.json");
+  const sourceInventory = new Set<string>();
+  try {
+    const manifest = loadManifestFromFile(manifestPath);
+    for (const cell of manifest.cells) {
+      for (const filePath of sourceFilesForCell(options.rootDir, cell)) {
+        sourceInventory.add(repoPath(options.rootDir, filePath));
+      }
+    }
+    for (const filePath of sourceFilesUnderGovernance(options.rootDir, manifest)) {
+      sourceInventory.add(repoPath(options.rootDir, filePath));
+    }
+  } catch {
+    // The check result already carries the configuration error. Keep coverage
+    // computation side-effect-free and let the caller surface the original
+    // finding instead of masking it with an inventory failure.
+  }
+  const unresolvedFiles = new Set(unresolved.map((entry) => repoPath(options.rootDir, entry.filePath)));
+  const analyzedFiles = [...sourceInventory]
+    .filter((filePath) => !unresolvedFiles.has(filePath))
+    .sort((left, right) => left.localeCompare(right));
   return {
     unresolved,
-    analyzedFiles: check.findings.map((f) => f.filePath).filter((p): p is string => Boolean(p)),
-    totalFiles: check.findings.length + check.warnings.length,
+    analyzedFiles,
+    totalFiles: sourceInventory.size,
     check,
   };
 }

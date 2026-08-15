@@ -12,6 +12,7 @@ import {
 } from "@cellfence/engine";
 
 import {
+  buildCoverageReport,
   type CoverageReport,
   type CoverageUnresolved,
 } from "@cellfence/engine";
@@ -62,30 +63,12 @@ function printHumanReport(report: CoverageReport): void {
 
 export function runCoverageCommand(options: CoverageCommandOptions): CoverageCommandResult {
   const walked = walkCoverage({ ...options.check, rootDir: options.rootDir });
-  // The walker's coverage is computed against the number of
-  // findings, not files. The summary in buildCoverageReport expects
-  // a ratio, so use the engine's own "total cells vs analysed cells"
-  // heuristic by treating the total findings as the denominator and
-  // the unresolved count as the numerator of an inverse coverage
-  // ratio. This makes --fail-under meaningful in CI: a project that
-  // produces N findings but has K unresolved observations sits at
-  // coverage = (N - K) / N.
-  const total = Math.max(1, walked.check.findings.length + walked.check.warnings.length);
-  const unresolved = walked.unresolved.length;
-  const report = {
-    schemaVersion: "cellfence.coverage.v1" as const,
-    generatedAt: new Date().toISOString(),
+  const report = buildCoverageReport({
     rootDir: path.resolve(options.rootDir),
-    summary: {
-      totalFiles: total,
-      analyzedFiles: total - unresolved,
-      coverage: Number(((total - unresolved) / total).toFixed(4)),
-      unresolvedImports: walked.unresolved.filter((entry) => entry.kind === "import").length,
-      unresolvedResources: walked.unresolved.filter((entry) => entry.kind === "resource").length,
-      unresolvedPublicSurface: walked.unresolved.filter((entry) => entry.kind === "public-surface").length,
-    },
-    findings: walked.unresolved,
-  };
+    totalFiles: walked.totalFiles,
+    analyzedFiles: walked.analyzedFiles,
+    unresolved: walked.unresolved,
+  });
   let exitCode = 0;
   if (typeof options.failUnder === "number" && report.summary.coverage < options.failUnder) {
     exitCode = 2;

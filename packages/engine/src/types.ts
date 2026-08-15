@@ -485,10 +485,9 @@ export type CellFenceWaiver = {
   valid: boolean;
   errors: string[];
   // 0.4.x: true when the waiver's approved-by identity is not in the
-  // approval allowlist (CELLFENCE_APPROVERS / CODEOWNERS /
-  // .cellfence/approvers.txt). The mismatch is now a hard parse
-  // error (see waivers.ts); the waiver is marked invalid and
-  // does not suppress findings. A separate
+  // trusted approval allowlist supplied by CELLFENCE_APPROVERS. The
+  // mismatch is a hard parse error (see waivers.ts); the waiver is
+  // marked invalid and does not suppress findings. A separate
   // CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still emitted
   // by collectWaiversForManifest for observability.
   untrustedApprover?: boolean;

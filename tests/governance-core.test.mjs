@@ -222,6 +222,51 @@ test("parse errors and unsupported observations block without erasing active vio
   assert.ok(evaluation.ruleResults.some((result) => result.ruleId === "CELLFENCE_EVIDENCE_COVERAGE" && result.status === "UNKNOWN"));
 });
 
+test("check evidence graph records unsupported source observations as incomplete", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-envelope-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/app"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "src/app/public.ts"),
+      [
+        "const specifier = './dynamic-target';",
+        "export async function app() {",
+        "  return import(specifier);",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(path.join(tempDir, "cellfence.manifest.json"), `${JSON.stringify({
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    }, null, 2)}\n`);
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
+    const defectNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "evidence-defect");
+    assert.ok(defectNodes.some((node) => node.label === "UNSUPPORTED_OBSERVATION"));
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "src/app/public.ts"
+      && node.family === "imports"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("evidence assessment detects snapshot mismatch, unknown files, and duplicate observations", () => {
   const snapshot = completeSnapshot();
   const brokenSnapshot = { ...snapshot, snapshotDigest: "0".repeat(64) };

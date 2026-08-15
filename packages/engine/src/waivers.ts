@@ -31,14 +31,14 @@ function loadManifestFromFile(manifestPath: string): CellFenceManifest {
 /**
  * Discover the set of identities permitted to approve a CellFence waiver.
  *
- * Resolution order:
- * 1. `CELLFENCE_APPROVERS` env var (comma-separated). When set, it is a
- *    complete override so CI can pin the approver list without letting the
- *    pull request expand it by editing repository-local files.
- * 2. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
- * 3. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
+ * `CELLFENCE_APPROVERS` is the only trusted source because it is supplied by
+ * the caller's execution environment. Repository files are intentionally not
+ * read here: a pull request can edit CODEOWNERS or `.cellfence/approvers.txt`
+ * in the same diff as a waiver directive, so those files are policy hints, not
+ * proof that an external approval happened.
  */
 export function getApprovalAllowlist(rootDir: string): string[] {
+  void rootDir;
   const allow = new Set<string>();
   const fromEnv = process.env.CELLFENCE_APPROVERS;
   if (fromEnv) {
@@ -47,41 +47,6 @@ export function getApprovalAllowlist(rootDir: string): string[] {
       if (trimmed) allow.add(trimmed);
     }
     return [...allow];
-  }
-  // 0.4.0: do not derive the allowlist from git history. A
-  // malicious or careless agent can self-approve by simply
-  // committing, which would silently invert the trust model.
-  // External review surfaces (CI env, CODEOWNERS, repo-local
-  // approvers file) are the only authorities.
-  for (const ownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
-    const absolute = path.join(rootDir, ownersPath);
-    if (!fs.existsSync(absolute)) continue;
-    try {
-      const content = fs.readFileSync(absolute, "utf8");
-      for (const line of content.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) continue;
-        const owners = trimmed.match(/@[\w./-]+/g);
-        if (!owners) continue;
-        for (const owner of owners) {
-          allow.add(owner.slice(1));
-        }
-      }
-    } catch {
-      // best effort
-    }
-  }
-  const approversFile = path.join(rootDir, ".cellfence/approvers.txt");
-  if (fs.existsSync(approversFile)) {
-    try {
-      const content = fs.readFileSync(approversFile, "utf8");
-      for (const line of content.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith("#")) allow.add(trimmed);
-      }
-    } catch {
-      // best effort
-    }
   }
   return [...allow];
 }
@@ -115,7 +80,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   if (expired) errors.push("waiver is expired");
   // 0.4.x: the allowlist mismatch is a hard parse error.
   // A waiver whose approved-by identity is not in the approval
-  // allowlist (CELLFENCE_APPROVERS / CODEOWNERS / .cellfence/approvers.txt)
+  // allowlist (CELLFENCE_APPROVERS)
   // is marked invalid so the rest of the pipeline (list, prune,
   // change check) will NOT use it to suppress findings. The
   // separate CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still
@@ -125,18 +90,18 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   const allowlist = approvedBy ? getApprovalAllowlist(rootDir) : [];
   const untrustedApprover = Boolean(approvedBy) && approvedBy.toUpperCase() !== "PENDING" && !allowlist.includes(approvedBy);
   if (untrustedApprover) {
-    // M-7: when the allowlist itself is empty (no CELLFENCE_APPROVERS,
-    // no CODEOWNERS, no .cellfence/approvers.txt) every approver
+    // M-7: when the allowlist itself is empty (no CELLFENCE_APPROVERS)
+    // every approver
     // name looks untrusted. The previous message blamed the
     // approver; the real cause is the missing allowlist. Branch
     // on allowlist size so the operator sees the actionable fix.
     if (allowlist.length === 0) {
       errors.push(
-        `approval allowlist is empty; set CELLFENCE_APPROVERS, populate CODEOWNERS, or add .cellfence/approvers.txt before approving waivers`,
+        `approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret or signed review attestation before approving waivers`,
       );
     } else {
       errors.push(
-        `approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`,
+        `approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS)`,
       );
     }
   }
@@ -239,7 +204,7 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
           ruleId: "CELLFENCE_WAIVER_UNTRUSTED_APPROVER",
           severity: "warning",
           filePath: waiver.filePath,
-          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS, CODEOWNERS, or .cellfence/approvers.txt)`,
+          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS)`,
           details: { approvedBy: waiver.approvedBy, ruleId: waiver.ruleId, line: waiver.line },
         });
       }

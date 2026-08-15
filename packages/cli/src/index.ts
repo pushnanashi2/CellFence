@@ -202,94 +202,94 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (argument === "--mcp") {
       parsed.mcp = true;
     } else if (argument === "--base") {
-      parsed.baseRef = argv[index + 1];
+      parsed.baseRef = requireOptionValue(argv, index, "--base");
       index += 1;
     } else if (argument.startsWith("--base=")) {
       parsed.baseRef = argument.slice("--base=".length);
     } else if (argument === "--head") {
-      parsed.headRef = argv[index + 1];
+      parsed.headRef = requireOptionValue(argv, index, "--head");
       index += 1;
     } else if (argument.startsWith("--head=")) {
       parsed.headRef = argument.slice("--head=".length);
     } else if (argument === "--commit") {
-      parsed.commitRef = argv[index + 1];
+      parsed.commitRef = requireOptionValue(argv, index, "--commit");
       index += 1;
     } else if (argument.startsWith("--commit=")) {
       parsed.commitRef = argument.slice("--commit=".length);
     } else if (argument === "--manifest") {
-      parsed.manifestPath = argv[index + 1];
+      parsed.manifestPath = requireOptionValue(argv, index, "--manifest");
       index += 1;
     } else if (argument.startsWith("--manifest=")) {
       parsed.manifestPath = argument.slice("--manifest=".length);
     } else if (argument === "--baseline") {
-      parsed.baselinePath = argv[index + 1];
+      parsed.baselinePath = requireOptionValue(argv, index, "--baseline");
       index += 1;
     } else if (argument.startsWith("--baseline=")) {
       parsed.baselinePath = argument.slice("--baseline=".length);
     } else if (argument === "--audit-log") {
-      parsed.auditLogPath = argv[index + 1];
+      parsed.auditLogPath = requireOptionValue(argv, index, "--audit-log");
       index += 1;
     } else if (argument.startsWith("--audit-log=")) {
       parsed.auditLogPath = argument.slice("--audit-log=".length);
     } else if (argument === "--summary-json") {
-      parsed.summaryJsonPath = argv[index + 1];
+      parsed.summaryJsonPath = requireOptionValue(argv, index, "--summary-json");
       index += 1;
     } else if (argument.startsWith("--summary-json=")) {
       parsed.summaryJsonPath = argument.slice("--summary-json=".length);
     } else if (argument === "--evidence-graph") {
-      parsed.evidenceGraphPath = argv[index + 1];
+      parsed.evidenceGraphPath = requireOptionValue(argv, index, "--evidence-graph");
       index += 1;
     } else if (argument.startsWith("--evidence-graph=")) {
       parsed.evidenceGraphPath = argument.slice("--evidence-graph=".length);
     } else if (argument === "--cell") {
-      parsed.cellId = argv[index + 1];
-      parsed.claimCells.push(argv[index + 1]);
+      parsed.cellId = requireOptionValue(argv, index, "--cell");
+      parsed.claimCells.push(parsed.cellId);
       index += 1;
     } else if (argument.startsWith("--cell=")) {
       parsed.cellId = argument.slice("--cell=".length);
       parsed.claimCells.push(parsed.cellId);
     } else if (argument === "--agent") {
-      parsed.agent = argv[index + 1];
+      parsed.agent = requireOptionValue(argv, index, "--agent");
       index += 1;
     } else if (argument.startsWith("--agent=")) {
       parsed.agent = argument.slice("--agent=".length);
     } else if (argument === "--claim-id") {
-      parsed.claimId = argv[index + 1];
+      parsed.claimId = requireOptionValue(argv, index, "--claim-id");
       index += 1;
     } else if (argument.startsWith("--claim-id=")) {
       parsed.claimId = argument.slice("--claim-id=".length);
     } else if (argument === "--claims") {
-      parsed.claimsPath = argv[index + 1];
+      parsed.claimsPath = requireOptionValue(argv, index, "--claims");
       index += 1;
     } else if (argument.startsWith("--claims=")) {
       parsed.claimsPath = argument.slice("--claims=".length);
     } else if (argument === "--path") {
-      parsed.claimPaths.push(argv[index + 1]);
+      parsed.claimPaths.push(requireOptionValue(argv, index, "--path"));
       index += 1;
     } else if (argument.startsWith("--path=")) {
       parsed.claimPaths.push(argument.slice("--path=".length));
     } else if (argument === "--symbol") {
-      parsed.symbols.push(argv[index + 1]);
+      parsed.symbols.push(requireOptionValue(argv, index, "--symbol"));
       index += 1;
     } else if (argument.startsWith("--symbol=")) {
       parsed.symbols.push(argument.slice("--symbol=".length));
     } else if (argument === "--resource") {
-      parsed.resources.push(argv[index + 1]);
+      parsed.resources.push(requireOptionValue(argv, index, "--resource"));
       index += 1;
     } else if (argument.startsWith("--resource=")) {
       parsed.resources.push(argument.slice("--resource=".length));
     } else if (argument === "--artifact") {
-      parsed.artifactLanes.push(argv[index + 1]);
+      parsed.artifactLanes.push(requireOptionValue(argv, index, "--artifact"));
       index += 1;
     } else if (argument.startsWith("--artifact=")) {
       parsed.artifactLanes.push(argument.slice("--artifact=".length));
     } else if (argument === "--task") {
-      parsed.task = argv[index + 1];
+      parsed.task = requireOptionValue(argv, index, "--task");
       index += 1;
     } else if (argument.startsWith("--task=")) {
       parsed.task = argument.slice("--task=".length);
     } else if (argument === "--target") {
-      parsed.installTarget = argv[index + 1];
+      parsed.installTarget = requireOptionValue(argv, index, "--target");
       index += 1;
     } else if (argument.startsWith("--target=")) {
       parsed.installTarget = argument.slice("--target=".length);
@@ -299,90 +299,92 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (argument.startsWith("--output=")) {
       parsed.initOutputPath = requireInlineOptionValue(argument, "--output=", "--output");
     } else if (argument === "--repo") {
-      parsed.repo = argv[index + 1];
+      parsed.repo = requireOptionValue(argv, index, "--repo");
       index += 1;
     } else if (argument.startsWith("--repo=")) {
       parsed.repo = argument.slice("--repo=".length);
     } else if (argument === "--branch") {
-      parsed.branch = argv[index + 1];
+      parsed.branch = requireOptionValue(argv, index, "--branch");
       index += 1;
     } else if (argument.startsWith("--branch=")) {
       parsed.branch = argument.slice("--branch=".length);
     } else if (argument === "--required-check") {
-      parsed.requiredCheck = argv[index + 1];
+      parsed.requiredCheck = requireOptionValue(argv, index, "--required-check");
       index += 1;
     } else if (argument.startsWith("--required-check=")) {
       parsed.requiredCheck = argument.slice("--required-check=".length);
     } else if (argument === "--rule") {
-      parsed.ruleId = argv[index + 1];
+      parsed.ruleId = requireOptionValue(argv, index, "--rule");
       index += 1;
     } else if (argument.startsWith("--rule=")) {
       parsed.ruleId = argument.slice("--rule=".length);
     } else if (argument === "--file") {
-      parsed.targetFilePath = argv[index + 1];
-      parsed.docPaths.push(argv[index + 1]);
+      parsed.targetFilePath = requireOptionValue(argv, index, "--file");
+      parsed.docPaths.push(parsed.targetFilePath);
       index += 1;
     } else if (argument.startsWith("--file=")) {
       parsed.targetFilePath = argument.slice("--file=".length);
       parsed.docPaths.push(parsed.targetFilePath);
     } else if (argument === "--line") {
-      parsed.line = Number(argv[index + 1]);
+      parsed.line = Number(requireOptionValue(argv, index, "--line"));
       index += 1;
     } else if (argument.startsWith("--line=")) {
       parsed.line = Number(argument.slice("--line=".length));
     } else if (argument === "--expires") {
-      parsed.expires = argv[index + 1];
+      parsed.expires = requireOptionValue(argv, index, "--expires");
       index += 1;
     } else if (argument.startsWith("--expires=")) {
       parsed.expires = argument.slice("--expires=".length);
     } else if (argument === "--ttl") {
-      parsed.ttl = argv[index + 1];
+      parsed.ttl = requireOptionValue(argv, index, "--ttl");
       index += 1;
     } else if (argument.startsWith("--ttl=")) {
       parsed.ttl = argument.slice("--ttl=".length);
     } else if (argument === "--reason") {
-      parsed.reason = argv[index + 1];
+      parsed.reason = requireOptionValue(argv, index, "--reason");
       index += 1;
     } else if (argument.startsWith("--reason=")) {
       parsed.reason = argument.slice("--reason=".length);
     } else if (argument === "--approved-by") {
-      parsed.approvedBy = argv[index + 1];
+      parsed.approvedBy = requireOptionValue(argv, index, "--approved-by");
       index += 1;
     } else if (argument.startsWith("--approved-by=")) {
       parsed.approvedBy = argument.slice("--approved-by=".length);
     } else if (argument === "--evidence") {
-      parsed.evidencePaths.push(argv[index + 1]);
+      parsed.evidencePaths.push(requireOptionValue(argv, index, "--evidence"));
       index += 1;
     } else if (argument.startsWith("--evidence=")) {
       parsed.evidencePaths.push(argument.slice("--evidence=".length));
     } else if (argument === "--from") {
-      parsed.fromPaths.push(argv[index + 1]);
+      parsed.fromPaths.push(requireOptionValue(argv, index, "--from"));
       index += 1;
     } else if (argument.startsWith("--from=")) {
       parsed.fromPaths.push(argument.slice("--from=".length));
     } else if (argument === "--profile") {
-      parsed.profile = argv[index + 1];
+      parsed.profile = requireOptionValue(argv, index, "--profile");
       index += 1;
     } else if (argument.startsWith("--profile=")) {
       parsed.profile = argument.slice("--profile=".length);
     } else if (argument === "--report") {
-      parsed.reportPath = argv[index + 1];
+      parsed.reportPath = requireOptionValue(argv, index, "--report");
       index += 1;
     } else if (argument.startsWith("--report=")) {
       parsed.reportPath = argument.slice("--report=".length);
     } else if (argument === "--min-score") {
-      parsed.minScore = Number(argv[index + 1]);
+      parsed.minScore = Number(requireOptionValue(argv, index, "--min-score"));
+      index += 1;
     } else if (argument === "--fail-under") {
-      const value = Number(argv[index + 1]);
+      const value = Number(requireOptionValue(argv, index, "--fail-under"));
       if (Number.isFinite(value)) parsed.failUnder = value;
+      index += 1;
     } else if (argument.startsWith("--fail-under=")) {
       const value = Number(argument.slice("--fail-under=".length));
       if (Number.isFinite(value)) parsed.failUnder = value;
     } else if (argument === "--coverage-output") {
       parsed.coverageOutputPath = requireOptionValue(argv, index, "--coverage-output");
+      index += 1;
     } else if (argument.startsWith("--coverage-output=")) {
       parsed.coverageOutputPath = argument.slice("--coverage-output=".length);
-      index += 1;
     } else if (argument.startsWith("--min-score=")) {
       parsed.minScore = Number(argument.slice("--min-score=".length));
     } else if (argument === "--format") {
@@ -637,6 +639,8 @@ function commandCheck(parsed: ParsedArgs): number {
   const options = {
     rootDir: parsed.rootDir,
     manifestPath: parsed.manifestPath,
+    baselinePath: parsed.baselinePath,
+    evidencePaths: parsed.evidencePaths,
     ruleSeverities,
   };
   const startedAtMs = Date.now();

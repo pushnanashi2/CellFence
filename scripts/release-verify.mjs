@@ -14,6 +14,9 @@ const requiredFiles = [
   "docs/implementation-status.md",
 ];
 const findings = [];
+const publicBaselineHmacTestKeys = new Set([
+  "5a9f2b10da1af4fa5b8c02e7e3c478100ce2301cc12ee6ea2a2c7eae68882989",
+]);
 
 function changelogSection(text, heading) {
   const lines = text.split(/\r?\n/);
@@ -123,6 +126,11 @@ const expectedActionPins = new Map([
 
 for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {
   const text = fs.readFileSync(workflowPath, "utf8");
+  for (const publicKey of publicBaselineHmacTestKeys) {
+    if (text.includes(publicKey)) {
+      findings.push(`${workflowPath} must not contain the public baseline HMAC test key; use a protected GitHub secret`);
+    }
+  }
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     const match = line.match(/uses:\s*(actions\/[^@\s]+)@([^\s#]+)/);
     if (match && !/^[a-f0-9]{40}$/.test(match[2])) {

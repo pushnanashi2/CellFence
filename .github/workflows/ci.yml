@@ -10,12 +10,7 @@ permissions:
   contents: read
 
 env:
-  # Pin the same env the developer shell sets so every
-  # job runs the same hermetic test suite the local
-  # `npm test` runs. Override in a fork via GitHub
-  # Actions secrets if you need a different signing key.
-  CELLFENCE_BASELINE_HMAC_KEY: 5a9f2b10da1af4fa5b8c02e7e3c478100ce2301cc12ee6ea2a2c7eae68882989
-  CELLFENCE_APPROVERS: test-owner
+  CELLFENCE_BASELINE_HMAC_KEY: ${{ secrets.CELLFENCE_BASELINE_HMAC_KEY }}
   CELLFENCE_REDIS_INTEGRATION: "1"
 
 jobs:

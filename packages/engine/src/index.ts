@@ -1387,6 +1387,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     evidencePathsForOptions(rootDir, options.evidencePaths),
     observedImports,
     accessesByCell,
+    [...severityAdjusted.findings, ...severityAdjusted.warnings],
   );
   const evaluation = evaluateGovernance({
     evidence: evidenceEnvelope.assessment,
@@ -1680,11 +1681,11 @@ function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string)
     }
   };
   if (headRef) {
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", `${baseRef}...${headRef}`]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", `${baseRef}...${headRef}`]);
   } else {
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR", "--cached"]);
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMR"]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", `${baseRef}...HEAD`]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", "--cached"]);
+    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD"]);
     addDiff(["ls-files", "--others", "--exclude-standard", "-z"]);
   }
   return [...files].sort((left, right) => left.localeCompare(right));
@@ -2019,6 +2020,12 @@ export function formatHumanResult(result: CheckResult): string {
 
 export { findingFingerprint } from "./findings.js";
 
+export {
+  repoPath,
+  sourceFilesForCell,
+  sourceFilesUnderGovernance,
+} from "./file-index.js";
+
 // 0.4.0 (prototype): coverage collector used by the `cellfence coverage`
 // subcommand. See packages/engine/src/analysis/coverage-collector.ts for
 // the rationale. Re-exported here so the CLI can import it through
@@ -2062,7 +2069,6 @@ export {
   type ClaimStoreState,
 } from "./claims/backend.js";
 export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
-export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
 export { RedisClaimStore, type RedisClaimStoreOptions, type RedisLike } from "./claims/backends/redis.js";
 
 // 0.4.0: claim backend selector. The 0.3.0 prototype shipped the

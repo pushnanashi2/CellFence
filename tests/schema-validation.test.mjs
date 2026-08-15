@@ -168,9 +168,7 @@ test("schema validation accepts maximal valid manifests", () => {
         celery: "off",
       },
       claimBackend: {
-        type: "github-artifact",
-        artifactName: "cellfence-claims-staging",
-        retentionDays: 2,
+        type: "local-file",
       },
     },
     rules: {
@@ -400,14 +398,14 @@ test("schema validation rejects malformed manifest governance and overrides", ()
     /unknown must be a known built-in adapter[\s\S]*file must be on\|off/,
   );
   assertInvalid(validateManifest(validManifest({ governance: { claimBackend: "github-artifact" } })), /claimBackend must be an object/);
-  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: { type: "redis" } } })), /claimBackend\.type must be local-file\|github-artifact/);
+  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: { type: "redis" } } })), /claimBackend\.type must be local-file/);
   assertInvalid(
-    validateManifest(validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: 1, retentionDays: 0 } } })),
-    /artifactName must be a string[\s\S]*retentionDays must be a positive integer/,
+    validateManifest(validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: "claims", retentionDays: 1 } } })),
+    /claimBackend\.type must be local-file/,
   );
   assertInvalid(
     validateManifest(validManifest({ governance: { claimBackend: { type: "local-file", artifactName: "ignored" } } })),
-    /artifactName is only supported for github-artifact/,
+    /artifactName is not supported for local-file/,
   );
 
   assertInvalid(validateManifest(validManifest({ overrides: "bad" })), /overrides must be an array/);

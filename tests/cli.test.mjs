@@ -106,6 +106,13 @@ function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function declareResourceContracts(tempDir, contracts) {
+  const manifestPath = path.join(tempDir, "cellfence.manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.cells[0].resourceContracts = contracts;
+  writeJson(manifestPath, manifest);
+}
+
 function writePrivateImportProject(tempDir, { withWaiver = false, waiverExpires = WAVING_INTO_THE_FUTURE } = {}) {
   fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
   fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
@@ -220,6 +227,57 @@ test("CLI evidence check rejects new runtime resource evidence", () => {
     const result = runCli(["evidence", "check", "--evidence", evidencePath, "--json"], tempDir);
     assert.equal(result.status, 1, result.stderr);
     assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI check forwards runtime evidence paths to the engine", () => {
+  const fixturePath = path.join(root, "fixtures/invalid/resource-evidence-detects-new");
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-check-evidence-"));
+  fs.cpSync(fixturePath, tempDir, { recursive: true });
+  try {
+    rebindEvidenceToHead(tempDir, "resource-evidence.json");
+    const result = runCli(["check", "--evidence", "resource-evidence.json", "--json"], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout, /CELLFENCE_UNDECLARED_RESOURCE_ACCESS/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI check forwards explicit baselines to the engine ratchet", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-check-baseline-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const one = 1;\nexport const two = 2;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["one", "two"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "custom-baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          resourceAccesses: [],
+        },
+      },
+    });
+    const result = runCli(["check", "--baseline", "custom-baseline.json", "--json"], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout, /CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -1527,8 +1585,6 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   // the check result but the waiver itself is recognised as valid.
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-valid-"));
   fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
-  fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
-  fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "test-owner\n");
   fs.writeFileSync(
     path.join(tempDir, "src/core/public.ts"),
     [
@@ -1553,7 +1609,7 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   // but the waiver itself is syntactically valid and present in the
   // list. We assert the waiver's validity directly via the list
   // subcommand rather than via the check exit code.
-  const listResult = runCli(["waivers", "list", "--json"], tempDir);
+  const listResult = runCliWithEnv(["waivers", "list", "--json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
   assert.equal(listResult.status, 0);
   const parsed = JSON.parse(listResult.stdout);
   assert.equal(parsed.schemaVersion, "cellfence.waivers.v1");
@@ -1561,7 +1617,7 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   assert.equal(parsed.waivers[0].ruleId, "CELLFENCE_PUBLIC_ENTRY_MISSING");
   assert.equal(parsed.waivers[0].valid, true);
 
-  const humanList = runCli(["waivers", "list"], tempDir);
+  const humanList = runCliWithEnv(["waivers", "list"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
   assert.equal(humanList.status, 0);
   assert.match(humanList.stdout, /valid CELLFENCE_PUBLIC_ENTRY_MISSING src\/core\/public\.ts:1/);
 });
@@ -1639,8 +1695,6 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
     fs.mkdirSync(path.join(tempDir, "src/consumer"), { recursive: true });
     fs.mkdirSync(path.join(tempDir, "src/unused"), { recursive: true });
-    fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
-    fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "test-owner\n");
     fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const used = true;\nexport const unused = true;\n");
     fs.writeFileSync(
       path.join(tempDir, "src/consumer/public.ts"),
@@ -1691,7 +1745,7 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
       },
     });
 
-    const result = runCli(["prune", "--baseline", "cellfence.baseline.json", "--json"], tempDir);
+    const result = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json", "--json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.equal(report.schemaVersion, "cellfence.prune.v1");
@@ -1702,7 +1756,7 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-waiver"));
     assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-baseline-resource" && candidate.resource.selector === "app.old"));
 
-    const human = runCli(["prune", "--baseline", "cellfence.baseline.json"], tempDir);
+    const human = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
     assert.equal(human.status, 1);
     assert.match(human.stdout, /CellFence prune found/);
   } finally {
@@ -2238,6 +2292,12 @@ test("CLI baseline create stores runtime evidence inventory", () => {
   const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-baseline-"));
   fs.cpSync(fixturePath, tempDir, { recursive: true });
   fs.rmSync(path.join(tempDir, "cellfence.baseline.json"));
+  declareResourceContracts(tempDir, [{
+    id: "runtime-orders",
+    kind: "database",
+    access: ["read"],
+    selectors: ["runtime.orders"],
+  }]);
   rebindEvidenceToHead(tempDir, "resource-evidence.json");
 
   try {
@@ -2264,6 +2324,12 @@ test("CLI baseline create stores Prisma delegate inventory", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-prisma-"));
   fs.cpSync(fixturePath, tempDir, { recursive: true });
   fs.rmSync(path.join(tempDir, "cellfence.baseline.json"));
+  declareResourceContracts(tempDir, [{
+    id: "app-users",
+    kind: "database",
+    access: ["read", "write"],
+    selectors: ["app_users"],
+  }]);
 
   const result = runCli(["baseline", "create"], tempDir);
   assert.equal(result.status, 0);
@@ -2478,6 +2544,65 @@ test("CLI parses space-separated option forms before returning usage", () => {
   ]);
   assert.equal(result.status, 2);
   assert.match(result.stdout, /Usage:/);
+});
+
+test("CLI rejects separated options when the next token is another flag", () => {
+  for (const optionName of ["--manifest", "--baseline", "--evidence", "--min-score", "--fail-under", "--coverage-output"]) {
+    const result = runCli(["check", optionName, "--json"]);
+    assert.equal(result.status, 2, `${optionName} should be a configuration error`);
+    assert.match(result.stderr, new RegExp(`${optionName} requires a value`));
+  }
+});
+
+test("CLI value options consume their separated values before command dispatch", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-value-options-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    const coverageResult = runCli([
+      "--fail-under",
+      "0",
+      "--coverage-output",
+      "coverage.json",
+      "coverage",
+      "--format",
+      "json",
+    ], tempDir);
+    assert.equal(coverageResult.status, 0, coverageResult.stderr || coverageResult.stdout);
+    assert.ok(fs.existsSync(path.join(tempDir, "coverage.json")));
+
+    writeJson(path.join(tempDir, "mutation.json"), {
+      files: {
+        "src/core/public.ts": {
+          mutants: [{ status: "Survived" }],
+        },
+      },
+    });
+    const mutationResult = runCli([
+      "--min-score",
+      "100",
+      "mutation",
+      "check",
+      "--report",
+      "mutation.json",
+      "--json",
+    ], tempDir);
+    assert.equal(mutationResult.status, 1, mutationResult.stderr || mutationResult.stdout);
+    assert.match(mutationResult.stdout, /CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI help returns usage without running a command", () => {

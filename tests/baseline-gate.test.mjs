@@ -157,6 +157,8 @@ test("baseline gate action metadata declares every source input", () => {
   assert.match(actionYaml, /baseline-file:\r?\n\s+description: "Repo-relative path to the baseline JSON\."\r?\n\s+required: false\r?\n\s+default: "\.cellfence\/baselines\/cellfence\.baseline\.json"/);
   assert.match(source, /core\.getInput\("github-token", \{ required: true \}\)/);
   assert.match(source, /review\.state === "APPROVED" && review\.commitId === headSha/);
+  assert.doesNotMatch(source, /codeowners\.length === 0\)\s*return true/);
+  assert.match(source, /codeowners\.length === 0\)\s*return false/);
   assert.match(source, /mode === "create"/);
   assert.match(source, /removeLabelIfPresent/);
 });

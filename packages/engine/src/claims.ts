@@ -20,7 +20,8 @@ import {
   type ClaimStoreBackend,
   type ClaimStoreState,
   CellFenceClaimCasConflict,
-} from "./claims/index.js";
+} from "./claims/backend.js";
+import { resolveClaimBackend } from "./claims/selector.js";
 import type {
   AnalysisContext,
   CellFenceClaim,
@@ -42,6 +43,14 @@ type ClaimOperationDependencies = {
   gitCommand(rootDir: string, args: string[]): string;
   loadManifestFromFile(manifestPath: string): CellFenceManifest;
 };
+
+function configuredClaimBackend(rootDir: string, claimsPath: string | undefined, manifest: CellFenceManifest): ClaimStoreBackend {
+  return resolveClaimBackend({
+    rootDir,
+    defaultFilePath: claimStorePath(rootDir, claimsPath),
+    manifest,
+  }).backend;
+}
 
 function claimConfigurationFailure(message: string, claimsPath = ""): ClaimCheckResult {
   return {
@@ -800,7 +809,13 @@ export function checkClaims(options: ClaimCheckOptions = {}, dependencies: Claim
   const context = dependencies.createContext(rootDir, manifest);
   const findings: Finding[] = [];
   const warnings: Finding[] = [];
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest);
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error));
+  }
+  const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
   const claimsPath = repoPath(rootDir, store.path);
   const now = options.now || new Date();
   for (const claim of store.claims) validateClaimCells(context, claim, findings, claimsPath);
@@ -843,6 +858,12 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
   const findings: Finding[] = [];
   const warnings: Finding[] = [];
   const claimsStorePath = claimStorePath(rootDir, options.claimsPath);
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest);
+  } catch (error) {
+    return { ...claimConfigurationFailure(errorMessage(error)), claimsPath: claimsStorePath };
+  }
   let releaseClaimLock: (() => void) | undefined;
   try {
     releaseClaimLock = acquireClaimStoreLock(claimsStorePath);
@@ -859,7 +880,7 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
     };
   }
   try {
-    const store = readClaimStore(rootDir, options.claimsPath, findings);
+    const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
     const claimsPath = repoPath(rootDir, store.path);
     const now = options.now || new Date();
     const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
@@ -960,7 +981,7 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
       ...store.claims.filter((candidate) => candidate.id !== claim.id),
       claim,
     ];
-    writeClaimStore(store.path, nextClaims);
+    writeClaimStore(store.path, nextClaims, backend, store.claims);
     const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
     return {
       ...claimResult(findings, warnings, nextClaims, nextActiveClaims),
@@ -975,7 +996,24 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
 export function listClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
   const findings: Finding[] = [];
   const rootDir = path.resolve(options.rootDir || process.cwd());
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  let manifest: CellFenceManifest | undefined;
+  try {
+    manifest = readJsonFile(manifestPath) as CellFenceManifest;
+  } catch {
+    manifest = undefined;
+  }
+  let backend: ClaimStoreBackend;
+  try {
+    backend = resolveClaimBackend({
+      rootDir,
+      defaultFilePath: claimStorePath(rootDir, options.claimsPath),
+      manifest,
+    }).backend;
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error), repoPath(rootDir, claimStorePath(rootDir, options.claimsPath)));
+  }
+  const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
   const now = options.now || new Date();
   return claimResult(findings, [], store.claims, store.claims.filter((claim) => claimIsActive(claim, now)));
 }

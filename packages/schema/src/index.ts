@@ -154,12 +154,7 @@ export type ManifestGovernance = {
 };
 
 export type ClaimBackendManifest =
-  | { type: "local-file" }
-  | {
-      type: "github-artifact";
-      artifactName?: string;
-      retentionDays?: number;
-    };
+  | { type: "local-file" };
 
 export type CellManifest = {
   id: string;
@@ -546,20 +541,14 @@ function validateClaimBackend(value: unknown, location: string, errors: string[]
     return false;
   }
   validateKnownKeys(value, location, ["type", "artifactName", "retentionDays"], errors);
-  if (value.type !== "local-file" && value.type !== "github-artifact") {
-    errors.push(`${location}.type must be local-file|github-artifact`);
+  if (value.type !== "local-file") {
+    errors.push(`${location}.type must be local-file`);
     return false;
   }
   if (value.type === "local-file") {
-    if (value.artifactName !== undefined) errors.push(`${location}.artifactName is only supported for github-artifact`);
-    if (value.retentionDays !== undefined) errors.push(`${location}.retentionDays is only supported for github-artifact`);
+    if (value.artifactName !== undefined) errors.push(`${location}.artifactName is not supported for local-file`);
+    if (value.retentionDays !== undefined) errors.push(`${location}.retentionDays is not supported for local-file`);
     return true;
-  }
-  if (!optionalString(value.artifactName)) {
-    errors.push(`${location}.artifactName must be a string when present`);
-  }
-  if (value.retentionDays !== undefined && (!Number.isInteger(value.retentionDays) || Number(value.retentionDays) < 1)) {
-    errors.push(`${location}.retentionDays must be a positive integer when present`);
   }
   return true;
 }

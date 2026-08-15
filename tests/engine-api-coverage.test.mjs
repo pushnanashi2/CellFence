@@ -43,6 +43,7 @@ import {
   listWaivers,
   loadManifestFromFile,
 } from "../packages/engine/dist/index.js";
+import { sealBaselineIfConfigured } from "../packages/engine/dist/baseline-seal.js";
 
 const root = process.cwd();
 
@@ -1296,6 +1297,35 @@ test("engine changed checks include untracked files in working tree mode", () =>
   }
 });
 
+test("engine changed checks include deleted public entries in the changed scope", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-deleted-public-entry-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.rmSync(path.join(rootDir, "src/core/public.ts"));
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "delete public entry"]);
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+    });
+    assert.equal(result.exitCode, 1);
+    assert.deepEqual(result.changedFiles, ["src/core/public.ts"]);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PUBLIC_ENTRY_MISSING" && finding.filePath === "src/core/public.ts"
+    ), JSON.stringify(result.findings));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed checks preserve paths containing spaces and non-ascii characters", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-path-encoding-"));
   try {
@@ -1742,6 +1772,7 @@ test("engine claim creation does not steal fresh or live claim store locks", () 
 
 test("engine locked baseline guard reports each semantic expansion type", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-guard-"));
+  const originalBaselineHmacKey = process.env.CELLFENCE_BASELINE_HMAC_KEY;
   try {
     writeCell(rootDir, "core");
     writeManifest(rootDir, [baseCell("core", { locked: true })]);
@@ -1765,15 +1796,14 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
       },
     });
 
-    assert.deepEqual(
-      guardBaselineUpdate({
-        rootDir,
-        manifestPath: "cellfence.manifest.json",
-        baselinePath: "missing-baseline.json",
-        nextBaseline: { schemaVersion: "cellfence.baseline.v1", generatedAt: "now", cells: {} },
-      }),
-      { ok: true, findings: [] },
-    );
+    const missingBaseline = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "missing-baseline.json",
+      nextBaseline: { schemaVersion: "cellfence.baseline.v1", generatedAt: "now", cells: {} },
+    });
+    assert.equal(missingBaseline.ok, false);
+    assert.match(missingBaseline.findings[0].message, /existing baseline is missing/);
 
     fs.writeFileSync(path.join(rootDir, "bad-baseline.json"), "{not-json");
     assert.throws(
@@ -1796,6 +1826,41 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
       }),
       /baseline is invalid/,
     );
+
+    process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
+    const sealedBaseline = sealBaselineIfConfigured({
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+        },
+      },
+    });
+    sealedBaseline.cells.core.publicSymbols = 2;
+    writeJson(path.join(rootDir, "tampered-baseline.json"), sealedBaseline);
+    const tamperedSeal = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "tampered-baseline.json",
+      nextBaseline: {
+        schemaVersion: "cellfence.baseline.v1",
+        generatedAt: "2026-01-02T00:00:00.000Z",
+        cells: {
+          core: {
+            ownedPathPatterns: 1,
+            publicSymbols: 1,
+            publicSurfaceLines: 1,
+            crossCellDependencies: 0,
+          },
+        },
+      },
+    });
+    assert.equal(tamperedSeal.ok, false);
+    assert.ok(tamperedSeal.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));
 
     const result = guardBaselineUpdate({
       rootDir,
@@ -1859,7 +1924,7 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         },
       },
     });
-    const legacyCompatible = guardBaselineUpdate({
+    const legacyMissingCell = guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "legacy-baseline.json",
@@ -1876,9 +1941,45 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         },
       },
     });
-    assert.equal(legacyCompatible.ok, true, JSON.stringify(legacyCompatible.findings));
+    assert.equal(legacyMissingCell.ok, false, JSON.stringify(legacyMissingCell.findings));
+    assert.match(legacyMissingCell.findings.map((finding) => finding.message).join("\n"), /missing-next is locked and is absent/);
 
-    const shrinkCompatible = guardBaselineUpdate({
+    writeManifest(rootDir, [baseCell("core", { locked: true })]);
+    const legacyFieldIntroduction = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "legacy-baseline.json",
+      nextBaseline: {
+        schemaVersion: "cellfence.baseline.v1",
+        generatedAt: "2026-01-04T00:00:00.000Z",
+        cells: {
+          core: {
+            ownedPathPatterns: 1,
+            publicSymbols: 1,
+            publicSurfaceLines: 1,
+            crossCellDependencies: 0,
+            ownedPathSet: ["src/core/**"],
+            publicEntryPath: "src/core/public.ts",
+            publicSymbolSet: ["core"],
+            publicSurfaceHash: "introduced-hash",
+            dependencyEdges: ["core->other"],
+            artifactContracts: ["produce:reports:src/core/reports/**"],
+            resourceAccesses: [{ kind: "database", access: "read", selector: "app.users" }],
+          },
+        },
+      },
+    });
+    assert.equal(legacyFieldIntroduction.ok, false, JSON.stringify(legacyFieldIntroduction.findings));
+    const legacyMessages = legacyFieldIntroduction.findings.map((finding) => finding.message).join("\n");
+    assert.match(legacyMessages, /ownership scope would expand/);
+    assert.match(legacyMessages, /public entry would be introduced/);
+    assert.match(legacyMessages, /public symbols would be added/);
+    assert.match(legacyMessages, /dependency edges would be added/);
+    assert.match(legacyMessages, /artifact contracts would be added/);
+    assert.match(legacyMessages, /public surface signature hash would be introduced/);
+    assert.match(legacyMessages, /grandfather database read app\.users/);
+
+    const shrinkRejected = guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "legacy-baseline.json",
@@ -1888,8 +1989,11 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         cells: {},
       },
     });
-    assert.equal(shrinkCompatible.ok, true, JSON.stringify(shrinkCompatible.findings));
+    assert.equal(shrinkRejected.ok, false, JSON.stringify(shrinkRejected.findings));
+    assert.match(shrinkRejected.findings.map((finding) => finding.message).join("\n"), /would be removed from the next baseline/);
   } finally {
+    if (originalBaselineHmacKey === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+    else process.env.CELLFENCE_BASELINE_HMAC_KEY = originalBaselineHmacKey;
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
@@ -2613,6 +2717,25 @@ test("engine createBaseline throws when the repository cannot be checked", () =>
     assert.throws(
       () => createBaseline({ rootDir, manifestPath: "cellfence.manifest.json" }),
       /schemaVersion must be cellfence\.manifest\.v1/,
+    );
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine createBaseline refuses to grandfather active policy findings", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-create-baseline-policy-"));
+  try {
+    writeCell(rootDir, "producer", "export const publicValue = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/private.ts"), "export const secret = true;\n");
+    writeCell(rootDir, "consumer", "import { secret } from '../producer/private';\nexport const consumer = secret;\n");
+    writeManifest(rootDir, [
+      baseCell("producer", { publicSymbols: ["publicValue"] }),
+      baseCell("consumer", { consumes: [{ cell: "producer" }] }),
+    ]);
+    assert.throws(
+      () => createBaseline({ rootDir, manifestPath: "cellfence.manifest.json" }),
+      /private/i,
     );
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

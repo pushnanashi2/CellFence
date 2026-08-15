@@ -2,13 +2,9 @@
 //
 // This is the simplest possible implementation: read
 // `.cellfence/claims.json`, mutate, write back, and serialise writers
-// through a per-process async mutex. Distributed concurrency is *not*
-// safe with this backend (a second machine will happily overwrite the
-// first). The CAS check is in place so a process that loses the race
-// gets a `CellFenceClaimCasConflict` rather than a silent lost
-// update; the next 0.4.0 milestone will plug a real distributed
-// backend (GitHub Actions artifact, Redis, …) behind the same
-// interface.
+// through optimistic CAS. Distributed locking is *not* provided by
+// this backend, but a process that loses the race gets a
+// `CellFenceClaimCasConflict` rather than a silent lost update.
 
 import fs from "node:fs";
 import crypto from "node:crypto";
@@ -62,36 +58,33 @@ function writeStateAtomic(filePath: string, state: ClaimStoreState): void {
 
 export class LocalFileClaimStore implements ClaimStoreBackend {
   readonly id = "local-file";
-  private current: ClaimStoreState;
+  private current: ClaimStoreState = emptyClaimStoreState();
   private mutex: Promise<void> = Promise.resolve();
 
-  constructor(private readonly options: LocalFileClaimStoreOptions) {
-    this.current = readState(this.options.filePath);
-  }
+  constructor(private readonly options: LocalFileClaimStoreOptions) {}
 
-  async read(): Promise<ClaimStoreState> {
+  read(): ClaimStoreState {
+    this.current = readState(this.options.filePath);
     return this.current;
   }
 
-  async write(next: ClaimStoreState, previous: ClaimStoreState): Promise<void> {
-    const release = await this.lock(5000);
-    try {
-      // Re-read from disk before comparing so concurrent writers in
-      // other processes (or other LocalFileClaimStore instances
-      // pointing at the same path) are visible to the CAS check.
-      const live = readState(this.options.filePath);
-      if (fingerprintOf(live) !== fingerprintOf(previous)) {
-        throw new CellFenceClaimCasConflict(
-          "claim store state changed under us; reread and retry",
-        );
-      }
-      writeStateAtomic(this.options.filePath, next);
-      this.current = next;
-    } finally {
-      await release();
+  write(next: ClaimStoreState, previous: ClaimStoreState): void {
+    // Re-read from disk before comparing so concurrent writers in
+    // other processes (or other LocalFileClaimStore instances
+    // pointing at the same path) are visible to the CAS check.
+    const live = readState(this.options.filePath);
+    if (fingerprintOf(live) !== fingerprintOf(previous)) {
+      throw new CellFenceClaimCasConflict(
+        "claim store state changed under us; reread and retry",
+      );
     }
+    writeStateAtomic(this.options.filePath, next);
+    this.current = next;
   }
 
+  // Test/helper-only process-local lock. It is intentionally not part
+  // of the public ClaimStoreBackend contract because public claim
+  // operations are synchronous and rely on CAS for this backend.
   async lock(ttlMs: number): Promise<() => Promise<void>> {
     let resolveLock: (() => void) | undefined;
     const next = new Promise<void>((resolve) => {

@@ -89,7 +89,7 @@ test("CELLFENCE_APPROVERS overrides repository-local waiver approvers", () => {
   }
 });
 
-test("repository-local waiver approvers are used only when CI override is absent", () => {
+test("repository-local waiver approvers are not trusted without environment approval", () => {
   const original = process.env.CELLFENCE_APPROVERS;
   delete process.env.CELLFENCE_APPROVERS;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-repo-allowlist-"));
@@ -100,7 +100,8 @@ test("repository-local waiver approvers are used only when CI override is absent
     const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
     const waivers = collectWaiversForManifest(tempDir, manifest);
     assert.equal(waivers.length, 1);
-    assert.equal(waivers[0].valid, true);
+    assert.equal(waivers[0].valid, false);
+    assert.ok(waivers[0].errors.some((error) => error.includes("approval allowlist is empty")));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
     if (original === undefined) delete process.env.CELLFENCE_APPROVERS;

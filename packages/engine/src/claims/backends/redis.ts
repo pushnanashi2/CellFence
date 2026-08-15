@@ -9,7 +9,6 @@
 import crypto from "node:crypto";
 
 import {
-  type ClaimStoreBackend,
   type ClaimStoreState,
   CellFenceClaimCasConflict,
   emptyClaimStoreState,
@@ -40,7 +39,7 @@ export type RedisLike = {
   isOpen?: boolean;
 };
 
-export class RedisClaimStore implements ClaimStoreBackend {
+export class RedisClaimStore {
   readonly id = "redis";
   private readonly key: string;
   private readonly lockTtlMs: number;

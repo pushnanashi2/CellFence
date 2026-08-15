@@ -55,7 +55,7 @@ async function approveFromCodeowner(
   codeowners: string[],
   headSha: string,
 ): Promise<boolean> {
-  if (codeowners.length === 0) return true;
+  if (codeowners.length === 0) return false;
   const reviews = await octokit.paginate(octokit.rest.pulls.listReviews, {
     owner,
     repo,

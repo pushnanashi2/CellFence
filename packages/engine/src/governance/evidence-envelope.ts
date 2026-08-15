@@ -9,7 +9,7 @@ import {
   sourceFilesUnderGovernance,
 } from "../file-index.js";
 import type { ResourceAccessReference } from "../resource-access.js";
-import type { AnalysisContext, PluginImportReference } from "../types.js";
+import type { AnalysisContext, Finding, PluginImportReference } from "../types.js";
 import { assessEvidence } from "./evidence-assessment.js";
 import type {
   EvidenceAssessment,
@@ -67,6 +67,42 @@ function requiredGovernanceFamilies(baselinePath: string | undefined): Observati
   return families;
 }
 
+function diagnosticsByFile(diagnostics: Finding[]): Map<string, Finding[]> {
+  const byFile = new Map<string, Finding[]>();
+  for (const finding of diagnostics) {
+    if (!finding.filePath) continue;
+    const filePath = normalizePath(finding.filePath);
+    const bucket = byFile.get(filePath) ?? [];
+    bucket.push(finding);
+    byFile.set(filePath, bucket);
+  }
+  return byFile;
+}
+
+function observationStatusFor(filePath: string, family: ObservationFamily, diagnostics: Map<string, Finding[]>): FileObservation {
+  const fileDiagnostics = diagnostics.get(normalizePath(filePath)) ?? [];
+  if (family === "imports") {
+    const syntax = fileDiagnostics.find((finding) =>
+      finding.ruleId === "CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX"
+      || finding.ruleId === "CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX");
+    if (syntax) return { filePath, family, status: "parse-error", message: syntax.message };
+    const unsupported = fileDiagnostics.find((finding) =>
+      finding.ruleId === "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
+      || finding.ruleId === "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
+      || finding.ruleId === "CELLFENCE_UNRESOLVED_IMPORT"
+      || finding.ruleId === "CELLFENCE_UNRESOLVED_REQUIRE");
+    if (unsupported) return { filePath, family, status: "unsupported", message: unsupported.message };
+  }
+  if (family === "resources") {
+    const unsupported = fileDiagnostics.find((finding) =>
+      finding.ruleId === "CELLFENCE_RESOURCE_EVIDENCE_INVALID"
+      || finding.ruleId === "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INACTIVE"
+      || finding.ruleId === "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INCOMPLETE");
+    if (unsupported) return { filePath, family, status: "unsupported", message: unsupported.message };
+  }
+  return { filePath, family, status: "processed" };
+}
+
 export type GovernanceEvidenceEnvelope = {
   snapshot: SubjectSnapshot;
   report: RawObservationReport;
@@ -80,8 +116,10 @@ export function governanceEvidenceEnvelopeForCheck(
   evidencePaths: string[],
   observedImports: PluginImportReference[],
   accessesByCell: Map<string, ResourceAccessReference[]>,
+  diagnostics: Finding[] = [],
 ): GovernanceEvidenceEnvelope {
   const snapshot = createSubjectSnapshotFromFiles(governanceSubjectFiles(context, manifestPath, baselinePath, evidencePaths));
+  const diagnosticIndex = diagnosticsByFile(diagnostics);
   const statuses: FileObservation[] = snapshot.files.flatMap((file): FileObservation[] => {
     if (file.role === "manifest") {
       return [
@@ -93,9 +131,9 @@ export function governanceEvidenceEnvelopeForCheck(
     if (file.role === "runtime-evidence") return [{ filePath: file.path, family: "resources" as const, status: "processed" as const }];
     if (file.role === "source") {
       return [
-        { filePath: file.path, family: "imports" as const, status: "processed" as const },
-        { filePath: file.path, family: "public-surface" as const, status: "processed" as const },
-        { filePath: file.path, family: "resources" as const, status: "processed" as const },
+        observationStatusFor(file.path, "imports", diagnosticIndex),
+        observationStatusFor(file.path, "public-surface", diagnosticIndex),
+        observationStatusFor(file.path, "resources", diagnosticIndex),
       ];
     }
     return [{ filePath: file.path, family: "imports" as const, status: "not-applicable" as const }];

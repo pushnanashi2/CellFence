@@ -5,7 +5,6 @@ import test from "node:test";
 
 import {
   CellFenceClaimCasConflict,
-  GitHubArtifactClaimStore,
   LocalFileClaimStore,
   emptyClaimStoreState,
 } from "../packages/engine/dist/index.js";
@@ -57,8 +56,8 @@ test("LocalFileClaimStore raises CellFenceClaimCasConflict when state moves unde
       { ...emptyClaimStoreState(), claims: [{ id: "claim-other", agent: "agent-b", cellId: "worker", paths: ["src/worker/**"], symbols: [], resources: [], artifactLanes: [], expiresAt: "2099-01-01T00:00:00.000Z", fingerprint: "ignored" }] },
       emptyClaimStoreState(),
     );
-    await assert.rejects(
-      store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
+    assert.throws(
+      () => store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
       (error) => error instanceof CellFenceClaimCasConflict,
     );
   } finally {
@@ -72,7 +71,7 @@ test("LocalFileClaimStore rejects corrupt stores instead of treating them as emp
     const filePath = path.join(dir, "claims.json");
     fs.writeFileSync(filePath, "{ not json");
     assert.throws(
-      () => new LocalFileClaimStore({ filePath }),
+      () => new LocalFileClaimStore({ filePath }).read(),
       /claim store is corrupt/,
     );
   } finally {
@@ -86,7 +85,7 @@ test("LocalFileClaimStore rejects invalid store schemas instead of overwriting t
     const filePath = path.join(dir, "claims.json");
     fs.writeFileSync(filePath, JSON.stringify({ schemaVersion: "wrong", claims: [] }));
     assert.throws(
-      () => new LocalFileClaimStore({ filePath }),
+      () => new LocalFileClaimStore({ filePath }).read(),
       /claim store is corrupt/,
     );
     assert.equal(JSON.parse(fs.readFileSync(filePath, "utf8")).schemaVersion, "wrong");
@@ -114,24 +113,4 @@ test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
-});
-
-test("GitHubArtifactClaimStore accepts the first write and rejects lock acquisition", async () => {
-  const store = new GitHubArtifactClaimStore({ artifactName: "cellfence-claims" });
-  const previous = await store.read();
-  await store.write({ ...emptyClaimStoreState(), claims: [] }, previous);
-  await assert.rejects(() => store.lock(1000), /github-artifact backend does not provide a lock/);
-});
-
-test("GitHubArtifactClaimStore surfaces a CAS conflict when the in-memory state moved", async () => {
-  const store = new GitHubArtifactClaimStore({ artifactName: "cellfence-claims" });
-  const previous = await store.read();
-  // The 0.4.0 wiring will round-trip through the GitHub artifact
-  // API. For the prototype we simulate a concurrent write by
-  // re-pointing the store's lastObserved at a new state directly.
-  store.lastObserved = { ...emptyClaimStoreState(), claims: [] };
-  await assert.rejects(
-    () => store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
-    (error) => error instanceof CellFenceClaimCasConflict,
-  );
 });
