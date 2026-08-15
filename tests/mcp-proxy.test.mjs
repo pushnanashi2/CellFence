@@ -525,6 +525,30 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
   }
 });
 
+test("proxy rejects downstream cwd symlinks that escape the root", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-root-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-outside-"));
+  context.after(() => {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  });
+  const linkPath = path.join(rootDir, "outside-link");
+  try {
+    fs.symlinkSync(outsideDir, linkPath, "dir");
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && ["EPERM", "EACCES", "EINVAL"].includes(error.code)) {
+      context.skip(`symlink unavailable on this platform: ${error.code}`);
+      return;
+    }
+    throw error;
+  }
+  assert.throws(
+    () => __testing.resolveAndValidateDownstreamCwd(rootDir, linkPath, false),
+    /--downstream-cwd must be inside --root/,
+  );
+  assert.equal(__testing.resolveAndValidateDownstreamCwd(rootDir, linkPath, true), path.resolve(linkPath));
+});
+
 test("proxy argument parser rejects malformed modes, write tools, and configs", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-parse-errors-"));
   try {

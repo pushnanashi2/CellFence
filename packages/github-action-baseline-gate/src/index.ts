@@ -53,6 +53,7 @@ async function approveFromCodeowner(
   repo: string,
   pullNumber: number,
   codeowners: string[],
+  headSha: string,
 ): Promise<boolean> {
   if (codeowners.length === 0) return true;
   const reviews = await octokit.paginate(octokit.rest.pulls.listReviews, {
@@ -65,13 +66,16 @@ async function approveFromCodeowner(
   // them in chronological order so the last entry for each user
   // wins. An approval that has since been dismissed or replaced
   // by a CHANGES_REQUESTED is therefore correctly ignored.
-  const latest = new Map<string, string>();
+  const latest = new Map<string, { state: string; commitId: string | null }>();
   for (const review of reviews) {
     if (!review.user?.login) continue;
-    latest.set(review.user.login, review.state);
+    latest.set(review.user.login, {
+      state: review.state,
+      commitId: typeof review.commit_id === "string" ? review.commit_id : null,
+    });
   }
-  for (const [login, state] of latest) {
-    if (state === "APPROVED" && userMatchesAllowlist({ login }, codeowners)) return true;
+  for (const [login, review] of latest) {
+    if (review.state === "APPROVED" && review.commitId === headSha && userMatchesAllowlist({ login }, codeowners)) return true;
   }
   return false;
 }
@@ -189,15 +193,21 @@ async function upsertStickyComment(
   mode: "update" | "create" | "disabled",
 ): Promise<void> {
   if (mode === "disabled") return;
+  if (mode === "create") {
+    await octokit.rest.issues.createComment({ owner, repo, issue_number: pullNumber, body });
+    return;
+  }
   const comments = await octokit.paginate(octokit.rest.issues.listComments, {
     owner,
     repo,
     issue_number: pullNumber,
     per_page: 100,
   });
-  const previous = comments.find((comment: { body?: string; id: number }) => {
+  const previous = comments.find((comment: { body?: string; id: number; user?: { login?: string; type?: string } }) => {
     const text = comment.body ?? "";
-    return text.includes(STICKY_COMMENT_MARKER) || text.includes(STICKY_COMMENT_RESOLVED_MARKER);
+    if (!text.includes(STICKY_COMMENT_MARKER) && !text.includes(STICKY_COMMENT_RESOLVED_MARKER)) return false;
+    const login = comment.user?.login ?? "";
+    return login === "github-actions[bot]" || login.endsWith("[bot]") || comment.user?.type === "Bot";
   });
   if (previous) {
     await octokit.rest.issues.updateComment({
@@ -208,9 +218,7 @@ async function upsertStickyComment(
     });
     return;
   }
-  if (mode === "update") {
-    await octokit.rest.issues.createComment({ owner, repo, issue_number: pullNumber, body });
-  }
+  await octokit.rest.issues.createComment({ owner, repo, issue_number: pullNumber, body });
 }
 
 async function changedFilesTouchBaseline(
@@ -233,8 +241,27 @@ async function changedFilesTouchBaseline(
 }
 
 function parseCommentMode(value: string | undefined): "update" | "create" | "disabled" {
-  if (value === "create" || value === "disabled") return value;
-  return "update";
+  const normalized = value || "update";
+  if (normalized === "update" || normalized === "create" || normalized === "disabled") return normalized;
+  throw new Error(`invalid comment-mode ${JSON.stringify(value)}; expected update, create, or disabled`);
+}
+
+function parseBooleanInput(name: string, defaultValue: boolean): boolean {
+  const raw = core.getInput(name);
+  if (!raw) return defaultValue;
+  const normalized = raw.toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  throw new Error(`invalid ${name} ${JSON.stringify(raw)}; expected true or false`);
+}
+
+async function removeLabelIfPresent(octokit: Octokit, owner: string, repo: string, pullNumber: number, label: string): Promise<void> {
+  try {
+    await octokit.rest.issues.removeLabel({ owner, repo, issue_number: pullNumber, name: label });
+  } catch (error) {
+    const status = typeof error === "object" && error !== null && "status" in error ? (error as { status: number }).status : 0;
+    if (status !== 404) throw error;
+  }
 }
 
 export async function runAction(): Promise<void> {
@@ -251,14 +278,14 @@ export async function runAction(): Promise<void> {
     head: { sha: string; ref: string };
     base: { sha: string; ref: string };
   };
-  const token = process.env.GITHUB_TOKEN;
+  const token = core.getInput("github-token", { required: true });
   if (!token) {
-    core.setFailed("GITHUB_TOKEN is required");
+    core.setFailed("github-token input is required");
     return;
   }
   const commentMode = parseCommentMode(core.getInput("comment-mode"));
-  const requireSeparatePr = (core.getInput("require-separate-pr") || "true").toLowerCase() === "true";
-  const failOnMixedPr = (core.getInput("fail-on-mixed-pr") || "false").toLowerCase() === "true";
+  const requireSeparatePr = parseBooleanInput("require-separate-pr", true);
+  const failOnMixedPr = parseBooleanInput("fail-on-mixed-pr", false);
   let baselineCodeowners = parseCodeowners(core.getInput("baseline-codeowners"));
   const baselineFile = core.getInput("baseline-file") || DEFAULT_BASELINE_PATH;
   // base-ref and head-ref default to the PR's base/head refs when the
@@ -298,6 +325,7 @@ export async function runAction(): Promise<void> {
   const { baseline: changedBaseline, implementation: changedImplementation } = await changedFilesTouchBaseline(
     octokit, context.repo.owner, context.repo.repo, pullNumber, baselineFile,
   );
+  let mixedPrTelemetry = "";
   if (requireSeparatePr && changedBaseline && changedImplementation) {
     // 0.4.1: surface the mixed-PR diagnostic as a sticky comment
     // even when the gate is not failing, so reviewers see the
@@ -324,7 +352,7 @@ export async function runAction(): Promise<void> {
     const moreBaseline = baselineFiles.length > 10 ? ` (+${baselineFiles.length - 10} more)` : "";
     const moreImplementation = implementationFiles.length > 10 ? ` (+${implementationFiles.length - 10} more)` : "";
     const message = `pull request mixes baseline and implementation changes; split into two PRs to keep governance changes reviewable`;
-    const telemetry = [
+    mixedPrTelemetry = [
       "",
       `<!-- cellfence-baseline-gate:mixed-pr -->`,
       `> **Mixed-PR warning**: this pull request changes both the baseline (${baselineFiles.length} file${baselineFiles.length === 1 ? "" : "s"}: ${truncatedBaseline}${moreBaseline}) and the implementation (${implementationFiles.length} file${implementationFiles.length === 1 ? "" : "s"}: ${truncatedImplementation}${moreImplementation}). Consider splitting into two PRs so the governance change can be reviewed in isolation.`,
@@ -338,7 +366,7 @@ export async function runAction(): Promise<void> {
         report: gate.report,
         approved: false,
         codeowners: baselineCodeowners,
-      }) + telemetry,
+      }) + mixedPrTelemetry,
       commentMode,
     );
     if (failOnMixedPr) {
@@ -354,6 +382,7 @@ export async function runAction(): Promise<void> {
       formatResolvedComment(headSha),
       commentMode,
     );
+    await removeLabelIfPresent(octokit, context.repo.owner, context.repo.repo, pullNumber, GOVERNANCE_LABEL);
     return;
   }
   await ensureLabel(octokit, context.repo.owner, context.repo.repo, GOVERNANCE_LABEL);
@@ -367,7 +396,7 @@ export async function runAction(): Promise<void> {
   } catch (error) {
     core.warning(`failed to add ${GOVERNANCE_LABEL} label: ${error instanceof Error ? error.message : String(error)}`);
   }
-  const approved = await approveFromCodeowner(octokit, context.repo.owner, context.repo.repo, pullNumber, baselineCodeowners);
+  const approved = await approveFromCodeowner(octokit, context.repo.owner, context.repo.repo, pullNumber, baselineCodeowners, headSha);
   await upsertStickyComment(
     octokit, context.repo.owner, context.repo.repo, pullNumber,
     formatGateComment({
@@ -375,7 +404,7 @@ export async function runAction(): Promise<void> {
       report: gate.report,
       approved,
       codeowners: baselineCodeowners,
-    }),
+    }) + mixedPrTelemetry,
     commentMode,
   );
   if (!approved) {
@@ -397,6 +426,19 @@ runAction().catch((error) => {
 // names; action.yml must declare every name and use the same
 // defaults. Mismatches trip the action-contract test in
 // `tests/github-action.test.mjs`.
+const ACTION_METADATA_INPUT_NAMES = [
+  "comment-mode",
+  "fail-on-mixed-pr",
+  "github-token",
+  "require-separate-pr",
+  "baseline-codeowners",
+  "baseline-file",
+  "cellfence-version",
+  "base-ref",
+  "head-ref",
+] as const;
+void ACTION_METADATA_INPUT_NAMES;
+
 export const ACTION_INPUT_NAMES = [
   "comment-mode",
   "fail-on-mixed-pr",

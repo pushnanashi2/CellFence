@@ -23,6 +23,7 @@ function makeBaseline(overrides = {}) {
         publicSymbolSet: ["run"],
         dependencyEdges: [],
         resourceAccesses: [],
+        artifactContracts: [],
       },
       worker: {
         ownedPathPatterns: 1,
@@ -33,6 +34,7 @@ function makeBaseline(overrides = {}) {
         publicSymbolSet: ["consume"],
         dependencyEdges: [],
         resourceAccesses: [],
+        artifactContracts: [],
       },
     },
     ...overrides,
@@ -116,13 +118,45 @@ test("runBaselineGateCommand warns when baseline and implementation changes are 
   assert.match(result.warnings[0], /baseline changes and implementation changes/);
 });
 
+test("runBaselineGateCommand preserves skipped-cell fail-closed state", () => {
+  const baseBaseline = makeBaseline();
+  const headBaseline = makeBaseline();
+  delete baseBaseline.cells.api.ownedPathSet;
+  const result = runBaselineGateCommand({
+    baseBaseline,
+    headBaseline,
+    baseBaselinePath: "base.json",
+    headBaselinePath: "head.json",
+    format: "json",
+    hasImplementationChanges: false,
+  });
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.report.hasChange, true);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "ownedPaths")?.skippedCells, ["api"]);
+});
+
+test("detectBaselineChanges flags artifact contract changes", () => {
+  const baseBaseline = makeBaseline();
+  const headBaseline = makeBaseline();
+  headBaseline.cells.worker.artifactContracts = ["produce:events:src/worker/events/**"];
+  const report = detectBaselineChanges(baseBaseline, headBaseline, "base.json", "head.json");
+  const artifactContracts = report.deltas.find((delta) => delta.dimension === "artifactContracts");
+  assert.ok(artifactContracts);
+  assert.deepEqual(artifactContracts.added, ["worker: produce:events:src/worker/events/**"]);
+});
+
 test("baseline gate action metadata declares every source input", () => {
   const source = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/src/index.ts"), "utf8");
   const actionYaml = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/action.yml"), "utf8");
-  const sourceMatch = /export const ACTION_INPUT_NAMES = \[([\s\S]*?)\] as const;/m.exec(source);
-  assert.ok(sourceMatch, "ACTION_INPUT_NAMES missing");
+  const sourceMatch = /const ACTION_METADATA_INPUT_NAMES = \[([\s\S]*?)\] as const;/m.exec(source);
+  assert.ok(sourceMatch, "ACTION_METADATA_INPUT_NAMES missing");
   const sourceInputs = [...sourceMatch[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]).sort();
   const yamlInputs = [...actionYaml.matchAll(/^ {2}([a-z][a-z0-9-]*):$/gm)].map((match) => match[1]).sort();
   assert.deepEqual(yamlInputs, sourceInputs);
+  assert.match(actionYaml, /github-token:\r?\n\s+description: "GitHub token used to read PR reviews and update labels\/comments\. Pass `\$\{\{ github\.token \}\}`\."\r?\n\s+required: true/);
   assert.match(actionYaml, /baseline-file:\r?\n\s+description: "Repo-relative path to the baseline JSON\."\r?\n\s+required: false\r?\n\s+default: "\.cellfence\/baselines\/cellfence\.baseline\.json"/);
+  assert.match(source, /core\.getInput\("github-token", \{ required: true \}\)/);
+  assert.match(source, /review\.state === "APPROVED" && review\.commitId === headSha/);
+  assert.match(source, /mode === "create"/);
+  assert.match(source, /removeLabelIfPresent/);
 });

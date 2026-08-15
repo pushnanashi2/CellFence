@@ -35,20 +35,24 @@ jobs:
           fetch-depth: 0
       - uses: cellfence/baseline-gate@v0
         with:
+          github-token: ${{ github.token }}
           cellfence-version: "0.2.1"
           baseline-codeowners: "@acme/architecture"
           require-separate-pr: "true"
           comment-mode: "update"
 ```
 
-The workflow must pass `GITHUB_TOKEN` (Actions does this
-automatically) so the action can attach the sticky PR comment and
-apply the `governance-change` label.
+Pass `github-token: ${{ github.token }}` explicitly so the action can
+read PR reviews, attach the sticky PR comment, and apply or remove the
+`governance-change` label. A baseline change approval is accepted only
+when it comes from an allowed reviewer and targets the current PR head
+commit.
 
 ## Inputs
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
+| `github-token` | yes | (none) | GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`. |
 | `cellfence-version` | no | `0.2.1` | CellFence CLI version advertised in the install hint. The action itself does not invoke the CLI; it reads the two baseline files directly. |
 | `baseline-codeowners` | no | (resolved from `CODEOWNERS`) | Comma-separated list of GitHub usernames or teams that can approve a baseline change. Defaults to the `CODEOWNERS` entry that matches `baseline-file`. |
 | `require-separate-pr` | no | `true` | When `true`, a mixed PR (baseline + implementation) is surfaced as a sticky comment and (optionally) a failed check. |

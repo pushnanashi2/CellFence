@@ -4,6 +4,9 @@ branding:
   icon: shield
   color: blue
 inputs:
+  github-token:
+    description: "GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`."
+    required: true
   cellfence-version:
     description: "CellFence CLI version to install. Pin to a release tag."
     required: false

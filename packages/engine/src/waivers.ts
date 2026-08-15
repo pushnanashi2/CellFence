@@ -32,8 +32,9 @@ function loadManifestFromFile(manifestPath: string): CellFenceManifest {
  * Discover the set of identities permitted to approve a CellFence waiver.
  *
  * Resolution order:
- * 1. `CELLFENCE_APPROVERS` env var (comma-separated). Highest priority so
- *    that CI can pin the approver list without modifying the repository.
+ * 1. `CELLFENCE_APPROVERS` env var (comma-separated). When set, it is a
+ *    complete override so CI can pin the approver list without letting the
+ *    pull request expand it by editing repository-local files.
  * 2. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
  * 3. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
  */
@@ -45,6 +46,7 @@ export function getApprovalAllowlist(rootDir: string): string[] {
       const trimmed = item.trim();
       if (trimmed) allow.add(trimmed);
     }
+    return [...allow];
   }
   // 0.4.0: do not derive the allowlist from git history. A
   // malicious or careless agent can self-approve by simply

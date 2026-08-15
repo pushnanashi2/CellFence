@@ -16,7 +16,7 @@ inputs:
   version:
     description: Published CellFence CLI version to run. Pin to an exact version (for example, 0.2.1) for required checks.
     required: false
-    default: latest
+    default: "0.2.1"
 runs:
   using: composite
   steps:
@@ -30,7 +30,7 @@ runs:
         set -euo pipefail
         cli_version="${CELLFENCE_ACTION_VERSION:-}"
         if [ -z "${cli_version}" ]; then
-          cli_version="latest"
+          cli_version="0.2.1"
         fi
         cli_package="cellfence@${cli_version}"
         # H-7 (0.3.0): bash 3.2 (the macOS default) treats an unset or

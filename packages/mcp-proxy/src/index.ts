@@ -634,15 +634,32 @@ function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
 // reach, so the cwd must sit inside --root unless the operator
 // explicitly opts in with allowCwdMismatch. The default cwd is
 // --root so the safe option is also the convenient one.
+function resolveRealPathForConfinement(targetPath: string): string {
+  const absolute = path.resolve(targetPath);
+  if (fs.existsSync(absolute)) return fs.realpathSync.native(absolute);
+  const missingSegments: string[] = [];
+  let cursor = absolute;
+  while (!fs.existsSync(cursor)) {
+    const parent = path.dirname(cursor);
+    if (parent === cursor) break;
+    missingSegments.unshift(path.basename(cursor));
+    cursor = parent;
+  }
+  const realParent = fs.realpathSync.native(cursor);
+  return path.resolve(realParent, ...missingSegments);
+}
+
 export function resolveAndValidateDownstreamCwd(rootDir: string, downstreamCwd: string | undefined, allowCwdMismatch: boolean): string {
   const absoluteRoot = path.resolve(rootDir);
   if (!downstreamCwd) return absoluteRoot;
   const absoluteCwd = path.resolve(downstreamCwd);
   if (allowCwdMismatch) return absoluteCwd;
-  const relativeCwd = path.relative(absoluteRoot, absoluteCwd);
+  const realRoot = resolveRealPathForConfinement(absoluteRoot);
+  const realCwd = resolveRealPathForConfinement(absoluteCwd);
+  const relativeCwd = path.relative(realRoot, realCwd);
   if (relativeCwd.startsWith("..") || path.isAbsolute(relativeCwd)) {
     throw new Error(
-      `--downstream-cwd must be inside --root (${absoluteRoot}); got ${absoluteCwd}. ` +
+      `--downstream-cwd must be inside --root (${realRoot}); got ${realCwd}. ` +
       `Pass --allow-cwd-mismatch to override.`,
     );
   }

@@ -69,6 +69,45 @@ test("B-02: waiver with trusted approver remains valid", () => {
   }
 });
 
+test("CELLFENCE_APPROVERS overrides repository-local waiver approvers", () => {
+  const original = process.env.CELLFENCE_APPROVERS;
+  process.env.CELLFENCE_APPROVERS = "ci-owner";
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-env-override-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "repo-owner\n");
+    writeProject(tempDir, "repo-owner");
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    const waivers = collectWaiversForManifest(tempDir, manifest);
+    assert.equal(waivers.length, 1);
+    assert.equal(waivers[0].valid, false);
+    assert.ok(waivers[0].errors.some((error) => error.includes("repo-owner is not in the approval allowlist")));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    if (original === undefined) delete process.env.CELLFENCE_APPROVERS;
+    else process.env.CELLFENCE_APPROVERS = original;
+  }
+});
+
+test("repository-local waiver approvers are used only when CI override is absent", () => {
+  const original = process.env.CELLFENCE_APPROVERS;
+  delete process.env.CELLFENCE_APPROVERS;
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-repo-allowlist-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, ".cellfence"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, ".cellfence/approvers.txt"), "repo-owner\n");
+    writeProject(tempDir, "repo-owner");
+    const manifest = JSON.parse(fs.readFileSync(path.join(tempDir, "cellfence.manifest.json"), "utf8"));
+    const waivers = collectWaiversForManifest(tempDir, manifest);
+    assert.equal(waivers.length, 1);
+    assert.equal(waivers[0].valid, true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    if (original === undefined) delete process.env.CELLFENCE_APPROVERS;
+    else process.env.CELLFENCE_APPROVERS = original;
+  }
+});
+
 test("B-02: CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is emitted alongside the hard error", () => {
   const original = process.env.CELLFENCE_APPROVERS;
   process.env.CELLFENCE_APPROVERS = "test-owner";

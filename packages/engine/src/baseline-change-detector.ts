@@ -51,10 +51,11 @@ export function detectBaselineChanges(
   const crossCellEdges = diffCrossCellEdges(baseBaseline, headBaseline);
   const signatures = diffSignatures(baseBaseline, headBaseline);
   const resourceAccesses = diffResourceAccesses(baseBaseline, headBaseline);
+  const artifactContracts = diffArtifactContracts(baseBaseline, headBaseline);
   const publicSurfaceMetadata = diffPublicSurfaceMetadata(baseBaseline, headBaseline);
   const dependencyCounts = diffDependencyCounts(baseBaseline, headBaseline);
 
-  const deltas = [ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, publicSurfaceMetadata, dependencyCounts].filter(
+  const deltas = [ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, publicSurfaceMetadata, dependencyCounts].filter(
     (delta) => delta.added.length > 0 || delta.removed.length > 0 || (delta.skippedCells?.length ?? 0) > 0,
   );
 
@@ -189,6 +190,23 @@ function diffResourceAccesses(baseBaseline: CellFenceBaseline, headBaseline: Cel
     for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
   }
   return { dimension: "resourceAccesses", added, removed };
+}
+
+function artifactContractSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
+  return [...(baseline.cells[cellId]?.artifactContracts || [])];
+}
+
+function diffArtifactContracts(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
+  const added: string[] = [];
+  const removed: string[] = [];
+  const cellIds = new Set<string>([...Object.keys(baseBaseline.cells), ...Object.keys(headBaseline.cells)]);
+  for (const cellId of cellIds) {
+    const base = new Set(artifactContractSetForCell(baseBaseline, cellId));
+    const head = new Set(artifactContractSetForCell(headBaseline, cellId));
+    for (const entry of head) if (!base.has(entry)) added.push(`${cellId}: ${entry}`);
+    for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
+  }
+  return { dimension: "artifactContracts" as BaselineDimension, added, removed };
 }
 
 // `publicSurfaceMetadata` covers the fields that describe the cell

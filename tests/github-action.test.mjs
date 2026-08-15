@@ -41,9 +41,10 @@ test("GitHub Action wrapper does not assume CellFence source checkout in consume
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
   assert.match(actionYaml, /^\s{2}version:\r?\n/m);
-  assert.match(actionYaml, /^\s{4}default:\s*latest\s*$/m);
+  assert.match(actionYaml, /^\s{4}default:\s*"0\.2\.1"\s*$/m);
   assert.match(actionYaml, /cli_package="cellfence@\$\{cli_version\}"/);
-  assert.match(actionYaml, /cli_version="latest"/);
+  assert.match(actionYaml, /cli_version="0\.2\.1"/);
+  assert.doesNotMatch(actionYaml, /^\s{4}default:\s*latest\s*$/m);
   assert.doesNotMatch(actionYaml, new RegExp(`cellfence@${packageJson.version.replaceAll(".", "\\.")}`));
   assert.match(actionYaml, /CELLFENCE_ACTION_VERSION:\s*\$\{\{ inputs\.version \}\}/);
   assert.match(actionYaml, /CELLFENCE_ACTION_MANIFEST:\s*\$\{\{ inputs\.manifest \}\}/);

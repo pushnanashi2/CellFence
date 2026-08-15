@@ -56,6 +56,11 @@ try {
   process.exit(1);
 }
 
+for (const generatedPath of [path.join(outDir, "index.js"), path.join(outDir, "index.js.map")]) {
+  const generated = fs.readFileSync(generatedPath, "utf8");
+  fs.writeFileSync(generatedPath, generated.replace(/[ \t]+$/gm, ""));
+}
+
 // The action is a single CommonJS file; remove the ESM type so
 // the GitHub Actions runner loads it as CJS.
 const pkgPath = path.join(actionRoot, "package.json");

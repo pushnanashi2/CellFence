@@ -86,8 +86,12 @@ if (hardcodedActionCliVersions.length > 0) {
 if (!/^\s{2}version:\r?\n\s{4}description:/m.test(githubAction)) {
   findings.push("packages/github-action/action.yml must expose a version input for the published CLI");
 }
-if (!/^\s{4}default:\s*latest\s*$/m.test(githubAction)) {
-  findings.push("packages/github-action/action.yml version input must default to npm latest so main does not reference an unpublished CLI");
+const escapedPackageVersion = packageJson.version.replaceAll(".", "\\.");
+if (!new RegExp(`^\\s{4}default:\\s*"?${escapedPackageVersion}"?\\s*$`, "m").test(githubAction)) {
+  findings.push(`packages/github-action/action.yml version input must default to exact package version ${packageJson.version}`);
+}
+if (!new RegExp(`cli_version="?${escapedPackageVersion}"?`).test(githubAction)) {
+  findings.push(`packages/github-action/action.yml empty version fallback must use exact package version ${packageJson.version}`);
 }
 if (!/cli_package="cellfence@\$\{cli_version\}"/.test(githubAction)) {
   findings.push("packages/github-action/action.yml must invoke cellfence through the version input");
