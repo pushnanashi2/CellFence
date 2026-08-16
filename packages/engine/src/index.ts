@@ -1725,11 +1725,20 @@ function gitMetadataFailure(message: string): CheckResult {
   };
 }
 
+function validateGitRefArgument(ref: string, label: string): void {
+  if (!ref.trim()) throw new Error(`${label} must not be empty`);
+  if (ref.startsWith("-")) throw new Error(`${label} must not start with '-'`);
+  if (/[\u0000-\u001f\u007f\s]/.test(ref)) throw new Error(`${label} must not contain whitespace or control characters`);
+}
+
 function assertGitCommit(rootDir: string, ref: string): string {
+  validateGitRefArgument(ref, "git ref");
   return gitCommand(rootDir, ["rev-list", "-1", "--end-of-options", ref]);
 }
 
 function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
+  validateGitRefArgument(baseRef, "base ref");
+  if (headRef) validateGitRefArgument(headRef, "head ref");
   const files = new Set<string>();
   const addDiff = (args: string[]): void => {
     const output = gitCommandRaw(rootDir, args);

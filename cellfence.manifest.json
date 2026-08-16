@@ -5,7 +5,9 @@
     "include": [
       "packages/**"
     ],
-    "exclude": [],
+    "exclude": [
+      "packages/**/dist/**"
+    ],
     "resourceAdapters": {
       "bullmq": "on",
       "celery": "on",
@@ -297,7 +299,6 @@
       "publicEntry": "packages/mcp-proxy/src/index.ts",
       "publicSymbols": [
         "decideToolCall",
-        "decideToolCallAsync",
         "DownstreamFeaturePolicy",
         "FailMode",
         "main",

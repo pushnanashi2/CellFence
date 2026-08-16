@@ -915,7 +915,7 @@ export function checkMutationReport(options: { rootDir?: string; manifest: CellF
   }
   const cells: MutationCheckResult["cells"] = {};
   const findings: AdvancedFinding[] = [];
-  const minScore = options.minScore ?? 0;
+  const minScore = Number.isFinite(options.minScore) ? Number(options.minScore) : 0;
   for (const [cellId, counts] of [...countsByCell.entries()].sort((left, right) => left[0].localeCompare(right[0]))) {
     const denominator = counts.killed + counts.survived + counts.timeout + counts.noCoverage;
     const score = denominator === 0 ? 100 : (counts.killed / denominator) * 100;

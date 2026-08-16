@@ -73,9 +73,24 @@ function directoryHasExplicitGovernance(rootDir: string, directoryPath: string, 
   return manifest.cells.some((cell) => cell.ownedPaths.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern))));
 }
 
+function directoryExcludedByGovernance(rootDir: string, directoryPath: string, context?: FileIndexContext): boolean {
+  // Stryker disable all: without a context, generated directories are already ignored by the explicit-governance fallback in shouldIgnoreDirectory.
+  if (!context) return false;
+  // Stryker restore all
+  const relativeDirectory = repoPath(rootDir, directoryPath);
+  const probePaths = [
+    relativeDirectory,
+    ...SOURCE_EXTENSIONS.map((extension) => `${relativeDirectory}/__cellfence_probe__${extension}`),
+  ];
+  const excludePatterns = context.manifest.governance?.exclude;
+  if (!excludePatterns) return false;
+  return excludePatterns.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern)));
+}
+
 function shouldIgnoreDirectory(rootDir: string, directoryPath: string, directoryName: string, context?: FileIndexContext): boolean {
   if (ALWAYS_IGNORED_DIRECTORIES.has(directoryName)) return true;
   if (!DEFAULT_GENERATED_DIRECTORIES.has(directoryName)) return false;
+  if (directoryExcludedByGovernance(rootDir, directoryPath, context)) return true;
   return !directoryHasExplicitGovernance(rootDir, directoryPath, context);
 }
 

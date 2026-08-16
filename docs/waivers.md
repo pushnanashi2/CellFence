@@ -52,7 +52,7 @@ cellfence check
 - `attestation:<id>` in source and a matching entry in `.cellfence/waiver-attestations.json` or `.cellfence/waiver-attestations/*.json`.
 - `repository`, `headSha`, `sourceSha256`, `filePath`, `line`, `ruleId`, and `findingFingerprint` match the evaluated repository state.
 - The directive line is immediately before the attested finding line.
-- `expiresAt` is not expired and is at most 90 days from evaluation.
+- `expiresAt` is not expired and is at most 90 days from evaluation; date-only expiry is evaluated against UTC calendar days.
 - `approver` appears in trusted `CELLFENCE_APPROVERS`.
 - `signature.digest` verifies with `CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY`, and `signature.keyId` matches `CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY_ID` when configured.
 

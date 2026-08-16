@@ -18,6 +18,7 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 
 import { main } from "../packages/cli/dist/index.js";
+import { printCheckResult } from "../packages/cli/dist/check-output.js";
 import {
   initGitRepo,
   waiverEnv,
@@ -496,7 +497,7 @@ test("CLI install writes, checks, repairs, and uninstalls managed agent instruct
 
     const repair = runCli(["install"], tempDir);
     assert.equal(repair.status, 0, repair.stderr || repair.stdout);
-    fs.appendFileSync(agentsPath, "\n### Architecture fence (CellFence)\nold unmanaged copy\n");
+    fs.appendFileSync(agentsPath, "\n### Architecture fence (CellFence)\nold unmanaged copy\nRun `npx cellfence check` before editing.\n");
     const unmanaged = runCli(["install", "--check"], tempDir);
     assert.equal(unmanaged.status, 1);
     assert.match(unmanaged.stdout, /unmanaged CellFence instruction text/);
@@ -778,7 +779,7 @@ test("CLI claim commands render human output and reject missing agent ids", () =
   assert.equal(emptyList.status, 0);
   assert.match(emptyList.stdout, /No CellFence claims found/);
 
-  const create = runCli(["claim", "create", "--agent=codex-a", "--cell=reporting", "--path=src/reporting/**", "--ttl=2h"], tempDir);
+  const create = runCli(["--cell=reporting", "claim", "create", "--agent=codex-a", "--path=src/reporting/**", "--ttl=2h"], tempDir);
   assert.equal(create.status, 0, create.stderr || create.stdout);
   assert.match(create.stdout, /Created claim:/);
 
@@ -1472,8 +1473,43 @@ test("CLI check emits PR-ready markdown output", () => {
   assert.equal(result.status, 1);
   assert.match(result.stdout, /^# CellFence Check/m);
   assert.match(result.stdout, /\*\*Result:\*\* failed/);
-  assert.match(result.stdout, /`CELLFENCE_PRIVATE_IMPORT`/);
+  assert.match(result.stdout, /&#96;CELLFENCE_PRIVATE_IMPORT&#96;/);
   assert.match(result.stdout, /src\/consumer\/public\.ts/);
+});
+
+test("CLI markdown output escapes table metacharacters in findings", () => {
+  const metadata = {
+    command: "check",
+    runId: "test-run",
+    startedAt: "2026-01-01T00:00:00.000Z",
+    completedAt: "2026-01-01T00:00:00.000Z",
+    durationMs: 0,
+    commit: null,
+  };
+  const result = {
+    ok: false,
+    exitCode: 1,
+    findings: [{
+      ruleId: "CELLFENCE_TEST",
+      severity: "error",
+      filePath: "src/core.ts",
+      cellId: "core",
+      message: "`tick` [link] <tag> & pipe | split\nnext",
+    }],
+    warnings: [],
+    metrics: {},
+  };
+  const originalLog = console.log;
+  let output = "";
+  console.log = (message) => {
+    output += `${String(message)}\n`;
+  };
+  try {
+    printCheckResult("markdown", result, metadata);
+  } finally {
+    console.log = originalLog;
+  }
+  assert.match(output, /&#96;tick&#96; &#91;link&#93; &lt;tag&gt; &amp; pipe \\| split<br>next/);
 });
 
 test("CLI check emits SARIF output for code scanning", () => {
@@ -1484,6 +1520,86 @@ test("CLI check emits SARIF output for code scanning", () => {
   assert.equal(sarif.version, "2.1.0");
   assert.equal(sarif.runs[0].tool.driver.name, "CellFence");
   assert.ok(sarif.runs[0].results.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
+});
+
+test("CLI SARIF output encodes artifact URIs", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-sarif-space-path-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/producer"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "src/app space"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/producer/public.ts"), "export const exposed = true;\n");
+    fs.writeFileSync(path.join(tempDir, "src/producer/internal.ts"), "export const hidden = true;\n");
+    fs.writeFileSync(path.join(tempDir, "src/app space/public.ts"), "import { hidden } from \"../producer/internal\";\nexport const used = hidden;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [
+        {
+          id: "producer",
+          ownedPaths: ["src/producer/**"],
+          publicEntry: "src/producer/public.ts",
+          publicSymbols: ["exposed"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+        {
+          id: "consumer",
+          ownedPaths: ["src/app space/**"],
+          publicEntry: "src/app space/public.ts",
+          publicSymbols: ["used"],
+          consumes: [{ cell: "producer" }],
+          producesArtifacts: [],
+        },
+      ],
+    });
+    const result = runCli(["check", "--format=sarif"], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const sarif = JSON.parse(result.stdout);
+    const uris = sarif.runs[0].results.flatMap((finding) =>
+      (finding.locations || []).map((location) => location.physicalLocation.artifactLocation.uri)
+    );
+    assert.ok(uris.includes("src/app%20space/public.ts"), JSON.stringify(uris));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI SARIF output percent-encodes reserved path characters", () => {
+  const metadata = {
+    command: "check",
+    runId: "test-run",
+    startedAt: "2026-01-01T00:00:00.000Z",
+    completedAt: "2026-01-01T00:00:00.000Z",
+    durationMs: 0,
+    commit: null,
+  };
+  const result = {
+    ok: false,
+    exitCode: 1,
+    findings: [{
+      ruleId: "CELLFENCE_TEST",
+      severity: "error",
+      filePath: "src/app #?.ts",
+      message: "reserved path chars",
+      fingerprint: "abc",
+    }],
+    warnings: [],
+    metrics: {},
+  };
+  const originalWrite = process.stdout.write;
+  let output = "";
+  process.stdout.write = (chunk, ...args) => {
+    output += String(chunk);
+    const callback = args.find((arg) => typeof arg === "function");
+    if (callback) callback();
+    return true;
+  };
+  try {
+    printCheckResult("sarif", result, metadata);
+  } finally {
+    process.stdout.write = originalWrite;
+  }
+  const sarif = JSON.parse(output);
+  assert.equal(sarif.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri, "src/app%20%23%3F.ts");
 });
 
 test("CLI check rejects ambiguous JSON and formatted output options", () => {
@@ -2851,10 +2967,27 @@ test("CLI rejects separated options when the next token is another flag", () => 
     "--format",
     "--preset",
     "--root",
+    "--cell",
   ]) {
     const result = runCli(["check", optionName, "--json"]);
     assert.equal(result.status, 2, `${optionName} should be a configuration error`);
     assert.match(result.stderr, new RegExp(`${optionName} requires a value`));
+  }
+});
+
+test("CLI rejects invalid numeric option values", () => {
+  for (const [args, message] of [
+    [["mutation", "check", "--report", "mutation.json", "--min-score", "90%"], "--min-score must be a finite number"],
+    [["mutation", "check", "--report", "mutation.json", "--min-score=90.0.0"], "--min-score must be a finite number"],
+    [["coverage", "--fail-under", "not-a-number"], "--fail-under must be a finite number"],
+    [["coverage", "--fail-under="], "--fail-under requires a value"],
+    [["context", "--cell="], "--cell requires a value"],
+    [["waivers", "request", "--line", "0"], "--line must be a positive integer"],
+    [["waivers", "request", "--line=1.5"], "--line must be a positive integer"],
+  ]) {
+    const result = runCli(args);
+    assert.equal(result.status, 2, args.join(" "));
+    assert.match(result.stderr, new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 });
 
@@ -3001,6 +3134,8 @@ test("CLI help returns usage without running a command", () => {
   const result = runCli(["--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Usage:/);
+  assert.match(result.stdout, /cellfence coverage/);
+  assert.match(result.stdout, /cellfence baseline gate/);
 });
 
 test("CLI main catches unexpected command errors", () => {

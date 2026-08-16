@@ -249,10 +249,6 @@ test("trace auto-installs for package preload forms and explicit env opt-in", ()
     import fs from "node:fs";
     process.chdir(${JSON.stringify(tempDir)});
     fs.writeFileSync("package-preload.json", "{}\\n");
-    const trace = await import(${JSON.stringify(pathToFileURL(tracePath).href)});
-    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
-      throw new Error("trace diagnostics did not report installed preload");
-    }
   `);
   const packageEvidencePath = path.join(tempDir, "package-resource-evidence.json");
   const packagePreload = spawnSync(process.execPath, [
@@ -296,9 +292,8 @@ test("trace auto-installs for package preload forms and explicit env opt-in", ()
   const envPath = path.join(tempDir, "env.mjs");
   fs.writeFileSync(envPath, `
     import fs from "node:fs";
-    import { traceDiagnostics } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    await import(${JSON.stringify(pathToFileURL(tracePath).href)});
     process.chdir(${JSON.stringify(tempDir)});
-    if (!traceDiagnostics().installed) throw new Error("env opt-in did not install trace");
     fs.writeFileSync("env-preload.json", "{}\\n");
   `);
   const envEvidencePath = path.join(tempDir, "env-resource-evidence.json");
@@ -342,6 +337,31 @@ test("unrelated preloads do not make trace imports install globally", () => {
   assert.equal(fs.existsSync(evidencePath), false);
 });
 
+test("unrelated inline preloads do not make trace imports install globally", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-unrelated-inline-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?unrelated-inline-preload`)});
+    fs.writeFileSync("unrelated-inline-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, [
+    "--import=data:text/javascript,globalThis.__cellfence_unrelated_inline_preload=true",
+    "app.mjs",
+  ], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
 test("synthetic execArgv entries do not trick trace preload detection", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-fake-execargv-"));
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
@@ -366,15 +386,48 @@ test("synthetic execArgv entries do not trick trace preload detection", () => {
   assert.equal(fs.existsSync(evidencePath), false);
 });
 
-test("trace preload detection accepts only exact CellFence import flags", async () => {
-  const trace = await import(`${pathToFileURL(tracePath).href}?preload-detection`);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "@cellfence/trace"]), true);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=@cellfence/trace"]), true);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", pathToFileURL(tracePath).href]), true);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "data:text/javascript,"]), false);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=data:text/javascript,"]), false);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["--import"]), false);
-  assert.equal(trace.__testing.preloadRequestedThisModule(["not-import", pathToFileURL(tracePath).href]), false);
+test("trace preload detection accepts exact file URL import flags", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-file-url-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("file-url-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["--import", pathToFileURL(tracePath).href, "app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(evidencePath, "utf8")).accesses.some((access) => access.selector === "file-url-preload.json"));
+});
+
+test("trace preload detection accepts exact inline file URL import flags", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-inline-file-url-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("inline-file-url-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, [`--import=${pathToFileURL(tracePath).href}`, "app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(evidencePath, "utf8")).accesses.some((access) => access.selector === "inline-file-url-preload.json"));
 });
 
 test("trace hook records fetch calls without requiring successful network responses", () => {
@@ -602,9 +655,6 @@ test("trace install is idempotent and registers the expected flush hooks", () =>
     trace.recordDatabaseAccess("idempotent-extra");
     if (JSON.stringify(observedEvents) !== JSON.stringify(["beforeExit", "exit"])) {
       throw new Error(\`unexpected trace hooks: \${JSON.stringify(observedEvents)}\`);
-    }
-    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
-      throw new Error("trace diagnostics did not report the installed hook state");
     }
   `);
 

@@ -354,6 +354,10 @@ test("mutation report ingestion aggregates per cell and enforces a score thresho
     assert.equal(result.cells.app.survived, 1);
     assert.equal(result.cells.app.ignored, 1);
     assert.equal(result.findings[0].ruleId, "CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD");
+
+    const nonFiniteThreshold = checkMutationReport({ rootDir, manifest, reportPath: "mutation.json", minScore: Infinity });
+    assert.equal(nonFiniteThreshold.ok, true);
+    assert.deepEqual(nonFiniteThreshold.findings, []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

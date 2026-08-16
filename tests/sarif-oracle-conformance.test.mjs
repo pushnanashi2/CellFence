@@ -70,7 +70,7 @@ test("SARIF semantic comparison reports tampered results as divergent", () => {
     $schema: "https://json.schemastore.org/sarif-2.1.0.json",
     runs: [{
       tool: { driver: { name: "CellFence", rules: [{ id: "CELLFENCE_PRIVATE_IMPORT" }] } },
-      invocations: [{}],
+      invocations: [{ executionSuccessful: true }],
       results: [{
         ruleId: "CELLFENCE_PRIVATE_IMPORT",
         level: "warning",
@@ -83,4 +83,35 @@ test("SARIF semantic comparison reports tampered results as divergent", () => {
   const comparison = compareSarifToJson(checkResult, sarif);
   assert.equal(comparison.status, "divergent");
   assert.match(comparison.errors.join("\n"), /diverge/);
+});
+
+test("SARIF semantic comparison decodes artifact URIs before comparing paths", () => {
+  const checkResult = {
+    findings: [{
+      ruleId: "CELLFENCE_PRIVATE_IMPORT",
+      severity: "error",
+      message: "private import",
+      filePath: "src/app #?.ts",
+      details: { line: 3 },
+      fingerprint: "abc",
+    }],
+    warnings: [],
+  };
+  const sarif = {
+    version: "2.1.0",
+    $schema: "https://json.schemastore.org/sarif-2.1.0.json",
+    runs: [{
+      tool: { driver: { name: "CellFence", rules: [{ id: "CELLFENCE_PRIVATE_IMPORT" }] } },
+      invocations: [{ executionSuccessful: true }],
+      results: [{
+        ruleId: "CELLFENCE_PRIVATE_IMPORT",
+        level: "error",
+        message: { text: "private import" },
+        locations: [{ physicalLocation: { artifactLocation: { uri: "src/app%20%23%3F.ts" }, region: { startLine: 3 } } }],
+        partialFingerprints: { cellfence: "abc" },
+      }],
+    }],
+  };
+  const comparison = compareSarifToJson(checkResult, sarif);
+  assert.equal(comparison.status, "conformant", comparison.errors.join("\n"));
 });

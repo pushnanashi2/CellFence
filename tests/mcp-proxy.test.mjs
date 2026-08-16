@@ -497,7 +497,7 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.deepEqual(options.readTools, ["custom_read"]);
     assert.equal(options.auditLogPath, "audit.jsonl");
     assert.equal(options.downstreamCommand, process.execPath);
-    assert.deepEqual(options.downstreamArgs, ["-e", "setTimeout(()=>{}, 1)"]);
+    assert.deepEqual(options.downstreamArgs, ["--first", "--second", "-e", "setTimeout(()=>{}, 1)"]);
     assert.equal(options.downstreamCwd, rootDir);
     assert.equal(options.downstreamEnv.MOCK_MCP_LOG, "mock-log");
     assert.equal(options.downstreamEnv.EXTRA_SAFE, "safe");
@@ -561,23 +561,27 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(envOptions.downstreamFeaturePolicy, "allow");
     assert.deepEqual(envOptions.readTools, ["read_file", "inspect_file"]);
 
-    const separatorFallback = parseProxyArgs(["--"], {
-      CELLFENCE_AGENT: "fallback-agent",
-      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
-    });
-    assert.equal(separatorFallback.downstreamCommand, "fallback-cmd");
-
-    const missingRootValue = parseProxyArgs(["--root"], {
-      CELLFENCE_AGENT: "fallback-agent",
-      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
-    });
-    assert.equal(missingRootValue.rootDir, process.cwd());
-
-    const missingArgValue = parseProxyArgs(["--downstream-arg"], {
-      CELLFENCE_AGENT: "fallback-agent",
-      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
-    });
-    assert.deepEqual(missingArgValue.downstreamArgs, []);
+    assert.throws(
+      () => parseProxyArgs(["--"], {
+        CELLFENCE_AGENT: "fallback-agent",
+        CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
+      }),
+      /-- requires a value/,
+    );
+    assert.throws(
+      () => parseProxyArgs(["--root"], {
+        CELLFENCE_AGENT: "fallback-agent",
+        CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
+      }),
+      /--root requires a value/,
+    );
+    assert.throws(
+      () => parseProxyArgs(["--downstream-arg"], {
+        CELLFENCE_AGENT: "fallback-agent",
+        CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
+      }),
+      /--downstream-arg requires a value/,
+    );
 
     assert.equal(await main(["--help"], {}), 0);
     assert.equal(await main(["--mode=bad", "--agent=a", "--downstream-command=node"], {}), 2);
@@ -627,19 +631,20 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "not-tools.json"), "--agent=a", "--downstream-command=node"], {}), /tool config must be an object/);
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-read-tools.json"), "--agent=a", "--downstream-command=node"], {}), /readTools must be an array/);
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-policy.json"), "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy maybe/);
-    assert.throws(() => parseProxyArgs(["--tool-config", "--agent=a", "--downstream-command=node"], {}), /ENOENT|no such file/i);
-    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--tool-config"], {}), /ENOENT|no such file/i);
-    assert.throws(() => parseProxyArgs(["--write-tool", "", "--agent=a", "--downstream-command=node"], {}), /NAME=path|tool name/);
-    assert.throws(() => parseProxyArgs(["--read-tool", "", "--agent=a", "--downstream-command=node"], {}), /must include a tool name/);
+    assert.throws(() => parseProxyArgs(["--tool-config", "--agent=a", "--downstream-command=node"], {}), /--tool-config requires a value/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--tool-config"], {}), /--tool-config requires a value/);
+    assert.throws(() => parseProxyArgs(["--write-tool", "", "--agent=a", "--downstream-command=node"], {}), /--write-tool requires a value/);
+    assert.throws(() => parseProxyArgs(["--read-tool", "", "--agent=a", "--downstream-command=node"], {}), /--read-tool requires a value/);
     assert.throws(() => parseProxyArgs(["--unknown-tool-policy=maybe", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy maybe/);
-    assert.throws(() => parseProxyArgs(["--unknown-tool-policy", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
-    assert.throws(() => parseProxyArgs(["--unknown-tool-policy=", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
+    assert.throws(() => parseProxyArgs(["--unknown-tool-policy", "--agent=a", "--downstream-command=node"], {}), /--unknown-tool-policy requires a value/);
+    assert.throws(() => parseProxyArgs(["--unknown-tool-policy=", "--agent=a", "--downstream-command=node"], {}), /--unknown-tool-policy requires a value/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "" }), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--downstream-env=BAD-NAME"], {}), /invalid downstream env name BAD-NAME/);
     assert.throws(() => parseProxyArgs(["--downstream-feature-policy=maybe", "--agent=a", "--downstream-command=node"], {}), /invalid downstream feature policy maybe/);
-    assert.throws(() => parseProxyArgs(["--downstream-feature-policy", "--agent=a", "--downstream-command=node"], {}), /requires allow or deny/);
-    assert.throws(() => parseProxyArgs(["--agent"], { CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node" }), /missing --agent/);
-    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command"], {}), /missing --downstream-command/);
+    assert.throws(() => parseProxyArgs(["--downstream-feature-policy", "--agent=a", "--downstream-command=node"], {}), /--downstream-feature-policy requires a value/);
+    assert.throws(() => parseProxyArgs(["--downstream-feature-policy=", "--agent=a", "--downstream-command=node"], {}), /--downstream-feature-policy requires a value/);
+    assert.throws(() => parseProxyArgs(["--agent"], { CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node" }), /--agent requires a value/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command"], {}), /--downstream-command requires a value/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--unknown"], {}), /unknown argument --unknown/);
     assert.throws(() => parseProxyArgs(["--downstream-command=node"], {}), /missing --agent/);
     assert.throws(() => parseProxyArgs(["--agent=a"], {}), /missing --downstream-command/);

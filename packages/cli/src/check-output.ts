@@ -84,9 +84,20 @@ function findingLocation(finding: Finding): string {
 
 function markdownTableCell(value: unknown): string {
   return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/`/g, "&#96;")
+    .replace(/\[/g, "&#91;")
+    .replace(/\]/g, "&#93;")
     .replace(/\|/g, "\\|")
     .replace(/\r?\n/g, "<br>")
     .trim();
+}
+
+function sarifArtifactUri(filePath: string): string {
+  const normalized = filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+  return normalized.split("/").map((segment) => encodeURIComponent(segment)).join("/");
 }
 
 function formatCheckResultMarkdown(result: CheckResult, metadata: CheckRunMetadata): string {
@@ -151,7 +162,7 @@ function formatCheckResultSarif(result: CheckResult, metadata: CheckRunMetadata)
     if (finding.filePath) {
       sarifResult.locations = [{
         physicalLocation: {
-          artifactLocation: { uri: finding.filePath },
+          artifactLocation: { uri: sarifArtifactUri(finding.filePath) },
           ...(line ? { region: { startLine: line } } : {}),
         },
       }];

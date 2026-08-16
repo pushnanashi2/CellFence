@@ -9,6 +9,11 @@ import { detectBaselineChanges } from "../packages/engine/dist/index.js";
 import { runBaselineGateCommand } from "../packages/cli/dist/baseline-gate-command.js";
 import { runBaselineGateFull as runCliBaselineGateFull } from "../packages/cli/dist/baseline-gate-full.js";
 import { runBaselineGateFull } from "../packages/github-action-baseline-gate/dist/baseline-gate.js";
+import {
+  changedFileIsImplementation,
+  codeownersForPath,
+  loadCodeownersFromRepo,
+} from "../packages/github-action-baseline-gate/dist/codeowners.js";
 
 const root = process.cwd();
 const bundledActionEntrypoint = path.join(root, "packages/github-action-baseline-gate/dist/index.js");
@@ -464,6 +469,66 @@ test("bundled github action baseline gate fails outside pull request events", ()
   assert.match(`${result.stdout}\n${result.stderr}`, /requires a pull_request event/);
 });
 
+test("baseline gate action resolves CODEOWNERS globs with last match winning", () => {
+  const owners = codeownersForPath([
+    "* @fallback",
+    ".cellfence/baselines/*.baseline.json @baseline-owner",
+    ".cellfence/baselines/cellfence.baseline.json @specific-owner",
+    "",
+  ].join("\n"), ".cellfence/baselines/cellfence.baseline.json");
+  assert.deepEqual(owners, ["@specific-owner"]);
+  assert.deepEqual(
+    codeownersForPath("docs/ @docs-owner\n", "docs/design/cell.md"),
+    ["@docs-owner"],
+  );
+});
+
+test("baseline gate action treats the first existing CODEOWNERS file as authoritative", async () => {
+  const calls = [];
+  const contents = new Map([
+    [".github/CODEOWNERS", "src/** @source-owner\n"],
+    ["CODEOWNERS", ".cellfence/baselines/*.baseline.json @stale-baseline-owner\n"],
+  ]);
+  const octokit = {
+    rest: {
+      repos: {
+        getContent: async ({ path: codeownersPath }) => {
+          calls.push(codeownersPath);
+          if (!contents.has(codeownersPath)) {
+            const error = new Error("not found");
+            error.status = 404;
+            throw error;
+          }
+          return {
+            data: {
+              content: Buffer.from(contents.get(codeownersPath), "utf8").toString("base64"),
+            },
+          };
+        },
+      },
+    },
+  };
+  const owners = await loadCodeownersFromRepo(
+    octokit,
+    "owner",
+    "repo",
+    ".cellfence/baselines/cellfence.baseline.json",
+    "base-sha",
+  );
+  assert.deepEqual(owners, []);
+  assert.deepEqual(calls, [".github/CODEOWNERS"]);
+});
+
+test("baseline gate action classifies only source-like files as implementation changes", () => {
+  const baselineFile = ".cellfence/baselines/cellfence.baseline.json";
+  assert.equal(changedFileIsImplementation("src/app.ts", baselineFile), true);
+  assert.equal(changedFileIsImplementation("scripts/release.sh", baselineFile), true);
+  assert.equal(changedFileIsImplementation(baselineFile, baselineFile), false);
+  assert.equal(changedFileIsImplementation(".github/workflows/ci.yml", baselineFile), false);
+  assert.equal(changedFileIsImplementation("package-lock.json", baselineFile), false);
+  assert.equal(changedFileIsImplementation("README.md", baselineFile), false);
+});
+
 test("runBaselineGateCommand preserves skipped-cell fail-closed state", () => {
   const baseBaseline = makeBaseline();
   const headBaseline = makeBaseline();
@@ -493,6 +558,7 @@ test("detectBaselineChanges flags artifact contract changes", () => {
 
 test("baseline gate action metadata declares every source input", () => {
   const source = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/src/index.ts"), "utf8");
+  const codeownersSource = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/src/codeowners.ts"), "utf8");
   const actionYaml = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/action.yml"), "utf8");
   const sourceMatch = /const ACTION_METADATA_INPUT_NAMES = \[([\s\S]*?)\] as const;/m.exec(source);
   assert.ok(sourceMatch, "ACTION_METADATA_INPUT_NAMES missing");
@@ -509,15 +575,15 @@ test("baseline gate action metadata declares every source input", () => {
   assert.match(source, /core\.getInput\("github-token", \{ required: true \}\)/);
   assert.match(source, /parseBooleanInput\("fail-on-mixed-pr", true\)/);
   assert.match(actionYaml, /fail-on-mixed-pr:\r?\n\s+description: "When `require-separate-pr` is true, exit non-zero if the PR mixes baseline and implementation changes\."\r?\n\s+required: false\r?\n\s+default: "true"/);
-  assert.match(source, /baseline-codeowners currently supports GitHub usernames only/);
-  assert.match(source, /repos\.getContent\(\{ owner, repo, path: codeownersPath, ref \}\)/);
+  assert.match(codeownersSource, /baseline-codeowners currently supports GitHub usernames only/);
+  assert.match(codeownersSource, /repos\.getContent\(\{ owner, repo, path: codeownersPath, ref \}\)/);
   assert.match(source, /loadCodeownersFromRepo\(octokit, context\.repo\.owner, context\.repo\.repo, baselineFile, baseSha\)/);
   assert.match(source, /assertPullRequestRevision\(octokit, owner, repo, pullNumber, expectedBaseSha, expectedHeadSha\)/);
   assert.match(source, /review\.state === "APPROVED" && review\.commitId === headSha/);
   assert.doesNotMatch(source, /codeowners\.length === 0\)\s*return true/);
   assert.match(source, /codeowners\.length === 0\)\s*return false/);
-  assert.match(source, /function changedFileIsBaseline\(name: string, baselineFile: string\): boolean/);
-  assert.match(source, /if \(changedFileIsBaseline\(normalized, baselineFile\)\) return false/);
+  assert.match(codeownersSource, /function changedFileIsBaseline\(name: string, baselineFile: string\): boolean/);
+  assert.match(codeownersSource, /if \(changedFileIsBaseline\(normalized, baselineFile\)\) return false/);
   assert.match(source, /mode === "create"/);
   assert.match(source, /removeLabelIfPresent/);
 });

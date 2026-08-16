@@ -6,13 +6,17 @@ function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function stableKeyCompare(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 export function stableCanonicalJson(value: unknown): string {
   if (value === null) return "null";
   if (Array.isArray(value)) return `[${value.map((item) => stableCanonicalJson(item)).join(",")}]`;
   if (isJsonObject(value)) {
     const entries = Object.entries(value)
       .filter((entry) => entry[1] !== undefined)
-      .sort((left, right) => left[0].localeCompare(right[0]))
+      .sort(([left], [right]) => stableKeyCompare(left, right))
       .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableCanonicalJson(entryValue)}`);
     return `{${entries.join(",")}}`;
   }

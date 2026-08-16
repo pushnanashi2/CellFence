@@ -123,6 +123,18 @@ test("governance canonicalization is stable across object order and JSON primiti
   assert.equal(stableDigest({ b: 2, a: 1 }), stableDigest({ a: 1, b: 2 }));
 });
 
+test("governance canonicalization does not depend on localeCompare", () => {
+  const originalLocaleCompare = String.prototype.localeCompare;
+  try {
+    String.prototype.localeCompare = () => {
+      throw new Error("localeCompare must not be used for canonical JSON");
+    };
+    assert.equal(stableCanonicalJson({ b: 2, a: 1, "á": 3 }), "{\"a\":1,\"b\":2,\"á\":3}");
+  } finally {
+    String.prototype.localeCompare = originalLocaleCompare;
+  }
+});
+
 test("subject snapshot digest is deterministic and integrity checked", () => {
   const first = createSubjectSnapshotFromFiles([
     { path: "src\\b.ts", role: "source", content: "export const b = 2;\n" },

@@ -47,10 +47,6 @@ let installed = false;
 let flushed = false;
 let flushHooksRegistered = false;
 
-export function traceDiagnostics(): { installed: boolean; flushHooksRegistered: boolean } {
-  return { installed, flushHooksRegistered };
-}
-
 function normalizeSelector(selector: fs.PathOrFileDescriptor): string | undefined {
   if (typeof selector === "number") return undefined;
   const text = selector instanceof URL ? selector.pathname : selector.toString();
@@ -203,6 +199,7 @@ function registerFlushHooks(): void {
 
 export function installTrace(): void {
   if (installed || process.env.CELLFENCE_TRACE_DISABLE === "1") return;
+  // Stryker disable next-line BooleanLiteral: repeated installs reassign wrappers from immutable originals, so flipping this guard assignment is observationally equivalent.
   installed = true;
   registerFlushHooks();
 
@@ -247,7 +244,9 @@ export function installTrace(): void {
 }
 
 function importSpecifierTargetsThisModule(specifier: string): boolean {
+  // Stryker disable all: package-specifier preload is exercised through subprocess resolution, which Stryker cannot reliably bind to the mutated sandbox copy.
   if (specifier === "@cellfence/trace") return true;
+  // Stryker restore all
   try {
     if (path.resolve(fileURLToPath(specifier)) === path.resolve(fileURLToPath(import.meta.url))) return true;
   } catch {
@@ -269,11 +268,6 @@ function preloadRequestedThisModule(execArgv: readonly string[] = process.execAr
   }
   return false;
 }
-
-export const __testing = {
-  importSpecifierTargetsThisModule,
-  preloadRequestedThisModule,
-};
 
 if (process.env.CELLFENCE_TRACE_AUTO_INSTALL === "1" || preloadRequestedThisModule()) installTrace();
 

@@ -67,6 +67,13 @@ type ToolConfigPatch = {
   unknownToolPolicy?: UnknownToolPolicy;
 };
 
+class HelpRequested extends Error {
+  constructor() {
+    super(usage());
+    this.name = "HelpRequested";
+  }
+}
+
 type AuditDecision = "allow" | "deny" | "dry-run-deny" | "off";
 
 type AuditEvent = {
@@ -78,7 +85,7 @@ type AuditEvent = {
   reason: string;
 };
 
-export const DEFAULT_AUDIT_LOG_MAX_BYTES = 10 * 1024 * 1024;
+const DEFAULT_AUDIT_LOG_MAX_BYTES = 10 * 1024 * 1024;
 
 type ToolDecision = {
   shouldForward: boolean;
@@ -307,6 +314,24 @@ function parseReadTool(value: string | undefined): string {
   return tool;
 }
 
+function requireProxyOptionValue(argv: string[], index: number, optionName: string): string {
+  const value = argv[index + 1];
+  if (!value || value.startsWith("--")) throw new Error(`${optionName} requires a value`);
+  return value;
+}
+
+function requireProxyOptionToken(argv: string[], index: number, optionName: string): string {
+  const value = argv[index + 1];
+  if (value === undefined) throw new Error(`${optionName} requires a value`);
+  return value;
+}
+
+function requireInlineProxyOptionValue(argument: string, prefix: string, optionName: string): string {
+  const value = argument.slice(prefix.length);
+  if (!value) throw new Error(`${optionName} requires a value`);
+  return value;
+}
+
 export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.env): ProxyOptions {
   let rootDir = process.cwd();
   let manifestPath: string | undefined;
@@ -334,100 +359,97 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--") {
-      downstreamCommand = argv[index + 1] || downstreamCommand;
-      downstreamArgs = argv.slice(index + 2);
+      downstreamCommand = requireProxyOptionValue(argv, index, "--");
+      downstreamArgs = [...downstreamArgs, ...argv.slice(index + 2)];
       break;
     } else if (argument === "--help" || argument === "-h") {
-      throw new Error(usage());
+      throw new HelpRequested();
     } else if (argument === "--root") {
-      rootDir = argv[index + 1] || "";
+      rootDir = requireProxyOptionValue(argv, index, "--root");
       index += 1;
     } else if (argument.startsWith("--root=")) {
-      rootDir = argument.slice("--root=".length);
+      rootDir = requireInlineProxyOptionValue(argument, "--root=", "--root");
     } else if (argument === "--manifest") {
-      manifestPath = argv[index + 1];
+      manifestPath = requireProxyOptionValue(argv, index, "--manifest");
       index += 1;
     } else if (argument.startsWith("--manifest=")) {
-      manifestPath = argument.slice("--manifest=".length);
+      manifestPath = requireInlineProxyOptionValue(argument, "--manifest=", "--manifest");
     } else if (argument === "--claims") {
-      claimsPath = argv[index + 1];
+      claimsPath = requireProxyOptionValue(argv, index, "--claims");
       index += 1;
     } else if (argument.startsWith("--claims=")) {
-      claimsPath = argument.slice("--claims=".length);
+      claimsPath = requireInlineProxyOptionValue(argument, "--claims=", "--claims");
     } else if (argument === "--agent") {
-      agent = argv[index + 1] || "";
+      agent = requireProxyOptionValue(argv, index, "--agent");
       index += 1;
     } else if (argument.startsWith("--agent=")) {
-      agent = argument.slice("--agent=".length);
+      agent = requireInlineProxyOptionValue(argument, "--agent=", "--agent");
     } else if (argument === "--mode") {
-      mode = parseMode(argv[index + 1]);
+      mode = parseMode(requireProxyOptionValue(argv, index, "--mode"));
       index += 1;
     } else if (argument.startsWith("--mode=")) {
-      mode = parseMode(argument.slice("--mode=".length));
+      mode = parseMode(requireInlineProxyOptionValue(argument, "--mode=", "--mode"));
     } else if (argument === "--fail-mode") {
-      failMode = parseFailMode(argv[index + 1]);
+      failMode = parseFailMode(requireProxyOptionValue(argv, index, "--fail-mode"));
       index += 1;
     } else if (argument.startsWith("--fail-mode=")) {
-      failMode = parseFailMode(argument.slice("--fail-mode=".length));
+      failMode = parseFailMode(requireInlineProxyOptionValue(argument, "--fail-mode=", "--fail-mode"));
     } else if (argument === "--unknown-tool-policy") {
-      const value = argv[index + 1];
-      unknownToolPolicy = parseUnknownToolPolicy(value && !value.startsWith("--") ? value : undefined);
+      unknownToolPolicy = parseUnknownToolPolicy(requireProxyOptionValue(argv, index, "--unknown-tool-policy"));
       index += 1;
     } else if (argument.startsWith("--unknown-tool-policy=")) {
-      unknownToolPolicy = parseUnknownToolPolicy(argument.slice("--unknown-tool-policy=".length));
+      unknownToolPolicy = parseUnknownToolPolicy(requireInlineProxyOptionValue(argument, "--unknown-tool-policy=", "--unknown-tool-policy"));
     } else if (argument === "--audit-log") {
-      auditLogPath = argv[index + 1];
+      auditLogPath = requireProxyOptionValue(argv, index, "--audit-log");
       index += 1;
     } else if (argument.startsWith("--audit-log=")) {
-      auditLogPath = argument.slice("--audit-log=".length);
+      auditLogPath = requireInlineProxyOptionValue(argument, "--audit-log=", "--audit-log");
     } else if (argument === "--tool-config") {
-      const config = readToolConfig(argv[index + 1] || "");
+      const config = readToolConfig(requireProxyOptionValue(argv, index, "--tool-config"));
       writeTools = mergeWriteToolConfig(writeTools, config.writeTools);
       readTools = mergeReadTools(readTools, config.readTools);
       unknownToolPolicy = config.unknownToolPolicy ?? unknownToolPolicy;
       index += 1;
     } else if (argument.startsWith("--tool-config=")) {
-      const config = readToolConfig(argument.slice("--tool-config=".length));
+      const config = readToolConfig(requireInlineProxyOptionValue(argument, "--tool-config=", "--tool-config"));
       writeTools = mergeWriteToolConfig(writeTools, config.writeTools);
       readTools = mergeReadTools(readTools, config.readTools);
       unknownToolPolicy = config.unknownToolPolicy ?? unknownToolPolicy;
     } else if (argument === "--write-tool") {
-      writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(argv[index + 1] || ""));
+      writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(requireProxyOptionValue(argv, index, "--write-tool")));
       index += 1;
     } else if (argument.startsWith("--write-tool=")) {
-      writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(argument.slice("--write-tool=".length)));
+      writeTools = mergeWriteToolConfig(writeTools, parseWriteToolOverride(requireInlineProxyOptionValue(argument, "--write-tool=", "--write-tool")));
     } else if (argument === "--read-tool") {
-      readTools = mergeReadTools(readTools, [parseReadTool(argv[index + 1])]);
+      readTools = mergeReadTools(readTools, [parseReadTool(requireProxyOptionValue(argv, index, "--read-tool"))]);
       index += 1;
     } else if (argument.startsWith("--read-tool=")) {
-      readTools = mergeReadTools(readTools, [parseReadTool(argument.slice("--read-tool=".length))]);
+      readTools = mergeReadTools(readTools, [parseReadTool(requireInlineProxyOptionValue(argument, "--read-tool=", "--read-tool"))]);
     } else if (argument === "--downstream-feature-policy") {
-      const value = argv[index + 1];
-      if (!value || value.startsWith("--")) throw new Error("--downstream-feature-policy requires allow or deny");
-      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(value);
+      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(requireProxyOptionValue(argv, index, "--downstream-feature-policy"));
       index += 1;
     } else if (argument.startsWith("--downstream-feature-policy=")) {
-      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(argument.slice("--downstream-feature-policy=".length));
+      downstreamFeaturePolicy = parseDownstreamFeaturePolicy(requireInlineProxyOptionValue(argument, "--downstream-feature-policy=", "--downstream-feature-policy"));
     } else if (argument === "--downstream-command") {
-      downstreamCommand = argv[index + 1] || "";
+      downstreamCommand = requireProxyOptionValue(argv, index, "--downstream-command");
       index += 1;
     } else if (argument.startsWith("--downstream-command=")) {
-      downstreamCommand = argument.slice("--downstream-command=".length);
+      downstreamCommand = requireInlineProxyOptionValue(argument, "--downstream-command=", "--downstream-command");
     } else if (argument === "--downstream-arg") {
-      downstreamArgs.push(argv[index + 1] || "");
+      downstreamArgs.push(requireProxyOptionToken(argv, index, "--downstream-arg"));
       index += 1;
     } else if (argument.startsWith("--downstream-arg=")) {
-      downstreamArgs.push(argument.slice("--downstream-arg=".length));
+      downstreamArgs.push(requireInlineProxyOptionValue(argument, "--downstream-arg=", "--downstream-arg"));
     } else if (argument === "--downstream-cwd") {
-      downstreamCwd = argv[index + 1];
+      downstreamCwd = requireProxyOptionValue(argv, index, "--downstream-cwd");
       index += 1;
     } else if (argument.startsWith("--downstream-cwd=")) {
-      downstreamCwd = argument.slice("--downstream-cwd=".length);
+      downstreamCwd = requireInlineProxyOptionValue(argument, "--downstream-cwd=", "--downstream-cwd");
     } else if (argument === "--downstream-env") {
-      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(argv[index + 1])];
+      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(requireProxyOptionValue(argv, index, "--downstream-env"))];
       index += 1;
     } else if (argument.startsWith("--downstream-env=")) {
-      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(argument.slice("--downstream-env=".length))];
+      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(requireInlineProxyOptionValue(argument, "--downstream-env=", "--downstream-env"))];
     } else if (argument === "--allow-cwd-mismatch") {
       allowCwdMismatch = true;
     } else {
@@ -588,7 +610,7 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
   }
 }
 
-export async function decideToolCallAsync(options: ProxyOptions, toolName: string, args: unknown): Promise<ToolDecision> {
+async function decideToolCallAsync(options: ProxyOptions, toolName: string, args: unknown): Promise<ToolDecision> {
   const paths = pathsForToolCall(toolName, args, options.writeTools);
   if (options.mode === "off") {
     return { shouldForward: true, auditDecision: "off", paths: paths || [], reason: "guard disabled" };
@@ -904,7 +926,7 @@ export async function main(argv = process.argv.slice(2), env = process.env): Pro
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.startsWith("CellFence MCP runtime guard")) {
+    if (error instanceof HelpRequested) {
       console.log(message);
       return 0;
     }
