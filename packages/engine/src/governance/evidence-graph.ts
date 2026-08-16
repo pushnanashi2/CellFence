@@ -1,4 +1,4 @@
-import { stableCanonicalJson, stableDigest } from "./canonicalization.js";
+import { stableCanonicalJson, stableDigest, stableStringCompare } from "./canonicalization.js";
 import type {
   EvidenceAssessment,
   EvidenceDefect,
@@ -140,7 +140,7 @@ function stringDetailSubjects(details: Record<string, unknown> | undefined): Fin
 }
 
 function compareWitnessSubjects(left: FindingWitnessSubject, right: FindingWitnessSubject): number {
-  return `${left.kind}:${left.key}:${left.value}`.localeCompare(`${right.kind}:${right.key}:${right.value}`);
+  return stableStringCompare(`${left.kind}:${left.key}:${left.value}`, `${right.kind}:${right.key}:${right.value}`);
 }
 
 function sortedWitnessSubjects(subjects: readonly FindingWitnessSubject[]): FindingWitnessSubject[] {
@@ -250,9 +250,9 @@ export function createEvidenceGraph<TFinding extends GovernanceFinding>(input: E
   return {
     schemaVersion: "cellfence.evidence-graph.v1",
     snapshotDigest: input.snapshot.snapshotDigest,
-    nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
-    edges: [...edges.values()].sort((left, right) => `${left.from}:${left.to}:${left.kind}:${left.label}`.localeCompare(`${right.from}:${right.to}:${right.kind}:${right.label}`)),
+    nodes: [...nodes.values()].sort((left, right) => stableStringCompare(left.id, right.id)),
+    edges: [...edges.values()].sort((left, right) => stableStringCompare(`${left.from}:${left.to}:${left.kind}:${left.label}`, `${right.from}:${right.to}:${right.kind}:${right.label}`)),
     findingWitnesses: findingWitnesses.sort((left, right) =>
-      witnessSortKey(left).localeCompare(witnessSortKey(right))),
+      stableStringCompare(witnessSortKey(left), witnessSortKey(right))),
   };
 }

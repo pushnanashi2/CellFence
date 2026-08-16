@@ -16,6 +16,7 @@ import type {
   PluginRepositoryModel,
   PluginResourceAccess,
 } from "./types.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
 function allSourceFilesByCell(context: AnalysisContext): Record<string, readonly string[]> {
   const byCell: Record<string, readonly string[]> = {};
@@ -60,8 +61,10 @@ function flattenResourceAccesses(accessesByCell: Map<string, ResourceAccessRefer
     for (const access of cellAccesses) accesses.push(resourceAccessForPlugin(cellId, access));
   }
   return accesses.sort((left, right) =>
-    `${left.cellId}:${left.kind}:${left.access}:${left.selector}:${left.filePath}:${left.line}`
-      .localeCompare(`${right.cellId}:${right.kind}:${right.access}:${right.selector}:${right.filePath}:${right.line}`));
+    stableStringCompare(
+      `${left.cellId}:${left.kind}:${left.access}:${left.selector}:${left.filePath}:${left.line}`,
+      `${right.cellId}:${right.kind}:${right.access}:${right.selector}:${right.filePath}:${right.line}`,
+    ));
 }
 
 export function createRepositoryModel(

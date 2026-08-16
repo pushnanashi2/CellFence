@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
@@ -118,9 +119,11 @@ function checkFixture(relativePath, options = {}) {
 
 test("governance canonicalization is stable across object order and JSON primitive shapes", () => {
   assert.equal(stableCanonicalJson({ b: 2, a: 1, skipped: undefined }), "{\"a\":1,\"b\":2}");
-  assert.equal(stableCanonicalJson([null, "x", true, 3]), "[null,\"x\",true,3]");
+  assert.equal(stableCanonicalJson([null, "x", true, 3, undefined]), "[null,\"x\",true,3,null]");
   assert.equal(stableCanonicalJson(null), "null");
   assert.equal(stableDigest({ b: 2, a: 1 }), stableDigest({ a: 1, b: 2 }));
+  assert.throws(() => stableCanonicalJson(new Map()), /plain objects/);
+  assert.throws(() => stableCanonicalJson(new Date("2026-01-01T00:00:00Z")), /plain objects/);
 });
 
 test("governance canonicalization does not depend on localeCompare", () => {
@@ -811,6 +814,39 @@ test("checkRepository can return an opt-in evidence graph with finding witnesses
     && witness.filePath === "src/consumer/public.ts"
     && witness.subjects.some((subject) => subject.kind === "detail" && subject.key === "targetPath")));
   assert.equal(checkFixture("invalid/private-cross-cell-import").evidenceGraph, undefined);
+});
+
+test("checkRepository flags governed directory symlinks even when the link has no source extension", { skip: process.platform === "win32" }, () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-dir-symlink-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-dir-symlink-target-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/core/public.ts"), "export const api = true;\n");
+    fs.writeFileSync(path.join(outsideDir, "backdoor.ts"), "export const backdoor = true;\n");
+    fs.symlinkSync(outsideDir, path.join(rootDir, "src/core/shadow"), "dir");
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        requireOwnership: true,
+        include: ["src/**/*.ts"],
+      },
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["api"],
+      }],
+    });
+
+    const result = checkRepository({ rootDir });
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP"
+      && finding.filePath === "src/core/shadow"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  }
 });
 
 test("pure evaluator dependency closure excludes filesystem, process, git, and compiler imports", () => {

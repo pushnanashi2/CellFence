@@ -8,10 +8,14 @@ import type {
   RuleResult,
 } from "./model.js";
 
+function stableStringCompare(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 const EVIDENCE_RULE_ID = "CELLFENCE_EVIDENCE_COVERAGE";
 
 function uniqueSorted(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
+  return [...new Set(values)].sort(stableStringCompare);
 }
 
 function ruleResultsForFindings<TFinding extends GovernanceFinding>(findings: TFinding[]): RuleResult[] {

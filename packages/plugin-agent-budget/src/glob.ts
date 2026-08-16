@@ -34,6 +34,21 @@ import path from "node:path";
 
 const MATCHER_CACHE = new Map<string, (pathSegments: string[]) => boolean>();
 
+export function normalizeGlobPattern(pattern: string): string {
+  const slashPattern = pattern.split("\\").join("/");
+  const normalized = path.posix.normalize(slashPattern).replace(/^\.\/+/, "");
+  if (normalized === ".") return "";
+  return normalized.replace(/\/+$/, "");
+}
+
+export function expandedGlobPatterns(pattern: string): string[] {
+  const slashPattern = pattern.split("\\").join("/");
+  const normalized = normalizeGlobPattern(pattern);
+  const hadTrailingSlash = /\/+$/.test(slashPattern);
+  if (!hadTrailingSlash || normalized === "" || normalized === "**" || normalized.endsWith("/**")) return [normalized];
+  return [normalized, `${normalized}/**`];
+}
+
 function escapeRegExp(text: string): string {
   return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
@@ -58,8 +73,7 @@ function collapseAdjacentGlobstars(segments: string[]): string[] {
 }
 
 function buildMatcher(pattern: string): (pathSegments: string[]) => boolean {
-  const normalized = pattern.split("\\").join("/").replace(/\/+$/, "");
-  const collapsed = collapseAdjacentGlobstars(normalized.split("/"));
+  const collapsed = collapseAdjacentGlobstars(pattern.split("/"));
   if (collapsed.length === 0) return () => true;
 
   const compiled = collapsed.map((segment) => ({
@@ -134,8 +148,8 @@ export function matchesGlobPattern(relativePath: string, pattern: string): boole
   // Normalise both backslashes and the platform separator so Windows
   // style paths ("src\\core\\a.ts") and POSIX style paths match the
   // same set of patterns.
-  const normalizedPath = relativePath.split("\\").join("/").split(path.sep).join("/");
-  return compilePattern(pattern)(normalizedPath.split("/"));
+  const normalizedPath = normalizeGlobPattern(relativePath.split(path.sep).join("/"));
+  return expandedGlobPatterns(pattern).some((expandedPattern) => compilePattern(expandedPattern)(normalizedPath.split("/")));
 }
 
 export function clearGlobMatcherCache(): void {

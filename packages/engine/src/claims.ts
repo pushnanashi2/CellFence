@@ -16,7 +16,7 @@ import {
   repoPath,
 } from "./file-index.js";
 import { pathPatternsOverlap } from "./glob-overlap.js";
-import { stableCanonicalJson } from "./governance/canonicalization.js";
+import { stableCanonicalJson, stableStringCompare } from "./governance/canonicalization.js";
 import { readJsonFile } from "./json-file.js";
 import {
   type ClaimStoreBackend,
@@ -81,7 +81,7 @@ function claimConfigurationFailure(message: string, claimsPath = ""): ClaimCheck
 
 function sortedUnique(values: readonly string[] | undefined): string[] {
   return [...new Set((values || []).map((value) => normalizePath(String(value).trim())).filter(Boolean))]
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function claimStorePath(rootDir: string, claimsPath: string | undefined): string {
@@ -470,7 +470,7 @@ function writeClaimStore(filePath: string, claims: CellFenceClaim[], backend?: C
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const store: CellFenceClaimStore = {
     schemaVersion: "cellfence.claims.v1",
-    claims: [...claims].sort((left, right) => left.id.localeCompare(right.id)),
+    claims: [...claims].sort((left, right) => stableStringCompare(left.id, right.id)),
   };
   const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
   fs.writeFileSync(temporaryPath, `${JSON.stringify(store, null, 2)}\n`, { flag: "wx" });
@@ -550,7 +550,7 @@ function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim, cont
       }
     }
   }
-  return [...new Set(surfaces)].sort((first, second) => first.localeCompare(second));
+  return [...new Set(surfaces)].sort();
 }
 
 function ownedPathPrefixesFor(
@@ -658,7 +658,7 @@ function workingTreeChangedFiles(rootDir: string, dependencies: ClaimOperationDe
   dependencies.assertGitCommit(rootDir, "HEAD");
   add(["diff", "--name-only", "--diff-filter=ACMRDT", "--end-of-options", "HEAD"]);
   add(["ls-files", "--others", "--exclude-standard"]);
-  return [...files].sort((left, right) => left.localeCompare(right));
+  return [...files].sort();
 }
 
 function changedFilesForClaimCheck(rootDir: string, options: ClaimCheckOptions, dependencies: ClaimOperationDependencies): string[] {

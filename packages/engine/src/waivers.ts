@@ -7,7 +7,7 @@ import { validateManifest } from "@cellfence/schema";
 import { CORE_REQUIRED_RULES, DEFAULT_MANIFEST_PATH } from "./constants.js";
 import { daysBetween, isIsoDate, todayIsoDate } from "./dates.js";
 import { readJsonFile } from "./json-file.js";
-import { sourceFilesForCell, normalizePath, repoPath } from "./file-index.js";
+import { sourceFilesForCell, normalizePath, readSourceText, repoPath } from "./file-index.js";
 import { createContext } from "./analysis-context.js";
 import { execCommandSync } from "./command-execution.js";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
@@ -79,7 +79,8 @@ function parseWaiverFields(suffix: string): Map<string, string> {
     const key = match[1];
     const valueStart = (match.index ?? 0) + match[0].length;
     const valueEnd = index + 1 < matches.length ? matches[index + 1].index ?? suffix.length : suffix.length;
-    const value = suffix.slice(valueStart, valueEnd).trim().replace(/\s*\*\/\s*$/, "").trim();
+    let value = suffix.slice(valueStart, valueEnd).trim().replace(/\s*\*\/\s*$/, "").trim();
+    if (key !== "reason") value = value.replace(/[,;]+$/, "");
     if (value && !fields.has(key)) fields.set(key, value);
   }
   return fields;
@@ -342,7 +343,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   }
   if (attestationValidation) errors.push(...attestationValidation.errors);
   const expired = Boolean(expiresAt) && Date.parse(expiresAt) < Date.now();
-  if (expired) errors.push("waiver is expired");
+  if (expired && !errors.includes("waiver is expired")) errors.push("waiver is expired");
   const untrustedApprover = Boolean(attestationValidation?.untrustedApprover);
   return {
     ruleId,
@@ -361,18 +362,17 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
   };
 }
 
-function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): string[] {
-  const context = createContext(rootDir, manifest);
+function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest, context = createContext(rootDir, manifest)): string[] {
   const files = new Set<string>();
   for (const cell of manifest.cells) {
     for (const sourceFile of sourceFilesForCell(rootDir, cell, context)) {
       files.add(sourceFile);
     }
   }
-  return [...files].sort((left, right) => left.localeCompare(right));
+  return [...files].sort();
 }
 
-export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest, findings?: Finding[]): CellFenceWaiver[] {
+export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest, findings?: Finding[], context = createContext(rootDir, manifest)): CellFenceWaiver[] {
   // 0.4.0: cells that opt out of waiver parsing (waiverParsing === false)
   // keep ownership of their files but their // cellfence-ignore directives
   // are not interpreted as waivers. This is the escape hatch for cells that
@@ -399,10 +399,9 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
   }
   const skipFiles = new Set<string>();
   if (skipCells.size > 0) {
-    const ctx = createContext(rootDir, manifest);
     for (const cell of manifest.cells) {
       if (!skipCells.has(cell.id)) continue;
-      for (const file of sourceFilesForCell(rootDir, cell, ctx)) {
+      for (const file of sourceFilesForCell(rootDir, cell, context)) {
         skipFiles.add(file);
       }
     }
@@ -413,9 +412,9 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
     ...CORE_REQUIRED_RULES,
     ...(manifest.governance?.requiredRules || []),
   ]);
-  for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
+  for (const sourceFile of sourceFilesForManifest(rootDir, manifest, context)) {
     if (skipFiles.has(sourceFile)) continue;
-    const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
+    const lines = readSourceText(context, sourceFile).split(/\r?\n/);
     for (const [index, line] of lines.entries()) {
       const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line, attestations);
       if (!waiver) continue;
@@ -476,7 +475,7 @@ export function applyWaiversToFindings(
   findings: Finding[],
   warnings: Finding[],
 ): { findings: Finding[]; warnings: Finding[] } {
-  const waivers = collectWaiversForManifest(context.rootDir, context.manifest);
+  const waivers = collectWaiversForManifest(context.rootDir, context.manifest, undefined, context);
   const validWaivers = waivers.filter((waiver) => waiver.valid);
   const waiverFindings = waivers
     .filter((waiver) => !waiver.valid)
@@ -512,6 +511,20 @@ export function applyWaiversToFindings(
       });
     }
   }
+  const activeDiagnostics = [...findings, ...warnings];
+  const waiverWarnings = validWaivers
+    .filter((waiver) => !activeDiagnostics.some((finding) => waiverMatchesFinding(waiver, finding)))
+    .map((waiver): Finding => ({
+      ruleId: "CELLFENCE_WAIVER_UNUSED",
+      severity: "warning",
+      filePath: waiver.filePath,
+      message: `CellFence waiver at line ${waiver.line} did not match any active finding`,
+      details: {
+        line: waiver.line,
+        ruleId: waiver.ruleId,
+        attestationId: waiver.attestationId,
+      },
+    }));
 
   const requiredRules = new Set<string>([
     ...CORE_REQUIRED_RULES,
@@ -522,6 +535,6 @@ export function applyWaiversToFindings(
     && validWaivers.some((waiver) => waiverMatchesFinding(waiver, finding));
   return {
     findings: [...findings.filter((finding) => !isWaived(finding)), ...waiverFindings],
-    warnings: warnings.filter((warning) => !isWaived(warning)),
+    warnings: [...warnings.filter((warning) => !isWaived(warning)), ...waiverWarnings],
   };
 }

@@ -8,10 +8,12 @@ import {
 } from "@cellfence/schema";
 import {
   listFiles,
+  isSourceFilePath,
   matchesPattern,
   normalizePath,
   repoPath,
   SOURCE_EXTENSIONS,
+  sourceExtensionForPath,
   type FileIndexContext,
 } from "./file-index.js";
 import {
@@ -24,6 +26,7 @@ import {
   resolvePathAliasTarget,
   resolveRelativeImport,
 } from "./module-resolution.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 import { prewarmPythonInspections } from "./python-analysis.js";
 
 type CellCandidate = {
@@ -199,7 +202,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function sourceFiles(rootDir: string): string[] {
-  return listFiles(rootDir).filter((filePath) => SOURCE_EXTENSIONS.includes(path.extname(filePath)));
+  return listFiles(rootDir).filter((filePath) => isSourceFilePath(filePath));
 }
 
 function hasSourceFiles(rootDir: string, relativeRoot: string, scope?: InferManifestScope): boolean {
@@ -216,7 +219,7 @@ function sourceFilesInRoot(rootDir: string, relativeRoot: string, scope?: InferM
     .map((filePath) => repoPath(rootDir, filePath))
     .filter((relativePath) => matchesPattern(relativePath, pattern))
     .filter((relativePath) => !pathExcludedByScope(scope, relativePath))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function sourceFilesDirectlyUnder(rootDir: string, relativeRoot: string, scope?: InferManifestScope): string[] {
@@ -225,7 +228,7 @@ function sourceFilesDirectlyUnder(rootDir: string, relativeRoot: string, scope?:
     .map((filePath) => repoPath(rootDir, filePath))
     .filter((relativePath) => path.posix.dirname(relativePath) === normalizedRoot)
     .filter((relativePath) => !pathExcludedByScope(scope, relativePath))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function directoryChildrenWithSources(rootDir: string, relativeRoot: string, scope?: InferManifestScope): string[] {
@@ -235,7 +238,7 @@ function directoryChildrenWithSources(rootDir: string, relativeRoot: string, sco
     .filter((entry) => entry.isDirectory())
     .map((entry) => normalizePath(path.posix.join(relativeRoot, entry.name)))
     .filter((childRoot) => hasSourceFiles(rootDir, childRoot, scope))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function packageNameFromRoot(rootDir: string, relativeRoot: string): string | undefined {
@@ -422,7 +425,7 @@ function pythonPackagingSourceRoots(rootDir: string): string[] {
   for (const root of pythonSourceRootsFromSetupPy(rootDir)) addPythonSourceRoot(roots, root);
   if (fs.existsSync(path.join(rootDir, "src")) && fs.statSync(path.join(rootDir, "src")).isDirectory()) roots.add("src");
   roots.add("");
-  return [...roots].sort((left, right) => left.localeCompare(right));
+  return [...roots].sort();
 }
 
 function pythonProjectName(rootDir: string): string | undefined {
@@ -445,7 +448,7 @@ function workspacePatterns(rootDir: string): string[] {
     }
   }
   for (const entry of pnpmWorkspacePatterns(rootDir)) patterns.add(entry);
-  return [...patterns].sort((left, right) => left.localeCompare(right));
+  return [...patterns].sort();
 }
 
 function pnpmWorkspacePatterns(rootDir: string): string[] {
@@ -495,7 +498,7 @@ function expandWorkspacePattern(rootDir: string, pattern: string): string[] {
       if (fs.existsSync(path.join(rootDir, scopedRoot, "package.json"))) roots.push(scopedRoot);
     }
   }
-  return roots.sort((left, right) => left.localeCompare(right));
+  return roots.sort();
 }
 
 function exportValueStrings(value: unknown): string[] {
@@ -629,7 +632,7 @@ function packageLikeRootsInContainer(rootDir: string, containerRoot: string): st
     }
     packageRoots.push(packageRoot);
   }
-  return packageRoots.sort((left, right) => left.localeCompare(right));
+  return packageRoots.sort();
 }
 
 function pythonPackageRootForProject(rootDir: string, sourceRoot: string, projectName: string, scope?: InferManifestScope): string | undefined {
@@ -647,9 +650,9 @@ function pythonPackageRootsInSourceRoot(rootDir: string, sourceRoot: string, sco
   return fs.readdirSync(absoluteSourceRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
     .map((entry) => normalizePath(path.posix.join(sourceRoot, entry.name)))
-    .filter((packageRoot) => fs.existsSync(path.join(rootDir, packageRoot, "__init__.py")) || sourceFilesDirectlyUnder(rootDir, packageRoot, scope).some((filePath) => path.extname(filePath) === ".py"))
+    .filter((packageRoot) => fs.existsSync(path.join(rootDir, packageRoot, "__init__.py")) || sourceFilesDirectlyUnder(rootDir, packageRoot, scope).some((filePath) => [".py", ".pyi"].includes(sourceExtensionForPath(filePath))))
     .filter((packageRoot) => hasSourceFiles(rootDir, packageRoot, scope))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function discoverCandidates(rootDir: string, options: InferManifestOptions = {}): CellCandidate[] {
@@ -715,7 +718,7 @@ function discoverCandidates(rootDir: string, options: InferManifestOptions = {})
   }
 
   return removeAmbiguousPackageNames(narrowAncestorCandidates(rootDir, candidates, options.scope))
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .sort((left, right) => stableStringCompare(left.id, right.id));
 }
 
 function narrowAncestorCandidates(rootDir: string, candidates: readonly CellCandidate[], scope?: InferManifestScope): CellCandidate[] {
@@ -724,7 +727,7 @@ function narrowAncestorCandidates(rootDir: string, candidates: readonly CellCand
     const childRoots = candidates
       .filter((other) => other.id !== candidate.id && pathWithinRoot(candidate.root, other.root))
       .map((other) => other.root)
-      .sort((left, right) => left.localeCompare(right));
+      .sort();
     if (childRoots.length === 0) {
       narrowed.push(candidate);
       continue;
@@ -766,7 +769,7 @@ function ownedPathsOutsideChildRoots(rootDir: string, relativeRoot: string, chil
     }
     ownedPaths.add(`${normalizedRoot}/${remainder.split("/")[0]}/**`);
   }
-  return [...ownedPaths].sort((left, right) => left.localeCompare(right));
+  return [...ownedPaths].sort();
 }
 
 function firstSourceFileMatchingOwnedPaths(rootDir: string, ownedPaths: readonly string[], scope?: InferManifestScope): string | undefined {
@@ -789,7 +792,7 @@ function sourceFilesOwnedByCandidate(rootDir: string, candidate: CellCandidate, 
     .map((filePath) => repoPath(rootDir, filePath))
     .filter((relativePath) => candidate.ownedPaths.some((ownedPath) => matchesPattern(relativePath, ownedPath)))
     .filter((relativePath) => !pathExcludedByScope(scope, relativePath))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 function packageDependencyNames(rootDir: string, packageRoot: string | undefined): string[] {
@@ -802,7 +805,7 @@ function packageDependencyNames(rootDir: string, packageRoot: string | undefined
     if (!isRecord(dependencies)) continue;
     for (const dependencyName of Object.keys(dependencies)) names.add(dependencyName);
   }
-  return [...names].sort((left, right) => left.localeCompare(right));
+  return [...names].sort();
 }
 
 function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates: readonly CellCandidate[], options: InferManifestOptions): { cell: string }[] {
@@ -827,7 +830,7 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
       ...pythonPackagingSourceRoots(rootDir),
       ...candidates.map((entry) => parentPrefix(entry.root)),
     ]),
-  ].sort((left, right) => left.localeCompare(right));
+  ].sort();
   const context: FileIndexContext = {
     rootDir,
     manifest: { schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION, cells: [] },
@@ -839,7 +842,7 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
     const warnings: never[] = [];
     for (const reference of extractImports(context, path.join(rootDir, relativePath), warnings)) {
       let targetPath: string | undefined;
-      if (path.extname(relativePath) === ".py") {
+      if ([".py", ".pyi"].includes(sourceExtensionForPath(relativePath))) {
         for (const specifier of [...(reference.candidateSpecifiers || []), reference.specifier]) {
           targetPath = resolvePythonImport(rootDir, relativePath, specifier, pythonSourceRoots);
           if (targetPath) break;
@@ -854,17 +857,17 @@ function inferredConsumes(rootDir: string, candidate: CellCandidate, candidates:
       if (targetOwner && targetOwner.id !== candidate.id) consumedCells.add(targetOwner.id);
     }
   }
-  return [...consumedCells].sort((left, right) => left.localeCompare(right)).map((cell) => ({ cell }));
+  return [...consumedCells].sort().map((cell) => ({ cell }));
 }
 
 function manifestFromCandidatesWithOptions(rootDir: string, candidates: readonly CellCandidate[], options: InferManifestOptions): CellFenceManifest {
   const include = [...new Set(candidates.flatMap((candidate) => candidate.ownedPaths.map((ownedPath) => {
     if (ownedPath.startsWith("src/")) return "src/**";
     return ownedPath;
-  })))].sort((left, right) => left.localeCompare(right));
+  })))].sort();
   prewarmPythonInspections(candidates.flatMap((candidate) =>
     sourceFilesOwnedByCandidate(rootDir, candidate, options.scope)
-      .filter((relativePath) => path.extname(relativePath) === ".py")
+      .filter((relativePath) => [".py", ".pyi"].includes(sourceExtensionForPath(relativePath)))
       .map((relativePath) => path.join(rootDir, relativePath))
   ));
   return {
@@ -879,7 +882,7 @@ function manifestFromCandidatesWithOptions(rootDir: string, candidates: readonly
       id: candidate.id,
       ownedPaths: candidate.ownedPaths,
       publicEntry: candidate.publicEntry,
-      publicSymbols: [...extractPublicSymbols(path.join(rootDir, candidate.publicEntry))].sort((left, right) => left.localeCompare(right)),
+      publicSymbols: [...extractPublicSymbols(path.join(rootDir, candidate.publicEntry))].sort(),
       ...(candidate.packageName ? { packageName: candidate.packageName } : {}),
       consumes: inferredConsumes(rootDir, candidate, candidates, options),
       producesArtifacts: [],

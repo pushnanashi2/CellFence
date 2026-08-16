@@ -19,6 +19,7 @@ import {
   validateBaselineSealFindings,
 } from "./baseline-seal.js";
 import { resourceBaselineKey } from "./baseline-ratchet.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 import type {
   BaselineUpdateGuardOptions,
   BaselineUpdateGuardResult,
@@ -72,7 +73,7 @@ export function createBaseline(
   return {
     schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
-    cellIds: Object.keys(result.metrics).sort((left, right) => left.localeCompare(right)),
+    cellIds: Object.keys(result.metrics).sort(stableStringCompare),
     cells: result.metrics,
   };
 }

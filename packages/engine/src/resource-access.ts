@@ -10,6 +10,7 @@ import {
   parseSourceFile,
   readSourceText,
   repoPath,
+  sourceExtensionForPath,
   type FileIndexContext,
 } from "./file-index.js";
 import { inspectPythonSource } from "./python-analysis.js";
@@ -1100,7 +1101,7 @@ function resourceAdapterEnabled(context: ResourceAccessAnalysisContext, adapter:
 }
 
 function isPythonPath(filePath: string): boolean {
-  return path.extname(filePath) === ".py";
+  return [".py", ".pyi"].includes(sourceExtensionForPath(filePath));
 }
 
 function collectPythonResourceAccesses(context: ResourceAccessAnalysisContext, filePath: string): ResourceAccessReference[] {

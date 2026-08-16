@@ -427,6 +427,17 @@ test("schema validation rejects duplicate names that would overwrite manifest po
     })),
     /ownedPaths\[0\] must be a repo-relative path[\s\S]*publicEntry must be a repo-relative path[\s\S]*paths\[0\] must be a repo-relative path/,
   );
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        id: "core\u200b",
+        consumes: [{ cell: "api\u202e" }],
+        ownedPaths: ["src/\u200bcore/**"],
+      }],
+    })),
+    /cells\[0\]\.id must match[\s\S]*ownedPaths\[0\] must be a repo-relative path[\s\S]*consumes\[0\]\.cell must match/,
+  );
 });
 
 test("schema validation rejects malformed manifest governance and overrides", () => {
@@ -671,7 +682,7 @@ test("schema validation accepts and rejects resource evidence", () => {
   }));
   assert.equal(richEvidence.ok, true);
   assert.deepEqual(richEvidence.errors, []);
-  const { cellId: _topLevelCellId, ...evidenceWithoutTopLevelCell } = validEvidence({
+  const evidenceWithoutTopLevelCell = validEvidence({
     accesses: [{
       kind: "queue",
       access: "publish",
@@ -681,6 +692,7 @@ test("schema validation accepts and rejects resource evidence", () => {
       confidence: "runtime",
     }],
   });
+  delete evidenceWithoutTopLevelCell.cellId;
   const perAccessCellEvidence = validateResourceEvidence(evidenceWithoutTopLevelCell);
   assert.equal(perAccessCellEvidence.ok, true);
   assert.deepEqual(perAccessCellEvidence.errors, []);

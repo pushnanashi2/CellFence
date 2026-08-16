@@ -16,6 +16,7 @@ import {
 export type { CellFenceBaseline } from "@cellfence/schema";
 import {
   absolutePath,
+  isSourceFilePath,
   listSymlinks,
   matchesPattern,
   normalizePath,
@@ -28,6 +29,7 @@ import {
   type SymlinkEntry,
   sourceFilesForCell,
   sourceFilesUnderGovernance,
+  sourceExtensionForPath,
   sourceKindForPath,
 } from "./file-index.js";
 
@@ -74,6 +76,7 @@ import {
   withFindingFingerprint,
 } from "./findings.js";
 import { ownedPathPatternsOverlap } from "./glob-overlap.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 import { errorMessage } from "./errors.js";
 import { execCommandSync } from "./command-execution.js";
 import {
@@ -410,7 +413,11 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
 
 function symlinkIsRelevant(context: AnalysisContext, symlink: SymlinkEntry): boolean {
   const relativePath = repoPath(context.rootDir, symlink.path);
-  return SOURCE_EXTENSIONS.includes(path.extname(relativePath))
+  if (symlink.targetType === "directory") {
+    const probePaths = SOURCE_EXTENSIONS.map((extension) => `${relativePath}/__cellfence_probe__${extension}`);
+    if (probePaths.some((probePath) => pathIsGoverned(context.manifest, probePath) || owningCells(context.manifest, probePath).length > 0)) return true;
+  }
+  return isSourceFilePath(relativePath)
     || pathIsGoverned(context.manifest, relativePath)
     || owningCells(context.manifest, relativePath).length > 0;
 }
@@ -420,12 +427,22 @@ function pathIsInsideDirectory(directoryPath: string, targetPath: string): boole
   return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
 }
 
-function targetIsInsideRoot(rootDir: string, targetPath: string): boolean {
-  const targetAbsolutePath = path.resolve(targetPath);
-  if (!fs.existsSync(targetAbsolutePath)) {
-    return pathIsInsideDirectory(path.resolve(rootDir), targetAbsolutePath);
+function realPathForPossiblyMissingPath(targetPath: string): string {
+  const resolvedTarget = path.resolve(targetPath);
+  if (fs.existsSync(resolvedTarget)) return fs.realpathSync(resolvedTarget);
+  const missingSegments: string[] = [];
+  let candidate = resolvedTarget;
+  while (!fs.existsSync(candidate)) {
+    const parent = path.dirname(candidate);
+    if (parent === candidate) return resolvedTarget;
+    missingSegments.unshift(path.basename(candidate));
+    candidate = parent;
   }
-  return pathIsInsideDirectory(fs.realpathSync(rootDir), fs.realpathSync(targetAbsolutePath));
+  return path.join(fs.realpathSync(candidate), ...missingSegments);
+}
+
+function targetIsInsideRoot(rootDir: string, targetPath: string): boolean {
+  return pathIsInsideDirectory(fs.realpathSync(rootDir), realPathForPossiblyMissingPath(targetPath));
 }
 
 function validateSymlinkTargets(context: AnalysisContext, findings: Finding[]): void {
@@ -919,7 +936,7 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
 }
 
 function resolveImport(context: AnalysisContext, reference: ImportReference): ResolvedImport {
-  if (path.extname(reference.importerPath) === ".py") {
+  if ([".py", ".pyi"].includes(sourceExtensionForPath(reference.importerPath))) {
     const specifiers = [...(reference.candidateSpecifiers || []), reference.specifier];
     for (const specifier of specifiers) {
       const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, specifier, pythonSourceRoots(context));
@@ -1064,10 +1081,10 @@ function prewarmRepositoryPythonInspections(context: AnalysisContext): void {
   const pythonFilePaths = new Set<string>();
   for (const cell of context.manifest.cells) {
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
-      if (path.extname(sourceFilePath) === ".py") pythonFilePaths.add(sourceFilePath);
+      if ([".py", ".pyi"].includes(sourceExtensionForPath(sourceFilePath))) pythonFilePaths.add(sourceFilePath);
     }
     const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
-    if (path.extname(publicEntryPath) === ".py" && fs.existsSync(publicEntryPath)) pythonFilePaths.add(publicEntryPath);
+    if ([".py", ".pyi"].includes(sourceExtensionForPath(publicEntryPath)) && fs.existsSync(publicEntryPath)) pythonFilePaths.add(publicEntryPath);
   }
   prewarmPythonInspections([...pythonFilePaths]);
 }
@@ -1174,7 +1191,7 @@ function validateImports(
         if (resolvedImport.artifactLaneId) {
           if (
             resolvedImport.targetPath
-            && SOURCE_EXTENSIONS.includes(path.extname(resolvedImport.targetPath))
+            && isSourceFilePath(resolvedImport.targetPath)
             && importTargetsPrivateImplementation(resolvedImport, producerCell)
           ) {
             addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
@@ -1452,7 +1469,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     findings: active.findings,
     warnings: active.warnings,
     metrics,
-    requiredRules: [...requiredRuleSet(context)].sort((left, right) => left.localeCompare(right)),
+    requiredRules: [...requiredRuleSet(context)].sort(),
   });
   const decision = legacyDecisionFromEvaluation(evaluation);
   const evidenceGraph = options.includeEvidenceGraph
@@ -1672,7 +1689,7 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
   }
 
   const sortedCandidates = candidates.sort((left, right) =>
-    pruneCandidateSortKey(left).localeCompare(pruneCandidateSortKey(right)));
+    stableStringCompare(pruneCandidateSortKey(left), pruneCandidateSortKey(right)));
   return {
     schemaVersion: "cellfence.prune.v1",
     ok: sortedCandidates.length === 0,
@@ -1728,7 +1745,12 @@ function gitMetadataFailure(message: string): CheckResult {
 function validateGitRefArgument(ref: string, label: string): void {
   if (!ref.trim()) throw new Error(`${label} must not be empty`);
   if (ref.startsWith("-")) throw new Error(`${label} must not start with '-'`);
-  if (/[\u0000-\u001f\u007f\s]/.test(ref)) throw new Error(`${label} must not contain whitespace or control characters`);
+  for (const char of ref) {
+    const codePoint = char.codePointAt(0) ?? 0;
+    if (codePoint <= 0x1f || codePoint === 0x7f || /\s/u.test(char)) {
+      throw new Error(`${label} must not contain whitespace or control characters`);
+    }
+  }
 }
 
 function assertGitCommit(rootDir: string, ref: string): string {
@@ -1755,7 +1777,7 @@ function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string)
     addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD"]);
     addDiff(["ls-files", "--others", "--exclude-standard", "-z"]);
   }
-  return [...files].sort((left, right) => left.localeCompare(right));
+  return [...files].sort();
 }
 
 type OwnershipMovement = {
@@ -1811,7 +1833,7 @@ function movementEntriesForRefs(rootDir: string, baseRef: string, headRef?: stri
     addDiff([...diffArgs, "--cached"]);
     addDiff([...diffArgs]);
   }
-  return [...movements.values()].sort((left, right) => `${left.fromPath}:${left.toPath}`.localeCompare(`${right.fromPath}:${right.toPath}`));
+  return [...movements.values()].sort((left, right) => stableStringCompare(`${left.fromPath}:${left.toPath}`, `${right.fromPath}:${right.toPath}`));
 }
 
 function crossCellMovementFindings(manifest: CellFenceManifest, movements: OwnershipMovement[]): Finding[] {

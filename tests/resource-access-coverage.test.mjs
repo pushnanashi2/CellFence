@@ -81,6 +81,13 @@ function writePythonSource(rootDir, lines) {
   return filePath;
 }
 
+function writePythonStubSource(rootDir, lines) {
+  fs.mkdirSync(path.join(rootDir, "src/runtime"), { recursive: true });
+  const filePath = path.join(rootDir, "src/runtime/public.pyi");
+  fs.writeFileSync(filePath, `${lines.join("\n")}\n`);
+  return filePath;
+}
+
 function lineOf(lines, needle) {
   const index = lines.findIndex((line) => line.includes(needle));
   assert.notEqual(index, -1, `missing source line containing ${needle}`);
@@ -468,6 +475,25 @@ test("collectResourceAccesses detects FastAPI route decorators in Python source"
     ].sort());
     assert.ok(accesses.every((access) => access.kind === "http" && access.access === "serve"));
     assert.ok(accesses.every((access) => access.confidence === "high"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses treats Python type stubs as Python sources", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-fastapi-pyi-"));
+  try {
+    const lines = [
+      "from fastapi import FastAPI",
+      "app = FastAPI()",
+      "@app.get('/typed')",
+      "def typed():",
+      "    return {'ok': True}",
+    ];
+    const filePath = writePythonStubSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.map((access) => access.selector), ["GET /typed"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

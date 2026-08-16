@@ -34,7 +34,11 @@
     "path": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?=.*\\S)(?![/\\\\])(?![A-Za-z]:[/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$))[^\\u0000-\\u001f]+$"
+      "pattern": "^(?=.*\\S)(?!\\.?$)(?![/\\\\])(?![A-Za-z]:[/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$))(?!.*[\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202e\\u2060-\\u206f\\ufeff])[^\\u0000-\\u001f]+$"
+    },
+    "cellId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
     },
     "stringArray": {
       "type": "array",
@@ -136,7 +140,7 @@
       "additionalProperties": false,
       "required": ["id", "kind", "access", "selectors"],
       "properties": {
-        "id": { "$ref": "#/$defs/string" },
+        "id": { "$ref": "#/$defs/cellId" },
         "kind": { "enum": ["file", "database", "queue", "http"] },
         "access": {
           "type": "array",
@@ -170,7 +174,7 @@
             "additionalProperties": false,
             "required": ["cell"],
             "properties": {
-              "cell": { "$ref": "#/$defs/string" },
+              "cell": { "$ref": "#/$defs/cellId" },
               "artifactLanes": { "$ref": "#/$defs/stringArray" }
             }
           }

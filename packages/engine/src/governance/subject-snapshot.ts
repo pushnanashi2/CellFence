@@ -1,5 +1,5 @@
 import type { SubjectFile, SubjectFileRole, SubjectSnapshot } from "./model.js";
-import { stableDigest, sha256Hex } from "./canonicalization.js";
+import { stableDigest, sha256Hex, stableStringCompare } from "./canonicalization.js";
 
 export type SubjectSnapshotInputFile = {
   path: string;
@@ -23,7 +23,7 @@ export function createSubjectSnapshotFromFiles(files: SubjectSnapshotInputFile[]
       digest: sha256Hex(file.content),
       size: file.content.length,
     }))
-    .sort((left, right) => subjectFileSortKey(left).localeCompare(subjectFileSortKey(right)));
+    .sort((left, right) => stableStringCompare(subjectFileSortKey(left), subjectFileSortKey(right)));
   return {
     schemaVersion: "cellfence.governance-subject.v1",
     files: subjectFiles,

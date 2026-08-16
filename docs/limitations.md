@@ -12,7 +12,8 @@ Version 0.x is deliberately narrow:
 - file-path artifact lanes only;
 - selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred;
 - ORM, query builder, and broker-client support is adapter-scoped; unsupported libraries require a dedicated adapter or runtime evidence;
-- ownership overlap detection is segment-aware for literal path prefixes, but does not solve arbitrary glob intersection;
+- ownership overlap detection uses a segment-aware NFA for CellFence's supported `*`/standalone-`**` dialect; unsupported extended glob operators are treated as literal text;
+- CommonJS public-surface extraction is conservative and does not infer every `module.exports.foo = ...` or `exports.foo = ...` mutation pattern;
 - public symbol analysis supports common TypeScript forms, exported namespaces, and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern;
 - TypeScript/JavaScript public surface hashes use isolated normalized declaration output when available and remain contract fingerprints, not full API-compatibility proofs; imported implementation details can still collapse to broad declaration types without a separate typecheck;
 - computed dynamic imports and computed CommonJS `require()` calls cannot be resolved statically;

@@ -142,7 +142,7 @@ function sarifLevel(finding: Finding): "error" | "warning" {
 
 function formatCheckResultSarif(result: CheckResult, metadata: CheckRunMetadata): string {
   const allFindings = [...result.findings, ...result.warnings];
-  const ruleIds = [...new Set(allFindings.map((finding) => finding.ruleId))].sort((left, right) => left.localeCompare(right));
+  const ruleIds = [...new Set(allFindings.map((finding) => finding.ruleId))].sort();
   const sarifResults = allFindings.map((finding) => {
     const line = findingLine(finding);
     const sarifResult: Record<string, unknown> = {

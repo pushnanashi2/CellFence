@@ -101,7 +101,8 @@ export function writeWaiverAttestationFile(rootDir, attestations) {
 }
 
 export function writeSignedWaiverAttestation(rootDir, values = {}, options = {}) {
-  const { signature: _ignoredSignature, ...unsignedOverrides } = values;
+  const unsignedOverrides = { ...values };
+  delete unsignedOverrides.signature;
   const filePath = normalizePath(unsignedOverrides.filePath || "src/consumer/public.ts");
   const sourcePath = path.join(rootDir, filePath);
   const sourceSha256 = fs.existsSync(sourcePath)

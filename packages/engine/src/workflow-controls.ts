@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
 export type WorkflowControlKind =
   | "action_reference"
@@ -206,7 +207,7 @@ export function snapshotWorkflowControls(text: string): WorkflowControlReference
   collectPermissions(items, text);
   collectActionReferences(items, text);
   collectTextControls(items, text);
-  return items.sort((left, right) => `${left.kind}:${left.semanticPath}:${left.value}`.localeCompare(`${right.kind}:${right.semanticPath}:${right.value}`));
+  return items.sort((left, right) => stableStringCompare(`${left.kind}:${left.semanticPath}:${left.value}`, `${right.kind}:${right.semanticPath}:${right.value}`));
 }
 
 export function diffWorkflowControls(beforeText: string, afterText: string): WorkflowControlDelta[] {
@@ -228,5 +229,5 @@ export function diffWorkflowControls(beforeText: string, afterText: string): Wor
       after: afterValue,
     });
   }
-  return deltas.sort((left, right) => `${left.kind}:${left.semanticPath}`.localeCompare(`${right.kind}:${right.semanticPath}`));
+  return deltas.sort((left, right) => stableStringCompare(`${left.kind}:${left.semanticPath}`, `${right.kind}:${right.semanticPath}`));
 }

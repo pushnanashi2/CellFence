@@ -15,10 +15,11 @@ import {
   type ResourceContractManifest,
   type RuleSeverityMap,
 } from "@cellfence/schema";
-import { listFiles, matchesPattern, normalizePath, patternCoveredByOwnedPaths, repoPath, SOURCE_EXTENSIONS } from "./file-index.js";
+import { isSourceFilePath, listFiles, matchesPattern, normalizePath, patternCoveredByOwnedPaths, repoPath } from "./file-index.js";
 import { PRODUCTION_SCOPE_EXCLUDES, type InferManifestScope } from "./manifest-inference.js";
 import { extractPublicSymbols, publicSurfaceHash } from "./module-resolution.js";
 import { ownedPathPatternsOverlap } from "./glob-overlap.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
 export type AdvancedFinding = {
   ruleId: string;
@@ -228,8 +229,8 @@ function artifactConsumersFromReadOnlyArtifacts(
     }
   }
   return [...consumedByService.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([cell, laneIds]) => ({ cell, artifactLanes: [...laneIds].sort((left, right) => left.localeCompare(right)) }));
+    .sort(([left], [right]) => stableStringCompare(left, right))
+    .map(([cell, laneIds]) => ({ cell, artifactLanes: [...laneIds].sort() }));
 }
 
 function unmatchedReadOnlyArtifactContracts(
@@ -244,7 +245,7 @@ function unmatchedReadOnlyArtifactContracts(
       && lanes.some((lane) => lane.paths.some((artifactPath) => ownedPathPatternsOverlap(readOnlyArtifact, artifactPath)))
     )
   );
-  return [...new Set(unmatched)].sort((left, right) => left.localeCompare(right)).map((selector, index) => ({
+  return [...new Set(unmatched)].sort().map((selector, index) => ({
     id: uniqueIdForCell(`${serviceId}-readonly-artifact-${index + 1}`, usedIds),
     kind: "file",
     access: ["read"],
@@ -255,7 +256,7 @@ function unmatchedReadOnlyArtifactContracts(
 
 function scheduledResourceContracts(serviceId: string, scheduled: string[]): ResourceContractManifest[] {
   const usedIds = new Set<string>();
-  return [...new Set(scheduled)].sort((left, right) => left.localeCompare(right)).map((taskName, index) => ({
+  return [...new Set(scheduled)].sort().map((taskName, index) => ({
     id: uniqueIdForCell(`${serviceId}-scheduled-${index + 1}`, usedIds),
     kind: "queue",
     access: ["subscribe"],
@@ -371,13 +372,13 @@ function expandInputPaths(rootDir: string, inputPaths: string[]): string[] {
       if (matchesPattern(relativePath, normalizedInput)) files.add(filePath);
     }
   }
-  return [...files].sort((left, right) => left.localeCompare(right));
+  return [...files].sort();
 }
 
 function publicSymbolsForEntry(rootDir: string, entry: string, declaredSymbols: string[]): string[] {
   const entryPath = path.resolve(rootDir, entry);
   if (!fs.existsSync(entryPath)) return declaredSymbols;
-  const extracted = [...extractPublicSymbols(entryPath)].sort((left, right) => left.localeCompare(right));
+  const extracted = [...extractPublicSymbols(entryPath)].sort();
   return extracted.length > 0 ? extracted : declaredSymbols;
 }
 
@@ -391,9 +392,9 @@ function servicePublicPaths(rootDir: string, serviceId: string): string[] {
 function sourceFilesUnderRoot(rootDir: string, relativeRoot: string): string[] {
   const normalizedRoot = normalizePath(relativeRoot).replace(/\/+$/, "");
   return listFiles(path.resolve(rootDir, normalizedRoot))
-    .filter((filePath) => SOURCE_EXTENSIONS.includes(path.extname(filePath)))
+    .filter((filePath) => isSourceFilePath(filePath))
     .map((filePath) => repoPath(rootDir, filePath))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
 }
 
 export function createManifestFromServiceManifests(options: { rootDir?: string; serviceManifestPaths?: string[]; locked?: boolean; scope?: InferManifestScope } = {}): ServiceManifestImportResult {
@@ -431,16 +432,16 @@ export function createManifestFromServiceManifests(options: { rootDir?: string; 
     }
     const consumes = [...consumesByCell.entries()]
       .filter(([cell]) => cell !== serviceId)
-      .sort(([left], [right]) => left.localeCompare(right))
+      .sort(([left], [right]) => stableStringCompare(left, right))
       .map(([cell, artifactLanes]) => ({
         cell,
-        ...(artifactLanes.size > 0 ? { artifactLanes: [...artifactLanes].sort((left, right) => left.localeCompare(right)) } : {}),
+        ...(artifactLanes.size > 0 ? { artifactLanes: [...artifactLanes].sort() } : {}),
       }));
     const baseOwnedPaths = [...new Set([
       ...(ownedPaths.length > 0 ? ownedPaths : [`systems/${serviceId}/**`]),
       ...nonOverlappingAdditionalOwnedPaths(serviceId, "ownedData", asStringArray(service.ownedData), explicitOwnedPathsByService, producedArtifactsByService.get(serviceId) || [], warnings),
       ...nonOverlappingAdditionalOwnedPaths(serviceId, "writePaths", asStringArray(service.writePaths), explicitOwnedPathsByService, producedArtifactsByService.get(serviceId) || [], warnings),
-    ])].sort((left, right) => left.localeCompare(right));
+    ])].sort();
     const producesArtifacts = (producedArtifactsByService.get(serviceId) || [])
       .map((lane) => lane.paths.some((artifactPath) => !patternCoveredByOwnedPaths(artifactPath, baseOwnedPaths))
         ? { ...lane, external: true }
@@ -470,11 +471,11 @@ export function createManifestFromServiceManifests(options: { rootDir?: string; 
         requireOwnership: true,
         include: ["systems/**", "packages/**"],
         exclude: options.scope === "production"
-          ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort((left, right) => left.localeCompare(right))
+          ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort()
           : ["systems/**/node_modules/**"],
         ...(options.scope === "production" ? { resourceAdapters: SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS } : {}),
       },
-      cells: cells.sort((left, right) => left.id.localeCompare(right.id)),
+      cells: cells.sort((left, right) => stableStringCompare(left.id, right.id)),
     },
     warnings,
   };
@@ -641,11 +642,11 @@ function owningCellsForFiles(manifest: CellFenceManifest, files: string[]): stri
       if (cell.ownedPaths.some((pattern) => matchesPattern(filePath, pattern))) cells.add(cell.id);
     }
   }
-  return [...cells].sort((left, right) => left.localeCompare(right));
+  return [...cells].sort();
 }
 
 function csv(value: string | undefined): string[] {
-  return (value || "").split(/[,\s]+/).map((entry) => entry.trim()).filter(Boolean).sort((left, right) => left.localeCompare(right));
+  return (value || "").split(/[,\s]+/).map((entry) => entry.trim()).filter(Boolean).sort();
 }
 
 function looksPlaceholder(value: string): boolean {
@@ -688,7 +689,7 @@ export function checkCommitEvidence(options: { rootDir?: string; manifest: CellF
     if (csv(trailers["Tests-Modified"]).join(",") !== modifiedTests.join(",")) {
       findings.push({ ruleId: "CELLFENCE_COMMIT_TEST_EVIDENCE_MISMATCH", severity: "error", message: `${commit.slice(0, 12)} Tests-Modified does not match git diff`, details: { commit, declared: csv(trailers["Tests-Modified"]), actual: modifiedTests } });
     }
-    const productionChanged = filePaths.some((filePath) => SOURCE_EXTENSIONS.includes(path.extname(filePath)) && !/(^|\/)(tests?|__tests__)\//.test(filePath));
+    const productionChanged = filePaths.some((filePath) => isSourceFilePath(filePath) && !/(^|\/)(tests?|__tests__)\//.test(filePath));
     if (productionChanged && addedTests.length + modifiedTests.length === 0 && looksPlaceholder(trailers["Tests-Not-Added-Reason"] || "")) {
       findings.push({ ruleId: "CELLFENCE_COMMIT_TEST_REASON_REQUIRED", severity: "error", message: `${commit.slice(0, 12)} changes production source without concrete test reason`, details: { commit } });
     }
@@ -802,7 +803,7 @@ function changedFilesForTask(rootDir: string, baseRef?: string, headRef?: string
   const files = new Set(git(rootDir, args).split(/\r?\n/).map((line) => normalizePath(line.trim())).filter(Boolean));
   const untracked = git(rootDir, ["ls-files", "--others", "--exclude-standard"]).split(/\r?\n/).map((line) => normalizePath(line.trim())).filter(Boolean);
   for (const filePath of untracked) files.add(filePath);
-  return [...files].sort((left, right) => left.localeCompare(right));
+  return [...files].sort();
 }
 
 function markdownFiles(rootDir: string, inputPaths: string[]): string[] {
@@ -812,7 +813,7 @@ function markdownFiles(rootDir: string, inputPaths: string[]): string[] {
     : fs.existsSync(docsRoot)
       ? listFiles(docsRoot).filter((filePath) => filePath.endsWith(".md"))
       : [];
-  return files.filter((filePath) => fs.existsSync(filePath) && fs.statSync(filePath).isFile()).sort((left, right) => left.localeCompare(right));
+  return files.filter((filePath) => fs.existsSync(filePath) && fs.statSync(filePath).isFile()).sort();
 }
 
 function docMetadata(text: string): Record<string, string> {
@@ -894,7 +895,7 @@ function collectMutants(input: unknown, currentFile: string | undefined, output:
         : currentFile;
   if (typeof input.status === "string") output.push({ file: nextFile, status: input.status });
   for (const [key, value] of Object.entries(input)) {
-    const keyedFile = SOURCE_EXTENSIONS.includes(path.extname(key)) ? normalizePath(key) : nextFile;
+    const keyedFile = isSourceFilePath(key) ? normalizePath(key) : nextFile;
     collectMutants(value, keyedFile, output);
   }
 }
@@ -916,7 +917,7 @@ export function checkMutationReport(options: { rootDir?: string; manifest: CellF
   const cells: MutationCheckResult["cells"] = {};
   const findings: AdvancedFinding[] = [];
   const minScore = Number.isFinite(options.minScore) ? Number(options.minScore) : 0;
-  for (const [cellId, counts] of [...countsByCell.entries()].sort((left, right) => left[0].localeCompare(right[0]))) {
+  for (const [cellId, counts] of [...countsByCell.entries()].sort((left, right) => stableStringCompare(left[0], right[0]))) {
     const denominator = counts.killed + counts.survived + counts.timeout + counts.noCoverage;
     const score = denominator === 0 ? 100 : (counts.killed / denominator) * 100;
     cells[cellId] = { ...counts, score };

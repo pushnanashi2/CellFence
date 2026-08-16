@@ -67,6 +67,42 @@ test("trace hook emits runtime file resource evidence", () => {
   ]);
 });
 
+test("trace hook sorts resource evidence by deterministic access key", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-sort-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "data"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+      import fs from "node:fs";
+      fs.writeFileSync("data/z.json", "{}\\n");
+      fs.writeFileSync("data/a.json", "{}\\n");
+    `);
+
+    const evidencePath = path.join(tempDir, "resource-evidence.json");
+    const result = spawnSync(process.execPath, [
+      "--import",
+      pathToFileURL(tracePath).href,
+      "app.mjs",
+    ], {
+      cwd: tempDir,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CELLFENCE_TRACE_CELL: "runtime",
+        CELLFENCE_TRACE_OUT: evidencePath,
+      },
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+    assert.deepEqual(evidence.accesses.map((access) => access.selector), [
+      "data/a.json",
+      "data/z.json",
+    ]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("trace hook emits async and append file evidence while ignoring source files", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-async-"));
   fs.mkdirSync(path.join(tempDir, "data"), { recursive: true });

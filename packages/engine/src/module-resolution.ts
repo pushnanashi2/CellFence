@@ -10,9 +10,11 @@ import {
   parseSourceFile,
   repoPath,
   SOURCE_EXTENSIONS,
+  sourceExtensionForPath,
   sourceKindForPath,
   type FileIndexContext,
 } from "./file-index.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 import { inspectPythonSource } from "./python-analysis.js";
 
 export type PathAlias = {
@@ -235,7 +237,7 @@ function stripResourceQuery(specifier: string): string {
 }
 
 function isPythonPath(filePath: string): boolean {
-  return path.extname(filePath) === ".py";
+  return [".py", ".pyi"].includes(sourceExtensionForPath(filePath));
 }
 
 function resolvePythonRelativeModule(rootDir: string, importerPath: string, specifier: string): string | undefined {
@@ -1546,7 +1548,7 @@ export function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
   }
 
   visit(sourceFile);
-  return parts.sort((left, right) => left.localeCompare(right));
+  return parts.sort();
 }
 
 function findNearestTsConfig(filePath: string): string | undefined {
@@ -1688,7 +1690,7 @@ export function declarationPublicSurfaceSignatureParts(filePath: string): string
     });
   }
   return declarations
-    .sort((left, right) => left.orderKey.localeCompare(right.orderKey))
+    .sort((left, right) => stableStringCompare(left.orderKey, right.orderKey))
     .map((declaration) => `dts:${declaration.text}`);
 }
 

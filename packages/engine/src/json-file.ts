@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
 export function readJsonFile(filePath: string): unknown {
   const text = fs.readFileSync(filePath, "utf8");
@@ -64,5 +65,5 @@ function duplicateJsonKeys(text: string): string[] {
       if (current?.kind === "object") current.expectingKey = true;
     }
   }
-  return [...duplicates].sort((left, right) => left.localeCompare(right));
+  return [...duplicates].sort(stableStringCompare);
 }

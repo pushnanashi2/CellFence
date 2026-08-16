@@ -8,7 +8,7 @@ import type {
   ResourceBaselineEntry,
 } from "@cellfence/schema";
 import { absolutePath, normalizePath, patternCoveredByOwnedPaths } from "./file-index.js";
-import { stableCanonicalJson } from "./governance/canonicalization.js";
+import { stableCanonicalJson, stableStringCompare } from "./governance/canonicalization.js";
 import { publicSurfaceHash } from "./module-resolution.js";
 import type { ResourceAccessReference } from "./resource-access.js";
 import type { Finding, SuggestedResolution } from "./types.js";
@@ -49,7 +49,7 @@ export function sortedResourceBaselineEntries(accesses: readonly ResourceAccessR
     const entry = resourceBaselineEntry(access);
     uniqueEntries.set(resourceBaselineKey(entry), entry);
   }
-  return [...uniqueEntries.values()].sort((left, right) => resourceBaselineKey(left).localeCompare(resourceBaselineKey(right)));
+  return [...uniqueEntries.values()].sort((left, right) => stableStringCompare(resourceBaselineKey(left), resourceBaselineKey(right)));
 }
 
 function countLines(filePath: string): number {
@@ -67,13 +67,13 @@ function artifactContractsForCell(cell: CellManifest): string[] {
   for (const consumer of cell.consumes || []) {
     for (const lane of consumer.artifactLanes || []) contracts.push(`consume:${consumer.cell}:${lane}`);
   }
-  return contracts.sort((left, right) => left.localeCompare(right));
+  return contracts.sort(stableStringCompare);
 }
 
 function dependencyEdgesForCell(cellId: string, dependencies: Set<string> | undefined): string[] {
   return [...(dependencies || new Set<string>())]
     .map((dependency) => `${cellId}->${dependency}`)
-    .sort((left, right) => left.localeCompare(right));
+    .sort(stableStringCompare);
 }
 
 export function computeMetrics(
@@ -89,9 +89,9 @@ export function computeMetrics(
       publicSymbols: cell.publicSymbols.length,
       publicSurfaceLines: countLines(absolutePath(context.rootDir, cell.publicEntry)),
       crossCellDependencies: crossCellDependencies.get(cell.id)?.size || 0,
-      ownedPathSet: [...cell.ownedPaths].map(normalizePath).sort((left, right) => left.localeCompare(right)),
+      ownedPathSet: [...cell.ownedPaths].map(normalizePath).sort(stableStringCompare),
       publicEntryPath: normalizePath(cell.publicEntry),
-      publicSymbolSet: [...cell.publicSymbols].sort((left, right) => left.localeCompare(right)),
+      publicSymbolSet: [...cell.publicSymbols].sort(stableStringCompare),
       publicSurfaceHash: publicSurfaceHash(publicEntryPath),
       dependencyEdges: dependencyEdgesForCell(cell.id, crossCellDependencies.get(cell.id)),
       artifactContracts: artifactContractsForCell(cell),
@@ -119,8 +119,8 @@ export function compareBaseline(
         cellId,
         message: `${cellId} is not present in the accepted baseline cell set`,
         details: {
-          baselineCellIds: [...baselineCellIds].sort((left, right) => left.localeCompare(right)),
-          currentCellIds: Object.keys(metrics).sort((left, right) => left.localeCompare(right)),
+          baselineCellIds: [...baselineCellIds].sort(stableStringCompare),
+          currentCellIds: Object.keys(metrics).sort(stableStringCompare),
         },
         suggestedResolutions: [
           codeResolution("Move the new source under an existing accepted cell if this is not an intentional architecture addition"),

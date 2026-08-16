@@ -1591,7 +1591,7 @@ function requiredCheckNames(protection: Record<string, unknown>): string[] {
   const checks = Array.isArray(requiredStatusChecks.checks)
     ? requiredStatusChecks.checks.flatMap((entry) => isRecord(entry) && typeof entry.context === "string" ? [entry.context] : [])
     : [];
-  return [...new Set([...contexts, ...checks])].sort((left, right) => left.localeCompare(right));
+  return [...new Set([...contexts, ...checks])].sort();
 }
 
 function addDoctorCheck(checks: DoctorCheck[], check: DoctorCheck): void {
