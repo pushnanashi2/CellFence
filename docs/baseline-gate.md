@@ -25,8 +25,8 @@ the head baseline differs from the base baseline:
 - **crossCellEdges** — `+worker: api.consume`
 - **resourceAccesses** — `+worker: queue:orders.ready:subscribe`
 
-A non-empty report means a governance change. Exit 0 means "yes, the
-PR widens governance"; exit 1 means "no, the baseline is unchanged".
+A non-empty report means a governance change. Exit 1 means "yes, the
+PR widens governance"; exit 0 means "no, the baseline is unchanged".
 
 ### 2. Enforcement — `@cellfence/github-action-baseline-gate`
 
@@ -37,7 +37,8 @@ The companion action:
    see what widened without diffing JSON.
 3. Blocks merge until an approver from the `baseline-codeowners`
    list (or the `.cellfence/baselines/` CODEOWNERS section) has
-   reviewed the PR.
+   reviewed the PR. The prototype resolves GitHub usernames only;
+   team entries must be expanded before use.
 4. Warns (or, with `fail-on-mixed-pr: true`, fails) when the PR
    mixes baseline changes with implementation changes. The default
    is warn — a future flag will make the warn/fail choice a hard

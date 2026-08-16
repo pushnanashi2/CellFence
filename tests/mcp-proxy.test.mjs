@@ -435,6 +435,7 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(options.mode, "dry-run");
     assert.equal(options.failMode, "open");
     assert.equal(options.unknownToolPolicy, "deny");
+    assert.equal(options.downstreamFeaturePolicy, "deny");
     assert.deepEqual(options.readTools, ["custom_read"]);
     assert.equal(options.auditLogPath, "audit.jsonl");
     assert.equal(options.downstreamCommand, process.execPath);
@@ -473,6 +474,7 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
       "--mode", "enforce",
       "--fail-mode", "closed",
       "--unknown-tool-policy", "deny",
+      "--downstream-feature-policy", "allow",
       "--read-tool", "read_file",
       "--read-tool=inspect_file",
       "--audit-log", "audit.jsonl",
@@ -484,15 +486,18 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(separatedOptions.claimsPath, "claims.json");
     assert.equal(separatedOptions.downstreamCommand, "node");
     assert.equal(separatedOptions.unknownToolPolicy, "deny");
+    assert.equal(separatedOptions.downstreamFeaturePolicy, "allow");
     assert.deepEqual(separatedOptions.readTools, ["read_file", "inspect_file"]);
 
     const envOptions = parseProxyArgs([], {
       CELLFENCE_AGENT: "env-agent",
       CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "deny",
+      CELLFENCE_MCP_DOWNSTREAM_FEATURE_POLICY: "allow",
       CELLFENCE_MCP_READ_TOOLS: "read_file, inspect_file,read_file",
       CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node",
     });
     assert.equal(envOptions.unknownToolPolicy, "deny");
+    assert.equal(envOptions.downstreamFeaturePolicy, "allow");
     assert.deepEqual(envOptions.readTools, ["read_file", "inspect_file"]);
 
     const separatorFallback = parseProxyArgs(["--"], {
@@ -520,6 +525,30 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
   }
 });
 
+test("proxy rejects downstream cwd symlinks that escape the root", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-root-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-outside-"));
+  context.after(() => {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  });
+  const linkPath = path.join(rootDir, "outside-link");
+  try {
+    fs.symlinkSync(outsideDir, linkPath, "dir");
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && ["EPERM", "EACCES", "EINVAL"].includes(error.code)) {
+      context.skip(`symlink unavailable on this platform: ${error.code}`);
+      return;
+    }
+    throw error;
+  }
+  assert.throws(
+    () => __testing.resolveAndValidateDownstreamCwd(rootDir, linkPath, false),
+    /--downstream-cwd must be inside --root/,
+  );
+  assert.equal(__testing.resolveAndValidateDownstreamCwd(rootDir, linkPath, true), path.resolve(linkPath));
+});
+
 test("proxy argument parser rejects malformed modes, write tools, and configs", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-parse-errors-"));
   try {
@@ -530,6 +559,7 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_MODE: "bad" }), /invalid mode bad/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_FAIL_MODE: "maybe" }), /invalid fail mode maybe/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "maybe" }), /invalid unknown tool policy maybe/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_DOWNSTREAM_FEATURE_POLICY: "maybe" }), /invalid downstream feature policy maybe/);
     assert.throws(() => parseProxyArgs(["--write-tool", "broken", "--agent=a", "--downstream-command=node"], {}), /NAME=path/);
     assert.throws(() => parseProxyArgs(["--write-tool", "=path", "--agent=a", "--downstream-command=node"], {}), /tool name/);
     assert.throws(() => parseProxyArgs(["--tool-config", path.join(rootDir, "bad-tools.json"), "--agent=a", "--downstream-command=node"], {}), /must list at least one path key/);
@@ -544,6 +574,8 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
     assert.throws(() => parseProxyArgs(["--unknown-tool-policy", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--unknown-tool-policy=", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "" }), /invalid unknown tool policy \(empty\)/);
+    assert.throws(() => parseProxyArgs(["--downstream-feature-policy=maybe", "--agent=a", "--downstream-command=node"], {}), /invalid downstream feature policy maybe/);
+    assert.throws(() => parseProxyArgs(["--downstream-feature-policy", "--agent=a", "--downstream-command=node"], {}), /requires allow or deny/);
     assert.throws(() => parseProxyArgs(["--agent"], { CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node" }), /missing --agent/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command"], {}), /missing --downstream-command/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--unknown"], {}), /unknown argument --unknown/);
@@ -562,7 +594,7 @@ test("proxy path extraction treats prototype names as unknown tools", () => {
 test("proxy downstream environment is filtered to an explicit allowlist (H-3)", () => {
   const safeEnv = __testing.safeDownstreamEnvironment({
     PATH: "/usr/bin:/bin",
-    HOME: "/home/test",
+    HOME: "/tmp/cellfence-home-test",
     USER: "test",
     LANG: "C.UTF-8",
     LC_ALL: "C.UTF-8",
@@ -585,15 +617,24 @@ test("proxy downstream environment is filtered to an explicit allowlist (H-3)", 
   });
   // Allowed names come through verbatim.
   assert.equal(safeEnv.PATH, "/usr/bin:/bin");
-  assert.equal(safeEnv.HOME, "/home/test");
+  assert.equal(safeEnv.HOME, "/tmp/cellfence-home-test");
   assert.equal(safeEnv.USER, "test");
   assert.equal(safeEnv.LANG, "C.UTF-8");
   assert.equal(safeEnv.LC_ALL, "C.UTF-8");
   assert.equal(safeEnv.TZ, "UTC");
+  // 0.4.x (N-9): the audit log path (CELLFENCE_MCP_AUDIT_LOG) and
+  // the unknown-tool policy (CELLFENCE_MCP_UNKNOWN_TOOL_POLICY)
+  // must NOT reach the downstream because they expose operator
+  // state and let a caller override the guard. MOCK_MCP_LOG, on
+  // the other hand, lives in a separate test-harness namespace
+  // (MOCK_ prefix) that the proxy forwards intact so the mock
+  // MCP server can find its JSONL log file. The proxy is the
+  // boundary: production surfaces (CELLFENCE_*, PATH, HOME, ...)
+  // are filtered, and the mock surface is honoured.
   assert.equal(safeEnv.MOCK_MCP_LOG, "/tmp/log");
+  assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, undefined);
   // The proxy's own config is forwarded.
   assert.equal(safeEnv.CELLFENCE_MCP_MODE, "enforce");
-  assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, "/tmp/audit");
   // Secrets and unrelated env are dropped.
   assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY, undefined);
   assert.equal(safeEnv.CELLFENCE_BASELINE_HMAC_KEY_ID, undefined);
@@ -916,7 +957,23 @@ test("MCP proxy deny policy exposes configured tools and blocks unknown calls", 
   }
 });
 
-test("MCP proxy bridges downstream resources, prompts, and completion", async () => {
+test("MCP proxy hides downstream resources, prompts, and completion by default", async () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-features-deny-"));
+  try {
+    writeProject(rootDir);
+    const serverPath = writeFeatureServer(rootDir);
+    await withProxy(rootDir, "enforce", async (_rpc, { initialization }) => {
+      assert.equal(initialization.result.capabilities.resources, undefined);
+      assert.equal(initialization.result.capabilities.prompts, undefined);
+      assert.equal(initialization.result.capabilities.completions, undefined);
+      assert.deepEqual(initialization.result.capabilities.tools, { listChanged: true });
+    }, { serverPath, proxyArgs: ["--read-tool", "read_file"] });
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("MCP proxy bridges downstream resources, prompts, and completion only when explicitly allowed", async () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-features-"));
   try {
     writeProject(rootDir);
@@ -959,7 +1016,7 @@ test("MCP proxy bridges downstream resources, prompts, and completion", async ()
         "notifications/resources/updated",
         "notifications/tools/list_changed",
       ]);
-    }, { serverPath, proxyArgs: ["--read-tool", "read_file", "--read-tool", "run_command"] });
+    }, { serverPath, proxyArgs: ["--downstream-feature-policy", "allow", "--read-tool", "read_file", "--read-tool", "run_command"] });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

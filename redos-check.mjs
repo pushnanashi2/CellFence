@@ -3,7 +3,7 @@
 // The previous patternToRegExp implementation was O(2^n) on this input
 // and would take 6+ seconds at 14 segments, which is the exact
 // reproduction in the security report.
-import { matchesPattern } from "/home/ubuntu/agents/mavis/work/packages/engine/dist/file-index.js";
+import { matchesPattern } from "./packages/engine/dist/file-index.js";
 
 const cases = [
   { pattern: "**", path: "src/a.ts" },

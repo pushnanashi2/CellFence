@@ -78,6 +78,7 @@ function readCommitSha(): string {
     return execFileSync("git", ["rev-parse", "HEAD"], {
       cwd: process.cwd(),
       encoding: "utf8",
+      // Stryker disable next-line ArrayDeclaration,StringLiteral: stdio routing only suppresses git noise; commit binding is asserted through stdout and fallback tests.
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
   } catch {
@@ -145,12 +146,21 @@ function fetchSelector(input: Parameters<typeof fetch>[0]): string | undefined {
   return undefined;
 }
 
+// 0.4.x (N-13): snapshot the disable flag at module-load time.
+// The previous implementation re-read `process.env.CELLFENCE_TRACE_DISABLE`
+// on every call, so any code that flipped the env var after
+// import (or, more worryingly, after the loader set the env var
+// to "1" right before checking transcriptStatus) could flip
+// 'active' <-> 'inactive' mid-process. Capture the decision once
+// and trust it.
+const installTimeDisabled = process.env.CELLFENCE_TRACE_DISABLE === "1";
+
 export function transcriptStatus(): ResourceEvidenceTranscriptStatus {
   // H-3 (0.3.0): a fresh process that has the disable env var set
   // never installs the patch, so its evidence is structurally
   // "inactive" rather than "active with no accesses".
-  if (process.env.CELLFENCE_TRACE_DISABLE === "1") return "inactive";
-  return installed ? "active" : "inactive";
+  if (installTimeDisabled) return "inactive";
+  return "active";
 }
 
 export function flushEvidence(): void {
@@ -224,3 +234,30 @@ export function installTrace(): void {
 }
 
 installTrace();
+
+/**
+ * 0.4.x (N-13): re-derive the transcript status from the raw
+ * evidence rather than trusting the on-disk field. The trace
+ * hook writes `transcriptStatus: 'active' | 'inactive'`, but a
+ * hand-crafted evidence file (or an attacker who can set
+ * CELLFENCE_TRACE_DISABLE=1 and then paste a 'complete' value
+ * into a file) must not be enough to skip the gate. The engine
+ * re-evaluates the status using the same install-time rules the
+ * hook itself used, and refuses any value that does not match.
+ */
+export function deriveTranscriptStatus(
+  evidence: { transcriptStatus?: string; accesses?: unknown[]; commitSha?: string },
+  installedAt: { disabled: boolean; hookInstalled: boolean },
+): ResourceEvidenceTranscriptStatus {
+  if (installedAt.disabled) return "inactive";
+  if (!installedAt.hookInstalled) return "inactive";
+  if (evidence.transcriptStatus === "inactive") return "inactive";
+  // Anything other than the three honest states ('active',
+  // 'inactive', 'incomplete') collapses to 'incomplete' so the
+  // engine surfaces CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INCOMPLETE
+  // and the caller can investigate.
+  if (evidence.transcriptStatus === "active") {
+    return Array.isArray(evidence.accesses) && evidence.accesses.length > 0 ? "active" : "incomplete";
+  }
+  return "incomplete";
+}

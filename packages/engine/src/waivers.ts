@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -20,7 +19,6 @@ const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
  */
 export const MAX_WAIVER_DAYS = 90;
 
-const APPROVER_HISTORY_LIMIT = 200;
 
 function loadManifestFromFile(manifestPath: string): CellFenceManifest {
   const validation = validateManifest(readJsonFile(manifestPath));
@@ -33,14 +31,14 @@ function loadManifestFromFile(manifestPath: string): CellFenceManifest {
 /**
  * Discover the set of identities permitted to approve a CellFence waiver.
  *
- * Resolution order:
- * 1. `CELLFENCE_APPROVERS` env var (comma-separated). Highest priority so
- *    that CI can pin the approver list without modifying the repository.
- * 2. Git commit authors in the most recent `APPROVER_HISTORY_LIMIT` commits.
- * 3. `.github/CODEOWNERS` entries (`@org/team` or `@user`).
- * 4. `.cellfence/approvers.txt`, one identity per line. Optional escape hatch.
+ * `CELLFENCE_APPROVERS` is the only trusted source because it is supplied by
+ * the caller's execution environment. Repository files are intentionally not
+ * read here: a pull request can edit CODEOWNERS or `.cellfence/approvers.txt`
+ * in the same diff as a waiver directive, so those files are policy hints, not
+ * proof that an external approval happened.
  */
 export function getApprovalAllowlist(rootDir: string): string[] {
+  void rootDir;
   const allow = new Set<string>();
   const fromEnv = process.env.CELLFENCE_APPROVERS;
   if (fromEnv) {
@@ -48,49 +46,7 @@ export function getApprovalAllowlist(rootDir: string): string[] {
       const trimmed = item.trim();
       if (trimmed) allow.add(trimmed);
     }
-  }
-  try {
-    const out = execFileSync(
-      "git",
-      ["log", "--format=%ae", "-n", String(APPROVER_HISTORY_LIMIT)],
-      { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
-    );
-    for (const line of out.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed) allow.add(trimmed);
-    }
-  } catch {
-    // best effort
-  }
-  for (const ownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
-    const absolute = path.join(rootDir, ownersPath);
-    if (!fs.existsSync(absolute)) continue;
-    try {
-      const content = fs.readFileSync(absolute, "utf8");
-      for (const line of content.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) continue;
-        const owners = trimmed.match(/@[\w./-]+/g);
-        if (!owners) continue;
-        for (const owner of owners) {
-          allow.add(owner.slice(1));
-        }
-      }
-    } catch {
-      // best effort
-    }
-  }
-  const approversFile = path.join(rootDir, ".cellfence/approvers.txt");
-  if (fs.existsSync(approversFile)) {
-    try {
-      const content = fs.readFileSync(approversFile, "utf8");
-      for (const line of content.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith("#")) allow.add(trimmed);
-      }
-    } catch {
-      // best effort
-    }
+    return [...allow];
   }
   return [...allow];
 }
@@ -120,14 +76,35 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
       errors.push(`expires must be at most ${MAX_WAIVER_DAYS} days from today (got ${span})`);
     }
   }
-  if (approvedBy) {
-    const allowlist = getApprovalAllowlist(rootDir);
-    if (!allowlist.includes(approvedBy)) {
-      errors.push(`approved-by:${approvedBy} is not in the approval allowlist`);
-    }
-  }
   const expired = Boolean(expires) && expires < todayIsoDate();
   if (expired) errors.push("waiver is expired");
+  // 0.4.x: the allowlist mismatch is a hard parse error.
+  // A waiver whose approved-by identity is not in the approval
+  // allowlist (CELLFENCE_APPROVERS)
+  // is marked invalid so the rest of the pipeline (list, prune,
+  // change check) will NOT use it to suppress findings. The
+  // separate CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still
+  // emitted by collectWaiversForManifest for observability, but
+  // it is now an error code, not a soft warning: the waiver
+  // cannot grant a bypass.
+  const allowlist = approvedBy ? getApprovalAllowlist(rootDir) : [];
+  const untrustedApprover = Boolean(approvedBy) && approvedBy.toUpperCase() !== "PENDING" && !allowlist.includes(approvedBy);
+  if (untrustedApprover) {
+    // M-7: when the allowlist itself is empty (no CELLFENCE_APPROVERS)
+    // every approver
+    // name looks untrusted. The previous message blamed the
+    // approver; the real cause is the missing allowlist. Branch
+    // on allowlist size so the operator sees the actionable fix.
+    if (allowlist.length === 0) {
+      errors.push(
+        `approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret or signed review attestation before approving waivers`,
+      );
+    } else {
+      errors.push(
+        `approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS)`,
+      );
+    }
+  }
   return {
     ruleId,
     filePath: repoPath(rootDir, filePath),
@@ -137,6 +114,7 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
     reason,
     expired,
     valid: errors.length === 0,
+    untrustedApprover,
     errors,
   };
 }
@@ -152,13 +130,84 @@ function sourceFilesForManifest(rootDir: string, manifest: CellFenceManifest): s
   return [...files].sort((left, right) => left.localeCompare(right));
 }
 
-export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest): CellFenceWaiver[] {
+export function collectWaiversForManifest(rootDir: string, manifest: CellFenceManifest, findings?: Finding[]): CellFenceWaiver[] {
+  // 0.4.0: cells that opt out of waiver parsing (waiverParsing === false)
+  // keep ownership of their files but their // cellfence-ignore directives
+  // are not interpreted as waivers. This is the escape hatch for cells that
+  // contain deliberately invalid waiver test fixtures (CellFence's own
+  // scripts/ and tests/ trees, for example).
+  const skipCells = new Set(
+    manifest.cells.filter((cell) => cell.waiverParsing === false).map((cell) => cell.id),
+  );
+  // 0.4.x (N-5): surface a warning per cell that opts out of
+  // waiver parsing so the exemption shows up in the same log as
+  // the rest of the findings. Without this, a deliberately
+  // invalid directive in scripts/ or tests/ looks identical
+  // to a clean cell, and CI cannot tell why the engine did
+  // not surface an error.
+  if (findings && skipCells.size > 0) {
+    for (const cellId of skipCells) {
+            findings.push({
+        ruleId: "CELLFENCE_WAIVER_PARSING_DISABLED",
+        severity: "warning",
+        message: `${cellId} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,
+        details: { cellId },
+      });
+    }
+  }
+  // 0.4.x (N-5): the importAnalysis / resourceAnalysis flags
+  // are accepted by the schema but not enforced by the
+  // engine. Surface a warning for every cell that sets them
+  // so the manifest cannot claim an exemption the engine
+  // can't honour.
+  if (findings) {
+    for (const cell of manifest.cells) {
+      if (cell.importAnalysis === false) {
+        findings.push({
+          ruleId: "CELLFENCE_IMPORT_ANALYSIS_DISABLED",
+          severity: "warning",
+          cellId: cell.id,
+          message: `${cell.id} declared importAnalysis: false; the engine cannot honour this flag and continues to run import analysis. Drop the flag or implement the exemption.`,
+        });
+      }
+      if (cell.resourceAnalysis === false) {
+        findings.push({
+          ruleId: "CELLFENCE_RESOURCE_ANALYSIS_DISABLED",
+          severity: "warning",
+          cellId: cell.id,
+          message: `${cell.id} declared resourceAnalysis: false; the engine cannot honour this flag and continues to run resource analysis. Drop the flag or implement the exemption.`,
+        });
+      }
+    }
+  }
+
+  const skipFiles = new Set<string>();
+  if (skipCells.size > 0) {
+    const ctx = createContext(rootDir, manifest);
+    for (const cell of manifest.cells) {
+      if (!skipCells.has(cell.id)) continue;
+      for (const file of sourceFilesForCell(rootDir, cell, ctx)) {
+        skipFiles.add(file);
+      }
+    }
+  }
   const waivers: CellFenceWaiver[] = [];
   for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
+    if (skipFiles.has(sourceFile)) continue;
     const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
     for (const [index, line] of lines.entries()) {
       const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line);
-      if (waiver) waivers.push(waiver);
+      if (!waiver) continue;
+      waivers.push(waiver);
+      if (waiver.untrustedApprover && findings) {
+        findings.push({
+          ruleId: "CELLFENCE_WAIVER_UNTRUSTED_APPROVER",
+          severity: "warning",
+          filePath: waiver.filePath,
+          message: `waiver approves ${waiver.ruleId} but approved-by:${waiver.approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS)`,
+          details: { approvedBy: waiver.approvedBy, ruleId: waiver.ruleId, line: waiver.line },
+        });
+      }
     }
   }
   return waivers;
@@ -179,11 +228,8 @@ function lineForFinding(finding: Finding): number | undefined {
 export function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
   if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
   if (waiver.ruleId !== finding.ruleId) return false;
-  // TODO(0.4.0): findings without line metadata should not be silently waived
-  // by any file-level directive. Tracked as M-20. The 0.3.0 fix preserves the
-  // current match-anywhere behaviour so unrelated tests do not regress.
   const findingLine = lineForFinding(finding);
-  if (!findingLine) return true;
+  if (!findingLine) return false;
   return waiver.line === findingLine || waiver.line === findingLine - 1;
 }
 

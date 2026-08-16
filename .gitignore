@@ -50,6 +50,11 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 packages/*/dist/
+# M-4: ship the github-action-baseline-gate bundle so the
+# GitHub Actions runner has a self-contained distributable.
+# The bundled index.js is committed; the sibling .js.map
+# is intentionally ignored to keep PRs small.
+!packages/github-action-baseline-gate/dist/index.js
 
 # Optional npm cache directory
 .npm
@@ -145,3 +150,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# esbuild source maps (M-4)
+*.js.map

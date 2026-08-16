@@ -1,7 +1,31 @@
 # Changelog
 
+- Breaking changes since 0.2.1 (migration steps below):
+  - Evidence schema v1 -> v2 with `commitSha` required. Run
+    `npx cellfence evidence rewrite --cell <id>` against existing
+    v1 evidence files; the rewrite reads `git rev-parse HEAD`
+    and writes a v2 file alongside the original. v1 evidence
+    is no longer accepted by the engine. Re-bind every cell
+    before running `cellfence check` in CI.
+  - Manifest paths now reject glob metacharacters
+    (`{...}`, extglob `!`, single-`?`, character classes `[...]`,
+    leading `./`, embedded `//`). Manifests that relied on
+    `src/**/*.{ts,tsx}` style patterns must be rewritten with
+    an explicit alternation in the source. The error message
+    names the offending metacharacters.
+  - `cellfence-mcp-proxy`'s `--unknown-tool-policy` default is
+    now `deny` (was `allow`). Existing deployments that did not
+    set the flag now reject previously-allowed tools; pass
+    `--unknown-tool-policy=allow` to opt back into the old
+    behaviour for the transition period.
+  - `cellfence waivers request` now validates the `--expires`
+    date against the 90-day cap before rendering a directive.
+    Scripts that generated waivers with a longer horizon
+    must split the work into multiple waivers within the cap.
+
 ## Unreleased
 
+- Align `governance.claimBackend` with manifest validation and published JSON Schema, remove validator-blind nested analysis flags from artifact/resource contract types, make bare owned paths cover the directory itself and descendants, and avoid unnecessary GitHub Action package metadata rewrites during bundling.
 - Add a fail-closed `mutation:changed` pull-request gate with test/config change detection, isolated incremental caches, machine-readable evidence, and a daily non-incremental full-scope matrix audit while retaining `break: 100` throughout.
 - Cache deterministic `check --changed` base analysis outside the worktree using a key bound to the base commit, analyzer implementation, runtime, policy inputs, severity configuration, and explicit plugin identity.
 - Keep arbitrary plugin loading out of manifest and CLI configuration, support explicit programmatic plugin cache identity, and remove the research ablation switch from public help.
@@ -12,6 +36,10 @@
 - Turn on explicit-any, unused TypeScript binding, and JavaScript undefined-name linting, and generate the README CLI help block from the built CLI with a drift test.
 - Close independent-review gaps by making Python inspector failures fail closed with batch bisection, limiting changed-result cache reuse to non-suppressing base results with complete runtime identity, rejecting empty and prototype-named MCP tool policy inputs, and binding adversarial stdout claims to pinned artifacts.
 - Tie release dispatches to the exact-ref full mutation matrix, retain oracle reports on failure, harden action pin verification, and make changed-scope selection preserve deleted and both renamed paths.
+- Keep changed-scope mutation testing focused on production/test scope changes instead of widening to every scope for package lock, CI, or mutation runner support-file edits.
+- Harden baseline governance gates by preserving skipped-cell fail-closed deltas, diffing artifact contracts, treating CI waiver approvers as an override, binding GitHub Action approvals to the current head commit, requiring an explicit token input, and confining MCP downstream cwd through real paths.
+- Remove public baseline HMAC and test waiver identities from workflows, cover every workspace in root typecheck, and harden CLI value parsing plus normal-check baseline/evidence forwarding.
+- Refuse baselines that would grandfather active findings, fail closed on missing or tampered locked baselines, make claim backend configuration match the shipped synchronous local-file implementation, and mark unresolved or unsupported source observations as incomplete evidence.
 
 ## 0.2.1 - 2026-08-04
 

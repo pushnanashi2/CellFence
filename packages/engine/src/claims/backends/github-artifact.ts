@@ -11,7 +11,6 @@
 // factory function can be referenced from configuration today.
 
 import {
-  type ClaimStoreBackend,
   type ClaimStoreState,
   CellFenceClaimCasConflict,
 } from "../backend.js";
@@ -23,7 +22,7 @@ export type GitHubArtifactClaimStoreOptions = {
   token?: string;
 };
 
-export class GitHubArtifactClaimStore implements ClaimStoreBackend {
+export class GitHubArtifactClaimStore {
   readonly id = "github-artifact";
   // The 0.4.0 wiring will keep an in-memory cache of the last
   // downloaded state and refresh it on every read so the engine can

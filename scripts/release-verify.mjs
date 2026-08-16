@@ -14,6 +14,9 @@ const requiredFiles = [
   "docs/implementation-status.md",
 ];
 const findings = [];
+const publicBaselineHmacTestKeys = new Set([
+  "5a9f2b10da1af4fa5b8c02e7e3c478100ce2301cc12ee6ea2a2c7eae68882989",
+]);
 
 function changelogSection(text, heading) {
   const lines = text.split(/\r?\n/);
@@ -86,8 +89,12 @@ if (hardcodedActionCliVersions.length > 0) {
 if (!/^\s{2}version:\r?\n\s{4}description:/m.test(githubAction)) {
   findings.push("packages/github-action/action.yml must expose a version input for the published CLI");
 }
-if (!/^\s{4}default:\s*latest\s*$/m.test(githubAction)) {
-  findings.push("packages/github-action/action.yml version input must default to npm latest so main does not reference an unpublished CLI");
+const escapedPackageVersion = packageJson.version.replaceAll(".", "\\.");
+if (!new RegExp(`^\\s{4}default:\\s*"?${escapedPackageVersion}"?\\s*$`, "m").test(githubAction)) {
+  findings.push(`packages/github-action/action.yml version input must default to exact package version ${packageJson.version}`);
+}
+if (!new RegExp(`cli_version="?${escapedPackageVersion}"?`).test(githubAction)) {
+  findings.push(`packages/github-action/action.yml empty version fallback must use exact package version ${packageJson.version}`);
 }
 if (!/cli_package="cellfence@\$\{cli_version\}"/.test(githubAction)) {
   findings.push("packages/github-action/action.yml must invoke cellfence through the version input");
@@ -119,6 +126,11 @@ const expectedActionPins = new Map([
 
 for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {
   const text = fs.readFileSync(workflowPath, "utf8");
+  for (const publicKey of publicBaselineHmacTestKeys) {
+    if (text.includes(publicKey)) {
+      findings.push(`${workflowPath} must not contain the public baseline HMAC test key; use a protected GitHub secret`);
+    }
+  }
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     const match = line.match(/uses:\s*(actions\/[^@\s]+)@([^\s#]+)/);
     if (match && !/^[a-f0-9]{40}$/.test(match[2])) {
@@ -127,6 +139,14 @@ for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => 
       findings.push(`${workflowPath}:${index + 1} ${match[1]} must use audited pin ${expectedActionPins.get(match[1])}`);
     }
   }
+}
+
+const ciWorkflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
+if (/CELLFENCE_BASELINE_HMAC_KEY/.test(ciWorkflow)) {
+  findings.push(".github/workflows/ci.yml must not expose CELLFENCE_BASELINE_HMAC_KEY to pull_request jobs; use the Ed25519 public verifier");
+}
+if (!/CELLFENCE_BASELINE_ED25519_PUBLIC_KEY/.test(ciWorkflow)) {
+  findings.push(".github/workflows/ci.yml must configure CELLFENCE_BASELINE_ED25519_PUBLIC_KEY for fork-safe baseline verification");
 }
 
 if (findings.length > 0) {

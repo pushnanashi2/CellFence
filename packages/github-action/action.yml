@@ -14,9 +14,9 @@ inputs:
     required: false
     default: ""
   version:
-    description: Published CellFence CLI version to run. Pin to an exact version (e.g. 0.2.1) for required checks; the action defaults to a fixed release instead of the moving "latest" tag so a malicious or accidental publish cannot replace the binary under your workflows.
+    description: Published CellFence CLI version to run. Pin to an exact version (for example, 0.2.1) for required checks.
     required: false
-    default: 0.2.1
+    default: "0.2.1"
 runs:
   using: composite
   steps:
@@ -28,9 +28,6 @@ runs:
         CELLFENCE_ACTION_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
-        # H-7 (0.3.0): pin the CLI to the version baked into the action so
-        # "npx --yes cellfence@latest" cannot swap the binary out from
-        # under a required check. Operators can still override the input.
         cli_version="${CELLFENCE_ACTION_VERSION:-}"
         if [ -z "${cli_version}" ]; then
           cli_version="0.2.1"

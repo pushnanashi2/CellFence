@@ -23,7 +23,10 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - run: npm run cellfence:self-check
+      - run: |
+          CELLFENCE_BASELINE_ED25519_PUBLIC_KEY='-----BEGIN PUBLIC KEY-----
+          MCowBQYDK2VwAyEANjtQ85FaSB/GOuAFydogMJJtJo5U9TH4saTWkrlnKvo=
+          -----END PUBLIC KEY-----' npm run cellfence:self-check
       - run: npm run pack:smoke
       - run: npm run provenance:scan
       - run: npm run release:verify

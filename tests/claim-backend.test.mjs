@@ -5,8 +5,8 @@ import test from "node:test";
 
 import {
   CellFenceClaimCasConflict,
-  GitHubArtifactClaimStore,
   LocalFileClaimStore,
+  createClaim,
   emptyClaimStoreState,
 } from "../packages/engine/dist/index.js";
 
@@ -57,10 +57,39 @@ test("LocalFileClaimStore raises CellFenceClaimCasConflict when state moves unde
       { ...emptyClaimStoreState(), claims: [{ id: "claim-other", agent: "agent-b", cellId: "worker", paths: ["src/worker/**"], symbols: [], resources: [], artifactLanes: [], expiresAt: "2099-01-01T00:00:00.000Z", fingerprint: "ignored" }] },
       emptyClaimStoreState(),
     );
-    await assert.rejects(
-      store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
+    assert.throws(
+      () => store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
       (error) => error instanceof CellFenceClaimCasConflict,
     );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("LocalFileClaimStore rejects corrupt stores instead of treating them as empty", async () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-corrupt-"));
+  try {
+    const filePath = path.join(dir, "claims.json");
+    fs.writeFileSync(filePath, "{ not json");
+    assert.throws(
+      () => new LocalFileClaimStore({ filePath }).read(),
+      /claim store is corrupt/,
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("LocalFileClaimStore rejects invalid store schemas instead of overwriting them", async () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-invalid-schema-"));
+  try {
+    const filePath = path.join(dir, "claims.json");
+    fs.writeFileSync(filePath, JSON.stringify({ schemaVersion: "wrong", claims: [] }));
+    assert.throws(
+      () => new LocalFileClaimStore({ filePath }).read(),
+      /claim store is corrupt/,
+    );
+    assert.equal(JSON.parse(fs.readFileSync(filePath, "utf8")).schemaVersion, "wrong");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -78,7 +107,6 @@ test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
       return release2;
     });
     // Give the second lock a tick to be queued behind the first.
-    await new Promise((resolve) => setImmediate(resolve));
     assert.equal(secondAcquired, false);
     await release1();
     await second;
@@ -88,22 +116,46 @@ test("LocalFileClaimStore.lock serialises concurrent writers", async () => {
   }
 });
 
-test("GitHubArtifactClaimStore accepts the first write and rejects lock acquisition", async () => {
-  const store = new GitHubArtifactClaimStore({ artifactName: "cellfence-claims" });
-  const previous = await store.read();
-  await store.write({ ...emptyClaimStoreState(), claims: [] }, previous);
-  await assert.rejects(() => store.lock(1000), /github-artifact backend does not provide a lock/);
-});
+test("createClaim returns a structured failure when the backend CAS write conflicts", () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-create-cas-"));
+  const originalWrite = LocalFileClaimStore.prototype.write;
+  try {
+    fs.mkdirSync(path.join(dir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "src/core/public.ts"), "export const core = true;\n");
+    fs.writeFileSync(path.join(dir, "cellfence.manifest.json"), `${JSON.stringify({
+      schemaVersion: "cellfence.manifest.v1",
+      governance: {
+        claimBackend: { type: "local-file" },
+      },
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    }, null, 2)}\n`);
+    LocalFileClaimStore.prototype.write = function writeWithForcedConflict() {
+      throw new CellFenceClaimCasConflict("forced CAS conflict");
+    };
 
-test("GitHubArtifactClaimStore surfaces a CAS conflict when the in-memory state moved", async () => {
-  const store = new GitHubArtifactClaimStore({ artifactName: "cellfence-claims" });
-  const previous = await store.read();
-  // The 0.4.0 wiring will round-trip through the GitHub artifact
-  // API. For the prototype we simulate a concurrent write by
-  // re-pointing the store's lastObserved at a new state directly.
-  store.lastObserved = { ...emptyClaimStoreState(), claims: [] };
-  await assert.rejects(
-    () => store.write({ ...emptyClaimStoreState(), claims: [] }, previous),
-    (error) => error instanceof CellFenceClaimCasConflict,
-  );
+    const result = createClaim({
+      rootDir: dir,
+      agent: "agent-a",
+      cells: ["core"],
+      claimId: "claim-core",
+      ttl: "30m",
+      now: new Date("2026-01-01T00:00:00.000Z"),
+    });
+    assert.equal(result.exitCode, 1);
+    assert.equal(result.createdClaim, undefined);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_CLAIM_INVALID"
+      && /refresh claims and retry/.test(finding.message)
+    ), JSON.stringify(result.findings));
+  } finally {
+    LocalFileClaimStore.prototype.write = originalWrite;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

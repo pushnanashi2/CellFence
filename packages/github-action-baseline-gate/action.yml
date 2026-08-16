@@ -4,12 +4,25 @@ branding:
   icon: shield
   color: blue
 inputs:
+  github-token:
+    description: "GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`."
+    required: true
   cellfence-version:
     description: "CellFence CLI version to install. Pin to a release tag."
     required: false
     default: "0.2.1"
   baseline-codeowners:
-    description: "Comma-separated list of GitHub usernames or teams who can approve a baseline change. Defaults to the repo's CODEOWNERS entries under .cellfence/baselines/."
+    description: "Comma-separated list of GitHub usernames who can approve a baseline change. Team entries are not resolved in this prototype. Defaults to the repo's CODEOWNERS entries under .cellfence/baselines/."
+    required: false
+  baseline-file:
+    description: "Repo-relative path to the baseline JSON."
+    required: false
+    default: ".cellfence/baselines/cellfence.baseline.json"
+  base-ref:
+    description: "Git ref used to read the base baseline. Defaults to the PR base SHA."
+    required: false
+  head-ref:
+    description: "Git ref used to read the head baseline. Defaults to the PR head SHA."
     required: false
   require-separate-pr:
     description: "Warn (and optionally fail) when a baseline change is mixed with implementation changes in the same pull request."

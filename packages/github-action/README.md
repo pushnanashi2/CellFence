@@ -2,7 +2,10 @@
 
 GitHub Action entrypoint package for CellFence checks.
 
-The reusable Action runs the published npm CLI. `version` defaults to npm `latest` so the repository `main` branch never depends on an unpublished release-preparation version. For required checks, pin an exact published version:
+The reusable Action runs the published npm CLI. `version` defaults to the
+package's current exact release (`0.2.1`) so required checks are
+reproducible. Override it only when intentionally testing a different
+published CLI version:
 
 ```yaml
 - uses: OWNER/REPOSITORY/packages/github-action@v0.1.13

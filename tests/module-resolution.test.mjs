@@ -49,6 +49,12 @@ function sha256(text) {
   return crypto.createHash("sha256").update(text).digest("hex");
 }
 
+function packageFreeTempRoot(prefix) {
+  const candidateRoot = process.platform === "win32" ? os.tmpdir() : "/var/tmp";
+  const rootParent = fs.existsSync(candidateRoot) ? candidateRoot : os.tmpdir();
+  return fs.mkdtempSync(path.join(rootParent, prefix));
+}
+
 test("module resolution maps NodeNext runtime specifiers to source files", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-runtime-"));
   try {
@@ -681,6 +687,19 @@ test("nearest path alias resolution uses the closest tsconfig and fails closed w
   }
 });
 
+test("package import and self export resolution fail closed without package metadata", () => {
+  const rootDir = packageFreeTempRoot("cellfence-package-free-resolution-");
+  try {
+    fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
+    const importerPath = path.join(rootDir, "src/importer.ts");
+    fs.writeFileSync(importerPath, "import '#missing';\nexport * from 'missing/self';\n");
+    assert.equal(resolvePackageImportsTarget(rootDir, "src/importer.ts", "#missing"), undefined);
+    assert.deepEqual([...extractPublicSymbols(importerPath)], []);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("public re-export resolution independently follows package imports, self exports, and aliases", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-project-resolution-matrix-"));
   try {
@@ -723,6 +742,7 @@ test("public re-export resolution independently follows package imports, self ex
     const blockedPublicPath = path.join(rootDir, "src/blocked-public.ts");
     const fallbackPublicPath = path.join(rootDir, "src/fallback-public.ts");
     const mismatchedPublicPath = path.join(rootDir, "src/mismatched-public.ts");
+    const emptyNamePublicPath = path.join(rootDir, "src/empty-name-public.ts");
     fs.writeFileSync(importPublicPath, "export * from '#contract';\n");
     fs.writeFileSync(selfPublicPath, "export * from '@example/project/self';\n");
     fs.writeFileSync(selfRootPublicPath, "export * from '@example/project';\n");
@@ -730,6 +750,7 @@ test("public re-export resolution independently follows package imports, self ex
     fs.writeFileSync(blockedPublicPath, "export * from '@example/project/blocked';\n");
     fs.writeFileSync(fallbackPublicPath, "export * from '@example/project/fallback';\n");
     fs.writeFileSync(mismatchedPublicPath, "export * from 'differentpackage/self';\n");
+    fs.writeFileSync(emptyNamePublicPath, "export * from '';\n");
 
     assert.deepEqual([...extractPublicSymbols(importPublicPath)], ["ImportType"]);
     assert.deepEqual([...extractPublicSymbols(selfPublicPath)], ["SelfType"]);
@@ -747,6 +768,12 @@ test("public re-export resolution independently follows package imports, self ex
       exports: { "./self": "./src/contracts/self-types.js" },
     });
     assert.deepEqual([...extractPublicSymbols(selfPublicPath)], []);
+
+    writeJson(path.join(rootDir, "package.json"), {
+      name: "",
+      exports: { ".": "./src/contracts/root-types.js" },
+    });
+    assert.deepEqual([...extractPublicSymbols(emptyNamePublicPath)], []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

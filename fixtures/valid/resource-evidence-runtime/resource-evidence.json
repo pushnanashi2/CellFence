@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.resource-evidence.v2",
-  "commitSha": "52087c50d9b382fa181f21d24bbbf4f8bb261fb6",
+  "commitSha": "HEAD",
   "generatedAt": "2026-07-18T00:00:00.000Z",
   "accesses": [
     {
@@ -27,5 +27,6 @@
       "detectedBy": "fixture-runtime",
       "confidence": "runtime"
     }
-  ]
+  ],
+  "transcriptStatus": "active"
 }

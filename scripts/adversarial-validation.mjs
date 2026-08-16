@@ -8,6 +8,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { checkRepository } from "../packages/engine/dist/index.js";
 
 const categories = ["language-independent", "python", "js-ts"];
+const WAIVER_EXPIRES_AT = (() => {
+  const d = new Date(Date.now() + 89 * 86400 * 1000);
+  return d.toISOString().slice(0, 10);
+})();
 
 function parseArgs(argv) {
   const options = {
@@ -457,7 +461,7 @@ function languageIndependentTemplates() {
     setup(rootDir, index) {
       const producer = `producer${index}`;
       const source = [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:PENDING reason:temporary request",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAIVER_EXPIRES_AT} approved-by:PENDING reason:temporary request`,
         `import { secret${index} } from "../${producer}/internal";`,
         `export const ${symbolName(`consumer${index}`, 0)} = secret${index};`,
         "",
@@ -471,7 +475,7 @@ function languageIndependentTemplates() {
     setup(rootDir, index) {
       const producer = `producer${index}`;
       const source = [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary adversarial required-rule fixture",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAIVER_EXPIRES_AT} approved-by:test-owner reason:temporary adversarial required-rule fixture`,
         `import { secret${index} } from "../${producer}/internal";`,
         `export const ${symbolName(`consumer${index}`, 0)} = secret${index};`,
         "",

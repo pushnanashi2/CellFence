@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
@@ -16,6 +17,10 @@ import {
 } from "../packages/engine/dist/governance/subject-snapshot.js";
 
 const root = process.cwd();
+
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
 
 function completeSnapshot() {
   return createSubjectSnapshotFromFiles([
@@ -60,18 +65,48 @@ function summarizeCheck(result) {
   };
 }
 
+function headCommitSha() {
+  return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+}
+
+function resolveEvidenceFixturePath(fixtureRoot, evidenceRelPath) {
+  const evidenceSrc = path.join(fixtureRoot, evidenceRelPath);
+  const evidence = JSON.parse(fs.readFileSync(evidenceSrc, "utf8"));
+  if (evidence.commitSha === "HEAD") {
+    evidence.commitSha = headCommitSha();
+  }
+  const resolvedDir = path.join(fixtureRoot, ".resolved");
+  const resolvedPath = path.join(resolvedDir, evidenceRelPath);
+  fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+  fs.writeFileSync(resolvedPath, JSON.stringify(evidence, null, 2));
+  return resolvedPath;
+}
+
+function cleanupResolvedEvidence(fixtureRoot) {
+  const resolvedDir = path.join(fixtureRoot, ".resolved");
+  if (fs.existsSync(resolvedDir)) {
+    fs.rmSync(resolvedDir, { recursive: true, force: true });
+  }
+}
+
 function checkFixture(relativePath, options = {}) {
   const previous = process.env.CELLFENCE_BASELINE_HMAC_KEY;
-  const baselinePath = options.baselinePath ? path.join(root, "fixtures", relativePath, options.baselinePath) : "";
+  const fixtureRoot = path.join(root, "fixtures", relativePath);
+  const evidencePaths = (options.evidencePaths || []).map((evidencePath) =>
+    resolveEvidenceFixturePath(fixtureRoot, evidencePath),
+  );
+  const baselinePath = options.baselinePath ? path.join(fixtureRoot, options.baselinePath) : "";
   const baselineHasSeal = baselinePath && JSON.parse(fs.readFileSync(baselinePath, "utf8")).seal;
   if (baselineHasSeal) process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
   try {
     return checkRepository({
-      rootDir: path.join(root, "fixtures", relativePath),
+      rootDir: fixtureRoot,
       manifestPath: "cellfence.manifest.json",
       ...options,
+      evidencePaths,
     });
   } finally {
+    cleanupResolvedEvidence(fixtureRoot);
     if (baselineHasSeal) {
       if (previous === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
       else process.env.CELLFENCE_BASELINE_HMAC_KEY = previous;
@@ -189,6 +224,136 @@ test("parse errors and unsupported observations block without erasing active vio
   assert.equal(evaluation.gateDecision, "BLOCK");
   assert.ok(evaluation.ruleResults.some((result) => result.ruleId === "CELLFENCE_PRIVATE_IMPORT" && result.status === "VIOLATED"));
   assert.ok(evaluation.ruleResults.some((result) => result.ruleId === "CELLFENCE_EVIDENCE_COVERAGE" && result.status === "UNKNOWN"));
+});
+
+test("check evidence graph records unsupported source observations as incomplete", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-envelope-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/app"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "src/app/public.ts"),
+      [
+        "const specifier = './dynamic-target';",
+        "export async function app() {",
+        "  return import(specifier);",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(path.join(tempDir, "cellfence.manifest.json"), `${JSON.stringify({
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    }, null, 2)}\n`);
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
+    const defectNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "evidence-defect");
+    assert.ok(defectNodes.some((node) => node.label === "UNSUPPORTED_OBSERVATION"));
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "src/app/public.ts"
+      && node.family === "imports"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("check evidence graph records unsupported runtime evidence observations as incomplete", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-runtime-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/runtime"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/runtime/public.ts"), "export const runRuntime = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "runtime",
+        ownedPaths: ["src/runtime/**"],
+        publicEntry: "src/runtime/public.ts",
+        publicSymbols: ["runRuntime"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "resource-evidence.json"), {
+      schemaVersion: "cellfence.resource-evidence.v2",
+      commitSha: headCommitSha(),
+      cellId: "runtime",
+      accesses: [],
+      transcriptStatus: "inactive",
+    });
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      evidencePaths: ["resource-evidence.json"],
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
+    const defectNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "evidence-defect");
+    assert.ok(defectNodes.some((node) => node.label === "UNSUPPORTED_OBSERVATION"));
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "resource-evidence.json"
+      && node.family === "resources"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("check evidence graph keeps raw unresolved observations when the displayed rule is off", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-rule-off-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/app"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "src/app/public.ts"),
+      "import { missing } from './missing';\nexport const app = missing;\n",
+    );
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      rules: {
+        CELLFENCE_UNRESOLVED_IMPORT: "off",
+      },
+      cells: [{
+        id: "app",
+        ownedPaths: ["src/app/**"],
+        publicEntry: "src/app/public.ts",
+        publicSymbols: ["app"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+
+    const result = checkRepository({
+      rootDir: tempDir,
+      manifestPath: "cellfence.manifest.json",
+      includeEvidenceGraph: true,
+    });
+    assert.equal(result.findings.some((finding) => finding.ruleId === "CELLFENCE_UNRESOLVED_IMPORT"), false);
+    assert.equal(result.exitCode, 1);
+    const observationNodes = result.evidenceGraph.nodes.filter((node) => node.kind === "observation");
+    assert.ok(observationNodes.some((node) =>
+      node.filePath === "src/app/public.ts"
+      && node.family === "imports"
+      && node.status === "unsupported"
+    ), JSON.stringify(observationNodes));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("evidence assessment detects snapshot mismatch, unknown files, and duplicate observations", () => {

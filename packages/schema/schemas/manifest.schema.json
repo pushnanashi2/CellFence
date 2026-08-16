@@ -115,12 +115,21 @@
             "celery": { "enum": ["on", "off"] }
           }
         },
-        "pathClasses": { "type": "array", "items": { "$ref": "#/$defs/pathClass" } }
+        "pathClasses": { "type": "array", "items": { "$ref": "#/$defs/pathClass" } },
+        "claimBackend": { "$ref": "#/$defs/claimBackend" }
       },
       "allOf": [{
         "if": { "required": ["requireOwnership"], "properties": { "requireOwnership": { "const": true } } },
         "then": { "required": ["include"], "properties": { "include": { "type": "array", "minItems": 1 } } }
       }]
+    },
+    "claimBackend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "local-file" }
+      }
     },
     "resourceContract": {
       "type": "object",

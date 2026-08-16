@@ -1,28 +1,20 @@
 // 0.4.0: claim backend selector. The 0.3.0 prototype shipped the
-// `ClaimStoreBackend` interface and two reference implementations
-// behind it. The full 0.4.0 selector reads `governance.claimBackend`
-// from the manifest and returns the matching backend. The full
-// migration of `packages/engine/src/claims.ts` to call through this
-// interface is queued for a follow-up so this commit stays scoped
-// to "you can configure which backend your repo uses"; the
-// existing JSON-file behaviour is still the default until that
-// migration lands.
-
-import path from "node:path";
+// `ClaimStoreBackend` interface and reference implementations behind
+// it. Only synchronous backends may be exposed through manifest
+// configuration while the public claim commands remain synchronous.
 
 import type { CellFenceManifest } from "@cellfence/schema";
 
 import {
   type ClaimStoreBackend,
-  type ClaimStoreState,
 } from "./backend.js";
 import { LocalFileClaimStore } from "./backends/local-file.js";
-import { GitHubArtifactClaimStore } from "./backends/github-artifact.js";
 
 export type ClaimBackendType = "local-file" | "github-artifact";
+type ConfigurableClaimBackendType = "local-file";
 
 export type ResolvedClaimBackend = {
-  type: ClaimBackendType;
+  type: ConfigurableClaimBackendType;
   backend: ClaimStoreBackend;
   /** Source location the resolver found the configuration in. */
   source: "manifest" | "default" | "env";
@@ -49,29 +41,15 @@ export function resolveClaimBackend(options: ResolveOptions): ResolvedClaimBacke
   const fromManifest = manifestType(options.manifest);
   const type = (fromEnv || fromManifest || "local-file") as ClaimBackendType;
   switch (type) {
-    case "github-artifact": {
-      const manifestBackend = (options.manifest?.governance as Record<string, unknown> | undefined)?.["claimBackend"] as
-        | Record<string, unknown>
-        | undefined;
-      const artifactName = (manifestBackend?.["artifactName"] as string | undefined) ?? "cellfence-claims";
-      const retentionDays = (manifestBackend?.["retentionDays"] as number | undefined) ?? 1;
-      return {
-        type: "github-artifact",
-        backend: new GitHubArtifactClaimStore({
-          artifactName,
-          retentionDays,
-        }),
-        source: fromEnv ? "env" : fromManifest ? "manifest" : "default",
-      };
-    }
     case "local-file":
-    default:
       return {
         type: "local-file",
         backend: new LocalFileClaimStore({ filePath: options.defaultFilePath }),
         source: fromEnv ? "env" : fromManifest ? "manifest" : "default",
       };
+    default:
+      throw new Error(`unsupported claim backend ${type}; only local-file is available`);
   }
 }
 
-export type { ClaimStoreBackend, ClaimStoreState };
+export type { ClaimStoreBackend };

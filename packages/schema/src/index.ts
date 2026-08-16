@@ -150,7 +150,11 @@ export type ManifestGovernance = {
   requiredRules?: string[];
   resourceAdapters?: ResourceAdapterMap;
   pathClasses?: PathClassManifest[];
+  claimBackend?: ClaimBackendManifest;
 };
+
+export type ClaimBackendManifest =
+  | { type: "local-file" };
 
 export type CellManifest = {
   id: string;
@@ -159,6 +163,13 @@ export type CellManifest = {
   publicSymbols: string[];
   packageName?: string;
   locked?: boolean;
+  waiverParsing?: boolean;
+  // Optional human-readable explanation of why the
+  // escape hatch is set. Surfaced by the engine as the
+  // `reason` field on the corresponding warning finding.
+  waiverParsingReason?: string;
+  importAnalysis?: boolean;
+  resourceAnalysis?: boolean;
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
@@ -469,7 +480,7 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
     errors.push(`${location} must be an object`);
     return false;
   }
-  validateKnownKeys(value, location, ["requireOwnership", "include", "exclude", "requiredRules", "resourceAdapters", "pathClasses"], errors);
+  validateKnownKeys(value, location, ["requireOwnership", "include", "exclude", "requiredRules", "resourceAdapters", "pathClasses", "claimBackend"], errors);
   if (!optionalBoolean(value.requireOwnership)) {
     errors.push(`${location}.requireOwnership must be a boolean when present`);
   }
@@ -516,8 +527,28 @@ function validateGovernance(value: unknown, location: string, errors: string[]):
       validateUniqueNonEmptyStrings(pathClassIds, `${location}.pathClasses[].id`, errors);
     }
   }
+  validateClaimBackend(value.claimBackend, `${location}.claimBackend`, errors);
   if (value.requireOwnership === true && (!Array.isArray(value.include) || value.include.length === 0)) {
     errors.push(`${location}.include must contain at least one pattern when requireOwnership is true`);
+  }
+  return true;
+}
+
+function validateClaimBackend(value: unknown, location: string, errors: string[]): value is ClaimBackendManifest {
+  if (value === undefined) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object when present`);
+    return false;
+  }
+  validateKnownKeys(value, location, ["type", "artifactName", "retentionDays"], errors);
+  if (value.type !== "local-file") {
+    errors.push(`${location}.type must be local-file`);
+    return false;
+  }
+  if (value.type === "local-file") {
+    if (value.artifactName !== undefined) errors.push(`${location}.artifactName is not supported for local-file`);
+    if (value.retentionDays !== undefined) errors.push(`${location}.retentionDays is not supported for local-file`);
+    return true;
   }
   return true;
 }
@@ -607,6 +638,10 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "publicSymbols",
     "packageName",
     "locked",
+    "waiverParsing",
+    "waiverParsingReason",
+    "importAnalysis",
+    "resourceAnalysis",
     "consumes",
     "producesArtifacts",
     "resourceContracts",
@@ -637,6 +672,18 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   }
   if (!optionalBoolean(value.locked)) {
     errors.push(`${location}.locked must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.waiverParsing)) {
+    errors.push(`${location}.waiverParsing must be a boolean when present`);
+  }
+  if (!optionalString(value.waiverParsingReason)) {
+    errors.push(`${location}.waiverParsingReason must be a string when present`);
+  }
+  if (!optionalBoolean(value.importAnalysis)) {
+    errors.push(`${location}.importAnalysis must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.resourceAnalysis)) {
+    errors.push(`${location}.resourceAnalysis must be a boolean when present`);
   }
   if (value.consumes !== undefined) {
     if (!Array.isArray(value.consumes)) {

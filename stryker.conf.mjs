@@ -5,6 +5,7 @@ const mutationTestFiles = [
   "tests/resource-access-coverage.test.mjs",
   "tests/schema-validation.test.mjs",
   "tests/github-action.test.mjs",
+  "tests/baseline-gate.test.mjs",
   "tests/plugin-api.test.mjs",
   "tests/official-plugins.test.mjs",
   "tests/trace.test.mjs",
@@ -35,6 +36,7 @@ export default {
     "packages/engine/dist/glob-overlap.js",
     "packages/engine/dist/resource-access.js",
     "packages/github-action/dist/index.js",
+    "packages/github-action-baseline-gate/dist/baseline-gate.js",
   ],
   reporters: ["clear-text", "progress", "json"],
   jsonReporter: {
@@ -56,6 +58,8 @@ export default {
   tempDirName: ".stryker-tmp",
   ignorePatterns: [
     "/coverage",
+    "/.stryker-tmp",
+    "/docs/research",
     "/reports/corpus",
     "/reports/mutation",
     "cellfence-*.tgz",

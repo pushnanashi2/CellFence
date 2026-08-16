@@ -1,10 +1,28 @@
 import assert from "node:assert/strict";
+
+// N-6: ${WAVING_INTO_THE_FUTURE} was a 90-day-ahead literal that
+// expired 2026-10-10 and broke the suite. Use a
+// date relative to module load so the test stays
+// inside the 90-day waiver window forever.
+const WAVING_INTO_THE_FUTURE = (() => {
+  const d = new Date(Date.now() + 89 * 86400 * 1000);
+  return d.toISOString().slice(0, 10);
+})();
+
 import { execFileSync, spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+
+// M-3: B-02 (allowlist hard error) requires an approver
+// allowlist to evaluate any waiver. Set a sentinel so
+// `npm test` is hermetic without exporting
+// CELLFENCE_APPROVERS=test-owner in the developer's shell.
+if (!process.env.CELLFENCE_APPROVERS) {
+  process.env.CELLFENCE_APPROVERS = "test-owner";
+}
 
 import {
   checkChangedRepository,
@@ -25,6 +43,7 @@ import {
   listWaivers,
   loadManifestFromFile,
 } from "../packages/engine/dist/index.js";
+import { sealBaselineIfConfigured } from "../packages/engine/dist/baseline-seal.js";
 
 const root = process.cwd();
 
@@ -56,11 +75,16 @@ function writeJson(filePath, value) {
 
 function writeFakeNodeCommand(binDir, commandName, script) {
   fs.mkdirSync(binDir, { recursive: true });
+  // The fake script uses CommonJS (`require`); on POSIX we must give the
+  // file a `.cjs` extension so Node 24's ESM loader does not refuse
+  // `require` and so the shebang does not look like an extensionless
+  // ESM entry. The Windows `.cmd` shim keeps pointing at the .cjs file.
   const scriptPath = path.join(binDir, `${commandName}-fake.cjs`);
-  fs.writeFileSync(scriptPath, script);
+  fs.writeFileSync(scriptPath, `#!/usr/bin/env node\n${script}`);
+  fs.chmodSync(scriptPath, 0o755);
   const posixPath = path.join(binDir, commandName);
-  fs.writeFileSync(posixPath, `#!/usr/bin/env node\n${script}`);
-  fs.chmodSync(posixPath, 0o755);
+  if (fs.existsSync(posixPath)) fs.unlinkSync(posixPath);
+  fs.symlinkSync(path.basename(scriptPath), posixPath);
   fs.writeFileSync(path.join(binDir, `${commandName}.cmd`), `@echo off\r\n"${process.execPath}" "%~dp0${commandName}-fake.cjs" %*\r\n`);
 }
 
@@ -410,6 +434,7 @@ test("engine rejects stale runtime evidence commit shas at the repository root",
       commitSha: head,
       cellId: "core",
       accesses: [{ kind: "database", access: "read", selector: "app.orders" }],
+      transcriptStatus: "active",
     });
     const current = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
     assert.equal(current.ok, true, JSON.stringify(current.findings));
@@ -832,9 +857,9 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(invalidRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore * expires:2026-10-09 approved-by:test-owner reason:temporary invalid wildcard waiver",
+        `// cellfence-ignore * expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary invalid wildcard waiver`,
         "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH reason:short",
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner`,
         "export const core = true;",
         "",
       ].join("\n"),
@@ -859,7 +884,7 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(mismatchRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary unrelated waiver fixture",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary unrelated waiver fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),
@@ -883,7 +908,7 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(waivedRoot, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner reason:temporary public surface mismatch fixture",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public surface mismatch fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),
@@ -967,6 +992,7 @@ test("engine covers tsconfig alias fallback and runtime evidence default fields"
       commitSha: headSha,
       cellId: "core",
       accesses: [{ kind: "file", access: "read", selector: "data/input.json" }],
+      transcriptStatus: "active",
     });
     const evidence = checkRepository({ rootDir: evidenceRoot, manifestPath: "cellfence.manifest.json", evidencePaths: ["evidence.json"] });
     assert.equal(evidence.ok, true, JSON.stringify(evidence.findings));
@@ -1268,6 +1294,35 @@ test("engine changed checks include untracked files in working tree mode", () =>
     const result = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
     assert.deepEqual(result.changedFiles, ["generated/out.ts"]);
     assert.ok([...result.findings, ...result.warnings].some((finding) => finding.ruleId === "CELLFENCE_GENERATED_PATH_CHANGED"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine changed checks include deleted public entries in the changed scope", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-deleted-public-entry-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.rmSync(path.join(rootDir, "src/core/public.ts"));
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "delete public entry"]);
+
+    const result = checkChangedRepository({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD~1",
+      headRef: "HEAD",
+    });
+    assert.equal(result.exitCode, 1);
+    assert.deepEqual(result.changedFiles, ["src/core/public.ts"]);
+    assert.ok(result.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_PUBLIC_ENTRY_MISSING" && finding.filePath === "src/core/public.ts"
+    ), JSON.stringify(result.findings));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1719,6 +1774,7 @@ test("engine claim creation does not steal fresh or live claim store locks", () 
 
 test("engine locked baseline guard reports each semantic expansion type", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-guard-"));
+  const originalBaselineHmacKey = process.env.CELLFENCE_BASELINE_HMAC_KEY;
   try {
     writeCell(rootDir, "core");
     writeManifest(rootDir, [baseCell("core", { locked: true })]);
@@ -1742,15 +1798,14 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
       },
     });
 
-    assert.deepEqual(
-      guardBaselineUpdate({
-        rootDir,
-        manifestPath: "cellfence.manifest.json",
-        baselinePath: "missing-baseline.json",
-        nextBaseline: { schemaVersion: "cellfence.baseline.v1", generatedAt: "now", cells: {} },
-      }),
-      { ok: true, findings: [] },
-    );
+    const missingBaseline = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "missing-baseline.json",
+      nextBaseline: { schemaVersion: "cellfence.baseline.v1", generatedAt: "now", cells: {} },
+    });
+    assert.equal(missingBaseline.ok, false);
+    assert.match(missingBaseline.findings[0].message, /existing baseline is missing/);
 
     fs.writeFileSync(path.join(rootDir, "bad-baseline.json"), "{not-json");
     assert.throws(
@@ -1773,6 +1828,41 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
       }),
       /baseline is invalid/,
     );
+
+    process.env.CELLFENCE_BASELINE_HMAC_KEY = "test-baseline-secret";
+    const sealedBaseline = sealBaselineIfConfigured({
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+        },
+      },
+    });
+    sealedBaseline.cells.core.publicSymbols = 2;
+    writeJson(path.join(rootDir, "tampered-baseline.json"), sealedBaseline);
+    const tamperedSeal = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "tampered-baseline.json",
+      nextBaseline: {
+        schemaVersion: "cellfence.baseline.v1",
+        generatedAt: "2026-01-02T00:00:00.000Z",
+        cells: {
+          core: {
+            ownedPathPatterns: 1,
+            publicSymbols: 1,
+            publicSurfaceLines: 1,
+            crossCellDependencies: 0,
+          },
+        },
+      },
+    });
+    assert.equal(tamperedSeal.ok, false);
+    assert.ok(tamperedSeal.findings.some((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID"));
 
     const result = guardBaselineUpdate({
       rootDir,
@@ -1836,7 +1926,7 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         },
       },
     });
-    const legacyCompatible = guardBaselineUpdate({
+    const legacyMissingCell = guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "legacy-baseline.json",
@@ -1853,9 +1943,45 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         },
       },
     });
-    assert.equal(legacyCompatible.ok, true, JSON.stringify(legacyCompatible.findings));
+    assert.equal(legacyMissingCell.ok, false, JSON.stringify(legacyMissingCell.findings));
+    assert.match(legacyMissingCell.findings.map((finding) => finding.message).join("\n"), /missing-next is locked and is absent/);
 
-    const shrinkCompatible = guardBaselineUpdate({
+    writeManifest(rootDir, [baseCell("core", { locked: true })]);
+    const legacyFieldIntroduction = guardBaselineUpdate({
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baselinePath: "legacy-baseline.json",
+      nextBaseline: {
+        schemaVersion: "cellfence.baseline.v1",
+        generatedAt: "2026-01-04T00:00:00.000Z",
+        cells: {
+          core: {
+            ownedPathPatterns: 1,
+            publicSymbols: 1,
+            publicSurfaceLines: 1,
+            crossCellDependencies: 0,
+            ownedPathSet: ["src/core/**"],
+            publicEntryPath: "src/core/public.ts",
+            publicSymbolSet: ["core"],
+            publicSurfaceHash: "introduced-hash",
+            dependencyEdges: ["core->other"],
+            artifactContracts: ["produce:reports:src/core/reports/**"],
+            resourceAccesses: [{ kind: "database", access: "read", selector: "app.users" }],
+          },
+        },
+      },
+    });
+    assert.equal(legacyFieldIntroduction.ok, false, JSON.stringify(legacyFieldIntroduction.findings));
+    const legacyMessages = legacyFieldIntroduction.findings.map((finding) => finding.message).join("\n");
+    assert.match(legacyMessages, /ownership scope would expand/);
+    assert.match(legacyMessages, /public entry would be introduced/);
+    assert.match(legacyMessages, /public symbols would be added/);
+    assert.match(legacyMessages, /dependency edges would be added/);
+    assert.match(legacyMessages, /artifact contracts would be added/);
+    assert.match(legacyMessages, /public surface signature hash would be introduced/);
+    assert.match(legacyMessages, /grandfather database read app\.users/);
+
+    const shrinkRejected = guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "legacy-baseline.json",
@@ -1865,8 +1991,11 @@ test("engine locked baseline guard reports each semantic expansion type", () => 
         cells: {},
       },
     });
-    assert.equal(shrinkCompatible.ok, true, JSON.stringify(shrinkCompatible.findings));
+    assert.equal(shrinkRejected.ok, false, JSON.stringify(shrinkRejected.findings));
+    assert.match(shrinkRejected.findings.map((finding) => finding.message).join("\n"), /would be removed from the next baseline/);
   } finally {
+    if (originalBaselineHmacKey === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+    else process.env.CELLFENCE_BASELINE_HMAC_KEY = originalBaselineHmacKey;
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
@@ -1988,7 +2117,7 @@ test("engine prune report detects dead manifest declarations and stale governanc
     fs.writeFileSync(
       path.join(rootDir, "src/consumer/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:2026-10-09 approved-by:test-owner reason:temporary stale waiver fixture",
+        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale waiver fixture`,
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",
@@ -2092,7 +2221,7 @@ test("engine prune report keeps active waivers out of stale-waiver candidates", 
     fs.writeFileSync(
       path.join(rootDir, "src/core/public.ts"),
       [
-        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:2026-10-09 approved-by:test-owner reason:temporary public symbol mismatch fixture",
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public symbol mismatch fixture`,
         "export const extra = true;",
         "",
       ].join("\n"),
@@ -2590,6 +2719,25 @@ test("engine createBaseline throws when the repository cannot be checked", () =>
     assert.throws(
       () => createBaseline({ rootDir, manifestPath: "cellfence.manifest.json" }),
       /schemaVersion must be cellfence\.manifest\.v1/,
+    );
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine createBaseline refuses to grandfather active policy findings", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-create-baseline-policy-"));
+  try {
+    writeCell(rootDir, "producer", "export const publicValue = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/private.ts"), "export const secret = true;\n");
+    writeCell(rootDir, "consumer", "import { secret } from '../producer/private';\nexport const consumer = secret;\n");
+    writeManifest(rootDir, [
+      baseCell("producer", { publicSymbols: ["publicValue"] }),
+      baseCell("consumer", { consumes: [{ cell: "producer" }] }),
+    ]);
+    assert.throws(
+      () => createBaseline({ rootDir, manifestPath: "cellfence.manifest.json" }),
+      /private/i,
     );
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

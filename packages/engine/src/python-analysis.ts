@@ -873,12 +873,17 @@ print(json.dumps({
 `;
 
 let inspectorScriptPath: string | undefined;
+let inspectorScriptTempDir: string | undefined;
 
 function writeInspectorScript(): string {
   if (inspectorScriptPath) return inspectorScriptPath;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-inspector-"));
+  inspectorScriptTempDir = tempDir;
   inspectorScriptPath = path.join(tempDir, "inspect.py");
   fs.writeFileSync(inspectorScriptPath, PYTHON_INSPECTOR, { mode: 0o600 });
+  process.once("exit", () => {
+    if (inspectorScriptTempDir) fs.rmSync(inspectorScriptTempDir, { recursive: true, force: true });
+  });
   return inspectorScriptPath;
 }
 

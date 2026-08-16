@@ -99,6 +99,7 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "src\\..\\escape.ts" }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
+    ["manifest", validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: "claims", retentionDays: 1 } } }), validateManifest],
     ["manifest", validManifest({ overrides: [{ files: ["..\\escape.ts"], rules: {} }] }), validateManifest],
     ["baseline", validBaseline(), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "not-a-date" }), validateBaseline],
@@ -110,6 +111,7 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["evidence", validEvidence({ cellId: "   " }), validateResourceEvidence],
     ["evidence", validEvidence({ accesses: [{ kind: "database", access: "read", selector: "   " }] }), validateResourceEvidence],
     ["evidence", validEvidence({ generatedAt: "2026-99-99T99:99:99Z" }), validateResourceEvidence],
+    ["evidence", validEvidence({ transcriptStatus: "invalid" }), validateResourceEvidence],
   ];
   for (const [schemaName, value, runtimeValidator] of fixtures) {
     const schemaValid = jsonSchemaValidators[schemaName](value);
@@ -165,6 +167,9 @@ test("schema validation accepts maximal valid manifests", () => {
         fastapi: "off",
         sqlalchemy: "on",
         celery: "off",
+      },
+      claimBackend: {
+        type: "local-file",
       },
     },
     rules: {
@@ -393,6 +398,16 @@ test("schema validation rejects malformed manifest governance and overrides", ()
     validateManifest(validManifest({ governance: { resourceAdapters: { unknown: "on", file: "maybe" } } })),
     /unknown must be a known built-in adapter[\s\S]*file must be on\|off/,
   );
+  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: "github-artifact" } })), /claimBackend must be an object/);
+  assertInvalid(validateManifest(validManifest({ governance: { claimBackend: { type: "redis" } } })), /claimBackend\.type must be local-file/);
+  assertInvalid(
+    validateManifest(validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: "claims", retentionDays: 1 } } })),
+    /claimBackend\.type must be local-file/,
+  );
+  assertInvalid(
+    validateManifest(validManifest({ governance: { claimBackend: { type: "local-file", artifactName: "ignored" } } })),
+    /artifactName is not supported for local-file/,
+  );
 
   assertInvalid(validateManifest(validManifest({ overrides: "bad" })), /overrides must be an array/);
   assertInvalid(validateManifest(validManifest({ overrides: [null] })), /overrides\[0\] must be an object/);
@@ -426,8 +441,8 @@ test("schema validation rejects malformed cells and nested contracts", () => {
       cells: [{
         ...validCell,
         consumes: [null, { cell: "", artifactLanes: [1] }],
-        producesArtifacts: [null, { id: "", paths: [""], description: 1, locked: "yes" }],
-        resourceContracts: [null, { id: "", kind: "socket", access: ["execute"], selectors: [""], description: 1 }],
+        producesArtifacts: [null, { id: "", paths: [""], description: 1, locked: "yes", importAnalysis: false }],
+        resourceContracts: [null, { id: "", kind: "socket", access: ["execute"], selectors: [""], description: 1, resourceAnalysis: false }],
         budgets: {
           ownedPathPatterns: -1,
           publicSymbols: 1.2,
@@ -436,7 +451,7 @@ test("schema validation rejects malformed cells and nested contracts", () => {
         },
       }],
     })),
-    /consumes\[0\] must be an object[\s\S]*consumes\[1\]\.cell[\s\S]*artifactLanes[\s\S]*producesArtifacts\[0\] must be an object[\s\S]*producesArtifacts\[1\]\.id[\s\S]*producesArtifacts\[1\]\.paths[\s\S]*description must be a string[\s\S]*locked must be a boolean[\s\S]*resourceContracts\[0\] must be an object[\s\S]*kind must be file\|database\|queue\|http[\s\S]*access must contain[\s\S]*selectors must be an array[\s\S]*ownedPathPatterns must be a non-negative integer/,
+    /consumes\[0\] must be an object[\s\S]*consumes\[1\]\.cell[\s\S]*artifactLanes[\s\S]*producesArtifacts\[0\] must be an object[\s\S]*importAnalysis is not a supported field[\s\S]*producesArtifacts\[1\]\.id[\s\S]*producesArtifacts\[1\]\.paths[\s\S]*description must be a string[\s\S]*locked must be a boolean[\s\S]*resourceContracts\[0\] must be an object[\s\S]*resourceAnalysis is not a supported field[\s\S]*kind must be file\|database\|queue\|http[\s\S]*access must contain[\s\S]*selectors must be an array[\s\S]*ownedPathPatterns must be a non-negative integer/,
   );
 });
 
@@ -613,6 +628,11 @@ test("schema validation accepts and rejects resource evidence", () => {
   }));
   assert.equal(richEvidence.ok, true);
   assert.deepEqual(richEvidence.errors, []);
+  for (const transcriptStatus of ["active", "inactive", "incomplete"]) {
+    const transcriptEvidence = validateResourceEvidence(validEvidence({ transcriptStatus }));
+    assert.equal(transcriptEvidence.ok, true, transcriptEvidence.errors.join("\n"));
+    assert.deepEqual(transcriptEvidence.errors, []);
+  }
 
   assertInvalid(validateResourceEvidence("bad"), /resource evidence must be an object/);
   assertInvalid(validateResourceEvidence(validEvidence({ schemaVersion: "v0" })), /schemaVersion must be/);
@@ -624,6 +644,14 @@ test("schema validation accepts and rejects resource evidence", () => {
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: "" })), /cellId must be a non-empty string/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: "bad" })), /accesses must be an array/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: [123] })), /accesses\[0\] must be an object/);
+  assertInvalidContaining(
+    validateResourceEvidence(validEvidence({ transcriptStatus: "complete" })),
+    ["transcriptStatus must be one of active, inactive, incomplete when present"],
+  );
+  assertInvalidContaining(
+    validateResourceEvidence(validEvidence({ transcriptStatu: "active" })),
+    ["resource evidence.transcriptStatu is not a supported field"],
+  );
   assertInvalid(
     validateResourceEvidence(validEvidence({
       extraEvidence: true,

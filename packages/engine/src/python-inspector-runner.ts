@@ -64,6 +64,7 @@ print(json.dumps(results, separators=(",", ":")))
 `;
 
 let batchRunnerPath: string | undefined;
+let batchRunnerTempDir: string | undefined;
 let memoizedPythonCommand: PythonCommand | undefined;
 let memoizedPythonFailure: Error | undefined;
 let memoizedRuntimeIdentity: string | undefined;
@@ -72,8 +73,12 @@ let inspectorProcessCount = 0;
 function writeBatchRunner(): string {
   if (batchRunnerPath) return batchRunnerPath;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-runner-"));
+  batchRunnerTempDir = tempDir;
   batchRunnerPath = path.join(tempDir, "run-batch.py");
   fs.writeFileSync(batchRunnerPath, PYTHON_BATCH_RUNNER, { mode: 0o600 });
+  process.once("exit", () => {
+    if (batchRunnerTempDir) fs.rmSync(batchRunnerTempDir, { recursive: true, force: true });
+  });
   return batchRunnerPath;
 }
 

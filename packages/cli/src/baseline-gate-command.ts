@@ -31,7 +31,6 @@ export function runBaselineGateCommand(options: BaselineGateOptions): BaselineGa
     options.baseBaselinePath,
     options.headBaselinePath,
   );
-  report.hasChange = report.deltas.some((delta) => delta.added.length > 0 || delta.removed.length > 0);
   const warnings: string[] = [];
   if (options.hasImplementationChanges && report.hasChange) {
     // 0.4.0 will let users override this with a flag, but the default
@@ -44,7 +43,9 @@ export function runBaselineGateCommand(options: BaselineGateOptions): BaselineGa
   }
   // exit 0: governance change present (action continues to enforce
   // approval before merge). exit 1: no change (action can short-circuit).
-  const exitCode = report.hasChange ? 0 : 1;
+  // 0.4.x: CLI help declares '0 no violations / 1 governance violations';
+  // `hasChange: true` is a violation, so it must surface as exit 1.
+  const exitCode = report.hasChange ? 1 : 0;
   return { report, exitCode, warnings };
 }
 
@@ -55,9 +56,10 @@ function printHumanReport(report: GovernanceChangeReport): void {
   }
   console.log(`cellfence baseline gate: ${report.deltas.length} dimension(s) changed between ${report.baseBaselinePath} and ${report.headBaselinePath}`);
   for (const delta of report.deltas) {
-    if (delta.added.length === 0 && delta.removed.length === 0) continue;
+    if (delta.added.length === 0 && delta.removed.length === 0 && (delta.skippedCells?.length ?? 0) === 0) continue;
     console.log(`\n[${delta.dimension}] +${delta.added.length} / -${delta.removed.length}`);
     for (const entry of delta.added) console.log(`  + ${entry}`);
     for (const entry of delta.removed) console.log(`  - ${entry}`);
+    if (delta.skippedCells?.length) console.log(`  skipped: ${delta.skippedCells.join(", ")}`);
   }
 }

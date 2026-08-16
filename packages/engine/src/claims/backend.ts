@@ -1,19 +1,19 @@
-// 0.4.0 (prototype) — distributed claim backend interface.
+// 0.4.0 (prototype) — claim backend interface.
 //
 // Today every claim is written to a single `.cellfence/claims.json`
 // file. That is fine for one developer and one laptop but breaks down
 // the moment two parallel CI jobs try to take a claim at the same
-// time, because the file is not concurrency-safe. The full 0.4.0 work
-// replaces the file with a pluggable backend, the same way the
-// reporter or seal subsystems already do.
+// time, because the file is not concurrency-safe. The shipped backend
+// interface stays synchronous because the public claim commands are
+// synchronous today. Async/distributed backends remain internal until
+// the claim API itself grows an async path.
 //
-// The interface is intentionally minimal: read the current state,
-// compare-and-swap a new state in, and a lock that the caller can
-// release when it is done. Concrete backends (local file, GitHub
-// Actions artifact, Redis, …) plug in behind it. The 0.4.0
-// implementation will refactor packages/engine/src/claims.ts to
-// resolve its backend through this interface; for now the prototype
-// only ships the interface plus two reference implementations.
+// The public type accepts both the original async prototype surface
+// and the synchronous local-file runtime used by the shipped CLI.
+// Manifest-selected backends are still constrained by the resolver:
+// synchronous claim commands reject Promise-returning implementations
+// with a structured claim finding rather than awaiting arbitrary
+// distributed backends in a sync path.
 
 export type ClaimStoreState = {
   /** Schema version the state was serialised with. */
@@ -44,22 +44,20 @@ export type ClaimStoreBackend = {
    * artifact backend) MUST return the last-known state so the engine
    * can detect a lost update.
    */
-  read(): Promise<ClaimStoreState>;
+  read(): ClaimStoreState | Promise<ClaimStoreState>;
   /**
    * Persist `next`, conditional on the previously observed state
    * being `previous`. The implementation MUST throw a
    * `CellFenceClaimCasConflict` if the current state no longer
    * matches `previous`.
    */
-  write(next: ClaimStoreState, previous: ClaimStoreState): Promise<void>;
+  write(next: ClaimStoreState, previous: ClaimStoreState): void | Promise<void>;
   /**
-   * Acquire a distributed lock with the given TTL (ms). Returns a
-   * release function. The lock is advisory: callers MUST still
-   * perform CAS. Backends without a true lock (GitHub Actions
-   * artifact) can throw to signal "no lock available" and let the
-   * caller fall back to optimistic CAS only.
+   * Optional distributed lock retained for compatibility with the
+   * 0.4.0 prototype backend surface. Synchronous claim commands do
+   * not require it; CAS remains mandatory.
    */
-  lock(ttlMs: number): Promise<() => Promise<void>>;
+  lock?(ttlMs: number): Promise<() => Promise<void>>;
 };
 
 export class CellFenceClaimCasConflict extends Error {

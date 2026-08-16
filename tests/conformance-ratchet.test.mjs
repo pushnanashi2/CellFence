@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { checkRepository, guardBaselineUpdate } from "../packages/engine/dist/index.js";
+import {
+  checkRepository,
+  guardBaselineUpdate,
+  sealBaselineIfConfigured,
+} from "../packages/engine/dist/index.js";
 
 const rootDir = process.cwd();
 const casesPath = path.join(rootDir, "tests/conformance/ratchet/ratchet-cases.json");
@@ -30,7 +34,14 @@ function renderCase(testRoot, conformanceCase) {
     writeFile(path.join(testRoot, relativePath), contents);
   }
   writeJson(path.join(testRoot, "cellfence.manifest.json"), conformanceCase.manifest);
-  writeJson(path.join(testRoot, "cellfence.baseline.json"), conformanceCase.baseline);
+  // Re-seal the baseline at test time so the operator's HMAC/ED25519
+  // env var is the single source of truth. The fixture ships with no
+  // hand-written `seal` block; the engine's sealBaselineIfConfigured
+  // will mint a fresh digest when an HMAC key is present, and leave
+  // the baseline unsealed (and therefore verifier-skipped) when no
+  // key is configured. Same pattern as tests/fixtures.test.mjs.
+  const baselineCopy = JSON.parse(JSON.stringify(conformanceCase.baseline));
+  writeJson(path.join(testRoot, "cellfence.baseline.json"), sealBaselineIfConfigured(baselineCopy));
 }
 
 function normalizedFinding(finding) {
@@ -67,6 +78,14 @@ function normalizeFindings(findings) {
 
 function runCase(conformanceCase) {
   const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), `cellfence-ratchet-conformance-${conformanceCase.id}-`));
+  const previousHmac = process.env.CELLFENCE_BASELINE_HMAC_KEY;
+  const previousEdPublic = process.env.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY;
+  const previousEdPrivate = process.env.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY;
+  const previousEdKeyId = process.env.CELLFENCE_BASELINE_ED25519_KEY_ID;
+  process.env.CELLFENCE_BASELINE_HMAC_KEY = "ratchet-conformance-secret";
+  delete process.env.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY;
+  delete process.env.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY;
+  delete process.env.CELLFENCE_BASELINE_ED25519_KEY_ID;
   try {
     renderCase(testRoot, conformanceCase);
     if (conformanceCase.mode === "check") {
@@ -87,6 +106,14 @@ function runCase(conformanceCase) {
     }
     throw new Error(`unknown ratchet conformance mode ${conformanceCase.mode}`);
   } finally {
+    if (previousHmac === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+    else process.env.CELLFENCE_BASELINE_HMAC_KEY = previousHmac;
+    if (previousEdPublic === undefined) delete process.env.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY;
+    else process.env.CELLFENCE_BASELINE_ED25519_PUBLIC_KEY = previousEdPublic;
+    if (previousEdPrivate === undefined) delete process.env.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY;
+    else process.env.CELLFENCE_BASELINE_ED25519_PRIVATE_KEY = previousEdPrivate;
+    if (previousEdKeyId === undefined) delete process.env.CELLFENCE_BASELINE_ED25519_KEY_ID;
+    else process.env.CELLFENCE_BASELINE_ED25519_KEY_ID = previousEdKeyId;
     fs.rmSync(testRoot, { recursive: true, force: true });
   }
 }

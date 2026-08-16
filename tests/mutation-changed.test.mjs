@@ -17,6 +17,7 @@ import {
 import {
   collectChangedFiles,
   createMutationSummary,
+  mutationScopesRequiringFreshRun,
   parseMutationChangedArgs,
   resolveMutationBaseRef,
 } from "../scripts/mutation-changed.mjs";
@@ -75,9 +76,10 @@ test("mutation scopes select source and compiled paths with cross-platform norma
     mutationScopesForFiles([
       "packages/engine/src/file-index.ts",
       "packages\\schema\\dist\\index.js",
+      "packages/github-action-baseline-gate/src/baseline-gate.ts",
       "README.md",
     ]).map((scope) => scope.id),
-    ["schema", "engine-file-index"],
+    ["schema", "engine-file-index", "github-action-baseline-gate"],
   );
 });
 
@@ -90,6 +92,7 @@ test("changed mutation config keeps full thresholds and isolates tests and cache
   assert.equal(config.incremental, true);
   assert.equal(config.incrementalFile, "reports/mutation/incremental/engine-command-execution.json");
   assert.equal(config.jsonReporter.fileName, "reports/mutation/changed/engine-command-execution.json");
+  assert.ok(config.ignorePatterns.includes("/.stryker-tmp"));
 });
 
 test("changed file collection includes committed, staged, unstaged, and untracked paths", (context) => {
@@ -141,7 +144,7 @@ test("base ref resolution honors an explicit environment ref and falls back loca
 test("mutation changed argument parsing rejects missing and unknown options", () => {
   assert.deepEqual(parseMutationChangedArgs([
     "--base", "origin/main", "--head", "HEAD", "--files", "a.ts,b.ts", "--file", "c.ts",
-    "--force", "--no-incremental", "--plan", "--dry-run-only",
+    "--jobs", "1", "--force", "--no-incremental", "--plan", "--dry-run-only",
   ]), {
     baseRef: "origin/main",
     headRef: "HEAD",
@@ -151,8 +154,11 @@ test("mutation changed argument parsing rejects missing and unknown options", ()
     incremental: false,
     plan: true,
     dryRunOnly: true,
+    jobs: 1,
   });
   assert.throws(() => parseMutationChangedArgs(["--base"]), /--base requires a value/);
+  assert.throws(() => parseMutationChangedArgs(["--jobs", "0"]), /positive integer/);
+  assert.throws(() => parseMutationChangedArgs(["--jobs", "2"]), /must run serially/);
   assert.throws(() => parseMutationChangedArgs(["--unknown"]), /Unknown option/);
 });
 
@@ -217,17 +223,41 @@ test("mutation changed plan reports the exact target and dedicated tests", () =>
   assert.doesNotMatch(result.stdout, /tests\/module-resolution\.test\.mjs/);
 });
 
-test("mutation scopes rerun for dedicated tests and all mutation infrastructure changes", () => {
+test("mutation scopes rerun for dedicated source and test changes only", () => {
   assert.deepEqual(
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],
   );
-  assert.equal(mutationScopesForFiles(["stryker.conf.mjs"]).length, MUTATION_SCOPES.length);
-  assert.equal(mutationScopesForFiles(["package-lock.json"]).length, MUTATION_SCOPES.length);
+  assert.deepEqual(
+    mutationScopesForFiles([
+      "package-lock.json",
+      "stryker.conf.mjs",
+      "stryker.changed.conf.mjs",
+      "scripts/mutation-changed.mjs",
+      "scripts/mutation-scopes.mjs",
+      ".github/workflows/ci.yml",
+    ]),
+    [],
+  );
   assert.deepEqual(
     mutationScopesForFiles(["tests/file-index.test.mjs"]).map((scope) => scope.id),
     ["engine-file-index", "engine-glob-overlap"],
     "a deleted dedicated test path must continue to select its mutation scopes",
+  );
+  assert.deepEqual(
+    mutationScopesForFiles(["packages/github-action-baseline-gate/src/baseline-gate.ts"]).map((scope) => scope.id),
+    ["github-action-baseline-gate"],
+  );
+});
+
+test("dedicated test changes force a fresh incremental mutation run for their scopes", () => {
+  assert.deepEqual(
+    [...mutationScopesRequiringFreshRun(["tests/module-resolution.test.mjs"])],
+    ["engine-module-resolution"],
+  );
+  assert.deepEqual(
+    [...mutationScopesRequiringFreshRun(["README.md"])],
+    [],
   );
 });
 

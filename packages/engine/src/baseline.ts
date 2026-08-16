@@ -56,12 +56,17 @@ export function writeBaselineFile(filePath: string, baseline: CellFenceBaseline)
   fs.writeFileSync(filePath, `${JSON.stringify(sealBaselineIfConfigured(baseline), null, 2)}\n`);
 }
 
+function acceptedBaselineRecord(baseline: CellFenceBaseline, cellId: string): CellFenceBaseline["cells"][string] | undefined {
+  if (baseline.cellIds && !baseline.cellIds.includes(cellId)) return undefined;
+  return baseline.cells[cellId];
+}
+
 export function createBaseline(
   options: CheckOptions = {},
   dependencies: BaselineOperationDependencies,
 ): CellFenceBaseline {
   const result = dependencies.checkRepository({ ...options, baselinePath: undefined });
-  if (result.exitCode === 2 || result.exitCode === 3) {
+  if (!result.ok) {
     throw new Error(result.findings.map((finding) => finding.message).join("; "));
   }
   return {
@@ -120,32 +125,52 @@ export function guardBaselineUpdate(
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
   const baselinePath = path.resolve(rootDir, options.baselinePath || defaultBaselinePath(rootDir));
-  if (!fs.existsSync(baselinePath)) return { ok: true, findings: [] };
-
   const manifest = dependencies.loadManifestFromFile(manifestPath);
+  const findings: Finding[] = [];
+  if (!fs.existsSync(baselinePath)) {
+    for (const cell of manifest.cells) {
+      if (!cell.locked) continue;
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked but the existing baseline is missing`,
+        { cell: cell.id, metric: "baseline", previous: null, current: true },
+      );
+    }
+    return { ok: findings.length === 0, findings };
+  }
+
   const existingBaselineValidation = validateBaseline(readJsonFile(baselinePath));
   if (!existingBaselineValidation.ok || !existingBaselineValidation.value) {
     throw new Error(`baseline is invalid: ${existingBaselineValidation.errors.join("; ")}`);
   }
 
-  const findings: Finding[] = [];
   const existingBaseline = existingBaselineValidation.value;
+  for (const finding of validateBaselineSealFindings(manifest, existingBaseline, baselinePath, false)) {
+    addFinding(findings, finding);
+  }
   for (const cell of manifest.cells) {
     if (!cell.locked) continue;
-    const current = options.nextBaseline.cells[cell.id];
-    const previous = existingBaseline.cells[cell.id];
+    const current = acceptedBaselineRecord(options.nextBaseline, cell.id);
+    const previous = acceptedBaselineRecord(existingBaseline, cell.id);
     if (!previous) {
-      if (current) {
-        addLockedBaselineFinding(
-          findings,
-          cell.id,
-          `${cell.id} is locked and is absent from the existing baseline`,
-          { cell: cell.id, metric: "cellIds", previous: null, current: true },
-        );
-      }
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and is absent from the existing baseline`,
+        { cell: cell.id, metric: "cellIds", previous: null, current: Boolean(current) },
+      );
       continue;
     }
-    if (!current) continue;
+    if (!current) {
+      addLockedBaselineFinding(
+        findings,
+        cell.id,
+        `${cell.id} is locked and would be removed from the next baseline`,
+        { cell: cell.id, metric: "cellIds", previous: true, current: null },
+      );
+      continue;
+    }
 
     for (const metric of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"] as const) {
       if (current[metric] > previous[metric]) {
@@ -158,8 +183,9 @@ export function guardBaselineUpdate(
       }
     }
 
-    const scopeExpansion = current.ownedPathSet && previous.ownedPathSet
-      ? current.ownedPathSet.filter((currentPattern) => !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet as string[]))
+    const scopeExpansion = current.ownedPathSet
+      ? current.ownedPathSet.filter((currentPattern) =>
+        previous.ownedPathSet ? !patternCoveredByOwnedPaths(currentPattern, previous.ownedPathSet as string[]) : true)
       : [];
     if (scopeExpansion.length > 0) {
       addLockedBaselineFinding(
@@ -170,17 +196,19 @@ export function guardBaselineUpdate(
       );
     }
 
-    if (current.publicEntryPath && previous.publicEntryPath && current.publicEntryPath !== previous.publicEntryPath) {
+    if (current.publicEntryPath && current.publicEntryPath !== previous.publicEntryPath) {
       addLockedBaselineFinding(
         findings,
         cell.id,
-        `${cell.id} is locked and public entry would change from ${previous.publicEntryPath} to ${current.publicEntryPath}`,
+        previous.publicEntryPath
+          ? `${cell.id} is locked and public entry would change from ${previous.publicEntryPath} to ${current.publicEntryPath}`
+          : `${cell.id} is locked and public entry would be introduced as ${current.publicEntryPath}`,
         { cell: cell.id, metric: "publicEntryPath", previous: previous.publicEntryPath, current: current.publicEntryPath },
       );
     }
 
-    const addedPublicSymbols = current.publicSymbolSet && previous.publicSymbolSet
-      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet as string[]).includes(symbol))
+    const addedPublicSymbols = current.publicSymbolSet
+      ? current.publicSymbolSet.filter((symbol) => !(previous.publicSymbolSet || []).includes(symbol))
       : [];
     if (addedPublicSymbols.length > 0) {
       addLockedBaselineFinding(
@@ -191,8 +219,8 @@ export function guardBaselineUpdate(
       );
     }
 
-    const addedDependencyEdges = current.dependencyEdges && previous.dependencyEdges
-      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges as string[]).includes(edge))
+    const addedDependencyEdges = current.dependencyEdges
+      ? current.dependencyEdges.filter((edge) => !(previous.dependencyEdges || []).includes(edge))
       : [];
     if (addedDependencyEdges.length > 0) {
       addLockedBaselineFinding(
@@ -203,8 +231,8 @@ export function guardBaselineUpdate(
       );
     }
 
-    const addedArtifacts = current.artifactContracts && previous.artifactContracts
-      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts as string[]).includes(artifact))
+    const addedArtifacts = current.artifactContracts
+      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts || []).includes(artifact))
       : [];
     if (addedArtifacts.length > 0) {
       addLockedBaselineFinding(
@@ -215,11 +243,13 @@ export function guardBaselineUpdate(
       );
     }
 
-    if (current.publicSurfaceHash && previous.publicSurfaceHash && current.publicSurfaceHash !== previous.publicSurfaceHash) {
+    if (current.publicSurfaceHash && current.publicSurfaceHash !== previous.publicSurfaceHash) {
       addLockedBaselineFinding(
         findings,
         cell.id,
-        `${cell.id} is locked and public surface signature hash would change`,
+        previous.publicSurfaceHash
+          ? `${cell.id} is locked and public surface signature hash would change`
+          : `${cell.id} is locked and public surface signature hash would be introduced`,
         { cell: cell.id, metric: "publicSurfaceHash", previous: previous.publicSurfaceHash, current: current.publicSurfaceHash },
       );
     }

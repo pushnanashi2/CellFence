@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { resolveClaimBackend } from "../packages/engine/dist/index.js";
 
 const root = process.cwd();
+
+test("public ClaimBackendType keeps the github-artifact backend name for API compatibility", () => {
+  const declaration = fs.readFileSync(path.join(root, "packages/engine/dist/claims/selector.d.ts"), "utf8");
+  assert.match(declaration, /export type ClaimBackendType = "local-file" \| "github-artifact";/);
+});
 
 test("resolveClaimBackend defaults to local-file when no manifest is given", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-selector-"));
@@ -21,7 +25,7 @@ test("resolveClaimBackend defaults to local-file when no manifest is given", () 
   }
 });
 
-test("resolveClaimBackend reads claimBackend.type from the manifest", () => {
+test("resolveClaimBackend rejects unimplemented github-artifact manifests", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-selector-"));
   try {
     const filePath = path.join(dir, "claims.json");
@@ -36,16 +40,16 @@ test("resolveClaimBackend reads claimBackend.type from the manifest", () => {
       },
       cells: [],
     };
-    const resolved = resolveClaimBackend({ rootDir: dir, defaultFilePath: filePath, manifest });
-    assert.equal(resolved.type, "github-artifact");
-    assert.equal(resolved.source, "manifest");
-    assert.equal(resolved.backend.id, "github-artifact");
+    assert.throws(
+      () => resolveClaimBackend({ rootDir: dir, defaultFilePath: filePath, manifest }),
+      /unsupported claim backend github-artifact/,
+    );
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test("resolveClaimBackend honours CELLFENCE_CLAIM_BACKEND env override", () => {
+test("resolveClaimBackend honours the local-file env override", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-selector-"));
   try {
     const filePath = path.join(dir, "claims.json");
@@ -57,10 +61,10 @@ test("resolveClaimBackend honours CELLFENCE_CLAIM_BACKEND env override", () => {
       cells: [],
     };
     const previous = process.env.CELLFENCE_CLAIM_BACKEND;
-    process.env.CELLFENCE_CLAIM_BACKEND = "github-artifact";
+    process.env.CELLFENCE_CLAIM_BACKEND = "local-file";
     try {
       const resolved = resolveClaimBackend({ rootDir: dir, defaultFilePath: filePath, manifest });
-      assert.equal(resolved.type, "github-artifact");
+      assert.equal(resolved.type, "local-file");
       assert.equal(resolved.source, "env");
     } finally {
       if (previous === undefined) delete process.env.CELLFENCE_CLAIM_BACKEND;
@@ -71,7 +75,7 @@ test("resolveClaimBackend honours CELLFENCE_CLAIM_BACKEND env override", () => {
   }
 });
 
-test("resolveClaimBackend falls back to local-file on an unknown type", () => {
+test("resolveClaimBackend rejects unknown backend types", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-selector-"));
   try {
     const filePath = path.join(dir, "claims.json");
@@ -82,8 +86,10 @@ test("resolveClaimBackend falls back to local-file on an unknown type", () => {
       },
       cells: [],
     };
-    const resolved = resolveClaimBackend({ rootDir: dir, defaultFilePath: filePath, manifest });
-    assert.equal(resolved.type, "local-file");
+    assert.throws(
+      () => resolveClaimBackend({ rootDir: dir, defaultFilePath: filePath, manifest }),
+      /unsupported claim backend redis-not-shipped/,
+    );
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
