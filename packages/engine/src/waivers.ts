@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -8,9 +9,16 @@ import { daysBetween, isIsoDate, todayIsoDate } from "./dates.js";
 import { readJsonFile } from "./json-file.js";
 import { sourceFilesForCell, normalizePath, repoPath } from "./file-index.js";
 import { createContext } from "./analysis-context.js";
-import type { AnalysisContext, CellFenceWaiver, CheckOptions, Finding } from "./types.js";
+import { execCommandSync } from "./command-execution.js";
+import { stableCanonicalJson } from "./governance/canonicalization.js";
+import type { AnalysisContext, CellFenceWaiver, CheckOptions, Finding, WaiverAttestation, WaiverAttestationUnsigned } from "./types.js";
 
 const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
+const WAIVER_ATTESTATION_SCHEMA_VERSION = "cellfence.waiver-attestation.v1";
+export const WAIVER_ATTESTATION_HMAC_KEY_ENV = "CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY";
+export const WAIVER_ATTESTATION_HMAC_KEY_ID_ENV = "CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY_ID";
+export const WAIVER_ATTESTATIONS_PATH_ENV = "CELLFENCE_WAIVER_ATTESTATIONS";
+export const WAIVER_REPOSITORY_IDENTITY_ENV = "CELLFENCE_REPOSITORY_IDENTITY";
 
 /**
  * Maximum allowed waiver duration. Waivers that outlive this window are
@@ -51,23 +59,238 @@ export function getApprovalAllowlist(rootDir: string): string[] {
   return [...allow];
 }
 
-function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string): CellFenceWaiver | undefined {
+type WaiverAttestationIndex = {
+  attestations: Map<string, WaiverAttestation>;
+  errors: Map<string, string[]>;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function gitOutput(rootDir: string, args: string[]): string | undefined {
+  try {
+    return execCommandSync("git", args, { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return undefined;
+  }
+}
+
+function currentHeadSha(rootDir: string): string | undefined {
+  return gitOutput(rootDir, ["rev-parse", "--verify", "--end-of-options", "HEAD^{commit}"]);
+}
+
+function repositoryIdentity(rootDir: string): string {
+  const fromEnv = process.env[WAIVER_REPOSITORY_IDENTITY_ENV]?.trim();
+  if (fromEnv) return fromEnv;
+  const remote = gitOutput(rootDir, ["config", "--get", "remote.origin.url"]);
+  if (remote) return remote;
+  return `file://${rootDir}`;
+}
+
+function isoDatePart(value: string): string {
+  return value.slice(0, 10);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function fileSha256(filePath: string): string | undefined {
+  try {
+    return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+  } catch {
+    return undefined;
+  }
+}
+
+function unsignedWaiverAttestation(attestation: WaiverAttestation): WaiverAttestationUnsigned {
+  const { signature: _signature, ...unsigned } = attestation;
+  return unsigned;
+}
+
+export function waiverAttestationHmacDigest(attestation: WaiverAttestation | WaiverAttestationUnsigned, secret: string): string {
+  const unsigned = "signature" in attestation ? unsignedWaiverAttestation(attestation) : attestation;
+  return crypto.createHmac("sha256", secret).update(stableCanonicalJson(unsigned)).digest("hex");
+}
+
+function timingSafeHexEqual(left: string, right: string): boolean {
+  if (!/^[a-f0-9]{64}$/.test(left) || !/^[a-f0-9]{64}$/.test(right)) return false;
+  const leftBuffer = Buffer.from(left, "hex");
+  const rightBuffer = Buffer.from(right, "hex");
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function validateWaiverAttestationShape(value: unknown, source: string): { attestation?: WaiverAttestation; errors: string[] } {
+  const errors: string[] = [];
+  if (!isRecord(value)) return { errors: [`${source}: attestation must be an object`] };
+  const signature = value.signature;
+  if (value.schemaVersion !== WAIVER_ATTESTATION_SCHEMA_VERSION) errors.push(`${source}: schemaVersion must be ${WAIVER_ATTESTATION_SCHEMA_VERSION}`);
+  for (const field of ["attestationId", "repository", "headSha", "sourceSha256", "ruleId", "findingFingerprint", "filePath", "expiresAt", "reason", "approver", "issuedAt"]) {
+    if (typeof value[field] !== "string" || String(value[field]).trim().length === 0) errors.push(`${source}: ${field} must be a non-empty string`);
+  }
+  if (!Number.isInteger(value.line) || Number(value.line) <= 0) errors.push(`${source}: line must be a positive integer`);
+  if (!isRecord(signature)) {
+    errors.push(`${source}: signature must be an object`);
+  } else {
+    if (signature.algorithm !== "hmac-sha256") errors.push(`${source}: signature.algorithm must be hmac-sha256`);
+    if (signature.keyId !== undefined && typeof signature.keyId !== "string") errors.push(`${source}: signature.keyId must be a string when present`);
+    if (typeof signature.digest !== "string" || !/^[a-f0-9]{64}$/.test(signature.digest)) errors.push(`${source}: signature.digest must be a lowercase sha256 hex string`);
+  }
+  if (!/^CELLFENCE_[A-Z0-9_]+$/.test(String(value.ruleId || ""))) errors.push(`${source}: ruleId must be a concrete CELLFENCE_* rule`);
+  if (typeof value.findingFingerprint === "string" && !/^[a-f0-9]{64}$/.test(value.findingFingerprint)) errors.push(`${source}: findingFingerprint must be a lowercase sha256 hex string`);
+  if (typeof value.sourceSha256 === "string" && !/^[a-f0-9]{64}$/.test(value.sourceSha256)) errors.push(`${source}: sourceSha256 must be a lowercase sha256 hex string`);
+  if (typeof value.expiresAt === "string" && Number.isNaN(Date.parse(value.expiresAt))) errors.push(`${source}: expiresAt must be an ISO date or date-time`);
+  if (typeof value.issuedAt === "string" && Number.isNaN(Date.parse(value.issuedAt))) errors.push(`${source}: issuedAt must be an ISO date or date-time`);
+  return errors.length > 0 ? { errors } : { attestation: value as WaiverAttestation, errors };
+}
+
+function attestationValuesFromParsed(parsed: unknown): unknown[] {
+  if (Array.isArray(parsed)) return parsed;
+  if (isRecord(parsed) && Array.isArray(parsed.attestations)) return parsed.attestations;
+  return [parsed];
+}
+
+function loadAttestationFile(filePath: string, index: WaiverAttestationIndex): void {
+  let parsed: unknown;
+  try {
+    parsed = readJsonFile(filePath);
+  } catch (error) {
+    index.errors.set(filePath, [`${filePath}: failed to read waiver attestation: ${error instanceof Error ? error.message : String(error)}`]);
+    return;
+  }
+  for (const [entryIndex, value] of attestationValuesFromParsed(parsed).entries()) {
+    const source = `${filePath}[${entryIndex}]`;
+    const validation = validateWaiverAttestationShape(value, source);
+    const id = validation.attestation?.attestationId || (isRecord(value) && typeof value.attestationId === "string" ? value.attestationId : source);
+    if (validation.errors.length > 0) {
+      index.errors.set(id, [...(index.errors.get(id) || []), ...validation.errors]);
+      continue;
+    }
+    if (index.attestations.has(id)) {
+      index.errors.set(id, [...(index.errors.get(id) || []), `${source}: duplicate waiver attestation id ${id}`]);
+      continue;
+    }
+    index.attestations.set(id, validation.attestation as WaiverAttestation);
+  }
+}
+
+function attestationCandidatePaths(rootDir: string): string[] {
+  const configured = process.env[WAIVER_ATTESTATIONS_PATH_ENV];
+  if (configured) {
+    return configured.split(path.delimiter).map((entry) => entry.trim()).filter(Boolean)
+      .map((entry) => path.isAbsolute(entry) ? entry : path.resolve(rootDir, entry));
+  }
+  return [
+    path.join(rootDir, ".cellfence/waiver-attestations.json"),
+    path.join(rootDir, ".cellfence/waiver-attestations"),
+  ];
+}
+
+function loadWaiverAttestations(rootDir: string): WaiverAttestationIndex {
+  const index: WaiverAttestationIndex = { attestations: new Map(), errors: new Map() };
+  for (const candidate of attestationCandidatePaths(rootDir)) {
+    if (!fs.existsSync(candidate)) continue;
+    const stat = fs.statSync(candidate);
+    if (stat.isDirectory()) {
+      for (const entry of fs.readdirSync(candidate).filter((name) => name.endsWith(".json")).sort()) {
+        loadAttestationFile(path.join(candidate, entry), index);
+      }
+    } else if (stat.isFile()) {
+      loadAttestationFile(candidate, index);
+    }
+  }
+  return index;
+}
+
+function validateWaiverAttestation(
+  rootDir: string,
+  sourceFilePath: string,
+  ruleId: string,
+  attestationId: string,
+  index: WaiverAttestationIndex,
+): { attestation?: WaiverAttestation; errors: string[]; untrustedApprover: boolean } {
+  const errors: string[] = [];
+  const attestation = index.attestations.get(attestationId);
+  if (!attestation) {
+    errors.push(...(index.errors.get(attestationId) || [`attestation:${attestationId} was not found`]));
+    return { errors, untrustedApprover: false };
+  }
+  errors.push(...(index.errors.get(attestationId) || []));
+  if (attestation.ruleId !== ruleId) errors.push(`attestation:${attestationId} ruleId does not match source directive`);
+  if (normalizePath(attestation.filePath) !== repoPath(rootDir, sourceFilePath)) errors.push(`attestation:${attestationId} filePath does not match source directive`);
+  const sourceDigest = fileSha256(sourceFilePath);
+  if (!sourceDigest) errors.push(`attestation:${attestationId} sourceSha256 cannot be verified because the source file is unavailable`);
+  else if (attestation.sourceSha256 !== sourceDigest) errors.push(`attestation:${attestationId} sourceSha256 does not match the evaluated source file`);
+  const directiveLine = (() => {
+    try {
+      const lines = fs.readFileSync(sourceFilePath, "utf8").split(/\r?\n/);
+      const directivePattern = new RegExp(`\\bcellfence-ignore\\s+${escapeRegExp(ruleId)}\\b.*\\battestation:${escapeRegExp(attestationId)}\\b`);
+      const directiveIndex = lines.findIndex((line) => directivePattern.test(line));
+      return directiveIndex >= 0 ? directiveIndex + 1 : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  if (directiveLine && attestation.line !== directiveLine + 1) {
+    errors.push(`attestation:${attestationId} line must target the finding immediately after the source directive`);
+  }
+  const headSha = currentHeadSha(rootDir);
+  if (!headSha) errors.push(`attestation:${attestationId} headSha cannot be verified because HEAD is unavailable`);
+  else if (attestation.headSha !== headSha) errors.push(`attestation:${attestationId} headSha does not match the evaluated HEAD`);
+  const expectedRepository = repositoryIdentity(rootDir);
+  if (attestation.repository !== expectedRepository) errors.push(`attestation:${attestationId} repository does not match ${expectedRepository}`);
+  const expiresAtMs = Date.parse(attestation.expiresAt);
+  if (Number.isNaN(expiresAtMs) || expiresAtMs < Date.now()) errors.push(`attestation:${attestationId} is expired`);
+  else {
+    const span = daysBetween(todayIsoDate(), isoDatePart(attestation.expiresAt));
+    if (span > MAX_WAIVER_DAYS) {
+      errors.push(`attestation:${attestationId} expiresAt must be at most ${MAX_WAIVER_DAYS} days from today (got ${span})`);
+    }
+  }
+  const allowlist = getApprovalAllowlist(rootDir);
+  const untrustedApprover = !allowlist.includes(attestation.approver);
+  if (untrustedApprover) {
+    if (allowlist.length === 0) errors.push(`approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret before accepting waiver attestations`);
+    else errors.push(`attestation:${attestationId} approver ${attestation.approver} is not in the approval allowlist (CELLFENCE_APPROVERS)`);
+  }
+  const secret = process.env[WAIVER_ATTESTATION_HMAC_KEY_ENV];
+  if (!secret) {
+    errors.push(`attestation:${attestationId} cannot be verified; set ${WAIVER_ATTESTATION_HMAC_KEY_ENV}`);
+  } else {
+    const expectedDigest = waiverAttestationHmacDigest(attestation, secret);
+    if (!timingSafeHexEqual(attestation.signature.digest, expectedDigest)) errors.push(`attestation:${attestationId} signature does not match`);
+    const expectedKeyId = process.env[WAIVER_ATTESTATION_HMAC_KEY_ID_ENV];
+    if (expectedKeyId && attestation.signature.keyId !== expectedKeyId) errors.push(`attestation:${attestationId} signature keyId does not match ${WAIVER_ATTESTATION_HMAC_KEY_ID_ENV}`);
+  }
+  return { attestation, errors, untrustedApprover };
+}
+
+function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string, attestations: WaiverAttestationIndex): CellFenceWaiver | undefined {
   const match = WAIVER_PATTERN.exec(text);
   if (!match) return undefined;
   const [, ruleId, suffix] = match;
   const expiresMatch = /\bexpires:(\d{4}-\d{2}-\d{2})\b/.exec(suffix);
   const approvedByMatch = /\bapproved-by:([^\s]+)/.exec(suffix);
+  const attestationMatch = /\battestation:([A-Za-z0-9_.:-]+)\b/.exec(suffix);
   const reasonMatch = /\breason:(.+)$/.exec(suffix);
-  const expires = expiresMatch?.[1] || "";
+  const attestationId = attestationMatch?.[1] || "";
   const approvedBy = approvedByMatch?.[1] || "";
-  const reason = reasonMatch ? reasonMatch[1].trim() : "";
+  const attestationValidation = attestationId
+    ? validateWaiverAttestation(rootDir, filePath, ruleId, attestationId, attestations)
+    : undefined;
+  const attestation = attestationValidation?.attestation;
+  const expires = attestation?.expiresAt || expiresMatch?.[1] || "";
+  const reason = attestation?.reason || (reasonMatch ? reasonMatch[1].trim() : "");
+  const approvedByDisplay = attestation?.approver || approvedBy;
   const errors: string[] = [];
   if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
-  if (!expires || !isIsoDate(expires)) errors.push("expires must be YYYY-MM-DD");
-  if (!approvedBy) errors.push("approved-by is required");
+  if (!attestationId) errors.push("signed waiver attestation is required; source approved-by is a request only");
+  if (approvedBy) errors.push("approved-by in source is not an approval; use attestation:<id> signed by a trusted approver");
+  if (!attestation && (!expires || !isIsoDate(expires))) errors.push("expires must be YYYY-MM-DD until a valid attestation supplies expiresAt");
   if (approvedBy.toUpperCase() === "PENDING") errors.push("approved-by:PENDING is a request placeholder, not an approval");
   if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
-  if (expires && isIsoDate(expires)) {
+  if (!attestation && expires && isIsoDate(expires)) {
     const today = todayIsoDate();
     const span = daysBetween(today, expires);
     if (span < 0) {
@@ -76,41 +299,19 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
       errors.push(`expires must be at most ${MAX_WAIVER_DAYS} days from today (got ${span})`);
     }
   }
-  const expired = Boolean(expires) && expires < todayIsoDate();
+  if (attestationValidation) errors.push(...attestationValidation.errors);
+  const expired = Boolean(expires) && Date.parse(expires) < Date.now();
   if (expired) errors.push("waiver is expired");
-  // 0.4.x: the allowlist mismatch is a hard parse error.
-  // A waiver whose approved-by identity is not in the approval
-  // allowlist (CELLFENCE_APPROVERS)
-  // is marked invalid so the rest of the pipeline (list, prune,
-  // change check) will NOT use it to suppress findings. The
-  // separate CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still
-  // emitted by collectWaiversForManifest for observability, but
-  // it is now an error code, not a soft warning: the waiver
-  // cannot grant a bypass.
-  const allowlist = approvedBy ? getApprovalAllowlist(rootDir) : [];
-  const untrustedApprover = Boolean(approvedBy) && approvedBy.toUpperCase() !== "PENDING" && !allowlist.includes(approvedBy);
-  if (untrustedApprover) {
-    // M-7: when the allowlist itself is empty (no CELLFENCE_APPROVERS)
-    // every approver
-    // name looks untrusted. The previous message blamed the
-    // approver; the real cause is the missing allowlist. Branch
-    // on allowlist size so the operator sees the actionable fix.
-    if (allowlist.length === 0) {
-      errors.push(
-        `approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret or signed review attestation before approving waivers`,
-      );
-    } else {
-      errors.push(
-        `approved-by:${approvedBy} is not in the approval allowlist (CELLFENCE_APPROVERS)`,
-      );
-    }
-  }
+  const untrustedApprover = Boolean(attestationValidation?.untrustedApprover);
   return {
     ruleId,
     filePath: repoPath(rootDir, filePath),
     line,
     expires,
-    approvedBy,
+    approvedBy: approvedByDisplay,
+    attestationId: attestationId || undefined,
+    attestation,
+    findingFingerprint: attestation?.findingFingerprint,
     reason,
     expired,
     valid: errors.length === 0,
@@ -155,32 +356,6 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
       });
     }
   }
-  // 0.4.x (N-5): the importAnalysis / resourceAnalysis flags
-  // are accepted by the schema but not enforced by the
-  // engine. Surface a warning for every cell that sets them
-  // so the manifest cannot claim an exemption the engine
-  // can't honour.
-  if (findings) {
-    for (const cell of manifest.cells) {
-      if (cell.importAnalysis === false) {
-        findings.push({
-          ruleId: "CELLFENCE_IMPORT_ANALYSIS_DISABLED",
-          severity: "warning",
-          cellId: cell.id,
-          message: `${cell.id} declared importAnalysis: false; the engine cannot honour this flag and continues to run import analysis. Drop the flag or implement the exemption.`,
-        });
-      }
-      if (cell.resourceAnalysis === false) {
-        findings.push({
-          ruleId: "CELLFENCE_RESOURCE_ANALYSIS_DISABLED",
-          severity: "warning",
-          cellId: cell.id,
-          message: `${cell.id} declared resourceAnalysis: false; the engine cannot honour this flag and continues to run resource analysis. Drop the flag or implement the exemption.`,
-        });
-      }
-    }
-  }
-
   const skipFiles = new Set<string>();
   if (skipCells.size > 0) {
     const ctx = createContext(rootDir, manifest);
@@ -192,12 +367,21 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
     }
   }
   const waivers: CellFenceWaiver[] = [];
+  const attestations = loadWaiverAttestations(rootDir);
+  const requiredRules = new Set<string>([
+    ...CORE_REQUIRED_RULES,
+    ...(manifest.governance?.requiredRules || []),
+  ]);
   for (const sourceFile of sourceFilesForManifest(rootDir, manifest)) {
     if (skipFiles.has(sourceFile)) continue;
     const lines = fs.readFileSync(sourceFile, "utf8").split(/\r?\n/);
     for (const [index, line] of lines.entries()) {
-      const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line);
+      const waiver = parseWaiverDirective(rootDir, sourceFile, index + 1, line, attestations);
       if (!waiver) continue;
+      if (requiredRules.has(waiver.ruleId)) {
+        waiver.errors.push(`rule ${waiver.ruleId} is required and cannot be waived`);
+        waiver.valid = false;
+      }
       waivers.push(waiver);
       if (waiver.untrustedApprover && findings) {
         findings.push({
@@ -228,8 +412,21 @@ function lineForFinding(finding: Finding): number | undefined {
 export function waiverMatchesFinding(waiver: CellFenceWaiver, finding: Finding): boolean {
   if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
   if (waiver.ruleId !== finding.ruleId) return false;
+  if (waiver.findingFingerprint && finding.fingerprint !== waiver.findingFingerprint) return false;
   const findingLine = lineForFinding(finding);
   if (!findingLine) return false;
+  const attestedLine = waiver.attestation?.line;
+  if (attestedLine) return attestedLine === findingLine;
+  return waiver.line === findingLine || waiver.line === findingLine - 1;
+}
+
+function waiverTargetsFindingLocation(waiver: CellFenceWaiver, finding: Finding): boolean {
+  if (!finding.filePath || waiver.filePath !== normalizePath(finding.filePath)) return false;
+  if (waiver.ruleId !== finding.ruleId) return false;
+  const findingLine = lineForFinding(finding);
+  if (!findingLine) return false;
+  const attestedLine = waiver.attestation?.line;
+  if (attestedLine) return attestedLine === findingLine;
   return waiver.line === findingLine || waiver.line === findingLine - 1;
 }
 
@@ -253,8 +450,27 @@ export function applyWaiversToFindings(
         expires: waiver.expires,
         approvedBy: waiver.approvedBy,
         reason: waiver.reason,
+        attestationId: waiver.attestationId,
       },
     }));
+  for (const waiver of waivers.filter((candidate) => candidate.valid && candidate.findingFingerprint)) {
+    const targetedFinding = findings.find((finding) => waiverTargetsFindingLocation(waiver, finding));
+    if (targetedFinding && !waiverMatchesFinding(waiver, targetedFinding)) {
+      waiverFindings.push({
+        ruleId: "CELLFENCE_WAIVER_INVALID",
+        severity: "error",
+        filePath: waiver.filePath,
+        message: `invalid CellFence waiver at line ${waiver.line}: attestation findingFingerprint does not match the active finding`,
+        details: {
+          line: waiver.line,
+          ruleId: waiver.ruleId,
+          attestationId: waiver.attestationId,
+          expectedFingerprint: targetedFinding.fingerprint,
+          attestedFingerprint: waiver.findingFingerprint,
+        },
+      });
+    }
+  }
 
   const requiredRules = new Set<string>([
     ...CORE_REQUIRED_RULES,

@@ -9,6 +9,7 @@ export type ArtifactLaneManifest = {
   paths: string[];
   description?: string;
   locked?: boolean;
+  external?: boolean;
 };
 
 export type ResourceContractKind = "file" | "database" | "queue" | "http";
@@ -160,6 +161,7 @@ export type CellManifest = {
   id: string;
   ownedPaths: string[];
   publicEntry: string;
+  publicPaths?: string[];
   publicSymbols: string[];
   packageName?: string;
   locked?: boolean;
@@ -168,8 +170,8 @@ export type CellManifest = {
   // escape hatch is set. Surfaced by the engine as the
   // `reason` field on the corresponding warning finding.
   waiverParsingReason?: string;
-  importAnalysis?: boolean;
-  resourceAnalysis?: boolean;
+  importAnalysis?: true;
+  resourceAnalysis?: true;
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
@@ -206,11 +208,13 @@ export type BaselineSeal =
   | {
       algorithm: "hmac-sha256";
       keyId?: string;
+      payloadVersion?: "seal-metadata-v1";
       digest: string;
     }
   | {
       algorithm: "ed25519";
       keyId?: string;
+      payloadVersion?: "seal-metadata-v1";
       signature: string;
     };
 
@@ -333,7 +337,7 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
     errors.push(`${location} must be an object`);
     return false;
   }
-  validateKnownKeys(value, location, ["id", "paths", "description", "locked"], errors);
+  validateKnownKeys(value, location, ["id", "paths", "description", "locked", "external"], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
   }
@@ -348,6 +352,9 @@ function validateArtifactLane(value: unknown, location: string, errors: string[]
   }
   if (!optionalBoolean(value.locked)) {
     errors.push(`${location}.locked must be a boolean when present`);
+  }
+  if (!optionalBoolean(value.external)) {
+    errors.push(`${location}.external must be a boolean when present`);
   }
   return errors.length === 0 || typeof value.id === "string";
 }
@@ -635,6 +642,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "id",
     "ownedPaths",
     "publicEntry",
+    "publicPaths",
     "publicSymbols",
     "packageName",
     "locked",
@@ -662,6 +670,14 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   } else {
     validateRepoRelativePathLike(value.publicEntry, `${location}.publicEntry`, errors);
   }
+  if (value.publicPaths !== undefined) {
+    if (!isStringArray(value.publicPaths)) {
+      errors.push(`${location}.publicPaths must be an array of non-empty strings when present`);
+    } else {
+      validateUniqueNonEmptyStrings(value.publicPaths, `${location}.publicPaths`, errors);
+      validateRepoRelativePathLikeArray(value.publicPaths, `${location}.publicPaths`, errors);
+    }
+  }
   if (!isStringArray(value.publicSymbols)) {
     errors.push(`${location}.publicSymbols must be an array of non-empty strings`);
   } else {
@@ -679,11 +695,11 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   if (!optionalString(value.waiverParsingReason)) {
     errors.push(`${location}.waiverParsingReason must be a string when present`);
   }
-  if (!optionalBoolean(value.importAnalysis)) {
-    errors.push(`${location}.importAnalysis must be a boolean when present`);
+  if (value.importAnalysis !== undefined && value.importAnalysis !== true) {
+    errors.push(`${location}.importAnalysis must be true when present; disabling import analysis is not supported`);
   }
-  if (!optionalBoolean(value.resourceAnalysis)) {
-    errors.push(`${location}.resourceAnalysis must be a boolean when present`);
+  if (value.resourceAnalysis !== undefined && value.resourceAnalysis !== true) {
+    errors.push(`${location}.resourceAnalysis must be true when present; disabling resource analysis is not supported`);
   }
   if (value.consumes !== undefined) {
     if (!Array.isArray(value.consumes)) {
@@ -825,14 +841,17 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
       errors.push("seal must be an object when present");
     } else {
       if (value.seal.algorithm === "hmac-sha256") {
-        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "digest"], errors);
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "payloadVersion", "digest"], errors);
       } else if (value.seal.algorithm === "ed25519") {
-        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "signature"], errors);
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "payloadVersion", "signature"], errors);
       } else {
-        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "digest", "signature"], errors);
+        validateKnownKeys(value.seal, "seal", ["algorithm", "keyId", "payloadVersion", "digest", "signature"], errors);
       }
       if (!optionalString(value.seal.keyId)) {
         errors.push("seal.keyId must be a string when present");
+      }
+      if (value.seal.payloadVersion !== undefined && value.seal.payloadVersion !== "seal-metadata-v1") {
+        errors.push("seal.payloadVersion must be seal-metadata-v1 when present");
       }
       if (value.seal.algorithm === "hmac-sha256") {
         if (typeof value.seal.digest !== "string" || !/^[a-f0-9]{64}$/.test(value.seal.digest)) {

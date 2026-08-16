@@ -42,13 +42,19 @@ test("service manifest adapter imports and verifies the core service boundary fi
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-service-adapter-"));
   try {
     fs.mkdirSync(path.join(rootDir, "systems/platform"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "systems/platform/public"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "systems/platform/public.ts"), "export const platform = true;\n");
+    fs.writeFileSync(path.join(rootDir, "systems/platform/public/health.ts"), "export const health = true;\n");
     writeJson(path.join(rootDir, "systems/platform/service.json"), {
       serviceId: "platform",
       ownedPaths: ["systems/platform/**"],
       allowedServiceImports: [],
       consumes: { systems: [] },
-      produces: { exports: { entry: "systems/platform/public.ts", symbols: ["platform"] }, artifacts: [{ id: "ignored", path: "data/**" }] },
+      produces: {
+        exports: { entry: "systems/platform/public.ts", symbols: ["platform"] },
+        artifacts: [{ id: "platform-data", schema: "platform.v1", path: "data/platform/**" }],
+        http: [{ id: "health", method: "GET", path: "/health" }],
+      },
     });
     fs.mkdirSync(path.join(rootDir, "systems/admin-api"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "systems/admin-api/public.ts"), "export const adminApi = true;\n");
@@ -57,22 +63,103 @@ test("service manifest adapter imports and verifies the core service boundary fi
       ownedPaths: ["systems/admin-api/**"],
       allowedServiceImports: ["platform"],
       consumes: { systems: ["platform"] },
+      readOnlyArtifacts: ["data/platform/**", "data/external/**"],
+      scheduled: ["admin-reconcile"],
       produces: { exports: { entry: "systems/admin-api/public.ts", symbols: ["adminApi"] } },
     });
 
     const imported = createManifestFromServiceManifests({ rootDir, serviceManifestPaths: ["systems/*/service.json"] });
     assert.deepEqual(imported.manifest.cells.map((cell) => cell.id), ["admin-api", "platform"]);
-    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "admin-api").consumes, [{ cell: "platform" }]);
-    assert.ok(imported.warnings.some((warning) => warning.field === "produces.artifacts"));
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "admin-api").consumes, [{ cell: "platform", artifactLanes: ["platform-data"] }]);
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "admin-api").resourceContracts, [
+      {
+        id: "admin-api-readonly-artifact-1",
+        kind: "file",
+        access: ["read"],
+        selectors: ["data/external/**"],
+        description: "readOnlyArtifacts fallback file-read contract",
+      },
+      {
+        id: "admin-api-scheduled-1",
+        kind: "queue",
+        access: ["subscribe"],
+        selectors: ["scheduled:admin-reconcile"],
+        description: "scheduled service task",
+      },
+    ]);
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "platform").publicPaths, ["systems/platform/public/**"]);
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "platform").producesArtifacts, [
+      { id: "platform-data", paths: ["data/platform/**"], description: "schema: platform.v1", external: true },
+    ]);
+    assert.ok(!imported.manifest.cells.find((cell) => cell.id === "platform").ownedPaths.includes("data/platform/**"));
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "platform").resourceContracts, [
+      { id: "health", kind: "http", access: ["serve"], selectors: ["GET /health"] },
+    ]);
+    assert.ok(!imported.warnings.some((warning) => warning.field === "produces.artifacts"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "readOnlyArtifacts"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "scheduled"));
+    const productionScoped = createManifestFromServiceManifests({ rootDir, serviceManifestPaths: ["systems/*/service.json"], scope: "production" });
+    assert.ok(productionScoped.manifest.governance.exclude.includes("tests/**"));
+    assert.equal(productionScoped.manifest.governance.resourceAdapters.file, "off");
+    assert.equal(productionScoped.manifest.governance.resourceAdapters.fastify, "off");
 
     const verified = verifyManifestFromServiceManifests({ rootDir, manifest: imported.manifest, serviceManifestPaths: ["systems/*/service.json"] });
     assert.equal(verified.ok, true, JSON.stringify(verified.findings));
+    const productionVerified = verifyManifestFromServiceManifests({
+      rootDir,
+      manifest: productionScoped.manifest,
+      serviceManifestPaths: ["systems/*/service.json"],
+      scope: "production",
+    });
+    assert.equal(productionVerified.ok, true, JSON.stringify(productionVerified.findings));
 
     const drifted = structuredClone(imported.manifest);
     drifted.cells.find((cell) => cell.id === "admin-api").consumes = [];
     const driftResult = verifyManifestFromServiceManifests({ rootDir, manifest: drifted, serviceManifestPaths: ["systems/*/service.json"] });
     assert.equal(driftResult.ok, false);
     assert.equal(driftResult.findings[0].ruleId, "CELLFENCE_SERVICE_MANIFEST_DRIFT");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("publicPaths allow declared public sub-entries without opening private internals", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-public-paths-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/producer/public"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/producer/public.ts"), "export const producer = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/public/feature.ts"), "export const feature = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/producer/private.ts"), "export const secret = true;\n");
+    fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), "import { feature } from '../producer/public/feature.js';\nexport const consumer = feature;\n");
+    writeJson(path.join(rootDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [
+        {
+          id: "producer",
+          ownedPaths: ["src/producer/**"],
+          publicEntry: "src/producer/public.ts",
+          publicPaths: ["src/producer/public/**"],
+          publicSymbols: ["producer"],
+          consumes: [],
+          producesArtifacts: [],
+        },
+        {
+          id: "consumer",
+          ownedPaths: ["src/consumer/**"],
+          publicEntry: "src/consumer/public.ts",
+          publicSymbols: ["consumer"],
+          consumes: [{ cell: "producer" }],
+          producesArtifacts: [],
+        },
+      ],
+    });
+
+    assert.equal(checkRepository({ rootDir }).ok, true);
+    fs.writeFileSync(path.join(rootDir, "src/consumer/public.ts"), "import { secret } from '../producer/private.js';\nexport const consumer = secret;\n");
+    const result = checkRepository({ rootDir });
+    assert.equal(result.ok, false);
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_PRIVATE_IMPORT"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -109,22 +196,46 @@ test("service manifest adapter stays aligned with sanitized Cash service manifes
       "research-pipelines",
       "sec-eval",
     ]);
-    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "admin-api").consumes, [
-      { cell: "alpha-review" },
-      { cell: "disclosure-ingestion" },
-      { cell: "event-eval" },
-      { cell: "experiment-evaluation" },
-      { cell: "llm-gateway" },
-      { cell: "market-data" },
-      { cell: "ops-runtime" },
-      { cell: "platform" },
-      { cell: "portfolio-state" },
-      { cell: "report-output" },
-      { cell: "sec-eval" },
+    const adminConsumes = imported.manifest.cells.find((cell) => cell.id === "admin-api").consumes;
+    assert.deepEqual(adminConsumes.map((consumer) => consumer.cell), [
+      "agent-autopilot",
+      "alpha-discovery",
+      "alpha-review",
+      "disclosure-ingestion",
+      "entity-master",
+      "event-eval",
+      "experiment-evaluation",
+      "factor-eval",
+      "llm-gateway",
+      "market-data",
+      "ops-runtime",
+      "platform",
+      "portfolio-state",
+      "qualitative-eval",
+      "report-output",
+      "research-pipelines",
+      "sec-eval",
     ]);
+    assert.deepEqual(adminConsumes.find((consumer) => consumer.cell === "market-data").artifactLanes, ["market-data"]);
+    assert.deepEqual(adminConsumes.find((consumer) => consumer.cell === "platform").artifactLanes, ["platform"]);
     assert.equal(imported.manifest.cells.find((cell) => cell.id === "platform").publicEntry, "systems/platform/public.ts");
     assert.ok(imported.manifest.cells.find((cell) => cell.id === "research-pipelines").publicSymbols.includes("loadResearchGoals"));
-    assert.ok(imported.warnings.some((warning) => warning.serviceId === "platform" && warning.field === "produces.artifacts"));
+    assert.ok(imported.manifest.cells.find((cell) => cell.id === "platform").producesArtifacts.length > 0);
+    assert.ok(!imported.warnings.some((warning) => warning.serviceId === "platform" && warning.field === "produces.artifacts"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "ownedData"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "writePaths"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "readOnlyArtifacts"));
+    assert.ok(!imported.warnings.some((warning) => warning.field === "scheduled"));
+    assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "agent-autopilot").resourceContracts, [
+      {
+        id: "agent-autopilot-scheduled-1",
+        kind: "queue",
+        access: ["subscribe"],
+        selectors: ["scheduled:agent-cycle"],
+        description: "scheduled service task",
+      },
+    ]);
+    assert.ok(imported.manifest.cells.find((cell) => cell.id === "platform").ownedPaths.includes("systems/platform/config/script-capabilities.v1.json"));
 
     const verified = verifyManifestFromServiceManifests({ rootDir, manifest: imported.manifest, serviceManifestPaths: ["systems/*/service.json"] });
     assert.equal(verified.ok, true, JSON.stringify(verified.findings));

@@ -8,6 +8,11 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 import {
+  CELLFENCE_BASELINE_SCHEMA_VERSION,
+  validateBaseline,
+  type CellFenceBaseline,
+} from "@cellfence/schema";
+import {
   readJsonFile,
 } from "@cellfence/engine";
 
@@ -48,24 +53,66 @@ function resolveBaselineAtRef(rootDir: string, ref: string, baselineFile: string
   if (!ref || !/^[0-9a-fA-F]{4,}$|^[A-Za-z0-9._/-]+$/.test(ref)) {
     throw new Error(`refused to read baseline at invalid git ref: ${JSON.stringify(ref)}`);
   }
-  return path.relative(repoRoot, baselineFile) || baselineFile;
+  const relative = path.relative(repoRoot, baselineFile).replaceAll(path.sep, "/") || baselineFile;
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`baseline file must stay inside the git repository: ${baselineFile}`);
+  }
+  return relative;
 }
 
 function readBaselineFromGit(rootDir: string, ref: string, baselineFile: string): unknown {
   const relative = resolveBaselineAtRef(rootDir, ref, baselineFile);
   try {
-    const text = execFileSync("git", ["show", `${ref}:${relative}`], {
+    execFileSync("git", ["cat-file", "-e", `${ref}^{commit}`], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+  } catch (error) {
+    throw new Error(
+      `cannot resolve git ref ${ref}: ${(error as Error).message}`,
+      { cause: error },
+    );
+  }
+  let text: string;
+  try {
+    text = execFileSync("git", ["show", `${ref}:${relative}`], {
       cwd: rootDir,
       encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
+      stdio: ["ignore", "pipe", "pipe"],
     });
-    return JSON.parse(text);
   } catch (error) {
+    if (gitShowMissingPath(error)) return emptyBaseline();
     throw new Error(
       `failed to read baseline at git ref ${ref} (${relative}): ${(error as Error).message}`,
       { cause: error },
     );
   }
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(
+      `failed to parse baseline at git ref ${ref} (${relative}): ${(error as Error).message}`,
+      { cause: error },
+    );
+  }
+}
+
+function gitShowMissingPath(error: unknown): boolean {
+  const output = [
+    error instanceof Error ? error.message : "",
+    error && typeof error === "object" && "stderr" in error ? String((error as { stderr?: unknown }).stderr) : "",
+    error && typeof error === "object" && "stdout" in error ? String((error as { stdout?: unknown }).stdout) : "",
+  ].join("\n");
+  return /path ['"].*['"] does not exist in|exists on disk, but not in/i.test(output);
+}
+
+function emptyBaseline(): CellFenceBaseline {
+  return {
+    schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
+    generatedAt: "1970-01-01T00:00:00.000Z",
+    cellIds: [],
+    cells: {},
+  };
 }
 
 export type BaselineGateFullOptions = {
@@ -90,12 +137,31 @@ function readBaselineAt(rootDir: string, options: { ref?: string; filePath?: str
     };
   }
   if (options.filePath) {
-    return {
-      value: readJsonFile(options.filePath),
-      displayPath: options.filePath,
-    };
+    try {
+      return {
+        value: readJsonFile(options.filePath),
+        displayPath: options.filePath,
+      };
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? (error as NodeJS.ErrnoException).code : undefined;
+      if (code === "ENOENT") {
+        return {
+          value: emptyBaseline(),
+          displayPath: options.filePath,
+        };
+      }
+      throw error;
+    }
   }
   throw new Error("either a git ref or a local file path is required");
+}
+
+function validateBaselineValue(value: unknown, displayPath: string): CellFenceBaseline {
+  const validation = validateBaseline(value);
+  if (!validation.ok || !validation.value) {
+    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${validation.errors.join("; ")}`);
+  }
+  return validation.value;
 }
 
 export function runBaselineGateFull(options: BaselineGateFullOptions): BaselineGateResult {
@@ -122,40 +188,13 @@ export function runBaselineGateFull(options: BaselineGateFullOptions): BaselineG
     throw new Error(`head baseline: ${(error as Error).message}`, { cause: error });
   }
 
-  // 0.4.x (N-12): the previous code cast `unknown` to `never`
-  // before handing the values to the engine, which bypassed the
-  // type check and let an arbitrary object through. The engine's
-  // detectBaselineChanges expects a CellFenceBaseline; reject
-  // anything that doesn't look like one here so the runBaselineGateCommand
-  // call has a typed argument and the engine's structural
-  // assumptions hold end-to-end.
-  if (!isBaselineLike(baseBaseline) || !isBaselineLike(headBaseline)) {
-    throw new Error(
-      `baseline at ${baseDisplay} or ${headDisplay} is not a CellFenceBaseline (missing cells, schemaVersion, or generatedAt)`,
-    );
-  }
-  // The runtime check above guarantees the structural shape; the
-  // double cast keeps the literal schemaVersion type from
-  // CellFenceBaseline intact while still rejecting malformed
-  // values before they reach the engine.
   const gateOptions: BaselineGateOptions = {
-    baseBaseline: baseBaseline as Parameters<typeof runBaselineGateCommand>[0]["baseBaseline"],
-    headBaseline: headBaseline as Parameters<typeof runBaselineGateCommand>[0]["headBaseline"],
+    baseBaseline: validateBaselineValue(baseBaseline, baseDisplay),
+    headBaseline: validateBaselineValue(headBaseline, headDisplay),
     baseBaselinePath: baseDisplay,
     headBaselinePath: headDisplay,
     format: options.format,
     hasImplementationChanges: options.hasImplementationChanges ?? false,
   };
   return runBaselineGateCommand(gateOptions);
-}
-
-function isBaselineLike(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as { schemaVersion?: unknown; generatedAt?: unknown; cells?: unknown };
-  return (
-    typeof candidate.schemaVersion === "string" &&
-    typeof candidate.generatedAt === "string" &&
-    typeof candidate.cells === "object" &&
-    candidate.cells !== null
-  );
 }

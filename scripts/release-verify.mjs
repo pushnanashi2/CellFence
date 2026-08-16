@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { publicWorkspaceDirs } from "./public-workspaces.mjs";
 
 const requiredFiles = [
   "README.md",
@@ -114,6 +115,20 @@ if (!mcpProxyVersionMatch) {
   findings.push("packages/mcp-proxy/src/index.ts must expose a package VERSION");
 } else if (mcpProxyVersionMatch[1] !== packageJson.version) {
   findings.push(`packages/mcp-proxy/src/index.ts exposes VERSION ${mcpProxyVersionMatch[1]}, expected ${packageJson.version}`);
+}
+
+const publicPackages = publicWorkspaceDirs();
+const npmPublishWorkflow = fs.readFileSync(".github/workflows/npm-publish.yml", "utf8");
+if (/package_dirs=\(\s*\r?\n\s*packages\//.test(npmPublishWorkflow)) {
+  findings.push(".github/workflows/npm-publish.yml must derive package_dirs from scripts/public-workspaces.mjs instead of a hand-written list");
+}
+const publicWorkspaceCalls = [...npmPublishWorkflow.matchAll(/mapfile -t package_dirs < <\(node scripts\/public-workspaces\.mjs\)/g)].length;
+if (publicWorkspaceCalls !== 3) {
+  findings.push(`.github/workflows/npm-publish.yml must load public workspaces in preflight, publish, and smoke steps; found ${publicWorkspaceCalls}`);
+}
+for (const packageDir of publicPackages) {
+  const packageJsonPath = `${packageDir}/package.json`;
+  if (!fs.existsSync(packageJsonPath)) findings.push(`public workspace is missing package.json: ${packageDir}`);
 }
 
 const expectedActionPins = new Map([

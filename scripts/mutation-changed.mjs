@@ -6,9 +6,12 @@ import { fileURLToPath } from "node:url";
 import baseMutationConfig from "../stryker.conf.mjs";
 import {
   MUTATION_SCOPES,
+  isMutationInfrastructurePath,
   mutationScopeById,
+  mutationScopeTestCommand,
   mutationScopesForFiles,
   normalizeRepositoryPath,
+  validateMutationGovernanceConfig,
   validateMutationScopeCoverage,
 } from "./mutation-scopes.mjs";
 
@@ -60,14 +63,15 @@ export function parseMutationChangedArgs(args) {
 
 function parseJobs(value) {
   const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1) throw new Error(`--jobs must be a positive integer; got ${value}`);
-  if (parsed !== 1) throw new Error("changed mutation scopes must run serially; Stryker sandboxes are not safe to execute in parallel");
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 4) {
+    throw new Error(`--jobs must be an integer from 1 to 4; got ${value}`);
+  }
   return parsed;
 }
 
 function gitRefExists(ref, rootDir = repositoryRoot) {
   try {
-    execFileSync("git", ["rev-parse", "--verify", `${ref}^{commit}`], {
+    execFileSync("git", ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`], {
       cwd: rootDir,
       stdio: "ignore",
     });
@@ -92,14 +96,15 @@ export function collectChangedFiles(baseRef, headRef = "HEAD", rootDir = reposit
     "--name-only",
     "-z",
     "--no-renames",
-    "--diff-filter=ACMRD",
+    "--diff-filter=ACMRDT",
+    "--end-of-options",
     `${baseRef}...${headRef}`,
   ], rootDir)));
 
-  if (headRef === "HEAD") {
+  if (isCurrentHeadRef(headRef, rootDir)) {
     for (const args of [
-      ["diff", "--name-only", "-z", "--no-renames", "--diff-filter=ACMRD", "HEAD"],
-      ["diff", "--cached", "--name-only", "-z", "--no-renames", "--diff-filter=ACMRD", "HEAD"],
+      ["diff", "--name-only", "-z", "--no-renames", "--diff-filter=ACMRDT", "--end-of-options", "HEAD"],
+      ["diff", "--cached", "--name-only", "-z", "--no-renames", "--diff-filter=ACMRDT", "--end-of-options", "HEAD"],
       ["ls-files", "--others", "--exclude-standard", "-z"],
     ]) {
       for (const filePath of nulSeparatedPaths(gitOutput(args, rootDir))) changed.add(filePath);
@@ -111,9 +116,51 @@ export function collectChangedFiles(baseRef, headRef = "HEAD", rootDir = reposit
 
 export function mutationScopesRequiringFreshRun(changedFiles, scopes = MUTATION_SCOPES) {
   const changed = new Set(changedFiles.map(normalizeRepositoryPath));
+  if ([...changed].some(isMutationInfrastructurePath)) return new Set(scopes.map((scope) => scope.id));
   return new Set(scopes
-    .filter((scope) => scope.tests.some((testPath) => changed.has(testPath)))
+    .filter((scope) => [scope.source, ...scope.sources].some((sourcePath) => changed.has(sourcePath))
+      || scope.tests.some((testPath) => changed.has(testPath)))
     .map((scope) => scope.id));
+}
+
+function isCurrentHeadRef(ref, rootDir = repositoryRoot) {
+  return gitRevision(ref, rootDir) === gitRevision("HEAD", rootDir);
+}
+
+export function summarizeMutationJsonReport(reportPath) {
+  if (!fs.existsSync(reportPath)) return undefined;
+  let report;
+  try {
+    report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+  } catch {
+    return undefined;
+  }
+  const counts = {};
+  for (const fileResult of Object.values(report.files ?? {})) {
+    for (const mutant of fileResult.mutants ?? []) {
+      counts[mutant.status] = (counts[mutant.status] ?? 0) + 1;
+    }
+  }
+  const killed = counts.Killed ?? 0;
+  const timeout = counts.Timeout ?? 0;
+  const survived = counts.Survived ?? 0;
+  const noCoverage = counts.NoCoverage ?? 0;
+  const ignored = counts.Ignored ?? 0;
+  const runtimeErrors = counts.RuntimeError ?? 0;
+  const compileErrors = counts.CompileError ?? 0;
+  const detected = killed + timeout;
+  const total = killed + timeout + survived + noCoverage;
+  return {
+    total,
+    killed,
+    timeout,
+    survived,
+    noCoverage,
+    runtimeErrors,
+    compileErrors,
+    ignored,
+    mutationScore: total === 0 ? 100 : Number(((detected / total) * 100).toFixed(2)),
+  };
 }
 
 function runScope(scope, options) {
@@ -129,6 +176,7 @@ function runScope(scope, options) {
     env: {
       ...process.env,
       CELLFENCE_MUTATION_SCOPE: scope.id,
+      CELLFENCE_MUTATION_CHANGED_JOBS: String(options.jobs),
       CELLFENCE_MUTATION_INCREMENTAL: options.incremental ? "1" : "0",
     },
     stdio: "inherit",
@@ -140,6 +188,7 @@ function runScope(scope, options) {
         id: scope.id,
         mutate: scope.mutate,
         tests: scope.tests,
+        testCommand: mutationScopeTestCommand(scope),
         elapsedMs: Math.round(Number(elapsedSeconds) * 1000),
         exitCode: null,
         signal: null,
@@ -151,13 +200,17 @@ function runScope(scope, options) {
     });
     child.on("close", (code, signal) => {
       const elapsedSeconds = ((performance.now() - startedAt) / 1000).toFixed(1);
+      const reportPath = `reports/mutation/changed/${scope.id}.json`;
       const execution = {
         id: scope.id,
         mutate: scope.mutate,
         tests: scope.tests,
+        testCommand: mutationScopeTestCommand(scope),
         elapsedMs: Math.round(Number(elapsedSeconds) * 1000),
         exitCode: code,
         signal,
+        reportPath,
+        result: summarizeMutationJsonReport(path.join(repositoryRoot, reportPath)),
         status: code === 0 ? "passed" : "failed",
       };
       console.log(`Mutation scope ${scope.id} ${execution.status} in ${elapsedSeconds}s`);
@@ -191,14 +244,71 @@ function writeJsonAtomic(filePath, value) {
 
 function gitRevision(ref, rootDir = repositoryRoot) {
   try {
-    return gitOutput(["rev-parse", `${ref}^{commit}`], rootDir).trim();
+    return gitOutput(["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`], rootDir).trim();
   } catch {
     return null;
   }
 }
 
+function readGitFile(ref, filePath, rootDir = repositoryRoot) {
+  try {
+    return gitOutput(["show", "--end-of-options", `${ref}:${filePath}`], rootDir);
+  } catch {
+    return undefined;
+  }
+}
+
+function readCurrentPackageLockText(ref, rootDir = repositoryRoot) {
+  if (isCurrentHeadRef(ref, rootDir)) {
+    const packageLockPath = path.join(rootDir, "package-lock.json");
+    return fs.existsSync(packageLockPath) ? fs.readFileSync(packageLockPath, "utf8") : undefined;
+  }
+  return readGitFile(ref, "package-lock.json", rootDir);
+}
+
+function parsePackageLock(text) {
+  if (!text) return undefined;
+  try {
+    const parsed = JSON.parse(text);
+    return parsed && typeof parsed === "object" && parsed.packages && typeof parsed.packages === "object"
+      ? parsed
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function workspaceLockDir(lockPath) {
+  const match = /^(packages\/[^/]+)(?:$|\/node_modules\/)/.exec(lockPath);
+  return match?.[1];
+}
+
+function changedLockPackagePaths(baseLock, headLock) {
+  const basePackages = baseLock.packages ?? {};
+  const headPackages = headLock.packages ?? {};
+  const packagePaths = new Set([...Object.keys(basePackages), ...Object.keys(headPackages)]);
+  return [...packagePaths].filter((packagePath) => (
+    JSON.stringify(basePackages[packagePath]) !== JSON.stringify(headPackages[packagePath])
+  ));
+}
+
+export function packageLockWorkspaceDirsForDiff(baseRef, headRef = "HEAD", rootDir = repositoryRoot) {
+  const baseLock = parsePackageLock(readGitFile(baseRef, "package-lock.json", rootDir));
+  const headLock = parsePackageLock(readCurrentPackageLockText(headRef, rootDir));
+  if (!baseLock || !headLock) return undefined;
+
+  const workspaceDirs = new Set();
+  for (const packagePath of changedLockPackagePaths(baseLock, headLock)) {
+    const workspaceDir = workspaceLockDir(packagePath);
+    if (!workspaceDir) return undefined;
+    workspaceDirs.add(workspaceDir);
+  }
+  return [...workspaceDirs].sort();
+}
+
 export function mutationChangedPlan(options, rootDir = repositoryRoot) {
   validateMutationScopeCoverage(baseMutationConfig.mutate);
+  validateMutationGovernanceConfig(baseMutationConfig, { requireNonIncremental: true });
   const explicitScopes = options.scopes.map((scopeId) => {
     const scope = mutationScopeById(scopeId);
     if (!scope) throw new Error(`Unknown mutation scope: ${scopeId}`);
@@ -207,17 +317,21 @@ export function mutationChangedPlan(options, rootDir = repositoryRoot) {
   const explicitSelection = options.files.length > 0 || explicitScopes.length > 0;
   const baseRef = options.baseRef ?? (explicitSelection ? "HEAD" : resolveMutationBaseRef(rootDir));
   const changedFiles = options.files.length > 0
-    ? [...new Set(options.files.map(normalizeRepositoryPath))].sort()
-    : explicitScopes.length > 0 ? [] : collectChangedFiles(baseRef, options.headRef, rootDir);
+    ? [...new Set(options.files.map((filePath) => normalizeRepositoryPath(filePath, rootDir)))].sort()
+    : collectChangedFiles(baseRef, options.headRef, rootDir);
+  const packageLockWorkspaceDirs = !explicitSelection && changedFiles.includes("package-lock.json")
+    ? packageLockWorkspaceDirsForDiff(baseRef, options.headRef, rootDir)
+    : undefined;
   const scopes = explicitScopes.length > 0
     ? MUTATION_SCOPES.filter((scope) => explicitScopes.some((selected) => selected.id === scope.id))
-    : mutationScopesForFiles(changedFiles);
+    : mutationScopesForFiles(changedFiles, MUTATION_SCOPES, { packageLockWorkspaceDirs });
   return {
     baseRef,
     headRef: options.headRef,
     baseSha: gitRevision(baseRef, rootDir),
     headSha: gitRevision(options.headRef, rootDir),
     changedFiles,
+    ...(Array.isArray(packageLockWorkspaceDirs) ? { packageLockWorkspaceDirs } : {}),
     scopes,
   };
 }
@@ -258,7 +372,7 @@ export async function main(args = process.argv.slice(2)) {
     return;
   }
   for (const scope of plan.scopes) {
-    console.log(`Scope ${scope.id}: ${scope.mutate} -> ${scope.tests.join(", ")}`);
+    console.log(`Scope ${scope.id}: ${scope.mutate} -> ${mutationScopeTestCommand(scope)}`);
   }
   if (options.plan) return;
   const startedAt = new Date().toISOString();

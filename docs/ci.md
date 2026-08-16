@@ -112,6 +112,8 @@ The reusable Action wrapper accepts a `version` input. Its default is npm `lates
 
 For real enforcement, configure the architecture job as a required status check on a protected branch. A workflow file inside the repository is not, by itself, a root of trust.
 
+Signed waivers require the same credential separation discipline as HMAC baseline verification. Do not expose `CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY` to untrusted pull-request code; use it only in a trusted approval/signing job, an isolated verifier, or an external signing service. PR checks should set `CELLFENCE_APPROVERS` and `CELLFENCE_REPOSITORY_IDENTITY` from protected CI configuration, not from repository files.
+
 ## Signed Baseline Workflows
 
 Use asymmetric baseline signing when untrusted pull requests can edit `cellfence.baseline.json`. PR checks should receive only `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY`; the private key belongs only to an approval-controlled signing workflow or an external signing service.

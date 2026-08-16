@@ -240,25 +240,47 @@ export function createWaiverRequest(options: WaiverRequestOptions): WaiverReques
   if (!isIsoDate(options.expires)) throw new Error("expires must be YYYY-MM-DD");
   if (options.reason.trim().length < 12) throw new Error("reason must explain the waiver in at least 12 characters");
   const approvedBy = options.approvedBy || "PENDING";
-  const directive = `// cellfence-ignore ${options.ruleId} expires:${options.expires} approved-by:${approvedBy} reason:${options.reason.trim()}`;
+  const directive = `// cellfence-ignore ${options.ruleId} attestation:PENDING`;
+  const attestationTemplate = {
+    schemaVersion: "cellfence.waiver-attestation.v1" as const,
+    attestationId: "PENDING",
+    repository: "PENDING",
+    headSha: "PENDING",
+    sourceSha256: "PENDING",
+    ruleId: options.ruleId,
+    findingFingerprint: "PENDING",
+    filePath: normalizePath(options.filePath),
+    line: options.line,
+    expiresAt: options.expires,
+    reason: options.reason.trim(),
+    approver: approvedBy,
+    issuedAt: "PENDING",
+  };
   const markdown = [
     "## CellFence Waiver Request",
     "",
     `- Rule: ${options.ruleId}`,
     `- File: ${normalizePath(options.filePath)}:${options.line}`,
     `- Expires: ${options.expires}`,
-    `- Approved by: ${approvedBy}`,
+    `- Requested approver: ${approvedBy}`,
     `- Reason: ${options.reason.trim()}`,
     "",
-    "Approved directive:",
+    "Source directive:",
     "",
     "```ts",
     directive,
+    "```",
+    "",
+    "Unsigned attestation template:",
+    "",
+    "```json",
+    JSON.stringify(attestationTemplate, null, 2),
     "```",
   ].join("\n");
   return {
     schemaVersion: "cellfence.waiver-request.v1",
     directive,
+    attestationTemplate,
     markdown,
     approvalRequired: true,
     ruleId: options.ruleId,

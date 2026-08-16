@@ -36,6 +36,9 @@ export type RedisLike = {
   del(key: string): Promise<number>;
   eval(script: string, numKeysOrOptions: number | { keys: string[]; arguments: string[] }, ...args: (string | number)[]): Promise<unknown>;
   connect?: () => Promise<void>;
+  quit?: () => Promise<void>;
+  disconnect?: () => Promise<void>;
+  on?: (event: "error", listener: (error: Error) => void) => unknown;
   isOpen?: boolean;
 };
 
@@ -77,8 +80,20 @@ export class RedisClaimStore {
     const createClient = mod.createClient ?? mod.default?.createClient;
     if (!createClient) throw new Error("redis claim backend requires redis.createClient()");
     const client = createClient({ url: this.url });
+    client.on?.("error", () => undefined);
     if (client.connect && client.isOpen !== true) await client.connect();
     return client;
+  }
+
+  private async isolatedClient(): Promise<RedisLike> {
+    return this.createClient();
+  }
+
+  async close(): Promise<void> {
+    if (!this.clientPromise) return;
+    const client = await this.clientPromise;
+    this.clientPromise = undefined;
+    await closeRedisClient(client);
   }
 
   private static stableState(state: ClaimStoreState): string {
@@ -96,6 +111,9 @@ export class RedisClaimStore {
       if (!parsed || parsed.schemaVersion !== "cellfence.claims.v1" || !Array.isArray(parsed.claims)) {
         throw new Error("claim store must have schemaVersion cellfence.claims.v1 and claims array");
       }
+      for (const [index, claim] of parsed.claims.entries()) {
+        validateClaimEntry(claim, index);
+      }
       return parsed;
     } catch (error) {
       throw new Error(`redis claim store is corrupt: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
@@ -109,41 +127,73 @@ export class RedisClaimStore {
   }
 
   async write(next: ClaimStoreState, previous: ClaimStoreState): Promise<void> {
-    const client = await this.client();
-    const payload = JSON.stringify(next);
-    for (let attempt = 0; attempt < this.maxCasRetries; attempt += 1) {
-      await client.watch(this.key);
-      const current = await client.get(this.key);
-      if (RedisClaimStore.stateDigest(RedisClaimStore.parseState(current)) !== RedisClaimStore.stateDigest(previous)) {
-        await client.unwatch?.();
-        throw new CellFenceClaimCasConflict("redis claim store state changed under us; reread and retry");
+    const client = await this.isolatedClient();
+    try {
+      const payload = JSON.stringify(next);
+      for (let attempt = 0; attempt < this.maxCasRetries; attempt += 1) {
+        await client.watch(this.key);
+        const current = await client.get(this.key);
+        if (RedisClaimStore.stateDigest(RedisClaimStore.parseState(current)) !== RedisClaimStore.stateDigest(previous)) {
+          await client.unwatch?.();
+          throw new CellFenceClaimCasConflict("redis claim store state changed under us; reread and retry");
+        }
+        const tx = client.multi();
+        tx.set(this.key, payload);
+        const result = await tx.exec();
+        if (result !== null) return;
       }
-      const tx = client.multi();
-      tx.set(this.key, payload);
-      const result = await tx.exec();
-      if (result !== null) return;
+      throw new CellFenceClaimCasConflict("redis claim store CAS exhausted retries");
+    } finally {
+      await closeRedisClient(client);
     }
-    throw new CellFenceClaimCasConflict("redis claim store CAS exhausted retries");
   }
 
   async lock(ttlMs: number): Promise<() => Promise<void>> {
     // Single-instance Redlock-style lock via SET NX PX. Multi-node
     // Redlock is a 0.4.1 follow-up; for the prototype we acquire a
     // single key and release it explicitly.
-    const client = await this.client();
+    const client = await this.isolatedClient();
     const token = `${process.pid}-${Date.now()}-${crypto.randomBytes(16).toString("hex")}`;
     // node-redis v4 ships overloaded set(). We type the stub to
     // accept a generic (key, value, ...args) signature so the call
     // below doesn't have to track every overload.
     const ok = await redisSetNxPx(client, this.key + ":lock", token, ttlMs);
     if (ok === null) {
+      await closeRedisClient(client);
       throw new Error("redis claim store lock is held by another process");
     }
     return async () => {
       // Atomic release via a Lua compare-and-delete.
-      await redisEvalRelease(client, this.key + ":lock", token);
+      try {
+        await redisEvalRelease(client, this.key + ":lock", token);
+      } finally {
+        await closeRedisClient(client);
+      }
     };
   }
+}
+
+function validateClaimEntry(value: unknown, index: number): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`claim at index ${index} must be an object`);
+  const claim = value as Record<string, unknown>;
+  const errors: string[] = [];
+  for (const field of ["id", "agent", "createdAt", "expiresAt"]) {
+    if (typeof claim[field] !== "string" || String(claim[field]).trim().length === 0) errors.push(`${field} is required`);
+  }
+  for (const field of ["cells", "paths", "symbols", "resources", "artifactLanes"]) {
+    if (!Array.isArray(claim[field]) || !(claim[field] as unknown[]).every((entry) => typeof entry === "string")) errors.push(`${field} must be a string array`);
+  }
+  if (typeof claim.createdAt === "string" && Number.isNaN(Date.parse(claim.createdAt))) errors.push("createdAt must be an ISO timestamp");
+  if (typeof claim.expiresAt === "string" && Number.isNaN(Date.parse(claim.expiresAt))) errors.push("expiresAt must be an ISO timestamp");
+  if (errors.length > 0) throw new Error(`claim at index ${index} is invalid: ${errors.join("; ")}`);
+}
+
+async function closeRedisClient(client: RedisLike): Promise<void> {
+  if (client.quit) {
+    await client.quit();
+    return;
+  }
+  await client.disconnect?.();
 }
 
 async function redisSetNxPx(client: RedisLike, key: string, value: string, ttlMs: number): Promise<unknown> {

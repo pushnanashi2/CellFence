@@ -8,6 +8,7 @@ import { checkRepository, createEvidenceGraph, findingWitness } from "../package
 import { stableCanonicalJson, stableDigest } from "../packages/engine/dist/governance/canonicalization.js";
 import { createGovernanceControlState } from "../packages/engine/dist/governance/control-state.js";
 import { assessEvidence } from "../packages/engine/dist/governance/evidence-assessment.js";
+import { governanceEvidenceEnvelopeForCheck } from "../packages/engine/dist/governance/evidence-envelope.js";
 import { evaluateGovernance } from "../packages/engine/dist/governance/evaluator.js";
 import { legacyDecisionFromEvaluation } from "../packages/engine/dist/governance/legacy-adapter.js";
 import { createRawObservationReport } from "../packages/engine/dist/governance/observation-report.js";
@@ -15,6 +16,7 @@ import {
   createSubjectSnapshotFromFiles,
   verifySubjectSnapshotIntegrity,
 } from "../packages/engine/dist/governance/subject-snapshot.js";
+import { createContext } from "../packages/engine/dist/analysis-context.js";
 
 const root = process.cwd();
 
@@ -151,6 +153,61 @@ test("raw observation report defaults counts and sorts terminal statuses", () =>
     "cellfence.manifest.json:manifest",
     "src/a/public.ts:resources",
   ]);
+});
+
+test("governance evidence envelope does not fabricate processed source observations", () => {
+  const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-evidence-observed-files-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/a"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/a/public.ts"), "export const a = 1;\n");
+    const manifest = {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "a",
+        ownedPaths: ["src/a/**"],
+        publicEntry: "src/a/public.ts",
+        publicSymbols: ["a"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    };
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), manifest);
+    const context = createContext(tempDir, manifest);
+
+    const missing = governanceEvidenceEnvelopeForCheck(
+      context,
+      path.join(tempDir, "cellfence.manifest.json"),
+      undefined,
+      [],
+      [],
+      new Map(),
+      [],
+    );
+    const missingSourceStatuses = missing.report.statuses.filter((status) => status.filePath === "src/a/public.ts");
+    assert.equal(missing.assessment.status, "INCOMPLETE");
+    assert.ok(missingSourceStatuses.some((status) => status.family === "imports" && status.status === "unsupported"));
+    assert.ok(missingSourceStatuses.some((status) => status.family === "resources" && status.status === "unsupported"));
+    assert.ok(missingSourceStatuses.some((status) => status.family === "public-surface" && status.status === "not-applicable"));
+
+    const observed = governanceEvidenceEnvelopeForCheck(
+      context,
+      path.join(tempDir, "cellfence.manifest.json"),
+      undefined,
+      [],
+      [],
+      new Map(),
+      [],
+      {
+        imports: ["src/a/public.ts"],
+        resources: ["src/a/public.ts"],
+        "public-surface": ["src/a/public.ts"],
+      },
+    );
+    assert.equal(observed.assessment.status, "COMPLETE", JSON.stringify(observed.assessment.defects));
+    assert.equal(observed.report.publicSurfaceObservationCount, 1);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("complete evidence allows governance evaluation to satisfy required rules", () => {

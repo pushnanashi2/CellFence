@@ -59,20 +59,22 @@ npx cellfence evidence check --evidence resource-evidence.json
 npx cellfence evidence commit [--base origin/main] [--head HEAD] [--json]
 npx cellfence docs check|stamp
 npx cellfence mutation check --report reports/mutation/mutation.json [--min-score 90]
-npx cellfence waivers list|request
+npx cellfence waivers list|request|sign
 ```
 
 `init --production-scope` is intended for non-destructive onboarding and corpus
 measurement. It keeps the same strict ownership rules, but seeds
 `governance.exclude` for tests, fixtures, generated output, vendored code, and
 static assets so inferred manifests do not turn obvious non-production noise
-into precision claims.
+into precision claims. `init --no-scaffold` refuses an empty inference instead
+of writing an example manifest with missing source files; rerun without
+`--no-scaffold` for the starter scaffold, or add real source files first.
 
 Exit codes: `0` no violations · `1` governance violations · `2` configuration or manifest error · `3` internal tool error.
 
 ## For coding agents
 
-`context --format agents-md` emits a per-cell contract (owned paths, allowed imports, allowed resources, guidance) ready to pass into an agent's context. `install` writes a checksumed managed block into `AGENTS.md` or `CLAUDE.md`, and `install --check` fails when that block drifts or unmanaged CellFence instructions appear outside it.
+`context --format agents-md` emits a per-cell contract (owned paths, allowed imports, allowed resources, guidance) ready to pass into an agent's context. `install` writes a checksumed managed block into `AGENTS.md` or `CLAUDE.md`, and `install --check` fails when that block drifts or unmanaged CellFence instructions appear outside it. Waivers use `attestation:<id>` source directives plus signed external attestations; source `approved-by` text is never accepted as approval.
 
 MCP-capable agents can run `cellfence serve --mcp` and call `get_cell_context`, `check_change`, `create_claim`, and `explain_finding` over stdio. `check` and `baseline check` remain the deterministic completion signal.
 

@@ -34,6 +34,7 @@ CellFence check passed.
 ```
 
 `init` generates a starter manifest with one `example` cell owning `src/example/**`. Rename it, add your real cells, and re-run `check` until the fence matches your architecture.
+For non-destructive automation, `init --no-scaffold` refuses this empty example fallback instead of writing a manifest that points at missing files.
 
 For a non-TypeScript starter, choose a preset:
 
@@ -309,10 +310,10 @@ CellFence
 
 Usage:
   cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
-  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
+  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
   cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
-  cellfence manifest verify --from systems/*/service.json [--json]
+  cellfence manifest verify --from systems/*/service.json [--production-scope] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
@@ -338,6 +339,7 @@ Usage:
   cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
   cellfence waivers list [--manifest cellfence.manifest.json] [--json]
   cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
+  cellfence waivers sign --from waiver-request.json --attestation-id id --finding-fingerprint sha256 [--output file]
 
 Exit codes:
   0  no violations
@@ -363,7 +365,7 @@ Exit codes:
 | `cellfence baseline create\|check\|update\|sign\|verify\|audit` | Manage and seal the architectural ratchet |
 | `cellfence evidence check\|commit` | Verify runtime resource evidence and commit-derived evidence |
 | `cellfence docs check\|stamp` / `mutation check` | Guard design-doc stamps and mutation-score reports |
-| `cellfence waivers list\|request` | Time-boxed, reviewed exceptions |
+| `cellfence waivers list\|request\|sign` | Signed, time-boxed reviewed exceptions |
 
 Exit codes: `0` no violations · `1` governance violations · `2` configuration or manifest error · `3` internal tool error.
 
@@ -379,6 +381,7 @@ Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; r
 | Enforced rules | [docs/rules.md](docs/rules.md) |
 | Ratchets and baselines | [docs/ratchets.md](docs/ratchets.md) |
 | Artifact contracts | [docs/artifacts.md](docs/artifacts.md) |
+| Signed waivers | [docs/waivers.md](docs/waivers.md) |
 | Plugin API v1 | [docs/plugin-api.md](docs/plugin-api.md) |
 | Product evidence harnesses | [docs/evidence-harnesses.md](docs/evidence-harnesses.md) |
 | CI recipes | [docs/ci.md](docs/ci.md) |

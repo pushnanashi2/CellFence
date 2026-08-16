@@ -9,6 +9,7 @@ import {
   createClaim,
   emptyClaimStoreState,
 } from "../packages/engine/dist/index.js";
+import { GitHubArtifactClaimStore } from "../packages/engine/dist/claims/backends/github-artifact.js";
 
 const root = process.cwd();
 
@@ -158,4 +159,23 @@ test("createClaim returns a structured failure when the backend CAS write confli
     LocalFileClaimStore.prototype.write = originalWrite;
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("GitHubArtifactClaimStore fails closed until artifact persistence is implemented", async () => {
+  assert.throws(
+    () => new GitHubArtifactClaimStore({ artifactName: " " }),
+    /requires a non-empty artifactName/,
+  );
+  assert.throws(
+    () => new GitHubArtifactClaimStore({ artifactName: "claims", retentionDays: 0 }),
+    /retentionDays must be an integer from 1 to 90/,
+  );
+
+  const store = new GitHubArtifactClaimStore({ artifactName: "claims", retentionDays: 1 });
+  await assert.rejects(() => store.read(), /not implemented/);
+  await assert.rejects(
+    () => store.write(emptyClaimStoreState(), emptyClaimStoreState()),
+    /no artifact download\/upload CAS is available/,
+  );
+  await assert.rejects(() => store.lock(1000), /not implemented/);
 });

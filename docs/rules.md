@@ -11,8 +11,8 @@
 | `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` | Strict ownership coverage is disabled, so source outside ownedPaths can escape checks |
 | `CELLFENCE_UNOWNED_SOURCE` | Strict governance found source matched by `governance.include` that no cell owns |
 | `CELLFENCE_UNOWNED_IMPORT_TARGET` | A cell imports governed source that no cell owns |
-| `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry is outside the declaring cell's owned paths |
-| `CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP` | A produced artifact lane is outside the producer's owned paths |
+| `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry or public path is outside the declaring cell's owned paths |
+| `CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP` | A non-external produced artifact lane is outside the producer's owned paths |
 | `CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP` | A governed symlink points outside its owning cell, outside the repository, or cannot be resolved |
 | `CELLFENCE_PRIVATE_IMPORT` | Cross-cell import of private implementation |
 | `CELLFENCE_UNDECLARED_CONSUMER` | Cross-cell dependency missing from the consumer manifest |
@@ -27,6 +27,9 @@
 | `CELLFENCE_CLAIM_INVALID` | Claim store or claim request is malformed, expired metadata is invalid, or a claim references unknown cells |
 | `CELLFENCE_ACTIVE_CLAIM_CONFLICT` | Two active claim leases reserve overlapping cells, paths, symbols, resources, or artifact lanes |
 | `CELLFENCE_UNCLAIMED_CHANGE` | `claim check --agent` found a changed file outside that agent's active claim |
+| `CELLFENCE_WAIVER_INVALID` | A waiver directive is missing a valid signed attestation, is expired, exceeds the 90-day cap, mismatches repository/source/finding bindings, uses an untrusted approver, or attempts to waive a required rule |
+| `CELLFENCE_WAIVER_UNTRUSTED_APPROVER` | A signed waiver attestation names an approver outside trusted `CELLFENCE_APPROVERS` |
+| `CELLFENCE_WAIVER_PARSING_DISABLED` | A cell disabled waiver directive parsing with `waiverParsing: false`; directives in that cell are intentionally ignored |
 | `CELLFENCE_UNRESOLVED_IMPORT` | Static relative import could not be resolved; fails closed |
 | `CELLFENCE_RATCHET_OWNED_PATH_GROWTH` | Owned path pattern count increased |
 | `CELLFENCE_RATCHET_PUBLIC_SYMBOL_GROWTH` | Public symbol count increased |

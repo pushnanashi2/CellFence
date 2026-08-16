@@ -107,17 +107,19 @@ test("addResourceAccess only suppresses exact duplicate resource observations", 
   addResourceAccess(accesses, baseAccess);
   addResourceAccess(accesses, { ...baseAccess });
   addResourceAccess(accesses, { ...baseAccess, access: "write" });
+  addResourceAccess(accesses, { ...baseAccess, kind: "queue" });
   addResourceAccess(accesses, { ...baseAccess, selector: "audit_logs" });
   addResourceAccess(accesses, { ...baseAccess, filePath: "src/runtime/other.ts" });
   addResourceAccess(accesses, { ...baseAccess, line: 11 });
 
-  assert.equal(accesses.length, 5);
-  assert.deepEqual(accesses.map((access) => `${access.access}:${access.selector}:${access.filePath}:${access.line}`), [
-    "read:app_users:src/runtime/public.ts:10",
-    "write:app_users:src/runtime/public.ts:10",
-    "read:audit_logs:src/runtime/public.ts:10",
-    "read:app_users:src/runtime/other.ts:10",
-    "read:app_users:src/runtime/public.ts:11",
+  assert.equal(accesses.length, 6);
+  assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.filePath}:${access.line}`), [
+    "database:read:app_users:src/runtime/public.ts:10",
+    "database:write:app_users:src/runtime/public.ts:10",
+    "queue:read:app_users:src/runtime/public.ts:10",
+    "database:read:audit_logs:src/runtime/public.ts:10",
+    "database:read:app_users:src/runtime/other.ts:10",
+    "database:read:app_users:src/runtime/public.ts:11",
   ]);
 });
 
@@ -1292,6 +1294,26 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "queue:subscribe:kafka:orders.created:kafkajs-adapter:",
     ]);
     assert.equal(accesses.find((access) => access.selector === "GET /status")?.line, lineOf(lines, "server.route({ 'wrong': '/wrong'"));
+    const fastifyGet = accesses.find((access) => access.selector === "GET /status");
+    assert.deepEqual({
+      kind: fastifyGet?.kind,
+      source: fastifyGet?.source,
+      confidence: fastifyGet?.confidence,
+    }, {
+      kind: "http",
+      source: "route",
+      confidence: "high",
+    });
+    const kafkaPublish = accesses.find((access) => access.selector === "kafka:orders.created" && access.access === "publish");
+    assert.deepEqual({
+      kind: kafkaPublish?.kind,
+      source: kafkaPublish?.source,
+      confidence: kafkaPublish?.confidence,
+    }, {
+      kind: "queue",
+      source: "send",
+      confidence: "medium",
+    });
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

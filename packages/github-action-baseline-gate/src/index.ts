@@ -128,11 +128,12 @@ async function loadCodeownersFromRepo(
   owner: string,
   repo: string,
   baselineFile: string,
+  ref: string,
 ): Promise<string[]> {
   for (const codeownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
     let text: string;
     try {
-      const response = await octokit.rest.repos.getContent({ owner, repo, path: codeownersPath });
+      const response = await octokit.rest.repos.getContent({ owner, repo, path: codeownersPath, ref });
       const data = response.data;
       if (Array.isArray(data) || !("content" in data) || typeof data.content !== "string") continue;
       text = Buffer.from(data.content, "base64").toString("utf8");
@@ -241,17 +242,54 @@ async function changedFilesTouchBaseline(
   repo: string,
   pullNumber: number,
   baselineFile: string,
+  expectedBaseSha: string,
+  expectedHeadSha: string,
 ): Promise<{ baseline: boolean; implementation: boolean; names: string[] }> {
+  await assertPullRequestRevision(octokit, owner, repo, pullNumber, expectedBaseSha, expectedHeadSha);
   const files = await octokit.paginate(octokit.rest.pulls.listFiles, {
     owner,
     repo,
     pull_number: pullNumber,
     per_page: 100,
   });
+  await assertPullRequestRevision(octokit, owner, repo, pullNumber, expectedBaseSha, expectedHeadSha);
   const names = files.map((f: { filename: string }) => f.filename);
-  const baseline = names.some((name: string) => name === baselineFile || name.endsWith("/" + baselineFile));
-  const implementation = names.some((name: string) => !name.startsWith(".cellfence/") && !name.endsWith(".md") && name !== "PROGRESS.md");
+  const baseline = names.some((name: string) => changedFileIsBaseline(name, baselineFile));
+  const implementation = names.some((name: string) => changedFileIsImplementation(name, baselineFile));
   return { baseline, implementation, names };
+}
+
+async function assertPullRequestRevision(
+  octokit: Octokit,
+  owner: string,
+  repo: string,
+  pullNumber: number,
+  expectedBaseSha: string,
+  expectedHeadSha: string,
+): Promise<void> {
+  const response = await octokit.rest.pulls.get({ owner, repo, pull_number: pullNumber });
+  const pullRequest = response.data;
+  const actualBaseSha = pullRequest?.base?.sha;
+  const actualHeadSha = pullRequest?.head?.sha;
+  if (actualBaseSha !== expectedBaseSha || actualHeadSha !== expectedHeadSha) {
+    throw new Error(
+      `pull request revision changed while baseline gate was running; expected base ${expectedBaseSha} and head ${expectedHeadSha}, got base ${actualBaseSha || "unknown"} and head ${actualHeadSha || "unknown"}. Re-run the workflow on the current PR revision.`,
+    );
+  }
+}
+
+function normalizeRepoPathForAction(filePath: string): string {
+  return filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function changedFileIsBaseline(name: string, baselineFile: string): boolean {
+  return normalizeRepoPathForAction(name) === normalizeRepoPathForAction(baselineFile);
+}
+
+function changedFileIsImplementation(name: string, baselineFile: string): boolean {
+  const normalized = normalizeRepoPathForAction(name);
+  if (changedFileIsBaseline(normalized, baselineFile)) return false;
+  return !normalized.startsWith(".cellfence/") && !normalized.endsWith(".md") && normalized !== "PROGRESS.md";
 }
 
 function parseCommentMode(value: string | undefined): "update" | "create" | "disabled" {
@@ -281,10 +319,7 @@ async function removeLabelIfPresent(octokit: Octokit, owner: string, repo: strin
 export async function runAction(): Promise<void> {
   const context = github.context;
   if (!context.payload.pull_request) {
-    // No-op outside of pull_request events. The action is a CI gate;
-    // GitHub Actions convention is to skip cleanly so the workflow
-    // does not fail on push events or manual dispatch.
-    core.warning("cellfence-baseline-gate only runs on pull_request events; skipping");
+    core.setFailed("cellfence-baseline-gate requires a pull_request event so it can bind the baseline comparison to immutable base/head SHAs");
     return;
   }
   const pullRequest = context.payload.pull_request as {
@@ -299,7 +334,7 @@ export async function runAction(): Promise<void> {
   }
   const commentMode = parseCommentMode(core.getInput("comment-mode"));
   const requireSeparatePr = parseBooleanInput("require-separate-pr", true);
-  const failOnMixedPr = parseBooleanInput("fail-on-mixed-pr", false);
+  const failOnMixedPr = parseBooleanInput("fail-on-mixed-pr", true);
   let baselineCodeowners = parseCodeowners(core.getInput("baseline-codeowners"));
   const baselineFile = core.getInput("baseline-file") || DEFAULT_BASELINE_PATH;
   // base-ref and head-ref default to the PR's base/head refs when the
@@ -314,7 +349,7 @@ export async function runAction(): Promise<void> {
   const baseRef = explicitBaseRef || pullRequest.base.sha;
   const octokit = github.getOctokit(token) as unknown as Octokit;
   if (baselineCodeowners.length === 0) {
-    baselineCodeowners = await loadCodeownersFromRepo(octokit, context.repo.owner, context.repo.repo, baselineFile);
+    baselineCodeowners = await loadCodeownersFromRepo(octokit, context.repo.owner, context.repo.repo, baselineFile, baseSha);
     if (baselineCodeowners.length === 0) {
       core.setFailed(
         `no baseline-codeowners configured; pass \`baseline-codeowners:\` to the action or add a CODEOWNERS entry for \`${baselineFile}\``,
@@ -336,8 +371,12 @@ export async function runAction(): Promise<void> {
     core.setFailed(`baseline gate failed: ${error instanceof Error ? error.message : String(error)}`);
     return;
   }
-  const { baseline: changedBaseline, implementation: changedImplementation } = await changedFilesTouchBaseline(
-    octokit, context.repo.owner, context.repo.repo, pullNumber, baselineFile,
+  const {
+    baseline: changedBaseline,
+    implementation: changedImplementation,
+    names: changedFileNames,
+  } = await changedFilesTouchBaseline(
+    octokit, context.repo.owner, context.repo.repo, pullNumber, baselineFile, baseSha, headSha,
   );
   let mixedPrTelemetry = "";
   if (requireSeparatePr && changedBaseline && changedImplementation) {
@@ -349,18 +388,8 @@ export async function runAction(): Promise<void> {
     // finished. The "mixed" marker in the body lets downstream
     // automation (and humans) grep for the failure mode without
     // having to re-run the changed-files check.
-    const filesResult = await octokit.paginate(octokit.rest.pulls.listFiles, {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      pull_number: pullNumber,
-      per_page: 100,
-    });
-    const baselineFiles = filesResult
-      .map((f: { filename: string }) => f.filename)
-      .filter((name: string) => name === baselineFile || name.endsWith("/" + baselineFile));
-    const implementationFiles = filesResult
-      .map((f: { filename: string }) => f.filename)
-      .filter((name: string) => !name.startsWith(".cellfence/") && !name.endsWith(".md") && name !== "PROGRESS.md");
+    const baselineFiles = changedFileNames.filter((name: string) => changedFileIsBaseline(name, baselineFile));
+    const implementationFiles = changedFileNames.filter((name: string) => changedFileIsImplementation(name, baselineFile));
     const truncatedBaseline = baselineFiles.slice(0, 10).map((name: string) => `\`${name}\``).join(", ");
     const truncatedImplementation = implementationFiles.slice(0, 10).map((name: string) => `\`${name}\``).join(", ");
     const moreBaseline = baselineFiles.length > 10 ? ` (+${baselineFiles.length - 10} more)` : "";

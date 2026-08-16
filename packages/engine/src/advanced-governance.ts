@@ -4,15 +4,21 @@ import path from "node:path";
 
 import {
   CELLFENCE_MANIFEST_SCHEMA_VERSION,
+  type ArtifactLaneManifest,
   type CellFenceManifest,
   type CellManifest,
   type CheckProfileManifest,
   type PathClassKind,
   type PathClassManifest,
+  type ResourceAdapterMap,
+  type ResourceAccessMode,
+  type ResourceContractManifest,
   type RuleSeverityMap,
 } from "@cellfence/schema";
-import { listFiles, matchesPattern, normalizePath, repoPath, SOURCE_EXTENSIONS } from "./file-index.js";
+import { listFiles, matchesPattern, normalizePath, patternCoveredByOwnedPaths, repoPath, SOURCE_EXTENSIONS } from "./file-index.js";
+import { PRODUCTION_SCOPE_EXCLUDES, type InferManifestScope } from "./manifest-inference.js";
 import { extractPublicSymbols, publicSurfaceHash } from "./module-resolution.js";
+import { ownedPathPatternsOverlap } from "./glob-overlap.js";
 
 export type AdvancedFinding = {
   ruleId: string;
@@ -29,6 +35,10 @@ type ServiceJson = {
   allowedServiceImports?: unknown;
   consumes?: unknown;
   produces?: unknown;
+  ownedData?: unknown;
+  readOnlyArtifacts?: unknown;
+  writePaths?: unknown;
+  scheduled?: unknown;
   owner?: unknown;
   ownerAgent?: unknown;
 };
@@ -37,6 +47,25 @@ type ServiceMappingWarning = {
   serviceId: string;
   field: string;
   message: string;
+};
+
+const SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS: ResourceAdapterMap = {
+  file: "off",
+  http: "off",
+  queue: "off",
+  "sql-literal": "off",
+  prisma: "off",
+  typeorm: "off",
+  drizzle: "off",
+  "query-builder": "off",
+  bullmq: "off",
+  kafkajs: "off",
+  nestjs: "off",
+  fastify: "off",
+  django: "off",
+  fastapi: "off",
+  sqlalchemy: "off",
+  celery: "off",
 };
 
 export type ServiceManifestImportResult = {
@@ -133,6 +162,191 @@ function serviceConsumesSystems(consumes: unknown): string[] {
   return asStringArray(consumes.systems);
 }
 
+function uniqueIdForCell(baseId: string, usedIds: Set<string>): string {
+  let candidate = baseId.trim() || "contract";
+  let suffix = 2;
+  while (usedIds.has(candidate)) {
+    candidate = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+  usedIds.add(candidate);
+  return candidate;
+}
+
+function serviceArtifactLanes(serviceId: string, produces: unknown, warnings: ServiceMappingWarning[]): ArtifactLaneManifest[] {
+  if (!isRecord(produces)) return [];
+  const artifacts = Array.isArray(produces.artifacts) ? produces.artifacts : [];
+  const usedIds = new Set<string>();
+  const lanes: ArtifactLaneManifest[] = [];
+  for (let index = 0; index < artifacts.length; index += 1) {
+    const artifact = artifacts[index];
+    if (!isRecord(artifact)) {
+      warnings.push({ serviceId, field: `produces.artifacts[${index}]`, message: "artifact entry is not an object; skipped" });
+      continue;
+    }
+    const paths = [
+      ...(typeof artifact.path === "string" && artifact.path.trim().length > 0 ? [artifact.path] : []),
+      ...asStringArray(artifact.paths),
+    ];
+    if (paths.length === 0) {
+      warnings.push({ serviceId, field: `produces.artifacts[${index}].path`, message: "artifact entry has no path or paths; skipped" });
+      continue;
+    }
+    const id = typeof artifact.id === "string" && artifact.id.trim().length > 0
+      ? artifact.id
+      : `${serviceId}-artifact-${index + 1}`;
+    const schema = typeof artifact.schema === "string" && artifact.schema.trim().length > 0 ? artifact.schema.trim() : undefined;
+    const description = typeof artifact.description === "string" && artifact.description.trim().length > 0
+      ? artifact.description
+      : schema ? `schema: ${schema}` : undefined;
+    lanes.push({
+      id: uniqueIdForCell(id, usedIds),
+      paths: [...new Set(paths)],
+      ...(description ? { description } : {}),
+      ...(typeof artifact.locked === "boolean" ? { locked: artifact.locked } : {}),
+    });
+  }
+  return lanes;
+}
+
+function artifactConsumersFromReadOnlyArtifacts(
+  serviceId: string,
+  readOnlyArtifacts: string[],
+  producedArtifactsByService: Map<string, ArtifactLaneManifest[]>,
+): CellManifest["consumes"] {
+  const consumedByService = new Map<string, Set<string>>();
+  for (const readOnlyArtifact of readOnlyArtifacts) {
+    for (const [producerServiceId, lanes] of producedArtifactsByService.entries()) {
+      if (producerServiceId === serviceId) continue;
+      const matchingLaneIds = lanes
+        .filter((lane) => lane.paths.some((artifactPath) => ownedPathPatternsOverlap(readOnlyArtifact, artifactPath)))
+        .map((lane) => lane.id);
+      if (matchingLaneIds.length === 0) continue;
+      const laneIds = consumedByService.get(producerServiceId) ?? new Set<string>();
+      for (const laneId of matchingLaneIds) laneIds.add(laneId);
+      consumedByService.set(producerServiceId, laneIds);
+    }
+  }
+  return [...consumedByService.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([cell, laneIds]) => ({ cell, artifactLanes: [...laneIds].sort((left, right) => left.localeCompare(right)) }));
+}
+
+function unmatchedReadOnlyArtifactContracts(
+  serviceId: string,
+  readOnlyArtifacts: string[],
+  producedArtifactsByService: Map<string, ArtifactLaneManifest[]>,
+): ResourceContractManifest[] {
+  const usedIds = new Set<string>();
+  const unmatched = readOnlyArtifacts.filter((readOnlyArtifact) =>
+    ![...producedArtifactsByService.entries()].some(([producerServiceId, lanes]) =>
+      producerServiceId !== serviceId
+      && lanes.some((lane) => lane.paths.some((artifactPath) => ownedPathPatternsOverlap(readOnlyArtifact, artifactPath)))
+    )
+  );
+  return [...new Set(unmatched)].sort((left, right) => left.localeCompare(right)).map((selector, index) => ({
+    id: uniqueIdForCell(`${serviceId}-readonly-artifact-${index + 1}`, usedIds),
+    kind: "file",
+    access: ["read"],
+    selectors: [selector],
+    description: "readOnlyArtifacts fallback file-read contract",
+  }));
+}
+
+function scheduledResourceContracts(serviceId: string, scheduled: string[]): ResourceContractManifest[] {
+  const usedIds = new Set<string>();
+  return [...new Set(scheduled)].sort((left, right) => left.localeCompare(right)).map((taskName, index) => ({
+    id: uniqueIdForCell(`${serviceId}-scheduled-${index + 1}`, usedIds),
+    kind: "queue",
+    access: ["subscribe"],
+    selectors: [`scheduled:${taskName}`],
+    description: "scheduled service task",
+  }));
+}
+
+function httpSelectorsFromServiceEntry(entry: unknown): string[] {
+  if (typeof entry === "string" && entry.trim().length > 0) return [entry.trim()];
+  if (!isRecord(entry)) return [];
+  const selectors = asStringArray(entry.selectors);
+  if (selectors.length > 0) return selectors;
+  if (typeof entry.selector === "string" && entry.selector.trim().length > 0) return [entry.selector.trim()];
+  const route = typeof entry.route === "string" && entry.route.trim().length > 0
+    ? entry.route.trim()
+    : typeof entry.path === "string" && entry.path.trim().length > 0
+      ? entry.path.trim()
+      : undefined;
+  if (!route) return [];
+  const method = typeof entry.method === "string" && entry.method.trim().length > 0 ? entry.method.trim().toUpperCase() : undefined;
+  return [method ? `${method} ${route}` : route];
+}
+
+function httpAccessFromServiceEntry(entry: unknown): ResourceAccessMode[] {
+  if (!isRecord(entry)) return ["serve"];
+  const access = asStringArray(entry.access).filter((mode): mode is ResourceAccessMode =>
+    ["read", "write", "publish", "subscribe", "call", "serve"].includes(mode)
+  );
+  if (access.length > 0) return [...new Set(access)];
+  const mode = typeof entry.mode === "string" ? entry.mode : undefined;
+  if (mode && ["read", "write", "publish", "subscribe", "call", "serve"].includes(mode)) return [mode as ResourceAccessMode];
+  return ["serve"];
+}
+
+function serviceHttpResourceContracts(serviceId: string, produces: unknown, warnings: ServiceMappingWarning[]): ResourceContractManifest[] {
+  if (!isRecord(produces)) return [];
+  const httpEntries = Array.isArray(produces.http) ? produces.http : [];
+  const usedIds = new Set<string>();
+  const contracts: ResourceContractManifest[] = [];
+  for (let index = 0; index < httpEntries.length; index += 1) {
+    const entry = httpEntries[index];
+    const selectors = httpSelectorsFromServiceEntry(entry);
+    if (selectors.length === 0) {
+      warnings.push({ serviceId, field: `produces.http[${index}]`, message: "http entry has no selector, route, or path; skipped" });
+      continue;
+    }
+    const id = isRecord(entry) && typeof entry.id === "string" && entry.id.trim().length > 0
+      ? entry.id
+      : `${serviceId}-http-${index + 1}`;
+    contracts.push({
+      id: uniqueIdForCell(id, usedIds),
+      kind: "http",
+      access: httpAccessFromServiceEntry(entry),
+      selectors: [...new Set(selectors)],
+      ...(isRecord(entry) && typeof entry.description === "string" && entry.description.trim().length > 0 ? { description: entry.description } : {}),
+      ...(isRecord(entry) && typeof entry.locked === "boolean" ? { locked: entry.locked } : {}),
+    });
+  }
+  return contracts;
+}
+
+function nonOverlappingAdditionalOwnedPaths(
+  serviceId: string,
+  field: "ownedData" | "writePaths",
+  paths: string[],
+  explicitOwnedPathsByService: Map<string, string[]>,
+  ownProducedArtifacts: ArtifactLaneManifest[],
+  warnings: ServiceMappingWarning[],
+): string[] {
+  const accepted: string[] = [];
+  for (const candidate of paths) {
+    const owner = [...explicitOwnedPathsByService.entries()].find(([otherServiceId, otherPaths]) =>
+      otherServiceId !== serviceId && otherPaths.some((otherPath) => ownedPathPatternsOverlap(candidate, otherPath))
+    );
+    if (owner) {
+      if (ownProducedArtifacts.some((lane) => lane.paths.some((artifactPath) => ownedPathPatternsOverlap(candidate, artifactPath)))) {
+        continue;
+      }
+      warnings.push({
+        serviceId,
+        field,
+        message: `${candidate} overlaps ${owner[0]} ownedPaths; skipped as an ownership path`,
+      });
+      continue;
+    }
+    accepted.push(candidate);
+  }
+  return accepted;
+}
+
 function pathExists(rootDir: string, relativePath: string): boolean {
   return fs.existsSync(path.resolve(rootDir, relativePath));
 }
@@ -167,36 +381,85 @@ function publicSymbolsForEntry(rootDir: string, entry: string, declaredSymbols: 
   return extracted.length > 0 ? extracted : declaredSymbols;
 }
 
-export function createManifestFromServiceManifests(options: { rootDir?: string; serviceManifestPaths?: string[]; locked?: boolean } = {}): ServiceManifestImportResult {
+function servicePublicPaths(rootDir: string, serviceId: string): string[] {
+  const publicRoot = `systems/${serviceId}/public`;
+  const absolutePublicRoot = path.resolve(rootDir, publicRoot);
+  if (!fs.existsSync(absolutePublicRoot) || !fs.statSync(absolutePublicRoot).isDirectory()) return [];
+  return sourceFilesUnderRoot(rootDir, publicRoot).length > 0 ? [`${publicRoot}/**`] : [];
+}
+
+function sourceFilesUnderRoot(rootDir: string, relativeRoot: string): string[] {
+  const normalizedRoot = normalizePath(relativeRoot).replace(/\/+$/, "");
+  return listFiles(path.resolve(rootDir, normalizedRoot))
+    .filter((filePath) => SOURCE_EXTENSIONS.includes(path.extname(filePath)))
+    .map((filePath) => repoPath(rootDir, filePath))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+export function createManifestFromServiceManifests(options: { rootDir?: string; serviceManifestPaths?: string[]; locked?: boolean; scope?: InferManifestScope } = {}): ServiceManifestImportResult {
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const warnings: ServiceMappingWarning[] = [];
   const cells: CellManifest[] = [];
-  for (const filePath of expandInputPaths(rootDir, options.serviceManifestPaths || [])) {
+  const services = expandInputPaths(rootDir, options.serviceManifestPaths || []).map((filePath) => {
     const service = readJson(filePath) as ServiceJson;
     const serviceId = typeof service.serviceId === "string" && service.serviceId.trim().length > 0
       ? service.serviceId
       : path.basename(path.dirname(filePath));
+    return { service, serviceId };
+  });
+  const explicitOwnedPathsByService = new Map(
+    services.map(({ service, serviceId }) => [serviceId, asStringArray(service.ownedPaths)]),
+  );
+  const producedArtifactsByService = new Map(
+    services.map(({ service, serviceId }) => [serviceId, serviceArtifactLanes(serviceId, service.produces, warnings)]),
+  );
+  for (const { service, serviceId } of services) {
     const ownedPaths = asStringArray(service.ownedPaths);
     if (ownedPaths.length === 0) warnings.push({ serviceId, field: "ownedPaths", message: "service manifest has no ownedPaths; generated cell will own only the service directory" });
     const publicEntry = serviceProducesEntry(service.produces) || `systems/${serviceId}/public.ts`;
     if (!pathExists(rootDir, publicEntry)) warnings.push({ serviceId, field: "publicEntry", message: `public entry does not exist: ${publicEntry}` });
     const allowedImports = asStringArray(service.allowedServiceImports);
     const consumesSystems = serviceConsumesSystems(service.consumes);
-    const consumes = [...new Set([...allowedImports, ...consumesSystems])]
-      .filter((cell) => cell !== serviceId)
-      .sort((left, right) => left.localeCompare(right))
-      .map((cell) => ({ cell }));
-    for (const field of ["produces.artifacts", "produces.http", "ownedData", "readOnlyArtifacts", "writePaths", "scheduled"]) {
-      warnings.push({ serviceId, field, message: "field is not mapped by service-manifest adapter v1" });
+    const consumesByCell = new Map<string, Set<string>>();
+    for (const cell of [...new Set([...allowedImports, ...consumesSystems])].filter((cell) => cell !== serviceId)) {
+      consumesByCell.set(cell, new Set<string>());
     }
+    for (const consumer of artifactConsumersFromReadOnlyArtifacts(serviceId, asStringArray(service.readOnlyArtifacts), producedArtifactsByService) || []) {
+      const laneIds = consumesByCell.get(consumer.cell) ?? new Set<string>();
+      for (const laneId of consumer.artifactLanes || []) laneIds.add(laneId);
+      consumesByCell.set(consumer.cell, laneIds);
+    }
+    const consumes = [...consumesByCell.entries()]
+      .filter(([cell]) => cell !== serviceId)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([cell, artifactLanes]) => ({
+        cell,
+        ...(artifactLanes.size > 0 ? { artifactLanes: [...artifactLanes].sort((left, right) => left.localeCompare(right)) } : {}),
+      }));
+    const baseOwnedPaths = [...new Set([
+      ...(ownedPaths.length > 0 ? ownedPaths : [`systems/${serviceId}/**`]),
+      ...nonOverlappingAdditionalOwnedPaths(serviceId, "ownedData", asStringArray(service.ownedData), explicitOwnedPathsByService, producedArtifactsByService.get(serviceId) || [], warnings),
+      ...nonOverlappingAdditionalOwnedPaths(serviceId, "writePaths", asStringArray(service.writePaths), explicitOwnedPathsByService, producedArtifactsByService.get(serviceId) || [], warnings),
+    ])].sort((left, right) => left.localeCompare(right));
+    const producesArtifacts = (producedArtifactsByService.get(serviceId) || [])
+      .map((lane) => lane.paths.some((artifactPath) => !patternCoveredByOwnedPaths(artifactPath, baseOwnedPaths))
+        ? { ...lane, external: true }
+        : lane);
+    const resourceContracts = [
+      ...serviceHttpResourceContracts(serviceId, service.produces, warnings),
+      ...unmatchedReadOnlyArtifactContracts(serviceId, asStringArray(service.readOnlyArtifacts), producedArtifactsByService),
+      ...scheduledResourceContracts(serviceId, asStringArray(service.scheduled)),
+    ];
     cells.push({
       id: serviceId,
-      ownedPaths: ownedPaths.length > 0 ? ownedPaths : [`systems/${serviceId}/**`],
+      ownedPaths: baseOwnedPaths,
       publicEntry,
+      ...(servicePublicPaths(rootDir, serviceId).length > 0 ? { publicPaths: servicePublicPaths(rootDir, serviceId) } : {}),
       publicSymbols: publicSymbolsForEntry(rootDir, publicEntry, serviceProducesSymbols(service.produces)),
       locked: options.locked ?? true,
       consumes,
-      producesArtifacts: [],
+      producesArtifacts,
+      resourceContracts,
     });
   }
   return {
@@ -206,7 +469,10 @@ export function createManifestFromServiceManifests(options: { rootDir?: string; 
       governance: {
         requireOwnership: true,
         include: ["systems/**", "packages/**"],
-        exclude: ["systems/**/node_modules/**"],
+        exclude: options.scope === "production"
+          ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort((left, right) => left.localeCompare(right))
+          : ["systems/**/node_modules/**"],
+        ...(options.scope === "production" ? { resourceAdapters: SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS } : {}),
       },
       cells: cells.sort((left, right) => left.id.localeCompare(right.id)),
     },
@@ -227,7 +493,7 @@ function compareArrayField(findings: AdvancedFinding[], cellId: string, field: k
   });
 }
 
-export function verifyManifestFromServiceManifests(options: { rootDir?: string; manifest: CellFenceManifest; serviceManifestPaths?: string[] }): ServiceManifestVerifyResult {
+export function verifyManifestFromServiceManifests(options: { rootDir?: string; manifest: CellFenceManifest; serviceManifestPaths?: string[]; scope?: InferManifestScope }): ServiceManifestVerifyResult {
   const generated = createManifestFromServiceManifests(options);
   const generatedById = new Map(generated.manifest.cells.map((cell) => [cell.id, cell]));
   const findings: AdvancedFinding[] = [];
@@ -252,7 +518,10 @@ export function verifyManifestFromServiceManifests(options: { rootDir?: string; 
         details: { current: current.publicEntry, expected: generatedCell.publicEntry },
       });
     }
+    compareArrayField(findings, generatedCell.id, "publicPaths", current.publicPaths || [], generatedCell.publicPaths || []);
     compareArrayField(findings, generatedCell.id, "consumes", current.consumes || [], generatedCell.consumes || []);
+    compareArrayField(findings, generatedCell.id, "producesArtifacts", current.producesArtifacts || [], generatedCell.producesArtifacts || []);
+    compareArrayField(findings, generatedCell.id, "resourceContracts", current.resourceContracts || [], generatedCell.resourceContracts || []);
   }
   for (const current of options.manifest.cells) {
     if (generatedById.has(current.id)) continue;

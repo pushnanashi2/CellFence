@@ -8,7 +8,7 @@ inputs:
     description: "GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`."
     required: true
   cellfence-version:
-    description: "CellFence CLI version to install. Pin to a release tag."
+    description: "CellFence release version this bundled gate is paired with. The action does not install the CLI."
     required: false
     default: "0.2.1"
   baseline-codeowners:
@@ -25,7 +25,7 @@ inputs:
     description: "Git ref used to read the head baseline. Defaults to the PR head SHA."
     required: false
   require-separate-pr:
-    description: "Warn (and optionally fail) when a baseline change is mixed with implementation changes in the same pull request."
+    description: "Block mixed pull requests that change both baseline and implementation files unless fail-on-mixed-pr is explicitly false."
     required: false
     default: "true"
   comment-mode:
@@ -35,7 +35,7 @@ inputs:
   fail-on-mixed-pr:
     description: "When `require-separate-pr` is true, exit non-zero if the PR mixes baseline and implementation changes."
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: "node20"
   main: "dist/index.js"

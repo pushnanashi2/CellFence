@@ -41,7 +41,7 @@ function printHumanReport(report: CoverageReport): void {
   const { summary, findings } = report;
   console.log(
     `cellfence coverage: ${(summary.coverage * 100).toFixed(2)}% ` +
-      `(${summary.analyzedFiles}/${summary.totalFiles} findings analysed, ` +
+      `(${summary.analyzedFiles}/${summary.totalFiles} files analysed, ` +
       `${findings.length} unresolved observations)`,
   );
   if (findings.length === 0) return;

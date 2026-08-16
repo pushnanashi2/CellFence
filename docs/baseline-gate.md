@@ -37,12 +37,12 @@ The companion action:
    see what widened without diffing JSON.
 3. Blocks merge until an approver from the `baseline-codeowners`
    list (or the `.cellfence/baselines/` CODEOWNERS section) has
-   reviewed the PR. The prototype resolves GitHub usernames only;
-   team entries must be expanded before use.
-4. Warns (or, with `fail-on-mixed-pr: true`, fails) when the PR
-   mixes baseline changes with implementation changes. The default
-   is warn — a future flag will make the warn/fail choice a hard
-   policy decision rather than a config knob.
+   reviewed the PR head SHA. The prototype resolves GitHub usernames
+   only; team entries must be expanded before use. CODEOWNERS is read
+   from the PR base SHA, not from the moving default branch.
+4. Fails by default when the PR mixes baseline changes with
+   implementation changes. Set `fail-on-mixed-pr: false` only when
+   intentionally running the gate in warning mode.
 
 ## Minimum setup
 

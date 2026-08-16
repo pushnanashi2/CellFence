@@ -53,10 +53,10 @@ commit.
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
 | `github-token` | yes | (none) | GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`. |
-| `cellfence-version` | no | `0.2.1` | CellFence CLI version advertised in the install hint. The action itself does not invoke the CLI; it reads the two baseline files directly. |
-| `baseline-codeowners` | no | (resolved from `CODEOWNERS`) | Comma-separated list of GitHub usernames that can approve a baseline change. Team entries are not resolved by this prototype. Defaults to the `CODEOWNERS` entry that matches `baseline-file`. |
-| `require-separate-pr` | no | `true` | When `true`, a mixed PR (baseline + implementation) is surfaced as a sticky comment and (optionally) a failed check. |
-| `fail-on-mixed-pr` | no | `false` | When `true`, the action exits non-zero on a mixed PR. Ignored unless `require-separate-pr` is `true`. |
+| `cellfence-version` | no | `0.2.1` | CellFence release version this bundled gate is paired with. The action itself does not invoke the CLI; it reads the two baseline files directly. |
+| `baseline-codeowners` | no | (resolved from `CODEOWNERS`) | Comma-separated list of GitHub usernames that can approve a baseline change. Team entries are not resolved by this prototype. Defaults to the `CODEOWNERS` entry that matches `baseline-file` at the PR base SHA. |
+| `require-separate-pr` | no | `true` | When `true`, a mixed PR (baseline + implementation) is surfaced as a sticky comment and fails by default. |
+| `fail-on-mixed-pr` | no | `true` | When `true`, the action exits non-zero on a mixed PR. Ignored unless `require-separate-pr` is `true`. |
 | `comment-mode` | no | `update` | One of `update`, `create`, `disabled`. Controls whether the action reuses the existing sticky comment or creates a new one. |
 | `baseline-file` | no | `.cellfence/baselines/cellfence.baseline.json` | Repo-relative path to the baseline JSON. |
 | `base-ref` | no | PR base SHA | Git ref used to read the base baseline. |

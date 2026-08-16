@@ -79,7 +79,7 @@ export function buildCoverageReport(input: CoverageInput): CoverageReport {
   // Coverage is computed against the analyzer's actual reach rather than
   // raw file count, since the latter gets dragged around by tests, build
   // output, fixtures, and other sources of noise.
-  const coverage = input.totalFiles > 0 ? Math.min(1, input.analyzedFiles.length / input.totalFiles) : 1;
+  const coverage = input.totalFiles > 0 ? Math.min(1, input.analyzedFiles.length / input.totalFiles) : 0;
   return {
     schemaVersion: "cellfence.coverage.v1",
     generatedAt: new Date().toISOString(),

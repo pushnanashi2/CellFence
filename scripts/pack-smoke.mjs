@@ -2,26 +2,10 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { publicWorkspaceDirs } from "./public-workspaces.mjs";
 
 const root = process.cwd();
-const workspacePackages = [
-  "packages/schema",
-  "packages/plugin-api",
-  "packages/adapter-call-pattern",
-  "packages/adapter-opentelemetry",
-  "packages/plugin-agent-budget",
-  "packages/plugin-blast-radius",
-  "packages/plugin-dependency-sovereignty",
-  "packages/plugin-geo-purity",
-  "packages/plugin-legacy-strangler",
-  "packages/plugin-quants-trend",
-  "packages/reporter-economy-matrix",
-  "packages/engine",
-  "packages/cli",
-  "packages/github-action",
-  "packages/trace",
-  "packages/mcp-proxy"
-];
+const workspacePackages = publicWorkspaceDirs(root);
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {

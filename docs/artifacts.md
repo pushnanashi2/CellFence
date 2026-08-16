@@ -14,7 +14,9 @@ CellFence models these flows as **artifact lanes**:
 }
 ```
 
-The producer declares the lane. The consumer declares both the producer cell and the lane ID. In v0.x, the lane path must also fall under the producer's `ownedPaths` so the engine can resolve its owning cell. Importing a statically referenced file under an undeclared lane produces `CELLFENCE_UNDECLARED_ARTIFACT`.
+The producer declares the lane. The consumer declares both the producer cell and the lane ID. By default, the lane path must fall under the producer's `ownedPaths` so the engine can resolve its owning cell. Repositories with runtime/output directories outside source ownership can mark a lane `external: true`; that documents the produced artifact without forcing source ownership to include the runtime path. Importing a statically referenced file under an undeclared lane produces `CELLFENCE_UNDECLARED_ARTIFACT`.
+
+When importing `systems/*/service.json` files, the service-manifest adapter maps producer `produces.artifacts` entries into artifact lanes and maps `readOnlyArtifacts` entries back to matching producer lanes. If a read-only artifact path has no producer lane, the adapter preserves it as a `file`/`read` resource contract instead of dropping the contract. Scheduled service tasks are represented as `queue`/`subscribe` resource contracts with `scheduled:<task>` selectors.
 
 This makes statically imported file-based coupling visible in the same architecture contract as source-code dependencies. For selected string-literal resource access, CellFence can also snapshot current usage into the baseline and reject new static coupling during `baseline check`.
 

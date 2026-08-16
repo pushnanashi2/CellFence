@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {CellFenceClaimCasConflict, RedisClaimStore, emptyClaimStoreState} from "../packages/engine/dist/index.js";
+import { CellFenceClaimCasConflict, emptyClaimStoreState } from "../packages/engine/dist/claims/backend.js";
+import { RedisClaimStore } from "../packages/engine/dist/claims/backends/redis.js";
 
 function claimState(id) {
   return {
@@ -78,6 +79,72 @@ function createFakeRedis(initial = new Map()) {
   };
 }
 
+function createFakeRedisPool(initial = new Map()) {
+  const values = new Map(initial);
+  const calls = [];
+  let nextClientId = 0;
+  return {
+    values,
+    calls,
+    clientFactory() {
+      const clientId = `client-${nextClientId}`;
+      nextClientId += 1;
+      let watchedKey;
+      return {
+        async watch(key) {
+          calls.push([clientId, "watch", key]);
+          watchedKey = key;
+        },
+        async unwatch() {
+          calls.push([clientId, "unwatch", watchedKey]);
+          watchedKey = undefined;
+        },
+        async get(key) {
+          calls.push([clientId, "get", key]);
+          return values.get(key) ?? null;
+        },
+        multi() {
+          const queued = [];
+          return {
+            set(key, value) {
+              queued.push([key, value]);
+            },
+            async exec() {
+              calls.push([clientId, "exec", watchedKey]);
+              for (const [key, value] of queued) values.set(key, value);
+              watchedKey = undefined;
+              return queued.map(() => "OK");
+            },
+          };
+        },
+        async set(key, value, ...args) {
+          calls.push([clientId, "set", key, value, ...args]);
+          const nx = args.some((arg) => arg === "NX" || (arg && typeof arg === "object" && arg.NX === true));
+          if (nx && values.has(key)) return null;
+          values.set(key, value);
+          return "OK";
+        },
+        async del(key) {
+          calls.push([clientId, "del", key]);
+          const existed = values.delete(key);
+          return existed ? 1 : 0;
+        },
+        async eval(_script, numKeysOrOptions, ...args) {
+          const key = typeof numKeysOrOptions === "number" ? args[0] : numKeysOrOptions.keys[0];
+          const token = typeof numKeysOrOptions === "number" ? args[1] : numKeysOrOptions.arguments[0];
+          calls.push([clientId, "eval", key, token]);
+          if (values.get(key) !== token) return 0;
+          values.delete(key);
+          return 1;
+        },
+        async quit() {
+          calls.push([clientId, "quit"]);
+        },
+      };
+    },
+  };
+}
+
 test("RedisClaimStore reports the redis id and a default key", () => {
   const store = new RedisClaimStore({ url: "redis://localhost:6379/0" });
   assert.equal(store.id, "redis");
@@ -130,6 +197,32 @@ test("RedisClaimStore CAS conflict unwatches without deleting the claim store ke
   assert.deepEqual(JSON.parse(fake.values.get("cellfence:claims")), current);
   assert.ok(fake.calls.some((call) => call[0] === "unwatch"));
   assert.equal(fake.calls.some((call) => call[0] === "del" && call[1] === "cellfence:claims"), false);
+});
+
+test("RedisClaimStore validates claim entries read from Redis", async () => {
+  const fake = createFakeRedis(new Map([["cellfence:claims", JSON.stringify({
+    schemaVersion: "cellfence.claims.v1",
+    claims: [{ id: "bad", agent: "agent-a", cells: "api" }],
+  })]]));
+  const store = new RedisClaimStore({
+    url: "redis://example.test/0",
+    clientFactory: () => fake.client,
+  });
+  await assert.rejects(() => store.read(), /claim at index 0 is invalid/);
+});
+
+test("RedisClaimStore uses isolated CAS clients and closes them after writes", async () => {
+  const pool = createFakeRedisPool();
+  const store = new RedisClaimStore({
+    url: "redis://example.test/0",
+    clientFactory: () => pool.clientFactory(),
+  });
+  const first = claimState("claim-1");
+  await store.write(first, emptyClaimStoreState());
+  await store.write(claimState("claim-2"), first);
+  const watchClientIds = pool.calls.filter((call) => call[1] === "watch").map((call) => call[0]);
+  assert.deepEqual(watchClientIds, ["client-0", "client-1"]);
+  assert.deepEqual(pool.calls.filter((call) => call[1] === "quit").map((call) => call[0]), ["client-0", "client-1"]);
 });
 
 test("RedisClaimStore lock releases only the matching lease token", async () => {

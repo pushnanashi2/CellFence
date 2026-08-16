@@ -14,7 +14,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
-import { build } from "esbuild";
+import { build, formatMessages } from "esbuild";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const actionRoot = path.join(repoRoot, "packages/github-action-baseline-gate");
@@ -32,7 +32,7 @@ if (!fs.existsSync(sourceEntry)) {
 }
 
 try {
-  await build({
+  const result = await build({
     entryPoints: [sourceEntry],
     bundle: true,
     platform: "node",
@@ -46,8 +46,13 @@ try {
     outfile: path.join(outDir, "index.js"),
     sourcemap: "external",
     minify: true,
-    logLevel: "info",
+    logLevel: "silent",
   });
+  if (result.warnings.length > 0) {
+    const messages = await formatMessages(result.warnings, { kind: "warning", color: false });
+    console.error(messages.join("\n"));
+    process.exit(1);
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
@@ -81,12 +86,13 @@ if (fs.existsSync(baselineGateEntrypoint)) {
   );
 }
 
-// The action is a single CommonJS file; remove the ESM type so
-// the GitHub Actions runner loads it as CJS.
+// The action package intentionally omits `"type": "module"` so the
+// GitHub Actions runner loads the bundled `dist/index.js` as CommonJS.
+// Keep that source contract explicit instead of mutating package.json
+// during the build.
 const pkgPath = path.join(actionRoot, "package.json");
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-delete pkg.type;
-const nextPkg = JSON.stringify(pkg, null, 2) + "\n";
-if (fs.readFileSync(pkgPath, "utf8") !== nextPkg) {
-  fs.writeFileSync(pkgPath, nextPkg);
+if (Object.hasOwn(pkg, "type")) {
+  console.error(`${path.relative(repoRoot, pkgPath)} must not declare "type"; the bundled action is CommonJS`);
+  process.exit(1);
 }

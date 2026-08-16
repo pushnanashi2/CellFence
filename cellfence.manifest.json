@@ -7,17 +7,22 @@
     ],
     "exclude": [],
     "resourceAdapters": {
-      "bullmq": "off",
-      "drizzle": "off",
-      "fastify": "off",
-      "http": "off",
-      "kafkajs": "off",
-      "nestjs": "off",
-      "prisma": "off",
-      "queue": "off",
-      "query-builder": "off",
-      "sql-literal": "off",
-      "typeorm": "off"
+      "bullmq": "on",
+      "celery": "on",
+      "django": "on",
+      "drizzle": "on",
+      "fastapi": "on",
+      "fastify": "on",
+      "file": "on",
+      "http": "on",
+      "kafkajs": "on",
+      "nestjs": "on",
+      "prisma": "on",
+      "queue": "on",
+      "query-builder": "on",
+      "sql-literal": "on",
+      "sqlalchemy": "on",
+      "typeorm": "on"
     },
     "requiredRules": [
       "CELLFENCE_UNDECLARED_CONSUMER",
@@ -140,6 +145,7 @@
         "ChangedCheckOptions",
         "CheckOptions",
         "CheckResult",
+        "CORE_REQUIRED_RULES",
         "ClaimBackendType",
         "ClaimCheckOptions",
         "ClaimCheckResult",
@@ -193,6 +199,9 @@
         "Severity",
         "SuggestedResolution",
         "TaskCheckResult",
+        "WAIVER_ATTESTATION_HMAC_KEY_ENV",
+        "WAIVER_ATTESTATION_HMAC_KEY_ID_ENV",
+        "WAIVER_REPOSITORY_IDENTITY_ENV",
         "WaiverRequest",
         "WaiverRequestOptions",
         "WriteAccessOptions",
@@ -202,17 +211,20 @@
         "buildCoverageReport",
         "checkChangedRepository",
         "checkClaims",
+        "checkClaimsAsync",
         "checkCommitEvidence",
         "checkDesignDocs",
         "checkMutationReport",
         "checkRepository",
         "checkTaskManifest",
         "checkWriteAccess",
+        "checkWriteAccessAsync",
         "createAutoAllocation",
         "createBaseline",
         "createBaselineAudit",
         "createCellContext",
         "createClaim",
+        "createClaimAsync",
         "createCouplingGraph",
         "createEvidenceGraph",
         "createManifestFromServiceManifests",
@@ -229,6 +241,7 @@
         "guardBaselineUpdate",
         "inferManifest",
         "listClaims",
+        "listClaimsAsync",
         "listWaivers",
         "loadBaselineFromFile",
         "loadManifestFromFile",
@@ -248,6 +261,7 @@
         "stampDesignDoc",
         "verifyBaselineSeal",
         "verifyManifestFromServiceManifests",
+        "waiverAttestationHmacDigest",
         "writeBaselineFile",
         "MAX_WAIVER_DAYS"
       ],
@@ -260,6 +274,7 @@
             "write"
           ],
           "selectors": [
+            "/proc/sys/kernel/random/boot_id",
             "unresolved:dynamic-file-path"
           ],
           "description": "Engine reads manifests, source files, evidence, claims, and baselines from caller-supplied repository paths and writes caller-selected governance artifacts."
@@ -282,6 +297,7 @@
       "publicEntry": "packages/mcp-proxy/src/index.ts",
       "publicSymbols": [
         "decideToolCall",
+        "decideToolCallAsync",
         "DownstreamFeaturePolicy",
         "FailMode",
         "main",
@@ -312,6 +328,9 @@
       "consumes": [
         {
           "cell": "engine"
+        },
+        {
+          "cell": "schema"
         }
       ],
       "producesArtifacts": [],
@@ -592,6 +611,22 @@
       "consumes": [
         {
           "cell": "engine"
+        },
+        {
+          "cell": "schema"
+        }
+      ],
+      "resourceContracts": [
+        {
+          "id": "github-action-baseline-gate-baseline-file-read",
+          "kind": "file",
+          "access": [
+            "read"
+          ],
+          "selectors": [
+            "unresolved:dynamic-file-path"
+          ],
+          "description": "Baseline gate reads the operator-selected baseline JSON path from the working tree when a git ref is not supplied."
         }
       ],
       "producesArtifacts": [],

@@ -12,6 +12,7 @@ import type {
   RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
 import type { FileIndexContext } from "./file-index.js";
+import type { ClaimStoreBackend } from "./claims/backend.js";
 import type { EvidenceGraph, FindingWitness } from "./governance/model.js";
 import type { PackageExportResolutionState, PathAlias } from "./module-resolution.js";
 import type { ResourceAccessMode } from "./resource-access.js";
@@ -351,6 +352,7 @@ export type CellFenceClaimStore = {
 
 export type ClaimCreateOptions = CheckOptions & {
   claimsPath?: string;
+  claimBackend?: ClaimStoreBackend;
   claimId?: string;
   agent: string;
   task?: string;
@@ -366,6 +368,7 @@ export type ClaimCreateOptions = CheckOptions & {
 
 export type ClaimCheckOptions = CheckOptions & {
   claimsPath?: string;
+  claimBackend?: ClaimStoreBackend;
   agent?: string;
   baseRef?: string;
   headRef?: string;
@@ -402,6 +405,7 @@ export type WriteAccessOptions = CheckOptions & {
   agent: string;
   paths: string[];
   claimsPath?: string;
+  claimBackend?: ClaimStoreBackend;
   now?: Date;
 };
 
@@ -455,6 +459,7 @@ export type WaiverRequestOptions = {
 export type WaiverRequest = {
   schemaVersion: "cellfence.waiver-request.v1";
   directive: string;
+  attestationTemplate: WaiverAttestationUnsigned;
   markdown: string;
   approvalRequired: true;
   ruleId: RuleId;
@@ -463,6 +468,32 @@ export type WaiverRequest = {
   expires: string;
   approvedBy: string;
   reason: string;
+};
+
+export type WaiverAttestationSignature = {
+  algorithm: "hmac-sha256";
+  keyId?: string;
+  digest: string;
+};
+
+export type WaiverAttestationUnsigned = {
+  schemaVersion: "cellfence.waiver-attestation.v1";
+  attestationId: string;
+  repository: string;
+  headSha: string;
+  sourceSha256: string;
+  ruleId: string;
+  findingFingerprint: string;
+  filePath: string;
+  line: number;
+  expiresAt: string;
+  reason: string;
+  approver: string;
+  issuedAt: string;
+};
+
+export type WaiverAttestation = WaiverAttestationUnsigned & {
+  signature: WaiverAttestationSignature;
 };
 
 export type BaselineUpdateGuardResult = {
@@ -480,16 +511,19 @@ export type CellFenceWaiver = {
   line: number;
   expires: string;
   approvedBy: string;
+  attestationId?: string;
+  attestation?: WaiverAttestation;
+  findingFingerprint?: string;
   reason: string;
   expired: boolean;
   valid: boolean;
   errors: string[];
-  // 0.4.x: true when the waiver's approved-by identity is not in the
-  // trusted approval allowlist supplied by CELLFENCE_APPROVERS. The
-  // mismatch is a hard parse error (see waivers.ts); the waiver is
-  // marked invalid and does not suppress findings. A separate
-  // CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still emitted
-  // by collectWaiversForManifest for observability.
+  // True when the signed attestation approver is not in the trusted
+  // approval allowlist supplied by CELLFENCE_APPROVERS. The mismatch is
+  // a hard parse error (see waivers.ts); the waiver is marked invalid
+  // and does not suppress findings. A separate
+  // CELLFENCE_WAIVER_UNTRUSTED_APPROVER warning is still emitted by
+  // collectWaiversForManifest for observability.
   untrustedApprover?: boolean;
 };
 

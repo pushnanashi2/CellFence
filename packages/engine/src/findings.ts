@@ -4,14 +4,6 @@ import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { normalizePath } from "./file-index.js";
 import type { Finding, SuggestedResolution } from "./types.js";
 
-function normalizedFindingDetails(details: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
-  if (!details) return undefined;
-  const normalizedEntries = Object.entries(details)
-    .filter(([key]) => !["message", "currentHash", "nextHash", "line"].includes(key))
-    .map(([key, value]) => [key, value] as const);
-  return normalizedEntries.length > 0 ? Object.fromEntries(normalizedEntries) : undefined;
-}
-
 export function findingFingerprint(finding: Finding): string {
   return crypto
     .createHash("sha256")
@@ -21,7 +13,7 @@ export function findingFingerprint(finding: Finding): string {
       filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
       cellId: finding.cellId,
       producerCellId: finding.producerCellId,
-      details: normalizedFindingDetails(finding.details),
+      details: finding.details,
     }))
     .digest("hex");
 }

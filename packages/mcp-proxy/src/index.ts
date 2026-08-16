@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 
-import { checkWriteAccess, type WriteAccessResult } from "@cellfence/engine";
+import { checkWriteAccess, checkWriteAccessAsync, type WriteAccessResult } from "@cellfence/engine";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -47,6 +47,7 @@ export type ProxyOptions = {
   downstreamCommand: string;
   downstreamArgs: string[];
   downstreamCwd?: string;
+  downstreamEnv?: Record<string, string>;
   // H-6 (0.3.0): opt-in escape hatch for the --downstream-cwd
   // containment check. By default the cwd must sit inside rootDir;
   // setting this to true lets advanced deployments point the
@@ -91,7 +92,7 @@ const VERSION = "0.2.1";
 // MultiEdit/patch/fs_write/edit. Tool matching is now case-insensitive
 // (see shouldExposeTool) so the additional names are picked up.
 const DEFAULT_WRITE_TOOLS: WriteToolConfig = {
-  apply_patch: ["path", "file_path", "filename"],
+  apply_patch: ["path", "file_path", "filename", "patch", "diff"],
   create_file: ["path", "file_path", "filename"],
   edit_file: ["path", "file_path", "filename"],
   str_replace: ["path", "file_path", "filename"],
@@ -100,7 +101,7 @@ const DEFAULT_WRITE_TOOLS: WriteToolConfig = {
   Edit: ["file_path", "path", "filepath", "filename"],
   NotebookEdit: ["file_path", "path", "filepath", "filename"],
   MultiEdit: ["file_path", "path", "filepath", "filename"],
-  patch: ["file_path", "path", "filepath", "filename"],
+  patch: ["file_path", "path", "filepath", "filename", "patch", "diff"],
   fs_write: ["file_path", "path", "filepath", "filename"],
   edit: ["file_path", "path", "filepath", "filename"],
 };
@@ -129,6 +130,7 @@ Options:
   --downstream-command CMD      MCP server command to wrap.
   --downstream-arg ARG          Repeatable downstream argument.
   --downstream-cwd DIR          Working directory for the downstream server. Must be inside --root unless --allow-cwd-mismatch is set.
+  --downstream-env NAME         Extra exact environment variable name to forward to the downstream server. Repeatable/comma-separated.
   --allow-cwd-mismatch          Skip the --downstream-cwd containment check (H-6 opt-in escape hatch).
   --help                        Show this help.
 
@@ -148,6 +150,46 @@ function stringsFromValue(value: unknown): string[] {
   if (typeof value === "string" && value.trim().length > 0) return [value];
   if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
   return [];
+}
+
+function pathFromDiffHeader(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed === "/dev/null") return undefined;
+  if (trimmed.startsWith("a/") || trimmed.startsWith("b/")) return trimmed.slice(2);
+  return trimmed;
+}
+
+function pathsFromPatchText(value: string): string[] {
+  const paths: string[] = [];
+  for (const line of value.split(/\r?\n/)) {
+    let match = /^\*\*\* (?:Add|Update|Delete) File: (.+)$/.exec(line);
+    if (match) {
+      paths.push(match[1].trim());
+      continue;
+    }
+    match = /^\*\*\* Move to: (.+)$/.exec(line);
+    if (match) {
+      paths.push(match[1].trim());
+      continue;
+    }
+    match = /^diff --git\s+a\/(.+?)\s+b\/(.+)$/.exec(line);
+    if (match) {
+      paths.push(match[1].trim(), match[2].trim());
+      continue;
+    }
+    match = /^(?:---|\+\+\+)\s+(.+)$/.exec(line);
+    if (match) {
+      const filePath = pathFromDiffHeader(match[1]);
+      if (filePath) paths.push(filePath);
+    }
+  }
+  return paths.filter((entry) => entry.length > 0);
+}
+
+function keyLooksLikePatchPayload(keyPath: string): boolean {
+  const segments = keyPath.split(".");
+  const key = segments[segments.length - 1]?.replace(/\[\]$/, "").toLowerCase();
+  return key === "patch" || key === "diff";
 }
 
 function getNestedValues(value: unknown, keyPath: string): unknown[] {
@@ -248,6 +290,14 @@ function parseDownstreamFeaturePolicy(value: string | undefined): DownstreamFeat
   throw new Error(`invalid downstream feature policy ${value === undefined || value === "" ? "(empty)" : value}`);
 }
 
+function parseDownstreamEnvAllowlist(value: string | undefined): string[] {
+  if (!value) return [];
+  return value.split(",").map((entry) => entry.trim()).filter(Boolean).map((name) => {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`invalid downstream env name ${name}`);
+    return name;
+  });
+}
+
 function parseReadTool(value: string | undefined): string {
   const tool = value?.trim() || "";
   if (!tool) throw new Error("--read-tool must include a tool name");
@@ -274,6 +324,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
   let downstreamCommand = env.CELLFENCE_MCP_DOWNSTREAM_COMMAND || "";
   let downstreamArgs: string[] = [];
   let downstreamCwd: string | undefined;
+  let downstreamEnvAllowlist = parseDownstreamEnvAllowlist(env.CELLFENCE_MCP_DOWNSTREAM_ENV_ALLOW);
   let allowCwdMismatch = false;
   let writeTools = { ...DEFAULT_WRITE_TOOLS };
 
@@ -369,6 +420,11 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
       index += 1;
     } else if (argument.startsWith("--downstream-cwd=")) {
       downstreamCwd = argument.slice("--downstream-cwd=".length);
+    } else if (argument === "--downstream-env") {
+      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(argv[index + 1])];
+      index += 1;
+    } else if (argument.startsWith("--downstream-env=")) {
+      downstreamEnvAllowlist = [...downstreamEnvAllowlist, ...parseDownstreamEnvAllowlist(argument.slice("--downstream-env=".length))];
     } else if (argument === "--allow-cwd-mismatch") {
       allowCwdMismatch = true;
     } else {
@@ -389,6 +445,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     downstreamCommand,
     downstreamArgs: downstreamArgs.filter((entry) => entry.length > 0),
     downstreamCwd,
+    downstreamEnv: safeDownstreamEnvironment(env, downstreamEnvAllowlist),
     allowCwdMismatch,
     writeTools,
     readTools,
@@ -419,9 +476,26 @@ export function pathsForToolCall(toolName: string, args: unknown, writeTools: Wr
   if (!keys) return undefined;
   const paths: string[] = [];
   for (const key of keys) {
-    for (const value of getNestedValues(args, key)) paths.push(...stringsFromValue(value));
+    for (const value of getNestedValues(args, key)) {
+      if (keyLooksLikePatchPayload(key)) {
+        for (const patchText of stringsFromValue(value)) paths.push(...pathsFromPatchText(patchText));
+      } else {
+        paths.push(...stringsFromValue(value));
+      }
+    }
   }
   return [...new Set(paths)];
+}
+
+function authorizationPathsForToolCall(options: ProxyOptions, paths: string[]): string[] {
+  const downstreamCwd = resolveAndValidateDownstreamCwd(
+    options.rootDir,
+    options.downstreamCwd,
+    options.allowCwdMismatch === true,
+  );
+  return paths.map((targetPath) => path.isAbsolute(targetPath)
+    ? path.resolve(targetPath)
+    : path.resolve(downstreamCwd, targetPath));
 }
 
 /* c8 ignore start -- Audit file appending is exercised through the subprocess MCP proxy E2E tests; parent-process c8 does not retain that child coverage. */
@@ -446,13 +520,18 @@ function summarizeAccess(access: WriteAccessResult): string {
 }
 /* c8 ignore stop */
 
+function isConfiguredReadTool(options: ProxyOptions, toolName: string): boolean {
+  const wanted = toolName.toLowerCase();
+  return (options.readTools ?? []).some((tool) => tool.toLowerCase() === wanted);
+}
+
 export function decideToolCall(options: ProxyOptions, toolName: string, args: unknown): ToolDecision {
   const paths = pathsForToolCall(toolName, args, options.writeTools);
   if (options.mode === "off") {
     return { shouldForward: true, auditDecision: "off", paths: paths || [], reason: "guard disabled" };
   }
   if (paths === undefined) {
-    if (options.readTools?.includes(toolName)) {
+    if (isConfiguredReadTool(options, toolName)) {
       return { shouldForward: true, auditDecision: "allow", paths: [], reason: "configured read tool" };
     }
     if ((options.unknownToolPolicy ?? "deny") === "deny") {
@@ -475,12 +554,63 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
     };
   }
   try {
+    const authorizationPaths = authorizationPathsForToolCall(options, paths);
     const access = checkWriteAccess({
       rootDir: options.rootDir,
       manifestPath: options.manifestPath,
       claimsPath: options.claimsPath,
       agent: options.agent,
-      paths,
+      paths: authorizationPaths,
+    });
+    if (access.ok) return { shouldForward: true, auditDecision: "allow", paths, reason: "CellFence write access allowed", access };
+    const reason = summarizeAccess(access);
+    if (options.mode === "dry-run") return { shouldForward: true, auditDecision: "dry-run-deny", paths, reason, access };
+    if (options.failMode === "open") return { shouldForward: true, auditDecision: "allow", paths, reason: `fail-open after denial: ${reason}`, access };
+    return { shouldForward: false, auditDecision: "deny", paths, reason, access };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    if (options.mode === "dry-run") return { shouldForward: true, auditDecision: "dry-run-deny", paths, reason };
+    if (options.failMode === "open") return { shouldForward: true, auditDecision: "allow", paths, reason: `fail-open after policy error: ${reason}` };
+    return { shouldForward: false, auditDecision: "deny", paths, reason };
+  }
+}
+
+export async function decideToolCallAsync(options: ProxyOptions, toolName: string, args: unknown): Promise<ToolDecision> {
+  const paths = pathsForToolCall(toolName, args, options.writeTools);
+  if (options.mode === "off") {
+    return { shouldForward: true, auditDecision: "off", paths: paths || [], reason: "guard disabled" };
+  }
+  if (paths === undefined) {
+    if (isConfiguredReadTool(options, toolName)) {
+      return { shouldForward: true, auditDecision: "allow", paths: [], reason: "configured read tool" };
+    }
+    if ((options.unknownToolPolicy ?? "deny") === "deny") {
+      const reason = `unknown tool ${toolName} is not configured as a read or write tool`;
+      if (options.mode === "dry-run") {
+        return { shouldForward: true, auditDecision: "dry-run-deny", paths: [], reason };
+      }
+      return { shouldForward: false, auditDecision: "deny", paths: [], reason };
+    }
+    return { shouldForward: true, auditDecision: "allow", paths: [], reason: "read-only or unconfigured tool" };
+  }
+  if (paths.length === 0) {
+    const reason = `write tool ${toolName} did not expose a configured path argument`;
+    const shouldForward = options.failMode === "open" || options.mode === "dry-run";
+    return {
+      shouldForward,
+      auditDecision: shouldForward && options.mode === "dry-run" ? "dry-run-deny" : shouldForward ? "allow" : "deny",
+      paths: [],
+      reason,
+    };
+  }
+  try {
+    const authorizationPaths = authorizationPathsForToolCall(options, paths);
+    const access = await checkWriteAccessAsync({
+      rootDir: options.rootDir,
+      manifestPath: options.manifestPath,
+      claimsPath: options.claimsPath,
+      agent: options.agent,
+      paths: authorizationPaths,
     });
     if (access.ok) return { shouldForward: true, auditDecision: "allow", paths, reason: "CellFence write access allowed", access };
     const reason = summarizeAccess(access);
@@ -522,8 +652,7 @@ function deniedToolResult(toolName: string, decision: ToolDecision): CallToolRes
 // CELLFENCE_MCP_* prefix, which let through knob names that
 // should not have left the proxy (CELLFENCE_MCP_AUDIT_LOG exposes
 // the audit log path; CELLFENCE_MCP_UNKNOWN_TOOL_POLICY lets a
-// caller override the gate). It also shipped MOCK_MCP_LOG, a
-// test-only fixture that had no business in production. Replace
+// caller override the gate). Replace
 // the CELLFENCE_MCP_ prefix with an explicit set of the
 // configuration knobs the downstream MCP server genuinely needs
 // to honour, and add the missing cross-platform variables
@@ -577,19 +706,14 @@ const SAFE_DOWNSTREAM_ENV_NAMES = new Set([
 
 const SAFE_DOWNSTREAM_ENV_PREFIXES = [
   "LC_",
-  // MOCK_ is the test-harness namespace used by the mock MCP
-  // server that the mcp-proxy test suite spawns. No operator
-  // or production MCP server sets MOCK_* variables, so the
-  // prefix keeps the mock surface segregated from the
-  // CELLFENCE_* / LC_* / PATH / HOME production allowlist.
-  "MOCK_",
 ];
 
-function safeDownstreamEnvironment(env: NodeJS.ProcessEnv): Record<string, string> {
+function safeDownstreamEnvironment(env: NodeJS.ProcessEnv, extraNames: readonly string[] = []): Record<string, string> {
   const result: Record<string, string> = {};
+  const allowedExtraNames = new Set(extraNames);
   for (const [name, value] of Object.entries(env)) {
     if (typeof value !== "string") continue;
-    if (SAFE_DOWNSTREAM_ENV_NAMES.has(name)) {
+    if (SAFE_DOWNSTREAM_ENV_NAMES.has(name) || allowedExtraNames.has(name)) {
       result[name] = value;
       continue;
     }
@@ -623,8 +747,7 @@ function shouldExposeTool(options: ProxyOptions, toolName: string): boolean {
   const wanted = toolName.toLowerCase();
   const hasWrite = Object.keys(options.writeTools).some((key) => key.toLowerCase() === wanted);
   if (hasWrite) return true;
-  const readTools = options.readTools ?? [];
-  return readTools.some((tool) => tool.toLowerCase() === wanted);
+  return isConfiguredReadTool(options, toolName);
 }
 
 // H-6 (0.3.0): --downstream-cwd is the working directory of the
@@ -676,7 +799,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
     command: options.downstreamCommand,
     args: options.downstreamArgs,
     cwd: validatedCwd,
-    env: safeDownstreamEnvironment(process.env),
+    env: options.downstreamEnv ?? safeDownstreamEnvironment(process.env),
     stderr: "inherit",
   });
   const downstream = new Client({
@@ -713,7 +836,7 @@ export async function runProxy(options: ProxyOptions): Promise<void> {
   server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
     const toolName = request.params.name;
     const toolArgs = request.params.arguments;
-    const decision = decideToolCall(options, toolName, toolArgs);
+    const decision = await decideToolCallAsync(options, toolName, toolArgs);
     audit(options, toolName, decision);
     if (!decision.shouldForward) return deniedToolResult(toolName, decision);
     return downstream.callTool(request.params);

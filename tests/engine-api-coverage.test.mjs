@@ -27,11 +27,13 @@ if (!process.env.CELLFENCE_APPROVERS) {
 import {
   checkChangedRepository,
   checkClaims,
+  checkClaimsAsync,
   checkRepository,
   createAutoAllocation,
   createBaseline,
   createCellContext,
   createClaim,
+  createClaimAsync,
   createCouplingGraph,
   createPruneReport,
   createWaiverRequest,
@@ -39,11 +41,19 @@ import {
   formatHumanResult,
   guardBaselineUpdate,
   inferManifest,
+  findingFingerprint,
   listClaims,
+  listClaimsAsync,
   listWaivers,
   loadManifestFromFile,
+  checkWriteAccessAsync,
 } from "../packages/engine/dist/index.js";
 import { sealBaselineIfConfigured } from "../packages/engine/dist/baseline-seal.js";
+import {
+  initGitRepo,
+  withWaiverEnv,
+  writeSignedWaiverAttestation,
+} from "./helpers/waiver-attestations.mjs";
 
 const root = process.cwd();
 
@@ -872,7 +882,8 @@ test("engine validates waiver syntax and can waive findings without line metadat
     assert.equal(invalidWaivers.length, 3);
     assert.ok(invalidWaivers.some((finding) => /concrete CELLFENCE_\*/.test(finding.message)));
     assert.ok(invalidWaivers.some((finding) => /expires must be YYYY-MM-DD/.test(finding.message)));
-    assert.ok(invalidWaivers.some((finding) => /approved-by is required/.test(finding.message)));
+    assert.ok(invalidWaivers.every((finding) => /signed waiver attestation is required/.test(finding.message)));
+    assert.ok(invalidWaivers.some((finding) => /approved-by in source is not an approval/.test(finding.message)));
     assert.ok(invalidWaivers.some((finding) => /reason must explain/.test(finding.message)));
   } finally {
     fs.rmSync(invalidRoot, { recursive: true, force: true });
@@ -908,29 +919,37 @@ test("engine validates waiver syntax and can waive findings without line metadat
     fs.writeFileSync(
       path.join(waivedRoot, "src/core/public.ts"),
       [
-        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public surface mismatch fixture`,
+        "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH attestation:waiver-required-public-symbol",
         "export const extra = true;",
         "",
       ].join("\n"),
     );
     writeManifest(waivedRoot, [baseCell("core", { publicSymbols: [] })]);
+    initGitRepo(waivedRoot);
+    writeSignedWaiverAttestation(waivedRoot, {
+      attestationId: "waiver-required-public-symbol",
+      ruleId: "CELLFENCE_PUBLIC_SYMBOL_MISMATCH",
+      filePath: "src/core/public.ts",
+      line: 2,
+      findingFingerprint: "1".repeat(64),
+      expiresAt: `${WAVING_INTO_THE_FUTURE}T00:00:00.000Z`,
+      reason: "temporary public surface mismatch fixture",
+    });
 
-    const waived = checkRepository({ rootDir: waivedRoot, manifestPath: "cellfence.manifest.json" });
+    const waived = withWaiverEnv(waivedRoot, () => checkRepository({ rootDir: waivedRoot, manifestPath: "cellfence.manifest.json" }));
     assert.equal(waived.ok, false, JSON.stringify(waived.findings));
     assert.ok(waived.findings.some((finding) => finding.ruleId === "CELLFENCE_PUBLIC_SYMBOL_MISMATCH"),
       "expected the original finding to remain because the rule is required");
-    // TODO(0.4.0): waiver for a required rule should also surface as
-    // CELLFENCE_WAIVER_INVALID. Tracked as a follow-up; for 0.3.0 the waiver
-    // is silently a no-op and the original finding is what we assert here.
+    assert.ok(waived.findings.some((finding) =>
+      finding.ruleId === "CELLFENCE_WAIVER_INVALID"
+      && /required and cannot be waived/.test(finding.message)));
 
     process.chdir(waivedRoot);
-    const waivers = listWaivers();
+    const waivers = withWaiverEnv(waivedRoot, () => listWaivers());
     assert.equal(waivers.length, 1);
     assert.equal(waivers[0].ruleId, "CELLFENCE_PUBLIC_SYMBOL_MISMATCH");
-    // The waiver is syntactically valid (within 90 days, approver in allowlist)
-    // but it is a no-op against a required rule. valid stays true; the rule
-    // is enforced regardless of the comment.
-    assert.equal(waivers[0].valid, true);
+    assert.equal(waivers[0].valid, false);
+    assert.ok(waivers[0].errors.some((error) => /required and cannot be waived/.test(error)));
   } finally {
     process.chdir(previousCwd);
     fs.rmSync(waivedRoot, { recursive: true, force: true });
@@ -1009,6 +1028,19 @@ test("engine covers tsconfig alias fallback and runtime evidence default fields"
 });
 
 test("engine waiver requests and human formatting reject weak inputs", () => {
+  const request = createWaiverRequest({
+    ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
+    filePath: "src/core/public.ts",
+    line: 2,
+    expires: WAVING_INTO_THE_FUTURE,
+    reason: "temporary migration reason",
+    approvedBy: "owner",
+  });
+  assert.equal(request.directive, "// cellfence-ignore CELLFENCE_UNRESOLVED_IMPORT attestation:PENDING");
+  assert.equal(request.attestationTemplate.sourceSha256, "PENDING");
+  assert.equal(request.attestationTemplate.findingFingerprint, "PENDING");
+  assert.match(request.markdown, /Unsigned attestation template/);
+
   assert.throws(
     () => createWaiverRequest({
       ruleId: "CELLFENCE_PRIVATE_IMPORT",
@@ -1101,6 +1133,8 @@ test("engine changed checks cover explicit head refs and base-check failure path
 
 test("engine changed checks cache deterministic base analysis outside the worktree", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-cache-"));
+  const originalApprovers = process.env.CELLFENCE_APPROVERS;
+  const originalBaselineHmacKey = process.env.CELLFENCE_BASELINE_HMAC_KEY;
   try {
     initGit(rootDir);
     writeCell(rootDir, "core");
@@ -1125,7 +1159,21 @@ test("engine changed checks cache deterministic base analysis outside the worktr
       ruleSeverities: { CELLFENCE_UNOWNED_SOURCE: "warning" },
     });
     assert.equal(severityChanged.baseCacheHit, false);
+
+    process.env.CELLFENCE_APPROVERS = "cache-owner-a";
+    const approverChanged = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    assert.equal(approverChanged.baseCacheHit, false);
+    const approverCached = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    assert.equal(approverCached.baseCacheHit, true);
+
+    process.env.CELLFENCE_BASELINE_HMAC_KEY = "cache-hmac-a";
+    const hmacChanged = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    assert.equal(hmacChanged.baseCacheHit, false);
   } finally {
+    if (originalApprovers === undefined) delete process.env.CELLFENCE_APPROVERS;
+    else process.env.CELLFENCE_APPROVERS = originalApprovers;
+    if (originalBaselineHmacKey === undefined) delete process.env.CELLFENCE_BASELINE_HMAC_KEY;
+    else process.env.CELLFENCE_BASELINE_HMAC_KEY = originalBaselineHmacKey;
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
@@ -1415,7 +1463,7 @@ test("engine changed check finding identity is stable across message wording cha
   }
 });
 
-test("engine changed check finding identity ignores line-only drift", () => {
+test("engine changed check finding identity binds line drift", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-line-fingerprint-"));
   try {
     initGit(rootDir);
@@ -1439,12 +1487,35 @@ test("engine changed check finding identity ignores line-only drift", () => {
       baseRef: "HEAD~1",
       headRef: "HEAD",
     });
-    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
-    assert.deepEqual(result.findings, []);
+    assert.equal(result.exitCode, 1, JSON.stringify(result.findings));
+    assert.equal(result.findings.length, 1);
+    assert.equal(result.findings[0].ruleId, "CELLFENCE_PRIVATE_IMPORT");
+    assert.equal(result.findings[0].details?.line, 2);
     assert.deepEqual(result.changedFiles, ["src/app/public.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
+});
+
+test("finding fingerprints bind source line and semantic details", () => {
+  const finding = {
+    ruleId: "CELLFENCE_TEST",
+    severity: "error",
+    filePath: "src/core/public.ts",
+    message: "display wording one",
+    details: {
+      line: 7,
+      currentHash: "current",
+      nextHash: "next",
+      message: "semantic detail",
+    },
+  };
+  const fingerprint = findingFingerprint(finding);
+  assert.equal(fingerprint, findingFingerprint({ ...finding, message: "display wording two" }));
+  assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, line: 8 } }));
+  assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, currentHash: "other" } }));
+  assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, nextHash: "other" } }));
+  assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, message: "other semantic detail" } }));
 });
 
 test("engine changed check reports a newly introduced private import", () => {
@@ -1707,6 +1778,119 @@ test("engine claim APIs fail closed for malformed stores, bad surfaces, and conf
   }
 });
 
+test("engine async claim APIs drive Promise claim backends end to end", async () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-async-claims-"));
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const backend = {
+    id: "async-memory",
+    reads: 0,
+    writes: 0,
+    state: { schemaVersion: "cellfence.claims.v1", claims: [] },
+    async read() {
+      this.reads += 1;
+      return clone(this.state);
+    },
+    async write(next, previous) {
+      this.writes += 1;
+      assert.deepEqual(this.state, previous);
+      this.state = clone(next);
+    },
+  };
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    initGit(rootDir);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    const syncFailure = checkClaims({ rootDir, claimBackend: backend });
+    assert.equal(syncFailure.exitCode, 1);
+    assert.match(syncFailure.findings[0].message, /use the async read path/);
+
+    const created = await createClaimAsync({
+      rootDir,
+      claimBackend: backend,
+      agent: "codex-a",
+      cells: ["core"],
+      ttl: "1d",
+      claimId: "claim-async",
+      now: new Date("2026-01-01T00:00:00.000Z"),
+    });
+    assert.equal(created.exitCode, 0, JSON.stringify(created.findings));
+    assert.equal(created.createdClaim?.id, "claim-async");
+    assert.equal(backend.writes, 1);
+
+    const listed = await listClaimsAsync({ rootDir, claimBackend: backend, now: new Date("2026-01-01T00:00:00.000Z") });
+    assert.deepEqual(listed.claims.map((claim) => claim.id), ["claim-async"]);
+
+    const checked = await checkClaimsAsync({ rootDir, claimBackend: backend, agent: "codex-a", now: new Date("2026-01-01T00:00:00.000Z") });
+    assert.equal(checked.exitCode, 0, JSON.stringify(checked.findings));
+
+    const access = await checkWriteAccessAsync({
+      rootDir,
+      claimBackend: backend,
+      agent: "codex-a",
+      paths: [path.join(rootDir, "src/core/public.ts")],
+      now: new Date("2026-01-01T00:00:00.000Z"),
+    });
+    assert.equal(access.exitCode, 0, JSON.stringify(access.findings));
+    assert.equal(access.paths[0].allowed, true);
+
+    const denied = await checkWriteAccessAsync({
+      rootDir,
+      claimBackend: backend,
+      agent: "codex-a",
+      paths: [path.join(rootDir, "src/other/public.ts")],
+      now: new Date("2026-01-01T00:00:00.000Z"),
+    });
+    assert.equal(denied.exitCode, 1);
+    assert.equal(denied.paths[0].allowed, false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("claim check reports unclaimed deletions and audits claim-store changes", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-claims-deletion-"));
+  try {
+    writeCell(rootDir, "core");
+    writeCell(rootDir, "other");
+    writeManifest(rootDir, [baseCell("core"), baseCell("other")]);
+    writeJson(path.join(rootDir, ".cellfence/claims.json"), {
+      schemaVersion: "cellfence.claims.v1",
+      claims: [{
+        id: "claim-core",
+        agent: "codex-a",
+        cells: ["core"],
+        paths: [],
+        symbols: [],
+        resources: [],
+        artifactLanes: [],
+        createdAt: "2026-01-01T00:00:00.000Z",
+        expiresAt: "2099-01-01T00:00:00.000Z",
+      }],
+    });
+    initGit(rootDir);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    fs.rmSync(path.join(rootDir, "src/other/public.ts"));
+    const deletion = checkClaims({ rootDir, agent: "codex-a" });
+    assert.equal(deletion.exitCode, 1);
+    assert.deepEqual(deletion.changedFiles, ["src/other/public.ts"]);
+    assert.ok(deletion.findings.some((finding) => finding.ruleId === "CELLFENCE_UNCLAIMED_CHANGE" && finding.filePath === "src/other/public.ts"));
+
+    fs.writeFileSync(path.join(rootDir, "src/other/public.ts"), "export const other = true;\n");
+    fs.appendFileSync(path.join(rootDir, ".cellfence/claims.json"), "\n");
+    const claimStoreChanged = checkClaims({ rootDir, agent: "codex-a" });
+    assert.equal(claimStoreChanged.exitCode, 0, JSON.stringify(claimStoreChanged.findings));
+    assert.deepEqual(claimStoreChanged.changedFiles, []);
+    assert.ok(claimStoreChanged.warnings.some((warning) => warning.ruleId === "CELLFENCE_CLAIM_STORE_CHANGED"));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine claim creation recovers from stale claim store locks", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-stale-claim-lock-"));
   try {
@@ -1767,6 +1951,33 @@ test("engine claim creation does not steal fresh or live claim store locks", () 
     assert.equal(result.exitCode, 1);
     assert.ok(result.findings.some((finding) => /failed to acquire claim store lock/.test(finding.message)));
     assert.equal(fs.existsSync(`${claimsPath}.lock`), true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine claim creation does not steal stale locks owned by another host", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-foreign-claim-lock-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    const claimsPath = path.join(rootDir, ".cellfence/claims.json");
+    const lockPath = `${claimsPath}.lock`;
+    fs.mkdirSync(path.dirname(claimsPath), { recursive: true });
+    fs.writeFileSync(lockPath, `${JSON.stringify({
+      schemaVersion: "cellfence.claim-lock.v1",
+      pid: process.pid,
+      hostname: `other-host-${os.hostname()}`,
+      bootId: "other-boot",
+      createdAt: "1970-01-01T00:00:00.000Z",
+      token: "foreign-lock",
+    })}\n`);
+
+    const result = createClaim({ rootDir, agent: "codex-a", cells: ["core"], ttl: "2h", claimId: "claim-a" });
+
+    assert.equal(result.exitCode, 1);
+    assert.ok(result.findings.some((finding) => /failed to acquire claim store lock/.test(finding.message)));
+    assert.equal(fs.existsSync(lockPath), true);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -2117,7 +2328,7 @@ test("engine prune report detects dead manifest declarations and stale governanc
     fs.writeFileSync(
       path.join(rootDir, "src/consumer/public.ts"),
       [
-        `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale waiver fixture`,
+        "// cellfence-ignore CELLFENCE_UNRESOLVED_IMPORT attestation:waiver-prune-engine-stale",
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",
@@ -2177,8 +2388,17 @@ test("engine prune report detects dead manifest declarations and stale governanc
       cellId: "producer",
       accesses: [{ kind: "file", access: "read", selector: "data/current.json" }],
     });
+    writeSignedWaiverAttestation(rootDir, {
+      attestationId: "waiver-prune-engine-stale",
+      ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
+      filePath: "src/consumer/public.ts",
+      line: 2,
+      findingFingerprint: "2".repeat(64),
+      expiresAt: `${WAVING_INTO_THE_FUTURE}T00:00:00.000Z`,
+      reason: "temporary stale waiver fixture",
+    });
 
-    const report = createPruneReport({ rootDir, baselinePath: "cellfence.baseline.json", evidencePaths: ["resource-evidence.json"] });
+    const report = withWaiverEnv(rootDir, () => createPruneReport({ rootDir, baselinePath: "cellfence.baseline.json", evidencePaths: ["resource-evidence.json"] }));
     assert.equal(report.ok, false);
     assert.ok(report.candidates.some((candidate) =>
       candidate.kind === "unused-consumer"
@@ -2198,7 +2418,7 @@ test("engine prune report detects dead manifest declarations and stale governanc
       && candidate.symbol === "unused"));
     assert.ok(report.candidates.some((candidate) =>
       candidate.kind === "stale-waiver"
-      && candidate.ruleId === "CELLFENCE_PRIVATE_IMPORT"
+      && candidate.ruleId === "CELLFENCE_UNRESOLVED_IMPORT"
       && candidate.filePath === "src/consumer/public.ts"));
     assert.ok(report.candidates.some((candidate) =>
       candidate.kind === "stale-baseline-resource"
@@ -2221,13 +2441,36 @@ test("engine prune report keeps active waivers out of stale-waiver candidates", 
     fs.writeFileSync(
       path.join(rootDir, "src/core/public.ts"),
       [
-        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public symbol mismatch fixture`,
-        "export const extra = true;",
+        'import { missing } from "./missing";',
+        "export const core = missing;",
         "",
       ].join("\n"),
     );
-    writeManifest(rootDir, [baseCell("core", { publicSymbols: [] })]);
-    const report = createPruneReport({ rootDir });
+    writeManifest(rootDir, [baseCell("core", { publicSymbols: ["core"] })]);
+
+    fs.writeFileSync(
+      path.join(rootDir, "src/core/public.ts"),
+      [
+        "// cellfence-ignore CELLFENCE_UNRESOLVED_IMPORT attestation:waiver-prune-engine-active",
+        'import { missing } from "./missing";',
+        "export const core = missing;",
+        "",
+      ].join("\n"),
+    );
+    const activeFinding = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" })
+      .findings.find((finding) => finding.ruleId === "CELLFENCE_UNRESOLVED_IMPORT");
+    assert.ok(activeFinding?.fingerprint, "expected unresolved import fixture to produce a fingerprint");
+    initGitRepo(rootDir);
+    writeSignedWaiverAttestation(rootDir, {
+      attestationId: "waiver-prune-engine-active",
+      ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
+      filePath: "src/core/public.ts",
+      line: 2,
+      findingFingerprint: activeFinding.fingerprint,
+      expiresAt: `${WAVING_INTO_THE_FUTURE}T00:00:00.000Z`,
+      reason: "temporary unresolved import fixture",
+    });
+    const report = withWaiverEnv(rootDir, () => createPruneReport({ rootDir }));
     assert.equal(report.candidates.some((candidate) => candidate.kind === "stale-waiver"), false, JSON.stringify(report.candidates));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

@@ -41,6 +41,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@cellfence/engine": "0.2.1"
+    "@cellfence/engine": "0.2.1",
+    "@cellfence/schema": "0.2.1"
   }
 }
