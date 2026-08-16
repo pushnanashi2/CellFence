@@ -44,6 +44,7 @@ export type ProxyOptions = {
   mode: ProxyMode;
   failMode: FailMode;
   auditLogPath?: string;
+  auditLogMaxBytes?: number;
   downstreamCommand: string;
   downstreamArgs: string[];
   downstreamCwd?: string;
@@ -76,6 +77,8 @@ type AuditEvent = {
   decision: AuditDecision;
   reason: string;
 };
+
+export const DEFAULT_AUDIT_LOG_MAX_BYTES = 10 * 1024 * 1024;
 
 type ToolDecision = {
   shouldForward: boolean;
@@ -504,8 +507,18 @@ function appendAuditEvent(options: ProxyOptions, event: AuditEvent): void {
   const outputPath = path.isAbsolute(options.auditLogPath)
     ? options.auditLogPath
     : path.resolve(options.rootDir, options.auditLogPath);
+  const line = `${JSON.stringify(event)}\n`;
+  const maxBytes = Number.isFinite(options.auditLogMaxBytes) && Number(options.auditLogMaxBytes) >= 0
+    ? Number(options.auditLogMaxBytes)
+    : DEFAULT_AUDIT_LOG_MAX_BYTES;
+  try {
+    const currentSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
+    if (currentSize + Buffer.byteLength(line) > maxBytes) return;
+  } catch {
+    return;
+  }
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.appendFileSync(outputPath, `${JSON.stringify(event)}\n`);
+  fs.appendFileSync(outputPath, line);
 }
 /* c8 ignore stop */
 
@@ -724,7 +737,7 @@ function safeDownstreamEnvironment(env: NodeJS.ProcessEnv, extraNames: readonly 
   return result;
 }
 
-export const __testing = { safeDownstreamEnvironment, resolveAndValidateDownstreamCwd };
+export const __testing = { appendAuditEvent, safeDownstreamEnvironment, resolveAndValidateDownstreamCwd };
 
 function audit(options: ProxyOptions, toolName: string, decision: ToolDecision): void {
   appendAuditEvent(options, {

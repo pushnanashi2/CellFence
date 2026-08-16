@@ -870,6 +870,8 @@ test("engine validates waiver syntax and can waive findings without line metadat
         `// cellfence-ignore * expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary invalid wildcard waiver`,
         "// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH reason:short",
         `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner`,
+        `// cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH reason:short expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner`,
+        "export const waiverDocs = `cellfence-ignore CELLFENCE_PUBLIC_SYMBOL_MISMATCH reason:temporary docs example only expires:2099-01-01 approved-by:test-owner`;",
         "export const core = true;",
         "",
       ].join("\n"),
@@ -879,7 +881,7 @@ test("engine validates waiver syntax and can waive findings without line metadat
     const invalid = checkRepository({ rootDir: invalidRoot, manifestPath: "cellfence.manifest.json" });
     assert.equal(invalid.ok, false);
     const invalidWaivers = invalid.findings.filter((finding) => finding.ruleId === "CELLFENCE_WAIVER_INVALID");
-    assert.equal(invalidWaivers.length, 3);
+    assert.equal(invalidWaivers.length, 4);
     assert.ok(invalidWaivers.some((finding) => /concrete CELLFENCE_\*/.test(finding.message)));
     assert.ok(invalidWaivers.some((finding) => /expires must be YYYY-MM-DD/.test(finding.message)));
     assert.ok(invalidWaivers.every((finding) => /signed waiver attestation is required/.test(finding.message)));

@@ -401,6 +401,55 @@ test("commit evidence checks sections, trailers, changed cells, and test declara
   }
 });
 
+test("commit evidence detects test.todo and nested skip markers", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-commit-test-weakening-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/app"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "tests"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "src/app/public.ts"), "export const app = true;\n");
+    const manifest = {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{ id: "app", ownedPaths: ["src/app/**"], publicEntry: "src/app/public.ts", publicSymbols: ["app"], consumes: [], producesArtifacts: [] }],
+    };
+    initGit(rootDir);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+    fs.writeFileSync(path.join(rootDir, "tests/app.test.mjs"), "test.todo('covers private boundary later');\ntest.concurrent.skip('skipped concurrently', () => {});\n");
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", [
+      "Add weakened tests",
+      "",
+      "Problem:",
+      "Commit evidence must detect test files that weaken executable coverage.",
+      "",
+      "Change:",
+      "Add a regression fixture containing skipped and todo test APIs.",
+      "",
+      "Behavior:",
+      "The governance scan should reject skipped, focused, or todo tests.",
+      "",
+      "Tests:",
+      "This commit is itself the regression fixture for the scan.",
+      "",
+      "Known-Gaps:",
+      "The fixture intentionally contains no production change.",
+      "",
+      "Change-Type: maintenance",
+      "Changed-Cells: none",
+      "Tests-Added: tests/app.test.mjs",
+      "Tests-Modified: none",
+      "Test-Impact: governance regression fixture",
+      "Tests-Not-Added-Reason: not applicable because this commit adds a test fixture",
+      "Agent-Run-Id: agent-run-weakening",
+      "Agent-Task-Id: agent-task-weakening",
+    ].join("\n")]);
+    const result = checkCommitEvidence({ rootDir, manifest, commit: "HEAD" });
+    assert.ok(result.findings.some((finding) => finding.ruleId === "CELLFENCE_COMMIT_TEST_WEAKENING"), JSON.stringify(result.findings));
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("commit evidence parses git name-status paths with spaces and non-ascii", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-commit-evidence-paths-"));
   try {

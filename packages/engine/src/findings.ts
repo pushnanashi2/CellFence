@@ -4,10 +4,13 @@ import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { normalizePath } from "./file-index.js";
 import type { Finding, SuggestedResolution } from "./types.js";
 
+export const FINDING_FINGERPRINT_VERSION = "cellfence.finding-fingerprint.v1";
+
 export function findingFingerprint(finding: Finding): string {
   return crypto
     .createHash("sha256")
     .update(stableCanonicalJson({
+      fingerprintVersion: FINDING_FINGERPRINT_VERSION,
       ruleId: finding.ruleId,
       severity: finding.severity,
       filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,

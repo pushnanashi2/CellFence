@@ -16,6 +16,7 @@ import {
   repoPath,
 } from "./file-index.js";
 import { pathPatternsOverlap } from "./glob-overlap.js";
+import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { readJsonFile } from "./json-file.js";
 import {
   type ClaimStoreBackend,
@@ -1093,7 +1094,7 @@ export async function checkClaimsAsync(options: ClaimCheckOptions = {}, dependen
 }
 
 function claimIdFor(claim: Omit<CellFenceClaim, "id">): string {
-  const digest = crypto.createHash("sha256").update(JSON.stringify(claim)).digest("hex").slice(0, 12);
+  const digest = crypto.createHash("sha256").update(stableCanonicalJson(claim)).digest("hex").slice(0, 12);
   return `claim-${digest}`;
 }
 

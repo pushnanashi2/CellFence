@@ -48,6 +48,8 @@ function validBaseline(patch = {}) {
   };
 }
 
+const validEd25519Signature = Buffer.alloc(64, 7).toString("base64");
+
 function validEvidence(patch = {}) {
   return {
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
@@ -535,7 +537,7 @@ test("schema validation accepts and rejects baseline records", () => {
     seal: {
       algorithm: "ed25519",
       keyId: "baseline-signing-key",
-      signature: Buffer.from("signature").toString("base64"),
+      signature: validEd25519Signature,
     },
   }));
   assert.equal(ed25519Baseline.ok, true);
@@ -557,7 +559,7 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", keyId: 1, digest: "a".repeat(64) } })), /seal\.keyId must be a string/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", digest: "not-hex" } })), /seal\.digest must be a 64-character lowercase hex string/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "" } })), /seal\.signature must be a non-empty base64 string/);
-  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be a base64 string/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be an Ed25519 signature encoded as 64-byte base64/);
   assertInvalid(
     validateBaseline(validBaseline({
       extraBaseline: true,
@@ -832,10 +834,10 @@ test("schema validation distinguishes baseline seal algorithms and encoding boun
     seal: { algorithm: "hmac-sha256", keyId: "release", digest },
   })).errors, []);
   assert.deepEqual(validateBaseline(validBaseline({
-    seal: { algorithm: "ed25519", keyId: "release", signature: "YWJjZA==" },
+    seal: { algorithm: "ed25519", keyId: "release", signature: validEd25519Signature },
   })).errors, []);
   assert.deepEqual(validateBaseline(validBaseline({
-    seal: { algorithm: "ed25519", keyId: "release", payloadVersion: "seal-metadata-v1", signature: "YWJjZA==" },
+    seal: { algorithm: "ed25519", keyId: "release", payloadVersion: "seal-metadata-v1", signature: validEd25519Signature },
   })).errors, []);
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "hmac-sha256", keyId: "release", payloadVersion: "seal-metadata-v1", digest },
@@ -848,7 +850,7 @@ test("schema validation distinguishes baseline seal algorithms and encoding boun
     seal: { algorithm: "hmac-sha256", digest, signature: "YWJjZA==" },
   })).errors, ["seal.signature is not a supported field"]);
   assert.deepEqual(validateBaseline(validBaseline({
-    seal: { algorithm: "ed25519", signature: "YWJjZA==", digest },
+    seal: { algorithm: "ed25519", signature: validEd25519Signature, digest },
   })).errors, ["seal.digest is not a supported field"]);
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "unknown", keyId: "release", digest, signature: "YWJjZA==", extra: true },
@@ -870,7 +872,7 @@ test("schema validation distinguishes baseline seal algorithms and encoding boun
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "ed25519", signature: "    " },
   })).errors, ["seal.signature must be a non-empty base64 string"]);
-  for (const badSignature of ["_WJjZA==", "YWJjZA=_", "=YWJjZA==", "YWJjZA==x", "YWJjZA=", "YW JjZA=="]) {
+  for (const badSignature of ["AAAA", `!${validEd25519Signature}`, `${validEd25519Signature}A`, "_WJjZA==", "YWJjZA=_", "=YWJjZA==", "YWJjZA==x", "YWJjZA=", "YW JjZA=="]) {
     const result = validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: badSignature } }));
     assert.equal(result.ok, false, badSignature);
     assert.ok(result.errors.some((error) => error.startsWith("seal.signature must be")), badSignature);

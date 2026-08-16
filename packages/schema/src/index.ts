@@ -860,8 +860,8 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
       } else if (value.seal.algorithm === "ed25519") {
         if (typeof value.seal.signature !== "string" || value.seal.signature.trim().length === 0) {
           errors.push("seal.signature must be a non-empty base64 string");
-        } else if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value.seal.signature) || value.seal.signature.length % 4 !== 0) {
-          errors.push("seal.signature must be a base64 string");
+        } else if (!/^[A-Za-z0-9+/]{86}==$/.test(value.seal.signature)) {
+          errors.push("seal.signature must be an Ed25519 signature encoded as 64-byte base64");
         }
       } else {
         errors.push("seal.algorithm must be hmac-sha256 or ed25519");

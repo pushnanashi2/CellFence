@@ -67,6 +67,22 @@ test("LocalFileClaimStore raises CellFenceClaimCasConflict when state moves unde
   }
 });
 
+test("LocalFileClaimStore refuses direct writes while another writer lock exists", async () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-direct-lock-"));
+  try {
+    const filePath = path.join(dir, "claims.json");
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(`${filePath}.local-file-write.lock`, "other-writer\n");
+    const store = new LocalFileClaimStore({ filePath });
+    assert.throws(
+      () => store.write(emptyClaimStoreState(), emptyClaimStoreState()),
+      (error) => error instanceof CellFenceClaimCasConflict,
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("LocalFileClaimStore rejects corrupt stores instead of treating them as empty", async () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-claim-corrupt-"));
   try {

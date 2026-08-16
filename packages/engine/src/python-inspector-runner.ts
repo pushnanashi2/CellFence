@@ -10,6 +10,7 @@ type PythonCommand = {
 };
 
 export const PYTHON_INSPECTOR_BATCH_SIZE = 1_000;
+export const PYTHON_INSPECTOR_RECOVERY_ATTEMPT_LIMIT = 64;
 
 const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
 const INSPECTOR_MAX_TIMEOUT_MS = 120_000;
@@ -149,18 +150,29 @@ export function recoverPythonInspectorBatch<Result>(
   filePaths: readonly string[],
   inspect: (paths: readonly string[]) => Result[],
   errorResult: (error: unknown) => Result,
+  attemptLimit = PYTHON_INSPECTOR_RECOVERY_ATTEMPT_LIMIT,
 ): Result[] {
-  if (filePaths.length === 0) return [];
-  try {
-    return inspect(filePaths);
-  } catch (error) {
-    if (filePaths.length === 1) return [errorResult(error)];
-    const middle = Math.floor(filePaths.length / 2);
-    return [
-      ...recoverPythonInspectorBatch(filePaths.slice(0, middle), inspect, errorResult),
-      ...recoverPythonInspectorBatch(filePaths.slice(middle), inspect, errorResult),
-    ];
+  const budget = { remaining: Math.max(1, attemptLimit) };
+  function recover(paths: readonly string[]): Result[] {
+    if (paths.length === 0) return [];
+    if (budget.remaining <= 0) {
+      const error = new Error(`Python inspector recovery stopped after ${attemptLimit} failed batch attempts`);
+      return paths.map(() => errorResult(error));
+    }
+    budget.remaining -= 1;
+    try {
+      return inspect(paths);
+    } catch (error) {
+      if (paths.length === 1) return [errorResult(error)];
+      const middle = Math.floor(paths.length / 2);
+      return [
+        ...recover(paths.slice(0, middle)),
+        ...recover(paths.slice(middle)),
+      ];
+    }
   }
+  if (filePaths.length === 0) return [];
+  return recover(filePaths);
 }
 
 export function pythonInspectorRuntimeIdentity(): string {

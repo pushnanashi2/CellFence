@@ -13,7 +13,9 @@ import { execCommandSync } from "./command-execution.js";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
 import type { AnalysisContext, CellFenceWaiver, CheckOptions, Finding, WaiverAttestation, WaiverAttestationUnsigned } from "./types.js";
 
-const WAIVER_PATTERN = /cellfence-ignore\s+([A-Z0-9_*]+)\s+(.*)$/;
+const WAIVER_PATTERN = /^\s*(?:\/\/|#|\/\*+|\*)\s*cellfence-ignore\s+([A-Z0-9_*]+)(?:\s+(.*?))?\s*(?:\*\/)?\s*$/;
+const WAIVER_FIELD_PATTERN = /(?:^|\s)(expires|approved-by|attestation|reason):/g;
+const APPROVAL_IDENTITY_PATTERN = /^[A-Za-z0-9._-]+$/;
 const WAIVER_ATTESTATION_SCHEMA_VERSION = "cellfence.waiver-attestation.v1";
 export const WAIVER_ATTESTATION_HMAC_KEY_ENV = "CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY";
 export const WAIVER_ATTESTATION_HMAC_KEY_ID_ENV = "CELLFENCE_WAIVER_ATTESTATION_HMAC_KEY_ID";
@@ -27,6 +29,17 @@ export const WAIVER_REPOSITORY_IDENTITY_ENV = "CELLFENCE_REPOSITORY_IDENTITY";
  */
 export const MAX_WAIVER_DAYS = 90;
 
+
+function normalizeApprovalIdentity(identity: string): string {
+  return identity.trim().normalize("NFKC");
+}
+
+function approvalIdentityIsSafe(identity: string): boolean {
+  const trimmed = identity.trim();
+  return trimmed.length > 0
+    && trimmed === normalizeApprovalIdentity(trimmed)
+    && APPROVAL_IDENTITY_PATTERN.test(trimmed);
+}
 
 function loadManifestFromFile(manifestPath: string): CellFenceManifest {
   const validation = validateManifest(readJsonFile(manifestPath));
@@ -52,11 +65,37 @@ export function getApprovalAllowlist(rootDir: string): string[] {
   if (fromEnv) {
     for (const item of fromEnv.split(",")) {
       const trimmed = item.trim();
-      if (trimmed) allow.add(trimmed);
+      if (approvalIdentityIsSafe(trimmed)) allow.add(trimmed);
     }
     return [...allow];
   }
   return [...allow];
+}
+
+function parseWaiverFields(suffix: string): Map<string, string> {
+  const fields = new Map<string, string>();
+  const matches = [...suffix.matchAll(WAIVER_FIELD_PATTERN)];
+  for (const [index, match] of matches.entries()) {
+    const key = match[1];
+    const valueStart = (match.index ?? 0) + match[0].length;
+    const valueEnd = index + 1 < matches.length ? matches[index + 1].index ?? suffix.length : suffix.length;
+    const value = suffix.slice(valueStart, valueEnd).trim().replace(/\s*\*\/\s*$/, "").trim();
+    if (value && !fields.has(key)) fields.set(key, value);
+  }
+  return fields;
+}
+
+function reasonExplanationScore(reason: string): number {
+  let score = 0;
+  for (const character of reason.normalize("NFKC")) {
+    if (/\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul}/u.test(character)) score += 2;
+    else if (/\p{L}|\p{N}/u.test(character)) score += 1;
+  }
+  return score;
+}
+
+function reasonLooksMeaningful(reason: string): boolean {
+  return reasonExplanationScore(reason) >= 12;
 }
 
 type WaiverAttestationIndex = {
@@ -249,9 +288,12 @@ function validateWaiverAttestation(
     }
   }
   const allowlist = getApprovalAllowlist(rootDir);
-  const untrustedApprover = !allowlist.includes(attestation.approver);
+  const normalizedApprover = normalizeApprovalIdentity(attestation.approver);
+  const unsafeApprover = !approvalIdentityIsSafe(attestation.approver);
+  const untrustedApprover = unsafeApprover || !allowlist.includes(normalizedApprover);
   if (untrustedApprover) {
-    if (allowlist.length === 0) errors.push(`approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret before accepting waiver attestations`);
+    if (unsafeApprover) errors.push(`attestation:${attestationId} approver must use an ASCII approval identity without Unicode normalization changes`);
+    else if (allowlist.length === 0) errors.push(`approval allowlist is empty; set CELLFENCE_APPROVERS from a trusted CI secret before accepting waiver attestations`);
     else errors.push(`attestation:${attestationId} approver ${attestation.approver} is not in the approval allowlist (CELLFENCE_APPROVERS)`);
   }
   const secret = process.env[WAIVER_ATTESTATION_HMAC_KEY_ENV];
@@ -269,30 +311,29 @@ function validateWaiverAttestation(
 function parseWaiverDirective(rootDir: string, filePath: string, line: number, text: string, attestations: WaiverAttestationIndex): CellFenceWaiver | undefined {
   const match = WAIVER_PATTERN.exec(text);
   if (!match) return undefined;
-  const [, ruleId, suffix] = match;
-  const expiresMatch = /\bexpires:(\d{4}-\d{2}-\d{2})\b/.exec(suffix);
-  const approvedByMatch = /\bapproved-by:([^\s]+)/.exec(suffix);
-  const attestationMatch = /\battestation:([A-Za-z0-9_.:-]+)\b/.exec(suffix);
-  const reasonMatch = /\breason:(.+)$/.exec(suffix);
-  const attestationId = attestationMatch?.[1] || "";
-  const approvedBy = approvedByMatch?.[1] || "";
+  const [, ruleId, suffix = ""] = match;
+  const fields = parseWaiverFields(suffix);
+  const expires = fields.get("expires") || "";
+  const approvedBy = fields.get("approved-by") || "";
+  const attestationId = fields.get("attestation") || "";
   const attestationValidation = attestationId
     ? validateWaiverAttestation(rootDir, filePath, ruleId, attestationId, attestations)
     : undefined;
   const attestation = attestationValidation?.attestation;
-  const expires = attestation?.expiresAt || expiresMatch?.[1] || "";
-  const reason = attestation?.reason || (reasonMatch ? reasonMatch[1].trim() : "");
+  const expiresAt = attestation?.expiresAt || expires;
+  const reason = attestation?.reason || (fields.get("reason") || "");
   const approvedByDisplay = attestation?.approver || approvedBy;
   const errors: string[] = [];
   if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) errors.push("rule id must be a concrete CELLFENCE_* rule");
   if (!attestationId) errors.push("signed waiver attestation is required; source approved-by is a request only");
   if (approvedBy) errors.push("approved-by in source is not an approval; use attestation:<id> signed by a trusted approver");
-  if (!attestation && (!expires || !isIsoDate(expires))) errors.push("expires must be YYYY-MM-DD until a valid attestation supplies expiresAt");
+  if (approvedBy && !approvalIdentityIsSafe(approvedBy)) errors.push("approved-by must use an ASCII approval identity without Unicode normalization changes");
+  if (!attestation && (!expiresAt || !isIsoDate(expiresAt))) errors.push("expires must be YYYY-MM-DD until a valid attestation supplies expiresAt");
   if (approvedBy.toUpperCase() === "PENDING") errors.push("approved-by:PENDING is a request placeholder, not an approval");
-  if (reason.length < 12) errors.push("reason must explain the waiver in at least 12 characters");
-  if (!attestation && expires && isIsoDate(expires)) {
+  if (!reasonLooksMeaningful(reason)) errors.push("reason must explain the waiver with at least 12 letters/digits, or equivalent non-Latin text");
+  if (!attestation && expiresAt && isIsoDate(expiresAt)) {
     const today = todayIsoDate();
-    const span = daysBetween(today, expires);
+    const span = daysBetween(today, expiresAt);
     if (span < 0) {
       errors.push("waiver is expired");
     } else if (span > MAX_WAIVER_DAYS) {
@@ -300,14 +341,14 @@ function parseWaiverDirective(rootDir: string, filePath: string, line: number, t
     }
   }
   if (attestationValidation) errors.push(...attestationValidation.errors);
-  const expired = Boolean(expires) && Date.parse(expires) < Date.now();
+  const expired = Boolean(expiresAt) && Date.parse(expiresAt) < Date.now();
   if (expired) errors.push("waiver is expired");
   const untrustedApprover = Boolean(attestationValidation?.untrustedApprover);
   return {
     ruleId,
     filePath: repoPath(rootDir, filePath),
     line,
-    expires,
+    expires: expiresAt,
     approvedBy: approvedByDisplay,
     attestationId: attestationId || undefined,
     attestation,

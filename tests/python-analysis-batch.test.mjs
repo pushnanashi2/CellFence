@@ -98,6 +98,22 @@ test("Python batch recovery bisects aggregate failures and isolates a bad file",
   assert.ok(attempts.some((paths) => paths.length === 2 && paths.includes("good-c.py")));
 });
 
+test("Python batch recovery stops after a bounded number of failed splits", () => {
+  const attempts = [];
+  const results = recoverPythonInspectorBatch(
+    ["a.py", "b.py", "c.py", "d.py", "e.py"],
+    (paths) => {
+      attempts.push([...paths]);
+      throw new Error(`cannot inspect ${paths.join(",")}`);
+    },
+    (error) => ({ ok: false, error: error.message }),
+    3,
+  );
+  assert.equal(attempts.length, 3);
+  assert.equal(results.length, 5);
+  assert.ok(results.some((result) => /recovery stopped after 3 failed batch attempts/.test(result.error)));
+});
+
 test("Python inspector timeout shrinks for recovered sub-batches", () => {
   assert.equal(pythonInspectorTimeoutMs(1), 10_000);
   assert.equal(pythonInspectorTimeoutMs(50), 10_000);

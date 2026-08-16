@@ -157,6 +157,23 @@ test("B-02: signed waiver with untrusted approver is marked invalid", () => {
   }
 });
 
+test("signed waiver approvers reject Unicode confusables", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-confusable-"));
+  try {
+    const cyrillicAlice = "\u0430lice";
+    const manifest = writeSignedCollectProject(tempDir, { approver: cyrillicAlice });
+    const waivers = withWaiverEnv(tempDir, () => collectWaiversForManifest(tempDir, manifest), {
+      CELLFENCE_APPROVERS: "alice",
+    });
+    assert.equal(waivers.length, 1);
+    assert.equal(waivers[0].valid, false);
+    assert.equal(waivers[0].untrustedApprover, true);
+    assert.ok(waivers[0].errors.some((error) => /ASCII approval identity/.test(error)));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("B-02: signed waiver with trusted approver remains valid", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-b02-trusted-"));
   try {

@@ -694,7 +694,13 @@ export function checkCommitEvidence(options: { rootDir?: string; manifest: CellF
     }
     for (const filePath of filePaths.filter((entry) => /(^|\/)(tests?|__tests__)\//.test(entry))) {
       const content = git(rootDir, ["show", `${commit}:${filePath}`]);
-      if (/\.(only|skip)\s*\(/.test(content) || /TODO\s+test/i.test(content)) {
+      if (
+        /\b(?:test|it|describe)(?:\.[A-Za-z_$][\w$]*)*?\.(?:only|skip|todo)\s*\(/.test(content)
+        || /\b(?:xit|xdescribe)\s*\(/.test(content)
+        || /@pytest\.mark\.skip\b/.test(content)
+        || /\bunittest\.skip(?:If|Unless)?\b/.test(content)
+        || /\bTODO\s+test/i.test(content)
+      ) {
         findings.push({ ruleId: "CELLFENCE_COMMIT_TEST_WEAKENING", severity: "error", filePath, message: `${commit.slice(0, 12)} adds skipped/focused/TODO test marker`, details: { commit, filePath } });
       }
     }

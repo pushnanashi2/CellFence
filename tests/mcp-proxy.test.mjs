@@ -965,6 +965,27 @@ test("proxy decisions cover fail-open and policy-error branches", () => {
   }
 });
 
+test("MCP proxy audit log stops before exceeding the configured byte cap", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-audit-cap-"));
+  try {
+    const event = {
+      timestamp: "2026-01-01T00:00:00.000Z",
+      agent: "agent",
+      tool: "unknown-tool",
+      paths: [],
+      decision: "deny",
+      reason: "x".repeat(40),
+    };
+    __testing.appendAuditEvent({ rootDir, auditLogPath: "audit.jsonl", auditLogMaxBytes: 500 }, event);
+    const firstSize = fs.statSync(path.join(rootDir, "audit.jsonl")).size;
+    assert.ok(firstSize > 0);
+    __testing.appendAuditEvent({ rootDir, auditLogPath: "audit.jsonl", auditLogMaxBytes: firstSize }, event);
+    assert.equal(fs.statSync(path.join(rootDir, "audit.jsonl")).size, firstSize);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("MCP proxy forwards reads and claimed writes, but denies unclaimed writes before downstream", async () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-enforce-"));
   try {
