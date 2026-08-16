@@ -30,7 +30,7 @@ Agents working in separate clones or worktrees only see each other's claims when
 
 `claim create` refuses active overlapping claims with `CELLFENCE_ACTIVE_CLAIM_CONFLICT`. `claim check --agent` inspects the current Git diff, or a `--base`/`--head` range, and rejects files not covered by that agent's active claim with `CELLFENCE_UNCLAIMED_CHANGE`.
 
-`claim create` serializes local writes with a `.lock` file next to the claim store, writes the new store to a temporary file, then atomically renames it into place. This prevents normal local last-write-wins races between parallel agents. Distributed filesystems and cross-machine coordination may still need an external lease service or a shared CI workspace with reliable lock semantics.
+`claim create` serializes local writes with a `.lock` file next to the claim store, writes the new store to a temporary file, then atomically renames it into place. Lock files record the creating PID, hostname, boot id when available, creation time, and a reclaim token; stale reclaim trusts PID liveness only for locks created on the same host/boot. This prevents normal local last-write-wins races between parallel agents. Distributed filesystems and cross-machine coordination may still need an external lease service or a shared CI workspace with reliable lock semantics.
 
 Expired claims are ignored for conflict purposes. Malformed claim stores, invalid expiration metadata, and claims referencing unknown cells fail with `CELLFENCE_CLAIM_INVALID`.
 

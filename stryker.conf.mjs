@@ -1,15 +1,6 @@
-const mutationTestFiles = [
-  "tests/file-index.test.mjs",
-  "tests/command-execution.test.mjs",
-  "tests/module-resolution.test.mjs",
-  "tests/resource-access-coverage.test.mjs",
-  "tests/schema-validation.test.mjs",
-  "tests/github-action.test.mjs",
-  "tests/baseline-gate.test.mjs",
-  "tests/plugin-api.test.mjs",
-  "tests/official-plugins.test.mjs",
-  "tests/trace.test.mjs",
-];
+import { MUTATION_SCOPES } from "./scripts/mutation-scopes.mjs";
+
+const mutationTestFiles = [...new Set(MUTATION_SCOPES.flatMap((scope) => scope.tests))];
 
 export default {
   packageManager: "npm",

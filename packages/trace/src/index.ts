@@ -21,6 +21,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
@@ -44,6 +45,11 @@ const accesses = new Map<string, ResourceEvidenceAccess>();
 const SOURCE_FILE_EXTENSIONS = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".mts", ".cts"]);
 let installed = false;
 let flushed = false;
+let flushHooksRegistered = false;
+
+export function traceDiagnostics(): { installed: boolean; flushHooksRegistered: boolean } {
+  return { installed, flushHooksRegistered };
+}
 
 function normalizeSelector(selector: fs.PathOrFileDescriptor): string | undefined {
   if (typeof selector === "number") return undefined;
@@ -91,6 +97,7 @@ function accessKey(access: ResourceEvidenceAccess): string {
 }
 
 export function recordResourceAccess(access: TraceAccessInput): void {
+  registerFlushHooks();
   const resolvedAccess: ResourceEvidenceAccess = {
     ...access,
     cellId: access.cellId || defaultCellId(),
@@ -187,9 +194,17 @@ export function flushEvidence(): void {
   originalWriteFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);
 }
 
+function registerFlushHooks(): void {
+  if (flushHooksRegistered) return;
+  flushHooksRegistered = true;
+  process.once("beforeExit", flushEvidence);
+  process.once("exit", flushEvidence);
+}
+
 export function installTrace(): void {
   if (installed || process.env.CELLFENCE_TRACE_DISABLE === "1") return;
   installed = true;
+  registerFlushHooks();
 
   fs.readFileSync = ((selector: fs.PathOrFileDescriptor, ...args: unknown[]) => {
     recordFileAccess("read", selector);
@@ -229,11 +244,38 @@ export function installTrace(): void {
     }) as typeof fetch;
   }
 
-  process.once("beforeExit", flushEvidence);
-  process.once("exit", flushEvidence);
 }
 
-installTrace();
+function importSpecifierTargetsThisModule(specifier: string): boolean {
+  if (specifier === "@cellfence/trace") return true;
+  try {
+    if (path.resolve(fileURLToPath(specifier)) === path.resolve(fileURLToPath(import.meta.url))) return true;
+  } catch {
+    // Non-file preload specifiers such as data: URLs are not CellFence trace.
+  }
+  return false;
+}
+
+function preloadRequestedThisModule(execArgv: readonly string[] = process.execArgv): boolean {
+  const inlinePrefix = "--import=";
+  for (const [index, argument] of execArgv.entries()) {
+    if (argument === "--import") {
+      if (importSpecifierTargetsThisModule(execArgv[index + 1])) return true;
+      continue;
+    }
+    if (!argument.startsWith(inlinePrefix)) continue;
+    const inlineSpecifier = argument.slice(inlinePrefix.length);
+    if (importSpecifierTargetsThisModule(inlineSpecifier)) return true;
+  }
+  return false;
+}
+
+export const __testing = {
+  importSpecifierTargetsThisModule,
+  preloadRequestedThisModule,
+};
+
+if (process.env.CELLFENCE_TRACE_AUTO_INSTALL === "1" || preloadRequestedThisModule()) installTrace();
 
 /**
  * 0.4.x (N-13): re-derive the transcript status from the raw

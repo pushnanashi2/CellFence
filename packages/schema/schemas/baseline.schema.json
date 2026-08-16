@@ -31,7 +31,7 @@
         "access": { "enum": ["read", "write", "publish", "subscribe", "call", "serve"] },
         "selector": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "detectedBy": { "type": "string" },
-        "confidence": { "enum": ["high", "medium", "low", "runtime"] }
+        "confidence": { "enum": ["high", "medium", "low", "transient", "runtime"] }
       }
     },
     "cell": {
@@ -61,6 +61,7 @@
           "properties": {
             "algorithm": { "const": "hmac-sha256" },
             "keyId": { "type": "string" },
+            "payloadVersion": { "const": "seal-metadata-v1" },
             "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
           }
         },
@@ -71,6 +72,7 @@
           "properties": {
             "algorithm": { "const": "ed25519" },
             "keyId": { "type": "string" },
+            "payloadVersion": { "const": "seal-metadata-v1" },
             "signature": { "type": "string", "minLength": 4, "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$" }
           }
         }

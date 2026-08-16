@@ -26,6 +26,7 @@ import {
   createWaiverRequest,
   createBaseline,
   createManifestFromServiceManifests,
+  CORE_REQUIRED_RULES,
   defaultBaselinePath,
   execCommandSync,
   formatCouplingGraphMermaid,
@@ -35,6 +36,10 @@ import {
   listClaims,
   listWaivers,
   MAX_WAIVER_DAYS,
+  WAIVER_ATTESTATION_HMAC_KEY_ENV,
+  WAIVER_ATTESTATION_HMAC_KEY_ID_ENV,
+  WAIVER_REPOSITORY_IDENTITY_ENV,
+  waiverAttestationHmacDigest,
   loadBaselineFromFile,
   loadManifestFromFile,
   profileConfig,
@@ -103,6 +108,8 @@ type ParsedArgs = {
   ttl?: string;
   reason?: string;
   approvedBy?: string;
+  attestationId?: string;
+  findingFingerprint?: string;
   checkInstall: boolean;
   uninstall: boolean;
   baselineGateBase?: string;
@@ -122,10 +129,10 @@ function printUsage(): void {
 
 Usage:
   cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
-  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold]
+  cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
   cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
-  cellfence manifest verify --from systems/*/service.json [--json]
+  cellfence manifest verify --from systems/*/service.json [--production-scope] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
@@ -151,6 +158,7 @@ Usage:
   cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
   cellfence waivers list [--manifest cellfence.manifest.json] [--json]
   cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
+  cellfence waivers sign --from waiver-request.json --attestation-id id --finding-fingerprint sha256 [--output file]
 
 Exit codes:
   0  no violations
@@ -226,6 +234,26 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--baseline=")) {
       parsed.baselinePath = argument.slice("--baseline=".length);
+    } else if (argument === "--baseline-base") {
+      parsed.baselineGateBase = requireOptionValue(argv, index, "--baseline-base");
+      index += 1;
+    } else if (argument.startsWith("--baseline-base=")) {
+      parsed.baselineGateBase = requireInlineOptionValue(argument, "--baseline-base=", "--baseline-base");
+    } else if (argument === "--baseline-head") {
+      parsed.baselineGateHead = requireOptionValue(argv, index, "--baseline-head");
+      index += 1;
+    } else if (argument.startsWith("--baseline-head=")) {
+      parsed.baselineGateHead = requireInlineOptionValue(argument, "--baseline-head=", "--baseline-head");
+    } else if (argument === "--base-ref") {
+      parsed.baselineGateBaseRef = requireOptionValue(argv, index, "--base-ref");
+      index += 1;
+    } else if (argument.startsWith("--base-ref=")) {
+      parsed.baselineGateBaseRef = requireInlineOptionValue(argument, "--base-ref=", "--base-ref");
+    } else if (argument === "--head-ref") {
+      parsed.baselineGateHeadRef = requireOptionValue(argv, index, "--head-ref");
+      index += 1;
+    } else if (argument.startsWith("--head-ref=")) {
+      parsed.baselineGateHeadRef = requireInlineOptionValue(argument, "--head-ref=", "--head-ref");
     } else if (argument === "--audit-log") {
       parsed.auditLogPath = requireOptionValue(argv, index, "--audit-log");
       index += 1;
@@ -350,6 +378,16 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--approved-by=")) {
       parsed.approvedBy = argument.slice("--approved-by=".length);
+    } else if (argument === "--attestation-id") {
+      parsed.attestationId = requireOptionValue(argv, index, "--attestation-id");
+      index += 1;
+    } else if (argument.startsWith("--attestation-id=")) {
+      parsed.attestationId = argument.slice("--attestation-id=".length);
+    } else if (argument === "--finding-fingerprint") {
+      parsed.findingFingerprint = requireOptionValue(argv, index, "--finding-fingerprint");
+      index += 1;
+    } else if (argument.startsWith("--finding-fingerprint=")) {
+      parsed.findingFingerprint = argument.slice("--finding-fingerprint=".length);
     } else if (argument === "--evidence") {
       parsed.evidencePaths.push(requireOptionValue(argv, index, "--evidence"));
       index += 1;
@@ -388,20 +426,20 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (argument.startsWith("--min-score=")) {
       parsed.minScore = Number(argument.slice("--min-score=".length));
     } else if (argument === "--format") {
-      parsed.format = argv[index + 1];
+      parsed.format = requireOptionValue(argv, index, "--format");
       index += 1;
     } else if (argument.startsWith("--format=")) {
-      parsed.format = argument.slice("--format=".length);
+      parsed.format = requireInlineOptionValue(argument, "--format=", "--format");
     } else if (argument === "--preset") {
-      parsed.preset = argv[index + 1];
+      parsed.preset = requireOptionValue(argv, index, "--preset");
       index += 1;
     } else if (argument.startsWith("--preset=")) {
-      parsed.preset = argument.slice("--preset=".length);
+      parsed.preset = requireInlineOptionValue(argument, "--preset=", "--preset");
     } else if (argument === "--root") {
-      parsed.rootDir = path.resolve(argv[index + 1]);
+      parsed.rootDir = path.resolve(requireOptionValue(argv, index, "--root"));
       index += 1;
     } else if (argument.startsWith("--root=")) {
-      parsed.rootDir = path.resolve(argument.slice("--root=".length));
+      parsed.rootDir = path.resolve(requireInlineOptionValue(argument, "--root=", "--root"));
     } else {
       parsed.command.push(argument);
     }
@@ -594,7 +632,11 @@ function commandInit(parsed: ParsedArgs): number {
     return 2;
   }
   const imported = parsed.fromPaths.length > 0
-    ? createManifestFromServiceManifests({ rootDir, serviceManifestPaths: parsed.fromPaths })
+    ? createManifestFromServiceManifests({
+      rootDir,
+      serviceManifestPaths: parsed.fromPaths,
+      scope: parsed.initProductionScope ? "production" : "all",
+    })
     : undefined;
   let manifest: InferredManifest;
   try {
@@ -609,7 +651,12 @@ function commandInit(parsed: ParsedArgs): number {
     console.error(errorMessage(error));
     return 2;
   }
-  if (!parsed.noScaffold && manifest.cells.length === 1 && manifest.cells[0]?.id === "example") {
+  const inferredExampleFallback = manifest.cells.length === 1 && manifest.cells[0]?.id === "example";
+  if (parsed.noScaffold && inferredExampleFallback) {
+    console.error("cellfence init could not infer source cells; rerun without --no-scaffold to scaffold the example cell, or add source files first");
+    return 2;
+  }
+  if (!parsed.noScaffold && inferredExampleFallback) {
     fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
   }
@@ -686,6 +733,7 @@ function commandManifestVerify(parsed: ParsedArgs): number {
     rootDir: parsed.rootDir,
     manifest,
     serviceManifestPaths: parsed.fromPaths,
+    scope: parsed.initProductionScope ? "production" : "all",
   });
   if (parsed.json) writeJson(result);
   else {
@@ -1153,7 +1201,10 @@ function commandWaiversList(parsed: ParsedArgs): number {
   } else {
     for (const waiver of waivers) {
       const status = waiver.valid ? "valid" : "invalid";
-      console.log(`${status} ${waiver.ruleId} ${waiver.filePath}:${waiver.line} expires:${waiver.expires} approved-by:${waiver.approvedBy}`);
+      const approval = waiver.attestationId
+        ? `attestation:${waiver.attestationId} approver:${waiver.approvedBy}`
+        : `approved-by:${waiver.approvedBy || "MISSING"}`;
+      console.log(`${status} ${waiver.ruleId} ${waiver.filePath}:${waiver.line} expires:${waiver.expires} ${approval}`);
     }
   }
   return waivers.some((waiver) => !waiver.valid) ? 1 : 0;
@@ -1193,6 +1244,23 @@ function commandWaiversRequest(parsed: ParsedArgs): number {
     console.error(`cellfence waivers request: ${expiryCheck.reason}`);
     return 2;
   }
+  try {
+    const manifest = loadManifestFromFile(path.resolve(parsed.rootDir, parsed.manifestPath || "cellfence.manifest.json"));
+    const requiredRules = new Set<string>([
+      ...CORE_REQUIRED_RULES,
+      ...(manifest.governance?.requiredRules || []),
+    ]);
+    if (requiredRules.has(parsed.ruleId)) {
+      console.error(`cellfence waivers request: ${parsed.ruleId} is required and cannot be waived`);
+      return 2;
+    }
+  } catch {
+    const requiredRules = new Set<string>(CORE_REQUIRED_RULES);
+    if (requiredRules.has(parsed.ruleId)) {
+      console.error(`cellfence waivers request: ${parsed.ruleId} is required and cannot be waived`);
+      return 2;
+    }
+  }
   const request = createWaiverRequest({
     ruleId: parsed.ruleId as Parameters<typeof createWaiverRequest>[0]["ruleId"],
     filePath: parsed.targetFilePath,
@@ -1203,6 +1271,116 @@ function commandWaiversRequest(parsed: ParsedArgs): number {
   });
   if (parsed.json) writeJson(request);
   else console.log(request.markdown);
+  return 0;
+}
+
+function gitText(rootDir: string, args: string[]): string | undefined {
+  try {
+    return execCommandSync("git", args, { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return undefined;
+  }
+}
+
+function waiverRepositoryIdentity(rootDir: string): string {
+  const fromEnv = process.env[WAIVER_REPOSITORY_IDENTITY_ENV]?.trim();
+  if (fromEnv) return fromEnv;
+  return gitText(rootDir, ["config", "--get", "remote.origin.url"]) || `file://${rootDir}`;
+}
+
+function commandWaiversSign(parsed: ParsedArgs): number {
+  const inputPath = parsed.fromPaths[0];
+  if (!inputPath) {
+    console.error("cellfence waivers sign requires --from waiver-request.json");
+    return 2;
+  }
+  if (!parsed.attestationId) {
+    console.error("cellfence waivers sign requires --attestation-id");
+    return 2;
+  }
+  if (!parsed.findingFingerprint || !/^[a-f0-9]{64}$/.test(parsed.findingFingerprint)) {
+    console.error("cellfence waivers sign requires --finding-fingerprint as lowercase sha256 hex");
+    return 2;
+  }
+  const secret = process.env[WAIVER_ATTESTATION_HMAC_KEY_ENV];
+  if (!secret) {
+    console.error(`cellfence waivers sign requires ${WAIVER_ATTESTATION_HMAC_KEY_ENV}`);
+    return 2;
+  }
+  const parsedInput = JSON.parse(fs.readFileSync(path.resolve(parsed.rootDir, inputPath), "utf8")) as unknown;
+  const template = isRecord(parsedInput) && isRecord(parsedInput.attestationTemplate)
+    ? parsedInput.attestationTemplate
+    : parsedInput;
+  if (!isRecord(template) || template.schemaVersion !== "cellfence.waiver-attestation.v1") {
+    console.error("cellfence waivers sign requires a waiver request JSON or unsigned waiver attestation template");
+    return 2;
+  }
+  const filePath = typeof template.filePath === "string" ? template.filePath.replace(/\\/g, "/") : "";
+  const sourcePath = path.resolve(parsed.rootDir, filePath);
+  if (!filePath || !fs.existsSync(sourcePath)) {
+    console.error(`cellfence waivers sign cannot read source file ${filePath || "(missing)"}`);
+    return 2;
+  }
+  const headSha = gitText(parsed.rootDir, ["rev-parse", "--verify", "--end-of-options", "HEAD^{commit}"]);
+  if (!headSha) {
+    console.error("cellfence waivers sign cannot verify repository HEAD");
+    return 2;
+  }
+  const expiresAt = typeof template.expiresAt === "string" ? template.expiresAt : "";
+  const expiryCheck = validateWaiverExpiry(expiresAt.slice(0, 10));
+  if (!expiryCheck.ok) {
+    console.error(`cellfence waivers sign: ${expiryCheck.reason.replace(/^expires /, "expiresAt ")}`);
+    return 2;
+  }
+  const ruleId = typeof template.ruleId === "string" ? template.ruleId : "";
+  const line = Number(template.line);
+  const reason = typeof template.reason === "string" ? template.reason.trim() : "";
+  const approver = parsed.approvedBy || (typeof template.approver === "string" ? template.approver : "PENDING");
+  if (!/^CELLFENCE_[A-Z0-9_]+$/.test(ruleId)) {
+    console.error("cellfence waivers sign requires a concrete CELLFENCE_* ruleId in the template");
+    return 2;
+  }
+  if (!Number.isInteger(line) || line <= 0) {
+    console.error("cellfence waivers sign requires a positive integer line in the template");
+    return 2;
+  }
+  if (reason.length < 12) {
+    console.error("cellfence waivers sign requires a reason of at least 12 characters");
+    return 2;
+  }
+  if (!approver || approver === "PENDING") {
+    console.error("cellfence waivers sign requires an approver; pass --approved-by or fill the template approver");
+    return 2;
+  }
+  const unsigned = {
+    schemaVersion: "cellfence.waiver-attestation.v1" as const,
+    attestationId: parsed.attestationId,
+    repository: waiverRepositoryIdentity(parsed.rootDir),
+    headSha,
+    sourceSha256: crypto.createHash("sha256").update(fs.readFileSync(sourcePath)).digest("hex"),
+    ruleId,
+    findingFingerprint: parsed.findingFingerprint,
+    filePath,
+    line,
+    expiresAt,
+    reason,
+    approver,
+    issuedAt: new Date().toISOString(),
+  };
+  const signature = {
+    algorithm: "hmac-sha256" as const,
+    ...(process.env[WAIVER_ATTESTATION_HMAC_KEY_ID_ENV] ? { keyId: process.env[WAIVER_ATTESTATION_HMAC_KEY_ID_ENV] } : {}),
+    digest: waiverAttestationHmacDigest(unsigned, secret),
+  };
+  const attestation = { ...unsigned, signature };
+  const output = `${JSON.stringify(attestation, null, 2)}\n`;
+  if (parsed.initOutputPath) {
+    const outputPath = path.resolve(parsed.rootDir, parsed.initOutputPath);
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, output);
+  } else {
+    process.stdout.write(output);
+  }
   return 0;
 }
 
@@ -1746,6 +1924,25 @@ function mcpToolDefinitions(): Record<string, unknown>[] {
   }];
 }
 
+function realPathForMcpBoundary(candidatePath: string): string {
+  const absolutePath = path.resolve(candidatePath);
+  if (fs.existsSync(absolutePath)) return fs.realpathSync.native(absolutePath);
+  const missingSegments: string[] = [];
+  let cursor = absolutePath;
+  while (!fs.existsSync(cursor)) {
+    const parent = path.dirname(cursor);
+    if (parent === cursor) return absolutePath;
+    missingSegments.unshift(path.basename(cursor));
+    cursor = parent;
+  }
+  return path.join(fs.realpathSync.native(cursor), ...missingSegments);
+}
+
+function pathIsInsideMcpRoot(rootDir: string, candidatePath: string): boolean {
+  const relative = path.relative(rootDir, candidatePath);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
 function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootDir: string): unknown {
   // C-4 (0.3.0): every per-call rootDir / manifestPath / claimsPath /
   // baselinePath must be confined to the server's working directory.
@@ -1754,16 +1951,17 @@ function mcpToolCall(name: string, params: Record<string, unknown>, defaultRootD
   const requestedRoot = stringParam(params, "rootDir") || defaultRootDir;
   const absoluteRoot = path.resolve(requestedRoot);
   const serverRoot = path.resolve(defaultRootDir);
-  const relativeRoot = path.relative(serverRoot, absoluteRoot);
-  if (relativeRoot.startsWith("..") || path.isAbsolute(relativeRoot)) {
+  const realServerRoot = realPathForMcpBoundary(serverRoot);
+  const realRoot = realPathForMcpBoundary(absoluteRoot);
+  if (!pathIsInsideMcpRoot(realServerRoot, realRoot)) {
     throw new Error(`rootDir must be inside ${serverRoot}; got ${absoluteRoot}`);
   }
   const rootDir = absoluteRoot;
   const confinePath = (rawPath: string | undefined, label: string): string | undefined => {
     if (rawPath === undefined) return rawPath;
     const resolved = path.isAbsolute(rawPath) ? path.resolve(rawPath) : path.resolve(rootDir, rawPath);
-    const relative = path.relative(rootDir, resolved);
-    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    const realResolved = realPathForMcpBoundary(resolved);
+    if (!pathIsInsideMcpRoot(realRoot, realResolved)) {
       throw new Error(`${label} must be inside ${rootDir}; got ${resolved}`);
     }
     return resolved;
@@ -1997,6 +2195,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "mutation" && secondaryCommand === "check") return commandMutationCheck(parsed);
     if (primaryCommand === "waivers" && secondaryCommand === "list") return commandWaiversList(parsed);
     if (primaryCommand === "waivers" && secondaryCommand === "request") return commandWaiversRequest(parsed);
+    if (primaryCommand === "waivers" && secondaryCommand === "sign") return commandWaiversSign(parsed);
     printUsage();
     return 2;
   } catch (error) {

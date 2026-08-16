@@ -33,7 +33,9 @@ export function createRawObservationReport(input: RawObservationReportInput): Ra
 
 export function observationFamiliesForReport(report: RawObservationReport): ObservationFamily[] {
   const families = new Set<ObservationFamily>();
-  for (const status of report.statuses) families.add(status.family);
+  for (const status of report.statuses) {
+    if (status.status !== "not-applicable") families.add(status.family);
+  }
   if (report.importObservationCount > 0) families.add("imports");
   if (report.resourceObservationCount > 0) families.add("resources");
   if (report.publicSurfaceObservationCount > 0) families.add("public-surface");

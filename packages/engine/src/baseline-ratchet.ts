@@ -8,6 +8,7 @@ import type {
   ResourceBaselineEntry,
 } from "@cellfence/schema";
 import { absolutePath, normalizePath, patternCoveredByOwnedPaths } from "./file-index.js";
+import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { publicSurfaceHash } from "./module-resolution.js";
 import type { ResourceAccessReference } from "./resource-access.js";
 import type { Finding, SuggestedResolution } from "./types.js";
@@ -39,7 +40,7 @@ export function resourceBaselineEntry(access: ResourceAccessReference): Resource
 }
 
 export function resourceBaselineKey(access: ResourceBaselineEntry): string {
-  return `${access.kind}:${access.access}:${access.selector}`;
+  return stableCanonicalJson([access.kind, access.access, access.selector]);
 }
 
 export function sortedResourceBaselineEntries(accesses: readonly ResourceAccessReference[] = []): ResourceBaselineEntry[] {

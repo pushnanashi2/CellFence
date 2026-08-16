@@ -9,7 +9,19 @@ import { pathPatternSubset } from "./glob-overlap.js";
 
 export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
 
-const IGNORED_DIRECTORIES = new Set([".git", "node_modules", "dist", "coverage", ".turbo"]);
+const ALWAYS_IGNORED_DIRECTORIES = new Set([
+  ".git",
+  "node_modules",
+  ".venv",
+  "venv",
+  ".tox",
+  ".nox",
+  "__pycache__",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+]);
+const DEFAULT_GENERATED_DIRECTORIES = new Set(["dist", "coverage", ".turbo"]);
 
 export type FileIndexContext = {
   rootDir: string;
@@ -52,13 +64,28 @@ export function literalPrefix(pattern: string): string {
   return prefix.replace(/\/+$/, "");
 }
 
+function directoryHasExplicitGovernance(rootDir: string, directoryPath: string, context?: FileIndexContext): boolean {
+  if (!context) return false;
+  const relativeDirectory = repoPath(rootDir, directoryPath);
+  const probePaths = SOURCE_EXTENSIONS.map((extension) => `${relativeDirectory}/__cellfence_probe__${extension}`);
+  const manifest = context.manifest;
+  if (manifest.governance?.include?.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern)))) return true;
+  return manifest.cells.some((cell) => cell.ownedPaths.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern))));
+}
+
+function shouldIgnoreDirectory(rootDir: string, directoryPath: string, directoryName: string, context?: FileIndexContext): boolean {
+  if (ALWAYS_IGNORED_DIRECTORIES.has(directoryName)) return true;
+  if (!DEFAULT_GENERATED_DIRECTORIES.has(directoryName)) return false;
+  return !directoryHasExplicitGovernance(rootDir, directoryPath, context);
+}
+
 export function listFiles(rootDir: string, context?: FileIndexContext): string[] {
   if (context?.listFilesCache) return context.listFilesCache;
   const files: string[] = [];
   function visit(directoryPath: string): void {
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
-      if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
       const entryPath = path.join(directoryPath, entry.name);
+      if (entry.isDirectory() && shouldIgnoreDirectory(rootDir, entryPath, entry.name, context)) continue;
       if (entry.isDirectory()) {
         visit(entryPath);
       } else if (entry.isFile()) {
@@ -82,8 +109,8 @@ export function listSymlinks(rootDir: string): SymlinkEntry[] {
   const symlinks: SymlinkEntry[] = [];
   function visit(directoryPath: string): void {
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
-      if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
       const entryPath = path.join(directoryPath, entry.name);
+      if (entry.isDirectory() && shouldIgnoreDirectory(rootDir, entryPath, entry.name)) continue;
       if (entry.isDirectory()) {
         visit(entryPath);
       } else if (entry.isSymbolicLink()) {

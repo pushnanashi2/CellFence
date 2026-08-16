@@ -13,6 +13,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 
+import { CELLFENCE_BASELINE_SCHEMA_VERSION, validateBaseline } from "@cellfence/schema";
 import { detectBaselineChanges, type CellFenceBaseline, type GovernanceChangeReport } from "@cellfence/engine";
 
 export type { GovernanceChangeReport } from "@cellfence/engine";
@@ -31,18 +32,68 @@ export type BaselineGateOptions = {
   hasImplementationChanges?: boolean;
 };
 
+const GIT_COMMAND = "git";
+
+function gitText(rootDir: string, args: string[]): string {
+  // Stryker disable next-line StringLiteral,ArrayDeclaration: stdio/encoding only control git subprocess plumbing; ref/path behavior is covered by gate tests.
+  return String(execFileSync(GIT_COMMAND, args, { cwd: rootDir, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }));
+}
+
+function gitSilent(rootDir: string, args: string[]): void {
+  // Stryker disable next-line StringLiteral,ArrayDeclaration: stdio only controls git subprocess plumbing; ref/path behavior is covered by gate tests.
+  execFileSync(GIT_COMMAND, args, { cwd: rootDir, stdio: ["ignore", "ignore", "pipe"] });
+}
+
 function readBaselineFromGit(rootDir: string, ref: string, baselineFile: string): unknown {
+  if (!/^[A-Za-z0-9._/-]+$/.test(ref)) {
+    throw new Error(`refused to read baseline at invalid git ref: ${JSON.stringify(ref)}`);
+  }
+  const repoRoot = gitText(rootDir, ["rev-parse", "--show-toplevel"]).trim();
   const relativeBaselineFile = isAbsolute(baselineFile)
-    ? relative(rootDir, baselineFile)
+    ? relative(repoRoot, baselineFile)
     : baselineFile;
-  const text = String(execFileSync("git", ["show", `${ref}:${relativeBaselineFile}`], {
-    cwd: rootDir,
-  }));
+  if (relativeBaselineFile.startsWith("..")) {
+    throw new Error(`baseline file must stay inside the git repository: ${baselineFile}`);
+  }
+  try {
+    gitSilent(repoRoot, ["cat-file", "-e", `${ref}^{commit}`]);
+  } catch (error) {
+    throw new Error(`cannot resolve git ref ${ref}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+  }
+  if (!baselinePathExistsAtRef(repoRoot, ref, relativeBaselineFile)) return emptyBaseline();
+  const text = gitText(repoRoot, ["show", `${ref}:${relativeBaselineFile}`]);
   return JSON.parse(text);
 }
 
+function baselinePathExistsAtRef(repoRoot: string, ref: string, relativeBaselineFile: string): boolean {
+  const text = gitText(repoRoot, ["ls-tree", "-z", "--name-only", ref, "--", relativeBaselineFile]);
+  return text === `${relativeBaselineFile}\0`;
+}
+
+function emptyBaseline(): CellFenceBaseline {
+  return {
+    schemaVersion: CELLFENCE_BASELINE_SCHEMA_VERSION,
+    generatedAt: "1970-01-01T00:00:00.000Z",
+    cellIds: [],
+    cells: {},
+  };
+}
+
 function readBaselineFromPath(filePath: string): unknown {
-  return JSON.parse(String(readFileSync(filePath)));
+  try {
+    return JSON.parse(String(readFileSync(filePath)));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return emptyBaseline();
+    throw error;
+  }
+}
+
+function validateBaselineValue(value: unknown, displayPath: string): CellFenceBaseline {
+  const validation = validateBaseline(value);
+  if (!validation.ok) {
+    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${validation.errors.join("; ")}`);
+  }
+  return validation.value as CellFenceBaseline;
 }
 
 export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateResult {
@@ -64,9 +115,11 @@ export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateR
   const headDisplay = options.headRef
     ? `${options.headRef}:${relative(options.rootDir, baselineFile)}`
     : baselineFile;
+  const baseBaseline = validateBaselineValue(baseValue, baseDisplay);
+  const headBaseline = validateBaselineValue(headValue, headDisplay);
   const report = detectBaselineChanges(
-    baseValue as CellFenceBaseline,
-    headValue as CellFenceBaseline,
+    baseBaseline,
+    headBaseline,
     baseDisplay,
     headDisplay,
   );

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,9 +7,11 @@ import test from "node:test";
 
 import { detectBaselineChanges } from "../packages/engine/dist/index.js";
 import { runBaselineGateCommand } from "../packages/cli/dist/baseline-gate-command.js";
+import { runBaselineGateFull as runCliBaselineGateFull } from "../packages/cli/dist/baseline-gate-full.js";
 import { runBaselineGateFull } from "../packages/github-action-baseline-gate/dist/baseline-gate.js";
 
 const root = process.cwd();
+const bundledActionEntrypoint = path.join(root, "packages/github-action-baseline-gate/dist/index.js");
 
 
 function makeBaseline(overrides = {}) {
@@ -50,6 +52,10 @@ function git(rootDir, args) {
 
 function writeBaseline(rootDir, baseline) {
   fs.writeFileSync(path.join(rootDir, "cellfence.baseline.json"), `${JSON.stringify(baseline, null, 2)}\n`);
+}
+
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 function createBaselineRepository(context) {
@@ -186,6 +192,211 @@ test("github action baseline gate reads base ref and working tree baseline", (co
   ]);
 });
 
+test("github action baseline gate reads git ref baselines relative to repository root", (context) => {
+  const rootDir = createBaselineRepository(context);
+  const packageDir = path.join(rootDir, "packages/app");
+  fs.mkdirSync(packageDir, { recursive: true });
+  const headBaseline = makeBaseline();
+  headBaseline.cells.worker.publicSymbolSet = ["consume", "subdir"];
+  writeBaseline(rootDir, headBaseline);
+
+  const result = runBaselineGateFull({
+    rootDir: packageDir,
+    baselineFile: path.join(rootDir, "cellfence.baseline.json"),
+    baseRef: "HEAD",
+    hasImplementationChanges: false,
+  });
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.report.hasChange, true);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "publicSymbols")?.added, [
+    "worker.subdir",
+  ]);
+});
+
+test("github action baseline gate validates baseline JSON before diffing", (context) => {
+  const rootDir = createBaselineRepository(context);
+  fs.writeFileSync(path.join(rootDir, "cellfence.baseline.json"), JSON.stringify({
+    schemaVersion: "wrong",
+    generatedAt: "not-a-date",
+    cells: {},
+  }));
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "HEAD",
+    }),
+    /not a valid CellFenceBaseline: schemaVersion must be cellfence\.baseline\.v1; generatedAt must be an ISO 8601 date-time string/,
+  );
+});
+
+test("baseline gate reports baselines introduced or removed across git refs", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-missing-"));
+  context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
+  git(rootDir, ["init", "-q", "-b", "main"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  git(rootDir, ["config", "user.email", "test@example.com"]);
+  fs.writeFileSync(path.join(rootDir, "README.md"), "no baseline yet\n");
+  git(rootDir, ["add", "README.md"]);
+  git(rootDir, ["commit", "-qm", "initial without baseline"]);
+  const emptyRef = git(rootDir, ["rev-parse", "HEAD"]).trim();
+  writeBaseline(rootDir, makeBaseline());
+  git(rootDir, ["add", "cellfence.baseline.json"]);
+  git(rootDir, ["commit", "-qm", "add baseline"]);
+
+  for (const runGate of [runBaselineGateFull, (options) => runCliBaselineGateFull({ ...options, format: "json" })]) {
+    const added = runGate({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: emptyRef,
+      headRef: "HEAD",
+    });
+    assert.equal(added.exitCode, 1);
+    assert.deepEqual(added.report.deltas.find((delta) => delta.dimension === "cellIds"), {
+      dimension: "cellIds",
+      added: ["api", "worker"],
+      removed: [],
+    });
+
+    const removed = runGate({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "HEAD",
+      headRef: emptyRef,
+    });
+    assert.equal(removed.exitCode, 1);
+    assert.deepEqual(removed.report.deltas.find((delta) => delta.dimension === "cellIds"), {
+      dimension: "cellIds",
+      added: [],
+      removed: ["api", "worker"],
+    });
+  }
+});
+
+test("baseline gate treats baselines missing on both git sides as unchanged empty baselines", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-both-missing-"));
+  context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
+  git(rootDir, ["init", "-q", "-b", "main"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  git(rootDir, ["config", "user.email", "test@example.com"]);
+  fs.writeFileSync(path.join(rootDir, "README.md"), "no baseline on either side\n");
+  git(rootDir, ["add", "README.md"]);
+  git(rootDir, ["commit", "-qm", "without baseline"]);
+
+  const result = runBaselineGateFull({
+    rootDir,
+    baselineFile: "missing/cellfence.baseline.json",
+    baseRef: "HEAD",
+    headRef: "HEAD",
+  });
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.report.hasChange, false);
+  assert.deepEqual(result.report.deltas, []);
+});
+
+test("github action baseline gate rejects invalid git ref syntax before git lookup", (context) => {
+  const rootDir = createBaselineRepository(context);
+  for (const ref of ["bad ref abcd", "abcd ref", "feature\nbranch"]) {
+    assert.throws(
+      () => runBaselineGateFull({
+        rootDir,
+        baselineFile: "cellfence.baseline.json",
+        baseRef: ref,
+      }),
+      /refused to read baseline at invalid git ref/,
+    );
+  }
+});
+
+test("github action baseline gate rejects baseline paths outside the repository", (context) => {
+  const rootDir = createBaselineRepository(context);
+  const outsideBaseline = path.join(rootDir, "..", "outside.baseline.json");
+
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: outsideBaseline,
+      baseRef: "HEAD",
+    }),
+    /baseline file must stay inside the git repository/,
+  );
+});
+
+test("github action baseline gate fails closed for unresolved git refs", (context) => {
+  const rootDir = createBaselineRepository(context);
+
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "missing/ref",
+    }),
+    (error) => {
+      assert.match(error.message, /cannot resolve git ref missing\/ref/);
+      assert.ok(error.cause instanceof Error);
+      return true;
+    },
+  );
+});
+
+test("github action baseline gate treats missing working-tree baseline as empty", (context) => {
+  const rootDir = createBaselineRepository(context);
+  fs.rmSync(path.join(rootDir, "cellfence.baseline.json"));
+  const result = runBaselineGateFull({
+    rootDir,
+    baselineFile: "cellfence.baseline.json",
+    baseRef: "HEAD",
+  });
+
+  assert.equal(result.exitCode, 1);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "cellIds"), {
+    dimension: "cellIds",
+    added: [],
+    removed: ["api", "worker"],
+  });
+});
+
+test("github action baseline gate preserves parse errors for malformed working-tree baseline", (context) => {
+  const rootDir = createBaselineRepository(context);
+  fs.writeFileSync(path.join(rootDir, "cellfence.baseline.json"), "{not-json");
+
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "HEAD",
+    }),
+    SyntaxError,
+  );
+});
+
+test("cli baseline gate validates full baseline schema before diffing", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-schema-"));
+  context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
+  const basePath = path.join(rootDir, "base.baseline.json");
+  const headPath = path.join(rootDir, "head.baseline.json");
+  writeJson(basePath, {
+    schemaVersion: "cellfence.baseline.v1",
+    generatedAt: "not-a-date",
+    cells: {},
+  });
+  writeBaseline(rootDir, makeBaseline());
+  fs.renameSync(path.join(rootDir, "cellfence.baseline.json"), headPath);
+
+  assert.throws(
+    () => runCliBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      basePath,
+      headPath,
+      format: "json",
+    }),
+    /not a valid CellFenceBaseline: generatedAt must be an ISO 8601 date-time string/,
+  );
+});
+
 test("github action baseline gate reads working tree baseline and head ref", (context) => {
   const rootDir = createBaselineRepository(context);
   const headBaseline = makeBaseline();
@@ -237,6 +448,22 @@ test("github action baseline gate rejects runs without any baseline ref", (conte
   );
 });
 
+test("bundled github action baseline gate fails outside pull request events", () => {
+  const result = spawnSync(process.execPath, [bundledActionEntrypoint], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      GITHUB_EVENT_NAME: "push",
+      GITHUB_EVENT_PATH: "",
+      INPUT_GITHUB_TOKEN: "",
+    },
+  });
+
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(`${result.stdout}\n${result.stderr}`, /requires a pull_request event/);
+});
+
 test("runBaselineGateCommand preserves skipped-cell fail-closed state", () => {
   const baseBaseline = makeBaseline();
   const headBaseline = makeBaseline();
@@ -280,11 +507,17 @@ test("baseline gate action metadata declares every source input", () => {
   assert.match(actionYaml, /baseline-codeowners:\r?\n\s+description: "Comma-separated list of GitHub usernames who can approve a baseline change\. Team entries are not resolved in this prototype\./);
   assert.match(actionYaml, /baseline-file:\r?\n\s+description: "Repo-relative path to the baseline JSON\."\r?\n\s+required: false\r?\n\s+default: "\.cellfence\/baselines\/cellfence\.baseline\.json"/);
   assert.match(source, /core\.getInput\("github-token", \{ required: true \}\)/);
+  assert.match(source, /parseBooleanInput\("fail-on-mixed-pr", true\)/);
+  assert.match(actionYaml, /fail-on-mixed-pr:\r?\n\s+description: "When `require-separate-pr` is true, exit non-zero if the PR mixes baseline and implementation changes\."\r?\n\s+required: false\r?\n\s+default: "true"/);
   assert.match(source, /baseline-codeowners currently supports GitHub usernames only/);
-  assert.match(source, /const owners = codeownersForPath\(text, baselineFile\);\r?\n\s+if \(owners\.length === 0\) continue;\r?\n\s+validateUsernameCodeowners\(owners\);\r?\n\s+return owners;/);
+  assert.match(source, /repos\.getContent\(\{ owner, repo, path: codeownersPath, ref \}\)/);
+  assert.match(source, /loadCodeownersFromRepo\(octokit, context\.repo\.owner, context\.repo\.repo, baselineFile, baseSha\)/);
+  assert.match(source, /assertPullRequestRevision\(octokit, owner, repo, pullNumber, expectedBaseSha, expectedHeadSha\)/);
   assert.match(source, /review\.state === "APPROVED" && review\.commitId === headSha/);
   assert.doesNotMatch(source, /codeowners\.length === 0\)\s*return true/);
   assert.match(source, /codeowners\.length === 0\)\s*return false/);
+  assert.match(source, /function changedFileIsBaseline\(name: string, baselineFile: string\): boolean/);
+  assert.match(source, /if \(changedFileIsBaseline\(normalized, baselineFile\)\) return false/);
   assert.match(source, /mode === "create"/);
   assert.match(source, /removeLabelIfPresent/);
 });

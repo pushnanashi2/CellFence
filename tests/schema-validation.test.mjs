@@ -48,6 +48,8 @@ function validBaseline(patch = {}) {
   };
 }
 
+const validEd25519Signature = Buffer.alloc(64, 7).toString("base64");
+
 function validEvidence(patch = {}) {
   return {
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
@@ -99,13 +101,35 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "src\\..\\escape.ts" }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
-    ["manifest", validManifest({ governance: { claimBackend: { type: "github-artifact", artifactName: "claims", retentionDays: 1 } } }), validateManifest],
+    ["manifest", validManifest({
+      cells: [{
+        ...validCell,
+        waiverParsing: true,
+        waiverParsingReason: "legacy parser migration",
+        importAnalysis: true,
+        resourceAnalysis: true,
+      }],
+    }), validateManifest],
+    ["manifest", validManifest({ governance: { claimBackend: { type: "local-file" } } }), validateManifest],
     ["manifest", validManifest({ overrides: [{ files: ["..\\escape.ts"], rules: {} }] }), validateManifest],
     ["baseline", validBaseline(), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "not-a-date" }), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "2026-99-99T99:99:99Z" }), validateBaseline],
     ["baseline", validBaseline({ cellIds: ["   "] }), validateBaseline],
     ["baseline", validBaseline({ seal: { algorithm: "ed25519", signature: "abcde" } }), validateBaseline],
+    ["baseline", validBaseline({
+      cells: {
+        core: {
+          ...validBaseline().cells.core,
+          resourceAccesses: [{
+            kind: "file",
+            access: "read",
+            selector: "tmp/output.json",
+            confidence: "transient",
+          }],
+        },
+      },
+    }), validateBaseline],
     ["evidence", validEvidence(), validateResourceEvidence],
     ["evidence", validEvidence({ accesses: [{ kind: "database", access: "execute", selector: "users" }] }), validateResourceEvidence],
     ["evidence", validEvidence({ cellId: "   " }), validateResourceEvidence],
@@ -187,6 +211,10 @@ test("schema validation accepts maximal valid manifests", () => {
         ...validCell,
         packageName: "@example/core",
         locked: true,
+        waiverParsing: true,
+        waiverParsingReason: "legacy parser migration",
+        importAnalysis: true,
+        resourceAnalysis: true,
         consumes: [{ cell: "platform", artifactLanes: ["events-v1"] }],
         producesArtifacts: [{
           id: "events-v1",
@@ -230,6 +258,21 @@ test("schema validation accepts maximal valid manifests", () => {
   );
   assert.deepEqual(result.errors, []);
   assert.equal(result.value.cells[0].id, "core");
+});
+
+test("schema validation rejects unsupported per-cell analysis disabling", () => {
+  const manifest = validManifest({
+    cells: [{
+      ...validCell,
+      importAnalysis: false,
+      resourceAnalysis: false,
+    }],
+  });
+  const result = validateManifest(manifest);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /importAnalysis must be true when present; disabling import analysis is not supported/);
+  assert.match(result.errors.join("\n"), /resourceAnalysis must be true when present; disabling resource analysis is not supported/);
+  assert.equal(jsonSchemaValidators.manifest(manifest), false);
 });
 
 test("schema validation rejects malformed manifest root and reserved loaders", () => {
@@ -494,7 +537,7 @@ test("schema validation accepts and rejects baseline records", () => {
     seal: {
       algorithm: "ed25519",
       keyId: "baseline-signing-key",
-      signature: Buffer.from("signature").toString("base64"),
+      signature: validEd25519Signature,
     },
   }));
   assert.equal(ed25519Baseline.ok, true);
@@ -516,7 +559,7 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", keyId: 1, digest: "a".repeat(64) } })), /seal\.keyId must be a string/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "hmac-sha256", digest: "not-hex" } })), /seal\.digest must be a 64-character lowercase hex string/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "" } })), /seal\.signature must be a non-empty base64 string/);
-  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be a base64 string/);
+  assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: "not base64!" } })), /seal\.signature must be an Ed25519 signature encoded as 64-byte base64/);
   assertInvalid(
     validateBaseline(validBaseline({
       extraBaseline: true,
@@ -628,6 +671,19 @@ test("schema validation accepts and rejects resource evidence", () => {
   }));
   assert.equal(richEvidence.ok, true);
   assert.deepEqual(richEvidence.errors, []);
+  const { cellId: _topLevelCellId, ...evidenceWithoutTopLevelCell } = validEvidence({
+    accesses: [{
+      kind: "queue",
+      access: "publish",
+      selector: "events.v1",
+      cellId: "publisher",
+      detectedBy: "trace",
+      confidence: "runtime",
+    }],
+  });
+  const perAccessCellEvidence = validateResourceEvidence(evidenceWithoutTopLevelCell);
+  assert.equal(perAccessCellEvidence.ok, true);
+  assert.deepEqual(perAccessCellEvidence.errors, []);
   for (const transcriptStatus of ["active", "inactive", "incomplete"]) {
     const transcriptEvidence = validateResourceEvidence(validEvidence({ transcriptStatus }));
     assert.equal(transcriptEvidence.ok, true, transcriptEvidence.errors.join("\n"));
@@ -778,19 +834,33 @@ test("schema validation distinguishes baseline seal algorithms and encoding boun
     seal: { algorithm: "hmac-sha256", keyId: "release", digest },
   })).errors, []);
   assert.deepEqual(validateBaseline(validBaseline({
-    seal: { algorithm: "ed25519", keyId: "release", signature: "YWJjZA==" },
+    seal: { algorithm: "ed25519", keyId: "release", signature: validEd25519Signature },
   })).errors, []);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "ed25519", keyId: "release", payloadVersion: "seal-metadata-v1", signature: validEd25519Signature },
+  })).errors, []);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "hmac-sha256", keyId: "release", payloadVersion: "seal-metadata-v1", digest },
+  })).errors, []);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "hmac-sha256", payloadVersion: "legacy", digest },
+  })).errors, ["seal.payloadVersion must be seal-metadata-v1 when present"]);
 
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "hmac-sha256", digest, signature: "YWJjZA==" },
   })).errors, ["seal.signature is not a supported field"]);
   assert.deepEqual(validateBaseline(validBaseline({
-    seal: { algorithm: "ed25519", signature: "YWJjZA==", digest },
+    seal: { algorithm: "ed25519", signature: validEd25519Signature, digest },
   })).errors, ["seal.digest is not a supported field"]);
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "unknown", keyId: "release", digest, signature: "YWJjZA==", extra: true },
   })).errors, [
     "seal.extra is not a supported field",
+    "seal.algorithm must be hmac-sha256 or ed25519",
+  ]);
+  assert.deepEqual(validateBaseline(validBaseline({
+    seal: { algorithm: "unknown", payloadVersion: "seal-metadata-v1", digest, signature: "YWJjZA==" },
+  })).errors, [
     "seal.algorithm must be hmac-sha256 or ed25519",
   ]);
 
@@ -802,7 +872,7 @@ test("schema validation distinguishes baseline seal algorithms and encoding boun
   assert.deepEqual(validateBaseline(validBaseline({
     seal: { algorithm: "ed25519", signature: "    " },
   })).errors, ["seal.signature must be a non-empty base64 string"]);
-  for (const badSignature of ["_WJjZA==", "YWJjZA=_", "=YWJjZA==", "YWJjZA==x", "YWJjZA=", "YW JjZA=="]) {
+  for (const badSignature of ["AAAA", `!${validEd25519Signature}`, `${validEd25519Signature}A`, "_WJjZA==", "YWJjZA=_", "=YWJjZA==", "YWJjZA==x", "YWJjZA=", "YW JjZA=="]) {
     const result = validateBaseline(validBaseline({ seal: { algorithm: "ed25519", signature: badSignature } }));
     assert.equal(result.ok, false, badSignature);
     assert.ok(result.errors.some((error) => error.startsWith("seal.signature must be")), badSignature);

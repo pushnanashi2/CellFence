@@ -216,6 +216,7 @@ async function withProxy(rootDir, mode, fn, { proxyArgs = [], serverPath = mockS
     cwd: root,
     env: {
       ...process.env,
+      CELLFENCE_MCP_DOWNSTREAM_ENV_ALLOW: "MOCK_MCP_LOG",
       MOCK_MCP_LOG: mockLog,
     },
     stdio: ["pipe", "pipe", "pipe"],
@@ -392,7 +393,60 @@ test("proxy path extraction supports configured write tools", () => {
   assert.deepEqual(pathsForToolCall("apply_edits", {
     batches: [{ edits: [{ target: { path: "src/a.ts" } }] }, { edits: [{ target: { path: "src/b.ts" } }] }],
   }, { apply_edits: ["batches[].edits[].target.path"] }), ["src/a.ts", "src/b.ts"]);
+  assert.deepEqual(pathsForToolCall("apply_patch", {
+    patch: [
+      "*** Begin Patch",
+      "*** Update File: src/a.ts",
+      "@@",
+      "-old",
+      "+new",
+      "*** Add File: src/b.ts",
+      "+new",
+      "*** End Patch",
+    ].join("\n"),
+  }, { apply_patch: ["patch"] }), ["src/a.ts", "src/b.ts"]);
+  assert.deepEqual(pathsForToolCall("patch", {
+    diff: [
+      "diff --git a/src/a.ts b/src/a.ts",
+      "--- a/src/a.ts",
+      "+++ b/src/a.ts",
+      "diff --git a/src/old.ts b/src/new.ts",
+      "--- a/src/old.ts",
+      "+++ b/src/new.ts",
+    ].join("\n"),
+  }, { patch: ["diff"] }), ["src/a.ts", "src/old.ts", "src/new.ts"]);
   assert.deepEqual(pathsForToolCall("write_file", 7, { write_file: ["path"] }), []);
+});
+
+test("proxy authorizes relative write paths against downstream cwd", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-downstream-cwd-"));
+  try {
+    writeProject(rootDir);
+    const allowed = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "enforce",
+      failMode: "closed",
+      writeTools: { write_file: ["path"] },
+      downstreamCwd: path.join(rootDir, "src/owned"),
+    }, "write_file", { path: "new.ts" });
+    assert.equal(allowed.auditDecision, "allow", allowed.reason);
+    assert.equal(allowed.access.paths[0].relativePath, "src/owned/new.ts");
+
+    const confusedDeputy = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "enforce",
+      failMode: "closed",
+      writeTools: { write_file: ["path"] },
+      downstreamCwd: path.join(rootDir, "src/other"),
+    }, "write_file", { path: "src/owned/new.ts" });
+    assert.equal(confusedDeputy.auditDecision, "deny");
+    assert.equal(confusedDeputy.access.paths[0].allowed, false);
+    assert.equal(confusedDeputy.access.paths[0].relativePath, "src/other/src/owned/new.ts");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("proxy argument parser covers env defaults, file config, inline overrides, and separator args", async () => {
@@ -427,6 +481,10 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
       CELLFENCE_MCP_FAIL_MODE: "closed",
       CELLFENCE_MCP_AUDIT_LOG: "env-audit.jsonl",
       CELLFENCE_MCP_DOWNSTREAM_COMMAND: "env-cmd",
+      CELLFENCE_MCP_DOWNSTREAM_ENV_ALLOW: "MOCK_MCP_LOG,EXTRA_SAFE",
+      MOCK_MCP_LOG: "mock-log",
+      EXTRA_SAFE: "safe",
+      DATABASE_URL: "postgres://drop-me",
     });
     assert.equal(options.rootDir, rootDir);
     assert.equal(options.manifestPath, "custom.manifest.json");
@@ -441,6 +499,9 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     assert.equal(options.downstreamCommand, process.execPath);
     assert.deepEqual(options.downstreamArgs, ["-e", "setTimeout(()=>{}, 1)"]);
     assert.equal(options.downstreamCwd, rootDir);
+    assert.equal(options.downstreamEnv.MOCK_MCP_LOG, "mock-log");
+    assert.equal(options.downstreamEnv.EXTRA_SAFE, "safe");
+    assert.equal(options.downstreamEnv.DATABASE_URL, undefined);
     assert.deepEqual(options.writeTools.custom_write, ["payload.file", "path"]);
     assert.deepEqual(options.writeTools.patch_file, ["file_path", "filename"]);
 
@@ -574,6 +635,7 @@ test("proxy argument parser rejects malformed modes, write tools, and configs", 
     assert.throws(() => parseProxyArgs(["--unknown-tool-policy", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--unknown-tool-policy=", "--agent=a", "--downstream-command=node"], {}), /invalid unknown tool policy \(empty\)/);
     assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node"], { CELLFENCE_MCP_UNKNOWN_TOOL_POLICY: "" }), /invalid unknown tool policy \(empty\)/);
+    assert.throws(() => parseProxyArgs(["--agent=a", "--downstream-command=node", "--downstream-env=BAD-NAME"], {}), /invalid downstream env name BAD-NAME/);
     assert.throws(() => parseProxyArgs(["--downstream-feature-policy=maybe", "--agent=a", "--downstream-command=node"], {}), /invalid downstream feature policy maybe/);
     assert.throws(() => parseProxyArgs(["--downstream-feature-policy", "--agent=a", "--downstream-command=node"], {}), /requires allow or deny/);
     assert.throws(() => parseProxyArgs(["--agent"], { CELLFENCE_MCP_DOWNSTREAM_COMMAND: "node" }), /missing --agent/);
@@ -622,16 +684,12 @@ test("proxy downstream environment is filtered to an explicit allowlist (H-3)", 
   assert.equal(safeEnv.LANG, "C.UTF-8");
   assert.equal(safeEnv.LC_ALL, "C.UTF-8");
   assert.equal(safeEnv.TZ, "UTC");
-  // 0.4.x (N-9): the audit log path (CELLFENCE_MCP_AUDIT_LOG) and
-  // the unknown-tool policy (CELLFENCE_MCP_UNKNOWN_TOOL_POLICY)
-  // must NOT reach the downstream because they expose operator
-  // state and let a caller override the guard. MOCK_MCP_LOG, on
-  // the other hand, lives in a separate test-harness namespace
-  // (MOCK_ prefix) that the proxy forwards intact so the mock
-  // MCP server can find its JSONL log file. The proxy is the
-  // boundary: production surfaces (CELLFENCE_*, PATH, HOME, ...)
-  // are filtered, and the mock surface is honoured.
-  assert.equal(safeEnv.MOCK_MCP_LOG, "/tmp/log");
+  // 0.4.x (N-9): the audit log path (CELLFENCE_MCP_AUDIT_LOG), the
+  // unknown-tool policy (CELLFENCE_MCP_UNKNOWN_TOOL_POLICY), and
+  // test-only MOCK_* values must NOT reach the downstream unless the
+  // operator explicitly allowlists an exact variable name.
+  assert.equal(safeEnv.MOCK_MCP_LOG, undefined);
+  assert.equal(__testing.safeDownstreamEnvironment({ MOCK_MCP_LOG: "/tmp/log" }, ["MOCK_MCP_LOG"]).MOCK_MCP_LOG, "/tmp/log");
   assert.equal(safeEnv.CELLFENCE_MCP_AUDIT_LOG, undefined);
   // The proxy's own config is forwarded.
   assert.equal(safeEnv.CELLFENCE_MCP_MODE, "enforce");
@@ -721,7 +779,7 @@ test("proxy decision defaults to fail-closed for write tools with no path argume
       downstreamCommand: process.execPath,
       downstreamArgs: [],
       writeTools: { write_file: ["path"] },
-      readTools: ["read_file"],
+      readTools: ["Read_File"],
     }, "read_file", { path: "src/other/new.ts" });
     assert.equal(readDecision.shouldForward, true);
     assert.equal(readDecision.reason, "configured read tool");
@@ -779,6 +837,30 @@ test("proxy decision defaults to fail-closed for write tools with no path argume
     }, "write_file", { path: "src/owned/new.ts" });
     assert.equal(allowedDecision.shouldForward, true);
     assert.equal(allowedDecision.auditDecision, "allow");
+
+    const multiPathPatchDecision = decideToolCall({
+      rootDir,
+      agent: "agent-owned",
+      mode: "enforce",
+      failMode: "closed",
+      downstreamCommand: process.execPath,
+      downstreamArgs: [],
+      writeTools: { apply_patch: ["patch"] },
+    }, "apply_patch", {
+      patch: [
+        "*** Begin Patch",
+        "*** Update File: src/owned/new.ts",
+        "@@",
+        "+owned",
+        "*** Update File: src/other/new.ts",
+        "@@",
+        "+other",
+        "*** End Patch",
+      ].join("\n"),
+    });
+    assert.equal(multiPathPatchDecision.shouldForward, false);
+    assert.deepEqual(multiPathPatchDecision.paths, ["src/owned/new.ts", "src/other/new.ts"]);
+    assert.ok(multiPathPatchDecision.access.paths.some((decision) => decision.relativePath === "src/other/new.ts" && decision.allowed === false));
 
     const deniedClosedDecision = decideToolCall({
       rootDir,
@@ -878,6 +960,27 @@ test("proxy decisions cover fail-open and policy-error branches", () => {
     const nonErrorDecision = decideToolCall(nonErrorOptions, "write_file", { path: "src/owned/new.ts" });
     assert.equal(nonErrorDecision.shouldForward, false);
     assert.equal(nonErrorDecision.reason, "string failure");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("MCP proxy audit log stops before exceeding the configured byte cap", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-audit-cap-"));
+  try {
+    const event = {
+      timestamp: "2026-01-01T00:00:00.000Z",
+      agent: "agent",
+      tool: "unknown-tool",
+      paths: [],
+      decision: "deny",
+      reason: "x".repeat(40),
+    };
+    __testing.appendAuditEvent({ rootDir, auditLogPath: "audit.jsonl", auditLogMaxBytes: 500 }, event);
+    const firstSize = fs.statSync(path.join(rootDir, "audit.jsonl")).size;
+    assert.ok(firstSize > 0);
+    __testing.appendAuditEvent({ rootDir, auditLogPath: "audit.jsonl", auditLogMaxBytes: firstSize }, event);
+    assert.equal(fs.statSync(path.join(rootDir, "audit.jsonl")).size, firstSize);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

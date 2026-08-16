@@ -219,6 +219,164 @@ test("trace hook emits runtime manual database, queue, and HTTP evidence", () =>
   ]);
 });
 
+test("plain trace imports do not monkey-patch file access", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-plain-import-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?plain-import`)});
+    fs.writeFileSync("should-not-be-traced.json", "{}\\n");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
+test("trace auto-installs for package preload forms and explicit env opt-in", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-package-preload-"));
+  const appPath = path.join(tempDir, "app.mjs");
+  fs.writeFileSync(appPath, `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("package-preload.json", "{}\\n");
+    const trace = await import(${JSON.stringify(pathToFileURL(tracePath).href)});
+    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
+      throw new Error("trace diagnostics did not report installed preload");
+    }
+  `);
+  const packageEvidencePath = path.join(tempDir, "package-resource-evidence.json");
+  const packagePreload = spawnSync(process.execPath, [
+    "--import=@cellfence/trace",
+    appPath,
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: packageEvidencePath,
+    },
+  });
+  assert.equal(packagePreload.status, 0, packagePreload.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(packageEvidencePath, "utf8")).accesses.some((access) => access.selector === "package-preload.json"));
+
+  const autoPath = path.join(tempDir, "auto.mjs");
+  fs.writeFileSync(autoPath, `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("auto-preload.json", "{}\\n");
+  `);
+  const autoEvidencePath = path.join(tempDir, "auto-resource-evidence.json");
+  const autoPreload = spawnSync(process.execPath, [
+    "--import",
+    "@cellfence/trace/auto",
+    autoPath,
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: autoEvidencePath,
+    },
+  });
+  assert.equal(autoPreload.status, 0, autoPreload.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(autoEvidencePath, "utf8")).accesses.some((access) => access.selector === "auto-preload.json"));
+
+  const envPath = path.join(tempDir, "env.mjs");
+  fs.writeFileSync(envPath, `
+    import fs from "node:fs";
+    import { traceDiagnostics } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    process.chdir(${JSON.stringify(tempDir)});
+    if (!traceDiagnostics().installed) throw new Error("env opt-in did not install trace");
+    fs.writeFileSync("env-preload.json", "{}\\n");
+  `);
+  const envEvidencePath = path.join(tempDir, "env-resource-evidence.json");
+  const envOptIn = spawnSync(process.execPath, [envPath], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_AUTO_INSTALL: "1",
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: envEvidencePath,
+    },
+  });
+  assert.equal(envOptIn.status, 0, envOptIn.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(envEvidencePath, "utf8")).accesses.some((access) => access.selector === "env-preload.json"));
+});
+
+test("unrelated preloads do not make trace imports install globally", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-unrelated-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?unrelated-preload`)});
+    fs.writeFileSync("unrelated-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, [
+    "--import",
+    "data:text/javascript,globalThis.__cellfence_unrelated_preload=true",
+    "app.mjs",
+  ], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
+test("synthetic execArgv entries do not trick trace preload detection", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-fake-execargv-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    const traceUrl = ${JSON.stringify(pathToFileURL(tracePath).href)};
+    process.execArgv.push("not-import", traceUrl, \`xxxxxxxxx\${traceUrl}\`);
+    await import(\`\${traceUrl}?fake-execargv\`);
+    fs.writeFileSync("fake-execargv.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
+test("trace preload detection accepts only exact CellFence import flags", async () => {
+  const trace = await import(`${pathToFileURL(tracePath).href}?preload-detection`);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "@cellfence/trace"]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=@cellfence/trace"]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", pathToFileURL(tracePath).href]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "data:text/javascript,"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=data:text/javascript,"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["not-import", pathToFileURL(tracePath).href]), false);
+});
+
 test("trace hook records fetch calls without requiring successful network responses", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-fetch-"));
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
@@ -440,8 +598,13 @@ test("trace install is idempotent and registers the expected flush hooks", () =>
     };
     const trace = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?install-idempotent`)});
     trace.installTrace();
+    trace.installTrace();
+    trace.recordDatabaseAccess("idempotent-extra");
     if (JSON.stringify(observedEvents) !== JSON.stringify(["beforeExit", "exit"])) {
       throw new Error(\`unexpected trace hooks: \${JSON.stringify(observedEvents)}\`);
+    }
+    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
+      throw new Error("trace diagnostics did not report the installed hook state");
     }
   `);
 
@@ -658,7 +821,8 @@ test("trace hook tolerates runtimes without fetch", () => {
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
     import fs from "node:fs";
     globalThis.fetch = undefined;
-    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?no-fetch`)});
+    const trace = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?no-fetch`)});
+    trace.installTrace();
     if (typeof globalThis.fetch !== "undefined") {
       throw new Error("trace should not install fetch when no original fetch exists");
     }
@@ -688,7 +852,8 @@ test("trace hook treats Request as optional when fetch exists", () => {
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
     globalThis.Request = undefined;
     globalThis.fetch = async () => ({ ok: true });
-    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?no-request`)});
+    const trace = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?no-request`)});
+    trace.installTrace();
     await fetch({ url: "https://example.invalid/not-a-real-request" });
   `);
 

@@ -314,6 +314,14 @@ test("file index listFiles sorts results, ignores generated directories, and cac
       "dist",
       "coverage",
       ".turbo",
+      ".venv/pkg",
+      "venv/pkg",
+      ".tox/pkg",
+      ".nox/pkg",
+      "__pycache__/pkg",
+      ".mypy_cache/pkg",
+      ".pytest_cache/pkg",
+      ".ruff_cache/pkg",
     ]) {
       fs.mkdirSync(path.join(rootDir, directory), { recursive: true });
     }
@@ -324,6 +332,9 @@ test("file index listFiles sorts results, ignores generated directories, and cac
     fs.writeFileSync(path.join(rootDir, "dist/out.ts"), "export const ignored = true;\n");
     fs.writeFileSync(path.join(rootDir, "coverage/out.ts"), "export const ignored = true;\n");
     fs.writeFileSync(path.join(rootDir, ".turbo/out.ts"), "export const ignored = true;\n");
+    for (const directory of [".venv", "venv", ".tox", ".nox", "__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache"]) {
+      fs.writeFileSync(path.join(rootDir, directory, "pkg/out.py"), "ignored = True\n");
+    }
     fs.symlinkSync(path.join(rootDir, "src/core/a.ts"), path.join(rootDir, "src/core/link.ts"));
     fs.symlinkSync(path.join(rootDir, "src/core"), path.join(rootDir, "src/core-link"));
     fs.symlinkSync(path.join(rootDir, "src/core/missing.ts"), path.join(rootDir, "src/core/broken.ts"));
@@ -348,6 +359,85 @@ test("file index listFiles sorts results, ignores generated directories, and cac
 
     const uncached = listFiles(rootDir).map((filePath) => normalizePath(path.relative(rootDir, filePath)));
     assert.deepEqual(uncached, ["src/core/a.ts", "src/core/link.ts", "src/core/new.ts", "src/core/z.ts"]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("file index honors explicitly governed generated directories", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-list-files-dist-governed-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "dist"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "coverage"), { recursive: true });
+    fs.writeFileSync(path.join(rootDir, "dist/runtime.ts"), "export const runtime = true;\n");
+    fs.writeFileSync(path.join(rootDir, "coverage/report.ts"), "export const report = true;\n");
+    const includeOnlyContext = {
+      rootDir,
+      manifest: {
+        schemaVersion: "cellfence.manifest.v1",
+        governance: {
+          requireOwnership: true,
+          include: ["src/other/**", "dist/**/*.ts"],
+          exclude: [],
+        },
+        cells: [{
+          id: "runtime",
+          ownedPaths: ["src/runtime/**"],
+          publicEntry: "dist/runtime.ts",
+          publicSymbols: ["runtime"],
+        }],
+      },
+      sourceFilesForCellCache: new Map(),
+      sourceTextCache: new Map(),
+      sourceFileCache: new Map(),
+    };
+    const ownedOnlyContext = {
+      ...includeOnlyContext,
+      manifest: {
+        ...includeOnlyContext.manifest,
+        governance: {
+          requireOwnership: true,
+          include: ["src/**"],
+          exclude: [],
+        },
+        cells: [{
+          id: "coverage",
+          ownedPaths: ["src/other/**", "coverage/**/*.ts"],
+          publicEntry: "coverage/report.ts",
+          publicSymbols: ["report"],
+        }],
+      },
+      listFilesCache: undefined,
+      sourceFilesForCellCache: new Map(),
+      sourceTextCache: new Map(),
+      sourceFileCache: new Map(),
+    };
+    const governanceWithoutIncludeContext = {
+      ...includeOnlyContext,
+      manifest: {
+        ...includeOnlyContext.manifest,
+        governance: {
+          requireOwnership: true,
+          exclude: [],
+        },
+        cells: [{
+          id: "coverage",
+          ownedPaths: ["coverage/**/*.ts"],
+          publicEntry: "coverage/report.ts",
+          publicSymbols: ["report"],
+        }],
+      },
+      listFilesCache: undefined,
+      sourceFilesForCellCache: new Map(),
+      sourceTextCache: new Map(),
+      sourceFileCache: new Map(),
+    };
+
+    assert.deepEqual(listFiles(rootDir, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/runtime.ts"]);
+    assert.deepEqual(sourceFilesUnderGovernance(rootDir, includeOnlyContext.manifest, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/runtime.ts"]);
+    assert.deepEqual(listFiles(rootDir, ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
+    assert.deepEqual(sourceFilesForCell(rootDir, ownedOnlyContext.manifest.cells[0], ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
+    assert.deepEqual(listFiles(rootDir, governanceWithoutIncludeContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }

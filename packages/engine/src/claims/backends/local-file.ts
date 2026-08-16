@@ -16,6 +16,7 @@ import {
   CellFenceClaimCasConflict,
   emptyClaimStoreState,
 } from "../backend.js";
+import { stableCanonicalJson } from "../../governance/canonicalization.js";
 
 export type LocalFileClaimStoreOptions = {
   filePath: string;
@@ -39,8 +40,30 @@ function fingerprintOf(state: ClaimStoreState): string {
   // the engine's canonical JSON so two writes with the same content
   // collide on the same fingerprint, and so callers can compute the
   // expected fingerprint without serialising twice.
-  const canonical = JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) });
+  const canonical = stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) });
   return crypto.createHash("sha256").update(canonical).digest("hex");
+}
+
+function withDirectWriteLock<Result>(filePath: string, callback: () => Result): Result {
+  const lockPath = `${filePath}.local-file-write.lock`;
+  let fd: number | undefined;
+  try {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fd = fs.openSync(lockPath, "wx", 0o600);
+    fs.writeFileSync(fd, `${process.pid}\n${new Date().toISOString()}\n`);
+    return callback();
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    if (code === "EEXIST" || code === "EPERM" || code === "EACCES" || code === "EBUSY") {
+      throw new CellFenceClaimCasConflict("claim store writer lock is held; reread and retry");
+    }
+    throw error;
+  } finally {
+    if (fd !== undefined) {
+      fs.closeSync(fd);
+      fs.rmSync(lockPath, { force: true });
+    }
+  }
 }
 
 function writeStateAtomic(filePath: string, state: ClaimStoreState): void {
@@ -69,17 +92,19 @@ export class LocalFileClaimStore implements ClaimStoreBackend {
   }
 
   write(next: ClaimStoreState, previous: ClaimStoreState): void {
-    // Re-read from disk before comparing so concurrent writers in
-    // other processes (or other LocalFileClaimStore instances
-    // pointing at the same path) are visible to the CAS check.
-    const live = readState(this.options.filePath);
-    if (fingerprintOf(live) !== fingerprintOf(previous)) {
-      throw new CellFenceClaimCasConflict(
-        "claim store state changed under us; reread and retry",
-      );
-    }
-    writeStateAtomic(this.options.filePath, next);
-    this.current = next;
+    withDirectWriteLock(this.options.filePath, () => {
+      // Re-read from disk before comparing so concurrent writers in
+      // other processes (or other LocalFileClaimStore instances
+      // pointing at the same path) are visible to the CAS check.
+      const live = readState(this.options.filePath);
+      if (fingerprintOf(live) !== fingerprintOf(previous)) {
+        throw new CellFenceClaimCasConflict(
+          "claim store state changed under us; reread and retry",
+        );
+      }
+      writeStateAtomic(this.options.filePath, next);
+      this.current = next;
+    });
   }
 
   // Test/helper-only process-local lock. It is intentionally not part
@@ -116,5 +141,5 @@ export function localFileClaimStoreFingerprint(state: ClaimStoreState): string {
 // same path. 0.4.0 callers should rely on LocalFileClaimStore.write
 // directly rather than reaching for the fingerprint.
 export function serializeLocalFileClaimStore(state: ClaimStoreState): string {
-  return JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) }, null, 2);
+  return `${stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) })}\n`;
 }

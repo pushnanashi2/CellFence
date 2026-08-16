@@ -393,6 +393,35 @@ test("manifest inference discovers common app source roots without src fallback"
   }
 });
 
+test("manifest inference discovers systems cells in service-oriented monorepos", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-systems-"));
+  try {
+    writeText(path.join(rootDir, "packages/core/src/path-registry.ts"), "export const root = 'systems';\n");
+    writeText(path.join(rootDir, "systems/platform/public.ts"), "export const platform = true;\n");
+    writeText(path.join(rootDir, "systems/ops-runtime/public.ts"), "import { platform } from '../platform/public.js';\nexport const ops = platform;\n");
+    writeText(path.join(rootDir, "systems/admin-api/public.ts"), "export const adminApi = true;\n");
+
+    const manifest = inferManifest({ rootDir, scope: "production" });
+
+    assert.deepEqual(manifest.governance.include, [
+      "packages/core/**",
+      "systems/admin-api/**",
+      "systems/ops-runtime/**",
+      "systems/platform/**",
+    ]);
+    assert.deepEqual(manifest.cells.map((cell) => [cell.id, cell.ownedPaths, cell.publicEntry, cell.publicSymbols, cell.consumes]), [
+      ["admin-api", ["systems/admin-api/**"], "systems/admin-api/public.ts", ["adminApi"], []],
+      ["core", ["packages/core/**"], "packages/core/src/path-registry.ts", ["root"], []],
+      ["ops-runtime", ["systems/ops-runtime/**"], "systems/ops-runtime/public.ts", ["ops"], [{ cell: "platform" }]],
+      ["platform", ["systems/platform/**"], "systems/platform/public.ts", ["platform"], []],
+    ]);
+    writeManifest(rootDir, manifest);
+    assert.equal(checkRepository({ rootDir }).ok, true);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("manifest inference narrows parent candidates around nested package source roots", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-manifest-infer-nested-packages-"));
   try {

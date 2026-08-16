@@ -1201,6 +1201,7 @@ test("readonly singleton Set guards require an exact return-require shape", () =
       ["literal-argument", "if (singletonModules.has(candidate)) return require('./literal.js');", ["./literal.js"], 0],
       ["wrong-identifier", "if (singletonModules.has(candidate)) return require(otherCandidate);", [], 1],
       ["multiple-statements", "if (singletonModules.has(candidate)) { return require(candidate); after(); }", [], 1],
+      ["multiple-statements-before-return", "if (singletonModules.has(candidate)) { other(); return require(candidate); }", [], 1],
       ["non-return", "if (singletonModules.has(candidate)) require(candidate);", [], 1],
       ["non-call-return", "if (singletonModules.has(candidate)) return candidate;", [], 0],
       ["missing-guard-argument", "if (singletonModules.has()) return require(candidate);", [], 1],
@@ -1213,6 +1214,7 @@ test("readonly singleton Set guards require an exact return-require shape", () =
       const filePath = path.join(rootDir, `src/${name}.ts`);
       fs.writeFileSync(filePath, [
         "declare const otherCandidate: string;",
+        "declare function other(): void;",
         "const singletonModules = new Set(['chalk']);",
         "export function load(candidate: string) {",
         `  ${guardedSource}`,
@@ -1904,6 +1906,8 @@ test("singleton Set prototype mutation detection distinguishes near misses", () 
     fs.mkdirSync(path.join(rootDir, "src"), { recursive: true });
     const cases = [
       ["positive", "Object.defineProperty(Set.prototype, 'has', { value: () => true });", false],
+      ["element-access-positive", "Object['defineProperty'](Set['prototype'], 'has', { value: () => true });", false],
+      ["wrapped-receiver-positive", "(Object).defineProperty((Set).prototype, 'has', { value: () => true });", false],
       ["reflect-define-property", "Reflect.defineProperty(Set.prototype, 'has', { value: () => true });", false],
       ["computed-define-property", "declare const propertyName: string; Object.defineProperty(Set.prototype, propertyName, {});", false],
       ["object-define-properties", "Object.defineProperties(Set.prototype, { has: { value: () => true } });", false],

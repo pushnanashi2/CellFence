@@ -66,7 +66,7 @@ test("buildCoverageReport rolls up unresolved observations into a stable summary
   }
 });
 
-test("runCoverageCommand returns exit 0 when no observations are unresolved", () => {
+test("runCoverageCommand does not treat an empty source inventory as 100 percent coverage", () => {
   const dir = fs.mkdtempSync(path.join(root, ".cellfence-coverage-empty-"));
   try {
     const { report, exitCode } = runCoverageCommand({
@@ -76,8 +76,9 @@ test("runCoverageCommand returns exit 0 when no observations are unresolved", ()
       check: {},
     });
     assert.equal(report.schemaVersion, "cellfence.coverage.v1");
-    assert.equal(typeof report.summary.coverage, "number");
-    assert.equal(exitCode, 0);
+    assert.equal(report.summary.totalFiles, 0);
+    assert.equal(report.summary.coverage, 0);
+    assert.equal(exitCode, 2);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -161,11 +162,12 @@ test("runCoverageCommand coverage is not inflated by irrelevant diagnostics", ()
       check: { plugins: [noisyPlugin] },
     });
     assert.equal(base.report.summary.totalFiles, 3);
-    assert.equal(base.report.summary.analyzedFiles, 2);
+    assert.equal(base.report.summary.analyzedFiles, 3);
     assert.equal(noisy.report.summary.totalFiles, base.report.summary.totalFiles);
     assert.equal(noisy.report.summary.analyzedFiles, base.report.summary.analyzedFiles);
     assert.equal(noisy.report.summary.coverage, base.report.summary.coverage);
-    assert.equal(noisy.report.summary.unresolvedImports, base.report.summary.unresolvedImports);
+    assert.equal(base.report.summary.unresolvedImports, 0);
+    assert.equal(noisy.report.summary.unresolvedImports, 0);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

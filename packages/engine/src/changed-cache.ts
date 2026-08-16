@@ -2,14 +2,12 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { stableDigest } from "./governance/canonicalization.js";
 import type { CheckResult } from "./types.js";
 
 const CACHE_SCHEMA_VERSION = "cellfence.changed-base-cache.v1";
-const implementationDirectory = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
 let implementationDigest: string | undefined;
 
 type ChangedBaseCacheEntry = {
@@ -29,8 +27,23 @@ function implementationFiles(directory: string, relativeDirectory = ""): string[
   return files.sort();
 }
 
+function modulePathFromStack(): string | undefined {
+  const stack = new Error().stack || "";
+  for (const line of stack.split("\n")) {
+    const fileUrlMatch = line.match(/\bfile:\/\/[^:)]+(?=:\d+:\d+)/);
+    if (fileUrlMatch) return fileURLToPath(fileUrlMatch[0]);
+    const pathMatch = line.match(/\((\/[^:)]+):\d+:\d+\)|\bat (\/[^:)]+):\d+:\d+/);
+    const absolutePath = pathMatch?.[1] || pathMatch?.[2];
+    if (absolutePath) return absolutePath;
+  }
+  return undefined;
+}
+
 export function changedCheckImplementationDigest(): string {
   if (implementationDigest) return implementationDigest;
+  const implementationPath = modulePathFromStack();
+  const implementationDirectory = implementationPath ? path.dirname(implementationPath) : process.cwd();
+  const require = createRequire(implementationPath ? pathToFileURL(implementationPath) : path.join(process.cwd(), "package.json"));
   const hash = crypto.createHash("sha256");
   for (const relativePath of implementationFiles(implementationDirectory)) {
     hash.update(relativePath);

@@ -48,7 +48,7 @@ const PUBLIC_ENTRY_BASENAMES = ["public", "index"];
 const PYTHON_PUBLIC_ENTRY_BASENAMES = ["__init__", "api", "main"];
 const PACKAGE_ENTRY_FIELDS = ["source", "types", "typings", "module", "main", "browser"];
 const PACKAGE_DEPENDENCY_FIELDS = ["dependencies", "peerDependencies", "optionalDependencies", "devDependencies"];
-const SOURCE_CONTAINER_ROOTS = ["apps", "packages", "libs", "services"];
+const SOURCE_CONTAINER_ROOTS = ["apps", "packages", "libs", "services", "systems"];
 const TOP_LEVEL_SOURCE_ROOTS = [
   "api",
   "app",
@@ -68,7 +68,7 @@ const TOP_LEVEL_SOURCE_ROOTS = [
   "web",
   "website",
 ];
-const PRODUCTION_SCOPE_EXCLUDES = [
+export const PRODUCTION_SCOPE_EXCLUDES = [
   "**/__fixtures__/**",
   "**/__generated__/**",
   "**/__mocks__/**",

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
-import type { CellFenceBaseline, CellFenceManifest } from "@cellfence/schema";
+import type { BaselineSeal, CellFenceBaseline, CellFenceManifest } from "@cellfence/schema";
+import { humanResolution } from "./findings.js";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
 import type { Finding } from "./types.js";
 
@@ -19,10 +20,35 @@ function baselineWithoutSeal(baseline: CellFenceBaseline): Omit<CellFenceBaselin
   return unsignedBaseline;
 }
 
-function baselineHmacDigest(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">, secret: string): string {
+type BaselineSealMetadata = Pick<BaselineSeal, "algorithm" | "keyId" | "payloadVersion">;
+
+const BASELINE_SEAL_PAYLOAD_VERSION = "seal-metadata-v1" as const;
+
+function baselineSealMetadata(seal: BaselineSeal): BaselineSealMetadata | undefined {
+  if (seal.payloadVersion !== BASELINE_SEAL_PAYLOAD_VERSION) return undefined;
+  return {
+    algorithm: seal.algorithm,
+    ...(seal.keyId ? { keyId: seal.keyId } : {}),
+    payloadVersion: BASELINE_SEAL_PAYLOAD_VERSION,
+  };
+}
+
+function baselineSealPayloadValue(
+  baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">,
+  sealMetadata?: BaselineSealMetadata,
+): Omit<CellFenceBaseline, "seal"> | (Omit<CellFenceBaseline, "seal"> & { seal: BaselineSealMetadata }) {
+  const unsignedBaseline = "seal" in baseline ? baselineWithoutSeal(baseline) : baseline;
+  return sealMetadata ? { ...unsignedBaseline, seal: sealMetadata } : unsignedBaseline;
+}
+
+function baselineHmacDigest(
+  baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">,
+  secret: string,
+  sealMetadata?: BaselineSealMetadata,
+): string {
   return crypto
     .createHmac("sha256", secret)
-    .update(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline))
+    .update(stableCanonicalJson(baselineSealPayloadValue(baseline, sealMetadata)))
     .digest("hex");
 }
 
@@ -33,47 +59,62 @@ function timingSafeHexEqual(left: string, right: string): boolean {
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
-function baselineSealPayload(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">): Buffer {
-  return Buffer.from(stableCanonicalJson("seal" in baseline ? baselineWithoutSeal(baseline) : baseline), "utf8");
+function baselineSealPayload(
+  baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">,
+  sealMetadata?: BaselineSealMetadata,
+): Buffer {
+  return Buffer.from(stableCanonicalJson(baselineSealPayloadValue(baseline, sealMetadata)), "utf8");
 }
 
 function baselineKeyMaterial(value: string): string {
   return value.includes("\\n") ? value.replace(/\\n/g, "\n") : value;
 }
 
-function baselineEd25519Signature(baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">, privateKeyPem: string): string {
+function baselineEd25519Signature(
+  baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">,
+  privateKeyPem: string,
+  sealMetadata?: BaselineSealMetadata,
+): string {
   const key = crypto.createPrivateKey(baselineKeyMaterial(privateKeyPem));
-  return crypto.sign(null, baselineSealPayload(baseline), key).toString("base64");
+  return crypto.sign(null, baselineSealPayload(baseline, sealMetadata), key).toString("base64");
 }
 
 function baselineEd25519SignatureValid(baseline: CellFenceBaseline, publicKeyPem: string): boolean {
   if (baseline.seal?.algorithm !== "ed25519") return false;
   const key = crypto.createPublicKey(baselineKeyMaterial(publicKeyPem));
-  return crypto.verify(null, baselineSealPayload(baseline), key, Buffer.from(baseline.seal.signature, "base64"));
+  return crypto.verify(null, baselineSealPayload(baseline, baselineSealMetadata(baseline.seal)), key, Buffer.from(baseline.seal.signature, "base64"));
 }
 
 export function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFenceBaseline {
   const privateKey = process.env[BASELINE_ED25519_PRIVATE_KEY_ENV];
   if (privateKey) {
     const unsignedBaseline = baselineWithoutSeal(baseline);
+    const sealMetadata = {
+      algorithm: "ed25519",
+      ...(process.env[BASELINE_ED25519_KEY_ID_ENV] ? { keyId: process.env[BASELINE_ED25519_KEY_ID_ENV] } : {}),
+      payloadVersion: BASELINE_SEAL_PAYLOAD_VERSION,
+    } satisfies BaselineSealMetadata;
     return {
       ...unsignedBaseline,
       seal: {
-        algorithm: "ed25519",
-        ...(process.env[BASELINE_ED25519_KEY_ID_ENV] ? { keyId: process.env[BASELINE_ED25519_KEY_ID_ENV] } : {}),
-        signature: baselineEd25519Signature(unsignedBaseline, privateKey),
+        ...sealMetadata,
+        signature: baselineEd25519Signature(unsignedBaseline, privateKey, sealMetadata),
       },
     };
   }
   const secret = process.env[BASELINE_HMAC_KEY_ENV];
   if (!secret) return baseline;
   const unsignedBaseline = baselineWithoutSeal(baseline);
+  const sealMetadata = {
+    algorithm: "hmac-sha256",
+    ...(process.env[BASELINE_HMAC_KEY_ID_ENV] ? { keyId: process.env[BASELINE_HMAC_KEY_ID_ENV] } : {}),
+    payloadVersion: BASELINE_SEAL_PAYLOAD_VERSION,
+  } satisfies BaselineSealMetadata;
   return {
     ...unsignedBaseline,
     seal: {
-      algorithm: "hmac-sha256",
-      ...(process.env[BASELINE_HMAC_KEY_ID_ENV] ? { keyId: process.env[BASELINE_HMAC_KEY_ID_ENV] } : {}),
-      digest: baselineHmacDigest(unsignedBaseline, secret),
+      ...sealMetadata,
+      digest: baselineHmacDigest(unsignedBaseline, secret, sealMetadata),
     },
   };
 }
@@ -82,6 +123,24 @@ function configuredSealVerifier(): "ed25519" | "hmac-sha256" | undefined {
   if (process.env[BASELINE_ED25519_PUBLIC_KEY_ENV]) return "ed25519";
   if (process.env[BASELINE_HMAC_KEY_ENV]) return "hmac-sha256";
   return undefined;
+}
+
+function verifierResolutionDetails(extra?: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ed25519PublicKeyEnv: BASELINE_ED25519_PUBLIC_KEY_ENV,
+    ed25519PrivateKeyEnv: BASELINE_ED25519_PRIVATE_KEY_ENV,
+    hmacKeyEnv: BASELINE_HMAC_KEY_ENV,
+    signCommand: "cellfence baseline sign --baseline cellfence.baseline.json",
+    ...extra,
+  };
+}
+
+function configureVerifierResolutions(extra?: Record<string, unknown>): Finding["suggestedResolutions"] {
+  const details = verifierResolutionDetails(extra);
+  return [
+    humanResolution(`Configure baseline check with ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`, details),
+    humanResolution(`Sign the accepted baseline with ${BASELINE_ED25519_PRIVATE_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`, details),
+  ];
 }
 
 export function validateBaselineSealFindings(
@@ -102,6 +161,7 @@ export function validateBaselineSealFindings(
       filePath: baselinePath,
       message: `locked cells require ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV} during baseline check`,
       details: { lockedCells: lockedCells.map((cell) => cell.id) },
+      suggestedResolutions: configureVerifierResolutions({ lockedCells: lockedCells.map((cell) => cell.id) }),
     });
     return findings;
   }
@@ -113,6 +173,12 @@ export function validateBaselineSealFindings(
         filePath: baselinePath,
         message: `baseline has a seal but no verifier is configured; set ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`,
         details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
+        suggestedResolutions: [
+          humanResolution(`Configure baseline check with the verifier for ${baseline.seal.algorithm}`, verifierResolutionDetails({
+            algorithm: baseline.seal.algorithm,
+            keyId: baseline.seal.keyId,
+          })),
+        ],
       });
     } else if (requireConfiguredVerifier) {
       findings.push({
@@ -120,6 +186,7 @@ export function validateBaselineSealFindings(
         severity: "error",
         filePath: baselinePath,
         message: `baseline verification requires ${BASELINE_ED25519_PUBLIC_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`,
+        suggestedResolutions: configureVerifierResolutions(),
       });
     }
     return findings;
@@ -130,6 +197,9 @@ export function validateBaselineSealFindings(
       severity: "error",
       filePath: baselinePath,
       message: "baseline is not sealed; sign the baseline before enabling sealed baseline verification",
+      suggestedResolutions: [
+        humanResolution(`Sign the accepted baseline with ${BASELINE_ED25519_PRIVATE_KEY_ENV} or ${BASELINE_HMAC_KEY_ENV}`, verifierResolutionDetails()),
+      ],
     });
     return findings;
   }
@@ -175,7 +245,7 @@ export function validateBaselineSealFindings(
     });
     return findings;
   }
-  const expectedDigest = baselineHmacDigest(baseline, secret as string);
+  const expectedDigest = baselineHmacDigest(baseline, secret as string, baselineSealMetadata(baseline.seal));
   if (!timingSafeHexEqual(baseline.seal.digest, expectedDigest)) {
     findings.push({
       ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",

@@ -1603,6 +1603,33 @@ test("opentelemetry adapter converts spans into resource evidence", () => {
   }]);
 });
 
+test("opentelemetry adapter mutation smoke covers top-level read spans", () => {
+  const evidence = openTelemetryToResourceEvidence({
+    resourceSpans: [{
+      scopeSpans: [{
+        spans: [{
+          attributes: {
+            "service.name": "runtime",
+            "db.sql.table": "app.users",
+            "db.operation": "SELECT",
+          },
+        }],
+      }],
+    }],
+  }, { generatedAt: "2026-01-01T00:00:00.000Z" });
+  assert.deepEqual(evidence.accesses.map((access) => ({
+    kind: access.kind,
+    access: access.access,
+    selector: access.selector,
+    cellId: access.cellId,
+  })), [{
+    kind: "database",
+    access: "read",
+    selector: "app.users",
+    cellId: "runtime",
+  }]);
+});
+
 test("economy matrix reporter summarizes producer and consumer load", () => {
   const context = {
     repository: {

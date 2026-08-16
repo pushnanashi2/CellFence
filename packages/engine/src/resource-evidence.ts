@@ -163,7 +163,7 @@ export function resourceEvidenceAccesses(
     if (transcriptStatus === "inactive") {
       addFinding(findings, {
         ruleId: "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INACTIVE",
-        severity: "warning",
+        severity: "error",
         filePath: repoPath(context.rootDir, evidencePath),
         message: "resource evidence was captured with the trace hook disabled (CELLFENCE_TRACE_DISABLE=1); an empty `accesses` array here does not prove the cell made no resource accesses",
         details: { transcriptStatus, accessesObserved: evidence.accesses.length },
@@ -171,7 +171,7 @@ export function resourceEvidenceAccesses(
     } else if (transcriptStatus === "incomplete") {
       addFinding(findings, {
         ruleId: "CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INCOMPLETE",
-        severity: "warning",
+        severity: "error",
         filePath: repoPath(context.rootDir, evidencePath),
         message: "resource evidence is missing `transcriptStatus` or the trace hook may have missed accesses (ESM named imports of `node:fs` and `globalThis.fetch` bypass the monkey-patch); the 0.4.0 rewrite will replace the patch with `node --import` + diagnostics_channel",
         details: { transcriptStatus, accessesObserved: evidence.accesses.length },

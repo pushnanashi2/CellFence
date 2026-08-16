@@ -1,7 +1,8 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
+import { execCommandSync } from "./command-execution.js";
 
 type PythonCommand = {
   command: string;
@@ -9,9 +10,12 @@ type PythonCommand = {
 };
 
 export const PYTHON_INSPECTOR_BATCH_SIZE = 1_000;
+export const PYTHON_INSPECTOR_RECOVERY_ATTEMPT_LIMIT = 64;
 
 const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
-const INSPECTOR_TIMEOUT_MS = 120_000;
+const INSPECTOR_MAX_TIMEOUT_MS = 120_000;
+const INSPECTOR_MIN_TIMEOUT_MS = 10_000;
+const INSPECTOR_TIMEOUT_PER_FILE_MS = 100;
 const PYTHON_BATCH_RUNNER = String.raw`
 import contextlib
 import io
@@ -116,7 +120,7 @@ export function runPythonInspectorBatch<Result>(inspectorPath: string, filePaths
   for (const pythonCommand of pythonCommands()) {
     try {
       inspectorProcessCount += 1;
-      const output = execFileSync(
+      const output = execCommandSync(
         pythonCommand.command,
         [...pythonCommand.args, "-I", "-B", runnerPath, inspectorPath],
         {
@@ -124,7 +128,7 @@ export function runPythonInspectorBatch<Result>(inspectorPath: string, filePaths
           input: JSON.stringify(filePaths.map((filePath, id) => ({ id, path: filePath }))),
           maxBuffer: MAX_OUTPUT_BYTES,
           stdio: ["pipe", "pipe", "pipe"],
-          timeout: INSPECTOR_TIMEOUT_MS,
+          timeout: pythonInspectorTimeoutMs(filePaths.length),
         },
       );
       const results = parsePythonInspectorBatchOutput<Result>(output, filePaths.length);
@@ -146,25 +150,36 @@ export function recoverPythonInspectorBatch<Result>(
   filePaths: readonly string[],
   inspect: (paths: readonly string[]) => Result[],
   errorResult: (error: unknown) => Result,
+  attemptLimit = PYTHON_INSPECTOR_RECOVERY_ATTEMPT_LIMIT,
 ): Result[] {
-  if (filePaths.length === 0) return [];
-  try {
-    return inspect(filePaths);
-  } catch (error) {
-    if (filePaths.length === 1) return [errorResult(error)];
-    const middle = Math.floor(filePaths.length / 2);
-    return [
-      ...recoverPythonInspectorBatch(filePaths.slice(0, middle), inspect, errorResult),
-      ...recoverPythonInspectorBatch(filePaths.slice(middle), inspect, errorResult),
-    ];
+  const budget = { remaining: Math.max(1, attemptLimit) };
+  function recover(paths: readonly string[]): Result[] {
+    if (paths.length === 0) return [];
+    if (budget.remaining <= 0) {
+      const error = new Error(`Python inspector recovery stopped after ${attemptLimit} failed batch attempts`);
+      return paths.map(() => errorResult(error));
+    }
+    budget.remaining -= 1;
+    try {
+      return inspect(paths);
+    } catch (error) {
+      if (paths.length === 1) return [errorResult(error)];
+      const middle = Math.floor(paths.length / 2);
+      return [
+        ...recover(paths.slice(0, middle)),
+        ...recover(paths.slice(middle)),
+      ];
+    }
   }
+  if (filePaths.length === 0) return [];
+  return recover(filePaths);
 }
 
 export function pythonInspectorRuntimeIdentity(): string {
   if (memoizedRuntimeIdentity) return memoizedRuntimeIdentity;
   for (const pythonCommand of pythonCommands()) {
     try {
-      const version = execFileSync(pythonCommand.command, [...pythonCommand.args, "--version"], {
+      const version = execCommandSync(pythonCommand.command, [...pythonCommand.args, "--version"], {
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],
         timeout: 5_000,
@@ -202,6 +217,11 @@ export function parsePythonInspectorBatchOutput<Result>(output: string, expected
     ordered[Number(id)] = record.result as Result;
   }
   return ordered;
+}
+
+export function pythonInspectorTimeoutMs(fileCount: number): number {
+  const scaledTimeout = Math.ceil(Math.max(1, fileCount) * INSPECTOR_TIMEOUT_PER_FILE_MS);
+  return Math.max(INSPECTOR_MIN_TIMEOUT_MS, Math.min(INSPECTOR_MAX_TIMEOUT_MS, scaledTimeout));
 }
 
 export function pythonInspectorProcessCount(): number {

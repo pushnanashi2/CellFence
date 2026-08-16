@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import test from "node:test";
 
 import {
+  BASELINE_ED25519_KEY_ID_ENV,
+  BASELINE_ED25519_PRIVATE_KEY_ENV,
   BASELINE_ED25519_PUBLIC_KEY_ENV,
   BASELINE_HMAC_KEY_ENV,
+  BASELINE_HMAC_KEY_ID_ENV,
   sealBaselineIfConfigured,
   validateBaselineSealFindings,
 } from "../packages/engine/dist/baseline-seal.js";
@@ -46,5 +50,89 @@ test("baseline HMAC verifier rejects malformed digest strings before timing-safe
     else process.env[BASELINE_HMAC_KEY_ENV] = previousSecret;
     if (previousPublicKey === undefined) delete process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
     else process.env[BASELINE_ED25519_PUBLIC_KEY_ENV] = previousPublicKey;
+  }
+});
+
+test("baseline HMAC seal binds key metadata for newly sealed baselines", () => {
+  const previousSecret = process.env[BASELINE_HMAC_KEY_ENV];
+  const previousKeyId = process.env[BASELINE_HMAC_KEY_ID_ENV];
+  const previousPublicKey = process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
+  try {
+    delete process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
+    process.env[BASELINE_HMAC_KEY_ENV] = "test-baseline-secret";
+    process.env[BASELINE_HMAC_KEY_ID_ENV] = "key-a";
+    const manifest = { schemaVersion: "cellfence.manifest.v1", cells: [] };
+    const baseline = sealBaselineIfConfigured({
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {},
+    });
+
+    assert.equal(baseline.seal?.payloadVersion, "seal-metadata-v1");
+    assert.deepEqual(validateBaselineSealFindings(manifest, baseline, "cellfence.baseline.json", true), []);
+    const tamperedKeyId = {
+      ...baseline,
+      seal: {
+        ...baseline.seal,
+        keyId: "key-b",
+      },
+    };
+    assert.deepEqual(
+      validateBaselineSealFindings(manifest, tamperedKeyId, "cellfence.baseline.json", true).map((finding) => finding.ruleId),
+      ["CELLFENCE_BASELINE_SEAL_INVALID"],
+    );
+  } finally {
+    if (previousSecret === undefined) delete process.env[BASELINE_HMAC_KEY_ENV];
+    else process.env[BASELINE_HMAC_KEY_ENV] = previousSecret;
+    if (previousKeyId === undefined) delete process.env[BASELINE_HMAC_KEY_ID_ENV];
+    else process.env[BASELINE_HMAC_KEY_ID_ENV] = previousKeyId;
+    if (previousPublicKey === undefined) delete process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
+    else process.env[BASELINE_ED25519_PUBLIC_KEY_ENV] = previousPublicKey;
+  }
+});
+
+test("baseline Ed25519 seal binds key metadata for newly sealed baselines", () => {
+  const previousPrivateKey = process.env[BASELINE_ED25519_PRIVATE_KEY_ENV];
+  const previousPublicKey = process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
+  const previousKeyId = process.env[BASELINE_ED25519_KEY_ID_ENV];
+  const previousSecret = process.env[BASELINE_HMAC_KEY_ENV];
+  try {
+    delete process.env[BASELINE_HMAC_KEY_ENV];
+    const pair = crypto.generateKeyPairSync("ed25519");
+    const privatePem = pair.privateKey.export({ type: "pkcs8", format: "pem" });
+    const publicPem = pair.publicKey.export({ type: "spki", format: "pem" });
+    process.env[BASELINE_ED25519_PRIVATE_KEY_ENV] = String(privatePem);
+    process.env[BASELINE_ED25519_KEY_ID_ENV] = "ed-key-a";
+    const manifest = { schemaVersion: "cellfence.manifest.v1", cells: [] };
+    const baseline = sealBaselineIfConfigured({
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: {},
+    });
+    delete process.env[BASELINE_ED25519_PRIVATE_KEY_ENV];
+    process.env[BASELINE_ED25519_PUBLIC_KEY_ENV] = String(publicPem);
+
+    assert.equal(baseline.seal?.payloadVersion, "seal-metadata-v1");
+    assert.deepEqual(validateBaselineSealFindings(manifest, baseline, "cellfence.baseline.json", true), []);
+    const tamperedKeyId = {
+      ...baseline,
+      seal: {
+        ...baseline.seal,
+        keyId: "ed-key-b",
+      },
+    };
+    assert.deepEqual(
+      validateBaselineSealFindings(manifest, tamperedKeyId, "cellfence.baseline.json", true).map((finding) => finding.ruleId),
+      ["CELLFENCE_BASELINE_SEAL_INVALID"],
+    );
+  } finally {
+    if (previousPrivateKey === undefined) delete process.env[BASELINE_ED25519_PRIVATE_KEY_ENV];
+    else process.env[BASELINE_ED25519_PRIVATE_KEY_ENV] = previousPrivateKey;
+    if (previousPublicKey === undefined) delete process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
+    else process.env[BASELINE_ED25519_PUBLIC_KEY_ENV] = previousPublicKey;
+    if (previousKeyId === undefined) delete process.env[BASELINE_ED25519_KEY_ID_ENV];
+    else process.env[BASELINE_ED25519_KEY_ID_ENV] = previousKeyId;
+    if (previousSecret === undefined) delete process.env[BASELINE_HMAC_KEY_ENV];
+    else process.env[BASELINE_HMAC_KEY_ENV] = previousSecret;
   }
 });

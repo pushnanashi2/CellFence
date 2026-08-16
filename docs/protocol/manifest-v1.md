@@ -65,6 +65,7 @@ Manifest, baseline, and resource evidence v1 objects are strict. Unknown fields 
   "locked": true,
   "ownedPaths": ["packages/engine/**"],
   "publicEntry": "packages/engine/src/index.ts",
+  "publicPaths": ["packages/engine/src/public/**"],
   "publicSymbols": ["checkRepository"],
   "consumes": [{ "cell": "schema" }],
   "producesArtifacts": [
@@ -98,7 +99,13 @@ Manifest, baseline, and resource evidence v1 objects are strict. Unknown fields 
 
 `governance` is optional for compatibility. When `requireOwnership` is true, `include` must contain at least one glob-like pattern. Governed source files that are not covered by exactly one cell produce ownership findings, and imports to governed unowned targets are rejected.
 
-`publicEntry` must be covered by the declaring cell's `ownedPaths`. Each produced artifact lane path must also be covered by the producer's `ownedPaths`.
+`publicEntry` and optional `publicPaths` must be covered by the declaring cell's `ownedPaths`. `publicPaths` is for repositories that expose a small public directory in addition to a single public entry file. Produced artifact lane paths must also be covered by the producer's `ownedPaths` unless the lane is marked `external: true` for runtime/output paths governed outside the source ownership surface.
+
+The service-manifest adapter preserves service `readOnlyArtifacts` as artifact-lane consumers when a producer lane overlaps the path pattern; unmatched read-only artifact paths become `file`/`read` resource contracts. Service `scheduled` entries become `queue`/`subscribe` resource contracts with `scheduled:<task>` selectors.
+
+`waiverParsing` may be set to `false` on a cell to ignore `// cellfence-ignore` directives in that cell's files while continuing normal ownership/import analysis. This is intended for fixtures and generated examples; production cells should leave waiver parsing enabled and use signed waiver attestations. `waiverParsingReason` should explain the exception.
+
+`importAnalysis` and `resourceAnalysis` are reserved compatibility flags. They may only be set to `true`; `false` is rejected because CellFence does not support per-cell disabling of import or resource analysis in production manifests.
 
 Repo-relative path patterns use a deliberately small glob dialect: `*` matches within one path segment, while a standalone `**` segment matches zero or more complete path segments. An embedded `**` behaves as `*`; familiar operators such as `?`, `{}`, `}`, `[`, `]`, and extglob grouping are not interpreted, though any supported `*` they contain remains an ordinary segment wildcard. Trailing `/` characters are removed before matching.
 
@@ -131,8 +138,8 @@ CellFence v0.x enforces:
 - overlapping owned paths using segment-aware literal prefixes plus conservative glob checks;
 - strict governed-source ownership when enabled;
 - governed symlinks that point outside the owning cell, outside the repository, or to broken targets;
-- public entries outside declared ownership;
-- artifact lanes outside declared ownership;
+- public entries or public paths outside declared ownership;
+- non-external artifact lanes outside declared ownership;
 - private cross-cell imports;
 - unresolved relative imports as errors;
 - TypeScript `import = require(...)`, selected `module.require(...)`, simple `require` aliases, and selected `createRequire(...)` aliases;
@@ -171,9 +178,9 @@ Unsupported library access must not be described as covered by CellFence unless 
 
 `governance.resourceAdapters` can disable built-in resource adapters that a repository does not use. Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, `fastify`, `django`, `fastapi`, `sqlalchemy`, and `celery`; values are `on` or `off`, and omitted adapters default to `on`. Disabling an adapter prevents that detector from emitting resource access records; it does not mark unsupported framework usage as safe.
 
-`@cellfence/trace` can generate runtime evidence for selected Node.js file reads and writes, fetch calls, and explicit database/HTTP/queue helper records via `node --import @cellfence/trace`. In v0.x it is a runtime evidence producer, not a sandbox: it observes supported operations and writes `cellfence.resource-evidence.v1` JSON for later `cellfence evidence check`.
+`@cellfence/trace` can generate runtime evidence for selected Node.js file reads and writes, fetch calls, and explicit database/HTTP/queue helper records via `node --import @cellfence/trace`. Plain `import "@cellfence/trace"` does not install monkey-patches; use `installTrace()`, `node --import @cellfence/trace`, or `node --import @cellfence/trace/auto` when process-wide tracing is intended. In v0.x it is a runtime evidence producer, not a sandbox: it observes supported operations and writes `cellfence.resource-evidence.v2` JSON for later `cellfence evidence check`. Evidence whose transcript is `inactive` or `incomplete` is fail-closed because it cannot prove absence of resource access.
 
-`@cellfence/plugin-api` defines Plugin API v1 for programmatic rules, adapters, and reporters. In v0.x, callers can pass plugin objects directly to `checkRepository`. Manifest `plugins` entries are validated as shape only; the CLI does not auto-load arbitrary npm or local plugin code from the manifest.
+`@cellfence/plugin-api` defines Plugin API v1 for programmatic rules, adapters, and reporters. In v0.x, callers can pass plugin objects directly to `checkRepository`. Manifest `plugins` entries are validated as shape only; the CLI does not auto-load arbitrary npm or local plugin code from the manifest. Programmatic plugins run in the same Node.js process and trust boundary as the caller; wrappers must only pass already-reviewed plugin objects from trusted code.
 
 ## Planned or Environment-Dependent Enforcement
 

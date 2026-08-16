@@ -155,9 +155,14 @@
         "id": { "$ref": "#/$defs/string" },
         "ownedPaths": { "$ref": "#/$defs/pathArray" },
         "publicEntry": { "$ref": "#/$defs/path" },
+        "publicPaths": { "$ref": "#/$defs/pathArray" },
         "publicSymbols": { "$ref": "#/$defs/stringArray" },
         "packageName": { "type": "string" },
         "locked": { "type": "boolean" },
+        "waiverParsing": { "type": "boolean" },
+        "waiverParsingReason": { "type": "string" },
+        "importAnalysis": { "const": true },
+        "resourceAnalysis": { "const": true },
         "consumes": {
           "type": "array",
           "items": {
@@ -180,7 +185,8 @@
               "id": { "$ref": "#/$defs/string" },
               "paths": { "$ref": "#/$defs/pathArray" },
               "description": { "type": "string" },
-              "locked": { "type": "boolean" }
+              "locked": { "type": "boolean" },
+              "external": { "type": "boolean" }
             }
           }
         },

@@ -18,6 +18,11 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 
 import { main } from "../packages/cli/dist/index.js";
+import {
+  initGitRepo,
+  waiverEnv,
+  writeSignedWaiverAttestation,
+} from "./helpers/waiver-attestations.mjs";
 
 const root = process.cwd();
 const cliPath = path.join(root, "packages/cli/dist/index.js");
@@ -104,6 +109,27 @@ function runGit(args, cwd) {
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function writeGateBaseline(filePath, overrides = {}) {
+  writeJson(filePath, {
+    schemaVersion: "cellfence.baseline.v1",
+    generatedAt: "2026-01-01T00:00:00.000Z",
+    cells: {
+      core: {
+        ownedPathPatterns: 1,
+        publicSymbols: 1,
+        publicSurfaceLines: 1,
+        crossCellDependencies: 0,
+        ownedPathSet: ["src/core/**"],
+        publicSymbolSet: ["api"],
+        dependencyEdges: [],
+        resourceAccesses: [],
+        artifactContracts: [],
+      },
+    },
+    ...overrides,
+  });
 }
 
 function declareResourceContracts(tempDir, contracts) {
@@ -564,6 +590,48 @@ test("CLI MCP server exposes context, checks, claims, and finding explanations",
   }
 });
 
+test("CLI MCP server rejects symlink escapes in per-call paths", (context) => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-symlink-"));
+  const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-mcp-outside-"));
+  try {
+    writeClaimProject(tempDir);
+    const escapeLink = path.join(tempDir, "escape");
+    try {
+      fs.symlinkSync(outsideDir, escapeLink, "dir");
+    } catch (error) {
+      context.skip(`symlink unavailable on this platform: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+    const input = [
+      JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} }),
+      JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }),
+      JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
+        params: {
+          name: "get_cell_context",
+          arguments: {
+            cellId: "billing",
+            manifestPath: "escape/cellfence.manifest.json",
+          },
+        },
+      }),
+      "",
+    ].join("\n");
+
+    const result = runCliWithInput(["serve", "--mcp"], tempDir, input);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const responses = result.stdout.trim().split(/\n/).map((line) => JSON.parse(line));
+    assert.equal(responses.length, 2);
+    assert.equal(responses[1].result.isError, true);
+    assert.match(responses[1].result.content[0].text, /manifestPath must be inside/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.rmSync(outsideDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI graph returns a machine-readable coupling graph", () => {
   const fixturePath = path.join(root, "fixtures/valid/public-import");
   const result = runCli(["graph", "--json"], fixturePath);
@@ -806,7 +874,7 @@ test("CLI waiver request creates an approval-oriented directive without editing 
     "waivers",
     "request",
     "--rule",
-    "CELLFENCE_PRIVATE_IMPORT",
+    "CELLFENCE_UNRESOLVED_IMPORT",
     "--file",
     "src/consumer/public.ts",
     "--line",
@@ -819,12 +887,108 @@ test("CLI waiver request creates an approval-oriented directive without editing 
     "owner",
     "--json",
   ]);
-  assert.equal(result.status, 0);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
   const request = JSON.parse(result.stdout);
   assert.equal(request.schemaVersion, "cellfence.waiver-request.v1");
   assert.equal(request.approvalRequired, true);
-  assert.equal(request.directive, `// cellfence-ignore CELLFENCE_PRIVATE_IMPORT expires:${WAVING_INTO_THE_FUTURE} approved-by:owner reason:temporary architecture migration while public API is extracted`);
+  assert.equal(request.directive, "// cellfence-ignore CELLFENCE_UNRESOLVED_IMPORT attestation:PENDING");
+  assert.equal(request.attestationTemplate.schemaVersion, "cellfence.waiver-attestation.v1");
+  assert.equal(request.attestationTemplate.attestationId, "PENDING");
+  assert.equal(request.attestationTemplate.repository, "PENDING");
+  assert.equal(request.attestationTemplate.headSha, "PENDING");
+  assert.equal(request.attestationTemplate.sourceSha256, "PENDING");
+  assert.equal(request.attestationTemplate.ruleId, "CELLFENCE_UNRESOLVED_IMPORT");
+  assert.equal(request.attestationTemplate.filePath, "src/consumer/public.ts");
+  assert.equal(request.attestationTemplate.line, 7);
+  assert.equal(request.attestationTemplate.approver, "owner");
   assert.match(request.markdown, /CellFence Waiver Request/);
+  assert.match(request.markdown, /Unsigned attestation template/);
+
+  const requiredRule = runCli([
+    "waivers",
+    "request",
+    "--rule",
+    "CELLFENCE_PRIVATE_IMPORT",
+    "--file",
+    "src/consumer/public.ts",
+    "--line",
+    "7",
+    "--expires",
+    WAVING_INTO_THE_FUTURE,
+    "--reason",
+    "temporary architecture migration while public API is extracted",
+    "--json",
+  ]);
+  assert.equal(requiredRule.status, 2);
+  assert.match(requiredRule.stderr, /CELLFENCE_PRIVATE_IMPORT is required and cannot be waived/);
+});
+
+test("CLI waiver sign creates a verifiable signed attestation", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-sign-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "src/core/public.ts"),
+      [
+        "// cellfence-ignore CELLFENCE_UNRESOLVED_IMPORT attestation:waiver-sign-1",
+        'import { missing } from "./missing";',
+        "export const core = missing;",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      governance: { requireOwnership: true, include: ["src/**"], exclude: [] },
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+      }],
+    });
+    initGitRepo(tempDir);
+
+    const request = runCli([
+      "waivers",
+      "request",
+      "--rule=CELLFENCE_UNRESOLVED_IMPORT",
+      "--file=src/core/public.ts",
+      "--line=2",
+      `--expires=${WAVING_INTO_THE_FUTURE}`,
+      "--reason=temporary unresolved import migration",
+      "--approved-by=test-owner",
+      "--json",
+    ], tempDir);
+    assert.equal(request.status, 0, request.stderr || request.stdout);
+    fs.writeFileSync(path.join(tempDir, "request.json"), request.stdout);
+
+    const sign = runCliWithEnv([
+      "waivers",
+      "sign",
+      "--from=request.json",
+      "--attestation-id=waiver-sign-1",
+      `--finding-fingerprint=${"a".repeat(64)}`,
+      "--output=.cellfence/waiver-attestations/waiver-sign-1.json",
+    ], tempDir, waiverEnv(tempDir));
+    assert.equal(sign.status, 0, sign.stderr || sign.stdout);
+
+    const attestation = JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/waiver-attestations/waiver-sign-1.json"), "utf8"));
+    assert.equal(attestation.schemaVersion, "cellfence.waiver-attestation.v1");
+    assert.equal(attestation.attestationId, "waiver-sign-1");
+    assert.equal(attestation.ruleId, "CELLFENCE_UNRESOLVED_IMPORT");
+    assert.equal(attestation.filePath, "src/core/public.ts");
+    assert.equal(attestation.line, 2);
+    assert.match(attestation.sourceSha256, /^[a-f0-9]{64}$/);
+    assert.match(attestation.signature.digest, /^[a-f0-9]{64}$/);
+
+    const list = runCliWithEnv(["waivers", "list", "--json"], tempDir, waiverEnv(tempDir));
+    assert.equal(list.status, 0, list.stderr || list.stdout);
+    const waivers = JSON.parse(list.stdout).waivers;
+    assert.equal(waivers.length, 1);
+    assert.equal(waivers[0].valid, true, JSON.stringify(waivers[0].errors));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI init enables strict ownership coverage by default", () => {
@@ -1064,7 +1228,7 @@ test("CLI init falls back to the example cell when repository metadata is malfor
   }
 });
 
-test("CLI init can write inferred manifests outside the root without scaffolding", () => {
+test("CLI init without scaffolding rejects empty example fallback manifests", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-output-"));
   try {
     fs.writeFileSync(path.join(tempDir, "package.json"), "{");
@@ -1072,12 +1236,11 @@ test("CLI init can write inferred manifests outside the root without scaffolding
 
     const result = runCli(["init", "--output", outputPath, "--no-scaffold"], tempDir);
 
-    assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.equal(fs.existsSync(outputPath), true);
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    assert.match(result.stderr, /could not infer source cells/);
+    assert.equal(fs.existsSync(outputPath), false);
     assert.equal(fs.existsSync(path.join(tempDir, "cellfence.manifest.json")), false);
     assert.equal(fs.existsSync(path.join(tempDir, "src/example/public.ts")), false);
-    const manifest = JSON.parse(fs.readFileSync(outputPath, "utf8"));
-    assert.deepEqual(manifest.cells.map((cell) => cell.id), ["example"]);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -1151,7 +1314,7 @@ test("CLI init refuses dangling manifest symlinks instead of following them", { 
   }
 });
 
-test("CLI init --no-scaffold does not follow a src symlink when inference falls back to example", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
+test("CLI init --no-scaffold does not follow a src symlink when rejecting example fallback", { skip: process.platform === "win32" ? "symlink setup requires elevated privileges on Windows" : false }, () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-src-symlink-"));
   const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-init-outside-src-"));
   try {
@@ -1161,8 +1324,9 @@ test("CLI init --no-scaffold does not follow a src symlink when inference falls 
 
     const result = runCli(["init", "--output", outputPath, "--no-scaffold"], tempDir);
 
-    assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.equal(fs.existsSync(outputPath), true);
+    assert.equal(result.status, 2, result.stderr || result.stdout);
+    assert.match(result.stderr, /could not infer source cells/);
+    assert.equal(fs.existsSync(outputPath), false);
     assert.equal(fs.existsSync(path.join(outsideDir, "example", "public.ts")), false);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -1601,6 +1765,53 @@ test("CLI baseline update refuses unsealed locked baselines even when the next b
   }
 });
 
+test("CLI baseline verify suggests signing and verifier setup for locked baselines", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-locked-remediation-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "src/core"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "src/core/public.ts"), "export const core = true;\n");
+    writeJson(path.join(tempDir, "cellfence.manifest.json"), {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        locked: true,
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["core"],
+        consumes: [],
+        producesArtifacts: [],
+      }],
+    });
+    writeJson(path.join(tempDir, "cellfence.baseline.json"), {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cellIds: ["core"],
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+        },
+      },
+    });
+
+    const result = runCli(["baseline", "verify", "--json"], tempDir);
+    assert.equal(result.status, 1);
+    const parsed = JSON.parse(result.stdout);
+    const sealFinding = parsed.findings.find((finding) => finding.ruleId === "CELLFENCE_BASELINE_SEAL_INVALID");
+    assert.ok(sealFinding);
+    assert.deepEqual(sealFinding.details.lockedCells, ["core"]);
+    assert.deepEqual(sealFinding.suggestedResolutions.map((resolution) => resolution.kind), ["ask-human", "ask-human"]);
+    assert.match(sealFinding.suggestedResolutions[0].title, /Configure baseline check/);
+    assert.match(sealFinding.suggestedResolutions[1].title, /Sign the accepted baseline/);
+    assert.equal(sealFinding.suggestedResolutions[0].details.ed25519PublicKeyEnv, "CELLFENCE_BASELINE_ED25519_PUBLIC_KEY");
+    assert.equal(sealFinding.suggestedResolutions[1].details.signCommand, "cellfence baseline sign --baseline cellfence.baseline.json");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI baseline check does not print the next public surface hash in human output", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-hash-redaction-"));
   try {
@@ -1644,7 +1855,7 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   fs.writeFileSync(
     path.join(tempDir, "src/core/public.ts"),
     [
-      `// cellfence-ignore CELLFENCE_PUBLIC_ENTRY_MISSING expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary public entry missing fixture`,
+      "// cellfence-ignore CELLFENCE_PUBLIC_ENTRY_MISSING attestation:waiver-list-1",
       "export const extra = true;",
       "",
     ].join("\n"),
@@ -1665,17 +1876,30 @@ test("CLI accepts a valid line-local CellFence waiver and lists it", () => {
   // but the waiver itself is syntactically valid and present in the
   // list. We assert the waiver's validity directly via the list
   // subcommand rather than via the check exit code.
-  const listResult = runCliWithEnv(["waivers", "list", "--json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
+  initGitRepo(tempDir);
+  writeSignedWaiverAttestation(tempDir, {
+    attestationId: "waiver-list-1",
+    ruleId: "CELLFENCE_PUBLIC_ENTRY_MISSING",
+    filePath: "src/core/public.ts",
+    line: 2,
+    findingFingerprint: "d".repeat(64),
+    expiresAt: `${WAVING_INTO_THE_FUTURE}T00:00:00.000Z`,
+    reason: "temporary public entry missing fixture",
+  });
+
+  const listResult = runCliWithEnv(["waivers", "list", "--json"], tempDir, waiverEnv(tempDir));
   assert.equal(listResult.status, 0);
   const parsed = JSON.parse(listResult.stdout);
   assert.equal(parsed.schemaVersion, "cellfence.waivers.v1");
   assert.equal(parsed.waivers.length, 1);
   assert.equal(parsed.waivers[0].ruleId, "CELLFENCE_PUBLIC_ENTRY_MISSING");
   assert.equal(parsed.waivers[0].valid, true);
+  assert.equal(parsed.waivers[0].attestationId, "waiver-list-1");
 
-  const humanList = runCliWithEnv(["waivers", "list"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
+  const humanList = runCliWithEnv(["waivers", "list"], tempDir, waiverEnv(tempDir));
   assert.equal(humanList.status, 0);
   assert.match(humanList.stdout, /valid CELLFENCE_PUBLIC_ENTRY_MISSING src\/core\/public\.ts:1/);
+  assert.match(humanList.stdout, /attestation:waiver-list-1 approver:test-owner/);
 });
 
 test("CLI waivers list reports an empty human-readable inventory", () => {
@@ -1755,7 +1979,7 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     fs.writeFileSync(
       path.join(tempDir, "src/consumer/public.ts"),
       [
-        `// cellfence-ignore CELLFENCE_PUBLIC_ENTRY_MISSING expires:${WAVING_INTO_THE_FUTURE} approved-by:test-owner reason:temporary stale prune fixture`,
+        "// cellfence-ignore CELLFENCE_PUBLIC_ENTRY_MISSING attestation:waiver-prune-1",
         "import { used } from '../producer/public';",
         "export const consumer = used;",
         "",
@@ -1800,8 +2024,18 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
         },
       },
     });
+    initGitRepo(tempDir);
+    writeSignedWaiverAttestation(tempDir, {
+      attestationId: "waiver-prune-1",
+      ruleId: "CELLFENCE_PUBLIC_ENTRY_MISSING",
+      filePath: "src/consumer/public.ts",
+      line: 2,
+      findingFingerprint: "e".repeat(64),
+      expiresAt: `${WAVING_INTO_THE_FUTURE}T00:00:00.000Z`,
+      reason: "temporary stale prune fixture",
+    });
 
-    const result = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json", "--json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
+    const result = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json", "--json"], tempDir, waiverEnv(tempDir));
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const report = JSON.parse(result.stdout);
     assert.equal(report.schemaVersion, "cellfence.prune.v1");
@@ -1812,7 +2046,7 @@ test("CLI prune reports dead declarations from manifest, waivers, and baseline",
     assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-waiver"));
     assert.ok(report.candidates.some((candidate) => candidate.kind === "stale-baseline-resource" && candidate.resource.selector === "app.old"));
 
-    const human = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json"], tempDir, { CELLFENCE_APPROVERS: "test-owner" });
+    const human = runCliWithEnv(["prune", "--baseline", "cellfence.baseline.json"], tempDir, waiverEnv(tempDir));
     assert.equal(human.status, 1);
     assert.match(human.stdout, /CellFence prune found/);
   } finally {
@@ -2479,7 +2713,7 @@ test("CLI human output covers check, baseline, evidence, and waiver error paths"
   const waiverTooFar = runCli([
     "waivers",
     "request",
-    "--rule=CELLFENCE_PRIVATE_IMPORT",
+    "--rule=CELLFENCE_UNRESOLVED_IMPORT",
     "--file=src/consumer/public.ts",
     "--line=7",
     "--expires=2099-01-01",
@@ -2494,7 +2728,7 @@ test("CLI human output covers check, baseline, evidence, and waiver error paths"
   const waiverWithin = runCli([
     "waivers",
     "request",
-    "--rule=CELLFENCE_PRIVATE_IMPORT",
+    "--rule=CELLFENCE_UNRESOLVED_IMPORT",
     "--file=src/consumer/public.ts",
     "--line=7",
     "--expires=" + validFuture,
@@ -2603,7 +2837,21 @@ test("CLI parses space-separated option forms before returning usage", () => {
 });
 
 test("CLI rejects separated options when the next token is another flag", () => {
-  for (const optionName of ["--manifest", "--baseline", "--evidence", "--min-score", "--fail-under", "--coverage-output"]) {
+  for (const optionName of [
+    "--manifest",
+    "--baseline",
+    "--baseline-base",
+    "--baseline-head",
+    "--base-ref",
+    "--head-ref",
+    "--evidence",
+    "--min-score",
+    "--fail-under",
+    "--coverage-output",
+    "--format",
+    "--preset",
+    "--root",
+  ]) {
     const result = runCli(["check", optionName, "--json"]);
     assert.equal(result.status, 2, `${optionName} should be a configuration error`);
     assert.match(result.stderr, new RegExp(`${optionName} requires a value`));
@@ -2656,6 +2904,94 @@ test("CLI value options consume their separated values before command dispatch",
     ], tempDir);
     assert.equal(mutationResult.status, 1, mutationResult.stderr || mutationResult.stdout);
     assert.match(mutationResult.stdout, /CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI baseline gate parses file path options and propagates governance exit code", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-baseline-gate-paths-"));
+  try {
+    const basePath = path.join(tempDir, "base.baseline.json");
+    const headPath = path.join(tempDir, "head.baseline.json");
+    writeGateBaseline(basePath);
+    writeGateBaseline(headPath, {
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 2,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          ownedPathSet: ["src/core/**"],
+          publicSymbolSet: ["api", "stream"],
+          dependencyEdges: [],
+          resourceAccesses: [],
+          artifactContracts: [],
+        },
+      },
+    });
+    const result = runCli([
+      "baseline",
+      "gate",
+      "--baseline-base",
+      basePath,
+      "--baseline-head",
+      headPath,
+    ], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.hasChange, true);
+    assert.deepEqual(report.deltas.find((delta) => delta.dimension === "publicSymbols")?.added, ["core.stream"]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("CLI baseline gate parses git ref options and reports configuration errors", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-baseline-gate-refs-"));
+  try {
+    runGit(["init", "-q", "-b", "main"], tempDir);
+    runGit(["config", "user.name", "CellFence Test"], tempDir);
+    runGit(["config", "user.email", "test@example.com"], tempDir);
+    writeGateBaseline(path.join(tempDir, "cellfence.baseline.json"));
+    runGit(["add", "cellfence.baseline.json"], tempDir);
+    runGit(["commit", "-qm", "base baseline"], tempDir);
+    const headPath = path.join(tempDir, "head.baseline.json");
+    writeGateBaseline(headPath, {
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          ownedPathSet: ["src/core/**", "src/core/internal/**"],
+          publicSymbolSet: ["api"],
+          dependencyEdges: [],
+          resourceAccesses: [],
+          artifactContracts: [],
+        },
+      },
+    });
+    const result = runCli([
+      "baseline",
+      "gate",
+      "--base-ref",
+      "HEAD",
+      "--baseline-head",
+      headPath,
+      "--baseline",
+      "cellfence.baseline.json",
+    ], tempDir);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.baseBaselinePath, "HEAD:cellfence.baseline.json");
+    assert.deepEqual(report.deltas.find((delta) => delta.dimension === "ownedPaths")?.added, [
+      "core: src/core/internal/**",
+    ]);
+
+    const missingBase = runCli(["baseline", "gate", "--baseline-head", headPath], tempDir);
+    assert.equal(missingBase.status, 2);
+    assert.match(missingBase.stderr, /requires --baseline-base or --base-ref/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

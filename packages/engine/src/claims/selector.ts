@@ -10,11 +10,10 @@ import {
 } from "./backend.js";
 import { LocalFileClaimStore } from "./backends/local-file.js";
 
-export type ClaimBackendType = "local-file" | "github-artifact";
-type ConfigurableClaimBackendType = "local-file";
+export type ClaimBackendType = "local-file";
 
 export type ResolvedClaimBackend = {
-  type: ConfigurableClaimBackendType;
+  type: ClaimBackendType;
   backend: ClaimStoreBackend;
   /** Source location the resolver found the configuration in. */
   source: "manifest" | "default" | "env";
@@ -39,7 +38,7 @@ function manifestType(manifest: CellFenceManifest | undefined): string | undefin
 export function resolveClaimBackend(options: ResolveOptions): ResolvedClaimBackend {
   const fromEnv = options.envType ?? process.env.CELLFENCE_CLAIM_BACKEND;
   const fromManifest = manifestType(options.manifest);
-  const type = (fromEnv || fromManifest || "local-file") as ClaimBackendType;
+  const type = fromEnv || fromManifest || "local-file";
   switch (type) {
     case "local-file":
       return {

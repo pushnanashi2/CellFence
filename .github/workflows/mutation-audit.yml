@@ -43,9 +43,30 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
+      - name: Record mutation audit intent
+        env:
+          CELLFENCE_MUTATION_AUDIT_SCOPE: ${{ matrix.id }}
+        run: |
+          mkdir -p reports/mutation/changed
+          node - <<'NODE'
+          const fs = require("fs");
+          const intent = {
+            schemaVersion: "cellfence.mutation-audit-intent.v1",
+            scopeId: process.env.CELLFENCE_MUTATION_AUDIT_SCOPE,
+            sha: process.env.GITHUB_SHA,
+            ref: process.env.GITHUB_REF,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            workflow: process.env.GITHUB_WORKFLOW,
+          };
+          fs.writeFileSync("reports/mutation/changed/audit-intent.json", `${JSON.stringify(intent, null, 2)}\n`);
+          NODE
       - run: npm ci
       - name: Run one authoritative mutation scope without cache
         run: npm run mutation:changed -- --scope "${{ matrix.id }}" --force --no-incremental
+      - name: Summarize authoritative mutation results
+        if: always()
+        run: node scripts/mutation-step-summary.mjs
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         if: always()
         with:

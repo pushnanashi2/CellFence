@@ -17,17 +17,6 @@ export {
 } from "./backends/local-file.js";
 
 export {
-  RedisClaimStore,
-  type RedisLike,
-  type RedisClaimStoreOptions,
-} from "./backends/redis.js";
-
-export {
-  GitHubArtifactClaimStore,
-  type GitHubArtifactClaimStoreOptions,
-} from "./backends/github-artifact.js";
-
-export {
   resolveClaimBackend,
   type ClaimBackendType,
   type ResolvedClaimBackend,

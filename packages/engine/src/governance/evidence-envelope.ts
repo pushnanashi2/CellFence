@@ -109,6 +109,33 @@ export type GovernanceEvidenceEnvelope = {
   assessment: EvidenceAssessment;
 };
 
+type ObservedFilesByFamily = Partial<Record<ObservationFamily, Iterable<string>>>;
+
+function normalizedObservedFiles(files: Iterable<string> | undefined): Set<string> {
+  const result = new Set<string>();
+  if (!files) return result;
+  for (const file of files) result.add(normalizePath(file));
+  return result;
+}
+
+function sourceObservationStatusFor(
+  filePath: string,
+  family: ObservationFamily,
+  observedFiles: Set<string>,
+  diagnostics: Map<string, Finding[]>,
+): FileObservation {
+  const diagnosticStatus = observationStatusFor(filePath, family, diagnostics);
+  if (diagnosticStatus.status !== "processed") return diagnosticStatus;
+  if (observedFiles.has(normalizePath(filePath))) return diagnosticStatus;
+  if (family === "public-surface") return { filePath, family, status: "not-applicable" };
+  return {
+    filePath,
+    family,
+    status: "unsupported",
+    message: `${family} analysis did not record an observation for ${filePath}`,
+  };
+}
+
 export function governanceEvidenceEnvelopeForCheck(
   context: AnalysisContext,
   manifestPath: string,
@@ -117,9 +144,17 @@ export function governanceEvidenceEnvelopeForCheck(
   observedImports: PluginImportReference[],
   accessesByCell: Map<string, ResourceAccessReference[]>,
   diagnostics: Finding[] = [],
+  observedFilesByFamily: ObservedFilesByFamily = {},
 ): GovernanceEvidenceEnvelope {
   const snapshot = createSubjectSnapshotFromFiles(governanceSubjectFiles(context, manifestPath, baselinePath, evidencePaths));
   const diagnosticIndex = diagnosticsByFile(diagnostics);
+  const observedImportFiles = normalizedObservedFiles(observedFilesByFamily.imports);
+  for (const observedImport of observedImports) observedImportFiles.add(normalizePath(observedImport.importerPath));
+  const observedResourceFiles = normalizedObservedFiles(observedFilesByFamily.resources);
+  for (const accesses of accessesByCell.values()) {
+    for (const access of accesses) observedResourceFiles.add(normalizePath(access.filePath));
+  }
+  const observedPublicSurfaceFiles = normalizedObservedFiles(observedFilesByFamily["public-surface"]);
   const statuses: FileObservation[] = snapshot.files.flatMap((file): FileObservation[] => {
     if (file.role === "manifest") {
       return [
@@ -131,9 +166,9 @@ export function governanceEvidenceEnvelopeForCheck(
     if (file.role === "runtime-evidence") return [observationStatusFor(file.path, "resources", diagnosticIndex)];
     if (file.role === "source") {
       return [
-        observationStatusFor(file.path, "imports", diagnosticIndex),
-        observationStatusFor(file.path, "public-surface", diagnosticIndex),
-        observationStatusFor(file.path, "resources", diagnosticIndex),
+        sourceObservationStatusFor(file.path, "imports", observedImportFiles, diagnosticIndex),
+        sourceObservationStatusFor(file.path, "public-surface", observedPublicSurfaceFiles, diagnosticIndex),
+        sourceObservationStatusFor(file.path, "resources", observedResourceFiles, diagnosticIndex),
       ];
     }
     return [{ filePath: file.path, family: "imports" as const, status: "not-applicable" as const }];
@@ -148,7 +183,7 @@ export function governanceEvidenceEnvelopeForCheck(
     statuses,
     importObservationCount: observedImports.length,
     resourceObservationCount,
-    publicSurfaceObservationCount: context.manifest.cells.length,
+    publicSurfaceObservationCount: observedPublicSurfaceFiles.size,
   });
   return {
     snapshot,

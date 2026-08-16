@@ -13,6 +13,7 @@
       "locked": true,
       "ownedPaths": ["packages/engine/**"],
       "publicEntry": "packages/engine/src/index.ts",
+      "publicPaths": ["packages/engine/src/public/**"],
       "publicSymbols": ["checkRepository"],
       "consumes": [
         {
@@ -54,6 +55,10 @@ Manifest v1 rejects unknown object fields instead of ignoring them. A misspelled
 `governance.requireOwnership` is optional for legacy adoption, but `cellfence init` enables it. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`. When omitted or false, CellFence emits `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` as a warning.
 
 `locked` is optional on cells and resource contracts. A locked cell marks its architectural surface as human-review sensitive: `baseline update` refuses to expand that cell's accepted baseline. This prevents an agent from resolving a failing ratchet by simply rewriting the ratchet file.
+
+`waiverParsing` is optional on cells. When set to `false`, CellFence keeps checking ownership and imports for the cell but ignores `// cellfence-ignore` directives inside that cell's files and emits `CELLFENCE_WAIVER_PARSING_DISABLED` as a warning. Use `waiverParsingReason` to document why a fixture or generated-test cell contains deliberately invalid waiver text.
+
+`importAnalysis` and `resourceAnalysis` are reserved for forward compatibility. They may only be `true` when present; `false` is a manifest error rather than a way to disable governance checks.
 
 Rule severity configuration is optional and follows a fixed precedence:
 

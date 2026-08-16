@@ -44,6 +44,19 @@ npm run evidence:corpus -- \
 
 The harness never installs dependencies in target repositories and refuses package-manager or shell analyzer commands. It checks out exact commits, verifies a clean worktree before and after every trusted analyzer, applies timeouts, records exit classification, findings, source KLOC, latency, and ms/KLOC, and preserves failures in the report. Optional analyzers must already be installed by the operator.
 
+For broad onboarding and init-manifest stress tests, collect popular repositories per language and immediately apply inferred manifests with:
+
+```bash
+npm run evidence:oss-scale -- \
+  --languages TypeScript,JavaScript,Python \
+  --limit-per-language 3000 \
+  --max-repo-size-kb 250000 \
+  --discard-checkouts \
+  --out reports/oss-scale-study.json
+```
+
+This harness works around GitHub Search's per-query result cap by walking descending star windows, pins every default branch to an exact commit, and records a manifest-naturalness diagnostic for each generated manifest. `--max-repo-size-kb` is an operational safety valve for broad runs; omit it only when the runner has enough disk and network budget for the largest repositories. The default language set matches CellFence's currently parsed source extensions (TypeScript, JavaScript, and Python). The report is diagnostic: it can identify init fallbacks, missing public entries, configuration errors, and performance outliers, but it is not reviewed-manifest precision evidence.
+
 ## Competitor Comparison
 
 `npm run evidence:competitors -- ...` compares normalized, pre-provisioned analyzer output. It reports common, competitor-only, and CellFence-only evidence without calling either side correct. Dependency-cruiser, import-linter, and madge have different policy models, so the comparison is a mechanism and coverage-gap oracle, not a precision score.

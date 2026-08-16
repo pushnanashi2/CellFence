@@ -103,24 +103,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Include only packages that already exist on npm and can have Trusted Publisher configured.
-          package_dirs=(
-            packages/schema
-            packages/plugin-api
-            packages/adapter-call-pattern
-            packages/adapter-opentelemetry
-            packages/plugin-agent-budget
-            packages/plugin-blast-radius
-            packages/plugin-dependency-sovereignty
-            packages/plugin-geo-purity
-            packages/plugin-legacy-strangler
-            packages/plugin-quants-trend
-            packages/reporter-economy-matrix
-            packages/engine
-            packages/cli
-            packages/github-action
-            packages/trace
-          )
+          # Include all publishable workspace packages in dependency order.
+          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
 
           missing_packages=0
           for package_dir in "${package_dirs[@]}"; do
@@ -145,24 +129,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Keep this in sync with the preflight list above.
-          package_dirs=(
-            packages/schema
-            packages/plugin-api
-            packages/adapter-call-pattern
-            packages/adapter-opentelemetry
-            packages/plugin-agent-budget
-            packages/plugin-blast-radius
-            packages/plugin-dependency-sovereignty
-            packages/plugin-geo-purity
-            packages/plugin-legacy-strangler
-            packages/plugin-quants-trend
-            packages/reporter-economy-matrix
-            packages/engine
-            packages/cli
-            packages/github-action
-            packages/trace
-          )
+          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
 
           for package_dir in "${package_dirs[@]}"; do
             package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
@@ -194,24 +161,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Keep this in sync with the publish list above.
-          package_dirs=(
-            packages/schema
-            packages/plugin-api
-            packages/adapter-call-pattern
-            packages/adapter-opentelemetry
-            packages/plugin-agent-budget
-            packages/plugin-blast-radius
-            packages/plugin-dependency-sovereignty
-            packages/plugin-geo-purity
-            packages/plugin-legacy-strangler
-            packages/plugin-quants-trend
-            packages/reporter-economy-matrix
-            packages/engine
-            packages/cli
-            packages/github-action
-            packages/trace
-          )
+          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
 
           for package_dir in "${package_dirs[@]}"; do
             package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
