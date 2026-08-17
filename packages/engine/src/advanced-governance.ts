@@ -10,14 +10,14 @@ import {
   type CheckProfileManifest,
   type PathClassKind,
   type PathClassManifest,
-  type ResourceAdapterMap,
   type ResourceAccessMode,
   type ResourceContractManifest,
   type RuleSeverityMap,
 } from "@cellfence/schema";
-import { isSourceFilePath, listFiles, matchesPattern, normalizePath, patternCoveredByOwnedPaths, repoPath } from "./file-index.js";
+import { isSourceFilePath, listFiles, matchesPattern, normalizePath, patternCoveredByOwnedPaths, repoPath, sourceFilesForCell, type FileIndexContext } from "./file-index.js";
 import { PRODUCTION_SCOPE_EXCLUDES, type InferManifestScope } from "./manifest-inference.js";
 import { extractPublicSymbols, publicSurfaceHash } from "./module-resolution.js";
+import { collectResourceAccesses, type ResourceAccessReference } from "./resource-access.js";
 import { ownedPathPatternsOverlap } from "./glob-overlap.js";
 import { stableStringCompare } from "./governance/canonicalization.js";
 
@@ -48,25 +48,6 @@ type ServiceMappingWarning = {
   serviceId: string;
   field: string;
   message: string;
-};
-
-const SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS: ResourceAdapterMap = {
-  file: "off",
-  http: "off",
-  queue: "off",
-  "sql-literal": "off",
-  prisma: "off",
-  typeorm: "off",
-  drizzle: "off",
-  "query-builder": "off",
-  bullmq: "off",
-  kafkajs: "off",
-  nestjs: "off",
-  fastify: "off",
-  django: "off",
-  fastapi: "off",
-  sqlalchemy: "off",
-  celery: "off",
 };
 
 export type ServiceManifestImportResult = {
@@ -397,6 +378,87 @@ function sourceFilesUnderRoot(rootDir: string, relativeRoot: string): string[] {
     .sort();
 }
 
+function resourceContractDeclaresAccess(contract: ResourceContractManifest, access: ResourceAccessReference): boolean {
+  return contract.kind === access.kind
+    && contract.access.includes(access.access)
+    && contract.selectors.some((selector) => matchesPattern(access.selector, selector) || selector === access.selector);
+}
+
+function resourceContractsDeclareAccess(contracts: readonly ResourceContractManifest[], access: ResourceAccessReference): boolean {
+  return contracts.some((contract) => resourceContractDeclaresAccess(contract, access));
+}
+
+function inferredResourceContractId(existingIds: Set<string>, access: ResourceAccessReference): string {
+  const baseId = `inferred-${access.kind}-${access.access}`;
+  let candidate = baseId;
+  let suffix = 2;
+  while (existingIds.has(candidate)) {
+    candidate = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+  existingIds.add(candidate);
+  return candidate;
+}
+
+function inferredResourceContractsForCell(rootDir: string, cell: CellManifest, context: FileIndexContext): ResourceContractManifest[] {
+  const declaredContracts = cell.resourceContracts || [];
+  const groupedSelectors = new Map<string, Set<string>>();
+  for (const sourceFilePath of sourceFilesForCell(rootDir, cell, context)) {
+    for (const access of collectResourceAccesses(context, sourceFilePath)) {
+      if (access.unresolved || access.confidence === "low" || access.confidence === "transient") continue;
+      if (resourceContractsDeclareAccess(declaredContracts, access)) continue;
+      const key = `${access.kind}\0${access.access}`;
+      const selectors = groupedSelectors.get(key) || new Set<string>();
+      selectors.add(access.selector);
+      groupedSelectors.set(key, selectors);
+    }
+  }
+  const existingIds = new Set(declaredContracts.map((contract) => contract.id));
+  return [...groupedSelectors.entries()]
+    .sort(([left], [right]) => stableStringCompare(left, right))
+    .map(([key, selectors]) => {
+      const [kind, access] = key.split("\0") as [ResourceContractManifest["kind"], ResourceAccessMode];
+      const reference: ResourceAccessReference = {
+        kind,
+        access,
+        selector: "",
+        filePath: "",
+        line: 0,
+        source: "init",
+        detectedBy: "init",
+        confidence: "high",
+      };
+      return {
+        id: inferredResourceContractId(existingIds, reference),
+        kind,
+        access: [access],
+        selectors: [...selectors].sort(stableStringCompare),
+        description: "inferred from existing source during init",
+      };
+    });
+}
+
+function withInferredResourceContracts(rootDir: string, manifest: CellFenceManifest): CellFenceManifest {
+  const context: FileIndexContext = {
+    rootDir,
+    manifest,
+    sourceFilesForCellCache: new Map<string, string[]>(),
+    sourceTextCache: new Map<string, string>(),
+    sourceFileCache: new Map(),
+  };
+  return {
+    ...manifest,
+    cells: manifest.cells.map((cell) => {
+      const inferredContracts = inferredResourceContractsForCell(rootDir, cell, context);
+      if (inferredContracts.length === 0) return cell;
+      return {
+        ...cell,
+        resourceContracts: [...(cell.resourceContracts || []), ...inferredContracts],
+      };
+    }),
+  };
+}
+
 export function createManifestFromServiceManifests(options: { rootDir?: string; serviceManifestPaths?: string[]; locked?: boolean; scope?: InferManifestScope } = {}): ServiceManifestImportResult {
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const warnings: ServiceMappingWarning[] = [];
@@ -463,20 +525,20 @@ export function createManifestFromServiceManifests(options: { rootDir?: string; 
       resourceContracts,
     });
   }
+  const manifest: CellFenceManifest = {
+    schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION,
+    governance: {
+      requireOwnership: true,
+      include: ["systems/**", "packages/**"],
+      exclude: options.scope === "production"
+        ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort()
+        : ["systems/**/node_modules/**"],
+    },
+    cells: cells.sort((left, right) => stableStringCompare(left.id, right.id)),
+  };
   return {
     schemaVersion: "cellfence.service-manifest-import.v1",
-    manifest: {
-      schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION,
-      governance: {
-        requireOwnership: true,
-        include: ["systems/**", "packages/**"],
-        exclude: options.scope === "production"
-          ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort()
-          : ["systems/**/node_modules/**"],
-        ...(options.scope === "production" ? { resourceAdapters: SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS } : {}),
-      },
-      cells: cells.sort((left, right) => stableStringCompare(left.id, right.id)),
-    },
+    manifest: withInferredResourceContracts(rootDir, manifest),
     warnings,
   };
 }

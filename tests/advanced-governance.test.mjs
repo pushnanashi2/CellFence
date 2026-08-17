@@ -58,6 +58,7 @@ test("service manifest adapter imports and verifies the core service boundary fi
     });
     fs.mkdirSync(path.join(rootDir, "systems/admin-api"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "systems/admin-api/public.ts"), "export const adminApi = true;\n");
+    fs.writeFileSync(path.join(rootDir, "systems/admin-api/routes.ts"), "declare const server: { route(config: unknown): void };\nserver.route({ path: '/admin', method: 'GET' });\n");
     writeJson(path.join(rootDir, "systems/admin-api/service.json"), {
       serviceId: "admin-api",
       ownedPaths: ["systems/admin-api/**"],
@@ -86,6 +87,13 @@ test("service manifest adapter imports and verifies the core service boundary fi
         selectors: ["scheduled:admin-reconcile"],
         description: "scheduled service task",
       },
+      {
+        id: "inferred-http-serve",
+        kind: "http",
+        access: ["serve"],
+        selectors: ["GET /admin"],
+        description: "inferred from existing source during init",
+      },
     ]);
     assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "platform").publicPaths, ["systems/platform/public/**"]);
     assert.deepEqual(imported.manifest.cells.find((cell) => cell.id === "platform").producesArtifacts, [
@@ -100,8 +108,7 @@ test("service manifest adapter imports and verifies the core service boundary fi
     assert.ok(!imported.warnings.some((warning) => warning.field === "scheduled"));
     const productionScoped = createManifestFromServiceManifests({ rootDir, serviceManifestPaths: ["systems/*/service.json"], scope: "production" });
     assert.ok(productionScoped.manifest.governance.exclude.includes("tests/**"));
-    assert.equal(productionScoped.manifest.governance.resourceAdapters.file, "off");
-    assert.equal(productionScoped.manifest.governance.resourceAdapters.fastify, "off");
+    assert.equal(productionScoped.manifest.governance.resourceAdapters, undefined);
 
     const verified = verifyManifestFromServiceManifests({ rootDir, manifest: imported.manifest, serviceManifestPaths: ["systems/*/service.json"] });
     assert.equal(verified.ok, true, JSON.stringify(verified.findings));
@@ -514,9 +521,11 @@ test("CLI exposes service-manifest import and verify commands", () => {
       consumes: { systems: [] },
       produces: { exports: { entry: "systems/app/public.ts", symbols: ["app"] } },
     });
-    const init = spawnSync("node", [CLI_PATH, "init", "--from", "systems/*/service.json"], { cwd: rootDir, encoding: "utf8" });
+    const init = spawnSync("node", [CLI_PATH, "init", "--from", "systems/*/service.json", "--production-scope"], { cwd: rootDir, encoding: "utf8" });
     assert.equal(init.status, 0, init.stderr || init.stdout);
-    const verify = spawnSync("node", [CLI_PATH, "manifest", "verify", "--from", "systems/*/service.json", "--json"], { cwd: rootDir, encoding: "utf8" });
+    const manifest = JSON.parse(fs.readFileSync(path.join(rootDir, "cellfence.manifest.json"), "utf8"));
+    assert.equal(manifest.governance.resourceAdapters, undefined);
+    const verify = spawnSync("node", [CLI_PATH, "manifest", "verify", "--from", "systems/*/service.json", "--production-scope", "--json"], { cwd: rootDir, encoding: "utf8" });
     assert.equal(verify.status, 0, verify.stderr || verify.stdout);
     const parsed = JSON.parse(verify.stdout);
     assert.equal(parsed.ok, true);
