@@ -285,6 +285,10 @@ test("trace auto-installs for package preload forms and explicit env opt-in", ()
     import fs from "node:fs";
     process.chdir(${JSON.stringify(tempDir)});
     fs.writeFileSync("package-preload.json", "{}\\n");
+    const trace = await import(${JSON.stringify(pathToFileURL(tracePath).href)});
+    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
+      throw new Error("trace diagnostics did not report installed preload");
+    }
   `);
   const packageEvidencePath = path.join(tempDir, "package-resource-evidence.json");
   const packagePreload = spawnSync(process.execPath, [
@@ -328,8 +332,9 @@ test("trace auto-installs for package preload forms and explicit env opt-in", ()
   const envPath = path.join(tempDir, "env.mjs");
   fs.writeFileSync(envPath, `
     import fs from "node:fs";
-    await import(${JSON.stringify(pathToFileURL(tracePath).href)});
+    import { traceDiagnostics } from ${JSON.stringify(pathToFileURL(tracePath).href)};
     process.chdir(${JSON.stringify(tempDir)});
+    if (!traceDiagnostics().installed) throw new Error("env opt-in did not install trace");
     fs.writeFileSync("env-preload.json", "{}\\n");
   `);
   const envEvidencePath = path.join(tempDir, "env-resource-evidence.json");
@@ -464,6 +469,17 @@ test("trace preload detection accepts exact inline file URL import flags", () =>
 
   assert.equal(result.status, 0, result.stderr);
   assert.ok(JSON.parse(fs.readFileSync(evidencePath, "utf8")).accesses.some((access) => access.selector === "inline-file-url-preload.json"));
+});
+
+test("trace preload detection accepts only exact CellFence import flags", async () => {
+  const trace = await import(`${pathToFileURL(tracePath).href}?preload-detection`);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "@cellfence/trace"]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=@cellfence/trace"]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", pathToFileURL(tracePath).href]), true);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import", "data:text/javascript,"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import=data:text/javascript,"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["--import"]), false);
+  assert.equal(trace.__testing.preloadRequestedThisModule(["not-import", pathToFileURL(tracePath).href]), false);
 });
 
 test("trace hook records fetch calls without requiring successful network responses", () => {
@@ -691,6 +707,9 @@ test("trace install is idempotent and registers the expected flush hooks", () =>
     trace.recordDatabaseAccess("idempotent-extra");
     if (JSON.stringify(observedEvents) !== JSON.stringify(["beforeExit", "exit"])) {
       throw new Error(\`unexpected trace hooks: \${JSON.stringify(observedEvents)}\`);
+    }
+    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
+      throw new Error("trace diagnostics did not report the installed hook state");
     }
   `);
 

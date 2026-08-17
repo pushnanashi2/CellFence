@@ -54,6 +54,10 @@ let installed = false;
 let flushed = false;
 let flushHooksRegistered = false;
 
+export function traceDiagnostics(): { installed: boolean; flushHooksRegistered: boolean } {
+  return { installed, flushHooksRegistered };
+}
+
 function normalizeSelector(selector: fs.PathOrFileDescriptor): string | undefined {
   if (typeof selector === "number") return undefined;
   const text = selector instanceof URL ? selector.pathname : selector.toString();
@@ -275,6 +279,11 @@ function preloadRequestedThisModule(execArgv: readonly string[] = process.execAr
   }
   return false;
 }
+
+export const __testing = {
+  importSpecifierTargetsThisModule,
+  preloadRequestedThisModule,
+};
 
 if (process.env.CELLFENCE_TRACE_AUTO_INSTALL === "1" || preloadRequestedThisModule()) installTrace();
 

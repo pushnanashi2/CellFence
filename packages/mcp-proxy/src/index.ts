@@ -85,7 +85,7 @@ type AuditEvent = {
   reason: string;
 };
 
-const DEFAULT_AUDIT_LOG_MAX_BYTES = 10 * 1024 * 1024;
+export const DEFAULT_AUDIT_LOG_MAX_BYTES = 10 * 1024 * 1024;
 
 type ToolDecision = {
   shouldForward: boolean;
@@ -610,7 +610,7 @@ export function decideToolCall(options: ProxyOptions, toolName: string, args: un
   }
 }
 
-async function decideToolCallAsync(options: ProxyOptions, toolName: string, args: unknown): Promise<ToolDecision> {
+export async function decideToolCallAsync(options: ProxyOptions, toolName: string, args: unknown): Promise<ToolDecision> {
   const paths = pathsForToolCall(toolName, args, options.writeTools);
   if (options.mode === "off") {
     return { shouldForward: true, auditDecision: "off", paths: paths || [], reason: "guard disabled" };

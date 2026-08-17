@@ -299,6 +299,7 @@
       "publicEntry": "packages/mcp-proxy/src/index.ts",
       "publicSymbols": [
         "decideToolCall",
+        "decideToolCallAsync",
         "DownstreamFeaturePolicy",
         "FailMode",
         "main",

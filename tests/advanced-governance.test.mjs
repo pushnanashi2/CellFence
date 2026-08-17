@@ -108,7 +108,8 @@ test("service manifest adapter imports and verifies the core service boundary fi
     assert.ok(!imported.warnings.some((warning) => warning.field === "scheduled"));
     const productionScoped = createManifestFromServiceManifests({ rootDir, serviceManifestPaths: ["systems/*/service.json"], scope: "production" });
     assert.ok(productionScoped.manifest.governance.exclude.includes("tests/**"));
-    assert.equal(productionScoped.manifest.governance.resourceAdapters, undefined);
+    assert.equal(productionScoped.manifest.governance.resourceAdapters.file, "off");
+    assert.equal(productionScoped.manifest.governance.resourceAdapters.fastify, "off");
 
     const verified = verifyManifestFromServiceManifests({ rootDir, manifest: imported.manifest, serviceManifestPaths: ["systems/*/service.json"] });
     assert.equal(verified.ok, true, JSON.stringify(verified.findings));
@@ -524,7 +525,8 @@ test("CLI exposes service-manifest import and verify commands", () => {
     const init = spawnSync("node", [CLI_PATH, "init", "--from", "systems/*/service.json", "--production-scope"], { cwd: rootDir, encoding: "utf8" });
     assert.equal(init.status, 0, init.stderr || init.stdout);
     const manifest = JSON.parse(fs.readFileSync(path.join(rootDir, "cellfence.manifest.json"), "utf8"));
-    assert.equal(manifest.governance.resourceAdapters, undefined);
+    assert.equal(manifest.governance.resourceAdapters.file, "off");
+    assert.equal(manifest.governance.resourceAdapters.kafkajs, "off");
     const verify = spawnSync("node", [CLI_PATH, "manifest", "verify", "--from", "systems/*/service.json", "--production-scope", "--json"], { cwd: rootDir, encoding: "utf8" });
     assert.equal(verify.status, 0, verify.stderr || verify.stdout);
     const parsed = JSON.parse(verify.stdout);

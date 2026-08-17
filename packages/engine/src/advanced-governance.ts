@@ -10,6 +10,7 @@ import {
   type CheckProfileManifest,
   type PathClassKind,
   type PathClassManifest,
+  type ResourceAdapterMap,
   type ResourceAccessMode,
   type ResourceContractManifest,
   type RuleSeverityMap,
@@ -48,6 +49,25 @@ type ServiceMappingWarning = {
   serviceId: string;
   field: string;
   message: string;
+};
+
+const SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS: ResourceAdapterMap = {
+  file: "off",
+  http: "off",
+  queue: "off",
+  "sql-literal": "off",
+  prisma: "off",
+  typeorm: "off",
+  drizzle: "off",
+  "query-builder": "off",
+  bullmq: "off",
+  kafkajs: "off",
+  nestjs: "off",
+  fastify: "off",
+  django: "off",
+  fastapi: "off",
+  sqlalchemy: "off",
+  celery: "off",
 };
 
 export type ServiceManifestImportResult = {
@@ -531,8 +551,9 @@ export function createManifestFromServiceManifests(options: { rootDir?: string; 
       requireOwnership: true,
       include: ["systems/**", "packages/**"],
       exclude: options.scope === "production"
-        ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort()
+        ? [...new Set(["systems/**/node_modules/**", ...PRODUCTION_SCOPE_EXCLUDES])].sort(stableStringCompare)
         : ["systems/**/node_modules/**"],
+      ...(options.scope === "production" ? { resourceAdapters: SERVICE_IMPORT_PHASE_ONE_RESOURCE_ADAPTERS } : {}),
     },
     cells: cells.sort((left, right) => stableStringCompare(left.id, right.id)),
   };
