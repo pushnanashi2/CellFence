@@ -11,10 +11,6 @@ export const BASELINE_ED25519_PRIVATE_KEY_ENV = "CELLFENCE_BASELINE_ED25519_PRIV
 export const BASELINE_ED25519_PUBLIC_KEY_ENV = "CELLFENCE_BASELINE_ED25519_PUBLIC_KEY";
 export const BASELINE_ED25519_KEY_ID_ENV = "CELLFENCE_BASELINE_ED25519_KEY_ID";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function baselineWithoutSeal(baseline: CellFenceBaseline): Omit<CellFenceBaseline, "seal"> {
   const { seal: _seal, ...unsignedBaseline } = baseline;
   return unsignedBaseline;
@@ -52,6 +48,39 @@ function baselineHmacDigest(
     .digest("hex");
 }
 
+const LEGACY_BASELINE_SEAL_COLLATOR = new Intl.Collator("en-US", {
+  usage: "sort",
+  sensitivity: "variant",
+  ignorePunctuation: false,
+  numeric: false,
+});
+
+function legacyBaselineSealCanonicalJson(value: unknown): string {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return `[${value.map((item) => legacyBaselineSealCanonicalJson(item)).join(",")}]`;
+  if (typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter((entry) => entry[1] !== undefined)
+      .sort(([left], [right]) => LEGACY_BASELINE_SEAL_COLLATOR.compare(left, right))
+      .map(([key, entryValue]) => `${JSON.stringify(key)}:${legacyBaselineSealCanonicalJson(entryValue)}`);
+    return `{${entries.join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function baselineHmacDigestCandidates(
+  baseline: CellFenceBaseline,
+  secret: string,
+  sealMetadata?: BaselineSealMetadata,
+): string[] {
+  const payloadValue = baselineSealPayloadValue(baseline, sealMetadata);
+  const digests = [baselineHmacDigest(baseline, secret, sealMetadata)];
+  if (!sealMetadata) {
+    digests.push(crypto.createHmac("sha256", secret).update(legacyBaselineSealCanonicalJson(payloadValue)).digest("hex"));
+  }
+  return digests;
+}
+
 function timingSafeHexEqual(left: string, right: string): boolean {
   if (!/^[a-f0-9]{64}$/.test(left) || !/^[a-f0-9]{64}$/.test(right)) return false;
   const leftBuffer = Buffer.from(left, "hex");
@@ -64,6 +93,16 @@ function baselineSealPayload(
   sealMetadata?: BaselineSealMetadata,
 ): Buffer {
   return Buffer.from(stableCanonicalJson(baselineSealPayloadValue(baseline, sealMetadata)), "utf8");
+}
+
+function baselineSealPayloadCandidates(
+  baseline: CellFenceBaseline,
+  sealMetadata?: BaselineSealMetadata,
+): Buffer[] {
+  const payloadValue = baselineSealPayloadValue(baseline, sealMetadata);
+  const payloads = [Buffer.from(stableCanonicalJson(payloadValue), "utf8")];
+  if (!sealMetadata) payloads.push(Buffer.from(legacyBaselineSealCanonicalJson(payloadValue), "utf8"));
+  return payloads;
 }
 
 function baselineKeyMaterial(value: string): string {
@@ -80,9 +119,11 @@ function baselineEd25519Signature(
 }
 
 function baselineEd25519SignatureValid(baseline: CellFenceBaseline, publicKeyPem: string): boolean {
-  if (baseline.seal?.algorithm !== "ed25519") return false;
+  if (!baseline.seal || baseline.seal.algorithm !== "ed25519") return false;
+  const signature = baseline.seal.signature;
   const key = crypto.createPublicKey(baselineKeyMaterial(publicKeyPem));
-  return crypto.verify(null, baselineSealPayload(baseline, baselineSealMetadata(baseline.seal)), key, Buffer.from(baseline.seal.signature, "base64"));
+  return baselineSealPayloadCandidates(baseline, baselineSealMetadata(baseline.seal))
+    .some((payload) => crypto.verify(null, payload, key, Buffer.from(signature, "base64")));
 }
 
 export function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFenceBaseline {
@@ -216,12 +257,12 @@ export function validateBaselineSealFindings(
     }
     try {
       if (publicKey && baselineEd25519SignatureValid(baseline, publicKey)) return findings;
-    } catch (error) {
+    } catch {
       findings.push({
         ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
         severity: "error",
         filePath: baselinePath,
-        message: `baseline Ed25519 seal could not be verified: ${errorMessage(error)}`,
+        message: "baseline Ed25519 seal could not be verified with the configured public key",
         details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId },
       });
       return findings;
@@ -245,8 +286,9 @@ export function validateBaselineSealFindings(
     });
     return findings;
   }
-  const expectedDigest = baselineHmacDigest(baseline, secret as string, baselineSealMetadata(baseline.seal));
-  if (!timingSafeHexEqual(baseline.seal.digest, expectedDigest)) {
+  const hmacSeal = baseline.seal;
+  const expectedDigests = baselineHmacDigestCandidates(baseline, secret as string, baselineSealMetadata(hmacSeal));
+  if (!expectedDigests.some((expectedDigest) => timingSafeHexEqual(hmacSeal.digest, expectedDigest))) {
     findings.push({
       ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
       severity: "error",

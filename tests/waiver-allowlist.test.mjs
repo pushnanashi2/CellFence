@@ -15,7 +15,6 @@ import {
   initGitRepo,
   readWaiverAttestationFile,
   TEST_WAIVER_APPROVER,
-  waiverEnv,
   withWaiverEnv,
   writeSignedWaiverAttestation,
   writeWaiverAttestationFile,

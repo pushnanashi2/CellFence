@@ -249,7 +249,7 @@ function hashFile(filePath) {
 function stableCanonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map((entry) => stableCanonicalJson(entry)).join(",")}]`;
   if (value && typeof value === "object") {
-    return `{${Object.keys(value).sort((left, right) => left.localeCompare(right)).map((key) => `${JSON.stringify(key)}:${stableCanonicalJson(value[key])}`).join(",")}}`;
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableCanonicalJson(value[key])}`).join(",")}}`;
   }
   return JSON.stringify(value);
 }

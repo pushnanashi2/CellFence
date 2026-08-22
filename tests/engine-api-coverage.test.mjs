@@ -1612,6 +1612,31 @@ test("engine changed check reports git stderr when metadata commands fail", () =
   }
 });
 
+test("engine changed check rejects option-like and whitespace git refs before lookup", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-invalid-git-ref-"));
+  try {
+    initGit(rootDir);
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core")]);
+    git(rootDir, ["add", "."]);
+    git(rootDir, ["commit", "-m", "base"]);
+
+    for (const options of [
+      { baseRef: "--all" },
+      { baseRef: "bad ref" },
+      { baseRef: "HEAD", headRef: "--branches" },
+      { baseRef: "HEAD", headRef: "feature\nbranch" },
+    ]) {
+      const result = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", ...options });
+      assert.equal(result.exitCode, 2, JSON.stringify(options));
+      assert.equal(result.findings[0].ruleId, "CELLFENCE_GIT_METADATA_UNAVAILABLE");
+      assert.match(result.findings[0].message, /git ref|base ref|head ref/);
+    }
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("engine changed check reports git spawn failures without raw stderr", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-git-missing-"));
   const previousPath = process.env.PATH;

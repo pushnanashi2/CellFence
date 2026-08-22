@@ -135,6 +135,7 @@ Usage:
   cellfence manifest verify --from systems/*/service.json [--production-scope] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
+  cellfence coverage [--manifest cellfence.manifest.json] [--json|--format sarif] [--fail-under 0.8] [--coverage-output coverage.json]
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
   cellfence serve --mcp
   cellfence graph [--json|--format mermaid]
@@ -150,6 +151,7 @@ Usage:
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence baseline gate [--baseline-base base.json|--base-ref HEAD~1] [--baseline-head head.json|--head-ref HEAD] [--json|--format markdown|--format sarif]
   cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
@@ -190,6 +192,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     initResearchAblatePackagePolicyHints: false,
     mcp: false,
   };
+  const cellValues: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--json") {
@@ -272,11 +275,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.evidenceGraphPath = argument.slice("--evidence-graph=".length);
     } else if (argument === "--cell") {
       parsed.cellId = requireOptionValue(argv, index, "--cell");
-      parsed.claimCells.push(parsed.cellId);
+      cellValues.push(parsed.cellId);
       index += 1;
     } else if (argument.startsWith("--cell=")) {
-      parsed.cellId = argument.slice("--cell=".length);
-      parsed.claimCells.push(parsed.cellId);
+      parsed.cellId = requireInlineOptionValue(argument, "--cell=", "--cell");
+      cellValues.push(parsed.cellId);
     } else if (argument === "--agent") {
       parsed.agent = requireOptionValue(argv, index, "--agent");
       index += 1;
@@ -355,10 +358,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.targetFilePath = argument.slice("--file=".length);
       parsed.docPaths.push(parsed.targetFilePath);
     } else if (argument === "--line") {
-      parsed.line = Number(requireOptionValue(argv, index, "--line"));
+      parsed.line = parsePositiveIntegerOption(requireOptionValue(argv, index, "--line"), "--line");
       index += 1;
     } else if (argument.startsWith("--line=")) {
-      parsed.line = Number(argument.slice("--line=".length));
+      parsed.line = parsePositiveIntegerOption(requireInlineOptionValue(argument, "--line=", "--line"), "--line");
     } else if (argument === "--expires") {
       parsed.expires = requireOptionValue(argv, index, "--expires");
       index += 1;
@@ -410,22 +413,20 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (argument.startsWith("--report=")) {
       parsed.reportPath = argument.slice("--report=".length);
     } else if (argument === "--min-score") {
-      parsed.minScore = Number(requireOptionValue(argv, index, "--min-score"));
+      parsed.minScore = parseFiniteNumberOption(requireOptionValue(argv, index, "--min-score"), "--min-score");
       index += 1;
     } else if (argument === "--fail-under") {
-      const value = Number(requireOptionValue(argv, index, "--fail-under"));
-      if (Number.isFinite(value)) parsed.failUnder = value;
+      parsed.failUnder = parseFiniteNumberOption(requireOptionValue(argv, index, "--fail-under"), "--fail-under");
       index += 1;
     } else if (argument.startsWith("--fail-under=")) {
-      const value = Number(argument.slice("--fail-under=".length));
-      if (Number.isFinite(value)) parsed.failUnder = value;
+      parsed.failUnder = parseFiniteNumberOption(requireInlineOptionValue(argument, "--fail-under=", "--fail-under"), "--fail-under");
     } else if (argument === "--coverage-output") {
       parsed.coverageOutputPath = requireOptionValue(argv, index, "--coverage-output");
       index += 1;
     } else if (argument.startsWith("--coverage-output=")) {
       parsed.coverageOutputPath = argument.slice("--coverage-output=".length);
     } else if (argument.startsWith("--min-score=")) {
-      parsed.minScore = Number(argument.slice("--min-score=".length));
+      parsed.minScore = parseFiniteNumberOption(requireInlineOptionValue(argument, "--min-score=", "--min-score"), "--min-score");
     } else if (argument === "--format") {
       parsed.format = requireOptionValue(argv, index, "--format");
       index += 1;
@@ -445,6 +446,9 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.command.push(argument);
     }
   }
+  if (parsed.command[0] === "claim" && parsed.command[1] === "create") {
+    parsed.claimCells = cellValues;
+  }
   return parsed;
 }
 
@@ -458,6 +462,18 @@ function requireInlineOptionValue(argument: string, prefix: string, optionName: 
   const value = argument.slice(prefix.length);
   if (!value) throw new Error(`${optionName} requires a value`);
   return value;
+}
+
+function parseFiniteNumberOption(value: string, optionName: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) throw new Error(`${optionName} must be a finite number`);
+  return parsed;
+}
+
+function parsePositiveIntegerOption(value: string, optionName: string): number {
+  const parsed = parseFiniteNumberOption(value, optionName);
+  if (!Number.isInteger(parsed) || parsed < 1) throw new Error(`${optionName} must be a positive integer`);
+  return parsed;
 }
 
 function writeJson(value: unknown): void {
@@ -862,7 +878,7 @@ function formatContextAsAgentsMarkdown(context: CellFenceContext): string {
   lines.push(...bulletList(context.cell.ownedPaths));
   lines.push("");
   lines.push("## Public Surface");
-  lines.push(`- publicEntry: ${context.cell.publicEntry}`);
+  lines.push(`- publicEntry: ${context.cell.publicEntry || "(none)"}`);
   if (context.cell.packageName) lines.push(`- packageName: ${context.cell.packageName}`);
   lines.push(`- locked: ${context.cell.locked ? "true" : "false"}`);
   lines.push(...context.cell.publicSymbols.map((symbol) => `- symbol: ${symbol}`));
@@ -1459,7 +1475,8 @@ function installChecksumFromBlock(block: string): string | undefined {
 
 function oldFenceTextOutsideBlock(text: string): boolean {
   const unmanaged = text.replace(installBlockPattern(), "");
-  return /Architecture fence \(CellFence/.test(unmanaged) || /cellfence context --cell/.test(unmanaged);
+  return /Architecture fence \(CellFence/i.test(unmanaged)
+    || /\b(?:npx\s+)?cellfence\s+(?:context|check|claim|task|baseline|evidence|graph|prune|doctor|install)\b/i.test(unmanaged);
 }
 
 function commandInstall(parsed: ParsedArgs): number {
@@ -1583,7 +1600,7 @@ function requiredCheckNames(protection: Record<string, unknown>): string[] {
   const checks = Array.isArray(requiredStatusChecks.checks)
     ? requiredStatusChecks.checks.flatMap((entry) => isRecord(entry) && typeof entry.context === "string" ? [entry.context] : [])
     : [];
-  return [...new Set([...contexts, ...checks])].sort((left, right) => left.localeCompare(right));
+  return [...new Set([...contexts, ...checks])].sort();
 }
 
 function addDoctorCheck(checks: DoctorCheck[], check: DoctorCheck): void {
@@ -2179,7 +2196,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "check") return commandCheck(parsed);
     if (primaryCommand === "manifest" && secondaryCommand === "verify") return commandManifestVerify(parsed);
     if (primaryCommand === "context") return commandContext(parsed);
-  if (primaryCommand === "coverage") return commandCoverage(parsed);
+    if (primaryCommand === "coverage") return commandCoverage(parsed);
     if (primaryCommand === "install") return commandInstall(parsed);
     if (primaryCommand === "serve") return commandServe(parsed);
     if (primaryCommand === "graph") return commandGraph(parsed);
@@ -2195,7 +2212,7 @@ function dispatchParsedArgs(parsed: ParsedArgs): number {
     if (primaryCommand === "baseline" && secondaryCommand === "update") return commandBaselineUpdate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "sign") return commandBaselineSign(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "verify") return commandBaselineVerify(parsed);
-  if (primaryCommand === "baseline" && secondaryCommand === "gate") return commandBaselineGate(parsed);
+    if (primaryCommand === "baseline" && secondaryCommand === "gate") return commandBaselineGate(parsed);
     if (primaryCommand === "baseline" && secondaryCommand === "audit") return commandBaselineAudit(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "check") return commandEvidenceCheck(parsed);
     if (primaryCommand === "evidence" && secondaryCommand === "commit") return commandEvidenceCommit(parsed);

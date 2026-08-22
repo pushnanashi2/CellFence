@@ -6,6 +6,7 @@ import { DEFAULT_MANIFEST_PATH } from "./constants.js";
 import { isIsoDate } from "./dates.js";
 import { normalizePath } from "./file-index.js";
 import { sortedResourceBaselineEntries } from "./baseline-ratchet.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 import type { ResourceAccessReference } from "./resource-access.js";
 import type {
   AnalysisContext,
@@ -137,8 +138,8 @@ export function createCouplingGraph(
 
   return {
     schemaVersion: "cellfence.coupling-graph.v1",
-    nodes: [...nodes.values()].sort((left, right) => graphNodeKey(left.kind, left.id).localeCompare(graphNodeKey(right.kind, right.id))),
-    edges: [...edges.values()].sort((left, right) => `${left.from}:${left.to}:${left.kind}:${left.label}`.localeCompare(`${right.from}:${right.to}:${right.kind}:${right.label}`)),
+    nodes: [...nodes.values()].sort((left, right) => stableStringCompare(graphNodeKey(left.kind, left.id), graphNodeKey(right.kind, right.id))),
+    edges: [...edges.values()].sort((left, right) => stableStringCompare(`${left.from}:${left.to}:${left.kind}:${left.label}`, `${right.from}:${right.to}:${right.kind}:${right.label}`)),
   };
 }
 

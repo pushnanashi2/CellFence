@@ -1,4 +1,5 @@
-import { normalizePath } from "./file-index.js";
+import { expandedGlobPatterns, normalizeGlobPattern } from "./glob.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
 type GlobTransition =
   | { kind: "epsilon"; to: number }
@@ -13,7 +14,7 @@ type GlobAutomaton = {
 };
 
 function normalizedGlobPattern(pattern: string): string {
-  return normalizePath(pattern).replace(/\/$/, "");
+  return normalizeGlobPattern(pattern);
 }
 
 function normalizedPatternSegments(pattern: string): string[] {
@@ -21,6 +22,13 @@ function normalizedPatternSegments(pattern: string): string[] {
   const segments = normalized.split("/");
   // Stryker disable next-line ArithmeticOperator: retaining the first or last member of a consecutive globstar run recognizes the same path language.
   return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
+}
+
+function expandedOwnedPathPatterns(pattern: string): string[] {
+  const expanded = expandedGlobPatterns(pattern);
+  if (pattern.includes("*")) return expanded;
+  // Stryker disable next-line ConditionalExpression,StringLiteral,ArrayDeclaration: schema-valid owned paths are non-empty, and the empty fallback cannot overlap a valid repo path.
+  return expanded.flatMap((entry) => entry === "" ? [entry] : [entry, `${entry}/**`]);
 }
 
 function patternAutomaton(pattern: string): GlobAutomaton {
@@ -170,7 +178,7 @@ const OTHER_NON_SLASH_KEY = "\u0000__cellfence_other_non_slash__";
 // L(outer), while preserving NFA nondeterminism for cases like
 // `src/*/a.ts` ⊆ `src/**/a.ts`.
 
-export function pathPatternSubset(innerPattern: string, outerPattern: string): boolean {
+function pathPatternSubsetOne(innerPattern: string, outerPattern: string): boolean {
   const inner = patternAutomaton(innerPattern);
   const outer = patternAutomaton(outerPattern);
   const alphabet = automataAlphabet(inner, outer);
@@ -198,7 +206,7 @@ export function pathPatternSubset(innerPattern: string, outerPattern: string): b
     const current = queue.shift() as Pair;
     const innerAccept = current.inner.has(inner.accept);
     const outerAccept = current.outer.has(outer.accept);
-    if (innerAccept && !outerAccept) return false;
+    if (innerAccept && !outerAccept && !current.lastWasSlash) return false;
     for (const symbol of alphabet) {
       if (symbol === "/" && current.lastWasSlash) continue;
       enqueue({
@@ -209,6 +217,13 @@ export function pathPatternSubset(innerPattern: string, outerPattern: string): b
     }
   }
   return true;
+}
+
+export function pathPatternSubset(innerPattern: string, outerPattern: string): boolean {
+  if (normalizeGlobPattern(innerPattern) === "") return false;
+  const outerPatterns = expandedGlobPatterns(outerPattern);
+  return expandedGlobPatterns(innerPattern)
+    .every((inner) => outerPatterns.some((outer) => pathPatternSubsetOne(inner, outer)));
 }
 
 function automataAlphabet(...automata: GlobAutomaton[]): string[] {
@@ -222,7 +237,7 @@ function automataAlphabet(...automata: GlobAutomaton[]): string[] {
     }
   }
   // Stryker disable next-line MethodExpression,ArrowFunction: sorting makes traversal deterministic for reports, but subset truth is independent of alphabet order.
-  return [...symbols].sort((left, right) => left.localeCompare(right));
+  return [...symbols].sort(stableStringCompare);
 }
 
 function transitionAcceptsSymbol(transition: ConsumingGlobTransition, symbol: string): boolean {
@@ -255,7 +270,8 @@ function stateSetKey(state: Set<number>): string {
 }
 
 export function pathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  if (patternAutomataIntersect(leftPattern, rightPattern)) return true;
+  if (expandedGlobPatterns(leftPattern).some((leftExpanded) =>
+    expandedGlobPatterns(rightPattern).some((rightExpanded) => patternAutomataIntersect(leftExpanded, rightExpanded)))) return true;
   const left = normalizedGlobPattern(leftPattern);
   const right = normalizedGlobPattern(rightPattern);
   const leftHasWildcard = left.includes("*");
@@ -264,5 +280,6 @@ export function pathPatternsOverlap(leftPattern: string, rightPattern: string): 
 }
 
 export function ownedPathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  return patternAutomataIntersect(leftPattern, rightPattern);
+  return expandedOwnedPathPatterns(leftPattern).some((leftExpanded) =>
+    expandedOwnedPathPatterns(rightPattern).some((rightExpanded) => patternAutomataIntersect(leftExpanded, rightExpanded)));
 }

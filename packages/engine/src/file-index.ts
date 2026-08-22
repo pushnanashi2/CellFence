@@ -4,10 +4,11 @@ import ts from "typescript";
 
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
 
-import { matchesGlobPattern } from "./glob.js";
+import { expandedGlobPatterns, matchesGlobPattern } from "./glob.js";
 import { pathPatternSubset } from "./glob-overlap.js";
+import { stableStringCompare } from "./governance/canonicalization.js";
 
-export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
+export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py", ".pyi"];
 
 const ALWAYS_IGNORED_DIRECTORIES = new Set([
   ".git",
@@ -36,6 +37,7 @@ export type FileIndexContext = {
 export type SymlinkEntry = {
   path: string;
   targetPath?: string;
+  targetType?: "file" | "directory" | "other";
   error?: string;
 };
 
@@ -56,6 +58,14 @@ export function matchesPattern(relativePath: string, pattern: string): boolean {
   return matchesGlobPattern(normalizePath(relativePath), pattern);
 }
 
+export function sourceExtensionForPath(filePath: string): string {
+  return path.extname(filePath).toLowerCase();
+}
+
+export function isSourceFilePath(filePath: string): boolean {
+  return SOURCE_EXTENSIONS.includes(sourceExtensionForPath(filePath));
+}
+
 export function literalPrefix(pattern: string): string {
   const normalized = normalizePath(pattern);
   const wildcardIndex = normalized.search(/[*]/);
@@ -73,16 +83,40 @@ function directoryHasExplicitGovernance(rootDir: string, directoryPath: string, 
   return manifest.cells.some((cell) => cell.ownedPaths.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern))));
 }
 
+function directoryExcludedByGovernance(rootDir: string, directoryPath: string, context?: FileIndexContext): boolean {
+  // Stryker disable all: without a context, generated directories are already ignored by the explicit-governance fallback in shouldIgnoreDirectory.
+  if (!context) return false;
+  // Stryker restore all
+  const relativeDirectory = repoPath(rootDir, directoryPath);
+  const probePaths = [
+    relativeDirectory,
+    ...SOURCE_EXTENSIONS.map((extension) => `${relativeDirectory}/__cellfence_probe__${extension}`),
+  ];
+  const excludePatterns = context.manifest.governance?.exclude;
+  if (!excludePatterns) return false;
+  return excludePatterns.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern)));
+}
+
 function shouldIgnoreDirectory(rootDir: string, directoryPath: string, directoryName: string, context?: FileIndexContext): boolean {
   if (ALWAYS_IGNORED_DIRECTORIES.has(directoryName)) return true;
   if (!DEFAULT_GENERATED_DIRECTORIES.has(directoryName)) return false;
+  if (directoryExcludedByGovernance(rootDir, directoryPath, context)) return true;
   return !directoryHasExplicitGovernance(rootDir, directoryPath, context);
 }
 
 export function listFiles(rootDir: string, context?: FileIndexContext): string[] {
   if (context?.listFilesCache) return context.listFilesCache;
   const files: string[] = [];
+  const realRootDir = fs.existsSync(rootDir) ? fs.realpathSync(rootDir) : path.resolve(rootDir);
+  const visitedDirectories = new Set<string>();
+  const pathInsideRoot = (targetPath: string): boolean => {
+    const relativePath = path.relative(realRootDir, targetPath);
+    return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+  };
   function visit(directoryPath: string): void {
+    const realDirectoryPath = fs.existsSync(directoryPath) ? fs.realpathSync(directoryPath) : path.resolve(directoryPath);
+    if (!pathInsideRoot(realDirectoryPath) || visitedDirectories.has(realDirectoryPath)) return;
+    visitedDirectories.add(realDirectoryPath);
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
       const entryPath = path.join(directoryPath, entry.name);
       if (entry.isDirectory() && shouldIgnoreDirectory(rootDir, entryPath, entry.name, context)) continue;
@@ -92,7 +126,9 @@ export function listFiles(rootDir: string, context?: FileIndexContext): string[]
         files.push(entryPath);
       } else if (entry.isSymbolicLink()) {
         try {
-          if (fs.statSync(entryPath).isFile()) files.push(entryPath);
+          const stat = fs.statSync(entryPath);
+          if (stat.isFile()) files.push(entryPath);
+          else if (stat.isDirectory() && !shouldIgnoreDirectory(rootDir, entryPath, entry.name, context)) visit(entryPath);
         } catch {
           // Broken symlinks are handled by listSymlinks; listFiles stays a source-file inventory.
         }
@@ -100,7 +136,7 @@ export function listFiles(rootDir: string, context?: FileIndexContext): string[]
     }
   }
   visit(rootDir);
-  const sortedFiles = files.sort((left, right) => left.localeCompare(right));
+  const sortedFiles = files.sort();
   if (context) context.listFilesCache = sortedFiles;
   return sortedFiles;
 }
@@ -115,7 +151,9 @@ export function listSymlinks(rootDir: string): SymlinkEntry[] {
         visit(entryPath);
       } else if (entry.isSymbolicLink()) {
         try {
-          symlinks.push({ path: entryPath, targetPath: fs.realpathSync(entryPath) });
+          const stat = fs.statSync(entryPath);
+          const targetType = stat.isFile() ? "file" : stat.isDirectory() ? "directory" : "other";
+          symlinks.push({ path: entryPath, targetPath: fs.realpathSync(entryPath), targetType });
         } catch (error) {
           symlinks.push({ path: entryPath, error: error instanceof Error ? error.message : String(error) });
         }
@@ -123,7 +161,7 @@ export function listSymlinks(rootDir: string): SymlinkEntry[] {
     }
   }
   visit(rootDir);
-  return symlinks.sort((left, right) => left.path.localeCompare(right.path));
+  return symlinks.sort((left, right) => stableStringCompare(left.path, right.path));
 }
 
 function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifest, context: FileIndexContext): Map<string, string[]> {
@@ -132,7 +170,7 @@ function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifes
   for (const cell of manifest.cells) index.set(cell.id, []);
   for (const filePath of listFiles(rootDir, context)) {
     const relativePath = repoPath(rootDir, filePath);
-    if (!SOURCE_EXTENSIONS.includes(path.extname(filePath))) continue;
+    if (!isSourceFilePath(filePath)) continue;
     if (pathExcludedByGovernance(manifest, relativePath)) continue;
     for (const cell of manifest.cells) {
       if (!cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern))) continue;
@@ -140,7 +178,7 @@ function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifes
       index.get(cell.id)?.push(filePath);
     }
   }
-  for (const files of index.values()) files.sort((left, right) => left.localeCompare(right));
+  for (const files of index.values()) files.sort();
   context.sourceFilesByCellIndex = index;
   return index;
 }
@@ -152,7 +190,7 @@ export function sourceFilesForCell(rootDir: string, cell: CellManifest, context?
   }
   const files = listFiles(rootDir).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
-    return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+    return isSourceFilePath(filePath) && pathOwnedByCell(cell, relativePath);
   });
   return files;
 }
@@ -171,7 +209,7 @@ export function sourceFilesUnderGovernance(rootDir: string, manifest: CellFenceM
   const exclude = governance.exclude || [];
   return listFiles(rootDir, context).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
-    return SOURCE_EXTENSIONS.includes(path.extname(filePath))
+    return isSourceFilePath(filePath)
       && include.some((pattern) => matchesPattern(relativePath, pattern))
       && !exclude.some((pattern) => matchesPattern(relativePath, pattern));
   });
@@ -187,7 +225,7 @@ export function pathIsGoverned(manifest: CellFenceManifest, relativePath: string
 }
 
 export function pathOwnedByCell(cell: CellManifest, relativePath: string): boolean {
-  return cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+  return cell.ownedPaths.some((pattern) => expandOwnedPath(pattern).some((expanded) => matchesPattern(relativePath, expanded)));
 }
 
 export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {
@@ -211,7 +249,10 @@ export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]
   // by `src/core`) without re-introducing the false
   // positives for sibling directories (e.g. `src/corex/**`
   // is still NOT covered by `src/core/**`).
-  return ownedPaths.some((ownedPath) => expandOwnedPath(ownedPath).some((expanded) => pathPatternSubset(pattern, expanded)));
+  const expandedOwnedPaths = ownedPaths.flatMap(expandOwnedPath);
+  // Stryker disable next-line ConditionalExpression,StringLiteral: empty normalized inner patterns are rejected by `pathPatternSubset`; changing this guard cannot make a schema-valid path covered.
+  return expandedGlobPatterns(pattern).every((expandedPattern) =>
+    expandedPattern !== "" && expandedOwnedPaths.some((ownedPath) => pathPatternSubset(expandedPattern, ownedPath)));
 }
 
 function expandOwnedPath(ownedPath: string): string[] {
@@ -221,11 +262,11 @@ function expandOwnedPath(ownedPath: string): string[] {
 }
 
 export function sourceKindForPath(filePath: string): ts.ScriptKind {
-  const extension = path.extname(filePath);
+  const extension = sourceExtensionForPath(filePath);
   if (extension === ".tsx") return ts.ScriptKind.TSX;
   if (extension === ".jsx") return ts.ScriptKind.JSX;
   if (extension === ".js" || extension === ".mjs" || extension === ".cjs") return ts.ScriptKind.JS;
-  if (extension === ".py") return ts.ScriptKind.Unknown;
+  if (extension === ".py" || extension === ".pyi") return ts.ScriptKind.Unknown;
   return ts.ScriptKind.TS;
 }
 

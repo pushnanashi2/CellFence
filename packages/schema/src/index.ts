@@ -250,12 +250,22 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === "string" && entry.trim().length > 0);
 }
 
+const REVIEW_CONFUSING_CHARACTER_PATTERN = /[\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff]/u;
+const CELL_ID_PATTERN = /^[a-z0-9][a-z0-9._-]*$/;
+
+function hasReviewConfusingCharacters(value: string): boolean {
+  return REVIEW_CONFUSING_CHARACTER_PATTERN.test(value);
+}
+
 function isRepoRelativePathLike(value: string): boolean {
   const normalized = value.replace(/\\/g, "/");
   if (normalized.startsWith("/") || normalized.startsWith("//")) return false;
   if (/^[A-Za-z]:\//.test(normalized)) return false;
-  if ([...normalized].some((character) => character.charCodeAt(0) <= 0x1f)) return false;
-  return !normalized.split("/").includes("..");
+  if ([...normalized].some((character) => character.charCodeAt(0) <= 0x1f) || hasReviewConfusingCharacters(normalized)) return false;
+  const segments = normalized.split("/");
+  const reviewPath = segments.filter((segment) => segment !== ".").join("/");
+  if (reviewPath === "" || reviewPath === ".") return false;
+  return !segments.includes("..");
 }
 
 function validateRepoRelativePathLike(value: unknown, location: string, errors: string[]): void {
@@ -267,6 +277,14 @@ function validateRepoRelativePathLike(value: unknown, location: string, errors: 
 function validateRepoRelativePathLikeArray(value: unknown, location: string, errors: string[]): void {
   if (!Array.isArray(value)) return;
   value.forEach((entry, index) => validateRepoRelativePathLike(entry, `${location}[${index}]`, errors));
+}
+
+function validateCellId(value: unknown, location: string, errors: string[]): void {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    errors.push(`${location} must be a non-empty string`);
+  } else if (!CELL_ID_PATTERN.test(value) || hasReviewConfusingCharacters(value)) {
+    errors.push(`${location} must match ${CELL_ID_PATTERN.source} and contain no bidi, zero-width, DEL, or C1 control characters`);
+  }
 }
 
 function isRuleSeverity(value: unknown): value is RuleSeverity {
@@ -373,9 +391,7 @@ function validateConsumer(value: unknown, location: string, errors: string[]): v
     return false;
   }
   validateKnownKeys(value, location, ["cell", "artifactLanes"], errors);
-  if (typeof value.cell !== "string" || value.cell.trim().length === 0) {
-    errors.push(`${location}.cell must be a non-empty string`);
-  }
+  validateCellId(value.cell, `${location}.cell`, errors);
   if (value.artifactLanes !== undefined && !isStringArray(value.artifactLanes)) {
     errors.push(`${location}.artifactLanes must be an array of non-empty strings`);
   }
@@ -415,9 +431,7 @@ function validateResourceContract(value: unknown, location: string, errors: stri
     return false;
   }
   validateKnownKeys(value, location, ["id", "kind", "access", "selectors", "locked", "description"], errors);
-  if (typeof value.id !== "string" || value.id.trim().length === 0) {
-    errors.push(`${location}.id must be a non-empty string`);
-  }
+  validateCellId(value.id, `${location}.id`, errors);
   if (!["file", "database", "queue", "http"].includes(String(value.kind))) {
     errors.push(`${location}.kind must be file|database|queue|http`);
   }
@@ -707,9 +721,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "budgets",
     "rules",
   ], errors);
-  if (typeof value.id !== "string" || value.id.trim().length === 0) {
-    errors.push(`${location}.id must be a non-empty string`);
-  }
+  validateCellId(value.id, `${location}.id`, errors);
   if (!isStringArray(value.ownedPaths)) {
     errors.push(`${location}.ownedPaths must be an array of non-empty strings`);
   } else {

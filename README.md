@@ -316,6 +316,7 @@ Usage:
   cellfence manifest verify --from systems/*/service.json [--production-scope] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
   cellfence context --auto-allocate --task "task text" [--cell cell-id] [--json|--format agents-md]
+  cellfence coverage [--manifest cellfence.manifest.json] [--json|--format sarif] [--fail-under 0.8] [--coverage-output coverage.json]
   cellfence install --target agents-md --file AGENTS.md [--check|--uninstall] [--json]
   cellfence serve --mcp
   cellfence graph [--json|--format mermaid]
@@ -331,6 +332,7 @@ Usage:
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
+  cellfence baseline gate [--baseline-base base.json|--base-ref HEAD~1] [--baseline-head head.json|--head-ref HEAD] [--json|--format markdown|--format sarif]
   cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]

@@ -264,7 +264,7 @@ function stableCanonicalJson(value) {
   if (isRecord(value)) {
     return `{${Object.entries(value)
       .filter((entry) => entry[1] !== undefined)
-      .sort((left, right) => left[0].localeCompare(right[0]))
+      .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
       .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableCanonicalJson(entryValue)}`)
       .join(",")}}`;
   }

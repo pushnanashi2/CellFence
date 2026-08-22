@@ -93,7 +93,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            node: 20
+          - os: ubuntu-latest
             node: 22
+          - os: ubuntu-latest
+            node: 24
           - os: macos-latest
             node: 22
           - os: windows-latest
@@ -109,6 +113,31 @@ jobs:
           python-version: "3.12"
       - run: npm ci
       - run: npm test
+
+  locale-determinism-smoke:
+    name: locale determinism smoke (${{ matrix.locale }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: [tr_TR.UTF-8, sv_SE.UTF-8]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - run: sudo locale-gen ${{ matrix.locale }}
+      - run: npm ci
+      - run: npm run build --silent
+      - run: node --test tests/baseline-seal.test.mjs tests/governance-core.test.mjs tests/file-index.test.mjs
+        env:
+          LANG: ${{ matrix.locale }}
+          LC_ALL: ${{ matrix.locale }}
 
   build:
     runs-on: ubuntu-latest

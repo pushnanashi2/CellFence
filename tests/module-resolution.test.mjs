@@ -159,12 +159,13 @@ test("module resolution candidate paths preserve runtime and source extension or
   assert.deepEqual(noExtension.slice(9, 10), [
     "dir/file.py",
   ]);
-  assert.deepEqual(noExtension.slice(10, 13), [
+  assert.deepEqual(noExtension.slice(10, 14), [
+    "dir/file.pyi",
     "dir/file.d.ts",
     "dir/file.d.mts",
     "dir/file.d.cts",
   ]);
-  assert.deepEqual(noExtension.slice(13), [
+  assert.deepEqual(noExtension.slice(14), [
     "dir/file/index.ts",
     "dir/file/index.tsx",
     "dir/file/index.js",
@@ -174,6 +175,7 @@ test("module resolution candidate paths preserve runtime and source extension or
     "dir/file/index.mjs",
     "dir/file/index.cjs",
     "dir/file/index.py",
+    "dir/file/index.pyi",
     "dir/file/index.d.ts",
     "dir/file/index.d.mts",
     "dir/file/index.d.cts",
@@ -2501,6 +2503,22 @@ test("module resolution extracts and resolves Python imports", () => {
   }
 });
 
+test("module resolution treats Python type stubs as Python sources", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-stub-imports-"));
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/consumer"), { recursive: true });
+    const consumerPath = path.join(rootDir, "src/consumer/public.pyi");
+    fs.writeFileSync(consumerPath, "import producer.public\n");
+
+    const references = extractImports(context(rootDir), consumerPath, []);
+    assert.deepEqual(references.map((reference) => [reference.importerPath, reference.specifier, reference.line]), [
+      ["src/consumer/public.pyi", "producer.public", 1],
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("module resolution extracts Python submodule from-imports and literal dynamic imports", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-python-submodule-imports-"));
   try {
@@ -2872,7 +2890,7 @@ test("module resolution extracts Python public symbols and surface hashes", () =
       "py:function:run(value)",
       "py:import:public_helper",
       "py:variable:VERSION:str",
-    ].sort((left, right) => left.localeCompare(right));
+    ].sort();
     assert.deepEqual(syntaxPublicSurfaceSignatureParts(inferredPath), expectedParts);
     assert.equal(publicSurfaceHash(inferredPath), sha256(expectedParts.join("\n")));
   } finally {
@@ -3007,19 +3025,19 @@ test("module resolution syntax surface parts encode every supported declaration 
       "ClassDeclaration:Box:export class Box { value: number = 1; }",
       "ClassDeclaration:default:export default class {}",
       "EnumDeclaration:Rank:export enum Rank { One = 1 }",
+      "InterfaceDeclaration:Shape:export interface Shape { name: string; }",
+      "TypeAliasDeclaration:Mode:export type Mode = 'a' | 'b';",
       "export-import:legacy:require('./legacy.js')",
       "export-star:./more.js",
       "export:default",
       "export:exposed",
       "function:default(value:string,count:number):boolean",
       "function:loose(value:):void",
-      "InterfaceDeclaration:Shape:export interface Shape { name: string; }",
       "namespace:API:export namespace API { export const flag = true; }",
       "namespace:tools",
-      "TypeAliasDeclaration:Mode:export type Mode = 'a' | 'b';",
       "variable:alpha:",
       "variable:beta:",
-    ].sort((left, right) => left.localeCompare(right)));
+    ].sort());
     assert.deepEqual(syntaxPublicSurfaceSignatureParts(path.join(rootDir, "src/core/missing.ts")), []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

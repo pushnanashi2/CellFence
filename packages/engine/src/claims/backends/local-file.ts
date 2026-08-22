@@ -16,7 +16,7 @@ import {
   CellFenceClaimCasConflict,
   emptyClaimStoreState,
 } from "../backend.js";
-import { stableCanonicalJson } from "../../governance/canonicalization.js";
+import { stableCanonicalJson, stableStringCompare } from "../../governance/canonicalization.js";
 
 export type LocalFileClaimStoreOptions = {
   filePath: string;
@@ -40,7 +40,7 @@ function fingerprintOf(state: ClaimStoreState): string {
   // the engine's canonical JSON so two writes with the same content
   // collide on the same fingerprint, and so callers can compute the
   // expected fingerprint without serialising twice.
-  const canonical = stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) });
+  const canonical = stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => stableStringCompare(a.id, b.id)) });
   return crypto.createHash("sha256").update(canonical).digest("hex");
 }
 
@@ -141,5 +141,5 @@ export function localFileClaimStoreFingerprint(state: ClaimStoreState): string {
 // same path. 0.4.0 callers should rely on LocalFileClaimStore.write
 // directly rather than reaching for the fingerprint.
 export function serializeLocalFileClaimStore(state: ClaimStoreState): string {
-  return `${stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) })}\n`;
+  return `${stableCanonicalJson({ ...state, claims: [...state.claims].sort((a, b) => stableStringCompare(a.id, b.id)) })}\n`;
 }

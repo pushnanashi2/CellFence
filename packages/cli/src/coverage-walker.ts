@@ -114,7 +114,7 @@ export function walkCoverage(options: WalkOptions): WalkResult {
     .filter((filePath) => !sourceInventory.has(filePath)).length;
   const analyzedFiles = [...sourceInventory]
     .filter((filePath) => !unresolvedFiles.has(filePath))
-    .sort((left, right) => left.localeCompare(right));
+    .sort();
   return {
     unresolved,
     analyzedFiles,

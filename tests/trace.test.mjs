@@ -67,6 +67,42 @@ test("trace hook emits runtime file resource evidence", () => {
   ]);
 });
 
+test("trace hook sorts resource evidence by deterministic access key", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-sort-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "data"), { recursive: true });
+    fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+      import fs from "node:fs";
+      fs.writeFileSync("data/z.json", "{}\\n");
+      fs.writeFileSync("data/a.json", "{}\\n");
+    `);
+
+    const evidencePath = path.join(tempDir, "resource-evidence.json");
+    const result = spawnSync(process.execPath, [
+      "--import",
+      pathToFileURL(tracePath).href,
+      "app.mjs",
+    ], {
+      cwd: tempDir,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CELLFENCE_TRACE_CELL: "runtime",
+        CELLFENCE_TRACE_OUT: evidencePath,
+      },
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+    assert.deepEqual(evidence.accesses.map((access) => access.selector), [
+      "data/a.json",
+      "data/z.json",
+    ]);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("trace hook emits async and append file evidence while ignoring source files", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-async-"));
   fs.mkdirSync(path.join(tempDir, "data"), { recursive: true });
@@ -342,6 +378,31 @@ test("unrelated preloads do not make trace imports install globally", () => {
   assert.equal(fs.existsSync(evidencePath), false);
 });
 
+test("unrelated inline preloads do not make trace imports install globally", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-unrelated-inline-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?unrelated-inline-preload`)});
+    fs.writeFileSync("unrelated-inline-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, [
+    "--import=data:text/javascript,globalThis.__cellfence_unrelated_inline_preload=true",
+    "app.mjs",
+  ], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
 test("synthetic execArgv entries do not trick trace preload detection", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-fake-execargv-"));
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
@@ -364,6 +425,50 @@ test("synthetic execArgv entries do not trick trace preload detection", () => {
 
   assert.equal(result.status, 0, result.stderr);
   assert.equal(fs.existsSync(evidencePath), false);
+});
+
+test("trace preload detection accepts exact file URL import flags", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-file-url-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("file-url-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["--import", pathToFileURL(tracePath).href, "app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(evidencePath, "utf8")).accesses.some((access) => access.selector === "file-url-preload.json"));
+});
+
+test("trace preload detection accepts exact inline file URL import flags", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-inline-file-url-preload-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import fs from "node:fs";
+    process.chdir(${JSON.stringify(tempDir)});
+    fs.writeFileSync("inline-file-url-preload.json", "{}\\n");
+  `);
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, [`--import=${pathToFileURL(tracePath).href}`, "app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(JSON.parse(fs.readFileSync(evidencePath, "utf8")).accesses.some((access) => access.selector === "inline-file-url-preload.json"));
 });
 
 test("trace preload detection accepts only exact CellFence import flags", async () => {

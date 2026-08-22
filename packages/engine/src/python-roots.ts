@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { literalPrefix, normalizePath } from "./file-index.js";
+import { literalPrefix, normalizePath, sourceExtensionForPath } from "./file-index.js";
 import type { AnalysisContext } from "./types.js";
 
 function parentPrefix(relativePath: string): string {
@@ -88,7 +88,7 @@ export function pythonSourceRoots(context: AnalysisContext): string[] {
   for (const root of pythonSourceRootsFromSetupCfg(context.rootDir)) addPythonRoot(roots, root);
   for (const root of pythonSourceRootsFromSetupPy(context.rootDir)) addPythonRoot(roots, root);
   for (const cell of context.manifest.cells) {
-    if (path.extname(cell.publicEntry) === ".py") {
+    if ([".py", ".pyi"].includes(sourceExtensionForPath(cell.publicEntry))) {
       const parent = parentPrefix(cell.publicEntry);
       const packageRoot = parentPrefix(parent);
       roots.add(packageRoot);
@@ -99,5 +99,5 @@ export function pythonSourceRoots(context: AnalysisContext): string[] {
       roots.add(parentPrefix(prefix));
     }
   }
-  return [...roots].sort((left, right) => left.localeCompare(right));
+  return [...roots].sort();
 }

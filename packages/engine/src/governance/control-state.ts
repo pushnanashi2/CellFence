@@ -4,7 +4,7 @@ import type {
   GovernanceControlState,
   NormalizedObservedIntermediateRepresentation,
 } from "./model.js";
-import { stableDigest } from "./canonicalization.js";
+import { stableDigest, stableStringCompare } from "./canonicalization.js";
 
 type ControlStateInput = {
   declared: DeclaredIntermediateRepresentation;
@@ -15,12 +15,12 @@ type ControlStateInput = {
 
 function sortedRecord(record: Record<string, string>): Record<string, string> {
   const sorted: Record<string, string> = {};
-  for (const key of Object.keys(record).sort((left, right) => left.localeCompare(right))) sorted[key] = record[key] as string;
+  for (const key of Object.keys(record).sort(stableStringCompare)) sorted[key] = record[key] as string;
   return sorted;
 }
 
 function sortedValues<Value extends string>(values: Value[]): Value[] {
-  return [...values].sort((left, right) => left.localeCompare(right));
+  return [...values].sort(stableStringCompare);
 }
 
 export function createGovernanceControlState(input: ControlStateInput): GovernanceControlState {

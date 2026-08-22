@@ -112,15 +112,24 @@ function normalizedJsonFindings(checkResult) {
   })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
 }
 
+function decodeSarifArtifactUri(uri) {
+  try {
+    return uri.split("/").map((segment) => decodeURIComponent(segment)).join("/");
+  } catch {
+    return uri;
+  }
+}
+
 function normalizedSarifFindings(sarif) {
   const results = sarif.runs?.flatMap((run) => run.results || []) || [];
   return results.map((result) => {
     const location = result.locations?.[0]?.physicalLocation;
+    const uri = location?.artifactLocation?.uri || null;
     return {
       ruleId: result.ruleId,
       level: result.level,
       message: result.message?.text,
-      filePath: location?.artifactLocation?.uri || null,
+      filePath: uri ? decodeSarifArtifactUri(uri) : null,
       line: location?.region?.startLine || null,
       fingerprint: result.partialFingerprints?.cellfence || null,
     };

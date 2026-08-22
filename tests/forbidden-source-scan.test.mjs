@@ -20,6 +20,12 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+test("forbidden source scan derives its own file path through fileURLToPath", () => {
+  const source = fs.readFileSync(scriptPath, "utf8");
+  assert.match(source, /fileURLToPath\(import\.meta\.url\)/);
+  assert.doesNotMatch(source, /new URL\(import\.meta\.url\)\.pathname/);
+});
+
 test("forbidden source scan rejects a blocked reviewer term but permits the related advisory word", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-forbidden-scan-"));
   try {

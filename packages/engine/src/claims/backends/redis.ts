@@ -13,6 +13,7 @@ import {
   CellFenceClaimCasConflict,
   emptyClaimStoreState,
 } from "../backend.js";
+import { stableStringCompare } from "../../governance/canonicalization.js";
 
 export type RedisClaimStoreOptions = {
   /** Redis connection URL, e.g. `redis://localhost:6379/0`. */
@@ -97,7 +98,7 @@ export class RedisClaimStore {
   }
 
   private static stableState(state: ClaimStoreState): string {
-    return JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => a.id.localeCompare(b.id)) });
+    return JSON.stringify({ ...state, claims: [...state.claims].sort((a, b) => stableStringCompare(a.id, b.id)) });
   }
 
   private static stateDigest(state: ClaimStoreState): string {

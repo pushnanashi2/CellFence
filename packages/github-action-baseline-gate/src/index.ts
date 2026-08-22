@@ -13,8 +13,15 @@
 
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import fs from "node:fs";
 
 import { runBaselineGateFull, type BaselineGateResult } from "./baseline-gate.js";
+import {
+  changedFileIsBaseline,
+  changedFileIsImplementation,
+  loadCodeownersFromRepo,
+  parseCodeowners,
+} from "./codeowners.js";
 
 const GOVERNANCE_LABEL = "governance-change";
 const STICKY_COMMENT_MARKER = "<!-- cellfence-baseline-gate -->";
@@ -78,78 +85,6 @@ async function approveFromCodeowner(
     if (review.state === "APPROVED" && review.commitId === headSha && userMatchesAllowlist({ login }, codeowners)) return true;
   }
   return false;
-}
-
-function parseCodeowners(input: string | undefined): string[] {
-  if (!input) return [];
-  const codeowners = input.split(",").map((entry) => entry.trim()).filter(Boolean);
-  validateUsernameCodeowners(codeowners);
-  return codeowners;
-}
-
-function validateUsernameCodeowners(codeowners: string[]): void {
-  const teamEntries = codeowners.filter((entry) => /^@?[^/\s]+\/[^/\s]+$/.test(entry));
-  if (teamEntries.length === 0) return;
-  throw new Error(
-    `baseline-codeowners currently supports GitHub usernames only; team entries are not resolved: ${teamEntries.join(", ")}`,
-  );
-}
-
-// Minimal CODEOWNERS parser: only enough to pull out the entries
-// that apply to the baseline path. The full CODEOWNERS spec has
-// many edge cases (negations, escape rules); for the gate's
-// default-allowlist purpose we only need "who owns the baseline
-// file". Falls back to an empty list on parse failure.
-function codeownersForPath(codeownersText: string, targetPath: string): string[] {
-  const target = targetPath.replace(/^\.\//, "").replace(/\\/g, "/");
-  const candidates: { pattern: string; owners: string[] }[] = [];
-  for (const rawLine of codeownersText.split(/\r?\n/)) {
-    const line = rawLine.replace(/#.*$/, "").trim();
-    if (!line) continue;
-    const [pattern, ...owners] = line.split(/\s+/);
-    if (!pattern || owners.length === 0) continue;
-    candidates.push({ pattern, owners });
-  }
-  // CODEOWNERS: latest match wins. Patterns are not full globs;
-  // we approximate by checking substring + trailing /**.
-  const matches = candidates.filter(({ pattern }) => {
-    const norm = pattern.replace(/^\//, "");
-    if (norm === target) return true;
-    if (norm.endsWith("/**") && target.startsWith(norm.slice(0, -2))) return true;
-    if (target.startsWith(norm.replace(/\/$/, "") + "/")) return true;
-    return false;
-  });
-  if (matches.length === 0) return [];
-  return matches[matches.length - 1].owners;
-}
-
-async function loadCodeownersFromRepo(
-  octokit: Octokit,
-  owner: string,
-  repo: string,
-  baselineFile: string,
-  ref: string,
-): Promise<string[]> {
-  for (const codeownersPath of [".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS"]) {
-    let text: string;
-    try {
-      const response = await octokit.rest.repos.getContent({ owner, repo, path: codeownersPath, ref });
-      const data = response.data;
-      if (Array.isArray(data) || !("content" in data) || typeof data.content !== "string") continue;
-      text = Buffer.from(data.content, "base64").toString("utf8");
-    } catch (error) {
-      const status = typeof error === "object" && error !== null && "status" in error ? (error as { status: number }).status : 0;
-      if (status !== 404) {
-        core.warning(`CODEOWNERS lookup at ${codeownersPath} failed: ${error instanceof Error ? error.message : String(error)}`);
-      }
-      continue;
-    }
-    const owners = codeownersForPath(text, baselineFile);
-    if (owners.length === 0) continue;
-    validateUsernameCodeowners(owners);
-    return owners;
-  }
-  return [];
 }
 
 function formatGateComment(input: {
@@ -276,20 +211,6 @@ async function assertPullRequestRevision(
       `pull request revision changed while baseline gate was running; expected base ${expectedBaseSha} and head ${expectedHeadSha}, got base ${actualBaseSha || "unknown"} and head ${actualHeadSha || "unknown"}. Re-run the workflow on the current PR revision.`,
     );
   }
-}
-
-function normalizeRepoPathForAction(filePath: string): string {
-  return filePath.replace(/\\/g, "/").replace(/^\.\//, "");
-}
-
-function changedFileIsBaseline(name: string, baselineFile: string): boolean {
-  return normalizeRepoPathForAction(name) === normalizeRepoPathForAction(baselineFile);
-}
-
-function changedFileIsImplementation(name: string, baselineFile: string): boolean {
-  const normalized = normalizeRepoPathForAction(name);
-  if (changedFileIsBaseline(normalized, baselineFile)) return false;
-  return !normalized.startsWith(".cellfence/") && !normalized.endsWith(".md") && normalized !== "PROGRESS.md";
 }
 
 function parseCommentMode(value: string | undefined): "update" | "create" | "disabled" {
@@ -459,9 +380,20 @@ export async function runAction(): Promise<void> {
   core.info("governance change approved by a baseline codeowner");
 }
 
-runAction().catch((error) => {
-  core.setFailed(error instanceof Error ? error.message : String(error));
-});
+function isDirectActionExecution(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(__filename) === fs.realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectActionExecution()) {
+  runAction().catch((error) => {
+    core.setFailed(error instanceof Error ? error.message : String(error));
+  });
+}
 
 // 0.4.1: surface the action.yml / source input contract as a
 // module-level constant so the test suite can assert the two

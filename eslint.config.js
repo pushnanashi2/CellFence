@@ -12,6 +12,11 @@ const focusedTestSelectors = [
   },
 ];
 
+const localeCompareSelector = {
+  selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='localeCompare']",
+  message: "Use code-unit ordering instead of localeCompare for deterministic CellFence outputs.",
+};
+
 export default tseslint.config(
   {
     ignores: [
@@ -77,6 +82,12 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
       "no-unused-vars": "off",
+    },
+  },
+  {
+    files: ["packages/**/*.{js,mjs,cjs,ts,tsx,mts,cts}"],
+    rules: {
+      "no-restricted-syntax": ["error", ...focusedTestSelectors, localeCompareSelector],
     },
   },
 );

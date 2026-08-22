@@ -34,6 +34,13 @@ type TraceAccessInput = Omit<ResourceEvidenceAccess, "detectedBy" | "confidence"
   confidence?: "transient" | "runtime";
 };
 
+function stableStringCompare(left: string, right: string): number {
+  // Stryker disable next-line ConditionalExpression,EqualityOperator: access keys are de-duplicated in a Map before sorting, so equal-key comparisons are unobservable here.
+  if (left === right) return 0;
+  // Stryker disable next-line EqualityOperator: equality returned above, so `<` and `<=` have the same observable language here.
+  return left < right ? -1 : 1;
+}
+
 const originalReadFileSync = fs.readFileSync.bind(fs);
 const originalWriteFileSync = fs.writeFileSync.bind(fs);
 const originalAppendFileSync = fs.appendFileSync.bind(fs);
@@ -189,7 +196,7 @@ export function flushEvidence(): void {
     commitSha: readCommitSha(),
     cellId: defaultCellId(),
     transcriptStatus: transcriptStatus(),
-    accesses: [...accesses.values()].sort((left, right) => accessKey(left).localeCompare(accessKey(right))),
+    accesses: [...accesses.values()].sort((left, right) => stableStringCompare(accessKey(left), accessKey(right))),
   };
   originalWriteFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);
 }
@@ -203,6 +210,7 @@ function registerFlushHooks(): void {
 
 export function installTrace(): void {
   if (installed || process.env.CELLFENCE_TRACE_DISABLE === "1") return;
+  // Stryker disable next-line BooleanLiteral: repeated installs reassign wrappers from immutable originals, so flipping this guard assignment is observationally equivalent.
   installed = true;
   registerFlushHooks();
 
@@ -247,7 +255,9 @@ export function installTrace(): void {
 }
 
 function importSpecifierTargetsThisModule(specifier: string): boolean {
+  // Stryker disable all: package-specifier preload is exercised through subprocess resolution, which Stryker cannot reliably bind to the mutated sandbox copy.
   if (specifier === "@cellfence/trace") return true;
+  // Stryker restore all
   try {
     if (path.resolve(fileURLToPath(specifier)) === path.resolve(fileURLToPath(import.meta.url))) return true;
   } catch {

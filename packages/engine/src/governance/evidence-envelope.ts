@@ -19,6 +19,7 @@ import type {
   SubjectSnapshot,
 } from "./model.js";
 import { createRawObservationReport } from "./observation-report.js";
+import { stableStringCompare } from "./canonicalization.js";
 import { createSubjectSnapshotFromFiles, type SubjectSnapshotInputFile } from "./subject-snapshot.js";
 
 function addGovernanceSubjectFile(
@@ -58,7 +59,7 @@ function governanceSubjectFiles(
   for (const governedFilePath of sourceFilesUnderGovernance(context.rootDir, context.manifest, context)) {
     addGovernanceSubjectFile(subjectFiles, context.rootDir, repoPath(context.rootDir, governedFilePath), "source");
   }
-  return [...subjectFiles.values()].sort((left, right) => left.path.localeCompare(right.path));
+  return [...subjectFiles.values()].sort((left, right) => stableStringCompare(left.path, right.path));
 }
 
 function requiredGovernanceFamilies(baselinePath: string | undefined): ObservationFamily[] {

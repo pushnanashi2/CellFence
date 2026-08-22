@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const forbiddenTerms = [
   "koenoki",
@@ -22,7 +23,7 @@ const allowedPhrases = [
 ];
 
 const root = process.cwd();
-const selfPath = path.relative(root, new URL(import.meta.url).pathname);
+const selfPath = path.relative(root, fileURLToPath(import.meta.url));
 const ignoredDirectories = new Set([".git", ".stryker-tmp", "node_modules", "dist", "coverage", "reports", "tmp"]);
 const ignoredFiles = new Set([selfPath.split(path.sep).join("/")]);
 const scannedExtensions = new Set([".ts", ".js", ".mjs", ".json", ".md", ".yml", ".yaml"]);

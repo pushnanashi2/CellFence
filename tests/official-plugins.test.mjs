@@ -1268,6 +1268,179 @@ test("geo purity plugin covers defaults, line boundaries, and escaped symbols", 
   }))), []);
 });
 
+test("geo purity JSDoc detection stays linear on repeated comment blocks", () => {
+  const rule = directRule(geoPurityPlugin({
+    requirePublicJsdoc: true,
+    maxPublicEntryLines: Number.MAX_SAFE_INTEGER,
+    severity: "error",
+  }), "geo-purity/context-shape");
+  const text = `${"/**\\n*/\\n".repeat(4096)}export const undocumented = true;\n`;
+  const findings = rule.run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["undocumented"],
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { core: ["src/core/public.ts"] },
+      contents: { "src/core/public.ts": text },
+    },
+  })));
+  assert.deepEqual(findings.map((finding) => finding.ruleId), ["geo-purity/public-symbol-undocumented"]);
+});
+
+test("geo purity JSDoc detection covers supported export forms exactly", () => {
+  const rule = directRule(geoPurityPlugin({
+    requirePublicJsdoc: true,
+    maxPublicEntryLines: Number.MAX_SAFE_INTEGER,
+    severity: "error",
+  }), "geo-purity/context-shape");
+  const publicSymbols = [
+    "DocumentedEnum",
+    "DocumentedInterface",
+    "DocumentedType",
+    "$dollar_1",
+    "AZaz09",
+    "bareNamed",
+    "documentedAlias",
+    "documentedAsync",
+    "documentedConst",
+    "documentedDefaultClass",
+    "documentedLet",
+    "documentedTab",
+    "documentedVertical",
+    "documentedFormFeed",
+    "documentedCarriage",
+    "documentedVar",
+    "spacedAlias",
+    "trickyAfterPriorClose",
+  ];
+  const findings = rule.run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols,
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "/** const docs */",
+          "export const documentedConst = true;",
+          "/** let docs */",
+          "export let documentedLet = 1;",
+          "/** var docs */",
+          "export var documentedVar = 1;",
+          "/** async function docs */",
+          "export async function documentedAsync() {}",
+          "/** default class docs */",
+          "export default class documentedDefaultClass {}",
+          "/** interface docs */",
+          "export declare interface DocumentedInterface { ok: boolean }",
+          "/** type docs */",
+          "export type DocumentedType = string;",
+          "/** enum docs */",
+          "export enum DocumentedEnum { One }",
+          "/** named export docs */",
+          "export { internal   as   documentedAlias, bareNamed, spacedName   as   spacedAlias };",
+          "*/ /** named export after prior close */",
+          "export { trickyAfterPriorClose };",
+          "/** dollar identifier docs */",
+          "export const $dollar_1 = 1;",
+          "/** identifier boundary docs */",
+          "export const AZaz09=1;",
+          "/** tab whitespace docs */\texport const documentedTab = true;",
+          "/** vertical whitespace docs */\vexport const documentedVertical = true;",
+          "/** form-feed whitespace docs */\fexport const documentedFormFeed = true;",
+          "/** carriage whitespace docs */\rexport const documentedCarriage = true;",
+          "",
+        ].join("\n"),
+      },
+    },
+  })));
+  assert.deepEqual(findings.filter((finding) => finding.ruleId.startsWith("geo-purity/")), []);
+});
+
+test("geo purity JSDoc detection ignores malformed and non-nearby exports", () => {
+  const rule = directRule(geoPurityPlugin({
+    requirePublicJsdoc: true,
+    maxPublicEntryLines: Number.MAX_SAFE_INTEGER,
+    severity: "error",
+  }), "geo-purity/context-shape");
+  const publicSymbols = [
+    "ordinary",
+    "prefixed",
+    "suffixed",
+    "brokenNamed",
+    "invalidIdentifier",
+    "=",
+    "[bad",
+    "[bad]",
+    "{bad",
+    "{bad}",
+    "aliasLeading",
+    "Stryker was here",
+    "unclosed",
+  ];
+  const findings = rule.run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols,
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "/* ordinary block, not JSDoc */",
+          "export const ordinary = true;",
+          "/** prefixed token */",
+          "preexport const prefixed = true;",
+          "/** suffixed token */",
+          "exportconst suffixed = true;",
+          "/** leading alias marker */",
+          "export { as aliasLeading };",
+          "/** empty named export entry */",
+          "export { , };",
+          "/** named export without close */",
+          "export { brokenNamed",
+          "/** invalid declaration */",
+          "export const = invalidIdentifier;",
+          "/** invalid bracket declaration */",
+          "export const [bad] = values;",
+          "/** invalid destructuring declaration */",
+          "export const {bad} = values;",
+          "/** unclosed comment",
+          "export const unclosed = true;",
+          "",
+        ].join("\n"),
+      },
+    },
+  })));
+  assert.deepEqual(
+    findings.map((finding) => finding.details?.symbol).sort(),
+    publicSymbols.sort(),
+  );
+});
+
 test("legacy strangler plugin emits exact legacy dependency findings", () => {
   const rule = directRule(legacyStranglerPlugin({
     legacyCells: ["legacy"],

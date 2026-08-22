@@ -4,6 +4,7 @@ import type {
   RawObservationReport,
   SubjectSnapshot,
 } from "./model.js";
+import { stableStringCompare } from "./canonicalization.js";
 
 export type RawObservationReportInput = {
   observer: string;
@@ -15,8 +16,10 @@ export type RawObservationReportInput = {
 };
 
 function sortObservation(left: FileObservation, right: FileObservation): number {
-  return `${left.filePath}:${left.family}:${left.status}:${left.message || ""}`
-    .localeCompare(`${right.filePath}:${right.family}:${right.status}:${right.message || ""}`);
+  return stableStringCompare(
+    `${left.filePath}:${left.family}:${left.status}:${left.message || ""}`,
+    `${right.filePath}:${right.family}:${right.status}:${right.message || ""}`,
+  );
 }
 
 export function createRawObservationReport(input: RawObservationReportInput): RawObservationReport {
@@ -39,5 +42,5 @@ export function observationFamiliesForReport(report: RawObservationReport): Obse
   if (report.importObservationCount > 0) families.add("imports");
   if (report.resourceObservationCount > 0) families.add("resources");
   if (report.publicSurfaceObservationCount > 0) families.add("public-surface");
-  return [...families].sort((left, right) => left.localeCompare(right));
+  return [...families].sort(stableStringCompare);
 }
