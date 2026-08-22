@@ -37,6 +37,10 @@
           "selectors": ["app.users", "app.events"]
         }
       ],
+      "externalDependencies": {
+        "claim": ["npm:decimal.js"],
+        "allow": ["npm:zod"]
+      },
       "budgets": {
         "ownedPathPatterns": 1,
         "publicSymbols": 10,
@@ -49,6 +53,12 @@
 ```
 
 `packageName` is optional. When present, importing the exact package name is treated as importing the declared public entry. Package subpath imports into private implementation remain violations.
+
+`externalDependencies` is optional. `allow` permits the current cell to use a namespaced external dependency such as `npm:zod` or `python-import:pydantic`. `claim` also permits the current cell, and additionally makes the dependency exclusive to the set of cells that claim it. Multiple cells may claim the same dependency to define a closed ownership set. A dependency may not appear in both any `claim` and any `allow` entry in the manifest.
+
+External dependency IDs are ecosystem-qualified. npm dependencies use package roots only (`npm:decimal.js`, `npm:@scope/pkg`); npm subpaths such as `npm:decimal.js/foo` are rejected. Python dependencies use import roots (`python-import:yaml`) rather than distribution names because imports and packages can differ, for example `yaml` versus `PyYAML`.
+
+Baseline checks record the observed external dependency set per cell. Claim violations are stronger than the baseline: if another cell starts claiming `npm:decimal.js`, existing baseline use in a non-claiming cell is still reported until that import is removed or covered by an explicit, expiring waiver. For unclaimed dependencies, the baseline permits existing use, declared `allow`/`claim` permits reviewed new use, and locked cells still reject dependency-set expansion.
 
 Manifest v1 rejects unknown object fields instead of ignoring them. A misspelled policy field such as `requireOwnershp` or `consume` is a configuration error, not a no-op. Duplicate package names, duplicate consumer edges, duplicate artifact lane IDs, duplicate resource contract IDs, and duplicate path class IDs are also rejected where they would make policy ambiguous.
 
@@ -74,7 +84,9 @@ repository rules
 rule default
 ```
 
-`governance.requiredRules` prevents a repository, cell, path override, or CLI caller from weakening selected rules below `error`.
+`governance.requiredRules` prevents a repository, cell, path override, or CLI caller from weakening selected rules below `error`; line-local waiver comments cannot suppress those findings. `cellfence init` and inferred starter manifests include the core boundary rules plus undeclared consumer, public symbol mismatch, and undeclared resource access rules in this list by default.
+
+Waiver comments are intentionally short-lived review artifacts. A valid directive must name one concrete `CELLFENCE_*` rule, expire within 30 days, include an approval identity in GitHub handle, email address, or `org/team` form, and explain the reason. For hard release gates, put the rule in `governance.requiredRules` instead of relying on reviewer text in source comments.
 
 See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
 

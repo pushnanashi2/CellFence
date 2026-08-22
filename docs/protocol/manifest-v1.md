@@ -36,6 +36,8 @@ Artifact lane: a versioned path contract for generated or runtime files that may
 
 Resource contract: a declared static coupling to a file path, database table, queue or topic, or HTTP route or endpoint.
 
+External dependency: a namespaced package or import-root dependency outside the repository boundary, such as `npm:zod`, `npm:@scope/pkg`, or `python-import:yaml`.
+
 Baseline: a captured measurement of architectural surface area.
 
 Ratchet: a check that permits reductions but rejects silent growth beyond a baseline.
@@ -46,7 +48,9 @@ Locked cell: a cell whose accepted baseline cannot be expanded by `baseline upda
 
 Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
 
-Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. CellFence also has a built-in core required-rule set for boundary integrity. `governance.requiredRules` extends that set. Required rules are normalized to `error`, and attempts to weaken them produce `CELLFENCE_REQUIRED_RULE_DISABLED`.
+Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. CellFence also has a built-in core required-rule set for boundary integrity. `governance.requiredRules` extends that set. Required rules are normalized to `error`, attempts to weaken them produce `CELLFENCE_REQUIRED_RULE_DISABLED`, and source waiver comments cannot suppress them. Starter and inferred manifests include undeclared consumer, public symbol mismatch, and undeclared resource access findings as required rules by default.
+
+Waivers: line-local `cellfence-ignore` comments are valid only for one concrete `CELLFENCE_*` rule, an expiry no more than 30 days in the future, an approval identity in GitHub handle, email address, or `org/team` form, and a reason of at least 12 characters. `approved-by:PENDING` is a request placeholder and never suppresses a finding.
 
 Plugin reference: a reserved manifest entry for future npm or local plugin loading. In v0.x, the programmatic plugin API is implemented, but manifest-driven arbitrary-code loading is not enabled.
 
@@ -83,6 +87,10 @@ Manifest, baseline, and resource evidence v1 objects are strict. Unknown fields 
       "selectors": ["app.users", "app.events"]
     }
   ],
+  "externalDependencies": {
+    "claim": ["npm:decimal.js"],
+    "allow": ["npm:zod"]
+  },
   "budgets": {
     "ownedPathPatterns": 1,
     "publicSymbols": 10,
@@ -112,6 +120,12 @@ Repo-relative path patterns use a deliberately small glob dialect: `*` matches w
 `locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires a configured baseline verifier (`CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY`) when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
 Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
+
+External dependency policy is declared per cell under `externalDependencies`. `allow` grants the cell permission to use a dependency without constraining other cells. `claim` grants the cell permission and adds the cell to the dependency's exclusive claiming set. Multiple cells may claim the same dependency, but a dependency cannot appear in both `claim` and `allow` anywhere in the manifest. Supported v1 IDs are npm package roots (`npm:zod`, `npm:@scope/pkg`) and Python import roots (`python-import:yaml`); npm subpaths, unknown prefixes, and Python dotted submodules are rejected as manifest errors.
+
+External dependency evaluation reuses CellFence's existing resolver. Relative imports, absolute local imports, `package.json#imports`, TypeScript path aliases, workspace package imports, package self imports, and Node built-ins are not external dependencies. TypeScript/JavaScript package roots and Python import roots that remain outside the repository boundary are recorded in each cell's baseline as `externalDependencySet`.
+
+The runtime order is fixed: another cell's `claim` produces `CELLFENCE_EXTERNAL_DEPENDENCY_CLAIM_VIOLATION` even if the current cell's baseline already contains that dependency; an existing baseline entry is accepted for unclaimed dependencies; locked cells reject dependency-set growth with `CELLFENCE_LOCKED_EXTERNAL_DEPENDENCY_EXPANSION`; declared `claim` or `allow` accepts reviewed new use in unlocked cells; otherwise baseline checks report `CELLFENCE_RATCHET_EXTERNAL_DEPENDENCY_ADDED`. Existing use that must remain during ownership migration should use a normal expiring waiver on the import finding.
 
 Rule severity precedence is fixed:
 
@@ -160,6 +174,7 @@ CellFence v0.x enforces:
 - locked baseline expansion during `baseline update`;
 - accepted baseline cell set growth;
 - baseline changes for ownership scope, public symbol set, dependency edge set, public entry path, artifact contracts, and isolated declaration-derived public surface signatures;
+- external dependency claim violations, baseline-ratcheted dependency additions, and locked-cell dependency-set expansion;
 - legacy ratchet growth for owned path counts, public symbol counts, public entry line counts, and cross-cell dependency counts when reading old baselines.
 
 Machine-readable findings can include `suggestedResolutions`. These suggestions are nonbinding, but they classify the safe next moves as code changes, manifest changes, baseline updates, or human approval requests. Agents should prefer non-approval code changes when available.

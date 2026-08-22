@@ -10,6 +10,7 @@ import type {
 import { absolutePath, normalizePath, patternCoveredByOwnedPaths } from "./file-index.js";
 import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { publicSurfaceHash } from "./module-resolution.js";
+import { externalDependencySetForCell, type ExternalDependencyObservation } from "./external-dependencies.js";
 import type { ResourceAccessReference } from "./resource-access.js";
 import type { Finding, SuggestedResolution } from "./types.js";
 
@@ -80,6 +81,7 @@ export function computeMetrics(
   context: RatchetContext,
   crossCellDependencies: Map<string, Set<string>>,
   accessesByCell: Map<string, ResourceAccessReference[]>,
+  externalDependenciesByCell: Map<string, ExternalDependencyObservation[]> = new Map(),
 ): Record<string, CellBaselineRecord> {
   const metrics: Record<string, CellBaselineRecord> = {};
   for (const cell of context.manifest.cells) {
@@ -96,6 +98,7 @@ export function computeMetrics(
       dependencyEdges: dependencyEdgesForCell(cell.id, crossCellDependencies.get(cell.id)),
       artifactContracts: artifactContractsForCell(cell),
       resourceAccesses: sortedResourceBaselineEntries(accessesByCell.get(cell.id)),
+      externalDependencySet: externalDependencySetForCell(externalDependenciesByCell.get(cell.id)),
     };
   }
   return metrics;

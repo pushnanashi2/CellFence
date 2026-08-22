@@ -338,6 +338,7 @@ Usage:
   cellfence docs stamp --cell cell-id --file docs/design/cell.md [--json]
   cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
   cellfence waivers list [--manifest cellfence.manifest.json] [--json]
+  cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by @reviewer|email|team] [--json]
   cellfence waivers request --rule CELLFENCE_RULE --file path --line n --expires YYYY-MM-DD --reason text [--approved-by name] [--json]
   cellfence waivers sign --from waiver-request.json --attestation-id id --finding-fingerprint sha256 [--output file]
 

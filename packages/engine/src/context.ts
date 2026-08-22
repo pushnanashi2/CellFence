@@ -83,6 +83,14 @@ export function createCellContext(
       artifactLanes: consumer.artifactLanes || [],
     }];
   });
+  const allowedExternalDependencies = (cell.externalDependencies?.allow || []).map((dependencyId) => ({
+    dependencyId,
+    source: "allow" as const,
+  }));
+  const claimedExternalDependencies = (cell.externalDependencies?.claim || []).map((dependencyId) => ({
+    dependencyId,
+    source: "claim" as const,
+  }));
 
   return {
     schemaVersion: "cellfence.context.v1",
@@ -95,6 +103,9 @@ export function createCellContext(
       publicSymbols: cell.publicSymbols,
     },
     allowedImports,
+    allowedExternalDependencies,
+    claimedExternalDependencies,
+    baselineExternalDependencies: baselineRecord?.externalDependencySet || [],
     allowedResources: cell.resourceContracts || [],
     baselineResources: baselineRecord?.resourceAccesses || [],
     producedArtifacts: cell.producesArtifacts || [],

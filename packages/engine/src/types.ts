@@ -42,6 +42,9 @@ export type RuleId = | "CELLFENCE_MANIFEST_INVALID"
   | "CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE"
   | "CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE"
   | "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"
+  | "CELLFENCE_EXTERNAL_DEPENDENCY_CLAIM_VIOLATION"
+  | "CELLFENCE_RATCHET_EXTERNAL_DEPENDENCY_ADDED"
+  | "CELLFENCE_LOCKED_EXTERNAL_DEPENDENCY_EXPANSION"
   | "CELLFENCE_BASELINE_SEAL_INVALID"
   | "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   | "CELLFENCE_UNRESOLVED_RESOURCE_ACCESS"
@@ -299,6 +302,11 @@ export type ContextBudgetMetric =
   | "publicSurfaceLines"
   | "crossCellDependencies";
 
+export type ContextExternalDependency = {
+  dependencyId: string;
+  source: "claim" | "allow" | "baseline";
+};
+
 export type CouplingGraphNode = {
   id: string;
   label: string;
@@ -431,6 +439,9 @@ export type CellFenceContext = {
     publicSymbols: string[];
   };
   allowedImports: ContextAllowedImport[];
+  allowedExternalDependencies: ContextExternalDependency[];
+  claimedExternalDependencies: ContextExternalDependency[];
+  baselineExternalDependencies: string[];
   allowedResources: ResourceContractManifest[];
   baselineResources: ResourceBaselineEntry[];
   producedArtifacts: Array<{ id: string; paths: string[]; description?: string }>;
