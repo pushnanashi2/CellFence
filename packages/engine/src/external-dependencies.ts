@@ -1,11 +1,13 @@
 import { builtinModules } from "node:module";
 import path from "node:path";
 
-import type { CellFenceBaseline, CellManifest, ExternalDependencyId } from "@cellfence/schema";
+import type { CellFenceBaseline, CellManifest } from "@cellfence/schema";
 
 import { addFinding, codeResolution, manifestResolution } from "./findings.js";
 import type { AnalysisContext, Finding, ResolvedImport } from "./types.js";
 import type { ImportReference } from "./module-resolution.js";
+
+type ExternalDependencyId = string;
 
 const NODE_BUILTINS = new Set<string>([
   ...builtinModules,

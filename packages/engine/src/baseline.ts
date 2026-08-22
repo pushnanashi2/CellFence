@@ -245,8 +245,9 @@ export function guardBaselineUpdate(
       }
     }
 
-    const addedArtifacts = current.artifactContracts && previous.artifactContracts
-      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts as string[]).includes(artifact))      : [];
+    const addedArtifacts = current.artifactContracts
+      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts || []).includes(artifact))
+      : [];
     if (addedArtifacts.length > 0) {
       addLockedBaselineFinding(
         findings,

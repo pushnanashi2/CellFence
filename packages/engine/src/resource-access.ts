@@ -1201,10 +1201,13 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
     if (ts.isCallExpression(node)) {
       const name = expressionName(node.expression);
       const firstArgumentText = literalText(node.arguments[0]);
-      const firstArgumentSql = staticStringResolutionAt(sourceFile, node, node.arguments[0], staticSqlStrings);
-      const firstArgumentSqlTexts = firstArgumentSql.values;
       const methodName = propertyName(node.expression);
       const rootName = ts.isPropertyAccessExpression(node.expression) ? expressionRootName(node.expression.expression) : undefined;
+      let firstArgumentSql: StaticStringResolution | undefined;
+      const firstArgumentSqlResolution = (): StaticStringResolution => {
+        firstArgumentSql ||= staticStringResolutionAt(sourceFile, node, node.arguments[0], staticSqlStrings);
+        return firstArgumentSql;
+      };
 
       // Stryker disable next-line LogicalOperator: property-call routing is a dispatcher guard covered by every adapter matrix case.
       if (ts.isPropertyAccessExpression(node.expression) && methodName) {
@@ -1352,8 +1355,8 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               reason: "unsafe raw SQL call",
               ...resourceAccessSource(methodName, "prisma-adapter", "low"),
             });
-          } else if (firstArgumentSqlTexts.length > 0) {
-            for (const sqlText of firstArgumentSqlTexts) {
+          } else if (firstArgumentSqlResolution().values.length > 0) {
+            for (const sqlText of firstArgumentSqlResolution().values) {
               for (const sqlAccess of sqlTableAccesses(sqlText)) {
                 addResourceAccess(accesses, {
                   kind: "database",
@@ -1378,8 +1381,8 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             });
           }
         } else if (sqlLiteralEnabled && methodName === "query") {
-          if (firstArgumentSqlTexts.length > 0) {
-            for (const sqlText of firstArgumentSqlTexts) {
+          if (firstArgumentSqlResolution().values.length > 0) {
+            for (const sqlText of firstArgumentSqlResolution().values) {
               for (const sqlAccess of sqlTableAccesses(sqlText)) {
                 addResourceAccess(accesses, {
                   kind: "database",
@@ -1394,7 +1397,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             }
           } else {
             const firstArgument = node.arguments[0];
-            if (firstArgument && (firstArgumentSql.dynamicSql || expressionContainsSqlLiteral(firstArgument))) {
+            if (firstArgument && (firstArgumentSqlResolution().dynamicSql || expressionContainsSqlLiteral(firstArgument))) {
               addResourceAccess(accesses, {
                 kind: "database",
                 access: "read",

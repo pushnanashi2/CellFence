@@ -1415,6 +1415,10 @@ function bindingNames(name: ts.BindingName): string[] {
   return names;
 }
 
+function hasInternalTag(node: ts.Node): boolean {
+  return ts.getJSDocTags(node).some((tag) => tag.tagName.text === "internal");
+}
+
 function resolveLocalModuleFile(fromFilePath: string, specifier: string): string | undefined {
   if (!specifier.startsWith(".") && !specifier.startsWith("/")) return undefined;
   const basePath = path.resolve(path.dirname(fromFilePath), stripResourceQuery(specifier));
@@ -1439,6 +1443,7 @@ export function extractPublicSymbols(filePath: string, visitedFiles = new Set<st
   }
 
   function visit(node: ts.Node): void {
+    if (hasInternalTag(node)) return;
     if (ts.isModuleDeclaration(node) && hasExportModifier(node)) {
       const exportedName = exportedNameFromDeclarationName(node.name);
       if (exportedName) symbols.add(exportedName);
@@ -1506,6 +1511,7 @@ export function syntaxPublicSurfaceSignatureParts(filePath: string): string[] {
   }
 
   function visit(node: ts.Node): void {
+    if (hasInternalTag(node)) return;
     if (ts.isModuleDeclaration(node) && hasExportModifier(node)) {
       const name = exportedNameFromDeclarationName(node.name);
       if (name) parts.push(`namespace:${name}:${normalizeWhitespace(node.getText(sourceFile))}`);
@@ -1635,8 +1641,28 @@ function normalizeDeclarationText(text: string): string {
   return text.split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
 }
 
-function hasInternalTag(node: ts.Node): boolean {
-  return ts.getJSDocTags(node).some((tag) => tag.tagName.text === "internal");
+function sourceTextWithoutInternalDeclarations(filePath: string): string {
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  const lineRanges: Array<{ start: number; end: number }> = [];
+  function visit(node: ts.Node): void {
+    if (hasInternalTag(node)) {
+      lineRanges.push({
+        start: sourceFile.getLineAndCharacterOfPosition(node.getFullStart()).line,
+        end: sourceFile.getLineAndCharacterOfPosition(node.getEnd()).line,
+      });
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  if (lineRanges.length === 0) return sourceText;
+  const removedLines = new Set<number>();
+  for (const range of lineRanges) {
+    for (let line = range.start; line <= range.end; line += 1) removedLines.add(line);
+  }
+  const lines = sourceText.split("\n");
+  return lines.filter((_, index) => !removedLines.has(index)).join("\n");
 }
 
 function normalizedDeclarationSourceText(filePath: string): string {
@@ -1662,7 +1688,7 @@ function normalizedDeclarationSourceText(filePath: string): string {
 export function declarationTextForRoot(rootFile: string, options: ts.CompilerOptions): string {
   if (isDeclarationPath(rootFile)) return normalizedDeclarationSourceText(rootFile);
   try {
-    return ts.transpileDeclaration(fs.readFileSync(rootFile, "utf8"), {
+    return ts.transpileDeclaration(sourceTextWithoutInternalDeclarations(rootFile), {
       compilerOptions: options,
       fileName: rootFile,
     }).outputText;

@@ -43,18 +43,20 @@
         "ArtifactLaneManifest",
         "BaselineSeal",
         "BuiltInResourceAdapter",
+        "CellBaselineRecord",
+        "CellConsumerManifest",
         "CELLFENCE_BASELINE_SCHEMA_VERSION",
         "CELLFENCE_MANIFEST_SCHEMA_VERSION",
         "CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION",
-        "CellBaselineRecord",
-        "CellConsumerManifest",
         "CellFenceBaseline",
         "CellFenceManifest",
         "CellFenceResourceEvidence",
         "CellManifest",
-        "ClaimBackendManifest",
         "CheckProfileManifest",
+        "ClaimBackendManifest",
         "EnforcementStatus",
+        "ExternalDependenciesManifest",
+        "ExternalDependencyId",
         "ManifestGovernance",
         "PathClassCommitPolicy",
         "PathClassKind",
@@ -68,14 +70,14 @@
         "ResourceContractKind",
         "ResourceContractManifest",
         "ResourceEvidenceAccess",
+        "ResourceEvidenceTranscriptStatus",
         "RuleOverride",
         "RuleSeverity",
         "RuleSeverityMap",
-        "ValidationResult",
         "validateBaseline",
         "validateManifest",
         "validateResourceEvidence",
-        "ResourceEvidenceTranscriptStatus"
+        "ValidationResult"
       ],
       "consumes": [],
       "producesArtifacts": [],
@@ -296,8 +298,10 @@
       ],
       "publicEntry": "packages/mcp-proxy/src/index.ts",
       "publicSymbols": [
+        "__testing",
         "decideToolCall",
         "decideToolCallAsync",
+        "DEFAULT_AUDIT_LOG_MAX_BYTES",
         "DownstreamFeaturePolicy",
         "FailMode",
         "main",
@@ -305,11 +309,10 @@
         "pathsForToolCall",
         "ProxyMode",
         "ProxyOptions",
+        "resolveAndValidateDownstreamCwd",
         "runProxy",
         "UnknownToolPolicy",
-        "WriteToolConfig",
-        "__testing",
-        "resolveAndValidateDownstreamCwd"
+        "WriteToolConfig"
       ],
       "resourceContracts": [
         {
@@ -399,6 +402,7 @@
       ],
       "publicEntry": "packages/trace/src/index.ts",
       "publicSymbols": [
+        "__testing",
         "deriveTranscriptStatus",
         "flushEvidence",
         "installTrace",
@@ -406,6 +410,7 @@
         "recordHttpAccess",
         "recordQueueAccess",
         "recordResourceAccess",
+        "traceDiagnostics",
         "transcriptStatus"
       ],
       "consumes": [

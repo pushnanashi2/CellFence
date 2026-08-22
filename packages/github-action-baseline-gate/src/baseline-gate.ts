@@ -10,11 +10,13 @@
 // in, GovernanceChangeReport on the way out.
 
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { isAbsolute, relative, resolve } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 
-import { CELLFENCE_BASELINE_SCHEMA_VERSION, validateBaseline } from "@cellfence/schema";
-import { detectBaselineChanges, type CellFenceBaseline, type GovernanceChangeReport } from "@cellfence/engine";
+import {
+  detectBaselineChanges,
+} from "@cellfence/engine/baseline-change-detector.js";
+import type { CellFenceBaseline, GovernanceChangeReport } from "@cellfence/engine";
 
 export type { GovernanceChangeReport } from "@cellfence/engine";
 
@@ -33,6 +35,7 @@ export type BaselineGateOptions = {
 };
 
 const GIT_COMMAND = "git";
+const CELLFENCE_BASELINE_SCHEMA_VERSION = "cellfence.baseline.v1";
 
 function gitText(rootDir: string, args: string[]): string {
   // Stryker disable next-line StringLiteral,ArrayDeclaration: stdio/encoding only control git subprocess plumbing; ref/path behavior is covered by gate tests.
@@ -44,24 +47,44 @@ function gitSilent(rootDir: string, args: string[]): void {
   execFileSync(GIT_COMMAND, args, { cwd: rootDir, stdio: ["ignore", "ignore", "pipe"] });
 }
 
+function canonicalPathForComparison(filePath: string): string {
+  let existingPath = resolve(filePath);
+  const missingSegments: string[] = [];
+  while (!existsSync(existingPath)) {
+    const parent = dirname(existingPath);
+    if (parent === existingPath) return resolve(filePath);
+    missingSegments.unshift(basename(existingPath));
+    existingPath = parent;
+  }
+  return resolve(realpathSync.native(existingPath), ...missingSegments);
+}
+
+function pathIsOutsideRepository(relativePath: string): boolean {
+  return relativePath === ".." || relativePath.startsWith("../") || relativePath.startsWith("..\\") || isAbsolute(relativePath);
+}
+
 function readBaselineFromGit(rootDir: string, ref: string, baselineFile: string): unknown {
   if (!/^[A-Za-z0-9._/-]+$/.test(ref)) {
     throw new Error(`refused to read baseline at invalid git ref: ${JSON.stringify(ref)}`);
   }
-  const repoRoot = gitText(rootDir, ["rev-parse", "--show-toplevel"]).trim();
+  const repoRoot = canonicalPathForComparison(gitText(rootDir, ["rev-parse", "--show-toplevel"]).trim());
+  const absoluteBaselineFile = isAbsolute(baselineFile)
+    ? baselineFile
+    : resolve(rootDir, baselineFile);
   const relativeBaselineFile = isAbsolute(baselineFile)
-    ? relative(repoRoot, baselineFile)
+    ? relative(repoRoot, canonicalPathForComparison(absoluteBaselineFile))
     : baselineFile;
-  if (relativeBaselineFile.startsWith("..")) {
+  if (pathIsOutsideRepository(relativeBaselineFile)) {
     throw new Error(`baseline file must stay inside the git repository: ${baselineFile}`);
   }
+  const gitBaselineFile = relativeBaselineFile.replace(/\\/g, "/");
   try {
     gitSilent(repoRoot, ["cat-file", "-e", `${ref}^{commit}`]);
   } catch (error) {
     throw new Error(`cannot resolve git ref ${ref}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
   }
-  if (!baselinePathExistsAtRef(repoRoot, ref, relativeBaselineFile)) return emptyBaseline();
-  const text = gitText(repoRoot, ["show", `${ref}:${relativeBaselineFile}`]);
+  if (!baselinePathExistsAtRef(repoRoot, ref, gitBaselineFile)) return emptyBaseline();
+  const text = gitText(repoRoot, ["show", `${ref}:${gitBaselineFile}`]);
   return JSON.parse(text);
 }
 
@@ -88,12 +111,34 @@ function readBaselineFromPath(filePath: string): unknown {
   }
 }
 
-function validateBaselineValue(value: unknown, displayPath: string): CellFenceBaseline {
-  const validation = validateBaseline(value);
-  if (!validation.ok) {
-    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${validation.errors.join("; ")}`);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function baselineValidationErrors(value: unknown): string[] {
+  const errors: string[] = [];
+  if (!isRecord(value)) return ["baseline must be an object"];
+  if (value.schemaVersion !== CELLFENCE_BASELINE_SCHEMA_VERSION) {
+    errors.push(`schemaVersion must be ${CELLFENCE_BASELINE_SCHEMA_VERSION}`);
   }
-  return validation.value as CellFenceBaseline;
+  if (typeof value.generatedAt !== "string" || Number.isNaN(Date.parse(value.generatedAt))) {
+    errors.push("generatedAt must be an ISO 8601 date-time string");
+  }
+  if (!isRecord(value.cells)) {
+    errors.push("cells must be an object");
+  }
+  if (value.cellIds !== undefined && !Array.isArray(value.cellIds)) {
+    errors.push("cellIds must be an array when present");
+  }
+  return errors;
+}
+
+function validateBaselineValue(value: unknown, displayPath: string): CellFenceBaseline {
+  const errors = baselineValidationErrors(value);
+  if (errors.length > 0) {
+    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${errors.join("; ")}`);
+  }
+  return value as CellFenceBaseline;
 }
 
 export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateResult {

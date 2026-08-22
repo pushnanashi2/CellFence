@@ -195,12 +195,12 @@ test("external dependency ratchet treats missing baseline sets as a legacy migra
     assert.equal(result.ok, true, JSON.stringify(result.findings, null, 2));
 
     const nextBaseline = baselineFor([{ id: "app", externalDependencySet: ["npm:decimal.js"] }]);
-    const guard = guardBaselineUpdate({
+    const guard = withHmacSeal(() => guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "cellfence.baseline.json",
       nextBaseline,
-    });
+    }));
     assert.equal(guard.ok, true, JSON.stringify(guard.findings, null, 2));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -317,15 +317,15 @@ test("locked baseline guard rejects external dependency grandfathering", () => {
       {
         "src/app/public.ts": "export const app = true;",
       },
-      baselineFor([{ id: "app", externalDependencySet: [] }]),
+      withHmacSeal(() => sealBaselineWithConfiguredKey(baselineFor([{ id: "app", externalDependencySet: [] }]))),
     );
     const nextBaseline = baselineFor([{ id: "app", externalDependencySet: ["npm:decimal.js"] }]);
-    const result = guardBaselineUpdate({
+    const result = withHmacSeal(() => guardBaselineUpdate({
       rootDir,
       manifestPath: "cellfence.manifest.json",
       baselinePath: "cellfence.baseline.json",
       nextBaseline,
-    });
+    }));
     assert.equal(result.ok, false);
     assert.deepEqual(ruleIds(result), ["CELLFENCE_LOCKED_BASELINE_EXPANSION"]);
     assert.match(result.findings[0].message, /external dependencies would be added/);

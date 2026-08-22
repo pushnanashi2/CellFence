@@ -279,6 +279,8 @@ test("schema validation rejects unsupported per-cell analysis disabling", () => 
   assert.match(result.errors.join("\n"), /importAnalysis must be true when present; disabling import analysis is not supported/);
   assert.match(result.errors.join("\n"), /resourceAnalysis must be true when present; disabling resource analysis is not supported/);
   assert.equal(jsonSchemaValidators.manifest(manifest), false);
+});
+
 test("schema validation enforces external dependency claim and allow shape", () => {
   const duplicate = validateManifest(validManifest({
     cells: [{
@@ -363,7 +365,8 @@ test("schema validation enforces external dependency claim and allow shape", () 
   assert.equal(
     malformedOverlap.errors.some((error) => error.includes("cannot appear in both claim and allow across the manifest")),
     false,
-  );});
+  );
+});
 
 test("schema validation rejects malformed manifest root and reserved loaders", () => {
   assertInvalid(validateManifest(null), /manifest must be an object/);
@@ -794,7 +797,7 @@ test("schema validation accepts and rejects resource evidence", () => {
   }));
   assert.equal(richEvidence.ok, true);
   assert.deepEqual(richEvidence.errors, []);
-  const { cellId: _topLevelCellId, ...evidenceWithoutTopLevelCell } = validEvidence({
+  const evidenceWithoutTopLevelCell = validEvidence({
     accesses: [{
       kind: "queue",
       access: "publish",
@@ -804,6 +807,7 @@ test("schema validation accepts and rejects resource evidence", () => {
       confidence: "runtime",
     }],
   });
+  delete evidenceWithoutTopLevelCell.cellId;
   const perAccessCellEvidence = validateResourceEvidence(evidenceWithoutTopLevelCell);
   assert.equal(perAccessCellEvidence.ok, true);
   assert.deepEqual(perAccessCellEvidence.errors, []);

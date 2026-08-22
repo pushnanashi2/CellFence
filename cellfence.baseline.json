@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-15T22:40:01.533Z",
+  "generatedAt": "2026-08-22T06:51:29.504Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -23,8 +23,8 @@
   "cells": {
     "schema": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 37,
-      "publicSurfaceLines": 946,
+      "publicSymbols": 39,
+      "publicSurfaceLines": 1036,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -47,6 +47,8 @@
         "CheckProfileManifest",
         "ClaimBackendManifest",
         "EnforcementStatus",
+        "ExternalDependenciesManifest",
+        "ExternalDependencyId",
         "ManifestGovernance",
         "PathClassCommitPolicy",
         "PathClassKind",
@@ -69,10 +71,11 @@
         "validateResourceEvidence",
         "ValidationResult"
       ],
-      "publicSurfaceHash": "3bee32257b132b3feb1c0abb6f5e9b8e37b552d0304a294c0896e4e4a1540d0f",
+      "publicSurfaceHash": "ab910221edee110f235f2887e46f05bd8998c2fe74f014ff560f8ee2081abd2a",
       "dependencyEdges": [],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-api": {
       "ownedPathPatterns": 1,
@@ -113,12 +116,15 @@
         "plugin-api->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": [
+        "npm:typescript"
+      ]
     },
     "engine": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 126,
-      "publicSurfaceLines": 2090,
+      "publicSymbols": 135,
+      "publicSurfaceLines": 2207,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -143,6 +149,7 @@
         "ChangedCheckOptions",
         "checkChangedRepository",
         "checkClaims",
+        "checkClaimsAsync",
         "checkCommitEvidence",
         "checkDesignDocs",
         "checkMutationReport",
@@ -151,6 +158,7 @@
         "CheckResult",
         "checkTaskManifest",
         "checkWriteAccess",
+        "checkWriteAccessAsync",
         "ClaimBackendType",
         "ClaimCheckOptions",
         "ClaimCheckResult",
@@ -163,6 +171,7 @@
         "ContextAllowedImport",
         "ContextBudgetEntry",
         "ContextOptions",
+        "CORE_REQUIRED_RULES",
         "CouplingGraph",
         "CouplingGraphEdge",
         "CouplingGraphEdgeKind",
@@ -177,6 +186,7 @@
         "createBaselineAudit",
         "createCellContext",
         "createClaim",
+        "createClaimAsync",
         "createCouplingGraph",
         "createEvidenceGraph",
         "createManifestFromServiceManifests",
@@ -208,6 +218,7 @@
         "inferManifest",
         "InferManifestOptions",
         "listClaims",
+        "listClaimsAsync",
         "listWaivers",
         "loadBaselineFromFile",
         "loadManifestFromFile",
@@ -245,6 +256,10 @@
         "TaskCheckResult",
         "verifyBaselineSeal",
         "verifyManifestFromServiceManifests",
+        "WAIVER_ATTESTATION_HMAC_KEY_ENV",
+        "WAIVER_ATTESTATION_HMAC_KEY_ID_ENV",
+        "WAIVER_REPOSITORY_IDENTITY_ENV",
+        "waiverAttestationHmacDigest",
         "WaiverRequest",
         "WaiverRequestOptions",
         "WriteAccessOptions",
@@ -252,12 +267,19 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "118860e4b37c93a35af2aca95d42e809f6283d90275c13140f759a68b4d10a87",
+      "publicSurfaceHash": "6c9bdb8b3dad316adbe876964418edcb29b306e6fe6c06cd3762a1740677e66c",
       "dependencyEdges": [
         "engine->schema"
       ],
       "artifactContracts": [],
       "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "read",
+          "selector": "/proc/sys/kernel/random/boot_id",
+          "detectedBy": "readFileSync",
+          "confidence": "high"
+        },
         {
           "kind": "file",
           "access": "read",
@@ -272,12 +294,16 @@
           "detectedBy": "file-call",
           "confidence": "low"
         }
+      ],
+      "externalDependencySet": [
+        "npm:redis",
+        "npm:typescript"
       ]
     },
     "mcp-proxy": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 13,
-      "publicSurfaceLines": 798,
+      "publicSymbols": 15,
+      "publicSurfaceLines": 934,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -286,6 +312,8 @@
       "publicSymbolSet": [
         "__testing",
         "decideToolCall",
+        "decideToolCallAsync",
+        "DEFAULT_AUDIT_LOG_MAX_BYTES",
         "DownstreamFeaturePolicy",
         "FailMode",
         "main",
@@ -298,7 +326,7 @@
         "UnknownToolPolicy",
         "WriteToolConfig"
       ],
-      "publicSurfaceHash": "d1e5f459f0b4944e31c5630d6ae35ff34c8418e41627ffcd9ef16540fb01854a",
+      "publicSurfaceHash": "1fab08326c9a0dd914b51e68ad07e43774781e1d0ce659ce31cf2e28d31a899e",
       "dependencyEdges": [
         "mcp-proxy->engine"
       ],
@@ -318,12 +346,15 @@
           "detectedBy": "file-call",
           "confidence": "low"
         }
+      ],
+      "externalDependencySet": [
+        "npm:@modelcontextprotocol/sdk"
       ]
     },
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 3,
-      "publicSurfaceLines": 2035,
+      "publicSurfaceLines": 2243,
       "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/cli/**"
@@ -355,7 +386,8 @@
           "detectedBy": "file-call",
           "confidence": "low"
         }
-      ]
+      ],
+      "externalDependencySet": []
     },
     "github-action": {
       "ownedPathPatterns": 1,
@@ -374,18 +406,20 @@
         "github-action->engine"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "trace": {
       "ownedPathPatterns": 1,
-      "publicSymbols": 8,
-      "publicSurfaceLines": 264,
+      "publicSymbols": 10,
+      "publicSurfaceLines": 306,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/trace/**"
       ],
       "publicEntryPath": "packages/trace/src/index.ts",
       "publicSymbolSet": [
+        "__testing",
         "deriveTranscriptStatus",
         "flushEvidence",
         "installTrace",
@@ -393,14 +427,16 @@
         "recordHttpAccess",
         "recordQueueAccess",
         "recordResourceAccess",
+        "traceDiagnostics",
         "transcriptStatus"
       ],
-      "publicSurfaceHash": "b8919d4acc833aad9ee16fcf8dbd566e414bbdba5612e6303c2eb962368e672c",
+      "publicSurfaceHash": "d8a2c20de815906eb1ad6441b62669eb977cd85dfc4ad952da19b491304a3a54",
       "dependencyEdges": [
         "trace->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "adapter-call-pattern": {
       "ownedPathPatterns": 1,
@@ -422,7 +458,10 @@
         "adapter-call-pattern->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": [
+        "npm:typescript"
+      ]
     },
     "adapter-opentelemetry": {
       "ownedPathPatterns": 1,
@@ -442,7 +481,8 @@
         "adapter-opentelemetry->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-agent-budget": {
       "ownedPathPatterns": 1,
@@ -462,7 +502,8 @@
         "plugin-agent-budget->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-blast-radius": {
       "ownedPathPatterns": 1,
@@ -482,7 +523,8 @@
         "plugin-blast-radius->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-dependency-sovereignty": {
       "ownedPathPatterns": 1,
@@ -502,7 +544,8 @@
         "plugin-dependency-sovereignty->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-geo-purity": {
       "ownedPathPatterns": 1,
@@ -522,7 +565,8 @@
         "plugin-geo-purity->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-legacy-strangler": {
       "ownedPathPatterns": 1,
@@ -542,7 +586,8 @@
         "plugin-legacy-strangler->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "plugin-quants-trend": {
       "ownedPathPatterns": 1,
@@ -564,7 +609,8 @@
         "plugin-quants-trend->schema"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "reporter-economy-matrix": {
       "ownedPathPatterns": 1,
@@ -586,12 +632,13 @@
         "reporter-economy-matrix->plugin-api"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [],
+      "externalDependencySet": []
     },
     "github-action-baseline-gate": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 467,
+      "publicSurfaceLines": 496,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/github-action-baseline-gate/**"
@@ -601,17 +648,30 @@
         "ACTION_INPUT_NAMES",
         "runAction"
       ],
-      "publicSurfaceHash": "52077e78737681384436e38d878efe498682e556b5701a3e9261015aceae02c4",
+      "publicSurfaceHash": "65486365d49ac4297bf84019db6ba6fa78a0301b5c617de50f079a231569fbf9",
       "dependencyEdges": [
         "github-action-baseline-gate->engine"
       ],
       "artifactContracts": [],
-      "resourceAccesses": []
+      "resourceAccesses": [
+        {
+          "kind": "file",
+          "access": "read",
+          "selector": "unresolved:dynamic-file-path",
+          "detectedBy": "file-call",
+          "confidence": "low"
+        }
+      ],
+      "externalDependencySet": [
+        "npm:@actions/core",
+        "npm:@actions/github"
+      ]
     }
   },
   "seal": {
     "algorithm": "ed25519",
-    "keyId": "baseline-ed25519-2026-08-15",
-    "signature": "sfw4W5sXDxgdyCuJ7888YBc1dh99RihRTr9elnu8jKL7RqL23Uo5VfQVYtGO5QXAMgReWFDZwx1yzHYh9QivDQ=="
+    "keyId": "baseline-ed25519-2026-08-22-ci-fix",
+    "payloadVersion": "seal-metadata-v1",
+    "signature": "WCNrCBRwbzJzvpLtYYo0qXS3uuVEQKCnc5uNWB+PYGma3a3nR3jmNXAeze0G+HqbH6SX/tR29AkA8Xc0dbsEBw=="
   }
 }

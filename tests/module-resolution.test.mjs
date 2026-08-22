@@ -2911,6 +2911,10 @@ test("module resolution public symbols cover declarations, aliases, defaults, cy
         "export const { alpha, nested: { beta }, alias: gamma } = source;",
         "export const [, delta] = items;",
         "export namespace API { export const flag = true; }",
+        "/** @internal */",
+        "export function hiddenHook(): void {}",
+        "/** @internal */",
+        "export const __testing = {};",
         "export import legacy = require('./legacy.js');",
         "const local = 1;",
         "export { local as exposed };",
@@ -2942,6 +2946,8 @@ test("module resolution public symbols cover declarations, aliases, defaults, cy
       "tools",
       "value",
     ]);
+    const declarationSurface = declarationPublicSurfaceSignatureParts(publicPath).join("\n");
+    assert.doesNotMatch(declarationSurface, /hiddenHook|__testing/);
 
     const externalPath = path.join(rootDir, "src/core/external.ts");
     fs.writeFileSync(externalPath, "export const shouldStayPrivate = true;\n");
@@ -3202,9 +3208,8 @@ test("module resolution declaration parts use relative-key order and syntax fall
 
     const fallbackPath = path.join(rootDir, "a/fallback.d.ts");
     fs.writeFileSync(fallbackPath, "/** @internal */\nexport interface Hidden { value: string }\n");
-    const fallbackParts = ["InterfaceDeclaration:Hidden:export interface Hidden { value: string }"];
     assert.deepEqual(declarationPublicSurfaceSignatureParts(fallbackPath), []);
-    assert.equal(publicSurfaceHash(fallbackPath), sha256(fallbackParts.join("\n")));
+    assert.equal(publicSurfaceHash(fallbackPath), sha256(""));
 
     const emptyPath = path.join(rootDir, "a/empty.ts");
     fs.writeFileSync(emptyPath, "");

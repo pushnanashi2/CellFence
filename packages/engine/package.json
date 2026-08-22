@@ -35,6 +35,10 @@
     "./constants.js": {
       "types": "./dist/constants.d.ts",
       "default": "./dist/constants.js"
+    },
+    "./baseline-change-detector.js": {
+      "types": "./dist/baseline-change-detector.d.ts",
+      "default": "./dist/baseline-change-detector.js"
     }
   },
   "files": [

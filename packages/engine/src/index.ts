@@ -58,6 +58,11 @@ import {
   mergeAccessesByCell,
   resourceEvidenceAccesses as resourceEvidenceAccessesOperation,
 } from "./resource-evidence.js";
+import {
+  externalDependencyIdForImport,
+  validateExternalDependencyPolicy,
+  type ExternalDependencyObservation,
+} from "./external-dependencies.js";
 import { createEvidenceGraph } from "./governance/evidence-graph.js";
 import { governanceEvidenceEnvelopeForCheck } from "./governance/evidence-envelope.js";
 import { evaluateGovernance } from "./governance/evaluator.js";
@@ -1078,6 +1083,7 @@ function validateImports(
   warnings: Finding[],
   observedImports: PluginImportReference[] = [],
   observedImportFiles = new Set<string>(),
+  externalDependencyObservations: ExternalDependencyObservation[] = [],
 ): Map<string, Set<string>> {
   const crossCellDependencies = new Map<string, Set<string>>();
   for (const importerCell of context.manifest.cells) {
@@ -1102,6 +1108,18 @@ function validateImports(
           packageExportState: resolvedImport.packageExportState,
           packageExportReason: resolvedImport.packageExportReason,
         });
+        const dependencyId = externalDependencyIdForImport(reference, resolvedImport);
+        if (dependencyId) {
+          externalDependencyObservations.push({
+            cellId: importerCell.id,
+            dependencyId,
+            filePath: reference.importerPath,
+            line: reference.line,
+            specifier: reference.specifier,
+            kind: reference.kind,
+            typeOnly: reference.typeOnly,
+          });
+        }
         if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
           addFinding(findings, {
             ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
@@ -1379,7 +1397,13 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
   const observedImports: PluginImportReference[] = [];
   const observedImportFiles = new Set<string>();
-  const crossCellDependencies = validateImports(context, findings, warnings, observedImports, observedImportFiles);
+  const externalDependencyObservations: ExternalDependencyObservation[] = [];
+  const crossCellDependencies = validateImports(context, findings, warnings, observedImports, observedImportFiles, externalDependencyObservations);
+  const externalDependenciesByCell = validateExternalDependencyPolicy({
+    context,
+    baseline,
+    observations: externalDependencyObservations,
+  }, findings);
   for (const finding of validatePathClassImports({
     pathClasses: manifest.governance?.pathClasses,
     imports: observedImports.map((reference) => ({
@@ -1402,7 +1426,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     accessesByCell,
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, verifiedResourceBaseline),
   );
-  const prePluginMetrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const prePluginMetrics = computeMetrics(context, crossCellDependencies, accessesByCell, externalDependenciesByCell);
   const pluginRepositoryModel = createRepositoryModel(
     context,
     baseline,
@@ -1421,7 +1445,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
       runPluginAdapters(context, plugins, pluginRepositoryModel, findings),
     ),
   );
-  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell, externalDependenciesByCell);
   const repositoryModel = createRepositoryModel(context, baseline, observedImports, accessesByCell, metrics, options.changedFiles);
 
   if (baseline) {

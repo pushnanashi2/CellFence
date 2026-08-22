@@ -30,7 +30,7 @@ function implementationFiles(directory: string, relativeDirectory = ""): string[
 function modulePathFromStack(): string | undefined {
   const stack = new Error().stack || "";
   for (const line of stack.split("\n")) {
-    const fileUrlMatch = line.match(/\bfile:\/\/[^:)]+(?=:\d+:\d+)/);
+    const fileUrlMatch = line.match(/\bfile:\/\/.*(?=:\d+:\d+\)?$)/);
     if (fileUrlMatch) return fileURLToPath(fileUrlMatch[0]);
     const pathMatch = line.match(/\((\/[^:)]+):\d+:\d+\)|\bat (\/[^:)]+):\d+:\d+/);
     const absolutePath = pathMatch?.[1] || pathMatch?.[2];
