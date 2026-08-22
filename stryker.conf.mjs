@@ -50,6 +50,7 @@ export default {
   ignorePatterns: [
     "/coverage",
     "/.stryker-tmp",
+    "/tmp",
     "/docs/research",
     "/reports/corpus",
     "/reports/mutation",

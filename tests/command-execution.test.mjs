@@ -199,6 +199,12 @@ test("command resolution ignores empty PATH entries", () => {
     }, () => {
       assert.equal(resolveCommand("fallback-tool"), "fallback-tool");
     });
+    withCommandEnvironment({
+      platform: "linux",
+      variables: { PATH: undefined, PATHEXT: undefined },
+    }, () => {
+      assert.equal(resolveCommand("fallback-tool"), "fallback-tool");
+    });
   } finally {
     process.chdir(previousCwd);
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -213,6 +219,7 @@ test("command resolution ignores relative PATH entries and non-executable files"
   try {
     fs.mkdirSync(path.join(rootDir, "relative-bin"));
     writeExecutable(path.join(rootDir, "relative-bin", "tool"), "repo-shadowed executable\n");
+    fs.mkdirSync(path.join(binDir, "directory-tool"));
     fs.writeFileSync(path.join(binDir, "tool"), "not executable\n", { mode: 0o644 });
     writeExecutable(path.join(binDir, "safe-tool"), "safe executable\n");
     process.chdir(rootDir);
@@ -221,6 +228,7 @@ test("command resolution ignores relative PATH entries and non-executable files"
       variables: { PATH: `relative-bin${path.delimiter}${binDir}`, PATHEXT: undefined },
     }, () => {
       assert.equal(resolveCommand("tool"), "tool");
+      assert.equal(resolveCommand("directory-tool"), "directory-tool");
       assert.equal(resolveCommand("safe-tool"), path.join(binDir, "safe-tool"));
     });
   } finally {

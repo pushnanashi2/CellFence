@@ -157,6 +157,7 @@ test("changed mutation config keeps full thresholds and isolates tests and cache
   assert.equal(path.isAbsolute(config.tempDirName), true);
   assert.doesNotMatch(config.tempDirName, /\/\.stryker-tmp\//);
   assert.ok(config.ignorePatterns.includes("/.stryker-tmp"));
+  assert.ok(config.ignorePatterns.includes("/tmp"));
 
   const parallelConfig = createChangedMutationConfig(baseMutationConfig, scope, { outerJobs: 3 });
   assert.equal(parallelConfig.concurrency, 1);

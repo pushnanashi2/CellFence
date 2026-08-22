@@ -1173,6 +1173,8 @@ test("dynamic execution scanning distinguishes require syntax and shadowed evalu
       "eval(\"require('./matched.js')\");",
       "eval(\"requireX('./not-require-x.js')\");",
       "eval(\"require(foo'./not-require-gap.js')\");",
+      "eval(\"importX('./not-import-x.js')\");",
+      "eval(\"import(foo'./not-import-gap.js')\");",
       "object.eval(\"require('./not-property-eval.js')\");",
       "const Function = (source: string) => source;",
       "Function(\"require('./not-shadowed-function.js')\");",
@@ -3182,6 +3184,10 @@ test("module resolution declaration text strips docs and internal declarations",
     ].join("\n"));
     assert.equal(
       declarationTextForRoot(sourcePath, { declaration: true, emitDeclarationOnly: true, stripInternal: true }),
+      "export declare function visible(value: string): string;\n",
+    );
+    assert.equal(
+      declarationTextForRoot(sourcePath, { declaration: true, emitDeclarationOnly: true, stripInternal: false }),
       "export declare function visible(value: string): string;\n",
     );
     assert.equal(declarationTextForRoot(path.join(rootDir, "missing.ts"), {}), "");

@@ -267,6 +267,61 @@ test("github action baseline gate validates baseline JSON before diffing", (cont
   );
 });
 
+test("github action baseline gate rejects non-object and malformed baseline structure", (context) => {
+  const rootDir = createBaselineRepository(context);
+  for (const value of [null, [], "not an object"]) {
+    writeJson(path.join(rootDir, "cellfence.baseline.json"), value);
+    assert.throws(
+      () => runBaselineGateFull({
+        rootDir,
+        baselineFile: "cellfence.baseline.json",
+        baseRef: "HEAD",
+      }),
+      /not a valid CellFenceBaseline: baseline must be an object/,
+    );
+  }
+
+  writeJson(path.join(rootDir, "cellfence.baseline.json"), {
+    schemaVersion: "cellfence.baseline.v1",
+    generatedAt: 0,
+    cells: [],
+    cellIds: "api",
+  });
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "HEAD",
+    }),
+    /generatedAt must be an ISO 8601 date-time string; cells must be an object; cellIds must be an array when present/,
+  );
+});
+
+test("github action baseline gate normalizes Windows-style git baseline paths", (context) => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-windows-path-"));
+  context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
+  git(rootDir, ["init", "-q", "-b", "main"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  git(rootDir, ["config", "user.email", "test@example.com"]);
+  fs.mkdirSync(path.join(rootDir, "nested"), { recursive: true });
+  writeJson(path.join(rootDir, "nested/cellfence.baseline.json"), makeBaseline());
+  git(rootDir, ["add", "nested/cellfence.baseline.json"]);
+  git(rootDir, ["commit", "-qm", "add nested baseline"]);
+
+  const result = runBaselineGateFull({
+    rootDir,
+    baselineFile: "nested\\cellfence.baseline.json",
+    baseRef: "HEAD",
+  });
+
+  assert.equal(result.exitCode, 1);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "cellIds"), {
+    dimension: "cellIds",
+    added: [],
+    removed: ["api", "worker"],
+  });
+});
+
 test("baseline gate reports baselines introduced or removed across git refs", (context) => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-missing-"));
   context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));

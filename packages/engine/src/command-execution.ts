@@ -16,6 +16,7 @@ function windowsCommandExtensions(commandName: string): string[] {
 }
 
 function commandCandidateUsable(candidate: string): boolean {
+  // Stryker disable BlockStatement: empty catch returns undefined, which is falsy like the explicit false used for unusable candidates.
   try {
     const stat = fs.statSync(candidate);
     if (!stat.isFile()) return false;
@@ -25,11 +26,14 @@ function commandCandidateUsable(candidate: string): boolean {
   } catch {
     return false;
   }
+  // Stryker restore BlockStatement
 }
 
 export function resolveCommand(commandName: string): string {
   if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
-  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter((directory) => directory && path.isAbsolute(directory));
+  const pathEntries = (process.env.PATH ?? path.delimiter)
+    .split(path.delimiter)
+    .filter((directory) => directory && path.isAbsolute(directory));
   const extensions = process.platform === "win32" ? windowsCommandExtensions(commandName) : [""];
   for (const directory of pathEntries) {
     for (const extension of extensions) {

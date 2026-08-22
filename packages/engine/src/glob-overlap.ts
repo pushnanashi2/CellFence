@@ -90,6 +90,7 @@ function buildPatternAutomaton(pattern: string): GlobAutomaton {
 function patternAutomaton(pattern: string): GlobAutomaton {
   const normalizedPattern = normalizedGlobPattern(pattern);
   const cached = PATTERN_AUTOMATON_CACHE.get(normalizedPattern);
+  // Stryker disable next-line ConditionalExpression: this is a pure performance cache; recomputing the same automaton preserves every public result.
   if (cached) return cached;
   const automaton = buildPatternAutomaton(normalizedPattern);
   PATTERN_AUTOMATON_CACHE.set(normalizedPattern, automaton);
@@ -138,6 +139,7 @@ function transitionLabelsIntersect(left: ConsumingGlobTransition, right: Consumi
 function patternAutomataIntersect(leftPattern: string, rightPattern: string): boolean {
   const cacheKey = `${normalizedGlobPattern(leftPattern)}\u0000${normalizedGlobPattern(rightPattern)}`;
   const cached = PATTERN_INTERSECTION_CACHE.get(cacheKey);
+  // Stryker disable next-line ConditionalExpression: this cache hit only skips recomputation; overlap truth is asserted through concrete witnesses.
   if (cached !== undefined) return cached;
   const left = patternAutomaton(leftPattern);
   const right = patternAutomaton(rightPattern);
@@ -193,6 +195,7 @@ const OTHER_NON_SLASH_KEY = "\u0000__cellfence_other_non_slash__";
 export function pathPatternSubset(innerPattern: string, outerPattern: string): boolean {
   const cacheKey = `${normalizedGlobPattern(innerPattern)}\u0000${normalizedGlobPattern(outerPattern)}`;
   const cached = PATTERN_SUBSET_CACHE.get(cacheKey);
+  // Stryker disable next-line ConditionalExpression: this cache hit only skips recomputation; repeated false-result caching is asserted below.
   if (cached !== undefined) return cached;
   const inner = patternAutomaton(innerPattern);
   const outer = patternAutomaton(outerPattern);

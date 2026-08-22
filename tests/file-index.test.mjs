@@ -303,6 +303,7 @@ test("glob subset distinguishes literal, slash, non-slash, and any transitions",
   for (const [inner, outer] of falseSubsets) {
     assert.equal(pathPatternSubset(inner, outer), false, `expected ${inner} not subset ${outer}`);
   }
+  assert.equal(pathPatternSubset("src/**", "src/*"), false, "cached false subset result must stay false");
 
   assert.equal(patternCoveredByOwnedPaths("src/core/a.ts", ["src/core/"]), true);
 });
@@ -458,6 +459,26 @@ test("file index honors explicitly governed generated directories", () => {
       sourceTextCache: new Map(),
       sourceFileCache: new Map(),
     };
+    const bareOwnedGeneratedContext = {
+      ...includeOnlyContext,
+      manifest: {
+        ...includeOnlyContext.manifest,
+        governance: {
+          requireOwnership: true,
+          exclude: [],
+        },
+        cells: [{
+          id: "dist",
+          ownedPaths: ["dist"],
+          publicEntry: "dist/runtime.ts",
+          publicSymbols: ["runtime"],
+        }],
+      },
+      listFilesCache: undefined,
+      sourceFilesForCellCache: new Map(),
+      sourceTextCache: new Map(),
+      sourceFileCache: new Map(),
+    };
 
     assert.deepEqual(listFiles(rootDir, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts", "dist/runtime.ts"]);
     assert.deepEqual(sourceFilesUnderGovernance(rootDir, includeOnlyContext.manifest, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/runtime.ts"]);
@@ -466,6 +487,8 @@ test("file index honors explicitly governed generated directories", () => {
     assert.deepEqual(listFiles(rootDir, ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
     assert.deepEqual(sourceFilesForCell(rootDir, ownedOnlyContext.manifest.cells[0], ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
     assert.deepEqual(listFiles(rootDir, governanceWithoutIncludeContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
+    assert.deepEqual(listFiles(rootDir, bareOwnedGeneratedContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts", "dist/runtime.ts"]);
+    assert.deepEqual(sourceFilesForCell(rootDir, bareOwnedGeneratedContext.manifest.cells[0], bareOwnedGeneratedContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts", "dist/runtime.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
