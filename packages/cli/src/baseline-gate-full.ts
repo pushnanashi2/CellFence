@@ -5,6 +5,7 @@
 // `cellfence-baseline-gate` action calls into from CI.
 
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 
 import {
@@ -34,6 +35,22 @@ import {
 // path from there, falling back to the previous behaviour only if
 // git cannot answer (e.g. the directory is not in a repo at all,
 // in which case the caller is expected to use filePath, not a ref).
+function canonicalPathForComparison(filePath: string): string {
+  let existingPath = path.resolve(filePath);
+  const missingSegments: string[] = [];
+  while (!fs.existsSync(existingPath)) {
+    const parent = path.dirname(existingPath);
+    if (parent === existingPath) return path.resolve(filePath);
+    missingSegments.unshift(path.basename(existingPath));
+    existingPath = parent;
+  }
+  return path.resolve(fs.realpathSync.native(existingPath), ...missingSegments);
+}
+
+function pathIsOutsideRepository(relativePath: string): boolean {
+  return relativePath === ".." || relativePath.startsWith("../") || relativePath.startsWith("..\\") || path.isAbsolute(relativePath);
+}
+
 function resolveBaselineAtRef(rootDir: string, ref: string, baselineFile: string): string {
   let repoRoot: string;
   try {
@@ -53,8 +70,8 @@ function resolveBaselineAtRef(rootDir: string, ref: string, baselineFile: string
   if (!ref || !/^[0-9a-fA-F]{4,}$|^[A-Za-z0-9._/-]+$/.test(ref)) {
     throw new Error(`refused to read baseline at invalid git ref: ${JSON.stringify(ref)}`);
   }
-  const relative = path.relative(repoRoot, baselineFile).replaceAll(path.sep, "/") || baselineFile;
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+  const relative = path.relative(canonicalPathForComparison(repoRoot), canonicalPathForComparison(baselineFile)).replaceAll(path.sep, "/") || baselineFile;
+  if (pathIsOutsideRepository(relative)) {
     throw new Error(`baseline file must stay inside the git repository: ${baselineFile}`);
   }
   return relative;

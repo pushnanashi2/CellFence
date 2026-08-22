@@ -214,6 +214,40 @@ test("github action baseline gate reads git ref baselines relative to repository
   ]);
 });
 
+test("cli baseline gate resolves symlinked baseline paths inside the git repository", (context) => {
+  const rootDir = createBaselineRepository(context);
+  const linkParent = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-link-"));
+  context.after(() => fs.rmSync(linkParent, { recursive: true, force: true }));
+  const linkedRoot = path.join(linkParent, "repo");
+  try {
+    fs.symlinkSync(rootDir, linkedRoot, "dir");
+  } catch {
+    context.skip("directory symlinks are not available");
+    return;
+  }
+  const baseRef = git(rootDir, ["rev-parse", "HEAD"]).trim();
+  const headBaseline = makeBaseline();
+  headBaseline.cells.worker.publicSymbolSet = ["consume", "linked"];
+  writeBaseline(rootDir, headBaseline);
+  git(rootDir, ["add", "cellfence.baseline.json"]);
+  git(rootDir, ["commit", "-qm", "update linked baseline"]);
+
+  const result = runCliBaselineGateFull({
+    rootDir,
+    baselineFile: path.join(linkedRoot, "cellfence.baseline.json"),
+    baseRef,
+    headRef: "HEAD",
+    format: "json",
+    hasImplementationChanges: false,
+  });
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.report.hasChange, true);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "publicSymbols")?.added, [
+    "worker.linked",
+  ]);
+});
+
 test("github action baseline gate validates baseline JSON before diffing", (context) => {
   const rootDir = createBaselineRepository(context);
   fs.writeFileSync(path.join(rootDir, "cellfence.baseline.json"), JSON.stringify({
