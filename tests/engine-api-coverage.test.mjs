@@ -57,6 +57,27 @@ import {
 
 const root = process.cwd();
 
+function withFrozenDate(isoDateTime, action) {
+  const RealDate = globalThis.Date;
+  const frozenTime = RealDate.parse(isoDateTime);
+  class FrozenDate extends RealDate {
+    constructor(...args) {
+      if (args.length === 0) super(frozenTime);
+      else super(...args);
+    }
+
+    static now() {
+      return frozenTime;
+    }
+  }
+  globalThis.Date = FrozenDate;
+  try {
+    return action();
+  } finally {
+    globalThis.Date = RealDate;
+  }
+}
+
 // H-4 (0.3.0): see the matching helper in the conformance test
 // drivers; live HEAD is needed to bind v2 evidence to the test
 // repository without re-stamping every fixture.
@@ -1153,8 +1174,13 @@ test("engine changed checks cache deterministic base analysis outside the worktr
     git(rootDir, ["add", "."]);
     git(rootDir, ["commit", "-m", "base"]);
 
-    const first = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
-    const second = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    const cacheOptions = {
+      rootDir,
+      manifestPath: "cellfence.manifest.json",
+      baseRef: "HEAD",
+    };
+    const first = withFrozenDate("2026-01-01T00:00:00.000Z", () => checkChangedRepository(cacheOptions));
+    const second = withFrozenDate("2026-01-01T00:00:00.000Z", () => checkChangedRepository(cacheOptions));
     assert.equal(first.exitCode, 0, JSON.stringify(first.findings));
     assert.equal(first.baseCacheHit, false);
     assert.equal(second.baseCacheHit, true);
@@ -1170,15 +1196,17 @@ test("engine changed checks cache deterministic base analysis outside the worktr
       ruleSeverities: { CELLFENCE_UNOWNED_SOURCE: "warning" },
     });
     assert.equal(severityChanged.baseCacheHit, false);
+    const clockChanged = withFrozenDate("2026-01-01T00:01:00.000Z", () => checkChangedRepository(cacheOptions));
+    assert.equal(clockChanged.baseCacheHit, false);
 
     process.env.CELLFENCE_APPROVERS = "cache-owner-a";
-    const approverChanged = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    const approverChanged = withFrozenDate("2026-01-01T00:00:00.000Z", () => checkChangedRepository(cacheOptions));
     assert.equal(approverChanged.baseCacheHit, false);
-    const approverCached = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    const approverCached = withFrozenDate("2026-01-01T00:00:00.000Z", () => checkChangedRepository(cacheOptions));
     assert.equal(approverCached.baseCacheHit, true);
 
     process.env.CELLFENCE_BASELINE_HMAC_KEY = "cache-hmac-a";
-    const hmacChanged = checkChangedRepository({ rootDir, manifestPath: "cellfence.manifest.json", baseRef: "HEAD" });
+    const hmacChanged = withFrozenDate("2026-01-01T00:00:00.000Z", () => checkChangedRepository(cacheOptions));
     assert.equal(hmacChanged.baseCacheHit, false);
   } finally {
     if (originalApprovers === undefined) delete process.env.CELLFENCE_APPROVERS;
