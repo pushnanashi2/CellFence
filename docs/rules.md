@@ -7,6 +7,7 @@
 |---|---|
 | `CELLFENCE_MANIFEST_INVALID` | Invalid manifest or baseline configuration |
 | `CELLFENCE_PATTERN_MATCHES_NOTHING` | Manifest-declared include, exclude, ownership, public path, or non-external artifact pattern matched no repository files |
+| `CELLFENCE_SUSPICIOUS_GLOB_PATTERN` | Manifest pattern contains a glob segment such as `***` that is usually a `**` typo and changes depth semantics |
 | `CELLFENCE_DUPLICATE_CELL_ID` | Duplicate cell identifiers |
 | `CELLFENCE_OWNERSHIP_OVERLAP` | Overlapping declared ownership paths |
 | `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` | Strict ownership coverage is disabled, so source outside ownedPaths can escape checks |
@@ -88,13 +89,13 @@ CellFence v0.x analyzes:
 - dynamic imports with a static string specifier;
 - exact package-name imports declared with `packageName`;
 - tsconfig `compilerOptions.paths` aliases, including aliases inherited through `extends`, that resolve to repository files;
-- Python `.py` source ownership, AST-extracted `import` and `from ... import ...` module references, common package roots from `pyproject.toml`, `setup.cfg`, and static `setup.py`, and public entries described by literal `__all__` or top-level declarations;
-- selected static string resource access for file, database, queue, and HTTP patterns;
+- Python `.py` source ownership, AST-extracted `import` and `from ... import ...` module references, common package roots from `pyproject.toml`, `setup.cfg`, and static `setup.py`, and public entries described by literal `__all__` or top-level declarations. Python module-level `from ... import name` creates a public module attribute unless hidden with an underscore alias or constrained by `__all__`;
+- selected static string resource access for file, database, queue, and HTTP patterns, including Node `fs` read/write/destructive file calls and `fetch`/`request` absolute, relative, websocket, `const`, and inline `new URL(...)` string forms;
 - Prisma model delegate calls when `schema.prisma` is present;
 - selected TypeORM entity, repository, and query builder calls;
 - selected Drizzle table declarations and `db.select().from(...)`, `db.insert(...)`, `db.update(...)`, and `db.delete(...)` calls;
 - selected Kysely/Knex-style query builder table calls;
-- unsafe or dynamic raw SQL calls as fail-closed unresolved resource access;
+- unsafe or dynamic raw SQL calls, known SQL receiver calls with non-literal arguments, and dynamic HTTP URL calls as fail-closed unresolved resource access;
 - selected BullMQ and KafkaJS topic or queue calls;
 - selected NestJS controller method decorators;
 - selected Fastify route object registrations;
@@ -110,7 +111,7 @@ NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are
 
 The repository CI includes a synthetic scale benchmark for 10,000 files / 20 cells, 50,000 files / 100 cells, and 100,000 files / 300 cells. It is a regression tripwire for file discovery, ownership indexing, and low-signal source scanning; it is not a universal performance guarantee for every monorepo shape.
 
-Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, selected NestJS/Fastify HTTP route declarations, selected FastAPI route decorators, Django URLConf routes and model manager calls, SQLAlchemy declarative/Table/query/text calls, and Celery task declarations and literal publish calls. It does not infer arbitrary ORM metadata, runtime broker topology, framework plugin behavior, or values assembled through general dataflow.
+Static resource analysis is intentionally limited. It detects simple string-literal calls, SQL literals, selected Node `fs` calls, selected `fetch`/`request` HTTP calls, selected Prisma delegate calls, selected TypeORM, Drizzle, and query-builder calls, selected BullMQ/KafkaJS calls, selected NestJS/Fastify HTTP route declarations, selected FastAPI route decorators, Django URLConf routes and model manager calls, SQLAlchemy declarative/Table/query/text calls, and Celery task declarations and literal publish calls. When a known HTTP call has a non-static URL, or a receiver already observed as SQL later receives a non-static query argument, CellFence emits unresolved resource access instead of silently dropping the call. It does not infer arbitrary ORM metadata, runtime broker topology, framework plugin behavior, or values assembled through general dataflow.
 
 ORMs, query builders, HTTP frameworks, and broker clients require explicit CellFence adapters. Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, selected string-literal query builders, selected NestJS routes, selected Fastify routes, and selected Django, FastAPI, SQLAlchemy, and Celery Python patterns have built-in coverage; that does not imply support for Sequelize, every Knex/Kysely expression, every Drizzle expression, every NestJS/Fastify plugin, every Python framework extension, or a project-local database wrapper. Each adapter must document:
 

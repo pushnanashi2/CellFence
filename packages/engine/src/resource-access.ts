@@ -510,11 +510,14 @@ const HTTP_METHOD_DECORATORS = new Map([
 ]);
 // Stryker disable next-line StringLiteral: raw SQL method names are externally fixed API tokens and are covered by raw-call contract tests.
 const RAW_SQL_METHODS = new Set(["$queryRaw", "$executeRaw", "query"]);
+const GENERIC_SQL_METHODS = new Set(["query", "execute"]);
 const UNSAFE_RAW_SQL_METHODS = new Set(["$queryRawUnsafe", "$executeRawUnsafe"]);
-const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync"]);
-const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream"]);
+const FILE_READ_METHODS = new Set(["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync", "open", "openSync"]);
+const FILE_WRITE_METHODS = new Set(["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream", "rm", "rmSync", "unlink", "unlinkSync"]);
+const FILE_COPY_METHODS = new Set(["copyFile", "copyFileSync"]);
 const FS_MODULE_SPECIFIERS = new Set(["fs", "node:fs", "fs/promises", "node:fs/promises"]);
-const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|Queue|Worker|fetch|request|query|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
+const COMMAND_EXECUTION_METHODS = new Set(["execSync", "execFileSync", "spawnSync"]);
+const RESOURCE_SCAN_HINT = /\b(?:prisma|PrismaClient|Entity|getRepository|createQueryBuilder|selectFrom|insertInto|updateTable|deleteFrom|pgTable|mysqlTable|sqliteTable|singlestoreTable|table|DatabaseSync|Queue|Worker|fetch|request|query|execute|publish|subscribe|enqueue|dequeue|readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|readdir|readdirSync|open|openSync|rm|rmSync|unlink|unlinkSync|copyFile|copyFileSync|execSync|execFileSync|spawnSync|route|Controller|Get|Post|Put|Patch|Delete|Options|Head|All)\b|\$queryRaw|\$executeRaw/;
 const PYTHON_RESOURCE_SCAN_HINT = /\b(?:django|FastAPI|APIRouter|Celery|shared_task|sqlalchemy|models\.Model|objects|path|re_path|url|select|insert|update|delete|Table|text|query|execute|get|send_task|delay|apply_async|bulk_save_objects|bulk_insert_mappings|bulk_update_mappings)\b|__tablename__/;
 const PYTHON_RESOURCE_ADAPTERS = new Map<string, BuiltInResourceAdapter>([
   ["django-adapter", "django"],
@@ -691,6 +694,67 @@ function collectBullQueueVariables(sourceFile: ts.SourceFile): Map<string, strin
   return queueVariables;
 }
 
+function fsMethodKnown(methodName: string): boolean {
+  return FILE_READ_METHODS.has(methodName) || FILE_WRITE_METHODS.has(methodName) || FILE_COPY_METHODS.has(methodName);
+}
+
+function fsOpenAccessMode(flag: string | undefined): ResourceAccessMode {
+  if (flag && /[wa+]/.test(flag)) return "write";
+  return "read";
+}
+
+function fileAccessModeForMethod(methodName: string, flag: string | undefined): ResourceAccessMode {
+  if (methodName === "open" || methodName === "openSync") return fsOpenAccessMode(flag);
+  return FILE_READ_METHODS.has(methodName) ? "read" : "write";
+}
+
+function commandExecutionMethodName(sourceFile: ts.SourceFile, expression: ts.Expression): string | undefined {
+  const name = expressionName(expression);
+  if (!name || !COMMAND_EXECUTION_METHODS.has(name)) return undefined;
+  if (ts.isIdentifier(expression)) return declarationShadowsName(sourceFile, expression, name) ? undefined : name;
+  if (!ts.isPropertyAccessExpression(expression)) return undefined;
+  const rootName = expressionRootName(expression.expression)?.toLowerCase();
+  return rootName && (rootName === "cp" || rootName.includes("child")) ? name : undefined;
+}
+
+function commandResourceHint(commandText: string): { kind: "database" | "http"; selector: string; reason: string } | undefined {
+  if (/\b(?:curl|wget)\b/i.test(commandText) || /^[a-z][a-z0-9+.-]*:\/\//i.test(commandText)) {
+    return {
+      kind: "http",
+      selector: "unresolved:external-command-http",
+      reason: "external command may access HTTP resources",
+    };
+  }
+  if (/\b(?:psql|mysql|sqlite3|sqlcmd)\b/i.test(commandText) || textLooksSql(commandText)) {
+    return {
+      kind: "database",
+      selector: "unresolved:external-command-sql",
+      reason: "external command may access database resources",
+    };
+  }
+  return undefined;
+}
+
+function collectSqlReceiverRoots(sourceFile: ts.SourceFile, constants: Map<string, string[]>): Set<string> {
+  const receiverRoots = new Set<string>();
+  function visit(node: ts.Node): void {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const methodName = node.expression.name.text;
+      const rootName = expressionRootName(node.expression.expression);
+      if (rootName && GENERIC_SQL_METHODS.has(methodName)) {
+        const resolution = staticStringResolutionAt(sourceFile, node, node.arguments[0], constants);
+        const firstArgument = node.arguments[0];
+        if (resolution.values.some(textLooksSql) || resolution.dynamicSql || expressionContainsSqlLiteral(firstArgument)) {
+          receiverRoots.add(rootName);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return receiverRoots;
+}
+
 type FsBindings = {
   namespaces: Map<string, FsBindingDeclaration[]>;
   callees: Map<string, FsCalleeBinding[]>;
@@ -777,7 +841,7 @@ function addFsObjectBinding(bindings: FsBindings, sourceFile: ts.SourceFile, bin
       else addFsObjectBinding(bindings, sourceFile, element.name);
       continue;
     }
-    if (ts.isIdentifier(element.name) && (FILE_READ_METHODS.has(importedName) || FILE_WRITE_METHODS.has(importedName))) addFsCalleeBinding(bindings, sourceFile, element.name, importedName);
+    if (ts.isIdentifier(element.name) && fsMethodKnown(importedName)) addFsCalleeBinding(bindings, sourceFile, element.name, importedName);
   }
 }
 
@@ -805,7 +869,7 @@ function collectFsBindings(sourceFile: ts.SourceFile): FsBindings {
             if (element.isTypeOnly) continue;
             const importedName = (element.propertyName || element.name).text;
             if (importedName === "promises") addFsNamespaceBinding(bindings, sourceFile, element.name, { hoisted: true });
-            if (FILE_READ_METHODS.has(importedName) || FILE_WRITE_METHODS.has(importedName)) addFsCalleeBinding(bindings, sourceFile, element.name, importedName, { hoisted: true });
+            if (fsMethodKnown(importedName)) addFsCalleeBinding(bindings, sourceFile, element.name, importedName, { hoisted: true });
           }
         }
       }
@@ -822,7 +886,7 @@ function collectFsBindings(sourceFile: ts.SourceFile): FsBindings {
           if (property === "promises") {
             if (ts.isIdentifier(node.name)) addFsNamespaceBinding(bindings, sourceFile, node.name);
             else addFsObjectBinding(bindings, sourceFile, node.name);
-          } else if ((FILE_READ_METHODS.has(property) || FILE_WRITE_METHODS.has(property)) && ts.isIdentifier(node.name)) {
+          } else if (fsMethodKnown(property) && ts.isIdentifier(node.name)) {
             addFsCalleeBinding(bindings, sourceFile, node.name, property);
           }
         } else if (fsNamespaceMethodName(sourceFile, node.initializer, bindings) && ts.isIdentifier(node.name)) {
@@ -954,13 +1018,13 @@ function fsNamespaceExpressionRootIsBound(sourceFile: ts.SourceFile, expression:
 function fsNamespaceMethodName(sourceFile: ts.SourceFile, expression: ts.Expression, bindings: FsBindings): string | undefined {
   if (!ts.isPropertyAccessExpression(expression)) return undefined;
   const methodName = expression.name.text;
-  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  if (!fsMethodKnown(methodName)) return undefined;
   return fsNamespaceExpressionRootIsBound(sourceFile, expression.expression, bindings) ? methodName : undefined;
 }
 
 function fsInlineRequireMethodName(sourceFile: ts.SourceFile, expression: ts.PropertyAccessExpression): string | undefined {
   const methodName = expression.name.text;
-  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  if (!fsMethodKnown(methodName)) return undefined;
   const directModule = requireModuleSpecifier(sourceFile, expression.expression);
   if (directModule && FS_MODULE_SPECIFIERS.has(directModule)) return methodName;
   if (ts.isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "promises") {
@@ -984,7 +1048,7 @@ function fsFileMethodName(sourceFile: ts.SourceFile, callExpression: ts.Expressi
   const rootName = expressionRootName(callExpression.expression);
   if (!rootName) return undefined;
   const methodName = callExpression.name.text;
-  if (!FILE_READ_METHODS.has(methodName) && !FILE_WRITE_METHODS.has(methodName)) return undefined;
+  if (!fsMethodKnown(methodName)) return undefined;
   const nodeStart = callExpression.getStart(sourceFile);
   const allowedStarts = fsVisibleNamespaceStarts(bindings, rootName, nodeStart);
   return allowedStarts.size > 0 && !declarationShadowsName(sourceFile, callExpression, rootName, allowedStarts) ? methodName : undefined;
@@ -1091,8 +1155,18 @@ function queueReceiverLooksExternal(expression: ts.Expression): boolean {
 }
 
 function selectorLooksQueueTopic(selector: string): boolean {
-  if (selector.startsWith("/") || /^https?:\/\//.test(selector)) return false;
+  if (selector.startsWith("/") || /^[a-z][a-z0-9+.-]*:\/\//i.test(selector)) return false;
   return !/^on[A-Z]/.test(selector);
+}
+
+function httpSelectorValues(sourceFile: ts.SourceFile, usageNode: ts.Node, expression: ts.Expression | undefined, constants: Map<string, string[]>): string[] {
+  if (!expression) return [];
+  const unwrapped = unwrapExpression(expression);
+  if (ts.isNewExpression(unwrapped) && expressionName(unwrapped.expression) === "URL") {
+    // Stryker disable next-line OptionalChaining: TypeScript NewExpression exposes an arguments array; empty arrays index to undefined either way.
+    return httpSelectorValues(sourceFile, usageNode, unwrapped.arguments?.[0], constants);
+  }
+  return staticStringResolutionAt(sourceFile, usageNode, unwrapped, constants).values.filter((value) => value.trim().length > 0);
 }
 
 function resourceAdapterEnabled(context: ResourceAccessAnalysisContext, adapter: BuiltInResourceAdapter): boolean {
@@ -1156,8 +1230,9 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
   const typeOrmRepositories = typeOrmEnabled ? collectTypeOrmRepositoryVariables(sourceFile, typeOrmEntitySelectors) : new Map<string, string>();
   const drizzleTableSelectors = drizzleEnabled ? collectDrizzleTableSelectors(sourceFile) : new Map<string, string>();
   const bullQueuesByVariable = bullmqEnabled ? collectBullQueueVariables(sourceFile) : new Map<string, string>();
-  // Stryker disable next-line ConditionalExpression,LogicalOperator: eager constant collection is a performance choice; adapter-off and per-adapter SQL tests fix every observable result.
-  const staticSqlStrings = sqlLiteralEnabled || prismaEnabled ? collectStaticStringConstants(sourceFile) : new Map<string, string[]>();
+  // Stryker disable next-line ConditionalExpression,LogicalOperator: eager constant collection is a performance choice; adapter-off and per-adapter SQL/HTTP tests fix every observable result.
+  const staticSqlStrings = sqlLiteralEnabled || prismaEnabled || httpEnabled ? collectStaticStringConstants(sourceFile) : new Map<string, string[]>();
+  const sqlReceiverRoots = sqlLiteralEnabled ? collectSqlReceiverRoots(sourceFile, staticSqlStrings) : new Set<string>();
   const fsBindings = fileEnabled ? collectFsBindings(sourceFile) : { namespaces: new Map<string, FsBindingDeclaration[]>(), callees: new Map<string, FsCalleeBinding[]>() };
   if (nestjsEnabled) {
     for (const access of collectNestRouteAccesses(sourceFile, relativeFilePath)) {
@@ -1380,7 +1455,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               ...resourceAccessSource(methodName, "prisma-adapter", "low"),
             });
           }
-        } else if (sqlLiteralEnabled && methodName === "query") {
+        } else if (rootName && GENERIC_SQL_METHODS.has(methodName) && sqlReceiverRoots.has(rootName)) {
           if (firstArgumentSqlResolution().values.length > 0) {
             for (const sqlText of firstArgumentSqlResolution().values) {
               for (const sqlAccess of sqlTableAccesses(sqlText)) {
@@ -1397,7 +1472,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             }
           } else {
             const firstArgument = node.arguments[0];
-            if (firstArgument && (firstArgumentSqlResolution().dynamicSql || expressionContainsSqlLiteral(firstArgument))) {
+            if (firstArgument) {
               addResourceAccess(accesses, {
                 kind: "database",
                 access: "read",
@@ -1406,7 +1481,9 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
                 line: getLineNumber(sourceFile, node),
                 // Stryker disable next-line BooleanLiteral: dynamic SQL evidence must remain unresolved and is asserted by detail tests.
                 unresolved: true,
-                reason: "SQL query is assembled dynamically",
+                reason: firstArgumentSqlResolution().dynamicSql || expressionContainsSqlLiteral(firstArgument)
+                  ? "SQL query is assembled dynamically"
+                  : "SQL query receiver was previously observed but this argument is not a static literal",
                 // Stryker disable next-line StringLiteral: dynamic SQL confidence is asserted by detail tests.
                 ...resourceAccessSource(methodName, "sql-literal", "low"),
               });
@@ -1463,28 +1540,106 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
       const hasFdOption = fsMethodName === "createReadStream" || fsMethodName === "createWriteStream"
         ? objectHasProperty(node.arguments[1], "fd")
         : false;
+      const firstFileArgument = node.arguments[0];
       // Stryker disable next-line ConditionalExpression,LogicalOperator: fsMethodName implies name; file-adapter-off and dynamic-path tests independently fix the observable guard.
-      if (fileEnabled && name && fsMethodName && !hasFdOption && !firstArgumentText && node.arguments.length > 0) {
-        addResourceAccess(accesses, {
-          kind: "file",
-          access: FILE_READ_METHODS.has(fsMethodName) ? "read" : "write",
-          selector: "unresolved:dynamic-file-path",
-          filePath: relativeFilePath,
-          line: getLineNumber(sourceFile, node),
-          unresolved: true,
-          reason: "file path argument is not a static literal",
-          ...resourceAccessSource(name, "file-call", "low"),
-        });
+      if (fileEnabled && name && fsMethodName && !hasFdOption && firstFileArgument) {
+        const unresolvedFileAccesses = FILE_COPY_METHODS.has(fsMethodName)
+          ? [
+            { argument: firstFileArgument, access: "read" as const },
+            { argument: node.arguments[1], access: "write" as const },
+          ]
+          : [{ argument: firstFileArgument, access: fileAccessModeForMethod(fsMethodName, literalText(node.arguments[1])) }];
+        for (const { argument, access } of unresolvedFileAccesses) {
+          if (!argument || literalText(argument)) continue;
+          addResourceAccess(accesses, {
+            kind: "file",
+            access,
+            selector: "unresolved:dynamic-file-path",
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: "file path argument is not a static literal",
+            ...resourceAccessSource(name, "file-call", "low"),
+          });
+        }
+      }
+
+      const httpCallName = name === "fetch" || name === "request" ? name : undefined;
+      if (httpEnabled && httpCallName) {
+        const selectors = httpSelectorValues(sourceFile, node, node.arguments[0], staticSqlStrings);
+        if (selectors.length > 0) {
+          for (const selector of selectors) {
+            addResourceAccess(accesses, {
+              kind: "http",
+              access: "call",
+              selector,
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(httpCallName),
+            });
+          }
+        } else if (node.arguments[0]) {
+          addResourceAccess(accesses, {
+            kind: "http",
+            access: "call",
+            selector: "unresolved:dynamic-http-url",
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: "HTTP URL argument is not a static literal",
+            ...resourceAccessSource(httpCallName, "http-call", "low"),
+          });
+        }
+      }
+
+      const commandMethodName = commandExecutionMethodName(sourceFile, node.expression);
+      if (commandMethodName) {
+        const commandText = literalText(node.arguments[0]);
+        const commandHint = commandText ? commandResourceHint(commandText) : undefined;
+        if (commandHint && ((commandHint.kind === "http" && httpEnabled) || (commandHint.kind === "database" && sqlLiteralEnabled))) {
+          addResourceAccess(accesses, {
+            kind: commandHint.kind,
+            access: commandHint.kind === "http" ? "call" : "read",
+            selector: commandHint.selector,
+            filePath: relativeFilePath,
+            line: getLineNumber(sourceFile, node),
+            unresolved: true,
+            reason: commandHint.reason,
+            ...resourceAccessSource(commandMethodName, "external-command", "low"),
+          });
+        }
       }
 
       // Stryker disable all: literal file/http/queue dispatch is fixed by adapter-off and near-miss black-box tests; remaining mutants only toggle equivalent dispatcher guard forms.
       if (name && firstArgumentText) {
-        if (fsMethodName && FILE_READ_METHODS.has(fsMethodName) && !hasFdOption) {
+        if (fsMethodName && FILE_COPY_METHODS.has(fsMethodName) && !hasFdOption) {
+          if (fileEnabled) {
+            addResourceAccess(accesses, {
+              kind: "file",
+              access: "read",
+              selector: normalizePath(firstArgumentText),
+              filePath: relativeFilePath,
+              line: getLineNumber(sourceFile, node),
+              ...resourceAccessSource(name),
+            });
+            const destinationText = literalText(node.arguments[1]);
+            if (destinationText) {
+              addResourceAccess(accesses, {
+                kind: "file",
+                access: "write",
+                selector: normalizePath(destinationText),
+                filePath: relativeFilePath,
+                line: getLineNumber(sourceFile, node),
+                ...resourceAccessSource(name),
+              });
+            }
+          }
+        } else if (fsMethodName && FILE_READ_METHODS.has(fsMethodName) && !hasFdOption) {
             // Stryker disable next-line ConditionalExpression: file adapter-off behavior is covered by the all-adapters-disabled contract.
             if (fileEnabled) {
             addResourceAccess(accesses, {
               kind: "file",
-              access: "read",
+              access: fileAccessModeForMethod(fsMethodName, literalText(node.arguments[1])),
               selector: normalizePath(firstArgumentText),
               filePath: relativeFilePath,
               line: getLineNumber(sourceFile, node),
@@ -1497,19 +1652,6 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
               kind: "file",
               access: "write",
               selector: normalizePath(firstArgumentText),
-              filePath: relativeFilePath,
-              line: getLineNumber(sourceFile, node),
-              ...resourceAccessSource(name),
-            });
-          }
-        // Stryker disable next-line Regex: anchored absolute-URL detection is covered by relative URL and queue URL near-miss tests.
-        } else if ((name === "fetch" || name === "request") && /^https?:\/\//.test(firstArgumentText)) {
-          // Stryker disable next-line ConditionalExpression: HTTP adapter-off behavior is covered by the all-adapters-disabled contract.
-          if (httpEnabled) {
-            addResourceAccess(accesses, {
-              kind: "http",
-              access: "call",
-              selector: firstArgumentText,
               filePath: relativeFilePath,
               line: getLineNumber(sourceFile, node),
               ...resourceAccessSource(name),
@@ -1559,6 +1701,20 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
       }
     }
 
+    if (sqlLiteralEnabled && ts.isNewExpression(node) && expressionName(node.expression) === "DatabaseSync") {
+      const databasePath = literalText(node.arguments?.[0]);
+      addResourceAccess(accesses, {
+        kind: "database",
+        access: "read",
+        selector: databasePath ? `sqlite:${normalizePath(databasePath)}` : "unresolved:dynamic-sqlite-database",
+        filePath: relativeFilePath,
+        line: getLineNumber(sourceFile, node),
+        unresolved: databasePath ? undefined : true,
+        reason: databasePath ? undefined : "SQLite database path is not a static literal",
+        ...resourceAccessSource("DatabaseSync", "node-sqlite-adapter", databasePath ? "medium" : "low"),
+      });
+    }
+
     ts.forEachChild(node, visit);
   }
 
@@ -1591,7 +1747,12 @@ export const resourceAccessTestHooks = {
   typeOrmWriteMethods: TYPEORM_WRITE_METHODS,
   queryBuilderReadMethods: QUERY_BUILDER_READ_METHODS,
   queryBuilderWriteMethods: QUERY_BUILDER_WRITE_METHODS,
+  genericSqlMethods: GENERIC_SQL_METHODS,
+  fileReadMethods: FILE_READ_METHODS,
+  fileWriteMethods: FILE_WRITE_METHODS,
+  fileCopyMethods: FILE_COPY_METHODS,
   fsModuleSpecifiers: FS_MODULE_SPECIFIERS,
+  commandExecutionMethods: COMMAND_EXECUTION_METHODS,
   pythonResourceAdapters: PYTHON_RESOURCE_ADAPTERS,
   resourceScanHint: RESOURCE_SCAN_HINT,
   pythonResourceScanHint: PYTHON_RESOURCE_SCAN_HINT,

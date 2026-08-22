@@ -10,11 +10,11 @@ Version 0.x is deliberately narrow:
 - one public entry per cell;
 - repository-local cells only;
 - file-path artifact lanes only;
-- selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred;
+- selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred, but recognized dynamic HTTP URLs and known SQL receivers with non-static query arguments fail closed as unresolved resources;
 - ORM, query builder, and broker-client support is adapter-scoped; unsupported libraries require a dedicated adapter or runtime evidence;
 - external dependency policy covers npm package roots and Python import roots observed by the resolver; it is not a package-manager lockfile auditor;
-- ownership overlap detection is segment-aware for literal path prefixes, but does not solve arbitrary glob intersection;
-- public symbol analysis supports common TypeScript forms, exported namespaces, and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern;
+- ownership overlap detection uses the same directory expansion for bare owned paths as source ownership and solves the supported glob dialect; unsupported glob syntax remains literal and suspicious multi-star segments are reported as manifest warnings;
+- public symbol analysis supports common TypeScript forms, exported namespaces, and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern. In Python, module-level imports are public attributes unless hidden by underscore aliases or constrained by `__all__`;
 - TypeScript/JavaScript public surface hashes use isolated normalized declaration output when available and remain contract fingerprints, not full API-compatibility proofs; imported implementation details can still collapse to broad declaration types without a separate typecheck;
 - computed dynamic imports and computed CommonJS `require()` calls cannot be resolved statically;
 - `check --changed` performs full head analysis, then compares stable finding fingerprints to report only newly introduced findings. Only clean base results without findings are cacheable; the key binds the base commit, engine and schema implementation, Node/TypeScript/Python runtime, policy inputs, and severity configuration. Absolute or repository-escaping policy paths and plugins without an explicit `pluginCacheKey` remain uncached;

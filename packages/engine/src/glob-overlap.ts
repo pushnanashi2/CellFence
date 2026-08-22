@@ -293,6 +293,13 @@ export function pathPatternsOverlap(leftPattern: string, rightPattern: string): 
   return !leftHasWildcard && !rightHasWildcard && (left.startsWith(`${right}/`) || right.startsWith(`${left}/`));
 }
 
+function expandOwnedPathPattern(pattern: string): string[] {
+  const normalized = normalizedGlobPattern(pattern);
+  if (normalized.includes("*")) return [normalized];
+  return [normalized, `${normalized}/**`];
+}
+
 export function ownedPathPatternsOverlap(leftPattern: string, rightPattern: string): boolean {
-  return patternAutomataIntersect(leftPattern, rightPattern);
+  return expandOwnedPathPattern(leftPattern).some((left) =>
+    expandOwnedPathPattern(rightPattern).some((right) => patternAutomataIntersect(left, right)));
 }

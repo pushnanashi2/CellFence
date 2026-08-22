@@ -211,7 +211,7 @@ test("glob overlap follows matcher semantics and canonicalizes trailing separato
   assert.equal(pathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
   assert.equal(pathPatternsOverlap("src/**.ts", "src/a.ts"), true);
   assert.equal(pathPatternsOverlap("src/**", "src"), false);
-  assert.equal(ownedPathPatternsOverlap("src/**", "src"), false);
+  assert.equal(ownedPathPatternsOverlap("src/**", "src"), true);
   assert.equal(ownedPathPatternsOverlap("src/**", "src/core"), true);
   assert.equal(ownedPathPatternsOverlap("src/**/a", "src/a"), true);
   assert.equal(ownedPathPatternsOverlap("src/**.ts", "src/nested/a.ts"), false);
@@ -254,9 +254,13 @@ test("glob overlap agrees with concrete matcher witnesses across a bounded diale
     for (const right of patterns) {
       const concreteIntersection = paths.some((candidate) =>
         matchesPattern(candidate, left) && matchesPattern(candidate, right));
+      const expandOwned = (pattern) => pattern.includes("*") ? [pattern] : [pattern, `${pattern}/**`];
+      const concreteOwnedIntersection = paths.some((candidate) =>
+        expandOwned(left).some((expandedLeft) => matchesPattern(candidate, expandedLeft))
+          && expandOwned(right).some((expandedRight) => matchesPattern(candidate, expandedRight)));
       assert.equal(
         ownedPathPatternsOverlap(left, right),
-        concreteIntersection,
+        concreteOwnedIntersection,
         `owned overlap mismatch: left=${left} right=${right}`,
       );
       const literalAncestor = !left.includes("*")
@@ -744,6 +748,9 @@ test("file index ownership and coverage helpers accept any matching owned path w
   assert.equal(pathOwnedByCell(cell, "src/addon/helper.ts"), true);
   assert.equal(pathOwnedByCell(cell, "src/other/helper.ts"), false);
   assert.equal(pathOwnedByCell({ ...cell, ownedPaths: ["src/core"] }, "src/core/public.ts"), true);
+  assert.equal(matchesPattern("src/core/public.ts", "./src//core/./**"), true);
+  assert.equal(matchesPattern("src/core/public.ts", "src/core/***"), true);
+  assert.equal(matchesPattern("src/core/nested/public.ts", "src/core/***"), false);
 
   assert.equal(patternCoveredByOwnedPaths("*.ts", ["*.ts"]), true);
   assert.equal(patternCoveredByOwnedPaths("src/core/public.ts", ["src/core/**", "src/other/**"]), true);

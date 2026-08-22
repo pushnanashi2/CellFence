@@ -384,14 +384,21 @@ test("resource detector vocabularies and receiver heuristics reject near misses"
   assert.deepEqual([...hooks.typeOrmWriteMethods], ["save", "insert", "update", "upsert", "delete", "remove", "softDelete", "restore"]);
   assert.deepEqual([...hooks.queryBuilderReadMethods], ["selectFrom", "from"]);
   assert.deepEqual([...hooks.queryBuilderWriteMethods], ["insertInto", "updateTable", "deleteFrom", "into", "update"]);
+  assert.deepEqual([...hooks.genericSqlMethods], ["query", "execute"]);
+  assert.deepEqual([...hooks.fileReadMethods], ["readFile", "readFileSync", "createReadStream", "readdir", "readdirSync", "open", "openSync"]);
+  assert.deepEqual([...hooks.fileWriteMethods], ["writeFile", "writeFileSync", "appendFile", "appendFileSync", "createWriteStream", "rm", "rmSync", "unlink", "unlinkSync"]);
+  assert.deepEqual([...hooks.fileCopyMethods], ["copyFile", "copyFileSync"]);
   assert.deepEqual([...hooks.fsModuleSpecifiers], ["fs", "node:fs", "fs/promises", "node:fs/promises"]);
+  assert.deepEqual([...hooks.commandExecutionMethods], ["execSync", "execFileSync", "spawnSync"]);
   assert.deepEqual([...hooks.pythonResourceAdapters], [
     ["django-adapter", "django"],
     ["fastapi-adapter", "fastapi"],
     ["sqlalchemy-adapter", "sqlalchemy"],
     ["celery-adapter", "celery"],
   ]);
-  for (const text of ["PrismaClient", "readFileSync", "$queryRaw", "route", "subscribe"]) assert.equal(hooks.resourceScanHint.test(text), true, text);
+  for (const text of ["PrismaClient", "readFileSync", "openSync", "rmSync", "copyFileSync", "DatabaseSync", "execFileSync", "$queryRaw", "route", "subscribe"]) {
+    assert.equal(hooks.resourceScanHint.test(text), true, text);
+  }
   for (const text of ["FastAPI", "models.Model", "__tablename__", "apply_async"]) assert.equal(hooks.pythonResourceScanHint.test(text), true, text);
   assert.equal(hooks.resourceScanHint.test("ordinary business logic"), false);
   assert.equal(hooks.pythonResourceScanHint.test("ordinary python logic"), false);
@@ -412,8 +419,10 @@ test("resource detector vocabularies and receiver heuristics reject near misses"
   }
   assert.equal(hooks.queueReceiverLooksExternal(expressionFrom("factory().subscribe")), false);
   for (const selector of ["orders.created", "queue-name", "lowercase"]) assert.equal(hooks.selectorLooksQueueTopic(selector), true, selector);
-  for (const selector of ["/route", "http://example.test", "https://example.test", "onResolved"]) assert.equal(hooks.selectorLooksQueueTopic(selector), false, selector);
-  for (const selector of ["prefixhttp://example.test", "prefixhttps://example.test", "prefixonResolved"]) {
+  for (const selector of ["/route", "http://example.test", "https://example.test", "prefixhttp://example.test", "prefixhttps://example.test", "onResolved"]) {
+    assert.equal(hooks.selectorLooksQueueTopic(selector), false, selector);
+  }
+  for (const selector of ["prefixonResolved", "topic/http://example.test"]) {
     assert.equal(hooks.selectorLooksQueueTopic(selector), true, selector);
   }
 });
@@ -846,11 +855,15 @@ test("collectResourceAccesses covers file, HTTP, and generic queue call vocabula
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-call-vocabulary-"));
   try {
     const lines = [
-      "import fsDefault, { appendFile, appendFileSync, createReadStream, createWriteStream, readFile, readFileSync, readdir, readdirSync, writeFile, writeFileSync } from 'node:fs';",
+      "import fsDefault, { appendFile, appendFileSync, copyFileSync, createReadStream, createWriteStream, openSync, readFile, readFileSync, readdir, readdirSync, rmSync, writeFile, writeFileSync } from 'node:fs';",
       "import { readFile as readFileFromPromises, writeFile as writeFileFromPromises } from 'node:fs/promises';",
       "import * as fsNamespace from 'fs';",
+      "const SERVICE_URL = 'https://api.example.test/const';",
       "declare const pathName: string;",
       "declare const fd: unknown;",
+      "declare const dynamicUrl: string;",
+      "declare const DatabaseSync: new (path: string) => unknown;",
+      "declare const childProcess: { execSync(command: string): unknown };",
       "declare function fetch(url: string): unknown;",
       "declare function request(url: string): unknown;",
       "declare const router: { get(path: string): unknown; post(path: string): unknown; put(path: string): unknown; patch(path: string): unknown; delete(path: string): unknown };",
@@ -868,6 +881,12 @@ test("collectResourceAccesses covers file, HTTP, and generic queue call vocabula
       "  appendFile('data/append.txt', '');",
       "  appendFileSync('data/append-sync.txt', '');",
       "  createWriteStream('data/write-stream.txt');",
+      "  openSync('data/open.txt', 'r');",
+      "  rmSync('data/delete.txt');",
+      "  copyFileSync('data/source.txt', 'data/dest.txt');",
+      "  new DatabaseSync('app.db');",
+      "  childProcess.execSync('psql -c \"select * from app_users\"');",
+      "  childProcess.execSync('curl https://api.example.test/from-command');",
       "  fsDefault.readFileSync('data/default-read-sync.txt');",
       "  fsNamespace.createWriteStream('data/namespace-write-stream.txt');",
       "  fsNamespace.createWriteStream(pathName, { fd });",
@@ -875,6 +894,12 @@ test("collectResourceAccesses covers file, HTTP, and generic queue call vocabula
       "  writeFileFromPromises('data/promises-write.txt', '');",
       "  readFile(pathName);",
       "  fetch('https://api.example.test/fetch');",
+      "  fetch('/api/v1/users');",
+      "  fetch('api/v1/users');",
+      "  fetch('ws://api.example.test/socket');",
+      "  fetch(new URL('https://api.example.test/url'));",
+      "  fetch(SERVICE_URL);",
+      "  fetch(dynamicUrl);",
       "  request('http://api.example.test/request');",
       "  router.get('/get');",
       "  router.post('/post');",
@@ -896,16 +921,142 @@ test("collectResourceAccesses covers file, HTTP, and generic queue call vocabula
     const filePath = writeRuntimeSource(rootDir, lines);
     const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
 
-    assert.equal(countMatching(accesses, (access) => access.kind === "file" && access.access === "read" && !access.unresolved), 7);
-    assert.equal(countMatching(accesses, (access) => access.kind === "file" && access.access === "write" && !access.unresolved), 7);
+    assert.equal(countMatching(accesses, (access) => access.kind === "file" && access.access === "read" && !access.unresolved), 9);
+    assert.equal(countMatching(accesses, (access) => access.kind === "file" && access.access === "write" && !access.unresolved), 9);
     assert.equal(countMatching(accesses, (access) => access.kind === "file" && access.selector === "unresolved:dynamic-file-path" && access.unresolved), 1);
-    assert.equal(countMatching(accesses, (access) => access.kind === "http" && access.access === "call"), 2);
+    assert.equal(countMatching(accesses, (access) => access.kind === "http" && access.access === "call"), 9);
     assert.equal(countMatching(accesses, (access) => access.kind === "http" && access.access === "serve"), 5);
     assert.equal(countMatching(accesses, (access) => access.kind === "queue" && access.access === "publish"), 4);
     assert.equal(countMatching(accesses, (access) => access.kind === "queue" && access.access === "subscribe"), 4);
     assert.equal(accesses.find((access) => access.selector === "data/read.txt")?.detectedBy, "readFile");
+    assert.equal(accesses.find((access) => access.selector === "data/source.txt")?.access, "read");
+    assert.equal(accesses.find((access) => access.selector === "data/dest.txt")?.access, "write");
+    assert.equal(accesses.find((access) => access.selector === "sqlite:app.db")?.detectedBy, "node-sqlite-adapter");
+    assert.deepEqual(
+      accesses
+        .filter((access) => access.selector === "unresolved:external-command-sql" || access.selector === "unresolved:external-command-http")
+        .map((access) => `${access.kind}:${access.access}:${access.selector}:${access.source}:${access.detectedBy}:${access.confidence}:${access.unresolved}:${access.reason}`)
+        .sort(),
+      [
+        "database:read:unresolved:external-command-sql:execSync:external-command:low:true:external command may access database resources",
+        "http:call:unresolved:external-command-http:execSync:external-command:low:true:external command may access HTTP resources",
+      ],
+    );
+    assert.deepEqual(
+      accesses
+        .filter((access) => access.selector === "unresolved:dynamic-http-url")
+        .map((access) => `${access.kind}:${access.access}:${access.source}:${access.detectedBy}:${access.confidence}:${access.unresolved}:${access.reason}`),
+      ["http:call:fetch:http-call:low:true:HTTP URL argument is not a static literal"],
+    );
     assert.equal(accesses.find((access) => access.selector === "GET /get")?.line, lineOf(lines, "router.get"));
     assert.equal(accesses.find((access) => access.selector === "unresolved:dynamic-file-path")?.reason, "file path argument is not a static literal");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses keeps HTTP selector resolution strict", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-http-strict-"));
+  try {
+    const lines = [
+      "declare const flag: boolean;",
+      "declare const dynamicUrl: string;",
+      "const CLEAN_URL = flag ? 'https://api.example.test/clean' : '';",
+      "const BLANK_URL = flag ? '   ' : 'https://api.example.test/blank';",
+      "declare function fetch(url?: unknown): unknown;",
+      "declare const Request: new (url: string) => unknown;",
+      "export function runRuntime(): void {",
+      "  fetch();",
+      "  fetch(new URL('https://api.example.test/url'));",
+      "  fetch(new Request('https://api.example.test/request-object'));",
+      "  fetch(CLEAN_URL);",
+      "  fetch(BLANK_URL);",
+      "  fetch(dynamicUrl);",
+      "}",
+    ];
+    const filePath = writeRuntimeSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.detectedBy}:${access.confidence}:${access.unresolved}:${access.reason}`), [
+      "http:call:https://api.example.test/blank:fetch:high:false:",
+      "http:call:https://api.example.test/clean:fetch:high:false:",
+      "http:call:https://api.example.test/url:fetch:high:false:",
+      "http:call:unresolved:dynamic-http-url:http-call:low:true:HTTP URL argument is not a static literal",
+      "http:call:unresolved:dynamic-http-url:http-call:low:true:HTTP URL argument is not a static literal",
+    ]);
+    assert.equal(accesses.some((access) => access.selector.trim().length === 0), false);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses classifies extended fs and command vocabularies exactly", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-extended-vocab-"));
+  try {
+    const lines = [
+      "import { copyFile, open, rm, unlink, unlinkSync } from 'node:fs';",
+      "declare const cp: { execFileSync(command: string): unknown; spawnSync(command: string): unknown };",
+      "declare const dynamicPath: string;",
+      "export function runRuntime(): void {",
+      "  open('data/open-read.txt', 'r');",
+      "  open('data/open-write.txt', 'w');",
+      "  rm('data/remove.txt');",
+      "  unlink('data/unlink.txt');",
+      "  unlinkSync('data/unlink-sync.txt');",
+      "  copyFile('data/copy-source.txt', 'data/copy-dest.txt');",
+      "  copyFile(dynamicPath, 'data/dynamic-source-dest.txt');",
+      "  copyFile('data/dynamic-dest-source.txt', dynamicPath);",
+      "  cp.execFileSync('wget https://api.example.test/archive');",
+      "  cp.spawnSync('sqlite3');",
+      "}",
+    ];
+    const filePath = writeRuntimeSource(rootDir, lines);
+    const accesses = summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir), filePath));
+
+    assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.source}:${access.detectedBy}:${access.confidence}:${access.unresolved}:${access.reason}`), [
+      "database:read:unresolved:external-command-sql:spawnSync:external-command:low:true:external command may access database resources",
+      "file:read:data/copy-source.txt:copyFile:copyFile:high:false:",
+      "file:read:data/dynamic-dest-source.txt:copyFile:copyFile:high:false:",
+      "file:read:data/open-read.txt:open:open:high:false:",
+      "file:read:unresolved:dynamic-file-path:copyFile:file-call:low:true:file path argument is not a static literal",
+      "file:write:data/copy-dest.txt:copyFile:copyFile:high:false:",
+      "file:write:data/open-write.txt:open:open:high:false:",
+      "file:write:data/remove.txt:rm:rm:high:false:",
+      "file:write:data/unlink-sync.txt:unlinkSync:unlinkSync:high:false:",
+      "file:write:data/unlink.txt:unlink:unlink:high:false:",
+      "file:write:unresolved:dynamic-file-path:copyFile:file-call:low:true:file path argument is not a static literal",
+      "http:call:unresolved:external-command-http:execFileSync:external-command:low:true:external command may access HTTP resources",
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("collectResourceAccesses honors HTTP and SQL adapter gates for external commands", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-resource-command-gates-"));
+  try {
+    const lines = [
+      "declare const childProcess: { execSync(command: string): unknown };",
+      "export function runRuntime(): void {",
+      "  childProcess.execSync('curl https://api.example.test/from-shell');",
+      "  childProcess.execSync('psql -c \"select * from app_users\"');",
+      "}",
+    ];
+    const filePath = writeRuntimeSource(rootDir, lines);
+    const commandSelectors = (governance = {}) => summarizeAccesses(collectResourceAccesses(createResourceContext(rootDir, governance), filePath))
+      .map((access) => `${access.kind}:${access.access}:${access.selector}:${access.source}:${access.detectedBy}:${access.confidence}:${access.unresolved}`);
+
+    assert.deepEqual(commandSelectors(), [
+      "database:read:unresolved:external-command-sql:execSync:external-command:low:true",
+      "http:call:unresolved:external-command-http:execSync:external-command:low:true",
+    ]);
+    assert.deepEqual(commandSelectors({ resourceAdapters: { http: "off" } }), [
+      "database:read:unresolved:external-command-sql:execSync:external-command:low:true",
+    ]);
+    assert.deepEqual(commandSelectors({ resourceAdapters: { "sql-literal": "off" } }), [
+      "http:call:unresolved:external-command-http:execSync:external-command:low:true",
+    ]);
+    assert.deepEqual(commandSelectors({ resourceAdapters: { http: "off", "sql-literal": "off" } }), []);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -1109,6 +1260,7 @@ test("collectResourceAccesses keeps adapter disabled switches fail-closed for ev
       "declare const sqlClient: { query(sql: string): void };",
       "import { readFile } from 'node:fs';",
       "declare function fetch(url: string): unknown;",
+      "declare const childProcess: { execSync(command: string): unknown };",
       "declare const bus: { publish(topic: string): unknown };",
       "export function runRuntime(): void {",
       "  prismaClient.user.findMany();",
@@ -1122,6 +1274,8 @@ test("collectResourceAccesses keeps adapter disabled switches fail-closed for ev
       "  sqlClient.query('select * from app_users');",
       "  readFile('data/input.json');",
       "  fetch('https://api.example.test');",
+      "  childProcess.execSync('curl https://api.example.test');",
+      "  childProcess.execSync('psql -c \"select * from app_users\"');",
       "  bus.publish('domain.events');",
       "}",
     ];
@@ -1217,7 +1371,8 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "declare const kafkaProducer: { send(config: unknown): void };",
       "declare const kafkaConsumer: { subscribe(config: unknown): void };",
       "declare const tableName: string;",
-      "declare const sqlClient: { query(input: unknown): void };",
+      "declare const sqlClient: { query(input: unknown): void; execute(input: unknown): void };",
+      "declare const analyticsClient: { query(input: unknown): void; inspect(input: unknown): void };",
       "declare const localFs: { readFile(path: string): unknown; writeFileSync(path: string, data: string): unknown };",
       "declare const fsFacade: { createReadStream(path: string): unknown };",
       "declare function fetch(url: string): unknown;",
@@ -1256,8 +1411,13 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "  sqlClient.query(dynamicSql);",
       "  sqlClient.query(notSql);",
       "  sqlClient.query(tableName);",
+      "  sqlClient.execute(tableName);",
+      "  sqlClient.inspect(tableName);",
+      "  analyticsClient.query(tableName);",
+      "  analyticsClient.inspect(tableName);",
       "  sqlClient.query();",
       "  hash.update('\\0', 'utf8').update('cache-key').digest('hex');",
+      "  fetch();",
       "  fetch('/relative-not-http');",
       "  readFile('local-helper.txt');",
       "  localFs.readFile('local-object.txt');",
@@ -1285,9 +1445,13 @@ test("collectResourceAccesses rejects near-miss object properties and non-resour
       "database:read:information_schema.columns:sql-literal:",
       "database:read:information_schema.columns:sql-literal:",
       "database:read:information_schema.tables:sql-literal:",
+      "database:read:unresolved:dynamic-sql:sql-literal:SQL query receiver was previously observed but this argument is not a static literal",
       "database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically",
+      "database:read:unresolved:dynamic-sql:sql-literal:SQL query receiver was previously observed but this argument is not a static literal",
+      "database:read:unresolved:dynamic-sql:sql-literal:SQL query receiver was previously observed but this argument is not a static literal",
       "database:write:app_users:sql-literal:",
       "database:write:audit_logs:sql-literal:",
+      "http:call:/relative-not-http:fetch:",
       "http:serve:GET /status:fastify-adapter:",
       "http:serve:POST /status:fastify-adapter:",
       "queue:publish:kafka:orders.created:kafkajs-adapter:",
@@ -1364,6 +1528,7 @@ test("collectResourceAccesses keeps SQL string resolution lexical and fail-close
       `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "// parameter")}`,
       `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "shadowed dependency")}`,
       `database:read:unresolved:dynamic-sql:sql-literal:SQL query is assembled dynamically:${lineOf(lines, "sqlClient.query(sqlText)")}`,
+      `database:read:unresolved:dynamic-sql:sql-literal:SQL query receiver was previously observed but this argument is not a static literal:${lineOf(lines, "sqlClient.query(notSql)")}`,
     ].sort();
 
     assert.deepEqual(accesses.map((access) => `${access.kind}:${access.access}:${access.selector}:${access.detectedBy}:${access.reason}:${access.line}`).sort(), expected);

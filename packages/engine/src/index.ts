@@ -1301,7 +1301,22 @@ function validateRequiredRuleConfiguration(
 function validateManifestPatternsMatchFiles(context: AnalysisContext, findings: Finding[], warnings: Finding[]): void {
   const files = listFiles(context.rootDir, context).map((filePath) => repoPath(context.rootDir, filePath));
   const cellsWithErrors = new Set(findings.filter((finding) => finding.severity === "error" && finding.cellId).map((finding) => finding.cellId));
+  const warnSuspiciousGlob = (pattern: string, source: string, cellId?: string, filePath?: string): void => {
+    if (!/(^|\/)[^/]*\*{3,}[^/]*(\/|$)/.test(pattern)) return;
+    addFinding(warnings, {
+      ruleId: "CELLFENCE_SUSPICIOUS_GLOB_PATTERN",
+      severity: "warning",
+      cellId,
+      filePath,
+      message: `${source} pattern ${pattern} contains a suspicious triple-star glob segment`,
+      details: { source, pattern },
+      suggestedResolutions: [
+        manifestResolution("Use ** for recursive directory matches or * for one path segment", true, { source, pattern }),
+      ],
+    });
+  };
   const checkPattern = (pattern: string, source: string, cellId?: string, filePath?: string): void => {
+    warnSuspiciousGlob(pattern, source, cellId, filePath);
     if (cellId && cellsWithErrors.has(cellId)) return;
     if (files.some((candidate) => matchesPattern(candidate, pattern))) return;
     addFinding(warnings, {

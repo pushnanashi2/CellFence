@@ -167,7 +167,7 @@ test("engine reports manifest glob patterns that match no files", () => {
   try {
     writeCell(rootDir, "core");
     writeManifest(rootDir, [baseCell("core", {
-      ownedPaths: ["src/core/**", "src/core/missing/**"],
+      ownedPaths: ["src/core/**", "src/core/***", "src/core/missing/**"],
       publicPaths: ["src/core/no-public/**"],
       producesArtifacts: [{ id: "snapshots", paths: ["src/core/artifacts/missing/**"] }],
     })], { governance: { include: ["src/**"], exclude: ["test-fixtures/missing/**"] } });
@@ -179,6 +179,8 @@ test("engine reports manifest glob patterns that match no files", () => {
       "src/core/no-public/**",
       "test-fixtures/missing/**",
     ]);
+    const suspiciousWarnings = result.warnings.filter((finding) => finding.ruleId === "CELLFENCE_SUSPICIOUS_GLOB_PATTERN");
+    assert.deepEqual(suspiciousWarnings.map((finding) => finding.details.pattern), ["src/core/***"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
