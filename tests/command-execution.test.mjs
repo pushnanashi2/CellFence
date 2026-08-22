@@ -216,6 +216,7 @@ test("command resolution ignores relative PATH entries and non-executable files"
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-relative-path-"));
   const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-absolute-path-"));
   const previousCwd = process.cwd();
+  const hostSupportsPosixExecutableBits = process.platform !== "win32";
   try {
     fs.mkdirSync(path.join(rootDir, "relative-bin"));
     writeExecutable(path.join(rootDir, "relative-bin", "tool"), "repo-shadowed executable\n");
@@ -227,7 +228,9 @@ test("command resolution ignores relative PATH entries and non-executable files"
       platform: "linux",
       variables: { PATH: `relative-bin${path.delimiter}${binDir}`, PATHEXT: undefined },
     }, () => {
-      assert.equal(resolveCommand("tool"), "tool");
+      if (hostSupportsPosixExecutableBits) {
+        assert.equal(resolveCommand("tool"), "tool");
+      }
       assert.equal(resolveCommand("directory-tool"), "directory-tool");
       assert.equal(resolveCommand("safe-tool"), path.join(binDir, "safe-tool"));
     });

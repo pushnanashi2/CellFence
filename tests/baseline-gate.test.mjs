@@ -307,6 +307,7 @@ test("github action baseline gate normalizes Windows-style git baseline paths", 
   writeJson(path.join(rootDir, "nested/cellfence.baseline.json"), makeBaseline());
   git(rootDir, ["add", "nested/cellfence.baseline.json"]);
   git(rootDir, ["commit", "-qm", "add nested baseline"]);
+  fs.rmSync(path.join(rootDir, "nested/cellfence.baseline.json"));
 
   const result = runBaselineGateFull({
     rootDir,
