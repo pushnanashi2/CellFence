@@ -3,7 +3,11 @@ export function todayIsoDate(): string {
 }
 
 export function isIsoDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const timestamp = Date.parse(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(timestamp)) return false;
+  return new Date(timestamp).toISOString().slice(0, 10) === value;
 }
 
 export function daysBetween(startIso: string, endIso: string): number {

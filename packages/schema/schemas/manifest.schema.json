@@ -41,6 +41,10 @@
       "items": { "$ref": "#/$defs/string" },
       "uniqueItems": true
     },
+    "cellId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
     "externalDependencyId": {
       "type": "string",
       "oneOf": [
@@ -181,7 +185,7 @@
       "additionalProperties": false,
       "required": ["id", "ownedPaths", "publicEntry", "publicSymbols"],
       "properties": {
-        "id": { "$ref": "#/$defs/string" },
+        "id": { "$ref": "#/$defs/cellId" },
         "ownedPaths": { "$ref": "#/$defs/pathArray" },
         "publicEntry": { "$ref": "#/$defs/path" },
         "publicPaths": { "$ref": "#/$defs/pathArray" },
@@ -199,7 +203,7 @@
             "additionalProperties": false,
             "required": ["cell"],
             "properties": {
-              "cell": { "$ref": "#/$defs/string" },
+              "cell": { "$ref": "#/$defs/cellId" },
               "artifactLanes": { "$ref": "#/$defs/stringArray" }
             }
           }

@@ -12,8 +12,9 @@
 //                    enough for any intercepted calls to land
 //   * `inactive`   — `CELLFENCE_TRACE_DISABLE=1` was set, the
 //                    install was skipped
+//   * `incomplete` — the trace reached its configured unique access cap
 //
-// The engine surfaces both as findings so a PR cannot accidentally
+// The engine surfaces non-active states as findings so a PR cannot accidentally
 // pass with an empty `accesses` array that was really "the hook
 // did not run".
 
@@ -43,9 +44,11 @@ const originalAppendFile = fs.promises.appendFile.bind(fs.promises);
 const originalFetch = globalThis.fetch?.bind(globalThis);
 const accesses = new Map<string, ResourceEvidenceAccess>();
 const SOURCE_FILE_EXTENSIONS = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".mts", ".cts"]);
+const DEFAULT_MAX_ACCESSES = 10_000;
 let installed = false;
 let flushed = false;
 let flushHooksRegistered = false;
+let accessLimitReached = false;
 
 export function traceDiagnostics(): { installed: boolean; flushHooksRegistered: boolean } {
   return { installed, flushHooksRegistered };
@@ -96,6 +99,11 @@ function accessKey(access: ResourceEvidenceAccess): string {
   return `${access.cellId || ""}:${access.kind}:${access.access}:${access.selector}`;
 }
 
+function maxAccesses(): number {
+  const parsed = Number(process.env.CELLFENCE_TRACE_MAX_ACCESSES);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_ACCESSES;
+}
+
 export function recordResourceAccess(access: TraceAccessInput): void {
   registerFlushHooks();
   const resolvedAccess: ResourceEvidenceAccess = {
@@ -104,7 +112,12 @@ export function recordResourceAccess(access: TraceAccessInput): void {
     detectedBy: access.detectedBy || "cellfence-trace",
     confidence: access.confidence || "transient",
   };
-  accesses.set(accessKey(resolvedAccess), resolvedAccess);
+  const key = accessKey(resolvedAccess);
+  if (!accesses.has(key) && accesses.size >= maxAccesses()) {
+    accessLimitReached = true;
+    return;
+  }
+  accesses.set(key, resolvedAccess);
 }
 
 export function recordDatabaseAccess(selector: string, access: "read" | "write" = "read", cellId?: string): void {
@@ -174,12 +187,10 @@ export function flushEvidence(): void {
   // H-3 (0.3.0): the previous implementation bailed when
   // `accesses.size === 0`, which silently merged three different
   // states ("disabled", "active but observed nothing", "active and
-  // observed things"). Keep the early-return so an unused hook
-  // does not write an empty file, but make sure the
-  // `transcriptStatus` field is written alongside any evidence we
-  // do emit, so consumers can still distinguish the cases where a
-  // file is present.
-  if (flushed || accesses.size === 0) return;
+  // observed things"). An installed hook now writes an empty active
+  // transcript, while a plain import with no recorded access still
+  // stays silent.
+  if (flushed || (!installed && accesses.size === 0)) return;
   flushed = true;
   const outputPath = evidencePath();
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -188,7 +199,7 @@ export function flushEvidence(): void {
     generatedAt: new Date().toISOString(),
     commitSha: readCommitSha(),
     cellId: defaultCellId(),
-    transcriptStatus: transcriptStatus(),
+    transcriptStatus: accessLimitReached ? "incomplete" : transcriptStatus(),
     accesses: [...accesses.values()].sort((left, right) => accessKey(left).localeCompare(accessKey(right))),
   };
   originalWriteFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);

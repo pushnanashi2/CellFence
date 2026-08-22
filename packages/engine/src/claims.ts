@@ -46,6 +46,8 @@ type ClaimOperationDependencies = {
   loadManifestFromFile(manifestPath: string): CellFenceManifest;
 };
 
+const MAX_CLAIM_TTL_MILLIS = 90 * 24 * 60 * 60 * 1000;
+
 function configuredClaimBackend(
   rootDir: string,
   claimsPath: string | undefined,
@@ -94,9 +96,13 @@ function parseTtlMillis(value: string): number | undefined {
   const amount = Number(match[1]);
   const unit = match[2];
   if (!Number.isSafeInteger(amount) || amount <= 0) return undefined;
-  if (unit === "m") return amount * 60 * 1000;
-  if (unit === "h") return amount * 60 * 60 * 1000;
-  return amount * 24 * 60 * 60 * 1000;
+  const ttlMillis = unit === "m"
+    ? amount * 60 * 1000
+    : unit === "h"
+      ? amount * 60 * 60 * 1000
+      : amount * 24 * 60 * 60 * 1000;
+  if (!Number.isSafeInteger(ttlMillis) || ttlMillis > MAX_CLAIM_TTL_MILLIS) return undefined;
+  return ttlMillis;
 }
 
 function computeClaimExpiresAt(now: Date, ttl: string | undefined, expiresAt: string | undefined): string | undefined {

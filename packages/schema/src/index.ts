@@ -367,9 +367,23 @@ function optionalBoolean(value: unknown): value is boolean | undefined {
   return value === undefined || typeof value === "boolean";
 }
 
+function isCellId(value: unknown): value is string {
+  return typeof value === "string" && /^[a-z0-9][a-z0-9._-]*$/.test(value);
+}
+
+function hasValidIsoDateParts(year: number, month: number, day: number): boolean {
+  const timestamp = Date.UTC(year, month - 1, day);
+  const date = new Date(timestamp);
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day;
+}
+
 function isIsoDateTime(value: string): boolean {
-  const timestamp = Date.parse(value);
-  return !Number.isNaN(timestamp) && /^\d{4}-\d{2}-\d{2}T/.test(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(value);
+  if (!match) return false;
+  return hasValidIsoDateParts(Number(match[1]), Number(match[2]), Number(match[3]))
+    && !Number.isNaN(Date.parse(value));
 }
 
 function validateOptionalIsoDateTime(value: unknown, location: string, errors: string[]): void {
@@ -386,6 +400,8 @@ function validateConsumer(value: unknown, location: string, errors: string[]): v
   validateKnownKeys(value, location, ["cell", "artifactLanes"], errors);
   if (typeof value.cell !== "string" || value.cell.trim().length === 0) {
     errors.push(`${location}.cell must be a non-empty string`);
+  } else if (!isCellId(value.cell)) {
+    errors.push(`${location}.cell must match /^[a-z0-9][a-z0-9._-]*$/`);
   }
   if (value.artifactLanes !== undefined && !isStringArray(value.artifactLanes)) {
     errors.push(`${location}.artifactLanes must be an array of non-empty strings`);
@@ -525,6 +541,8 @@ function validateResourceEvidenceAccess(value: unknown, location: string, errors
   if (!isRecord(value)) return false;
   if (value.cellId !== undefined && (typeof value.cellId !== "string" || value.cellId.trim().length === 0)) {
     errors.push(`${location}.cellId must be a non-empty string when present`);
+  } else if (typeof value.cellId === "string" && !isCellId(value.cellId)) {
+    errors.push(`${location}.cellId must match /^[a-z0-9][a-z0-9._-]*$/ when present`);
   }
   if (!optionalString(value.observedAt)) {
     errors.push(`${location}.observedAt must be a string when present`);
@@ -728,6 +746,8 @@ function validateCell(value: unknown, location: string, errors: string[]): value
   ], errors);
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     errors.push(`${location}.id must be a non-empty string`);
+  } else if (!isCellId(value.id)) {
+    errors.push(`${location}.id must match /^[a-z0-9][a-z0-9._-]*$/`);
   }
   if (!isStringArray(value.ownedPaths)) {
     errors.push(`${location}.ownedPaths must be an array of non-empty strings`);
@@ -921,6 +941,9 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
     errors.push("cellIds must be an array of non-empty strings when present");
   } else if (value.cellIds !== undefined) {
     validateUniqueNonEmptyStrings(value.cellIds, "cellIds", errors);
+    value.cellIds.forEach((cellId, cellIndex) => {
+      if (!isCellId(cellId)) errors.push(`cellIds[${cellIndex}] must match /^[a-z0-9][a-z0-9._-]*$/`);
+    });
   }
   if (value.seal !== undefined) {
     if (!isRecord(value.seal)) {
@@ -959,6 +982,7 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
   } else {
     for (const cellId of Object.keys(value.cells)) {
       if (cellId.trim().length === 0) errors.push("cells contains an empty cell id");
+      else if (!isCellId(cellId)) errors.push(`cells contains invalid cell id ${cellId}; expected /^[a-z0-9][a-z0-9._-]*$/`);
     }
     for (const [cellId, record] of Object.entries(value.cells)) {
       if (!isRecord(record)) {
@@ -1034,6 +1058,8 @@ export function validateResourceEvidence(value: unknown): ValidationResult<CellF
   }
   if (value.cellId !== undefined && (typeof value.cellId !== "string" || value.cellId.trim().length === 0)) {
     errors.push("cellId must be a non-empty string when present");
+  } else if (typeof value.cellId === "string" && !isCellId(value.cellId)) {
+    errors.push("cellId must match /^[a-z0-9][a-z0-9._-]*$/ when present");
   }
   if (value.transcriptStatus !== undefined && !["active", "inactive", "incomplete"].includes(value.transcriptStatus as string)) {
     errors.push("transcriptStatus must be one of active, inactive, incomplete when present");

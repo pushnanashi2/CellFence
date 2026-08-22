@@ -16,6 +16,7 @@ import {
 export type { CellFenceBaseline } from "@cellfence/schema";
 import {
   absolutePath,
+  listFiles,
   listSymlinks,
   matchesPattern,
   normalizePath,
@@ -1297,6 +1298,50 @@ function validateRequiredRuleConfiguration(
   checkMap("CLI ruleSeverities", cliRuleSeverities);
 }
 
+function validateManifestPatternsMatchFiles(context: AnalysisContext, findings: Finding[], warnings: Finding[]): void {
+  const files = listFiles(context.rootDir, context).map((filePath) => repoPath(context.rootDir, filePath));
+  const cellsWithErrors = new Set(findings.filter((finding) => finding.severity === "error" && finding.cellId).map((finding) => finding.cellId));
+  const checkPattern = (pattern: string, source: string, cellId?: string, filePath?: string): void => {
+    if (cellId && cellsWithErrors.has(cellId)) return;
+    if (files.some((candidate) => matchesPattern(candidate, pattern))) return;
+    addFinding(warnings, {
+      ruleId: "CELLFENCE_PATTERN_MATCHES_NOTHING",
+      severity: "warning",
+      cellId,
+      filePath,
+      message: `${source} pattern ${pattern} does not match any repository file`,
+      details: { source, pattern },
+      suggestedResolutions: [
+        manifestResolution("Remove the stale pattern or update it to match the intended files", true, { source, pattern }),
+      ],
+    });
+  };
+  for (const pattern of context.manifest.governance?.include || []) checkPattern(pattern, "governance.include");
+  for (const pattern of context.manifest.governance?.exclude || []) checkPattern(pattern, "governance.exclude");
+  for (const cell of context.manifest.cells) {
+    for (const pattern of cell.ownedPaths) checkPattern(pattern, `${cell.id}.ownedPaths`, cell.id, cell.publicEntry);
+    for (const pattern of cell.publicPaths || []) checkPattern(pattern, `${cell.id}.publicPaths`, cell.id, cell.publicEntry);
+    for (const lane of cell.producesArtifacts || []) {
+      if (lane.external) continue;
+      for (const pattern of lane.paths) checkPattern(pattern, `${cell.id}.producesArtifacts.${lane.id}.paths`, cell.id, cell.publicEntry);
+    }
+  }
+}
+
+function warnWhenWaiverParsingDisabled(context: AnalysisContext, warnings: Finding[]): void {
+  for (const cell of context.manifest.cells) {
+    if (cell.waiverParsing !== false) continue;
+    addFinding(warnings, {
+      ruleId: "CELLFENCE_WAIVER_PARSING_DISABLED",
+      severity: "warning",
+      cellId: cell.id,
+      filePath: cell.publicEntry,
+      message: `${cell.id} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,
+      details: { cellId: cell.id, reason: cell.waiverParsingReason },
+    });
+  }
+}
+
 function applyRuleSeverityPolicy(
   context: AnalysisContext,
   findings: Finding[],
@@ -1388,6 +1433,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   validateDuplicateCellIds(manifest, findings);
   validateOwnershipOverlap(manifest, findings);
+  warnWhenWaiverParsingDisabled(context, warnings);
   warnWhenOwnershipCoverageDisabled(context, warnings);
   validateOwnershipCoverage(context, findings);
   validateSymlinkTargets(context, findings);
@@ -1453,6 +1499,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   }
 
   runPluginRules(context, plugins, repositoryModel, findings);
+  validateManifestPatternsMatchFiles(context, findings, warnings);
 
   const rawObservationDiagnostics = [...findings, ...warnings];
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);

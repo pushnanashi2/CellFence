@@ -388,12 +388,14 @@ export function collectWaiversForManifest(rootDir: string, manifest: CellFenceMa
   // to a clean cell, and CI cannot tell why the engine did
   // not surface an error.
   if (findings && skipCells.size > 0) {
-    for (const cellId of skipCells) {
-            findings.push({
+    for (const cell of manifest.cells.filter((candidate) => skipCells.has(candidate.id))) {
+      findings.push({
         ruleId: "CELLFENCE_WAIVER_PARSING_DISABLED",
         severity: "warning",
-        message: `${cellId} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,
-        details: { cellId },
+        cellId: cell.id,
+        filePath: cell.publicEntry,
+        message: `${cell.id} declared waiverParsing: false; // cellfence-ignore directives in this cell's files will not be interpreted as waivers.`,
+        details: { cellId: cell.id, reason: cell.waiverParsingReason },
       });
     }
   }

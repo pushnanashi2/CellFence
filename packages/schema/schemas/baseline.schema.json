@@ -8,15 +8,24 @@
   "properties": {
     "schemaVersion": { "const": "cellfence.baseline.v1" },
     "generatedAt": { "type": "string", "minLength": 1, "format": "date-time" },
-    "cellIds": { "$ref": "#/$defs/stringArray" },
+    "cellIds": { "$ref": "#/$defs/cellIdArray" },
     "seal": { "$ref": "#/$defs/seal" },
     "cells": {
       "type": "object",
-      "propertyNames": { "minLength": 1, "pattern": "\\S" },
+      "propertyNames": { "$ref": "#/$defs/cellId" },
       "additionalProperties": { "$ref": "#/$defs/cell" }
     }
   },
   "$defs": {
+    "cellId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "cellIdArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/cellId" },
+      "uniqueItems": true
+    },
     "stringArray": {
       "type": "array",
       "items": { "type": "string", "minLength": 1, "pattern": "\\S" },

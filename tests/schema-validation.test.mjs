@@ -103,6 +103,8 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["manifest", validManifest({ cells: [{ ...validCell, resourceContracts: [{ id: "all-files", kind: "file", access: ["read"], selectors: ["**"] }] }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, id: "Core" }] }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, consumes: [{ cell: "Bad Cell" }] }] }), validateManifest],
     ["manifest", validManifest({
       cells: [{
         ...validCell,
@@ -117,6 +119,9 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["baseline", validBaseline(), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "not-a-date" }), validateBaseline],
     ["baseline", validBaseline({ generatedAt: "2026-99-99T99:99:99Z" }), validateBaseline],
+    ["baseline", validBaseline({ generatedAt: "2026-02-31T00:00:00.000Z" }), validateBaseline],
+    ["baseline", validBaseline({ cellIds: ["Bad Cell"] }), validateBaseline],
+    ["baseline", validBaseline({ cells: { "Bad Cell": validBaseline().cells.core } }), validateBaseline],
     ["baseline", validBaseline({ cellIds: ["   "] }), validateBaseline],
     ["baseline", validBaseline({ seal: { algorithm: "ed25519", signature: "abcde" } }), validateBaseline],
     ["baseline", validBaseline({
@@ -135,8 +140,10 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["evidence", validEvidence(), validateResourceEvidence],
     ["evidence", validEvidence({ accesses: [{ kind: "database", access: "execute", selector: "users" }] }), validateResourceEvidence],
     ["evidence", validEvidence({ cellId: "   " }), validateResourceEvidence],
+    ["evidence", validEvidence({ cellId: "Bad Cell" }), validateResourceEvidence],
     ["evidence", validEvidence({ accesses: [{ kind: "database", access: "read", selector: "   " }] }), validateResourceEvidence],
     ["evidence", validEvidence({ generatedAt: "2026-99-99T99:99:99Z" }), validateResourceEvidence],
+    ["evidence", validEvidence({ generatedAt: "2026-02-31T00:00:00.000Z" }), validateResourceEvidence],
     ["evidence", validEvidence({ transcriptStatus: "invalid" }), validateResourceEvidence],
   ];
   for (const [schemaName, value, runtimeValidator] of fixtures) {
@@ -672,10 +679,14 @@ test("schema validation accepts and rejects baseline records", () => {
   assertInvalid(validateBaseline(validBaseline({ generatedAt: "" })), /generatedAt must be a non-empty string/);
   assertInvalid(validateBaseline(validBaseline({ generatedAt: "   " })), /generatedAt must be a non-empty string/);
   assertInvalid(validateBaseline(validBaseline({ generatedAt: "tomorrow" })), /generatedAt must be an ISO 8601 date-time string/);
+  assertInvalid(validateBaseline(validBaseline({ generatedAt: "2026-02-31T00:00:00.000Z" })), /generatedAt must be an ISO 8601 date-time string/);
+  assertInvalid(validateBaseline(validBaseline({ generatedAt: "2026-01-01T00:00:00" })), /generatedAt must be an ISO 8601 date-time string/);
   assertInvalid(validateBaseline(validBaseline({ cellIds: [1] })), /cellIds must be an array/);
   assertInvalid(validateBaseline(validBaseline({ cellIds: ["core", "core"] })), /cellIds contains duplicate entry core/);
+  assertInvalid(validateBaseline(validBaseline({ cellIds: ["Core"] })), /cellIds\[0\] must match/);
   assertInvalid(validateBaseline(validBaseline({ cells: [] })), /cells must be an object/);
   assertInvalid(validateBaseline(validBaseline({ cells: { "": validBaseline().cells.core } })), /cells contains an empty cell id/);
+  assertInvalid(validateBaseline(validBaseline({ cells: { "bad cell": validBaseline().cells.core } })), /cells contains invalid cell id bad cell/);
   assertInvalid(validateBaseline(validBaseline({ cells: { core: null } })), /cells\.core must be an object/);
   assertInvalid(validateBaseline(validBaseline({ seal: "sealed" })), /seal must be an object/);
   assertInvalid(validateBaseline(validBaseline({ seal: { algorithm: "sha256", digest: "a".repeat(64) } })), /seal\.algorithm must be hmac-sha256 or ed25519/);
@@ -852,8 +863,11 @@ test("schema validation accepts and rejects resource evidence", () => {
   assertInvalid(validateResourceEvidence(validEvidence({ commitSha: "  " })), /commitSha is required/);
   assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: 1 })), /generatedAt must be a string/);
   assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: "yesterday" })), /generatedAt must be an ISO 8601 date-time string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: "2026-02-31T00:00:00.000Z" })), /generatedAt must be an ISO 8601 date-time string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ generatedAt: "2026-01-01T00:00:00" })), /generatedAt must be an ISO 8601 date-time string/);
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: 1 })), /cellId must be a non-empty string/);
   assertInvalid(validateResourceEvidence(validEvidence({ cellId: "" })), /cellId must be a non-empty string/);
+  assertInvalid(validateResourceEvidence(validEvidence({ cellId: "Bad Cell" })), /cellId must match/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: "bad" })), /accesses must be an array/);
   assertInvalid(validateResourceEvidence(validEvidence({ accesses: [123] })), /accesses\[0\] must be an object/);
   assertInvalidContaining(
@@ -895,7 +909,29 @@ test("schema validation accepts and rejects resource evidence", () => {
         kind: "database",
         access: "read",
         selector: "app.users",
+        cellId: "Bad Cell",
+      }],
+    })),
+    /accesses\[0\]\.cellId must match/,
+  );
+  assertInvalid(
+    validateResourceEvidence(validEvidence({
+      accesses: [{
+        kind: "database",
+        access: "read",
+        selector: "app.users",
         observedAt: "not-a-date",
+      }],
+    })),
+    /observedAt must be an ISO 8601 date-time string/,
+  );
+  assertInvalid(
+    validateResourceEvidence(validEvidence({
+      accesses: [{
+        kind: "database",
+        access: "read",
+        selector: "app.users",
+        observedAt: "2026-02-31T00:00:00.000Z",
       }],
     })),
     /observedAt must be an ISO 8601 date-time string/,
@@ -928,8 +964,12 @@ test("schema validation keeps manifest identity, profile, and cell reference bou
   }));
   assertInvalidContaining(invalidCells, [
     "cells[0].id must be a non-empty string",
+    "cells[0].consumes[0].cell must match /^[a-z0-9][a-z0-9._-]*$/",
     "cells[0].consumes[1].cell must be a non-empty string",
     "cells[0].consumes[0].cell references unknown cell Stryker was here",
+  ]);
+  assertInvalidContaining(validateManifest(validManifest({ cells: [{ ...validCell, id: "Core" }] })), [
+    "cells[0].id must match /^[a-z0-9][a-z0-9._-]*$/",
   ]);
   assert.deepEqual(validateManifest(validManifest({
     cells: [{ ...validCell, packageName: "Stryker was here" }],

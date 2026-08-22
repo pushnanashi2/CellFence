@@ -36,7 +36,8 @@
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "dependencies": {
     "@cellfence/schema": "0.2.1"

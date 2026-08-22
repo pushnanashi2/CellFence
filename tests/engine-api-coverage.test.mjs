@@ -57,6 +57,14 @@ import {
 
 const root = process.cwd();
 
+test("documented rule IDs stay synchronized with the engine RuleId union", () => {
+  const typeSource = fs.readFileSync(path.join(root, "packages/engine/src/types.ts"), "utf8");
+  const docsSource = fs.readFileSync(path.join(root, "docs/rules.md"), "utf8");
+  const typeRuleIds = [...new Set([...typeSource.matchAll(/"((?:CELLFENCE_)[A-Z0-9_]+)"/g)].map((match) => match[1]))].sort();
+  const documentedRuleIds = [...new Set([...docsSource.matchAll(/^\| `((?:CELLFENCE_)[A-Z0-9_]+)` \|/gm)].map((match) => match[1]))].sort();
+  assert.deepEqual(documentedRuleIds, typeRuleIds);
+});
+
 function withFrozenDate(isoDateTime, action) {
   const RealDate = globalThis.Date;
   const frozenTime = RealDate.parse(isoDateTime);
@@ -153,6 +161,64 @@ function baseCell(cellId, patch = {}) {
     ...patch,
   };
 }
+
+test("engine reports manifest glob patterns that match no files", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-pattern-empty-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core", {
+      ownedPaths: ["src/core/**", "src/core/missing/**"],
+      publicPaths: ["src/core/no-public/**"],
+      producesArtifacts: [{ id: "snapshots", paths: ["src/core/artifacts/missing/**"] }],
+    })], { governance: { include: ["src/**"], exclude: ["test-fixtures/missing/**"] } });
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    const emptyPatternWarnings = result.warnings.filter((finding) => finding.ruleId === "CELLFENCE_PATTERN_MATCHES_NOTHING");
+    assert.deepEqual(emptyPatternWarnings.map((finding) => finding.details.pattern).sort(), [
+      "src/core/artifacts/missing/**",
+      "src/core/missing/**",
+      "src/core/no-public/**",
+      "test-fixtures/missing/**",
+    ]);
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine rejects oversized JSON policy files before parsing", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-json-too-large-"));
+  const previousLimit = process.env.CELLFENCE_MAX_JSON_FILE_BYTES;
+  try {
+    process.env.CELLFENCE_MAX_JSON_FILE_BYTES = "16";
+    fs.writeFileSync(path.join(rootDir, "cellfence.manifest.json"), `${JSON.stringify({
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [],
+    })}\n`);
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    assert.equal(result.exitCode, 2);
+    assert.match(result.findings[0].message, /JSON file is too large/);
+  } finally {
+    if (previousLimit === undefined) delete process.env.CELLFENCE_MAX_JSON_FILE_BYTES;
+    else process.env.CELLFENCE_MAX_JSON_FILE_BYTES = previousLimit;
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine reports cells that disable waiver parsing with the manifest reason", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-waiver-parsing-disabled-"));
+  try {
+    writeCell(rootDir, "core");
+    writeManifest(rootDir, [baseCell("core", {
+      waiverParsing: false,
+      waiverParsingReason: "fixture cell contains invalid waiver directives",
+    })]);
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+    const warning = result.warnings.find((finding) => finding.ruleId === "CELLFENCE_WAIVER_PARSING_DISABLED");
+    assert.equal(warning?.cellId, "core");
+    assert.equal(warning?.details.reason, "fixture cell contains invalid waiver directives");
+  } finally {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
 
 function initGit(rootDir) {
   for (const args of [
@@ -2313,6 +2379,22 @@ test("engine context and graph APIs expose artifact lanes, resources, and error 
     const mermaid = formatCouplingGraphMermaid(graph);
     assert.match(mermaid, /snapshots/);
     assert.ok(graph.edges.some((edge) => edge.kind === "artifact-lane" && edge.label === "consumes"));
+    const collisionMermaid = formatCouplingGraphMermaid({
+      schemaVersion: "cellfence.coupling-graph.v1",
+      nodes: [
+        { id: "a-b", label: "a-b", kind: "cell" },
+        { id: "a_b", label: "a_b", kind: "cell" },
+        { id: "http:GET /v1/[items]\"", label: "http:GET /v1/[items]\"\nnext", kind: "resource" },
+      ],
+      edges: [
+        { from: "a-b", to: "a_b", kind: "observed-import", label: "imports" },
+        { from: "a_b", to: "http:GET /v1/[items]\"", kind: "resource-access", label: "call" },
+      ],
+    });
+    assert.match(collisionMermaid, /c0\["a-b"\]/);
+    assert.match(collisionMermaid, /c1\["a_b"\]/);
+    assert.match(collisionMermaid, /#quot;\\nnext/);
+    assert.match(collisionMermaid, /c0 -- "imports \(observed-import\)" --> c1/);
 
     const allocation = createAutoAllocation({
       rootDir,
@@ -2731,6 +2813,10 @@ test("engine claim API covers ttl units, explicit expiry, and non-path conflict 
     const zeroTtl = createClaim({ rootDir, agent: "agent-zero", artifactLanes: ["events"], ttl: "0m", claimId: "claim-zero", now });
     assert.equal(zeroTtl.exitCode, 1);
     assert.ok(zeroTtl.findings.some((finding) => /claim requires --ttl/.test(finding.message)));
+
+    const longTtl = createClaim({ rootDir, agent: "agent-long", artifactLanes: ["events"], ttl: "91d", claimId: "claim-long", now });
+    assert.equal(longTtl.exitCode, 1);
+    assert.ok(longTtl.findings.some((finding) => /claim requires --ttl/.test(finding.message)));
 
     writeJson(path.join(rootDir, ".cellfence/claims.json"), {
       schemaVersion: "cellfence.claims.v1",

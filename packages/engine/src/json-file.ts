@@ -1,6 +1,17 @@
 import fs from "node:fs";
 
+const DEFAULT_MAX_JSON_FILE_BYTES = 50 * 1024 * 1024;
+
+function maxJsonFileBytes(): number {
+  const configured = Number(process.env.CELLFENCE_MAX_JSON_FILE_BYTES || "");
+  if (Number.isSafeInteger(configured) && configured > 0) return configured;
+  return DEFAULT_MAX_JSON_FILE_BYTES;
+}
+
 export function readJsonFile(filePath: string): unknown {
+  const stats = fs.statSync(filePath);
+  const maxBytes = maxJsonFileBytes();
+  if (stats.size > maxBytes) throw new Error(`JSON file is too large (${stats.size} bytes; limit ${maxBytes} bytes)`);
   const text = fs.readFileSync(filePath, "utf8");
   const duplicateKeys = duplicateJsonKeys(text);
   if (duplicateKeys.length > 0) throw new Error(`duplicate JSON keys are not allowed: ${duplicateKeys.join(", ")}`);

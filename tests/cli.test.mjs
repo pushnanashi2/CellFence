@@ -228,6 +228,13 @@ test("CLI check returns two for manifest configuration errors", () => {
   assert.match(result.stdout, /CELLFENCE_MANIFEST_INVALID/);
 });
 
+test("CLI rejects unknown options as configuration errors", () => {
+  const fixturePath = path.join(root, "fixtures/valid/single-cell");
+  const result = runCli(["check", "--jsonn"], fixturePath);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /unknown option --jsonn/);
+});
+
 test("CLI evidence check accepts baseline-approved runtime evidence", () => {
   const fixturePath = path.join(root, "fixtures/valid/resource-evidence-baseline");
   const tempDir = fs.mkdtempSync(path.join(root, ".cellfence-cli-evidence-valid-"));
@@ -655,7 +662,8 @@ test("CLI graph renders Mermaid for review dashboards", () => {
   const result = runCli(["graph", "--format", "mermaid"], fixturePath);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /^flowchart LR/);
-  assert.match(result.stdout, /runtime -- "read \(resource-access\)" --> file_data_config_json/);
+  assert.match(result.stdout, /c0\["runtime"\]/);
+  assert.match(result.stdout, /c0 -- "read \(resource-access\)" --> c3/);
 });
 
 test("CLI rejects unsupported context and graph formats", () => {
@@ -701,6 +709,27 @@ test("CLI claim create writes an active lease before editing", () => {
   const store = JSON.parse(fs.readFileSync(path.join(tempDir, ".cellfence/claims.json"), "utf8"));
   assert.equal(store.schemaVersion, "cellfence.claims.v1");
   assert.equal(store.claims.length, 1);
+});
+
+test("CLI claim create rejects unknown options before writing a lease", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-claim-unknown-option-"));
+  writeClaimProject(tempDir);
+  try {
+    const result = runCli([
+      "claim",
+      "create",
+      "--agent",
+      "codex-a",
+      "--cell",
+      "billing",
+      "--typo",
+    ], tempDir);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /unknown option --typo/);
+    assert.equal(fs.existsSync(path.join(tempDir, ".cellfence/claims.json")), false);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI claim create rejects an active same-cell conflict", () => {

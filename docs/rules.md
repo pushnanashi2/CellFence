@@ -6,6 +6,7 @@
 | Rule ID | What it detects |
 |---|---|
 | `CELLFENCE_MANIFEST_INVALID` | Invalid manifest or baseline configuration |
+| `CELLFENCE_PATTERN_MATCHES_NOTHING` | Manifest-declared include, exclude, ownership, public path, or non-external artifact pattern matched no repository files |
 | `CELLFENCE_DUPLICATE_CELL_ID` | Duplicate cell identifiers |
 | `CELLFENCE_OWNERSHIP_OVERLAP` | Overlapping declared ownership paths |
 | `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` | Strict ownership coverage is disabled, so source outside ownedPaths can escape checks |
@@ -22,14 +23,20 @@
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
+| `CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INACTIVE` | Runtime evidence declares an inactive trace transcript, usually because the trace hook was disabled |
+| `CELLFENCE_RESOURCE_EVIDENCE_TRANSCRIPT_INCOMPLETE` | Runtime evidence is missing an active, trustworthy transcript or was capped/truncated before all accesses were observed |
 | `CELLFENCE_EXTERNAL_DEPENDENCY_CLAIM_VIOLATION` | A cell uses an external dependency claimed by another cell or claiming set |
 | `CELLFENCE_RATCHET_EXTERNAL_DEPENDENCY_ADDED` | A cell added a new unclaimed external dependency outside the accepted baseline |
 | `CELLFENCE_LOCKED_EXTERNAL_DEPENDENCY_EXPANSION` | A locked cell expanded its accepted external dependency set |
 | `CELLFENCE_PLUGIN_INVALID` | A programmatic plugin has an unsupported API version, throws, or emits invalid references |
 | `CELLFENCE_REQUIRED_RULE_DISABLED` | A configured `governance.requiredRules` rule was weakened |
+| `CELLFENCE_IMPORT_ANALYSIS_DISABLED` | Reserved compatibility rule ID; manifest v1 rejects `importAnalysis: false` as `CELLFENCE_MANIFEST_INVALID` before repository analysis |
+| `CELLFENCE_RESOURCE_ANALYSIS_DISABLED` | Reserved compatibility rule ID; manifest v1 rejects `resourceAnalysis: false` as `CELLFENCE_MANIFEST_INVALID` before repository analysis |
 | `CELLFENCE_CLAIM_INVALID` | Claim store or claim request is malformed, expired metadata is invalid, or a claim references unknown cells |
 | `CELLFENCE_ACTIVE_CLAIM_CONFLICT` | Two active claim leases reserve overlapping cells, paths, symbols, resources, or artifact lanes |
 | `CELLFENCE_UNCLAIMED_CHANGE` | `claim check --agent` found a changed file outside that agent's active claim |
+| `CELLFENCE_CROSS_CELL_MOVE` | A changed file moved between cells and needs explicit architectural review |
+| `CELLFENCE_GIT_METADATA_UNAVAILABLE` | CellFence could not read required Git metadata for changed-file, commit, or evidence checks |
 | `CELLFENCE_WAIVER_INVALID` | A waiver directive is missing a valid signed attestation, is expired, exceeds the 90-day cap, mismatches repository/source/finding bindings, uses an untrusted approver, or attempts to waive a required rule |
 | `CELLFENCE_WAIVER_UNTRUSTED_APPROVER` | A signed waiver attestation names an approver outside trusted `CELLFENCE_APPROVERS` |
 | `CELLFENCE_WAIVER_PARSING_DISABLED` | A cell disabled waiver directive parsing with `waiverParsing: false`; directives in that cell are intentionally ignored |
@@ -47,10 +54,28 @@
 | `CELLFENCE_RATCHET_RESOURCE_ACCESS_CHANGE` | A new static or evidence-backed resource access appeared outside the accepted baseline |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Declaration-derived public surface fingerprint changed beyond formatting/comment noise |
 | `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline seal is missing or does not match when Ed25519 or HMAC baseline verification is configured |
+| `CELLFENCE_LOCKED_BASELINE_EXPANSION` | A locked baseline scope expanded without an accepted ratchet update |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT` | Computed dynamic import cannot be resolved statically; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_TYPESCRIPT_SYNTAX` | TypeScript or JavaScript source could not be parsed cleanly; emitted as a fail-closed required-rule finding |
 | `CELLFENCE_UNSUPPORTED_PYTHON_SYNTAX` | Python source could not be parsed by the configured Python AST inspector; emitted as a fail-closed required-rule finding |
+| `CELLFENCE_SOURCE_IMPORTS_RUNTIME` | A source-class path imports a runtime-class path in violation of path class policy |
+| `CELLFENCE_MIXED_SOURCE_RUNTIME_CHANGE` | A change mixes source and runtime path classes without an allowed commit policy |
+| `CELLFENCE_GENERATED_PATH_CHANGED` | A generated path changed without the required provenance or separation policy |
+| `CELLFENCE_SERVICE_MANIFEST_DRIFT` | A generated CellFence manifest drifted from declared service manifests |
+| `CELLFENCE_COMMIT_EVIDENCE_MISSING` | Commit-level evidence required by path class policy is missing |
+| `CELLFENCE_COMMIT_TRAILER_MISSING` | A required commit trailer for governed path classes is missing |
+| `CELLFENCE_COMMIT_CHANGED_CELLS_MISMATCH` | Commit metadata does not match the cells changed in the diff |
+| `CELLFENCE_COMMIT_TEST_EVIDENCE_MISMATCH` | Commit test evidence does not cover the changed cell set |
+| `CELLFENCE_COMMIT_TEST_REASON_REQUIRED` | Commit metadata claims weak or missing test evidence without a required reason |
+| `CELLFENCE_COMMIT_TEST_WEAKENING` | Commit metadata weakens required test evidence policy |
+| `CELLFENCE_TASK_INVALID` | A task manifest is malformed or references invalid cells, files, budgets, or allowlists |
+| `CELLFENCE_TASK_WRITE_OUTSIDE_ALLOWLIST` | A task attempted to write outside its declared allowed paths |
+| `CELLFENCE_TASK_FORBIDDEN_PATH` | A task attempted to touch a path explicitly forbidden by its manifest |
+| `CELLFENCE_TASK_CHANGE_BUDGET_EXCEEDED` | A task changed more cells, files, or lines than its declared budget allows |
+| `CELLFENCE_DOC_UNKNOWN_CELL` | A stamped architecture document references a cell that is not in the manifest |
+| `CELLFENCE_DOC_SURFACE_STALE` | A stamped architecture document no longer matches the current cell public surface |
+| `CELLFENCE_MUTATION_SCORE_BELOW_THRESHOLD` | Mutation testing score is below the configured minimum |
 
 
 

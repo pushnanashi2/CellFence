@@ -443,6 +443,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--root=")) {
       parsed.rootDir = path.resolve(requireInlineOptionValue(argument, "--root=", "--root"));
+    } else if (argument === "--help" || argument === "-h") {
+      parsed.command.push(argument);
+    } else if (argument.startsWith("-")) {
+      throw new Error(`unknown option ${argument}`);
     } else {
       parsed.command.push(argument);
     }

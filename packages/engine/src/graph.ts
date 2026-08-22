@@ -142,17 +142,37 @@ export function createCouplingGraph(
   };
 }
 
-function mermaidId(value: string): string {
-  return value.replace(/[^A-Za-z0-9_]/g, "_");
+function mermaidLabel(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/"/g, "#quot;");
+}
+
+function graphNodeForEdgeEndpoint(graph: CouplingGraph, edge: CouplingGraphEdge, endpoint: "from" | "to"): CouplingGraphNode | undefined {
+  const id = endpoint === "from" ? edge.from : edge.to;
+  const expectedKind: CouplingGraphNode["kind"] = edge.kind === "resource-access" && endpoint === "to"
+    ? "resource"
+    : edge.kind === "artifact-lane" && endpoint === "to"
+      ? "artifact"
+      : "cell";
+  return graph.nodes.find((node) => node.id === id && node.kind === expectedKind)
+    ?? graph.nodes.find((node) => node.id === id);
 }
 
 export function formatCouplingGraphMermaid(graph: CouplingGraph): string {
   const lines = ["flowchart LR"];
-  for (const node of graph.nodes) {
-    lines.push(`  ${mermaidId(node.id)}["${node.label.replace(/"/g, "'")}"]`);
+  const nodeIds = new Map<string, string>();
+  graph.nodes.forEach((node, index) => {
+    nodeIds.set(graphNodeKey(node.kind, node.id), `c${index}`);
+  });
+  for (const [index, node] of graph.nodes.entries()) {
+    lines.push(`  c${index}["${mermaidLabel(node.label)}"]`);
   }
   for (const edge of graph.edges) {
-    lines.push(`  ${mermaidId(edge.from)} -- "${edge.label} (${edge.kind})" --> ${mermaidId(edge.to)}`);
+    const from = graphNodeForEdgeEndpoint(graph, edge, "from");
+    const to = graphNodeForEdgeEndpoint(graph, edge, "to");
+    const fromId = from ? nodeIds.get(graphNodeKey(from.kind, from.id)) : undefined;
+    const toId = to ? nodeIds.get(graphNodeKey(to.kind, to.id)) : undefined;
+    if (!fromId || !toId) continue;
+    lines.push(`  ${fromId} -- "${mermaidLabel(`${edge.label} (${edge.kind})`)}" --> ${toId}`);
   }
   return lines.join("\n");
 }

@@ -149,7 +149,7 @@ test("trace hook labels appendFileSync accesses as writes", () => {
   }]);
 });
 
-test("trace hook skips evidence output when disabled or unused", () => {
+test("trace hook skips disabled output but writes active empty transcripts", () => {
   const disabledDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-disabled-"));
   fs.writeFileSync(path.join(disabledDir, "app.mjs"), "import fs from 'node:fs'; fs.writeFileSync('data.json', '{}');\n");
   const disabledEvidence = path.join(disabledDir, "resource-evidence.json");
@@ -185,7 +185,10 @@ test("trace hook skips evidence output when disabled or unused", () => {
     },
   });
   assert.equal(unused.status, 0, unused.stderr);
-  assert.equal(fs.existsSync(unusedEvidence), false);
+  assert.equal(fs.existsSync(unusedEvidence), true);
+  const evidence = JSON.parse(fs.readFileSync(unusedEvidence, "utf8"));
+  assert.equal(evidence.transcriptStatus, "active");
+  assert.deepEqual(evidence.accesses, []);
 });
 
 test("trace hook emits runtime manual database, queue, and HTTP evidence", () => {
@@ -219,12 +222,87 @@ test("trace hook emits runtime manual database, queue, and HTTP evidence", () =>
   ]);
 });
 
+test("trace hook caps unique accesses and marks capped transcripts incomplete", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-access-cap-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("app_users", "read");
+    recordDatabaseAccess("app_orders", "read");
+    recordDatabaseAccess("app_fills", "read");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_MAX_ACCESSES: "2",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.transcriptStatus, "incomplete");
+  assert.deepEqual(evidence.accesses.map((access) => access.selector), ["app_orders", "app_users"]);
+});
+
+test("trace hook ignores invalid access cap values", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-invalid-access-cap-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    import { recordDatabaseAccess } from ${JSON.stringify(pathToFileURL(tracePath).href)};
+    recordDatabaseAccess("app_users", "read");
+    recordDatabaseAccess("app_orders", "read");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_MAX_ACCESSES: "0",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.transcriptStatus, "active");
+  assert.deepEqual(evidence.accesses.map((access) => access.selector), ["app_orders", "app_users"]);
+});
+
 test("plain trace imports do not monkey-patch file access", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-plain-import-"));
   fs.writeFileSync(path.join(tempDir, "app.mjs"), `
     import fs from "node:fs";
     await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?plain-import`)});
     fs.writeFileSync("should-not-be-traced.json", "{}\\n");
+  `);
+
+  const evidencePath = path.join(tempDir, "resource-evidence.json");
+  const result = spawnSync(process.execPath, ["app.mjs"], {
+    cwd: tempDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      CELLFENCE_TRACE_CELL: "runtime",
+      CELLFENCE_TRACE_OUT: evidencePath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(evidencePath), false);
+});
+
+test("plain trace imports stay silent even when flush is called", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-plain-flush-"));
+  fs.writeFileSync(path.join(tempDir, "app.mjs"), `
+    const trace = await import(${JSON.stringify(`${pathToFileURL(tracePath).href}?plain-flush`)});
+    trace.flushEvidence();
   `);
 
   const evidencePath = path.join(tempDir, "resource-evidence.json");
@@ -249,10 +327,6 @@ test("trace auto-installs for package preload forms and explicit env opt-in", ()
     import fs from "node:fs";
     process.chdir(${JSON.stringify(tempDir)});
     fs.writeFileSync("package-preload.json", "{}\\n");
-    const trace = await import(${JSON.stringify(pathToFileURL(tracePath).href)});
-    if (!trace.traceDiagnostics().installed || !trace.traceDiagnostics().flushHooksRegistered) {
-      throw new Error("trace diagnostics did not report installed preload");
-    }
   `);
   const packageEvidencePath = path.join(tempDir, "package-resource-evidence.json");
   const packagePreload = spawnSync(process.execPath, [
@@ -475,7 +549,9 @@ test("trace hook ignores fetch inputs that do not expose a URL selector", () => 
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(fs.existsSync(evidencePath), false);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.transcriptStatus, "active");
+  assert.deepEqual(evidence.accesses, []);
 });
 
 test("trace hook covers default cell/output and fd based skips", () => {
@@ -869,5 +945,7 @@ test("trace hook treats Request as optional when fetch exists", () => {
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(fs.existsSync(evidencePath), false);
+  const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.transcriptStatus, "active");
+  assert.deepEqual(evidence.accesses, []);
 });

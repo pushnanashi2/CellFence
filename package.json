@@ -5,6 +5,9 @@
   "description": "Manifest-driven repository governance for parallel coding agents.",
   "license": "Apache-2.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "packages/*"
   ],
@@ -16,6 +19,7 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "coverage": "npm run build && c8 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",
     "coverage:100": "npm run build && c8 --check-coverage --lines 100 --statements 100 --branches 100 --functions 100 --reporter=text --reporter=json --reporter=json-summary --reports-dir coverage node --test tests/*.test.mjs",
+    "security:redos": "npm run build && node scripts/redos-check.mjs",
     "conformance:imports": "npm run build && node --test tests/conformance-imports.test.mjs",
     "conformance:resolution": "npm run build && node --test tests/conformance-resolution.test.mjs",
     "conformance:ownership": "npm run build && node --test tests/conformance-ownership.test.mjs",
