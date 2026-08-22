@@ -637,10 +637,15 @@ test("engine extracts default and namespace public surface contracts", () => {
 test("engine reports semantic baseline contract changes beyond simple count growth", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-baseline-semantic-"));
   try {
-    writeCell(rootDir, "core", "export const core = true;\n");
+    writeCell(rootDir, "core", [
+      "import { readFileSync } from 'node:fs';",
+      "export const core = readFileSync('data/current.json', 'utf8');",
+      "",
+    ].join("\n"));
     writeManifest(rootDir, [
       baseCell("core", {
         producesArtifacts: [{ id: "reports", paths: ["src/core/artifacts/**"] }],
+        resourceContracts: [{ id: "current-data", kind: "file", access: ["read"], selectors: ["data/current.json"] }],
       }),
     ]);
     writeJson(path.join(rootDir, "cellfence.baseline.json"), {
@@ -667,6 +672,7 @@ test("engine reports semantic baseline contract changes beyond simple count grow
     const ruleIds = result.findings.map((finding) => finding.ruleId);
     assert.ok(ruleIds.includes("CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE"));
     assert.ok(ruleIds.includes("CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE"));
+    assert.ok(ruleIds.includes("CELLFENCE_RATCHET_RESOURCE_ACCESS_CHANGE"));
     assert.ok(ruleIds.includes("CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -1468,7 +1474,7 @@ test("engine changed check finding identity is stable across message wording cha
   }
 });
 
-test("engine changed check finding identity binds line drift", () => {
+test("engine changed check finding identity ignores line drift", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-engine-changed-line-fingerprint-"));
   try {
     initGit(rootDir);
@@ -1492,17 +1498,15 @@ test("engine changed check finding identity binds line drift", () => {
       baseRef: "HEAD~1",
       headRef: "HEAD",
     });
-    assert.equal(result.exitCode, 1, JSON.stringify(result.findings));
-    assert.equal(result.findings.length, 1);
-    assert.equal(result.findings[0].ruleId, "CELLFENCE_PRIVATE_IMPORT");
-    assert.equal(result.findings[0].details?.line, 2);
+    assert.equal(result.exitCode, 0, JSON.stringify(result.findings));
+    assert.deepEqual(result.findings, []);
     assert.deepEqual(result.changedFiles, ["src/app/public.ts"]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
 });
 
-test("finding fingerprints bind source line and semantic details", () => {
+test("finding fingerprints ignore display location and bind semantic details", () => {
   const finding = {
     ruleId: "CELLFENCE_TEST",
     severity: "error",
@@ -1517,7 +1521,8 @@ test("finding fingerprints bind source line and semantic details", () => {
   };
   const fingerprint = findingFingerprint(finding);
   assert.equal(fingerprint, findingFingerprint({ ...finding, message: "display wording two" }));
-  assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, line: 8 } }));
+  assert.equal(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, line: 8 } }));
+  assert.equal(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, offset: 2 } }));
   assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, currentHash: "other" } }));
   assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, nextHash: "other" } }));
   assert.notEqual(fingerprint, findingFingerprint({ ...finding, details: { ...finding.details, message: "other semantic detail" } }));

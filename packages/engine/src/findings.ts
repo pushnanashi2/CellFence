@@ -6,6 +6,15 @@ import type { Finding, SuggestedResolution } from "./types.js";
 
 export const FINDING_FINGERPRINT_VERSION = "cellfence.finding-fingerprint.v1";
 
+function fingerprintDetails(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(fingerprintDetails);
+  if (!value || typeof value !== "object") return value;
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([key]) => key !== "line" && key !== "offset")
+    .map(([key, entryValue]) => [key, fingerprintDetails(entryValue)]);
+  return Object.fromEntries(entries);
+}
+
 export function findingFingerprint(finding: Finding): string {
   return crypto
     .createHash("sha256")
@@ -16,7 +25,7 @@ export function findingFingerprint(finding: Finding): string {
       filePath: finding.filePath ? normalizePath(finding.filePath) : undefined,
       cellId: finding.cellId,
       producerCellId: finding.producerCellId,
-      details: finding.details,
+      details: fingerprintDetails(finding.details),
     }))
     .digest("hex");
 }

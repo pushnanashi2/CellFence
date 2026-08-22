@@ -12,6 +12,10 @@ type GlobAutomaton = {
   transitions: GlobTransition[][];
 };
 
+const PATTERN_AUTOMATON_CACHE = new Map<string, GlobAutomaton>();
+const PATTERN_INTERSECTION_CACHE = new Map<string, boolean>();
+const PATTERN_SUBSET_CACHE = new Map<string, boolean>();
+
 function normalizedGlobPattern(pattern: string): string {
   return normalizePath(pattern).replace(/\/$/, "");
 }
@@ -23,7 +27,7 @@ function normalizedPatternSegments(pattern: string): string[] {
   return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
 }
 
-function patternAutomaton(pattern: string): GlobAutomaton {
+function buildPatternAutomaton(pattern: string): GlobAutomaton {
   const segments = normalizedPatternSegments(pattern);
   // Stryker disable next-line ArrayDeclaration: adding a non-transition sentinel to this private, typed NFA state is unobservable and invalid by construction.
   const transitions: GlobTransition[][] = [[]];
@@ -83,6 +87,15 @@ function patternAutomaton(pattern: string): GlobAutomaton {
   return { accept: state, transitions };
 }
 
+function patternAutomaton(pattern: string): GlobAutomaton {
+  const normalizedPattern = normalizedGlobPattern(pattern);
+  const cached = PATTERN_AUTOMATON_CACHE.get(normalizedPattern);
+  if (cached) return cached;
+  const automaton = buildPatternAutomaton(normalizedPattern);
+  PATTERN_AUTOMATON_CACHE.set(normalizedPattern, automaton);
+  return automaton;
+}
+
 function epsilonClosure(automaton: GlobAutomaton, state: number): Set<number> {
   const closure = new Set<number>([state]);
   const stack = [state];
@@ -123,6 +136,9 @@ function transitionLabelsIntersect(left: ConsumingGlobTransition, right: Consumi
 }
 
 function patternAutomataIntersect(leftPattern: string, rightPattern: string): boolean {
+  const cacheKey = `${normalizedGlobPattern(leftPattern)}\u0000${normalizedGlobPattern(rightPattern)}`;
+  const cached = PATTERN_INTERSECTION_CACHE.get(cacheKey);
+  if (cached !== undefined) return cached;
   const left = patternAutomaton(leftPattern);
   const right = patternAutomaton(rightPattern);
   // Stryker disable next-line ArrayDeclaration: adding a non-state sentinel to this private, typed BFS queue is unobservable and invalid by construction.
@@ -139,9 +155,12 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
     }
   };
   enqueueClosures(0, 0);
-  while (queue.length > 0) {
-    const [leftState, rightState] = queue.shift() as [number, number];
-    if (leftState === left.accept && rightState === right.accept) return true;
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex += 1) {
+    const [leftState, rightState] = queue[queueIndex] as [number, number];
+    if (leftState === left.accept && rightState === right.accept) {
+      PATTERN_INTERSECTION_CACHE.set(cacheKey, true);
+      return true;
+    }
     for (const leftTransition of left.transitions[leftState]) {
       // Stryker disable next-line all: epsilon transitions are represented by closure states and cannot consume a paired character.
       if (leftTransition.kind === "epsilon") continue;
@@ -153,6 +172,7 @@ function patternAutomataIntersect(leftPattern: string, rightPattern: string): bo
       }
     }
   }
+  PATTERN_INTERSECTION_CACHE.set(cacheKey, false);
   return false;
 }
 
@@ -171,6 +191,9 @@ const OTHER_NON_SLASH_KEY = "\u0000__cellfence_other_non_slash__";
 // `src/*/a.ts` ⊆ `src/**/a.ts`.
 
 export function pathPatternSubset(innerPattern: string, outerPattern: string): boolean {
+  const cacheKey = `${normalizedGlobPattern(innerPattern)}\u0000${normalizedGlobPattern(outerPattern)}`;
+  const cached = PATTERN_SUBSET_CACHE.get(cacheKey);
+  if (cached !== undefined) return cached;
   const inner = patternAutomaton(innerPattern);
   const outer = patternAutomaton(outerPattern);
   const alphabet = automataAlphabet(inner, outer);
@@ -194,11 +217,14 @@ export function pathPatternSubset(innerPattern: string, outerPattern: string): b
     queue.push(next);
   };
   seen.add(keyOf(start));
-  while (queue.length > 0) {
-    const current = queue.shift() as Pair;
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex += 1) {
+    const current = queue[queueIndex] as Pair;
     const innerAccept = current.inner.has(inner.accept);
     const outerAccept = current.outer.has(outer.accept);
-    if (innerAccept && !outerAccept) return false;
+    if (innerAccept && !outerAccept) {
+      PATTERN_SUBSET_CACHE.set(cacheKey, false);
+      return false;
+    }
     for (const symbol of alphabet) {
       if (symbol === "/" && current.lastWasSlash) continue;
       enqueue({
@@ -208,6 +234,7 @@ export function pathPatternSubset(innerPattern: string, outerPattern: string): b
       });
     }
   }
+  PATTERN_SUBSET_CACHE.set(cacheKey, true);
   return true;
 }
 

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -165,6 +166,8 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(matchesPattern("src/core/public.ts", "src/**/private.ts"), false);
   assert.equal(matchesPattern("src/core/public.ts", "src/core/public.ts"), true);
   assert.equal(matchesPattern("src/core/public.ts", "src/core/public.js"), false);
+  assert.equal(matchesPattern("src/core/public.ts", "./src/**"), true);
+  assert.equal(pathPatternsOverlap("./src/**", "src/**"), true);
 
   assert.equal(literalPrefix("src/core/*.ts"), "src/core");
   assert.equal(literalPrefix("src/core///**"), "src/core");
@@ -368,8 +371,10 @@ test("file index honors explicitly governed generated directories", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-list-files-dist-governed-"));
   try {
     fs.mkdirSync(path.join(rootDir, "dist"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "dist/generated"), { recursive: true });
     fs.mkdirSync(path.join(rootDir, "coverage"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "dist/runtime.ts"), "export const runtime = true;\n");
+    fs.writeFileSync(path.join(rootDir, "dist/generated/leaked.ts"), "export const leaked = true;\n");
     fs.writeFileSync(path.join(rootDir, "coverage/report.ts"), "export const report = true;\n");
     const includeOnlyContext = {
       rootDir,
@@ -377,7 +382,7 @@ test("file index honors explicitly governed generated directories", () => {
         schemaVersion: "cellfence.manifest.v1",
         governance: {
           requireOwnership: true,
-          include: ["src/other/**", "dist/**/*.ts"],
+          include: ["src/other/**", "dist/runtime.ts"],
           exclude: [],
         },
         cells: [{
@@ -387,6 +392,27 @@ test("file index honors explicitly governed generated directories", () => {
           publicSymbols: ["runtime"],
         }],
       },
+      sourceFilesForCellCache: new Map(),
+      sourceTextCache: new Map(),
+      sourceFileCache: new Map(),
+    };
+    const deepIncludeContext = {
+      ...includeOnlyContext,
+      manifest: {
+        ...includeOnlyContext.manifest,
+        governance: {
+          requireOwnership: true,
+          include: ["src/**", "dist/generated/**"],
+          exclude: [],
+        },
+        cells: [{
+          id: "generated",
+          ownedPaths: ["dist/generated/**"],
+          publicEntry: "dist/generated/leaked.ts",
+          publicSymbols: ["leaked"],
+        }],
+      },
+      listFilesCache: undefined,
       sourceFilesForCellCache: new Map(),
       sourceTextCache: new Map(),
       sourceFileCache: new Map(),
@@ -433,8 +459,10 @@ test("file index honors explicitly governed generated directories", () => {
       sourceFileCache: new Map(),
     };
 
-    assert.deepEqual(listFiles(rootDir, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/runtime.ts"]);
+    assert.deepEqual(listFiles(rootDir, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts", "dist/runtime.ts"]);
     assert.deepEqual(sourceFilesUnderGovernance(rootDir, includeOnlyContext.manifest, includeOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/runtime.ts"]);
+    assert.deepEqual(listFiles(rootDir, deepIncludeContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts", "dist/runtime.ts"]);
+    assert.deepEqual(sourceFilesForCell(rootDir, deepIncludeContext.manifest.cells[0], deepIncludeContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["dist/generated/leaked.ts"]);
     assert.deepEqual(listFiles(rootDir, ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
     assert.deepEqual(sourceFilesForCell(rootDir, ownedOnlyContext.manifest.cells[0], ownedOnlyContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
     assert.deepEqual(listFiles(rootDir, governanceWithoutIncludeContext).map((filePath) => normalizePath(path.relative(rootDir, filePath))), ["coverage/report.ts"]);
@@ -477,10 +505,11 @@ test("file index sorting is deterministic even when filesystem order is not", ()
   }
 });
 
-test("file index inventories valid and broken symlinks while ignoring regular and generated entries", () => {
+test("file index inventories valid and broken symlinks while ignoring regular entries", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-list-symlinks-"));
   try {
     fs.mkdirSync(path.join(rootDir, "src/nested"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "dist/generated"), { recursive: true });
     fs.mkdirSync(path.join(rootDir, "node_modules/pkg"), { recursive: true });
     fs.writeFileSync(path.join(rootDir, "src/target.ts"), "export const target = true;\n");
     fs.writeFileSync(path.join(rootDir, "src/regular.ts"), "export const regular = true;\n");
@@ -488,6 +517,7 @@ test("file index inventories valid and broken symlinks while ignoring regular an
     fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "src/nested/a-link.ts"));
     fs.symlinkSync(path.join(rootDir, "src/missing.ts"), path.join(rootDir, "src/broken.ts"));
     fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "node_modules/pkg/ignored.ts"));
+    fs.symlinkSync(path.join(rootDir, "src/target.ts"), path.join(rootDir, "dist/generated/governed-link.ts"));
 
     const realRootDir = fs.realpathSync(rootDir);
     const symlinks = listSymlinks(rootDir).map((entry) => ({
@@ -497,14 +527,16 @@ test("file index inventories valid and broken symlinks while ignoring regular an
     }));
 
     assert.deepEqual(symlinks.map((entry) => entry.path), [
+      "dist/generated/governed-link.ts",
       "src/broken.ts",
       "src/nested/a-link.ts",
       "src/z-link.ts",
     ]);
-    assert.equal(typeof symlinks[0].error, "string");
-    assert.equal(symlinks[0].targetPath, undefined);
-    assert.equal(symlinks[1].targetPath, "src/target.ts");
+    assert.equal(symlinks[0].targetPath, "src/target.ts");
+    assert.equal(typeof symlinks[1].error, "string");
+    assert.equal(symlinks[1].targetPath, undefined);
     assert.equal(symlinks[2].targetPath, "src/target.ts");
+    assert.equal(symlinks[3].targetPath, "src/target.ts");
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
@@ -688,6 +720,7 @@ test("file index ownership and coverage helpers accept any matching owned path w
   assert.equal(pathOwnedByCell(cell, "src/core/public.ts"), true);
   assert.equal(pathOwnedByCell(cell, "src/addon/helper.ts"), true);
   assert.equal(pathOwnedByCell(cell, "src/other/helper.ts"), false);
+  assert.equal(pathOwnedByCell({ ...cell, ownedPaths: ["src/core"] }, "src/core/public.ts"), true);
 
   assert.equal(patternCoveredByOwnedPaths("*.ts", ["*.ts"]), true);
   assert.equal(patternCoveredByOwnedPaths("src/core/public.ts", ["src/core/**", "src/other/**"]), true);
@@ -704,6 +737,21 @@ test("file index ownership and coverage helpers accept any matching owned path w
   assert.equal(patternCoveredByOwnedPaths("src/a*/**", ["src/a/**"]), false);
   assert.equal(patternCoveredByOwnedPaths("src/corex/**", ["src/core/**"]), false);
   assert.equal(patternCoveredByOwnedPaths("src/core/**", ["src/core/private/**"]), false);
+});
+
+test("duplicated glob implementations stay in lock-step", () => {
+  const rootDir = path.resolve(import.meta.dirname, "..");
+  const engineGlob = fs.readFileSync(path.join(rootDir, "packages/engine/src/glob.ts"), "utf8");
+  const engineDigest = crypto.createHash("sha256").update(engineGlob).digest("hex");
+  for (const duplicatePath of [
+    "packages/plugin-agent-budget/src/glob.ts",
+    "packages/plugin-blast-radius/src/glob.ts",
+  ]) {
+    const duplicateDigest = crypto.createHash("sha256")
+      .update(fs.readFileSync(path.join(rootDir, duplicatePath), "utf8"))
+      .digest("hex");
+    assert.equal(duplicateDigest, engineDigest, `${duplicatePath} drifted from packages/engine/src/glob.ts`);
+  }
 });
 
 test("file index source kind mapping covers all JS and TS extensions", () => {

@@ -44,6 +44,7 @@
 | `CELLFENCE_RATCHET_DEPENDENCY_EDGE_CHANGE` | A new dependency edge appeared outside the accepted baseline set |
 | `CELLFENCE_RATCHET_PUBLIC_ENTRY_CHANGE` | A cell's public entry path changed |
 | `CELLFENCE_RATCHET_ARTIFACT_CONTRACT_CHANGE` | A new artifact producer/consumer contract appeared |
+| `CELLFENCE_RATCHET_RESOURCE_ACCESS_CHANGE` | A new static or evidence-backed resource access appeared outside the accepted baseline |
 | `CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE` | Declaration-derived public surface fingerprint changed beyond formatting/comment noise |
 | `CELLFENCE_BASELINE_SEAL_INVALID` | A baseline seal is missing or does not match when Ed25519 or HMAC baseline verification is configured |
 | `CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE` | Computed CommonJS `require()` cannot be resolved statically; emitted as a fail-closed required-rule finding |

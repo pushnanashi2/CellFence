@@ -57,8 +57,14 @@ function collapseAdjacentGlobstars(segments: string[]): string[] {
   return segments.filter((segment, index) => segment !== "**" || segments[index - 1] !== "**");
 }
 
-function buildMatcher(pattern: string): (pathSegments: string[]) => boolean {
-  const normalized = pattern.split("\\").join("/").replace(/\/+$/, "");
+function normalizeGlobPattern(pattern: string): string {
+  const slashPattern = pattern.split("\\").join("/").split(path.sep).join("/");
+  const normalized = path.posix.normalize(slashPattern);
+  return (normalized === "." ? "" : normalized).replace(/\/+$/, "");
+}
+
+function buildMatcher(normalizedPattern: string): (pathSegments: string[]) => boolean {
+  const normalized = normalizedPattern;
   const collapsed = collapseAdjacentGlobstars(normalized.split("/"));
   if (collapsed.length === 0) return () => true;
 
@@ -123,10 +129,11 @@ function buildMatcher(pattern: string): (pathSegments: string[]) => boolean {
 }
 
 function compilePattern(pattern: string): (pathSegments: string[]) => boolean {
-  const cached = MATCHER_CACHE.get(pattern);
+  const normalizedPattern = normalizeGlobPattern(pattern);
+  const cached = MATCHER_CACHE.get(normalizedPattern);
   if (cached) return cached;
-  const matcher = buildMatcher(pattern);
-  MATCHER_CACHE.set(pattern, matcher);
+  const matcher = buildMatcher(normalizedPattern);
+  MATCHER_CACHE.set(normalizedPattern, matcher);
   return matcher;
 }
 
@@ -134,7 +141,7 @@ export function matchesGlobPattern(relativePath: string, pattern: string): boole
   // Normalise both backslashes and the platform separator so Windows
   // style paths ("src\\core\\a.ts") and POSIX style paths match the
   // same set of patterns.
-  const normalizedPath = relativePath.split("\\").join("/").split(path.sep).join("/");
+  const normalizedPath = normalizeGlobPattern(relativePath);
   return compilePattern(pattern)(normalizedPath.split("/"));
 }
 

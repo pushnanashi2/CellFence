@@ -5,7 +5,7 @@ import ts from "typescript";
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
 
 import { matchesGlobPattern } from "./glob.js";
-import { pathPatternSubset } from "./glob-overlap.js";
+import { pathPatternsOverlap, pathPatternSubset } from "./glob-overlap.js";
 
 export const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py"];
 
@@ -67,10 +67,12 @@ export function literalPrefix(pattern: string): string {
 function directoryHasExplicitGovernance(rootDir: string, directoryPath: string, context?: FileIndexContext): boolean {
   if (!context) return false;
   const relativeDirectory = repoPath(rootDir, directoryPath);
-  const probePaths = SOURCE_EXTENSIONS.map((extension) => `${relativeDirectory}/__cellfence_probe__${extension}`);
+  const subtreePattern = `${relativeDirectory}/**`;
+  const patternTouchesDirectory = (pattern: string): boolean =>
+    expandOwnedPath(pattern).some((expanded) => pathPatternsOverlap(expanded, subtreePattern));
   const manifest = context.manifest;
-  if (manifest.governance?.include?.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern)))) return true;
-  return manifest.cells.some((cell) => cell.ownedPaths.some((pattern) => probePaths.some((probePath) => matchesPattern(probePath, pattern))));
+  if (manifest.governance?.include?.some(patternTouchesDirectory)) return true;
+  return manifest.cells.some((cell) => cell.ownedPaths.some(patternTouchesDirectory));
 }
 
 function shouldIgnoreDirectory(rootDir: string, directoryPath: string, directoryName: string, context?: FileIndexContext): boolean {
@@ -110,7 +112,7 @@ export function listSymlinks(rootDir: string): SymlinkEntry[] {
   function visit(directoryPath: string): void {
     for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
       const entryPath = path.join(directoryPath, entry.name);
-      if (entry.isDirectory() && shouldIgnoreDirectory(rootDir, entryPath, entry.name)) continue;
+      if (entry.isDirectory() && ALWAYS_IGNORED_DIRECTORIES.has(entry.name)) continue;
       if (entry.isDirectory()) {
         visit(entryPath);
       } else if (entry.isSymbolicLink()) {
@@ -135,7 +137,7 @@ function buildSourceFilesByCellIndex(rootDir: string, manifest: CellFenceManifes
     if (!SOURCE_EXTENSIONS.includes(path.extname(filePath))) continue;
     if (pathExcludedByGovernance(manifest, relativePath)) continue;
     for (const cell of manifest.cells) {
-      if (!cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern))) continue;
+      if (!pathOwnedByCell(cell, relativePath)) continue;
       // Stryker disable next-line OptionalChaining: the map is initialized for every manifest cell before iteration.
       index.get(cell.id)?.push(filePath);
     }
@@ -152,7 +154,7 @@ export function sourceFilesForCell(rootDir: string, cell: CellManifest, context?
   }
   const files = listFiles(rootDir).filter((filePath) => {
     const relativePath = repoPath(rootDir, filePath);
-    return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+    return SOURCE_EXTENSIONS.includes(path.extname(filePath)) && pathOwnedByCell(cell, relativePath);
   });
   return files;
 }
@@ -187,7 +189,7 @@ export function pathIsGoverned(manifest: CellFenceManifest, relativePath: string
 }
 
 export function pathOwnedByCell(cell: CellManifest, relativePath: string): boolean {
-  return cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern));
+  return cell.ownedPaths.some((pattern) => expandOwnedPath(pattern).some((expanded) => matchesPattern(relativePath, expanded)));
 }
 
 export function patternCoveredByOwnedPaths(pattern: string, ownedPaths: string[]): boolean {

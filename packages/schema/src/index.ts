@@ -258,9 +258,20 @@ function isRepoRelativePathLike(value: string): boolean {
   return !normalized.split("/").includes("..");
 }
 
+function unsupportedGlobSyntax(value: string): string | undefined {
+  if (/[{}?\]]/.test(value) || value.includes("[")) return "brace expansion, question marks, and character classes are not supported by the CellFence glob dialect";
+  if (/(?:!\(|\+\(|@\()/.test(value)) return "extglob operators are not supported by the CellFence glob dialect";
+  return undefined;
+}
+
 function validateRepoRelativePathLike(value: unknown, location: string, errors: string[]): void {
   if (typeof value === "string" && value.trim().length > 0 && !isRepoRelativePathLike(value)) {
     errors.push(`${location} must be a repo-relative path or pattern that does not escape the repository`);
+    return;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const reason = unsupportedGlobSyntax(value);
+    if (reason) errors.push(`${location} uses unsupported glob syntax: ${reason}`);
   }
 }
 
@@ -426,6 +437,14 @@ function validateResourceContract(value: unknown, location: string, errors: stri
   }
   if (!isStringArray(value.selectors)) {
     errors.push(`${location}.selectors must be an array of non-empty strings`);
+  } else {
+    validateUniqueNonEmptyStrings(value.selectors, `${location}.selectors`, errors);
+    value.selectors.forEach((selector, selectorIndex) => {
+      const normalizedSelector = selector.replace(/\\/g, "/").replace(/\/+$/, "");
+      if (normalizedSelector === "**" || normalizedSelector.startsWith("**/")) {
+        errors.push(`${location}.selectors[${selectorIndex}] cannot start with unbounded ** resource selector`);
+      }
+    });
   }
   if (!optionalString(value.description)) {
     errors.push(`${location}.description must be a string when present`);

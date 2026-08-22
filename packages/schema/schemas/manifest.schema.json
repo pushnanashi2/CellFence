@@ -34,7 +34,7 @@
     "path": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?=.*\\S)(?![/\\\\])(?![A-Za-z]:[/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$))[^\\u0000-\\u001f]+$"
+      "pattern": "^(?=.*\\S)(?![/\\\\])(?![A-Za-z]:[/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$))(?!.*(?:[{}?\\[\\]]|!\\(|\\+\\(|@\\())[^\\u0000-\\u001f]+$"
     },
     "stringArray": {
       "type": "array",
@@ -162,10 +162,19 @@
           "type": "array",
           "items": { "enum": ["read", "write", "publish", "subscribe", "call", "serve"] }
         },
-        "selectors": { "$ref": "#/$defs/stringArray" },
+        "selectors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/resourceSelector" },
+          "uniqueItems": true
+        },
         "locked": { "type": "boolean" },
         "description": { "type": "string" }
       }
+    },
+    "resourceSelector": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?=.*\\S)(?!\\*\\*(?:/|$)).+$"
     },
     "cell": {
       "type": "object",

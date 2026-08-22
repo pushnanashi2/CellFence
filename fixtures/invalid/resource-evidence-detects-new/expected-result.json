@@ -5,6 +5,7 @@
   ],
   "ok": false,
   "errorRuleIds": [
+    "CELLFENCE_RATCHET_RESOURCE_ACCESS_CHANGE",
     "CELLFENCE_UNDECLARED_RESOURCE_ACCESS"
   ],
   "warningRuleIds": [

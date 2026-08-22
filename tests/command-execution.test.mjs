@@ -34,6 +34,11 @@ function withCommandEnvironment(environment, action) {
   }
 }
 
+function writeExecutable(filePath, content = "executable\n") {
+  fs.writeFileSync(filePath, content);
+  fs.chmodSync(filePath, 0o755);
+}
+
 test("Windows batch command lines quote cmd metacharacters", () => {
   const commandLine = buildCmdCommandLine("C:\\Tools\\runner.cmd", [
     "plain",
@@ -84,9 +89,9 @@ test("Windows command resolution prefers native executables over batch shims", (
     const comPath = path.join(binDir, "cellfence.COM");
     const commandPath = path.join(binDir, "cellfence.CMD");
     const executablePath = path.join(binDir, "cellfence.EXE");
-    fs.writeFileSync(comPath, "native com executable\n");
-    fs.writeFileSync(commandPath, "batch shim\n");
-    fs.writeFileSync(executablePath, "native executable\n");
+    writeExecutable(comPath, "native com executable\n");
+    writeExecutable(commandPath, "batch shim\n");
+    writeExecutable(executablePath, "native executable\n");
     withCommandEnvironment({
       platform: "win32",
       variables: { PATH: binDir, PATHEXT: ".CMD;.EXE;.COM" },
@@ -108,9 +113,9 @@ test("Windows command resolution normalizes PATHEXT and handles explicit extensi
     const extensionlessPath = path.join(binDir, "cellfence");
     const commandPath = path.join(binDir, "cellfence.CMD");
     const appendedExtensionPath = path.join(binDir, "cellfence.CMD.COM");
-    fs.writeFileSync(extensionlessPath, "extensionless executable\n");
-    fs.writeFileSync(commandPath, "batch shim\n");
-    fs.writeFileSync(appendedExtensionPath, "wrong executable\n");
+    writeExecutable(extensionlessPath, "extensionless executable\n");
+    writeExecutable(commandPath, "batch shim\n");
+    writeExecutable(appendedExtensionPath, "wrong executable\n");
     withCommandEnvironment({
       platform: "win32",
       variables: { PATH: binDir, PATHEXT: "; .cmd ;" },
@@ -129,9 +134,9 @@ test("Windows command resolution uses the default PATHEXT and extensionless fall
     const defaultCommandPath = path.join(binDir, "default-command.CMD");
     const executablePath = path.join(binDir, "native.EXE");
     const extensionlessPath = path.join(binDir, "script");
-    fs.writeFileSync(defaultCommandPath, "default batch command\n");
-    fs.writeFileSync(executablePath, "native executable\n");
-    fs.writeFileSync(extensionlessPath, "extensionless executable\n");
+    writeExecutable(defaultCommandPath, "default batch command\n");
+    writeExecutable(executablePath, "native executable\n");
+    writeExecutable(extensionlessPath, "extensionless executable\n");
     withCommandEnvironment({
       platform: "win32",
       variables: { PATH: binDir, PATHEXT: undefined },
@@ -155,7 +160,7 @@ test("command resolution preserves direct paths and POSIX extension rules", () =
     const backslashCandidate = path.join(binDir, "nested\\tool");
     fs.mkdirSync(path.dirname(nestedCandidate), { recursive: true });
     for (const candidate of [executablePath, windowsExecutablePath, nestedCandidate, backslashCandidate]) {
-      fs.writeFileSync(candidate, "executable\n");
+      writeExecutable(candidate);
     }
     withCommandEnvironment({
       platform: "linux",
@@ -177,8 +182,8 @@ test("command resolution ignores empty PATH entries", () => {
   const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-nonempty-path-"));
   const previousCwd = process.cwd();
   try {
-    fs.writeFileSync(path.join(rootDir, "local-tool"), "local executable\n");
-    fs.writeFileSync(path.join(binDir, "local-tool"), "selected executable\n");
+    writeExecutable(path.join(rootDir, "local-tool"), "local executable\n");
+    writeExecutable(path.join(binDir, "local-tool"), "selected executable\n");
     fs.mkdirSync(path.join(rootDir, "Stryker was here!"));
     fs.writeFileSync(path.join(rootDir, "Stryker was here!", "fallback-tool"), "mutant target\n");
     process.chdir(rootDir);
@@ -193,6 +198,30 @@ test("command resolution ignores empty PATH entries", () => {
       variables: { PATH: "", PATHEXT: undefined },
     }, () => {
       assert.equal(resolveCommand("fallback-tool"), "fallback-tool");
+    });
+  } finally {
+    process.chdir(previousCwd);
+    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(binDir, { recursive: true, force: true });
+  }
+});
+
+test("command resolution ignores relative PATH entries and non-executable files", () => {
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-relative-path-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-command-absolute-path-"));
+  const previousCwd = process.cwd();
+  try {
+    fs.mkdirSync(path.join(rootDir, "relative-bin"));
+    writeExecutable(path.join(rootDir, "relative-bin", "tool"), "repo-shadowed executable\n");
+    fs.writeFileSync(path.join(binDir, "tool"), "not executable\n", { mode: 0o644 });
+    writeExecutable(path.join(binDir, "safe-tool"), "safe executable\n");
+    process.chdir(rootDir);
+    withCommandEnvironment({
+      platform: "linux",
+      variables: { PATH: `relative-bin${path.delimiter}${binDir}`, PATHEXT: undefined },
+    }, () => {
+      assert.equal(resolveCommand("tool"), "tool");
+      assert.equal(resolveCommand("safe-tool"), path.join(binDir, "safe-tool"));
     });
   } finally {
     process.chdir(previousCwd);

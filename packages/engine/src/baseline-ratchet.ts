@@ -218,6 +218,24 @@ export function compareBaseline(
       }
     }
 
+    if (baselineRecord.resourceAccesses) {
+      const previousResources = new Set(baselineRecord.resourceAccesses.map(resourceBaselineKey));
+      const addedResources = (metric.resourceAccesses || []).filter((resource) => !previousResources.has(resourceBaselineKey(resource)));
+      if (addedResources.length > 0) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_RATCHET_RESOURCE_ACCESS_CHANGE",
+          severity: "error",
+          cellId,
+          message: `${cellId} added resource accesses outside the accepted baseline: ${addedResources.map((resource) => `${resource.kind}:${resource.access}:${resource.selector}`).join(", ")}`,
+          details: { previous: baselineRecord.resourceAccesses, current: metric.resourceAccesses, addedResources },
+          suggestedResolutions: [
+            codeResolution("Remove the new resource access or route it through an accepted owner"),
+            baselineResolution("Accept the resource access change in the baseline", locked, { cell: cellId, addedResources }),
+          ],
+        });
+      }
+    }
+
     if (baselineRecord.publicSurfaceHash && metric.publicSurfaceHash !== baselineRecord.publicSurfaceHash) {
       addFinding(findings, {
         ruleId: "CELLFENCE_RATCHET_PUBLIC_SURFACE_SIGNATURE_CHANGE",

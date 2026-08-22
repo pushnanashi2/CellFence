@@ -287,6 +287,7 @@ function sleepSync(ms: number): void {
 }
 
 const CLAIM_LOCK_STALE_AFTER_MS = 30_000;
+const CLAIM_LOCK_RECLAIM_MAX_DEPTH = 4;
 
 type ClaimLockFile = {
   fd: number;
@@ -405,14 +406,22 @@ function claimLockSnapshotIsStale(snapshot: ClaimLockSnapshot, now = Date.now())
   return snapshot.pid === undefined || !processIsRunning(snapshot.pid);
 }
 
-function removeStaleClaimLockFile(lockPath: string): boolean {
+function removeStaleClaimLockFile(lockPath: string, depth = 0): boolean {
+  if (depth >= CLAIM_LOCK_RECLAIM_MAX_DEPTH) return false;
   const snapshot = readClaimLockSnapshot(lockPath);
   if (!snapshot || !claimLockSnapshotIsStale(snapshot)) return false;
   const tokenDigest = crypto.createHash("sha256").update(snapshot.content).digest("hex").slice(0, 16);
   const tokenPath = `${lockPath}.reclaim-${tokenDigest}`;
-  let token = tryAcquireClaimLockFile(tokenPath, `${process.pid}\n${new Date().toISOString()}\n`);
-  if (!token && removeStaleClaimLockFile(tokenPath)) {
+  let token: ClaimLockFile | undefined;
+  try {
     token = tryAcquireClaimLockFile(tokenPath, `${process.pid}\n${new Date().toISOString()}\n`);
+    if (!token && removeStaleClaimLockFile(tokenPath, depth + 1)) {
+      token = tryAcquireClaimLockFile(tokenPath, `${process.pid}\n${new Date().toISOString()}\n`);
+    }
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    if (code === "ENAMETOOLONG") return false;
+    throw error;
   }
   if (!token) return false;
   try {
@@ -674,7 +683,7 @@ function claimCoversFile(manifest: CellFenceManifest, claim: CellFenceClaim, rel
   if (claim.paths.some((pattern) => matchesPattern(relativePath, pattern))) return true;
   return claim.cells.some((cellId) => {
     const cell = manifest.cells.find((candidate) => candidate.id === cellId);
-    return cell ? cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)) : false;
+    return cell ? pathOwnedByCell(cell, relativePath) : false;
   });
 }
 

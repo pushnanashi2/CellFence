@@ -3,6 +3,7 @@
 <!-- Moved from README.md CLI notes and expanded to document cross-worktree sharing. -->
 
 Claim leases are short-lived coordination state for parallel agents. They are coordination-only architecture leases, not a runtime sandbox or filesystem permission system.
+The `--agent` value is a self-declared coordination label, not authenticated identity; use separate runner credentials, protected branches, or an external lease service when hostile or mutually distrustful actors share a repository.
 
 Use them when multiple agents may touch the same repository at the same time:
 

@@ -25,7 +25,11 @@ type BaselineSealMetadata = Pick<BaselineSeal, "algorithm" | "keyId" | "payloadV
 const BASELINE_SEAL_PAYLOAD_VERSION = "seal-metadata-v1" as const;
 
 function baselineSealMetadata(seal: BaselineSeal): BaselineSealMetadata | undefined {
-  if (seal.payloadVersion !== BASELINE_SEAL_PAYLOAD_VERSION) return undefined;
+  const payloadVersion = (seal as { payloadVersion?: string }).payloadVersion;
+  if (payloadVersion === undefined) return undefined;
+  if (payloadVersion !== BASELINE_SEAL_PAYLOAD_VERSION) {
+    throw new Error(`unsupported baseline seal payloadVersion ${payloadVersion}`);
+  }
   return {
     algorithm: seal.algorithm,
     ...(seal.keyId ? { keyId: seal.keyId } : {}),
@@ -70,6 +74,12 @@ function baselineKeyMaterial(value: string): string {
   return value.includes("\\n") ? value.replace(/\\n/g, "\n") : value;
 }
 
+function configuredHmacSecret(): string | undefined {
+  const secret = process.env[BASELINE_HMAC_KEY_ENV];
+  if (secret === undefined || secret.trim().length === 0) return undefined;
+  return secret;
+}
+
 function baselineEd25519Signature(
   baseline: CellFenceBaseline | Omit<CellFenceBaseline, "seal">,
   privateKeyPem: string,
@@ -102,7 +112,7 @@ export function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFence
       },
     };
   }
-  const secret = process.env[BASELINE_HMAC_KEY_ENV];
+  const secret = configuredHmacSecret();
   if (!secret) return baseline;
   const unsignedBaseline = baselineWithoutSeal(baseline);
   const sealMetadata = {
@@ -121,7 +131,7 @@ export function sealBaselineIfConfigured(baseline: CellFenceBaseline): CellFence
 
 function configuredSealVerifier(): "ed25519" | "hmac-sha256" | undefined {
   if (process.env[BASELINE_ED25519_PUBLIC_KEY_ENV]) return "ed25519";
-  if (process.env[BASELINE_HMAC_KEY_ENV]) return "hmac-sha256";
+  if (configuredHmacSecret()) return "hmac-sha256";
   return undefined;
 }
 
@@ -150,7 +160,7 @@ export function validateBaselineSealFindings(
   requireConfiguredVerifier = false,
 ): Finding[] {
   const findings: Finding[] = [];
-  const secret = process.env[BASELINE_HMAC_KEY_ENV];
+  const secret = configuredHmacSecret();
   const publicKey = process.env[BASELINE_ED25519_PUBLIC_KEY_ENV];
   const verifier = configuredSealVerifier();
   const lockedCells = manifest.cells.filter((cell) => cell.locked);
@@ -245,7 +255,19 @@ export function validateBaselineSealFindings(
     });
     return findings;
   }
-  const expectedDigest = baselineHmacDigest(baseline, secret as string, baselineSealMetadata(baseline.seal));
+  let expectedDigest: string;
+  try {
+    expectedDigest = baselineHmacDigest(baseline, secret as string, baselineSealMetadata(baseline.seal));
+  } catch (error) {
+    findings.push({
+      ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",
+      severity: "error",
+      filePath: baselinePath,
+      message: `baseline HMAC seal could not be verified: ${errorMessage(error)}`,
+      details: { algorithm: baseline.seal.algorithm, keyId: baseline.seal.keyId, payloadVersion: baseline.seal.payloadVersion },
+    });
+    return findings;
+  }
   if (!timingSafeHexEqual(baseline.seal.digest, expectedDigest)) {
     findings.push({
       ruleId: "CELLFENCE_BASELINE_SEAL_INVALID",

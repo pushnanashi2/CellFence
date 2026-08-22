@@ -1277,6 +1277,7 @@ test("module resolution fails closed for string execution require forms", () => 
         "const code = \"require('./computed.js')\";",
         "eval(\"require('./eval.js')\");",
         "Function(\"return require('./function.js')\")();",
+        "eval(\"import('./eval-import.js')\");",
         "eval(code);",
         "",
       ].join("\n"),
@@ -1288,13 +1289,14 @@ test("module resolution fails closed for string execution require forms", () => 
     assert.deepEqual(references.map((reference) => [reference.kind, reference.specifier, reference.line]), [
       ["require", "./eval.js", 2],
       ["require", "./function.js", 3],
+      ["dynamic-import", "./eval-import.js", 4],
     ]);
     assert.deepEqual(warnings, [{
       ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
       severity: "warning",
       filePath: "src/app.ts",
-      message: "computed eval() source cannot be resolved statically at line 4",
-      details: { line: 4 },
+      message: "computed eval() source cannot be resolved statically at line 5",
+      details: { line: 5 },
     }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });

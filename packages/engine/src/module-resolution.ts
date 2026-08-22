@@ -1171,7 +1171,10 @@ export function extractImports(
   function addDynamicExecutionRequireReferences(scope: ImportScope, node: ts.CallExpression): void {
     const sourceName = dynamicExecutionSourceName(scope, node);
     if (!sourceName) return;
-    const modulePattern = /\brequire\s*\(\s*(["'`])([^"'`]+)\1/g;
+    const modulePatterns = [
+      { kind: "require" as const, pattern: /\brequire\s*\(\s*(["'`])([^"'`]+)\1/g },
+      { kind: "dynamic-import" as const, pattern: /\bimport\s*\(\s*(["'`])([^"'`]+)\1/g },
+    ];
     let hasComputedArgument = false;
     for (const argument of node.arguments) {
       const sourceText = literalText(argument);
@@ -1179,8 +1182,10 @@ export function extractImports(
         hasComputedArgument = true;
         continue;
       }
-      for (const match of sourceText.matchAll(modulePattern)) {
-        addReference(match[2]!, "require", node, false);
+      for (const { kind, pattern } of modulePatterns) {
+        for (const match of sourceText.matchAll(pattern)) {
+          addReference(match[2]!, kind, node, false);
+        }
       }
     }
     if (hasComputedArgument) {

@@ -15,14 +15,26 @@ function windowsCommandExtensions(commandName: string): string[] {
   return [...new Set([".COM", ".EXE", ...configured, ""])];
 }
 
+function commandCandidateUsable(candidate: string): boolean {
+  try {
+    const stat = fs.statSync(candidate);
+    if (!stat.isFile()) return false;
+    if (process.platform === "win32") return true;
+    fs.accessSync(candidate, fs.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function resolveCommand(commandName: string): string {
   if (path.isAbsolute(commandName) || commandName.includes("/") || commandName.includes("\\")) return commandName;
-  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
+  const pathEntries = (process.env.PATH || "").split(path.delimiter).filter((directory) => directory && path.isAbsolute(directory));
   const extensions = process.platform === "win32" ? windowsCommandExtensions(commandName) : [""];
   for (const directory of pathEntries) {
     for (const extension of extensions) {
       const candidate = path.join(directory, `${commandName}${extension}`);
-      if (fs.existsSync(candidate)) return candidate;
+      if (commandCandidateUsable(candidate)) return candidate;
     }
   }
   return commandName;

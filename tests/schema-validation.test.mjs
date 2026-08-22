@@ -99,6 +99,8 @@ test("published JSON Schemas agree with runtime validators on structural fixture
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "../escape.ts" }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "C:\\escape.ts" }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "src\\..\\escape.ts" }] }), validateManifest],
+    ["manifest", validManifest({ governance: { include: ["**/*.{test,spec}.ts"] } }), validateManifest],
+    ["manifest", validManifest({ cells: [{ ...validCell, resourceContracts: [{ id: "all-files", kind: "file", access: ["read"], selectors: ["**"] }] }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, id: "   " }] }), validateManifest],
     ["manifest", validManifest({ cells: [{ ...validCell, publicEntry: "   " }] }), validateManifest],
     ["manifest", validManifest({
@@ -520,6 +522,21 @@ test("schema validation rejects duplicate names that would overwrite manifest po
     })),
     /ownedPaths\[0\] must be a repo-relative path[\s\S]*publicEntry must be a repo-relative path[\s\S]*paths\[0\] must be a repo-relative path/,
   );
+  assertInvalidContaining(
+    validateManifest(validManifest({
+      governance: { requireOwnership: true, include: ["./src/**"], exclude: ["**/*.{test,spec}.ts"] },
+      cells: [{
+        ...validCell,
+        ownedPaths: ["src/[ab]/**"],
+        publicPaths: ["src/core/file?.ts"],
+      }],
+    })),
+    [
+      "governance.exclude[0] uses unsupported glob syntax: brace expansion, question marks, and character classes are not supported by the CellFence glob dialect",
+      "cells[0].ownedPaths[0] uses unsupported glob syntax: brace expansion, question marks, and character classes are not supported by the CellFence glob dialect",
+      "cells[0].publicPaths[0] uses unsupported glob syntax: brace expansion, question marks, and character classes are not supported by the CellFence glob dialect",
+    ],
+  );
 });
 
 test("schema validation rejects malformed manifest governance and overrides", () => {
@@ -588,6 +605,18 @@ test("schema validation rejects malformed cells and nested contracts", () => {
       }],
     })),
     /consumes\[0\] must be an object[\s\S]*consumes\[1\]\.cell[\s\S]*artifactLanes[\s\S]*producesArtifacts\[0\] must be an object[\s\S]*importAnalysis is not a supported field[\s\S]*producesArtifacts\[1\]\.id[\s\S]*producesArtifacts\[1\]\.paths[\s\S]*description must be a string[\s\S]*locked must be a boolean[\s\S]*resourceContracts\[0\] must be an object[\s\S]*resourceAnalysis is not a supported field[\s\S]*kind must be file\|database\|queue\|http[\s\S]*access must contain[\s\S]*selectors must be an array[\s\S]*ownedPathPatterns must be a non-negative integer/,
+  );
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        resourceContracts: [
+          { id: "all", kind: "file", access: ["read"], selectors: ["**"] },
+          { id: "suffix", kind: "file", access: ["read"], selectors: ["**/secret.json"] },
+        ],
+      }],
+    })),
+    /selectors\[0\] cannot start with unbounded \*\* resource selector[\s\S]*selectors\[0\] cannot start with unbounded \*\* resource selector/,
   );
 });
 
