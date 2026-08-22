@@ -22,6 +22,9 @@
 | `CELLFENCE_UNDECLARED_RESOURCE_ACCESS` | Static file, database, queue, or HTTP resource access was not declared |
 | `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS` | Dynamic or unsafe resource access could not be resolved safely |
 | `CELLFENCE_RESOURCE_EVIDENCE_INVALID` | Runtime resource evidence JSON is invalid or references an unknown cell |
+| `CELLFENCE_EXTERNAL_DEPENDENCY_CLAIM_VIOLATION` | A cell uses an external dependency claimed by another cell or claiming set |
+| `CELLFENCE_RATCHET_EXTERNAL_DEPENDENCY_ADDED` | A cell added a new unclaimed external dependency outside the accepted baseline |
+| `CELLFENCE_LOCKED_EXTERNAL_DEPENDENCY_EXPANSION` | A locked cell expanded its accepted external dependency set |
 | `CELLFENCE_PLUGIN_INVALID` | A programmatic plugin has an unsupported API version, throws, or emits invalid references |
 | `CELLFENCE_REQUIRED_RULE_DISABLED` | A configured `governance.requiredRules` rule was weakened |
 | `CELLFENCE_CLAIM_INVALID` | Claim store or claim request is malformed, expired metadata is invalid, or a claim references unknown cells |
@@ -69,7 +72,7 @@ CellFence v0.x analyzes:
 - selected BullMQ and KafkaJS topic or queue calls;
 - selected NestJS controller method decorators;
 - selected Fastify route object registrations;
-- runtime resource evidence supplied as `cellfence.resource-evidence.v1`;
+- runtime resource evidence supplied as `cellfence.resource-evidence.v2`;
 - common TypeScript export declarations, named exports, and exported namespaces;
 - common Python public symbols from `__all__`, top-level functions/classes/assignments, and simple re-export imports.
 

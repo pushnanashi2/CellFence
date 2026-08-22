@@ -1,9 +1,7 @@
-// CLI glue for the prototype `cellfence baseline gate` subcommand.
-// The full implementation (git diff integration, GitHub Action glue,
-// CODEOWNER-driven approval gating) is queued for 0.4.0. This module
-// just demonstrates the wiring: given two parsed baselines, build a
-// GovernanceChangeReport, render it in JSON or human form, and exit
-// with a stable code so CI can detect a baseline change.
+// CLI glue for the `cellfence baseline gate` subcommand. The full
+// Git-ref loading and GitHub Action approval flow live in adjacent
+// modules; this module turns two parsed baselines into a stable
+// GovernanceChangeReport and exit code.
 
 import type { CellFenceBaseline } from "@cellfence/schema";
 import { detectBaselineChanges, type GovernanceChangeReport } from "@cellfence/engine";
@@ -33,18 +31,12 @@ export function runBaselineGateCommand(options: BaselineGateOptions): BaselineGa
   );
   const warnings: string[] = [];
   if (options.hasImplementationChanges && report.hasChange) {
-    // 0.4.0 will let users override this with a flag, but the default
-    // is to keep governance changes and implementation changes in
-    // separate PRs so reviewers can reason about them in isolation.
     warnings.push("baseline changes and implementation changes are mixed in the same pull request");
   }
   if (options.format === "human") {
     printHumanReport(report);
   }
-  // exit 0: governance change present (action continues to enforce
-  // approval before merge). exit 1: no change (action can short-circuit).
-  // 0.4.x: CLI help declares '0 no violations / 1 governance violations';
-  // `hasChange: true` is a violation, so it must surface as exit 1.
+  // exit 0: no governance change. exit 1: governance change present.
   const exitCode = report.hasChange ? 1 : 0;
   return { report, exitCode, warnings };
 }

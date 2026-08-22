@@ -1,9 +1,9 @@
-// 0.4.0: SARIF writer for the coverage command. The reporter
-// converts a CoverageReport into the SARIF 2.1.0 shape so the
-// output can be uploaded to GitHub Code Scanning. We render a
-// single run with one result per unresolved observation; the rule
-// id is `CELLFENCE_COVERAGE_<KIND>` so users can filter on kind in
-// the Code Scanning UI.
+// SARIF writer for the coverage command. The reporter converts a
+// CoverageReport into the SARIF 2.1.0 shape so the output can be
+// uploaded to GitHub Code Scanning. We render a single run with one
+// result per unresolved observation; the rule id is
+// `CELLFENCE_COVERAGE_<KIND>` so users can filter on kind in the Code
+// Scanning UI.
 
 import type { CoverageReport, CoverageUnresolved } from "@cellfence/engine";
 
@@ -92,7 +92,7 @@ export function coverageReportToSarif(report: CoverageReport): SarifLog {
         tool: {
           driver: {
             name: "cellfence-coverage",
-            version: "0.4.0",
+            version: "0.2.1",
             informationUri: "https://github.com/pushnanashi2/CellFence",
             rules,
           },

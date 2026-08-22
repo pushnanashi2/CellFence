@@ -1,9 +1,7 @@
-// Baseline change detector — proof-of-concept for the 0.4.0
-// `cellfence baseline gate` subcommand. Given two CellFence baselines
-// (the one in main vs the one in the PR), describe the governance
-// change in human-readable units. The full implementation will feed
-// this into the GitHub Action that gates PRs on a CODEOWNER approval
-// of any baseline change.
+// Baseline change detector for `cellfence baseline gate`. Given two
+// CellFence baselines, describe the governance change in
+// human-readable units so the CLI and bundled GitHub Action can gate
+// baseline widening on review.
 
 import type { CellFenceBaseline } from "@cellfence/schema";
 
@@ -55,10 +53,11 @@ export function detectBaselineChanges(
   const signatures = diffSignatures(baseBaseline, headBaseline);
   const resourceAccesses = diffResourceAccesses(baseBaseline, headBaseline);
   const artifactContracts = diffArtifactContracts(baseBaseline, headBaseline);
+  const externalDependencies = diffExternalDependencies(baseBaseline, headBaseline);
   const publicSurfaceMetadata = diffPublicSurfaceMetadata(baseBaseline, headBaseline);
   const dependencyCounts = diffDependencyCounts(baseBaseline, headBaseline);
 
-  const deltas = [cellIds, ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, publicSurfaceMetadata, dependencyCounts].filter(
+  const deltas = [cellIds, ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, externalDependencies, publicSurfaceMetadata, dependencyCounts].filter(
     (delta) => delta.added.length > 0 || delta.removed.length > 0 || (delta.skippedCells?.length ?? 0) > 0,
   );
 
@@ -148,8 +147,7 @@ function diffPublicSymbols(baseBaseline: CellFenceBaseline, headBaseline: CellFe
 function crossCellEdgeSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
   // CellBaselineRecord.dependencyEdges is intentionally typed as
   // string[] so callers can store whatever edge encoding is convenient
-  // for the language ecosystem. We diff the raw representation here;
-  // 0.4.0 may switch to a structured encoding.
+  // for the language ecosystem. We diff the raw representation here.
   return [...(acceptedCellRecord(baseline, cellId)?.dependencyEdges || [])];
 }
 
@@ -232,6 +230,23 @@ function diffArtifactContracts(baseBaseline: CellFenceBaseline, headBaseline: Ce
     for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
   }
   return { dimension: "artifactContracts" as BaselineDimension, added, removed };
+}
+
+function externalDependencySetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
+  return [...(acceptedCellRecord(baseline, cellId)?.externalDependencySet || [])];
+}
+
+function diffExternalDependencies(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
+  const added: string[] = [];
+  const removed: string[] = [];
+  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
+  for (const cellId of cellIds) {
+    const base = new Set(externalDependencySetForCell(baseBaseline, cellId));
+    const head = new Set(externalDependencySetForCell(headBaseline, cellId));
+    for (const entry of head) if (!base.has(entry)) added.push(`${cellId}: ${entry}`);
+    for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
+  }
+  return { dimension: "externalDependencies" as BaselineDimension, added, removed };
 }
 
 // `publicSurfaceMetadata` covers the fields that describe the cell

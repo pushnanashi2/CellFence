@@ -1,6 +1,6 @@
 # Architecture
 
-CellFence dogfoods its own manifest. The current repository is a package-level cell graph rather than the original four-cell prototype.
+CellFence dogfoods its own manifest. The current repository is a package-level cell graph rather than the original four-cell layout.
 
 The enforced source of truth is `cellfence.manifest.json`; this document is a human-readable map of that manifest.
 
@@ -10,7 +10,8 @@ The enforced source of truth is `cellfence.manifest.json`; this document is a hu
 - `plugin-api`: stable Plugin API v1 types and `define*` helpers. It depends only on `schema`.
 - `engine`: repository indexing, source analysis, resource adapters, rule evaluation, baselines, claims, changed checks, docs checks, and manifest inference. It depends on `schema`.
 - `cli`: process argument parsing, human/JSON output, audit/summary artifacts, and command dispatch. It depends on `engine`.
-- `github-action`: thin GitHub Action wrapper around the engine/CLI policy. It depends on `engine`.
+- `github-action`: composite GitHub Action wrapper that runs the published CLI version selected by the `version` input.
+- `github-action-baseline-gate`: private bundled GitHub Action for baseline governance-change labeling, commenting, and approval checks. It depends on `engine` and `schema`.
 
 ## Engine Internal Modules
 
@@ -68,7 +69,10 @@ schema
 
 schema <- engine <- cli
                  <- github-action
+                 <- github-action-baseline-gate
                  <- mcp-proxy
+
+schema <- github-action-baseline-gate
 
 schema <- trace
 ```

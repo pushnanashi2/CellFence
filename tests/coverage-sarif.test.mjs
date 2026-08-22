@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +9,7 @@ import { coverageReportToSarif } from "../packages/cli/dist/coverage-sarif.js";
 import { buildCoverageReport } from "../packages/engine/dist/index.js";
 
 const root = process.cwd();
+const cliPath = path.join(root, "packages/cli/dist/index.js");
 
 test("coverageReportToSarif emits a SARIF 2.1.0 log with one result per observation", () => {
   const rootDir = fs.mkdtempSync(path.join(root, ".cellfence-sarif-"));
@@ -49,6 +51,27 @@ test("runCoverageCommand supports --format sarif and writes SARIF JSON", () => {
     });
     assert.equal(exitCode, 0);
     assert.equal(report.schemaVersion, "cellfence.coverage.v1");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("CLI coverage supports --format sarif", () => {
+  const dir = fs.mkdtempSync(path.join(root, ".cellfence-sarif-cli-"));
+  try {
+    const result = spawnSync(process.execPath, [
+      cliPath,
+      "coverage",
+      "--format",
+      "sarif",
+    ], {
+      cwd: dir,
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const sarif = JSON.parse(result.stdout);
+    assert.equal(sarif.version, "2.1.0");
+    assert.equal(sarif.runs[0].tool.driver.name, "cellfence-coverage");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

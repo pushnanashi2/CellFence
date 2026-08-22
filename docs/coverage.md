@@ -1,47 +1,56 @@
-# Coverage (0.4.0 prototype)
+# Analysis Coverage And Blind Spots
 
-`cellfence coverage` reports the parts of a repository that
-CellFence could *not* see through. Fail-invisible becomes
-fail-visible: the same way `cellfence check` rejects violations,
-`cellfence coverage` flags the shapes that the engine could not
-resolve so a human can decide whether to add an adapter, a
-`resourceContracts` entry, or an explicit `// @cellfence ignore`.
+`cellfence coverage` reports the repository surface that CellFence could not analyze with confidence. It is a visibility report over the same parser, resolver, resource-adapter, manifest, baseline, and runtime-evidence inputs used by `cellfence check`.
 
-## What it reports
+The command does not grant exceptions and does not replace `check` or `baseline check`. Use it to make blind spots explicit before tightening a manifest, adding an adapter, supplying runtime evidence, or deciding that an unsupported pattern needs an ordinary reviewed waiver.
 
-Three buckets, counted and listed separately:
+## Command
 
-- **Unresolved imports** — dynamic imports with non-literal
-  specifiers, `require(variable)` calls, `tsconfig` paths the
-  resolver cannot pin down.
-- **Unresolved resources** — ORM calls (Prisma, TypeORM, BullMQ,
-  Drizzle, Knex, SQLAlchemy, Celery) that the built-in adapter did
-  not recognise. The collector records the call shape and the file
-  location so the user can add a `resourceContracts` entry or a
-  custom resource adapter.
-- **Unresolved public surface** — isolated declarations whose
-  public type could not be inferred (often `any` leakage, cyclic
-  references, or a hand-rolled `declare module`).
-
-## Output
-
-`cellfence coverage` writes a single `cellfence.coverage.v1` JSON
-document on stdout (or prints a human summary with `--format
-human`). SARIF output is queued for 0.4.0.
-
-```text
-$ cellfence coverage
-cellfence coverage: 95.35% (1189/1247 files analyzed, 49 unresolved observations)
+```bash
+npx cellfence coverage \
+  --manifest cellfence.manifest.json \
+  --baseline cellfence.baseline.json \
+  --evidence resource-evidence.json \
+  --format human
 ```
 
-`--fail-under` (or `CELLFENCE_COVERAGE_FAIL_UNDER=<ratio>`) makes
-the command exit non-zero when coverage falls below the threshold
-so CI can gate on it.
+Supported output forms:
 
-## Wiring to `init --infer`
+- `--json` or the default format writes a `cellfence.coverage.v1` report.
+- `--format human` prints a grouped terminal summary.
+- `--format sarif` emits SARIF for code-scanning style review.
+- `--coverage-output coverage.json` writes the JSON report, or SARIF when `--format sarif` is selected, to a file.
+- `--fail-under 0.95` or `CELLFENCE_COVERAGE_FAIL_UNDER=0.95` exits non-zero when the computed coverage ratio is lower than the threshold.
 
-The coverage collector's `unresolved` array is the same shape
-`init --infer` would consume to seed `resourceContracts`. The full
-integration (walking the repository, asking each adapter to call
-into the collector, and feeding the output back into `init`) is
-queued for 0.4.0.
+Example human output:
+
+```text
+cellfence coverage: 95.35% (1189/1247 files analysed, 49 unresolved observations)
+```
+
+## What Counts As Unresolved
+
+Coverage observations are grouped into three buckets:
+
+- **Unresolved imports** — computed dynamic imports, computed CommonJS `require()` calls, unresolved local specifiers, and parser diagnostics that prevent reliable boundary analysis.
+- **Unresolved resources** — dynamic or unsupported file, SQL, ORM, queue, broker, route, or runtime-evidence shapes that cannot be safely mapped to a declared `resourceContracts` selector or accepted baseline resource.
+- **Unresolved public surface** — public entries whose declaration-facing shape cannot be fingerprinted well enough for the baseline ratchet.
+
+Ordinary rule findings that do not represent analysis visibility, such as a plugin warning or an intentional policy violation, do not reduce the coverage ratio.
+
+## How To Improve Coverage
+
+Typical remediation paths are:
+
+- rewrite computed imports or resource names into static, reviewable forms;
+- add explicit `resourceContracts` for intentional high-value couplings;
+- let the baseline grandfather known existing resources, then review only new deltas;
+- pass runtime evidence through `--evidence` for resources that are only visible while tests or services run;
+- enable built-in adapters that match the stack, or write a programmatic adapter with `@cellfence/plugin-api`;
+- use a short-lived signed waiver only when the blind spot is reviewed and temporary.
+
+## Relationship To `init --infer`
+
+`cellfence init --from ...` and `cellfence init --preset ...` create a natural starting manifest. `cellfence coverage` is the follow-up visibility loop: run it after the first checks, look at unresolved imports/resources/public surface, and decide whether the manifest, source shape, adapter set, or runtime evidence should change.
+
+The coverage report intentionally stays diagnostic. It does not auto-edit manifests, create baselines, or infer ownership from unsupported code paths.

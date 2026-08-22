@@ -20,12 +20,14 @@ When importing `systems/*/service.json` files, the service-manifest adapter maps
 
 This makes statically imported file-based coupling visible in the same architecture contract as source-code dependencies. For selected string-literal resource access, CellFence can also snapshot current usage into the baseline and reject new static coupling during `baseline check`.
 
-Runtime systems can provide observed resource access as `cellfence.resource-evidence.v1` JSON:
+Runtime systems can provide observed resource access as `cellfence.resource-evidence.v2` JSON:
 
 ```json
 {
-  "schemaVersion": "cellfence.resource-evidence.v1",
+  "schemaVersion": "cellfence.resource-evidence.v2",
+  "commitSha": "reviewed-commit-sha",
   "cellId": "research",
+  "transcriptStatus": "active",
   "accesses": [
     {
       "kind": "database",

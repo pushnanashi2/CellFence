@@ -1,7 +1,7 @@
 {
   "name": "@cellfence/github-action-baseline-gate",
   "version": "0.0.1",
-  "description": "GitHub Action that gates CellFence baseline changes on a CODEOWNER approval (0.4.0 prototype).",
+  "description": "Private bundled GitHub Action that gates CellFence baseline changes on baseline-owner approval.",
   "private": true,
   "main": "dist/index.js",
   "scripts": {

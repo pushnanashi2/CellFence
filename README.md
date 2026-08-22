@@ -9,9 +9,8 @@
 [![CI](https://github.com/pushnanashi2/CellFence/actions/workflows/ci.yml/badge.svg)](https://github.com/pushnanashi2/CellFence/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/cellfence)](https://www.npmjs.com/package/cellfence)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-<!-- TODO: add an npm provenance badge once registry badge support is stable for the trusted-published package set -->
 
-CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, resource, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import/public-surface support, selected Django/FastAPI/SQLAlchemy/Celery resource adapters, and packaging-aware manifest inference for common `pyproject.toml`, `setup.cfg`, and static `setup.py` layouts. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
+CellFence is a manifest-driven repository change-governance engine for codebases edited in parallel by coding agents and humans. It turns architectural, ownership, dependency, public-surface, external-dependency, resource, artifact, waiver, baseline, and release evidence into deterministic CLI and CI checks. Its governance core is language-agnostic; v0.x ships first-class TypeScript/JavaScript analysis plus AST-based Python import/public-surface support, built-in resource adapters for selected Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, NestJS, Fastify, Django, FastAPI, SQLAlchemy, and Celery patterns, and packaging-aware manifest inference for common `pyproject.toml`, `setup.cfg`, and static `setup.py` layouts. An accepted baseline turns architectural growth into a review-gated event instead of a self-authorized manifest edit.
 
 Prompt files are context, not enforcement. An agent can import another module's internals, add an undeclared dependency, or widen a public API — and still merge green. CellFence moves these decisions out of prose and into machine-checkable repository contracts.
 
@@ -110,6 +109,8 @@ Declaring a consumer authorizes the dependency, not the internals. The producer'
 - Overlapping or missing ownership — `CELLFENCE_OWNERSHIP_OVERLAP`, `CELLFENCE_UNOWNED_SOURCE`
 - Governed symlinks that escape their owning cell — `CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP`
 - Undeclared static file, database, queue, and HTTP access — `CELLFENCE_UNDECLARED_RESOURCE_ACCESS`
+- Dynamic or unsupported resource access that cannot be resolved safely — `CELLFENCE_UNRESOLVED_RESOURCE_ACCESS`
+- External dependency ownership and baseline drift — `CELLFENCE_EXTERNAL_DEPENDENCY_CLAIM_VIOLATION`, `CELLFENCE_RATCHET_EXTERNAL_DEPENDENCY_ADDED`, `CELLFENCE_LOCKED_EXTERNAL_DEPENDENCY_EXPANSION`
 - Undeclared artifact lane consumption between producer and consumer cells
 - Silent architecture growth against an accepted baseline — `CELLFENCE_RATCHET_*`
 
@@ -184,7 +185,7 @@ Claims live in a repository-local `.cellfence/claims.json`. Agents working in se
 
 ## How it compares
 
-<!-- TODO(author): verify every competitor cell against current versions before publishing -->
+This is a capability map, not a replacement for evaluating the current release of each tool in your own stack.
 
 | Capability | CellFence | dependency-cruiser | eslint-plugin-boundaries | Nx boundaries | Sheriff |
 |---|---|---|---|---|---|
@@ -204,8 +205,6 @@ CellFence complements — and assumes — linting, type checking, tests, protect
 
 CellFence checks its own architecture with itself (`npm run cellfence:self-check`). The diagram below is not hand-drawn; it is the output of `cellfence graph --format mermaid` against this repository's own manifest.
 
-<!-- TODO: add a CI step regenerating this block and failing on diff, so the diagram cannot silently rot -->
-
 ```mermaid
 flowchart LR
   adapter_call_pattern["adapter-call-pattern"]
@@ -213,6 +212,8 @@ flowchart LR
   cli["cli"]
   engine["engine"]
   github_action["github-action"]
+  github_action_baseline_gate["github-action-baseline-gate"]
+  mcp_proxy["mcp-proxy"]
   plugin_agent_budget["plugin-agent-budget"]
   plugin_api["plugin-api"]
   plugin_blast_radius["plugin-blast-radius"]
@@ -223,6 +224,8 @@ flowchart LR
   reporter_economy_matrix["reporter-economy-matrix"]
   schema["schema"]
   trace["trace"]
+  file__proc_sys_kernel_random_boot_id["file:/proc/sys/kernel/random/boot_id"]
+  file_unresolved_dynamic_file_path["file:unresolved:dynamic-file-path"]
   adapter_call_pattern -- "declares (declared-consumer)" --> plugin_api
   adapter_call_pattern -- "imports (observed-import)" --> plugin_api
   adapter_call_pattern -- "declares (declared-consumer)" --> schema
@@ -231,10 +234,26 @@ flowchart LR
   adapter_opentelemetry -- "imports (observed-import)" --> schema
   cli -- "declares (declared-consumer)" --> engine
   cli -- "imports (observed-import)" --> engine
+  cli -- "read (resource-access)" --> file_unresolved_dynamic_file_path
+  cli -- "write (resource-access)" --> file_unresolved_dynamic_file_path
+  cli -- "declares (declared-consumer)" --> schema
+  cli -- "imports (observed-import)" --> schema
+  engine -- "read (resource-access)" --> file__proc_sys_kernel_random_boot_id
+  engine -- "read (resource-access)" --> file_unresolved_dynamic_file_path
+  engine -- "write (resource-access)" --> file_unresolved_dynamic_file_path
   engine -- "declares (declared-consumer)" --> schema
   engine -- "imports (observed-import)" --> schema
+  github_action_baseline_gate -- "declares (declared-consumer)" --> engine
+  github_action_baseline_gate -- "imports (observed-import)" --> engine
+  github_action_baseline_gate -- "read (resource-access)" --> file_unresolved_dynamic_file_path
+  github_action_baseline_gate -- "declares (declared-consumer)" --> schema
   github_action -- "declares (declared-consumer)" --> engine
   github_action -- "imports (observed-import)" --> engine
+  mcp_proxy -- "declares (declared-consumer)" --> engine
+  mcp_proxy -- "imports (observed-import)" --> engine
+  mcp_proxy -- "read (resource-access)" --> file_unresolved_dynamic_file_path
+  mcp_proxy -- "write (resource-access)" --> file_unresolved_dynamic_file_path
+  mcp_proxy -- "declares (declared-consumer)" --> schema
   plugin_agent_budget -- "declares (declared-consumer)" --> plugin_api
   plugin_agent_budget -- "imports (observed-import)" --> plugin_api
   plugin_api -- "declares (declared-consumer)" --> schema
@@ -259,14 +278,15 @@ flowchart LR
 
 ## Performance
 
-<!-- TODO(author): replace with numbers from your reference machine; keep the environment description honest -->
+The repository CI runs `npm run benchmark:scale` as a synthetic regression tripwire, not as a universal monorepo performance claim.
 
-| Files | Cells | Full `check` |
-|---:|---:|---:|
-| 50,000 | 100 | ~37 s |
-| 100,000 | 300 | ~3.5 min |
+| Files | Cells | Purpose |
+|---:|---:|---|
+| 10,000 | 20 | fast discovery and ownership-index regression check |
+| 50,000 | 100 | medium synthetic repository check |
+| 100,000 | 300 | large synthetic repository check |
 
-Measured with `npm run benchmark:scale` on a single container-class vCPU; reproduce on your own hardware. `check --changed --base origin/main` reports only newly introduced findings and reuses only clean deterministic base analysis keyed to the exact analyzer, schema, Python runtime, and policy inputs, while still analyzing the current tree in full. Base results containing findings are never cacheable because cached findings must not suppress current findings.
+Run the benchmark on your own hardware for real planning numbers. `check --changed --base origin/main` reports only newly introduced findings and reuses only clean deterministic base analysis keyed to the exact analyzer, schema, Python runtime, and policy inputs, while still analyzing the current tree in full. Base results containing findings are never cacheable because cached findings must not suppress current findings.
 
 ## CI
 
@@ -332,8 +352,10 @@ Usage:
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
+  cellfence baseline gate [--baseline .cellfence/baselines/cellfence.baseline.json] (--baseline-base base.json|--base-ref BASE) (--baseline-head head.json|--head-ref HEAD) [--json|--format human]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
+  cellfence coverage [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format human|sarif] [--fail-under 0.95] [--coverage-output coverage.json]
   cellfence docs check [--file docs/design/cell.md] [--json]
   cellfence docs stamp --cell cell-id --file docs/design/cell.md [--json]
   cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
@@ -364,7 +386,9 @@ Exit codes:
 | `cellfence claim create\|check\|list` | Coordination leases for parallel agents |
 | `cellfence task check` | Verify the current diff stays inside a task manifest |
 | `cellfence baseline create\|check\|update\|sign\|verify\|audit` | Manage and seal the architectural ratchet |
+| `cellfence baseline gate` | Compare baseline files or refs and surface governance-changing PRs |
 | `cellfence evidence check\|commit` | Verify runtime resource evidence and commit-derived evidence |
+| `cellfence coverage` | Report analysis blind spots as JSON, human text, or SARIF |
 | `cellfence docs check\|stamp` / `mutation check` | Guard design-doc stamps and mutation-score reports |
 | `cellfence waivers list\|request\|sign` | Signed, time-boxed reviewed exceptions |
 
@@ -372,7 +396,7 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## Status and limitations
 
-Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript with fail-closed parser diagnostics; isolated declaration-derived public surface fingerprints; AST-based Python boundary analysis for `.py` imports, public entries, and selected Django/FastAPI/SQLAlchemy/Celery resource patterns; packaging-aware Python manifest inference; conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness, full API compatibility proof, or runtime path-write prevention — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
+Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript with fail-closed parser diagnostics; isolated declaration-derived public surface fingerprints; AST-based Python boundary analysis for `.py` imports, public entries, and selected Django/FastAPI/SQLAlchemy/Celery resource patterns; packaging-aware Python manifest inference; adapter-scoped resource detection; and conservative static analysis for dynamic imports and non-literal resource paths. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness, full API compatibility proof, or runtime path-write prevention — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
 
 ## Documentation map
 
@@ -381,11 +405,16 @@ Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; r
 | Manifest reference | [docs/manifest.md](docs/manifest.md) |
 | Enforced rules | [docs/rules.md](docs/rules.md) |
 | Ratchets and baselines | [docs/ratchets.md](docs/ratchets.md) |
+| Baseline governance gate | [docs/baseline-gate.md](docs/baseline-gate.md) |
+| Analysis coverage and blind spots | [docs/coverage.md](docs/coverage.md) |
 | Artifact contracts | [docs/artifacts.md](docs/artifacts.md) |
+| Claim leases | [docs/claims.md](docs/claims.md) |
 | Signed waivers | [docs/waivers.md](docs/waivers.md) |
 | Plugin API v1 | [docs/plugin-api.md](docs/plugin-api.md) |
 | Product evidence harnesses | [docs/evidence-harnesses.md](docs/evidence-harnesses.md) |
 | CI recipes | [docs/ci.md](docs/ci.md) |
+| Mutation testing | [docs/mutation-testing.md](docs/mutation-testing.md) |
+| Publishing and supply chain | [docs/publishing.md](docs/publishing.md) |
 | Threat model | [docs/threat-model.md](docs/threat-model.md) |
 | Root of trust | [docs/root-of-trust.md](docs/root-of-trust.md) |
 | Architecture | [docs/architecture.md](docs/architecture.md) |

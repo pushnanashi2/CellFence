@@ -6,6 +6,18 @@
 ```json
 {
   "schemaVersion": "cellfence.manifest.v1",
+  "governance": {
+    "requireOwnership": true,
+    "include": ["packages/**", "src/**"],
+    "exclude": ["**/*.test.ts"],
+    "resourceAdapters": {
+      "prisma": "on",
+      "typeorm": "on",
+      "drizzle": "on",
+      "kafkajs": "on",
+      "nestjs": "on"
+    }
+  },
   "cells": [
     {
       "id": "engine",
@@ -60,6 +72,8 @@ External dependency IDs are ecosystem-qualified. npm dependencies use package ro
 
 Baseline checks record the observed external dependency set per cell. Claim violations are stronger than the baseline: if another cell starts claiming `npm:decimal.js`, existing baseline use in a non-claiming cell is still reported until that import is removed or covered by an explicit, expiring waiver. For unclaimed dependencies, the baseline permits existing use, declared `allow`/`claim` permits reviewed new use, and locked cells still reject dependency-set expansion.
 
+`governance.resourceAdapters` is optional. Omitted adapters default to `on`; setting an adapter to `off` prevents that built-in detector from emitting resource access records for stacks the repository does not use. Supported keys are `file`, `http`, `queue`, `sql-literal`, `prisma`, `typeorm`, `drizzle`, `query-builder`, `bullmq`, `kafkajs`, `nestjs`, `fastify`, `django`, `fastapi`, `sqlalchemy`, and `celery`.
+
 Manifest v1 rejects unknown object fields instead of ignoring them. A misspelled policy field such as `requireOwnershp` or `consume` is a configuration error, not a no-op. Duplicate package names, duplicate consumer edges, duplicate artifact lane IDs, duplicate resource contract IDs, and duplicate path class IDs are also rejected where they would make policy ambiguous.
 
 `governance.requireOwnership` is optional for legacy adoption, but `cellfence init` enables it. When true, every source file matched by `governance.include` and not matched by `governance.exclude` must be owned by exactly one cell. Imports to governed but unowned source fail with `CELLFENCE_UNOWNED_IMPORT_TARGET`, and unowned governed files fail with `CELLFENCE_UNOWNED_SOURCE`. When omitted or false, CellFence emits `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` as a warning.
@@ -88,7 +102,7 @@ rule default
 
 Waiver comments are intentionally short-lived review artifacts. A valid directive must name one concrete `CELLFENCE_*` rule, expire within 30 days, include an approval identity in GitHub handle, email address, or `org/team` form, and explain the reason. For hard release gates, put the rule in `governance.requiredRules` instead of relying on reviewer text in source comments.
 
-See [Manifest Protocol v1](docs/protocol/manifest-v1.md) for the current semantics and limitations.
+See [Manifest Protocol v1](protocol/manifest-v1.md) for the current semantics and limitations.
 
 ## Path pattern dialect
 

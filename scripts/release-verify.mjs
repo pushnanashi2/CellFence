@@ -109,6 +109,14 @@ if (!mcpServerInfoMatch) {
   findings.push(`packages/cli/src/index.ts exposes MCP serverInfo ${mcpServerInfoMatch[1]}, expected ${packageJson.version}`);
 }
 
+const coverageSarifSource = fs.readFileSync("packages/cli/src/coverage-sarif.ts", "utf8");
+const coverageSarifVersionMatch = /name:\s*"cellfence-coverage",\s*version:\s*"([^"]+)"/.exec(coverageSarifSource);
+if (!coverageSarifVersionMatch) {
+  findings.push("packages/cli/src/coverage-sarif.ts must expose a CellFence coverage SARIF tool version");
+} else if (coverageSarifVersionMatch[1] !== packageJson.version) {
+  findings.push(`packages/cli/src/coverage-sarif.ts exposes SARIF version ${coverageSarifVersionMatch[1]}, expected ${packageJson.version}`);
+}
+
 const mcpProxySource = fs.readFileSync("packages/mcp-proxy/src/index.ts", "utf8");
 const mcpProxyVersionMatch = /const VERSION = "([^"]+)"/.exec(mcpProxySource);
 if (!mcpProxyVersionMatch) {

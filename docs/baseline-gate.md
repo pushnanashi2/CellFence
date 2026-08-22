@@ -1,62 +1,95 @@
-# Baseline update gate (0.4.0 prototype)
+# Baseline Governance Gate
 
-`cellfence baseline update` is convenient but dangerous in
-agent-driven workflows: a coding agent that hits a CellFence
-violation can silence the violation by widening the baseline. The
-baseline update gate turns baseline changes from a CLI invocation
-into a first-class governance event that requires human review.
+`cellfence baseline update` is intentionally powerful: it accepts architectural growth after review. In agent-driven workflows, that same command can become a self-authorization path if a pull request silently widens the baseline to make a violation disappear.
 
-## Two layers
+The baseline governance gate turns baseline changes into an explicit PR event. It detects what changed, labels the PR, writes a reviewer-readable summary, and can require approval from baseline owners before merge.
 
-### 1. Detection — `cellfence baseline gate`
+## Detection CLI
 
-```sh
-cellfence baseline gate \
-  --baseline-base base.json \
-  --baseline-head head.json \
-  --format json
+Use the CLI when comparing two baseline files or two immutable Git refs:
+
+```bash
+npx cellfence baseline gate \
+  --baseline .cellfence/baselines/cellfence.baseline.json \
+  --base-ref origin/main \
+  --head-ref HEAD \
+  --format human
 ```
 
-Emits a `GovernanceChangeReport` that lists the dimensions in which
-the head baseline differs from the base baseline:
+File-path form is also supported:
 
-- **ownedPaths** — `+api: src/api/internal/**`
-- **publicSymbols** — `+api.stream`
-- **crossCellEdges** — `+worker: api.consume`
-- **resourceAccesses** — `+worker: queue:orders.ready:subscribe`
+```bash
+npx cellfence baseline gate \
+  --baseline-base base.json \
+  --baseline-head head.json \
+  --json
+```
 
-A non-empty report means a governance change. Exit 1 means "yes, the
-PR widens governance"; exit 0 means "no, the baseline is unchanged".
+The command emits a `GovernanceChangeReport`. Exit code `1` means the baseline changed in a governance-relevant way; exit code `0` means no governance delta was detected; configuration or tool failures use the normal CellFence configuration/internal-error exit codes.
 
-### 2. Enforcement — `@cellfence/github-action-baseline-gate`
+Current delta dimensions include:
 
-The companion action:
+- **cellIds** — a cell was added or removed from the accepted baseline set;
+- **ownedPaths** — a cell's accepted ownership scope changed;
+- **publicSymbols** — a public symbol was added or removed;
+- **crossCellEdges** — an accepted dependency edge changed;
+- **signatures** — the baseline seal changed;
+- **publicSurfaceMetadata** — public entry path, declaration-derived public surface fingerprint, or legacy public-surface count metadata changed;
+- **dependencyCounts** — legacy cross-cell dependency count changed;
+- **artifactContracts** — an accepted producer/consumer artifact lane changed;
+- **resourceAccesses** — accepted resource inventory changed;
+- **externalDependencies** — accepted third-party dependency inventory changed.
 
-1. Applies the `governance-change` label to the PR.
-2. Upserts a sticky comment summarising the change so reviewers can
-   see what widened without diffing JSON.
-3. Blocks merge until an approver from the `baseline-codeowners`
-   list (or the `.cellfence/baselines/` CODEOWNERS section) has
-   reviewed the PR head SHA. The prototype resolves GitHub usernames
-   only; team entries must be expanded before use. CODEOWNERS is read
-   from the PR base SHA, not from the moving default branch.
-4. Fails by default when the PR mixes baseline changes with
-   implementation changes. Set `fail-on-mixed-pr: false` only when
-   intentionally running the gate in warning mode.
+## GitHub Action
 
-## Minimum setup
+`packages/github-action-baseline-gate` is a bundled, repository-local Action. It does not install the CLI at runtime; `dist/index.js` contains the baseline comparison and the minimal GitHub API client dependencies needed for labels, comments, and review checks.
 
-1. Add the action to a workflow that triggers on `pull_request` and
-   on paths matching `.cellfence/baselines/**` or
-   `cellfence.manifest.json`.
-2. Add a CODEOWNERS entry under `.cellfence/baselines/`. Keep this
-   ownership separate from cell ownership.
-3. Adopt the AGENTS.md snippet from `docs/agents/agents-md-snippet.md`
-   so agentic tools stop trying to widen the baseline themselves.
+Minimum workflow shape:
 
-## Why not just protect the manifest path?
+```yaml
+name: cellfence-baseline-gate
 
-Protecting only `cellfence.manifest.json` would miss the
-single-cell baseline files CellFence writes under
-`.cellfence/baselines/`. The gate's whole point is to surface the
-*contents* of the change, not just the fact that the file moved.
+on:
+  pull_request:
+    paths:
+      - ".cellfence/baselines/**"
+      - "cellfence.manifest.json"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+      - uses: ./packages/github-action-baseline-gate
+        with:
+          github-token: ${{ github.token }}
+          baseline-codeowners: "@alice,@bob"
+          require-separate-pr: "true"
+          fail-on-mixed-pr: "true"
+```
+
+The Action:
+
+1. applies or removes the `governance-change` label;
+2. writes a sticky PR comment summarizing the exact baseline dimensions that changed;
+3. checks that an allowed baseline owner approved the current PR head SHA;
+4. fails by default when implementation files and baseline files are mixed in one PR.
+
+`baseline-codeowners` accepts explicit GitHub usernames. If omitted, the Action reads the `CODEOWNERS` entry for `baseline-file` from the PR base SHA. Team entries must be expanded before use; they are not resolved automatically.
+
+## Minimum Policy
+
+1. Keep `.cellfence/baselines/**` ownership separate from ordinary cell ownership.
+2. Require both the normal CellFence check and the baseline governance gate on protected branches.
+3. Keep `fail-on-mixed-pr: true` unless intentionally running the gate in warning mode.
+4. Adopt the agent instruction snippet from `docs/agents/agents-md-snippet.md` so agents are told not to widen the baseline merely to make a check pass.
+
+## Why Not Only Protect The Manifest?
+
+Protecting only `cellfence.manifest.json` misses accepted baseline files under `.cellfence/baselines/**`. Those files are where historical ownership, dependency edges, public surfaces, artifact lanes, resource inventory, and external dependency inventory become accepted. The gate reviews the content of that acceptance, not just the fact that a JSON file changed.

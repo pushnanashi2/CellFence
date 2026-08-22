@@ -8,7 +8,7 @@ A baseline captures both compatibility metrics and normalized architectural cont
 - owned path pattern count;
 - public symbol count;
 - public entry line count;
-- cross-cell dependency count.
+- cross-cell dependency count;
 - accepted cell IDs;
 - owned path set;
 - public entry path;
@@ -16,7 +16,8 @@ A baseline captures both compatibility metrics and normalized architectural cont
 - isolated declaration-derived public surface signature hash;
 - dependency edge set;
 - artifact contract set;
-- static and runtime resource access inventory.
+- static and runtime resource access inventory;
+- external dependency inventory.
 
 Create the accepted baseline:
 
@@ -64,14 +65,14 @@ cellfence baseline check --manifest cellfence.manifest.json --baseline cellfence
 
 The private key belongs to an approval-controlled workflow or external signing service. Ordinary PR checks need only the public key, so untrusted code cannot self-sign a widened baseline. `CELLFENCE_BASELINE_ED25519_KEY_ID` can label the signing key; newly signed baselines bind the seal algorithm, key id, and payload version into the signature payload so metadata edits invalidate the seal. The signing job should not run repository code from an untrusted PR checkout; use a trusted published CellFence version or an external signer to read and sign only the reviewed baseline file. HMAC remains supported through `CELLFENCE_BASELINE_HMAC_KEY` for isolated verifier deployments, but do not pass an HMAC secret to jobs that execute untrusted PR code.
 
-If a cell has `"locked": true`, `baseline check` requires either `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY` so a hand-edited baseline cannot silently redefine the accepted contract for that locked cell. `baseline update` also fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access for that cell. A human owner must either reduce the change or explicitly review and sign the contract expansion.
+If a cell has `"locked": true`, `baseline check` requires either `CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY` so a hand-edited baseline cannot silently redefine the accepted contract for that locked cell. `baseline update` also fails with `CELLFENCE_LOCKED_BASELINE_EXPANSION` whenever the update would increase or shift ownership scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather new resource access or external dependency use for that cell. A human owner must either reduce the change or explicitly review and sign the contract expansion.
 
 For large repositories, prefer this baseline-first workflow over hand-writing every resource contract:
 
 1. declare cells, public entries, and ownership in the manifest;
-2. run `cellfence baseline create` to snapshot existing static file, database, queue, and HTTP resource access;
+2. run `cellfence baseline create` to snapshot existing static file, database, queue, HTTP resource access, and observed external dependency use;
 3. optionally pass runtime evidence with `--evidence resource-evidence.json`;
 4. run `cellfence baseline check` in CI;
 5. review only new resource access deltas.
 
-`resourceContracts` remains useful for intentional high-value contracts, but the baseline prevents a manifest maintenance treadmill where every historical table, topic, or endpoint must be manually listed before adoption.
+`resourceContracts` and `externalDependencies` remain useful for intentional high-value contracts, but the baseline prevents a manifest maintenance treadmill where every historical table, topic, endpoint, or third-party dependency must be manually listed before adoption.

@@ -38,7 +38,7 @@ Expired claims are ignored for conflict purposes. Malformed claim stores, invali
 ## Choosing a backend
 
 The default claim store is a single JSON file. That works for one
-machine, but a `cellfence/claims.json` is *not* a coordination
+machine, but `.cellfence/claims.json` is *not* a coordination
 mechanism across machines: two GitHub Actions jobs each writing to
 their own checkout will silently overwrite each other on merge.
 

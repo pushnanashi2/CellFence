@@ -9,7 +9,14 @@ The CellFence manifest is JSON and starts with:
     "requireOwnership": true,
     "include": ["src/**", "packages/**", "apps/**"],
     "exclude": ["**/*.test.ts", "generated/**"],
-    "requiredRules": ["CELLFENCE_OWNERSHIP_OVERLAP"]
+    "requiredRules": ["CELLFENCE_OWNERSHIP_OVERLAP"],
+    "resourceAdapters": {
+      "prisma": "on",
+      "typeorm": "on",
+      "drizzle": "on",
+      "kafkajs": "on",
+      "nestjs": "on"
+    }
   },
   "plugins": [],
   "rules": {},
@@ -46,7 +53,7 @@ Claim lease: short-lived coordination state, stored outside the manifest by defa
 
 Locked cell: a cell whose accepted baseline cannot be expanded by `baseline update`.
 
-Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell.
+Governance coverage: optional manifest-level source coverage rules. When `requireOwnership` is true, every source file matched by `include` and not matched by `exclude` must be owned by exactly one cell. `resourceAdapters` can turn unused built-in resource detectors `off`; omitted adapters default to `on`.
 
 Rule severity: a rule can be configured as `off`, `warning`, or `error` at repository, cell, or path-override scope. CellFence also has a built-in core required-rule set for boundary integrity. `governance.requiredRules` extends that set. Required rules are normalized to `error`, attempts to weaken them produce `CELLFENCE_REQUIRED_RULE_DISABLED`, and source waiver comments cannot suppress them. Starter and inferred manifests include undeclared consumer, public symbol mismatch, and undeclared resource access findings as required rules by default.
 
@@ -119,7 +126,7 @@ Repo-relative path patterns use a deliberately small glob dialect: `*` matches w
 
 `locked` is optional on a cell or resource contract. In v0.x, locked cells are actively enforced by `baseline update`: if a previous baseline exists, the command refuses to increase or shift owned path scope, add public symbols, change the public entry, change public signatures, add dependency edges, add artifact contracts, increase legacy count metrics, or grandfather resource access for a locked cell. `baseline check` also requires a configured baseline verifier (`CELLFENCE_BASELINE_ED25519_PUBLIC_KEY` or `CELLFENCE_BASELINE_HMAC_KEY`) when any cell is locked, so a hand-edited baseline cannot silently redefine that locked contract. Locked resource contracts are surfaced in context output and suggested resolutions so agents can distinguish self-service changes from human-review changes.
 
-Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v1` and included with `--evidence`.
+Resource contracts can be declared explicitly in the manifest. For existing large repositories, the recommended adoption path is to generate a baseline first and review only new resource deltas. A baseline stores discovered `resourceAccesses` per cell, so `baseline check` can allow known implicit coupling without requiring every table, topic, endpoint, or file path to be hand-maintained in the manifest. Runtime access can also be supplied through `cellfence.resource-evidence.v2` and included with `--evidence`.
 
 External dependency policy is declared per cell under `externalDependencies`. `allow` grants the cell permission to use a dependency without constraining other cells. `claim` grants the cell permission and adds the cell to the dependency's exclusive claiming set. Multiple cells may claim the same dependency, but a dependency cannot appear in both `claim` and `allow` anywhere in the manifest. Supported v1 IDs are npm package roots (`npm:zod`, `npm:@scope/pkg`) and Python import roots (`python-import:yaml`); npm subpaths, unknown prefixes, and Python dotted submodules are rejected as manifest errors.
 

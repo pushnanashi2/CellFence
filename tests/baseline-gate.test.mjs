@@ -29,6 +29,7 @@ function makeBaseline(overrides = {}) {
         dependencyEdges: [],
         resourceAccesses: [],
         artifactContracts: [],
+        externalDependencySet: [],
       },
       worker: {
         ownedPathPatterns: 1,
@@ -40,6 +41,7 @@ function makeBaseline(overrides = {}) {
         dependencyEdges: [],
         resourceAccesses: [],
         artifactContracts: [],
+        externalDependencySet: [],
       },
     },
     ...overrides,
@@ -525,6 +527,16 @@ test("detectBaselineChanges flags artifact contract changes", () => {
   assert.deepEqual(artifactContracts.added, ["worker: produce:events:src/worker/events/**"]);
 });
 
+test("detectBaselineChanges flags external dependency changes", () => {
+  const baseBaseline = makeBaseline();
+  const headBaseline = makeBaseline();
+  headBaseline.cells.worker.externalDependencySet = ["npm:decimal.js", "python-import:yaml"];
+  const report = detectBaselineChanges(baseBaseline, headBaseline, "base.json", "head.json");
+  const externalDependencies = report.deltas.find((delta) => delta.dimension === "externalDependencies");
+  assert.ok(externalDependencies);
+  assert.deepEqual(externalDependencies.added, ["worker: npm:decimal.js", "worker: python-import:yaml"]);
+});
+
 test("baseline gate action metadata declares every source input", () => {
   const source = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/src/index.ts"), "utf8");
   const actionYaml = fs.readFileSync(path.join(root, "packages/github-action-baseline-gate/action.yml"), "utf8");
@@ -538,7 +550,7 @@ test("baseline gate action metadata declares every source input", () => {
   assert.deepEqual(yamlInputs, sourceInputs);
   assert.deepEqual(exportedInputs, yamlInputs);
   assert.match(actionYaml, /github-token:\r?\n\s+description: "GitHub token used to read PR reviews and update labels\/comments\. Pass `\$\{\{ github\.token \}\}`\."\r?\n\s+required: true/);
-  assert.match(actionYaml, /baseline-codeowners:\r?\n\s+description: "Comma-separated list of GitHub usernames who can approve a baseline change\. Team entries are not resolved in this prototype\./);
+  assert.match(actionYaml, /baseline-codeowners:\r?\n\s+description: "Comma-separated list of GitHub usernames who can approve a baseline change\. Team entries are not resolved automatically\./);
   assert.match(actionYaml, /baseline-file:\r?\n\s+description: "Repo-relative path to the baseline JSON\."\r?\n\s+required: false\r?\n\s+default: "\.cellfence\/baselines\/cellfence\.baseline\.json"/);
   assert.match(source, /core\.getInput\("github-token", \{ required: true \}\)/);
   assert.match(source, /parseBooleanInput\("fail-on-mixed-pr", true\)/);

@@ -29,9 +29,7 @@ Why this works well for coding agents:
 - the same command runs locally, in an agent loop, and in CI;
 - the tool evaluates the resulting repository rather than trusting the agent's explanation.
 
-
-
-After the npm package is published, a consuming repository can run CellFence as an ordinary required CI command:
+In a consuming repository, run CellFence as an ordinary required CI command:
 
 ```yaml
 name: CellFence
@@ -82,7 +80,7 @@ jobs:
         if: always()
         with:
           sarif_file: tmp/cellfence/cellfence.sarif
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: cellfence-audit-${{ github.sha }}
@@ -92,23 +90,27 @@ jobs:
         run: exit 1
 ```
 
-The current repository runs its source-built CLI in `.github/workflows/ci.yml`. A reusable externally pinned GitHub Action remains pre-release and runs the published npm CLI, not the source tree from the Action ref.
+The current repository runs its source-built CLI in `.github/workflows/ci.yml`, pins GitHub-hosted Actions to audited commit SHAs with tag comments, uses Node 20 for the main Linux jobs, and runs a Node 22 smoke matrix on Linux, macOS, and Windows. The reusable check Action runs the published npm CLI through its `version` input, not the source tree from the Action ref.
 
-Pull requests also run the `mutation changed` check. It selects mutation scopes from the merge-base diff, preserves a pull-request-local incremental cache, and uploads its machine-readable plan and summary on success or failure. The separate `Full Mutation Audit` workflow runs every scope without incremental reuse on a daily schedule, by manual dispatch, and as a required reusable job before npm publishing. The changed check is fast feedback; only the full audit is repository-wide mutation evidence. Configure `mutation changed` and `external-oracles` as required status checks on `main` so repository workflow changes cannot bypass them by convention alone.
+Pull requests also run the `mutation changed` check. It selects mutation scopes from the merge-base diff, narrows lockfile-only changes when the affected workspace can be identified, supports bounded parallelism with `--jobs 1..4`, preserves a pull-request-local incremental cache, and uploads its machine-readable plan and summary on success or failure. The separate `Full Mutation Audit` workflow runs every scope without incremental reuse on a daily schedule, by manual dispatch, and as a required reusable job before npm publishing. The changed check is fast feedback; only the full audit is repository-wide mutation evidence. Configure `mutation changed`, `external-oracles`, and the normal CellFence check as required status checks on `main` so repository workflow changes cannot bypass them by convention alone.
 
 For PR discussion, post or summarize `tmp/cellfence/comment.md`; it is generated from the same findings as JSON and SARIF.
 
-The reusable Action wrapper accepts a `version` input. Its default is npm `latest` so the `main` branch does not point at an unpublished pre-release CLI. For required checks, set an exact published version:
+The reusable Action wrapper accepts a `version` input. The checked-in Action defaults to the current package version for reproducibility. For required checks, keep it pinned to an exact published version:
 
 ```yaml
-- uses: OWNER/REPOSITORY/packages/github-action@v0.1.13
+- uses: OWNER/REPOSITORY/packages/github-action@v0.2.1
   with:
-    version: 0.1.13
+    version: 0.2.1
     manifest: cellfence.manifest.json
     baseline: cellfence.baseline.json
 ```
 
-`npm run release:verify` fails if the Action hard-codes an exact CLI version. This prevents release-preparation commits from publishing an Action that tries to download a package version that is not yet on npm.
+`npm run release:verify` fails if the Action bypasses the `version` input or drifts from the root package version.
+
+## Baseline Governance Gate
+
+If pull requests can edit `.cellfence/baselines/**`, add the bundled baseline gate Action from `packages/github-action-baseline-gate`. It compares the PR base and head baseline at immutable SHAs, applies a `governance-change` label, writes a sticky summary comment, checks approval from baseline owners, and fails mixed implementation-plus-baseline PRs by default. See [docs/baseline-gate.md](baseline-gate.md) for the complete workflow.
 
 For real enforcement, configure the architecture job as a required status check on a protected branch. A workflow file inside the repository is not, by itself, a root of trust.
 
@@ -177,7 +179,7 @@ jobs:
           node-version: 22
       - name: Install reviewed CellFence package
         env:
-          CELLFENCE_VERSION: 0.1.13 # replace with the exact published version approved for this workflow
+          CELLFENCE_VERSION: 0.2.1 # replace with the exact published version approved for this workflow
         run: npm install --global "cellfence@${CELLFENCE_VERSION}"
       - name: Sign reviewed baseline only
         env:

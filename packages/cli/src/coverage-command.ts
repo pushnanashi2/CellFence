@@ -1,8 +1,6 @@
-// CLI glue for the real coverage command. The prototype accepted
-// `unresolved` as input; the full implementation walks the
-// repository through `checkRepository` and reports the findings the
-// rules already raised as coverage observations. SARIF output is
-// queued for 0.4.1 — the prototype emits JSON and a human summary.
+// CLI glue for the coverage command. It walks the repository through
+// the normal check pipeline and reports visibility-related findings as
+// coverage observations for JSON, human, or SARIF output.
 
 import fs from "node:fs";
 import path from "node:path";

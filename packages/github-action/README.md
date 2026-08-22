@@ -8,9 +8,9 @@ reproducible. Override it only when intentionally testing a different
 published CLI version:
 
 ```yaml
-- uses: OWNER/REPOSITORY/packages/github-action@v0.1.13
+- uses: OWNER/REPOSITORY/packages/github-action@v0.2.1
   with:
-    version: 0.1.13
+    version: 0.2.1
     manifest: cellfence.manifest.json
     baseline: cellfence.baseline.json
 ```

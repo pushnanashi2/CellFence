@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Declare ownership, public entries, and dependency edges in one manifest. CellFence enforces them as deterministic CI checks."
+      content="Declare ownership, public entries, dependency edges, resources, external dependencies, and baselines in one manifest. CellFence enforces them as deterministic CI checks."
     />
     <meta property="og:title" content="CellFence" />
     <meta
@@ -2072,7 +2072,7 @@ npx cellfence check --format markdown</code>
           <p class="eyebrow">Machine-checkable boundaries</p>
           <h2 class="section-title">A manifest-driven repository firewall your agents can see before they edit.</h2>
           <p class="lead">
-            Machine-checkable boundaries for polyglot repositories in the age of Cursor and Claude Code.
+            Machine-checkable boundaries for polyglot repositories in the age of Codex, Cursor, and Claude Code.
             Prompts explain the architecture. CellFence enforces repository evidence in local CLI and required CI checks.
           </p>
           <div class="checks">
@@ -2089,7 +2089,7 @@ npx cellfence check --format markdown</code>
             <article class="check">
               <strong>03 / ratchets</strong>
               <h2>No quiet expansion</h2>
-              <p>Architecture may shrink freely, but growth has to show up as reviewable intent.</p>
+              <p>Architecture, resources, and external dependencies may shrink freely, but growth has to show up as reviewable intent.</p>
             </article>
           </div>
         </div>
@@ -2101,22 +2101,22 @@ npx cellfence check --format markdown</code>
             <p class="eyebrow">How it works</p>
             <h2 class="section-title">Deterministic checks, not another prompt.</h2>
             <p class="lead">
-              CellFence evaluates paths, declared public entries, dependency edges, resource evidence, and ratchet
-              baselines from repository state. The decision path is repeatable in local CLI and CI.
+              CellFence evaluates paths, declared public entries, dependency edges, resource evidence, external dependencies,
+              signed waivers, and ratchet baselines from repository state. The decision path is repeatable in local CLI and CI.
             </p>
             <div class="steps">
               <article class="step">
                 <span><i>1</i></span>
                 <div>
                   <h3>Declare governed cells</h3>
-                  <p>Map source paths to ownership, public entry points, consumers, resources, and artifact lanes in one manifest.</p>
+                  <p>Map source paths to ownership, public entry points, consumers, resources, external dependencies, and artifact lanes in one manifest.</p>
                 </div>
               </article>
               <article class="step">
                 <span><i>2</i></span>
                 <div>
                   <h3>Run deterministic checks</h3>
-                  <p>Fail private cross-cell imports, unowned source, undeclared lanes, and dependency drift without calling an LLM.</p>
+                  <p>Fail private cross-cell imports, unowned source, undeclared lanes, resource drift, and external dependency drift without calling an LLM.</p>
                 </div>
               </article>
               <article class="step">
@@ -2168,11 +2168,12 @@ jobs:
   architecture:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
-      - run: npx cellfence check --format markdown</code></pre>
+      - run: npx cellfence baseline verify
+      - run: npx cellfence baseline check --format markdown</code></pre>
           </div>
         </div>
       </section>
@@ -2183,12 +2184,12 @@ jobs:
           <h2 class="section-title">Different from linters, Nx, dependency-cruiser, and good-fences.</h2>
           <p class="lead">
             CellFence is focused on manifest-driven repository governance: who owns paths,
-            what is public, which edges are allowed, and what expansion must be reviewed.
+            what is public, which edges, resources, and external dependencies are allowed, and what expansion must be reviewed.
           </p>
           <div class="compare" role="table" aria-label="CellFence comparison">
             <div class="compare-row" role="row">
               <strong role="cell">CellFence</strong>
-              <span role="cell">Ownership, public entries, dependency edges, artifact lanes, resources, and ratchets.</span>
+              <span role="cell">Ownership, public entries, dependency edges, artifact lanes, resources, external dependencies, signed waivers, and ratchets.</span>
               <span role="cell">Designed as a required CI check for agent-edited repositories.</span>
               <span role="cell">Deterministic path and manifest checks. No LLM decision step.</span>
             </div>

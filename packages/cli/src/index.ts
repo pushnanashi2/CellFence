@@ -151,8 +151,10 @@ Usage:
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence baseline audit [--baseline cellfence.baseline.json] [--json]
+  cellfence baseline gate [--baseline .cellfence/baselines/cellfence.baseline.json] (--baseline-base base.json|--base-ref BASE) (--baseline-head head.json|--head-ref HEAD) [--json|--format human]
   cellfence evidence check --evidence resource-evidence.json [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
   cellfence evidence commit [--base origin/main] [--head HEAD] [--commit SHA] [--json]
+  cellfence coverage [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format human|sarif] [--fail-under 0.95] [--coverage-output coverage.json]
   cellfence docs check [--file docs/design/cell.md] [--json]
   cellfence docs stamp --cell cell-id --file docs/design/cell.md [--json]
   cellfence mutation check --report reports/mutation/mutation.json [--min-score 90] [--json]
@@ -2085,11 +2087,10 @@ function commandServe(parsed: ParsedArgs): number {
 }
 
 function commandBaselineGate(parsed: ParsedArgs): number {
-  // 0.4.0: full baseline update gate. Accepts either two paths
-  // (--baseline-base / --baseline-head) or two git refs
-  // (--base-ref / --head-ref). The git-ref form is what the
-  // cellfence-baseline-gate action uses; the path form is what
-  // humans and one-off scripts use.
+  // Accept either two paths (--baseline-base / --baseline-head) or
+  // two git refs (--base-ref / --head-ref). The git-ref form is what
+  // the baseline-gate action uses; the path form is for humans and
+  // one-off scripts.
   const basePath = parsed.baselineGateBase || process.env.CELLFENCE_BASELINE_GATE_BASE;
   const headPath = parsed.baselineGateHead || process.env.CELLFENCE_BASELINE_GATE_HEAD;
   const baseRef = parsed.baselineGateBaseRef || process.env.CELLFENCE_BASELINE_GATE_BASE_REF;
@@ -2125,14 +2126,12 @@ function commandBaselineGate(parsed: ParsedArgs): number {
 }
 
 function commandCoverage(parsed: ParsedArgs): number {
-  // 0.4.0: the coverage command walks the repository through the
-  // same engine pipeline as `cellfence check` and buckets every
-  // finding the existing rules raise into import / resource /
-  // public-surface unresolved observations. The format and
-  // fail-under are wired into the CLI; SARIF output is queued for
-  // 0.4.1.
+  // The coverage command walks the repository through the same engine
+  // pipeline as `cellfence check` and buckets visibility-related
+  // findings into import / resource / public-surface observations.
   const rootDir = parsed.rootDir;
-  const format: "json" | "human" = parsed.format === "human" ? "human" : "json";
+  const format: "json" | "human" | "sarif" =
+    parsed.format === "human" ? "human" : parsed.format === "sarif" ? "sarif" : "json";
   const failUnder = readFailUnder(parsed);
   const { report, exitCode } = runCoverageCommand({
     rootDir,
@@ -2163,8 +2162,7 @@ function readFailUnder(parsed: ParsedArgs): number | undefined {
   return undefined;
 }
 
-// 0.4.0: re-export the baseline gate helpers for the
-// cellfence-baseline-gate GitHub Action.
+// Re-export the baseline gate helper for tests and bundled Action code.
 export { runBaselineGateFull };
 export type { BaselineGateResult };
 
