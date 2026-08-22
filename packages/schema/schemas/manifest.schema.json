@@ -41,6 +41,26 @@
       "items": { "$ref": "#/$defs/string" },
       "uniqueItems": true
     },
+    "externalDependencyId": {
+      "type": "string",
+      "oneOf": [
+        { "pattern": "^npm:(?:@[a-z0-9._~-]+/[a-z0-9._~-]+|[a-z0-9._~-]+)$" },
+        { "pattern": "^python-import:[A-Za-z_][A-Za-z0-9_]*$" }
+      ]
+    },
+    "externalDependencyArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/externalDependencyId" },
+      "uniqueItems": true
+    },
+    "externalDependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": { "$ref": "#/$defs/externalDependencyArray" },
+        "claim": { "$ref": "#/$defs/externalDependencyArray" }
+      }
+    },
     "pathArray": {
       "type": "array",
       "items": { "$ref": "#/$defs/path" },
@@ -191,6 +211,7 @@
           }
         },
         "resourceContracts": { "type": "array", "items": { "$ref": "#/$defs/resourceContract" } },
+        "externalDependencies": { "$ref": "#/$defs/externalDependencies" },
         "budgets": {
           "type": "object",
           "additionalProperties": false,

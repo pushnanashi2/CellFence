@@ -22,6 +22,18 @@
       "items": { "type": "string", "minLength": 1, "pattern": "\\S" },
       "uniqueItems": true
     },
+    "externalDependencyId": {
+      "type": "string",
+      "oneOf": [
+        { "pattern": "^npm:(?:@[a-z0-9._~-]+/[a-z0-9._~-]+|[a-z0-9._~-]+)$" },
+        { "pattern": "^python-import:[A-Za-z_][A-Za-z0-9_]*$" }
+      ]
+    },
+    "externalDependencyArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/externalDependencyId" },
+      "uniqueItems": true
+    },
     "resource": {
       "type": "object",
       "additionalProperties": false,
@@ -49,7 +61,8 @@
         "publicSurfaceHash": { "type": "string" },
         "dependencyEdges": { "$ref": "#/$defs/stringArray" },
         "artifactContracts": { "$ref": "#/$defs/stringArray" },
-        "resourceAccesses": { "type": "array", "items": { "$ref": "#/$defs/resource" } }
+        "resourceAccesses": { "type": "array", "items": { "$ref": "#/$defs/resource" } },
+        "externalDependencySet": { "$ref": "#/$defs/externalDependencyArray" }
       }
     },
     "seal": {

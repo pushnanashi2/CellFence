@@ -144,6 +144,13 @@ export type ArchitecturalBudgets = {
   crossCellDependencies?: number;
 };
 
+export type ExternalDependencyId = string;
+
+export type ExternalDependenciesManifest = {
+  allow?: ExternalDependencyId[];
+  claim?: ExternalDependencyId[];
+};
+
 export type ManifestGovernance = {
   requireOwnership?: boolean;
   include?: string[];
@@ -175,6 +182,7 @@ export type CellManifest = {
   consumes?: CellConsumerManifest[];
   producesArtifacts?: ArtifactLaneManifest[];
   resourceContracts?: ResourceContractManifest[];
+  externalDependencies?: ExternalDependenciesManifest;
   budgets?: ArchitecturalBudgets;
   rules?: RuleSeverityMap;
 };
@@ -202,6 +210,7 @@ export type CellBaselineRecord = {
   dependencyEdges?: string[];
   artifactContracts?: string[];
   resourceAccesses?: ResourceBaselineEntry[];
+  externalDependencySet?: ExternalDependencyId[];
 };
 
 export type BaselineSeal =
@@ -277,6 +286,47 @@ function validateUniqueNonEmptyStrings(values: string[], location: string, error
     if (seen.has(value)) errors.push(`${location} contains duplicate entry ${value}`);
     seen.add(value);
   }
+}
+
+function externalDependencyIdError(value: string): string | undefined {
+  if (/^npm:(?:@[a-z0-9._~-]+\/[a-z0-9._~-]+|[a-z0-9._~-]+)$/.test(value)) return undefined;
+  if (/^python-import:[A-Za-z_][A-Za-z0-9_]*$/.test(value)) return undefined;
+  if (value.startsWith("npm:")) return "npm external dependency ids must be package roots like npm:zod or npm:@scope/pkg, not package subpaths";
+  if (value.startsWith("python-import:")) return "python-import external dependency ids must use a single import root like python-import:yaml";
+  return "external dependency ids must use a supported ecosystem prefix: npm: or python-import:";
+}
+
+function validateExternalDependencyIdArray(value: unknown, location: string, errors: string[]): value is ExternalDependencyId[] {
+  if (!isStringArray(value)) {
+    errors.push(`${location} must be an array of non-empty strings`);
+    return false;
+  }
+  validateUniqueNonEmptyStrings(value, location, errors);
+  for (const dependencyId of value) {
+    const error = externalDependencyIdError(dependencyId);
+    if (error) errors.push(`${location} contains invalid dependency ${dependencyId}: ${error}`);
+  }
+  return true;
+}
+
+function validateExternalDependencies(value: unknown, location: string, errors: string[]): value is ExternalDependenciesManifest {
+  if (value === undefined) return true;
+  if (!isRecord(value)) {
+    errors.push(`${location} must be an object`);
+    return false;
+  }
+  validateKnownKeys(value, location, ["allow", "claim"], errors);
+  const allow = value.allow !== undefined && validateExternalDependencyIdArray(value.allow, `${location}.allow`, errors)
+    ? value.allow
+    : [];
+  const claim = value.claim !== undefined && validateExternalDependencyIdArray(value.claim, `${location}.claim`, errors)
+    ? value.claim
+    : [];
+  const claimed = new Set(claim);
+  for (const dependencyId of allow) {
+    if (claimed.has(dependencyId)) errors.push(`${location} cannot list ${dependencyId} in both claim and allow`);
+  }
+  return true;
 }
 
 const BUILT_IN_RESOURCE_ADAPTERS = new Set([
@@ -653,6 +703,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
     "consumes",
     "producesArtifacts",
     "resourceContracts",
+    "externalDependencies",
     "budgets",
     "rules",
   ], errors);
@@ -737,6 +788,7 @@ function validateCell(value: unknown, location: string, errors: string[]): value
       validateUniqueNonEmptyStrings(contractIds, `${location}.resourceContracts[].id`, errors);
     }
   }
+  validateExternalDependencies(value.externalDependencies, `${location}.externalDependencies`, errors);
   validateBudgets(value.budgets, `${location}.budgets`, errors);
   validateRuleSeverityMap(value.rules, `${location}.rules`, errors);
   return true;
@@ -793,13 +845,28 @@ export function validateManifest(value: unknown): ValidationResult<CellFenceMani
   } else {
     const cellIds: string[] = [];
     const packageNames: string[] = [];
+    const claimedDependencies = new Set<string>();
+    const allowedDependencies = new Set<string>();
     value.cells.forEach((cell, cellIndex) => {
       validateCell(cell, `cells[${cellIndex}]`, errors);
       if (isRecord(cell) && typeof cell.id === "string" && cell.id.trim().length > 0) cellIds.push(cell.id);
       if (isRecord(cell) && typeof cell.packageName === "string" && cell.packageName.trim().length > 0) packageNames.push(cell.packageName);
+      if (isRecord(cell) && isRecord(cell.externalDependencies)) {
+        if (isStringArray(cell.externalDependencies.claim)) {
+          for (const dependencyId of cell.externalDependencies.claim) claimedDependencies.add(dependencyId);
+        }
+        if (isStringArray(cell.externalDependencies.allow)) {
+          for (const dependencyId of cell.externalDependencies.allow) allowedDependencies.add(dependencyId);
+        }
+      }
     });
     validateUniqueNonEmptyStrings(cellIds, "cells[].id", errors);
     validateUniqueNonEmptyStrings(packageNames, "cells[].packageName", errors);
+    for (const dependencyId of allowedDependencies) {
+      if (claimedDependencies.has(dependencyId)) {
+        errors.push(`external dependency ${dependencyId} cannot appear in both claim and allow across the manifest`);
+      }
+    }
     const knownCellIds = new Set(cellIds);
     value.cells.forEach((cell, cellIndex) => {
       if (!isRecord(cell) || !Array.isArray(cell.consumes)) return;
@@ -891,6 +958,7 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
         "dependencyEdges",
         "artifactContracts",
         "resourceAccesses",
+        "externalDependencySet",
       ], errors);
       for (const key of ["ownedPathPatterns", "publicSymbols", "publicSurfaceLines", "crossCellDependencies"]) {
         const numericValue = record[key];
@@ -898,10 +966,13 @@ export function validateBaseline(value: unknown): ValidationResult<CellFenceBase
           errors.push(`cells.${cellId}.${key} must be a non-negative integer`);
         }
       }
-      for (const key of ["ownedPathSet", "publicSymbolSet", "dependencyEdges", "artifactContracts"]) {
+      for (const key of ["ownedPathSet", "publicSymbolSet", "dependencyEdges", "artifactContracts", "externalDependencySet"]) {
         if (record[key] !== undefined && !isStringArray(record[key])) {
           errors.push(`cells.${cellId}.${key} must be an array of non-empty strings when present`);
         }
+      }
+      if (Array.isArray(record.externalDependencySet)) {
+        validateExternalDependencyIdArray(record.externalDependencySet, `cells.${cellId}.externalDependencySet`, errors);
       }
       if (!optionalString(record.publicEntryPath)) {
         errors.push(`cells.${cellId}.publicEntryPath must be a string when present`);

@@ -229,6 +229,9 @@ test("schema validation accepts maximal valid manifests", () => {
           selectors: ["app.users"],
           description: "reads and writes user rows",
         }],
+        externalDependencies: {
+          claim: ["npm:decimal.js", "python-import:yaml"],
+        },
         budgets: {
           ownedPathPatterns: 1,
           publicSymbols: 2,
@@ -245,6 +248,9 @@ test("schema validation accepts maximal valid manifests", () => {
         ownedPaths: ["src/platform/**"],
         publicEntry: "src/platform/public.ts",
         publicSymbols: ["platform"],
+        externalDependencies: {
+          allow: ["npm:zod"],
+        },
       },
     ],
   });
@@ -273,7 +279,91 @@ test("schema validation rejects unsupported per-cell analysis disabling", () => 
   assert.match(result.errors.join("\n"), /importAnalysis must be true when present; disabling import analysis is not supported/);
   assert.match(result.errors.join("\n"), /resourceAnalysis must be true when present; disabling resource analysis is not supported/);
   assert.equal(jsonSchemaValidators.manifest(manifest), false);
-});
+test("schema validation enforces external dependency claim and allow shape", () => {
+  const duplicate = validateManifest(validManifest({
+    cells: [{
+      ...validCell,
+      externalDependencies: { claim: ["npm:zod", "npm:zod"] },
+    }],
+  }));
+  assertInvalid(duplicate, /externalDependencies\.claim contains duplicate entry npm:zod/);
+
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        externalDependencies: { claim: ["npm:decimal.js/foo"] },
+      }],
+    })),
+    /package roots/,
+  );
+
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        externalDependencies: { allow: ["cargo:serde"] },
+      }],
+    })),
+    /supported ecosystem prefix/,
+  );
+
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [{
+        ...validCell,
+        externalDependencies: { claim: ["npm:zod"], allow: ["npm:zod"] },
+      }],
+    })),
+    /cannot list npm:zod in both claim and allow/,
+  );
+
+  const multiClaim = validateManifest(validManifest({
+    cells: [
+      { ...validCell, externalDependencies: { claim: ["npm:zod"] } },
+      {
+        ...validCell,
+        id: "config",
+        ownedPaths: ["src/config/**"],
+        publicEntry: "src/config/public.ts",
+        publicSymbols: ["config"],
+        externalDependencies: { claim: ["npm:zod"] },
+      },
+    ],
+  }));
+  assert.equal(multiClaim.ok, true, multiClaim.errors.join("\n"));
+
+  assertInvalid(
+    validateManifest(validManifest({
+      cells: [
+        { ...validCell, externalDependencies: { claim: ["npm:zod"] } },
+        {
+          ...validCell,
+          id: "consumer",
+          ownedPaths: ["src/consumer/**"],
+          publicEntry: "src/consumer/public.ts",
+          publicSymbols: ["consumer"],
+          externalDependencies: { allow: ["npm:zod"] },
+        },
+      ],
+    })),
+    /cannot appear in both claim and allow/,
+  );
+
+  const malformedOverlap = validateManifest(validManifest({
+    cells: [{
+      ...validCell,
+      externalDependencies: { claim: [1], allow: [1] },
+    }],
+  }));
+  assertInvalidContaining(malformedOverlap, [
+    "cells[0].externalDependencies.allow must be an array of non-empty strings",
+    "cells[0].externalDependencies.claim must be an array of non-empty strings",
+  ]);
+  assert.equal(
+    malformedOverlap.errors.some((error) => error.includes("cannot appear in both claim and allow across the manifest")),
+    false,
+  );});
 
 test("schema validation rejects malformed manifest root and reserved loaders", () => {
   assertInvalid(validateManifest(null), /manifest must be an object/);
@@ -521,6 +611,7 @@ test("schema validation accepts and rejects baseline records", () => {
         publicSurfaceHash: "abc",
         dependencyEdges: ["core->platform"],
         artifactContracts: ["events-v1"],
+        externalDependencySet: ["npm:zod", "python-import:yaml"],
         resourceAccesses: [{
           kind: "file",
           access: "read",
@@ -601,12 +692,13 @@ test("schema validation accepts and rejects baseline records", () => {
           publicEntryPath: 1,
           publicSurfaceHash: false,
           resourceAccesses: "bad",
+          externalDependencySet: [1],
         },
       },
     })),
-    /ownedPathPatterns must be a non-negative integer[\s\S]*publicSymbols must be a non-negative integer[\s\S]*publicSurfaceLines must be a non-negative integer[\s\S]*crossCellDependencies must be a non-negative integer[\s\S]*ownedPathSet must be an array[\s\S]*publicEntryPath must be a string[\s\S]*publicSurfaceHash must be a string[\s\S]*resourceAccesses must be an array/,
+    /ownedPathPatterns must be a non-negative integer[\s\S]*publicSymbols must be a non-negative integer[\s\S]*publicSurfaceLines must be a non-negative integer[\s\S]*crossCellDependencies must be a non-negative integer[\s\S]*ownedPathSet must be an array[\s\S]*externalDependencySet must be an array[\s\S]*publicEntryPath must be a string[\s\S]*publicSurfaceHash must be a string[\s\S]*resourceAccesses must be an array/,
   );
-  for (const key of ["publicSymbolSet", "dependencyEdges", "artifactContracts"]) {
+  for (const key of ["publicSymbolSet", "dependencyEdges", "artifactContracts", "externalDependencySet"]) {
     assertInvalid(
       validateBaseline(validBaseline({
         cells: {
@@ -622,6 +714,37 @@ test("schema validation accepts and rejects baseline records", () => {
       new RegExp(`${key} must be an array of non-empty strings`),
     );
   }
+  assertInvalid(
+    validateBaseline(validBaseline({
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          externalDependencySet: "npm:zod",
+        },
+      },
+    })),
+    /externalDependencySet must be an array of non-empty strings/,
+  );
+  assertInvalidContaining(
+    validateBaseline(validBaseline({
+      cells: {
+        core: {
+          ownedPathPatterns: 1,
+          publicSymbols: 1,
+          publicSurfaceLines: 1,
+          crossCellDependencies: 0,
+          externalDependencySet: ["npm:zod", "npm:zod", "npm:zod/subpath"],
+        },
+      },
+    })),
+    [
+      "cells.core.externalDependencySet contains duplicate entry npm:zod",
+      "cells.core.externalDependencySet contains invalid dependency npm:zod/subpath: npm external dependency ids must be package roots like npm:zod or npm:@scope/pkg, not package subpaths",
+    ],
+  );
   assertInvalid(
     validateBaseline(validBaseline({
       cells: {

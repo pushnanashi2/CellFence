@@ -231,9 +231,22 @@ export function guardBaselineUpdate(
       );
     }
 
-    const addedArtifacts = current.artifactContracts
-      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts || []).includes(artifact))
-      : [];
+    if (previous.externalDependencySet !== undefined) {
+      const previousExternalDependencies = new Set(previous.externalDependencySet);
+      const addedExternalDependencies = (current.externalDependencySet || [])
+        .filter((dependencyId) => !previousExternalDependencies.has(dependencyId));
+      if (addedExternalDependencies.length > 0) {
+        addLockedBaselineFinding(
+          findings,
+          cell.id,
+          `${cell.id} is locked and external dependencies would be added: ${addedExternalDependencies.join(", ")}`,
+          { cell: cell.id, metric: "externalDependencySet", addedExternalDependencies },
+        );
+      }
+    }
+
+    const addedArtifacts = current.artifactContracts && previous.artifactContracts
+      ? current.artifactContracts.filter((artifact) => !(previous.artifactContracts as string[]).includes(artifact))      : [];
     if (addedArtifacts.length > 0) {
       addLockedBaselineFinding(
         findings,

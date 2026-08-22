@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -13,7 +12,6 @@ import {
   validateManifest,
   type RuleSeverity as ConfiguredRuleSeverity,
 } from "@cellfence/schema";
-export type { CellFenceBaseline } from "@cellfence/schema";
 import {
   absolutePath,
   listSymlinks,
@@ -30,10 +28,6 @@ import {
   sourceFilesUnderGovernance,
   sourceKindForPath,
 } from "./file-index.js";
-
-// C-5: re-export the glob matcher so plugins can share a single, linear-time
-// implementation instead of maintaining their own patternToRegExp copies.
-export { matchesPattern } from "./file-index.js";
 import {
   extractImports,
   extractPublicSymbols,
@@ -77,10 +71,6 @@ import { ownedPathPatternsOverlap } from "./glob-overlap.js";
 import { errorMessage } from "./errors.js";
 import { execCommandSync } from "./command-execution.js";
 import {
-  BASELINE_ED25519_KEY_ID_ENV,
-  BASELINE_ED25519_PUBLIC_KEY_ENV,
-  BASELINE_HMAC_KEY_ENV,
-  BASELINE_HMAC_KEY_ID_ENV,
   validateBaselineSealFindings,
 } from "./baseline-seal.js";
 import {
@@ -91,6 +81,12 @@ import {
   sortedResourceBaselineEntries,
 } from "./baseline-ratchet.js";
 import {
+  externalDependencyIdForImport,
+  isNodeBuiltinSpecifier,
+  validateExternalDependencyPolicy,
+  type ExternalDependencyObservation,
+} from "./external-dependencies.js";
+import {
   createBaseline as createBaselineOperation,
   defaultBaselinePath,
   guardBaselineUpdate as guardBaselineUpdateOperation,
@@ -99,16 +95,10 @@ import {
 } from "./baseline.js";
 import {
   checkClaims as checkClaimsOperation,
-  checkClaimsAsync as checkClaimsOperationAsync,
   checkWriteAccess as checkWriteAccessOperation,
-  checkWriteAccessAsync as checkWriteAccessOperationAsync,
   createClaim as createClaimOperation,
-  createClaimAsync as createClaimOperationAsync,
   listClaims as listClaimsOperation,
-  listClaimsAsync as listClaimsOperationAsync,
 } from "./claims.js";
-export { GitHubArtifactClaimStore, type GitHubArtifactClaimStoreOptions } from "./claims/backends/github-artifact.js";
-export { RedisClaimStore, type RedisClaimStoreOptions, type RedisLike } from "./claims/backends/redis.js";
 import { createCellContext as createCellContextOperation } from "./context.js";
 import {
   createAutoAllocation as createAutoAllocationOperation,
@@ -125,7 +115,6 @@ import {
   applyWaiversToFindings,
   collectWaiversForManifest,
   listWaivers as listWaiversOperation,
-
   waiverMatchesFinding,
 } from "./waivers.js";
 import { pythonSourceRoots } from "./python-roots.js";
@@ -198,9 +187,6 @@ export {
   writeBaselineFile,
 } from "./baseline.js";
 export {
-  sealBaselineIfConfigured,
-} from "./baseline-seal.js";
-export {
   createWaiverRequest,
   formatCouplingGraphMermaid,
 } from "./graph.js";
@@ -236,6 +222,7 @@ export type {
   ClaimCreateResult,
   ContextAllowedImport,
   ContextBudgetEntry,
+  ContextExternalDependency,
   ContextOptions,
   CouplingGraph,
   CouplingGraphEdge,
@@ -255,14 +242,6 @@ export type {
   WriteAccessResult,
 } from "./types.js";
 
-export {
-  MAX_WAIVER_DAYS,
-  WAIVER_ATTESTATION_HMAC_KEY_ENV,
-  WAIVER_ATTESTATION_HMAC_KEY_ID_ENV,
-  WAIVER_REPOSITORY_IDENTITY_ENV,
-  waiverAttestationHmacDigest,
-} from "./waivers.js";
-export { CORE_REQUIRED_RULES } from "./constants.js";
 export function listWaivers(options: CheckOptions = {}): CellFenceWaiver[] {
   return listWaiversOperation(options);
 }
@@ -350,26 +329,7 @@ function validateOwnershipCoverage(context: AnalysisContext, findings: Finding[]
       });
     }
 
-    for (const publicPath of cell.publicPaths || []) {
-      if (patternCoveredByOwnedPaths(publicPath, cell.ownedPaths)) continue;
-      addFinding(findings, {
-        ruleId: "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
-        severity: "error",
-        cellId: cell.id,
-        filePath: publicPath,
-        message: `${cell.id} public path is outside its ownedPaths: ${publicPath}`,
-        details: { publicPath, ownedPaths: cell.ownedPaths },
-        suggestedResolutions: [
-          manifestResolution("Move publicPaths under an owned path or narrow the manifest to the real owner", Boolean(cell.locked), {
-            cell: cell.id,
-            publicPath,
-          }),
-        ],
-      });
-    }
-
     for (const artifactLane of cell.producesArtifacts || []) {
-      if (artifactLane.external) continue;
       for (const artifactPath of artifactLane.paths) {
         if (patternCoveredByOwnedPaths(artifactPath, cell.ownedPaths)) continue;
         addFinding(findings, {
@@ -509,18 +469,11 @@ function resourceAccessVerb(access: ResourceAccessMode): string {
   return "writes";
 }
 
-function validateResourceAccesses(
-  context: AnalysisContext,
-  findings: Finding[],
-  warnings: Finding[],
-  baseline: CellFenceBaseline | undefined,
-  observedResourceFiles = new Set<string>(),
-): Map<string, ResourceAccessReference[]> {
+function validateResourceAccesses(context: AnalysisContext, findings: Finding[], warnings: Finding[], baseline: CellFenceBaseline | undefined): Map<string, ResourceAccessReference[]> {
   const accessesByCell = new Map<string, ResourceAccessReference[]>();
   for (const cell of context.manifest.cells) {
     const cellAccesses: ResourceAccessReference[] = [];
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, cell, context)) {
-      observedResourceFiles.add(repoPath(context.rootDir, sourceFilePath));
       for (const access of collectResourceAccesses(context, sourceFilePath)) {
         if (access.unresolved) {
           if (resourceAccessDeclaredByManifest(cell, access) || resourceAccessDeclaredByBaseline(cell, baseline, access)) {
@@ -963,6 +916,10 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     return { targetPath: aliasTargetPath, targetCell, artifactLaneId, matchedSpecifier: reference.specifier, isExternal: false, isPublicPackage: false };
   }
 
+  if (reference.specifier.startsWith("#") || isNodeBuiltinSpecifier(reference.specifier)) {
+    return { isExternal: false, isPublicPackage: false };
+  }
+
   return { isExternal: true, isPublicPackage: false };
 }
 
@@ -980,10 +937,8 @@ function importTargetsPrivateImplementation(resolvedImport: ResolvedImport, prod
     && resolvedImport.packageExportReason === "specifier is explicitly excluded by the package exports map"
   ) return true;
   if (resolvedImport.isPublicPackage) return false;
-  const targetPath = normalizePath(resolvedImport.targetPath || "");
-  const targetIsPublicEntry = targetPath === normalizePath(producerCell.publicEntry);
+  const targetIsPublicEntry = normalizePath(resolvedImport.targetPath || "") === normalizePath(producerCell.publicEntry);
   if (targetIsPublicEntry) return false;
-  if ((producerCell.publicPaths || []).some((publicPath) => matchesPattern(targetPath, publicPath))) return false;
   return true;
 }
 
@@ -1015,7 +970,7 @@ function addPrivateImportFinding(
   });
 }
 
-function validatePublicEntries(context: AnalysisContext, findings: Finding[], observedPublicSurfaceFiles = new Set<string>()): void {
+function validatePublicEntries(context: AnalysisContext, findings: Finding[]): void {
   for (const cell of context.manifest.cells) {
     const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
     if (!fs.existsSync(publicEntryPath)) {
@@ -1028,7 +983,6 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[], ob
       });
       continue;
     }
-    observedPublicSurfaceFiles.add(normalizePath(cell.publicEntry));
     const actualSymbols = extractPublicSymbols(publicEntryPath);
     const declaredSymbols = new Set(cell.publicSymbols);
     const missingSymbols = [...declaredSymbols].filter((symbol) => !actualSymbols.has(symbol));
@@ -1043,7 +997,7 @@ function validatePublicEntries(context: AnalysisContext, findings: Finding[], ob
         cellId: cell.id,
         filePath: cell.publicEntry,
         message: `public symbols for cell ${cell.id} do not match manifest (${mismatchParts.join("; ")})`,
-        details: { missingSymbols, undeclaredSymbols, line: 1 },
+        details: { missingSymbols, undeclaredSymbols },
         suggestedResolutions: [
           codeResolution("Change the public entry exports to match the manifest", {
             publicEntry: cell.publicEntry,
@@ -1077,12 +1031,11 @@ function validateImports(
   findings: Finding[],
   warnings: Finding[],
   observedImports: PluginImportReference[] = [],
-  observedImportFiles = new Set<string>(),
-): Map<string, Set<string>> {
+): { crossCellDependencies: Map<string, Set<string>>; externalDependencyObservations: ExternalDependencyObservation[] } {
   const crossCellDependencies = new Map<string, Set<string>>();
+  const externalDependencyObservations: ExternalDependencyObservation[] = [];
   for (const importerCell of context.manifest.cells) {
     for (const sourceFilePath of sourceFilesForCell(context.rootDir, importerCell, context)) {
-      observedImportFiles.add(repoPath(context.rootDir, sourceFilePath));
       const references = extractImports(context, sourceFilePath, warnings, findings);
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
@@ -1102,7 +1055,23 @@ function validateImports(
           packageExportState: resolvedImport.packageExportState,
           packageExportReason: resolvedImport.packageExportReason,
         });
-        if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
+        const externalDependencyId = externalDependencyIdForImport(reference, resolvedImport);
+        if (externalDependencyId) {
+          externalDependencyObservations.push({
+            cellId: importerCell.id,
+            dependencyId: externalDependencyId,
+            filePath: reference.importerPath,
+            line: reference.line,
+            specifier: reference.specifier,
+            kind: reference.kind,
+            typeOnly: reference.typeOnly,
+          });
+        }
+        if (
+          !resolvedImport.targetPath
+          && !resolvedImport.isExternal
+          && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/") || reference.specifier.startsWith("#"))
+        ) {
           addFinding(findings, {
             ruleId: "CELLFENCE_UNRESOLVED_IMPORT",
             severity: "error",
@@ -1209,7 +1178,7 @@ function validateImports(
       }
     }
   }
-  return crossCellDependencies;
+  return { crossCellDependencies, externalDependencyObservations };
 }
 
 function manifestInvalidResult(message: string): CheckResult {
@@ -1374,12 +1343,15 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   validateOwnershipCoverage(context, findings);
   validateSymlinkTargets(context, findings);
   prewarmRepositoryPythonInspections(context);
-  const observedPublicSurfaceFiles = new Set<string>();
-  validatePublicEntries(context, findings, observedPublicSurfaceFiles);
+  validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
   const observedImports: PluginImportReference[] = [];
-  const observedImportFiles = new Set<string>();
-  const crossCellDependencies = validateImports(context, findings, warnings, observedImports, observedImportFiles);
+  const importValidation = validateImports(context, findings, warnings, observedImports);
+  const externalDependenciesByCell = validateExternalDependencyPolicy({
+    context,
+    baseline,
+    observations: importValidation.externalDependencyObservations,
+  }, findings);
   for (const finding of validatePathClassImports({
     pathClasses: manifest.governance?.pathClasses,
     imports: observedImports.map((reference) => ({
@@ -1396,13 +1368,12 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
   })) {
     addFinding(finding.severity === "error" ? findings : warnings, finding);
   }
-  const observedResourceFiles = new Set<string>();
-  const accessesByCell = validateResourceAccesses(context, findings, warnings, verifiedResourceBaseline, observedResourceFiles);
+  const accessesByCell = validateResourceAccesses(context, findings, warnings, verifiedResourceBaseline);
   mergeAccessesByCell(
     accessesByCell,
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, verifiedResourceBaseline),
   );
-  const prePluginMetrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const prePluginMetrics = computeMetrics(context, importValidation.crossCellDependencies, accessesByCell, externalDependenciesByCell);
   const pluginRepositoryModel = createRepositoryModel(
     context,
     baseline,
@@ -1421,7 +1392,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
       runPluginAdapters(context, plugins, pluginRepositoryModel, findings),
     ),
   );
-  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const metrics = computeMetrics(context, importValidation.crossCellDependencies, accessesByCell, externalDependenciesByCell);
   const repositoryModel = createRepositoryModel(context, baseline, observedImports, accessesByCell, metrics, options.changedFiles);
 
   if (baseline) {
@@ -1430,7 +1401,6 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
 
   runPluginRules(context, plugins, repositoryModel, findings);
 
-  const rawObservationDiagnostics = [...findings, ...warnings];
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const active = applyWaiversToFindings(context, severityAdjusted.findings, severityAdjusted.warnings);
   const evidenceEnvelope = governanceEvidenceEnvelopeForCheck(
@@ -1440,12 +1410,6 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     evidencePathsForOptions(rootDir, options.evidencePaths),
     observedImports,
     accessesByCell,
-    rawObservationDiagnostics,
-    {
-      imports: observedImportFiles,
-      resources: observedResourceFiles,
-      "public-surface": observedPublicSurfaceFiles,
-    },
   );
   const evaluation = evaluateGovernance({
     evidence: evidenceEnvelope.assessment,
@@ -1584,20 +1548,25 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
   validateOwnershipCoverage(context, findings);
   validatePublicEntries(context, findings);
   validateRequiredRuleConfiguration(context, options.ruleSeverities, findings);
-  const crossCellDependencies = validateImports(context, findings, warnings, observedImports);
+  const importValidation = validateImports(context, findings, warnings, observedImports);
+  const externalDependenciesByCell = validateExternalDependencyPolicy({
+    context,
+    baseline,
+    observations: importValidation.externalDependencyObservations,
+  }, findings);
   const accessesByCell = validateResourceAccesses(context, findings, warnings, baseline);
   mergeAccessesByCell(
     accessesByCell,
     resourceEvidenceAccesses(context, evidencePathsForOptions(rootDir, options.evidencePaths), findings, undefined),
   );
-  const metrics = computeMetrics(context, crossCellDependencies, accessesByCell);
+  const metrics = computeMetrics(context, importValidation.crossCellDependencies, accessesByCell, externalDependenciesByCell);
   if (baseline) compareBaseline(context, metrics, baseline, findings, addFinding);
   const severityAdjusted = applyRuleSeverityPolicy(context, findings, warnings, options.ruleSeverities);
   const preWaiverFindings = [...severityAdjusted.findings, ...severityAdjusted.warnings];
   const candidates: PruneCandidate[] = [];
 
   for (const cell of manifest.cells) {
-    const observedDependencies = crossCellDependencies.get(cell.id) || new Set<string>();
+    const observedDependencies = importValidation.crossCellDependencies.get(cell.id) || new Set<string>();
     for (const consumer of cell.consumes || []) {
       if (observedDependencies.has(consumer.cell) || (consumer.artifactLanes || []).length > 0) continue;
       addPruneCandidate(candidates, {
@@ -1689,16 +1658,12 @@ export function createPruneReport(options: CheckOptions = {}): PruneReport {
 }
 
 function gitCommand(rootDir: string, args: string[]): string {
-  return gitCommandRaw(rootDir, args).trim();
-}
-
-function gitCommandRaw(rootDir: string, args: string[]): string {
   try {
     return execCommandSync("git", ["-c", "core.quotepath=off", ...args], {
       cwd: rootDir,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
-    });
+    }).trim();
   } catch (error) {
     const failure = error as { stderr?: unknown; message?: unknown };
     const stderr = typeof failure.stderr === "string" ? failure.stderr.trim() : "";
@@ -1726,25 +1691,25 @@ function gitMetadataFailure(message: string): CheckResult {
 }
 
 function assertGitCommit(rootDir: string, ref: string): string {
-  return gitCommand(rootDir, ["rev-list", "-1", "--end-of-options", ref]);
+  return gitCommand(rootDir, ["rev-list", "-1", ref]);
 }
 
 function changedFilesForRefs(rootDir: string, baseRef: string, headRef?: string): string[] {
   const files = new Set<string>();
   const addDiff = (args: string[]): void => {
-    const output = gitCommandRaw(rootDir, args);
-    for (const entry of output.split("\0")) {
-      const normalized = normalizePath(entry);
+    const output = gitCommand(rootDir, args);
+    for (const entry of output.split(/\r?\n/)) {
+      const normalized = normalizePath(entry.trim());
       if (normalized) files.add(normalized);
     }
   };
   if (headRef) {
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", "--end-of-options", `${baseRef}...${headRef}`]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...${headRef}`]);
   } else {
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", "--end-of-options", `${baseRef}...HEAD`]);
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD", "--cached"]);
-    addDiff(["diff", "--name-only", "-z", "--diff-filter=ACMRD"]);
-    addDiff(["ls-files", "--others", "--exclude-standard", "-z"]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", `${baseRef}...HEAD`]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR", "--cached"]);
+    addDiff(["diff", "--name-only", "--diff-filter=ACMR"]);
+    addDiff(["ls-files", "--others", "--exclude-standard"]);
   }
   return [...files].sort((left, right) => left.localeCompare(right));
 }
@@ -1768,19 +1733,16 @@ function parseMovementStatus(status: string): Pick<OwnershipMovement, "status" |
 
 function movementEntriesFromDiff(output: string): OwnershipMovement[] {
   const movements: OwnershipMovement[] = [];
-  const parts = output.split("\0").filter((part) => part.length > 0);
-  for (let index = 0; index < parts.length;) {
-    const parsedStatus = parseMovementStatus(parts[index] || "");
-    index += 1;
+  for (const line of output.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parts = line.split("\t");
+    if (parts.length < 3) continue;
+    const parsedStatus = parseMovementStatus(parts[0]);
     if (!parsedStatus) continue;
-    const fromPath = parts[index];
-    const toPath = parts[index + 1];
-    index += 2;
-    if (!fromPath || !toPath) continue;
     movements.push({
       ...parsedStatus,
-      fromPath: normalizePath(fromPath),
-      toPath: normalizePath(toPath),
+      fromPath: normalizePath(parts[1]),
+      toPath: normalizePath(parts[2]),
     });
   }
   return movements;
@@ -1789,16 +1751,16 @@ function movementEntriesFromDiff(output: string): OwnershipMovement[] {
 function movementEntriesForRefs(rootDir: string, baseRef: string, headRef?: string): OwnershipMovement[] {
   const movements = new Map<string, OwnershipMovement>();
   const addDiff = (args: string[]): void => {
-    const output = gitCommandRaw(rootDir, args);
+    const output = gitCommand(rootDir, args);
     for (const movement of movementEntriesFromDiff(output)) {
       movements.set(`${movement.status}:${movement.fromPath}:${movement.toPath}`, movement);
     }
   };
-  const diffArgs = ["diff", "--find-renames=50", "--find-copies=50", "--name-status", "-z", "--diff-filter=RC"];
+  const diffArgs = ["diff", "--find-renames=50", "--find-copies=50", "--name-status", "--diff-filter=RC"];
   if (headRef) {
-    addDiff([...diffArgs, "--end-of-options", `${baseRef}...${headRef}`]);
+    addDiff([...diffArgs, `${baseRef}...${headRef}`]);
   } else {
-    addDiff([...diffArgs, "--end-of-options", `${baseRef}...HEAD`]);
+    addDiff([...diffArgs, `${baseRef}...HEAD`]);
     addDiff([...diffArgs, "--cached"]);
     addDiff([...diffArgs]);
   }
@@ -1908,27 +1870,6 @@ function hasExternalPolicyPath(rootDir: string, options: ChangedCheckOptions): b
     });
 }
 
-const WAIVER_APPROVERS_ENV = "CELLFENCE_APPROVERS";
-
-function hashedEnvironmentValue(name: string): string | null {
-  const value = process.env[name];
-  if (value === undefined) return null;
-  return crypto.createHash("sha256").update(value).digest("hex");
-}
-
-function changedBaseTrustedInputIdentity(): Record<string, unknown> {
-  return {
-    waiverClockMinuteUtc: new Date().toISOString().slice(0, 16),
-    environment: {
-      [WAIVER_APPROVERS_ENV]: hashedEnvironmentValue(WAIVER_APPROVERS_ENV),
-      [BASELINE_HMAC_KEY_ENV]: hashedEnvironmentValue(BASELINE_HMAC_KEY_ENV),
-      [BASELINE_HMAC_KEY_ID_ENV]: hashedEnvironmentValue(BASELINE_HMAC_KEY_ID_ENV),
-      [BASELINE_ED25519_PUBLIC_KEY_ENV]: hashedEnvironmentValue(BASELINE_ED25519_PUBLIC_KEY_ENV),
-      [BASELINE_ED25519_KEY_ID_ENV]: hashedEnvironmentValue(BASELINE_ED25519_KEY_ID_ENV),
-    },
-  };
-}
-
 function changedBaseCacheIdentity(rootDir: string, baseCommit: string, options: ChangedCheckOptions): string | undefined {
   if (hasExternalPolicyPath(rootDir, options)) return undefined;
   if ((options.plugins?.length || 0) > 0 && !options.pluginCacheKey) return undefined;
@@ -1939,7 +1880,6 @@ function changedBaseCacheIdentity(rootDir: string, baseCommit: string, options: 
     evidencePaths: [...(options.evidencePaths || [])].sort(),
     ruleSeverities: options.ruleSeverities,
     pluginCacheKey: options.pluginCacheKey,
-    trustedInputs: changedBaseTrustedInputIdentity(),
     runtime: {
       node: process.version,
       platform: process.platform,
@@ -2033,32 +1973,16 @@ export function checkWriteAccess(options: WriteAccessOptions): WriteAccessResult
   return checkWriteAccessOperation(options, claimOperationDependencies());
 }
 
-export function checkWriteAccessAsync(options: WriteAccessOptions): Promise<WriteAccessResult> {
-  return checkWriteAccessOperationAsync(options, claimOperationDependencies());
-}
-
 export function checkClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
   return checkClaimsOperation(options, claimOperationDependencies());
-}
-
-export function checkClaimsAsync(options: ClaimCheckOptions = {}): Promise<ClaimCheckResult> {
-  return checkClaimsOperationAsync(options, claimOperationDependencies());
 }
 
 export function createClaim(options: ClaimCreateOptions): ClaimCreateResult {
   return createClaimOperation(options, claimOperationDependencies());
 }
 
-export function createClaimAsync(options: ClaimCreateOptions): Promise<ClaimCreateResult> {
-  return createClaimOperationAsync(options, claimOperationDependencies());
-}
-
 export function listClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
   return listClaimsOperation(options);
-}
-
-export function listClaimsAsync(options: ClaimCheckOptions = {}): Promise<ClaimCheckResult> {
-  return listClaimsOperationAsync(options);
 }
 export function createBaseline(options: CheckOptions = {}): CellFenceBaseline {
   return createBaselineOperation(options, { checkRepository, loadManifestFromFile });
@@ -2115,68 +2039,3 @@ export function formatHumanResult(result: CheckResult): string {
 }
 
 export { findingFingerprint } from "./findings.js";
-
-export {
-  repoPath,
-  sourceFilesForCell,
-  sourceFilesUnderGovernance,
-} from "./file-index.js";
-
-// 0.4.0 (prototype): coverage collector used by the `cellfence coverage`
-// subcommand. See packages/engine/src/analysis/coverage-collector.ts for
-// the rationale. Re-exported here so the CLI can import it through
-// `@cellfence/engine` without reaching into the package internals.
-export {
-  buildCoverageReport,
-  recordUnresolved,
-  type CoverageInput,
-  type CoverageKind,
-  type CoverageReport,
-  type CoverageSummary,
-  type CoverageUnresolved,
-} from "./analysis/coverage-collector.js";
-
-// 0.4.0 (prototype): baseline change detector used by the
-// `cellfence baseline gate` subcommand and the cellfence-baseline-gate
-// GitHub Action. See packages/engine/src/baseline-change-detector.ts
-// for the rationale. Re-exported here so the CLI and the action can
-// import through `@cellfence/engine` without reaching into the
-// package internals.
-export {
-  detectBaselineChanges,
-  type BaselineDimension,
-  type BaselineDimensionDelta,
-  type GovernanceChangeReport,
-} from "./baseline-change-detector.js";
-
-export { readJsonFile } from "./json-file.js";
-
-// 0.4.0 (prototype): distributed claim backend interface and
-// reference implementations. The 0.4.0 refactor of
-// packages/engine/src/claims.ts will route all claim reads and
-// writes through these types. Re-exported here so downstream
-// packages (CLI, GitHub Action, MCP proxy) can build against the
-// same surface.
-export {
-  CellFenceClaimCasConflict,
-  emptyClaimStoreState,
-  type ClaimStoreBackend,
-  type ClaimStoreEntry,
-  type ClaimStoreState,
-} from "./claims/backend.js";
-export { LocalFileClaimStore, localFileClaimStoreFingerprint, type LocalFileClaimStoreOptions } from "./claims/backends/local-file.js";
-
-// 0.4.0: claim backend selector. The 0.3.0 prototype shipped the
-// `ClaimStoreBackend` interface and two reference implementations;
-// the 0.4.0 selector reads `governance.claimBackend` from the
-// manifest (or `CELLFENCE_CLAIM_BACKEND` from the environment) and
-// returns the matching backend. The full migration of
-// `packages/engine/src/claims.ts` to call through this interface
-// is queued for a follow-up commit; this lands just the selector
-// so a repository can configure a backend today.
-export {
-  resolveClaimBackend,
-  type ClaimBackendType,
-  type ResolvedClaimBackend,
-  type ResolveOptions,
-} from "./claims/selector.js";
