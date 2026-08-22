@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
@@ -15,7 +16,14 @@ import {
   repoPath,
 } from "./file-index.js";
 import { pathPatternsOverlap } from "./glob-overlap.js";
+import { stableCanonicalJson } from "./governance/canonicalization.js";
 import { readJsonFile } from "./json-file.js";
+import {
+  type ClaimStoreBackend,
+  type ClaimStoreState,
+  CellFenceClaimCasConflict,
+} from "./claims/backend.js";
+import { resolveClaimBackend } from "./claims/selector.js";
 import type {
   AnalysisContext,
   CellFenceClaim,
@@ -37,6 +45,20 @@ type ClaimOperationDependencies = {
   gitCommand(rootDir: string, args: string[]): string;
   loadManifestFromFile(manifestPath: string): CellFenceManifest;
 };
+
+function configuredClaimBackend(
+  rootDir: string,
+  claimsPath: string | undefined,
+  manifest: CellFenceManifest,
+  override?: ClaimStoreBackend,
+): ClaimStoreBackend {
+  if (override) return override;
+  return resolveClaimBackend({
+    rootDir,
+    defaultFilePath: claimStorePath(rootDir, claimsPath),
+    manifest,
+  }).backend;
+}
 
 function claimConfigurationFailure(message: string, claimsPath = ""): ClaimCheckResult {
   return {
@@ -130,9 +152,20 @@ function validateClaimShape(claim: unknown, index: number, findings: Finding[], 
   return true;
 }
 
-function readClaimStore(rootDir: string, claimsPathOption: string | undefined, findings: Finding[]): { path: string; claims: CellFenceClaim[] } {
+function readClaimStore(
+  rootDir: string,
+  claimsPathOption: string | undefined,
+  findings: Finding[],
+  backend?: ClaimStoreBackend,
+): { path: string; claims: CellFenceClaim[] } {
   const resolvedPath = claimStorePath(rootDir, claimsPathOption);
   const relativePath = repoPath(rootDir, resolvedPath);
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below so
+  // existing callers that do not opt in keep working unchanged.
+  if (backend) {
+    return readClaimStoreFromBackend(backend, resolvedPath, relativePath, findings);
+  }
   if (!fs.existsSync(resolvedPath)) return { path: resolvedPath, claims: [] };
   let raw: unknown;
   try {
@@ -159,6 +192,94 @@ function readClaimStore(rootDir: string, claimsPathOption: string | undefined, f
   return { path: resolvedPath, claims };
 }
 
+function isThenable(value: unknown): boolean {
+  return Boolean(value) && typeof value === "object" && typeof (value as { then?: unknown }).then === "function";
+}
+
+function claimsFromBackendState(
+  state: ClaimStoreState,
+  backend: ClaimStoreBackend,
+  relativePath: string,
+  findings: Finding[],
+): CellFenceClaim[] {
+  if (!state || typeof state !== "object" || state.schemaVersion !== "cellfence.claims.v1" || !Array.isArray(state.claims)) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: relativePath,
+      message: `claim backend ${backend.id} returned an invalid store; expected schemaVersion cellfence.claims.v1 and claims array`,
+    });
+    return [];
+  }
+  return (state.claims as unknown as CellFenceClaim[]).filter((claim, index) => validateClaimShape(claim, index, findings, relativePath));
+}
+
+function readClaimStoreFromBackend(
+  backend: ClaimStoreBackend,
+  resolvedPath: string,
+  relativePath: string,
+  findings: Finding[],
+): { path: string; claims: CellFenceClaim[] } {
+  let state: ClaimStoreState;
+  try {
+    const result = backend.read();
+    if (isThenable(result)) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: relativePath,
+        message: `claim backend ${backend.id} returned a Promise; use the async read path`,
+      });
+      return { path: resolvedPath, claims: [] };
+    }
+    state = result as unknown as ClaimStoreState;
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: relativePath,
+      message: `failed to read claim store via ${backend.id}: ${errorMessage(error)}`,
+    });
+    return { path: resolvedPath, claims: [] };
+  }
+  const claims = claimsFromBackendState(state, backend, relativePath, findings);
+  return { path: resolvedPath, claims };
+}
+
+async function readClaimStoreAsync(
+  rootDir: string,
+  claimsPathOption: string | undefined,
+  findings: Finding[],
+  backend?: ClaimStoreBackend,
+): Promise<{ path: string; claims: CellFenceClaim[] }> {
+  const resolvedPath = claimStorePath(rootDir, claimsPathOption);
+  const relativePath = repoPath(rootDir, resolvedPath);
+  if (!backend) return readClaimStore(rootDir, claimsPathOption, findings);
+  return readClaimStoreFromBackendAsync(backend, resolvedPath, relativePath, findings);
+}
+
+async function readClaimStoreFromBackendAsync(
+  backend: ClaimStoreBackend,
+  resolvedPath: string,
+  relativePath: string,
+  findings: Finding[],
+): Promise<{ path: string; claims: CellFenceClaim[] }> {
+  let state: ClaimStoreState;
+  try {
+    state = await backend.read();
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: relativePath,
+      message: `failed to read claim store via ${backend.id}: ${errorMessage(error)}`,
+    });
+    return { path: resolvedPath, claims: [] };
+  }
+  const claims = claimsFromBackendState(state, backend, relativePath, findings);
+  return { path: resolvedPath, claims };
+}
+
 function sleepSync(ms: number): void {
   const buffer = new SharedArrayBuffer(4);
   const view = new Int32Array(buffer);
@@ -178,7 +299,32 @@ type ClaimLockSnapshot = {
   stat: fs.Stats;
   pid?: number;
   createdAtMs?: number;
+  hostname?: string;
+  bootId?: string;
 };
+
+let claimLockBootId: string | undefined;
+
+function currentBootId(): string | undefined {
+  if (claimLockBootId !== undefined) return claimLockBootId || undefined;
+  try {
+    claimLockBootId = fs.readFileSync("/proc/sys/kernel/random/boot_id", "utf8").trim();
+  } catch {
+    claimLockBootId = "";
+  }
+  return claimLockBootId || undefined;
+}
+
+function claimLockContent(): string {
+  return `${JSON.stringify({
+    schemaVersion: "cellfence.claim-lock.v1",
+    pid: process.pid,
+    hostname: os.hostname(),
+    bootId: currentBootId(),
+    createdAt: new Date().toISOString(),
+    token: crypto.randomUUID(),
+  })}\n`;
+}
 
 function processIsRunning(pid: number): boolean {
   if (!Number.isSafeInteger(pid) || pid <= 0) return false;
@@ -194,7 +340,7 @@ function processIsRunning(pid: number): boolean {
 function tryAcquireClaimLockFile(lockPath: string, content?: string): ClaimLockFile | undefined {
   try {
     const fd = fs.openSync(lockPath, "wx");
-    fs.writeFileSync(fd, content ?? `${process.pid}\n${new Date().toISOString()}\n${crypto.randomUUID()}\n`);
+    fs.writeFileSync(fd, content ?? claimLockContent());
     return {
       fd,
       path: lockPath,
@@ -218,9 +364,21 @@ function readClaimLockSnapshot(lockPath: string): ClaimLockSnapshot | undefined 
   try {
     const stat = fs.statSync(lockPath);
     const content = fs.readFileSync(lockPath, "utf8");
+    const snapshot: ClaimLockSnapshot = { content, stat };
+    const trimmed = content.trim();
+    if (trimmed.startsWith("{")) {
+      const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+      const parsedPid = typeof parsed.pid === "number" ? parsed.pid : Number(parsed.pid);
+      const createdAt = typeof parsed.createdAt === "string" ? parsed.createdAt : "";
+      const parsedCreatedAt = Date.parse(createdAt);
+      if (!Number.isNaN(parsedCreatedAt)) snapshot.createdAtMs = parsedCreatedAt;
+      if (Number.isSafeInteger(parsedPid) && parsedPid > 0) snapshot.pid = parsedPid;
+      if (typeof parsed.hostname === "string" && parsed.hostname) snapshot.hostname = parsed.hostname;
+      if (typeof parsed.bootId === "string" && parsed.bootId) snapshot.bootId = parsed.bootId;
+      return snapshot;
+    }
     const [pidLine, createdAtLine] = content.split(/\r?\n/);
     const parsedPid = Number(pidLine);
-    const snapshot: ClaimLockSnapshot = { content, stat };
     const parsedCreatedAt = Date.parse(createdAtLine || "");
     if (!Number.isNaN(parsedCreatedAt)) snapshot.createdAtMs = parsedCreatedAt;
     if (Number.isSafeInteger(parsedPid) && parsedPid > 0) snapshot.pid = parsedPid;
@@ -230,12 +388,20 @@ function readClaimLockSnapshot(lockPath: string): ClaimLockSnapshot | undefined 
   }
 }
 
+function claimLockOwnerCanBeCheckedLocally(snapshot: ClaimLockSnapshot): boolean {
+  if (!snapshot.hostname) return true;
+  if (snapshot.hostname !== os.hostname()) return false;
+  const bootId = currentBootId();
+  return !snapshot.bootId || !bootId || snapshot.bootId === bootId;
+}
+
 function claimLockSnapshotIsStale(snapshot: ClaimLockSnapshot, now = Date.now()): boolean {
   const referenceTimeMs = snapshot.createdAtMs !== undefined && snapshot.createdAtMs <= now
     ? snapshot.createdAtMs
     : snapshot.stat.mtimeMs;
   const lockAgeMs = now - referenceTimeMs;
   if (lockAgeMs < CLAIM_LOCK_STALE_AFTER_MS) return false;
+  if (!claimLockOwnerCanBeCheckedLocally(snapshot)) return false;
   return snapshot.pid === undefined || !processIsRunning(snapshot.pid);
 }
 
@@ -283,7 +449,24 @@ function acquireClaimStoreLock(filePath: string): () => void {
   }
 }
 
-function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
+async function acquireClaimStoreLockAsync(filePath: string, backend?: ClaimStoreBackend): Promise<() => void | Promise<void>> {
+  if (!backend || backend.id === "local-file") return acquireClaimStoreLock(filePath);
+  if (!backend.lock) return () => undefined;
+  try {
+    return await backend.lock(CLAIM_LOCK_STALE_AFTER_MS);
+  } catch (error) {
+    if (/does not provide a lock|no lock/i.test(errorMessage(error))) return () => undefined;
+    throw error;
+  }
+}
+
+function writeClaimStore(filePath: string, claims: CellFenceClaim[], backend?: ClaimStoreBackend, previous?: CellFenceClaim[]): void {
+  // 0.4.0: route through the pluggable backend when one is
+  // provided. The legacy JSON-file behaviour is preserved below.
+  if (backend) {
+    writeClaimStoreToBackend(backend, filePath, claims, previous ?? []);
+    return;
+  }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const store: CellFenceClaimStore = {
     schemaVersion: "cellfence.claims.v1",
@@ -294,12 +477,47 @@ function writeClaimStore(filePath: string, claims: CellFenceClaim[]): void {
   fs.renameSync(temporaryPath, filePath);
 }
 
+function writeClaimStoreToBackend(backend: ClaimStoreBackend, filePath: string, claims: CellFenceClaim[], previous: CellFenceClaim[]): void {
+  const prevState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: previous as unknown as ClaimStoreState["claims"],
+  };
+  const nextState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: claims as unknown as ClaimStoreState["claims"],
+  };
+  const result = backend.write(nextState, prevState);
+  if (isThenable(result)) {
+    throw new CellFenceClaimCasConflict(`claim backend ${backend.id} returned a Promise; use the async write path`);
+  }
+}
+
+async function writeClaimStoreAsync(filePath: string, claims: CellFenceClaim[], backend?: ClaimStoreBackend, previous?: CellFenceClaim[]): Promise<void> {
+  if (backend) {
+    await writeClaimStoreToBackendAsync(backend, claims, previous ?? []);
+    return;
+  }
+  writeClaimStore(filePath, claims);
+}
+
+async function writeClaimStoreToBackendAsync(backend: ClaimStoreBackend, claims: CellFenceClaim[], previous: CellFenceClaim[]): Promise<void> {
+  const prevState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: previous as unknown as ClaimStoreState["claims"],
+  };
+  const nextState: ClaimStoreState = {
+    schemaVersion: "cellfence.claims.v1",
+    claims: claims as unknown as ClaimStoreState["claims"],
+  };
+  await backend.write(nextState, prevState);
+}
+
 function intersectingValues(left: readonly string[], right: readonly string[]): string[] {
   const rightSet = new Set(right);
   return left.filter((value) => rightSet.has(value));
 }
 
-function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim): string[] {
+function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim, context: AnalysisContext): string[] {
   const surfaces: string[] = [];
   for (const cell of intersectingValues(left.cells, right.cells)) surfaces.push(`cell:${cell}`);
   for (const symbol of intersectingValues(left.symbols, right.symbols)) surfaces.push(`symbol:${symbol}`);
@@ -310,7 +528,44 @@ function claimConflictSurfaces(left: CellFenceClaim, right: CellFenceClaim): str
       if (pathPatternsOverlap(leftPath, rightPath)) surfaces.push(`path:${leftPath}<->${rightPath}`);
     }
   }
+  // H-1: a cells-scoped claim and a paths-scoped claim still conflict
+  // when the cells' owned paths overlap the other claim's paths. The
+  // previous implementation only compared same-shape surfaces (cells vs
+  // cells, paths vs paths), so two claims could each "own" the same
+  // file from different angles and never report a conflict. Cross-check
+  // the cells of each side against the paths of the other.
+  const leftOwnedPathPrefixes = ownedPathPrefixesFor(context, left.cells);
+  const rightOwnedPathPrefixes = ownedPathPrefixesFor(context, right.cells);
+  for (const leftPath of left.paths) {
+    for (const rightOwned of rightOwnedPathPrefixes) {
+      if (pathPatternsOverlap(leftPath, rightOwned.pattern)) {
+        surfaces.push(`path:${leftPath}<->cell:${rightOwned.cellId}`);
+      }
+    }
+  }
+  for (const rightPath of right.paths) {
+    for (const leftOwned of leftOwnedPathPrefixes) {
+      if (pathPatternsOverlap(rightPath, leftOwned.pattern)) {
+        surfaces.push(`path:${rightPath}<->cell:${leftOwned.cellId}`);
+      }
+    }
+  }
   return [...new Set(surfaces)].sort((first, second) => first.localeCompare(second));
+}
+
+function ownedPathPrefixesFor(
+  context: AnalysisContext,
+  cellIds: readonly string[],
+): { cellId: string; pattern: string }[] {
+  const result: { cellId: string; pattern: string }[] = [];
+  for (const cellId of cellIds) {
+    const cell = context.cellsById.get(cellId);
+    if (!cell) continue;
+    for (const pattern of cell.ownedPaths) {
+      result.push({ cellId, pattern });
+    }
+  }
+  return result;
 }
 
 function validateClaimCells(context: AnalysisContext, claim: CellFenceClaim, findings: Finding[], claimsPath: string): void {
@@ -337,6 +592,24 @@ function validateClaimCells(context: AnalysisContext, claim: CellFenceClaim, fin
         });
       }
     }
+  } else if (claim.paths.length > 0) {
+    // C-3: a cells-empty claim carries path ownership that the
+    // engine cannot attribute to any cell. Without a guard an agent
+    // can write a single claim with `paths: ["**"]` and effectively
+    // own the whole repository. Require the path patterns to fall
+    // inside the manifest's declared governance include set.
+    const includePatterns = context.manifest.governance?.include ?? [];
+    for (const claimedPath of claim.paths) {
+      if (!includePatterns.some((pattern) => patternCoveredByOwnedPaths(claimedPath, [pattern]))) {
+        addFinding(findings, {
+          ruleId: "CELLFENCE_CLAIM_INVALID",
+          severity: "error",
+          filePath: claimsPath,
+          message: `claim ${claim.id} path ${claimedPath} is not declared in the manifest governance include set (cells must be specified for paths outside governance.include)`,
+          details: { claimId: claim.id, path: claimedPath, include: includePatterns },
+        });
+      }
+    }
   }
 }
 
@@ -360,13 +633,13 @@ function addClaimConflictFinding(findings: Finding[], left: CellFenceClaim, righ
   });
 }
 
-function validateActiveClaimConflicts(activeClaims: CellFenceClaim[], findings: Finding[]): void {
+function validateActiveClaimConflicts(activeClaims: CellFenceClaim[], findings: Finding[], context: AnalysisContext): void {
   for (let leftIndex = 0; leftIndex < activeClaims.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < activeClaims.length; rightIndex += 1) {
       const left = activeClaims[leftIndex];
       const right = activeClaims[rightIndex];
       if (left.id === right.id) continue;
-      const surfaces = claimConflictSurfaces(left, right);
+      const surfaces = claimConflictSurfaces(left, right, context);
       if (surfaces.length > 0) addClaimConflictFinding(findings, left, right, surfaces);
     }
   }
@@ -383,7 +656,7 @@ function workingTreeChangedFiles(rootDir: string, dependencies: ClaimOperationDe
   };
   dependencies.gitCommand(rootDir, ["rev-parse", "--is-inside-work-tree"]);
   dependencies.assertGitCommit(rootDir, "HEAD");
-  add(["diff", "--name-only", "--diff-filter=ACMR", "HEAD"]);
+  add(["diff", "--name-only", "--diff-filter=ACMRDT", "--end-of-options", "HEAD"]);
   add(["ls-files", "--others", "--exclude-standard"]);
   return [...files].sort((left, right) => left.localeCompare(right));
 }
@@ -459,50 +732,15 @@ function writeAccessResult(
   };
 }
 
-export function checkWriteAccess(options: WriteAccessOptions, dependencies: ClaimOperationDependencies): WriteAccessResult {
-  const rootDir = path.resolve(options.rootDir || process.cwd());
-  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
-  const agent = options.agent.trim();
-  const findings: Finding[] = [];
-  const warnings: Finding[] = [];
-  if (agent.length === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_CLAIM_INVALID",
-      severity: "error",
-      message: "write access check requires a non-empty agent",
-    });
-  }
-  if (options.paths.length === 0) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
-      severity: "error",
-      message: "write access check requires at least one path",
-    });
-  }
-
-  let manifest: CellFenceManifest;
-  try {
-    manifest = dependencies.loadManifestFromFile(manifestPath);
-  } catch (error) {
-    addFinding(findings, {
-      ruleId: "CELLFENCE_MANIFEST_INVALID",
-      severity: "error",
-      message: `failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`,
-    });
-    return writeAccessResult(agent, options.paths.map((requestedPath) => ({
-      requestedPath,
-      allowed: false,
-      reason: "manifest is unavailable",
-      claimIds: [],
-    })), findings, warnings, []);
-  }
-
-  const claimResultForPolicy = checkClaims({
-    rootDir,
-    manifestPath: repoPath(rootDir, manifestPath),
-    claimsPath: options.claimsPath,
-    now: options.now,
-  }, dependencies);
+function evaluateWriteAccess(
+  options: WriteAccessOptions,
+  rootDir: string,
+  manifest: CellFenceManifest,
+  agent: string,
+  claimResultForPolicy: ClaimCheckResult,
+  findings: Finding[],
+  warnings: Finding[],
+): WriteAccessResult {
   findings.push(...claimResultForPolicy.findings);
   warnings.push(...claimResultForPolicy.warnings);
   const activeClaims = claimResultForPolicy.activeClaims;
@@ -600,6 +838,102 @@ export function checkWriteAccess(options: WriteAccessOptions, dependencies: Clai
   return writeAccessResult(agent, pathDecisions, findings, warnings, activeClaims);
 }
 
+export function checkWriteAccess(options: WriteAccessOptions, dependencies: ClaimOperationDependencies): WriteAccessResult {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const agent = options.agent.trim();
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  if (agent.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      message: "write access check requires a non-empty agent",
+    });
+  }
+  if (options.paths.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
+      severity: "error",
+      message: "write access check requires at least one path",
+    });
+  }
+
+  let manifest: CellFenceManifest;
+  try {
+    manifest = dependencies.loadManifestFromFile(manifestPath);
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_MANIFEST_INVALID",
+      severity: "error",
+      message: `failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`,
+    });
+    return writeAccessResult(agent, options.paths.map((requestedPath) => ({
+      requestedPath,
+      allowed: false,
+      reason: "manifest is unavailable",
+      claimIds: [],
+    })), findings, warnings, []);
+  }
+
+  const claimResultForPolicy = checkClaims({
+    rootDir,
+    manifestPath: repoPath(rootDir, manifestPath),
+    claimsPath: options.claimsPath,
+    claimBackend: options.claimBackend,
+    now: options.now,
+  }, dependencies);
+  return evaluateWriteAccess(options, rootDir, manifest, agent, claimResultForPolicy, findings, warnings);
+}
+
+export async function checkWriteAccessAsync(options: WriteAccessOptions, dependencies: ClaimOperationDependencies): Promise<WriteAccessResult> {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  const agent = options.agent.trim();
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  if (agent.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      message: "write access check requires a non-empty agent",
+    });
+  }
+  if (options.paths.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_UNCLAIMED_CHANGE",
+      severity: "error",
+      message: "write access check requires at least one path",
+    });
+  }
+
+  let manifest: CellFenceManifest;
+  try {
+    manifest = dependencies.loadManifestFromFile(manifestPath);
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_MANIFEST_INVALID",
+      severity: "error",
+      message: `failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`,
+    });
+    return writeAccessResult(agent, options.paths.map((requestedPath) => ({
+      requestedPath,
+      allowed: false,
+      reason: "manifest is unavailable",
+      claimIds: [],
+    })), findings, warnings, []);
+  }
+
+  const claimResultForPolicy = await checkClaimsAsync({
+    rootDir,
+    manifestPath: repoPath(rootDir, manifestPath),
+    claimsPath: options.claimsPath,
+    claimBackend: options.claimBackend,
+    now: options.now,
+  }, dependencies);
+  return evaluateWriteAccess(options, rootDir, manifest, agent, claimResultForPolicy, findings, warnings);
+}
+
 function validateAgentChangedFiles(
   context: AnalysisContext,
   agent: string,
@@ -607,8 +941,19 @@ function validateAgentChangedFiles(
   changedFiles: string[],
   claimsPath: string,
   findings: Finding[],
+  warnings: Finding[],
 ): void {
   const claimsRelativePath = repoPath(context.rootDir, claimsPath);
+  const claimStoreChanged = changedFiles.some((filePath) => normalizePath(filePath) === claimsRelativePath);
+  if (claimStoreChanged) {
+    addFinding(warnings, {
+      ruleId: "CELLFENCE_CLAIM_STORE_CHANGED",
+      severity: "warning",
+      filePath: claimsRelativePath,
+      message: "claim store changed in the same worktree; keep claim coordination state outside implementation diffs or review this change explicitly",
+      details: { agent, claimsPath: claimsRelativePath },
+    });
+  }
   const agentClaims = activeClaims.filter((claim) => claim.agent === agent);
   const otherClaims = activeClaims.filter((claim) => claim.agent !== agent);
   for (const changedFile of changedFiles.filter((filePath) => normalizePath(filePath) !== claimsRelativePath)) {
@@ -672,19 +1017,70 @@ export function checkClaims(options: ClaimCheckOptions = {}, dependencies: Claim
   const context = dependencies.createContext(rootDir, manifest);
   const findings: Finding[] = [];
   const warnings: Finding[] = [];
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest, options.claimBackend);
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error));
+  }
+  const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
   const claimsPath = repoPath(rootDir, store.path);
   const now = options.now || new Date();
   for (const claim of store.claims) validateClaimCells(context, claim, findings, claimsPath);
   const activeClaims = store.claims.filter((claim) => claimIsActive(claim, now));
-  validateActiveClaimConflicts(activeClaims, findings);
+  validateActiveClaimConflicts(activeClaims, findings, context);
 
   let changedFiles: string[] | undefined;
   if (options.agent) {
     try {
       const claimsRelativePath = repoPath(rootDir, store.path);
-      changedFiles = changedFilesForClaimCheck(rootDir, options, dependencies).filter((filePath) => normalizePath(filePath) !== claimsRelativePath);
-      validateAgentChangedFiles(context, options.agent, activeClaims, changedFiles, store.path, findings);
+      const rawChangedFiles = changedFilesForClaimCheck(rootDir, options, dependencies);
+      changedFiles = rawChangedFiles.filter((filePath) => normalizePath(filePath) !== claimsRelativePath);
+      validateAgentChangedFiles(context, options.agent, activeClaims, rawChangedFiles, store.path, findings, warnings);
+    } catch (error) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_GIT_METADATA_UNAVAILABLE",
+        severity: "error",
+        message: `claim check --agent requires git metadata to compare changed files: ${errorMessage(error)}`,
+      });
+    }
+  }
+
+  return claimResult(findings, warnings, store.claims, activeClaims, changedFiles);
+}
+
+export async function checkClaimsAsync(options: ClaimCheckOptions = {}, dependencies: ClaimOperationDependencies): Promise<ClaimCheckResult> {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  let manifest: CellFenceManifest;
+  try {
+    manifest = dependencies.loadManifestFromFile(manifestPath);
+  } catch (error) {
+    return claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`);
+  }
+  const context = dependencies.createContext(rootDir, manifest);
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest, options.claimBackend);
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error));
+  }
+  const store = await readClaimStoreAsync(rootDir, options.claimsPath, findings, backend);
+  const claimsPath = repoPath(rootDir, store.path);
+  const now = options.now || new Date();
+  for (const claim of store.claims) validateClaimCells(context, claim, findings, claimsPath);
+  const activeClaims = store.claims.filter((claim) => claimIsActive(claim, now));
+  validateActiveClaimConflicts(activeClaims, findings, context);
+
+  let changedFiles: string[] | undefined;
+  if (options.agent) {
+    try {
+      const claimsRelativePath = repoPath(rootDir, store.path);
+      const rawChangedFiles = changedFilesForClaimCheck(rootDir, options, dependencies);
+      changedFiles = rawChangedFiles.filter((filePath) => normalizePath(filePath) !== claimsRelativePath);
+      validateAgentChangedFiles(context, options.agent, activeClaims, rawChangedFiles, store.path, findings, warnings);
     } catch (error) {
       addFinding(findings, {
         ruleId: "CELLFENCE_GIT_METADATA_UNAVAILABLE",
@@ -698,8 +1094,138 @@ export function checkClaims(options: ClaimCheckOptions = {}, dependencies: Claim
 }
 
 function claimIdFor(claim: Omit<CellFenceClaim, "id">): string {
-  const digest = crypto.createHash("sha256").update(JSON.stringify(claim)).digest("hex").slice(0, 12);
+  const digest = crypto.createHash("sha256").update(stableCanonicalJson(claim)).digest("hex").slice(0, 12);
   return `claim-${digest}`;
+}
+
+type PreparedClaimCreate =
+  | {
+    kind: "write";
+    claim: CellFenceClaim;
+    nextClaims: CellFenceClaim[];
+    activeClaims: CellFenceClaim[];
+    claimsPath: string;
+    now: Date;
+  }
+  | { kind: "return"; result: ClaimCreateResult };
+
+function prepareClaimCreate(
+  options: ClaimCreateOptions,
+  context: AnalysisContext,
+  store: { path: string; claims: CellFenceClaim[] },
+  findings: Finding[],
+  warnings: Finding[],
+): PreparedClaimCreate {
+  const claimsPath = repoPath(context.rootDir, store.path);
+  const now = options.now || new Date();
+  const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
+  if (!expiresAt) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: claimsPath,
+      message: "claim requires --ttl like 30m, 2h, 1d or --expires as an ISO timestamp",
+    });
+  }
+  const agent = options.agent?.trim() || "";
+  if (agent.length === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: claimsPath,
+      message: "claim requires a non-empty agent",
+    });
+  }
+  const draft: Omit<CellFenceClaim, "id"> = {
+    agent,
+    task: options.task?.trim() || undefined,
+    cells: sortedUnique(options.cells),
+    paths: sortedUnique(options.paths),
+    symbols: sortedUnique(options.symbols),
+    resources: sortedUnique(options.resources),
+    artifactLanes: sortedUnique(options.artifactLanes),
+    createdAt: now.toISOString(),
+    expiresAt: expiresAt || now.toISOString(),
+  };
+  const claimedSurfaceCount = draft.cells.length + draft.paths.length + draft.symbols.length + draft.resources.length + draft.artifactLanes.length;
+  if (claimedSurfaceCount === 0) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: claimsPath,
+      message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
+    });
+  }
+  const requestedId = options.claimId?.trim();
+  const claim: CellFenceClaim = {
+    ...draft,
+    id: requestedId || claimIdFor(draft),
+  };
+  // C-2: a caller-specified claim id may only replace an existing
+  // claim owned by the same agent. A different agent reusing the
+  // id would silently steal (or be stolen from) without this check.
+  if (requestedId) {
+    const collision = store.claims.find((candidate) => candidate.id === requestedId);
+    if (collision && collision.agent !== agent) {
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: claimsPath,
+        message: `claim id ${requestedId} is held by another agent (${collision.agent}) and cannot be replaced`,
+        details: { claimId: requestedId, holder: collision.agent, requester: agent },
+      });
+      return {
+        kind: "return",
+        result: {
+          ...claimResult(findings, warnings, store.claims, store.claims.filter((candidate) => claimIsActive(candidate, now))),
+          claimsPath: store.path,
+        },
+      };
+    }
+  }
+  // H-2: claim ids must be unique across the store. The previous
+  // implementation's `if (left.id === right.id) continue;` skip in
+  // the conflict checker meant a duplicate id silently disabled the
+  // overlap check. Reject any new claim whose id is already present
+  // (different agent was already covered above; same-agent duplicates
+  // are an authoring mistake and should also be rejected).
+  const existingWithId = store.claims.find((candidate) => candidate.id === claim.id);
+  if (existingWithId && existingWithId.agent === agent) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: claimsPath,
+      message: `claim id ${claim.id} already exists for agent ${agent}; re-create with a new id or release the existing one`,
+      details: { claimId: claim.id, agent },
+    });
+    return {
+      kind: "return",
+      result: {
+        ...claimResult(findings, warnings, store.claims, store.claims.filter((candidate) => claimIsActive(candidate, now))),
+        claimsPath: store.path,
+      },
+    };
+  }
+  validateClaimCells(context, claim, findings, claimsPath);
+  const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
+  for (const existingClaim of activeClaims) {
+    const surfaces = claimConflictSurfaces(existingClaim, claim, context);
+    if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
+  }
+  if (findings.some((finding) => finding.severity === "error")) {
+    return {
+      kind: "return",
+      result: {
+        ...claimResult(findings, warnings, store.claims, activeClaims),
+        claimsPath: store.path,
+      },
+    };
+  }
+  const nextClaims = [
+    ...store.claims.filter((candidate) => candidate.id !== claim.id),
+    claim,
+  ];
+  return { kind: "write", claim, nextClaims, activeClaims, claimsPath, now };
 }
 
 export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOperationDependencies): ClaimCreateResult {
@@ -715,6 +1241,12 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
   const findings: Finding[] = [];
   const warnings: Finding[] = [];
   const claimsStorePath = claimStorePath(rootDir, options.claimsPath);
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest, options.claimBackend);
+  } catch (error) {
+    return { ...claimConfigurationFailure(errorMessage(error)), claimsPath: claimsStorePath };
+  }
   let releaseClaimLock: (() => void) | undefined;
   try {
     releaseClaimLock = acquireClaimStoreLock(claimsStorePath);
@@ -731,81 +1263,29 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
     };
   }
   try {
-    const store = readClaimStore(rootDir, options.claimsPath, findings);
-    const claimsPath = repoPath(rootDir, store.path);
-    const now = options.now || new Date();
-    const expiresAt = computeClaimExpiresAt(now, options.ttl, options.expiresAt);
-    if (!expiresAt) {
+    const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
+    const prepared = prepareClaimCreate(options, context, store, findings, warnings);
+    if (prepared.kind === "return") return prepared.result;
+    try {
+      writeClaimStore(store.path, prepared.nextClaims, backend, store.claims);
+    } catch (error) {
+      if (!(error instanceof CellFenceClaimCasConflict)) throw error;
       addFinding(findings, {
         ruleId: "CELLFENCE_CLAIM_INVALID",
         severity: "error",
-        filePath: claimsPath,
-        message: "claim requires --ttl like 30m, 2h, 1d or --expires as an ISO timestamp",
+        filePath: prepared.claimsPath,
+        message: `claim store changed while creating ${prepared.claim.id}; refresh claims and retry`,
+        details: { claimId: prepared.claim.id, backend: backend.id },
       });
-    }
-    const agent = options.agent?.trim() || "";
-    if (agent.length === 0) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: "claim requires a non-empty agent",
-      });
-    }
-    const draft: Omit<CellFenceClaim, "id"> = {
-      agent,
-      task: options.task?.trim() || undefined,
-      cells: sortedUnique(options.cells),
-      paths: sortedUnique(options.paths),
-      symbols: sortedUnique(options.symbols),
-      resources: sortedUnique(options.resources),
-      artifactLanes: sortedUnique(options.artifactLanes),
-      createdAt: now.toISOString(),
-      expiresAt: expiresAt || now.toISOString(),
-    };
-    const claimedSurfaceCount = draft.cells.length + draft.paths.length + draft.symbols.length + draft.resources.length + draft.artifactLanes.length;
-    if (claimedSurfaceCount === 0) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: "claim must reserve at least one cell, path, symbol, resource, or artifact lane",
-      });
-    }
-    const claim: CellFenceClaim = {
-      ...draft,
-      id: options.claimId?.trim() || claimIdFor(draft),
-    };
-    if (store.claims.some((candidate) => candidate.id === claim.id)) {
-      addFinding(findings, {
-        ruleId: "CELLFENCE_CLAIM_INVALID",
-        severity: "error",
-        filePath: claimsPath,
-        message: `claim id ${claim.id} already exists; choose a new --claim-id instead of replacing an existing lease`,
-        details: { claimId: claim.id },
-      });
-    }
-    validateClaimCells(context, claim, findings, claimsPath);
-    const activeClaims = store.claims.filter((candidate) => claimIsActive(candidate, now));
-    for (const existingClaim of activeClaims) {
-      const surfaces = claimConflictSurfaces(existingClaim, claim);
-      if (surfaces.length > 0) addClaimConflictFinding(findings, existingClaim, claim, surfaces);
-    }
-    if (findings.some((finding) => finding.severity === "error")) {
       return {
-        ...claimResult(findings, warnings, store.claims, activeClaims),
+        ...claimResult(findings, warnings, store.claims, prepared.activeClaims),
         claimsPath: store.path,
       };
     }
-    const nextClaims = [
-      ...store.claims.filter((candidate) => candidate.id !== claim.id),
-      claim,
-    ];
-    writeClaimStore(store.path, nextClaims);
-    const nextActiveClaims = nextClaims.filter((candidate) => claimIsActive(candidate, now));
+    const nextActiveClaims = prepared.nextClaims.filter((candidate) => claimIsActive(candidate, prepared.now));
     return {
-      ...claimResult(findings, warnings, nextClaims, nextActiveClaims),
-      createdClaim: claim,
+      ...claimResult(findings, warnings, prepared.nextClaims, nextActiveClaims),
+      createdClaim: prepared.claim,
       claimsPath: store.path,
     };
   } finally {
@@ -813,10 +1293,117 @@ export function createClaim(options: ClaimCreateOptions, dependencies: ClaimOper
   }
 }
 
+export async function createClaimAsync(options: ClaimCreateOptions, dependencies: ClaimOperationDependencies): Promise<ClaimCreateResult> {
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  let manifest: CellFenceManifest;
+  try {
+    manifest = dependencies.loadManifestFromFile(manifestPath);
+  } catch (error) {
+    return { ...claimConfigurationFailure(`failed to read manifest ${repoPath(rootDir, manifestPath)}: ${errorMessage(error)}`), claimsPath: claimStorePath(rootDir, options.claimsPath) };
+  }
+  const context = dependencies.createContext(rootDir, manifest);
+  const findings: Finding[] = [];
+  const warnings: Finding[] = [];
+  const claimsStorePath = claimStorePath(rootDir, options.claimsPath);
+  let backend: ClaimStoreBackend;
+  try {
+    backend = configuredClaimBackend(rootDir, options.claimsPath, manifest, options.claimBackend);
+  } catch (error) {
+    return { ...claimConfigurationFailure(errorMessage(error)), claimsPath: claimsStorePath };
+  }
+  let releaseClaimLock: (() => void | Promise<void>) | undefined;
+  try {
+    releaseClaimLock = await acquireClaimStoreLockAsync(claimsStorePath, backend);
+  } catch (error) {
+    addFinding(findings, {
+      ruleId: "CELLFENCE_CLAIM_INVALID",
+      severity: "error",
+      filePath: repoPath(rootDir, claimsStorePath),
+      message: errorMessage(error),
+    });
+    return {
+      ...claimResult(findings, warnings, [], []),
+      claimsPath: claimsStorePath,
+    };
+  }
+  try {
+    const store = await readClaimStoreAsync(rootDir, options.claimsPath, findings, backend);
+    const prepared = prepareClaimCreate(options, context, store, findings, warnings);
+    if (prepared.kind === "return") return prepared.result;
+    try {
+      await writeClaimStoreAsync(store.path, prepared.nextClaims, backend, store.claims);
+    } catch (error) {
+      if (!(error instanceof CellFenceClaimCasConflict)) throw error;
+      addFinding(findings, {
+        ruleId: "CELLFENCE_CLAIM_INVALID",
+        severity: "error",
+        filePath: prepared.claimsPath,
+        message: `claim store changed while creating ${prepared.claim.id}; refresh claims and retry`,
+        details: { claimId: prepared.claim.id, backend: backend.id },
+      });
+      return {
+        ...claimResult(findings, warnings, store.claims, prepared.activeClaims),
+        claimsPath: store.path,
+      };
+    }
+    const nextActiveClaims = prepared.nextClaims.filter((candidate) => claimIsActive(candidate, prepared.now));
+    return {
+      ...claimResult(findings, warnings, prepared.nextClaims, nextActiveClaims),
+      createdClaim: prepared.claim,
+      claimsPath: store.path,
+    };
+  } finally {
+    await releaseClaimLock?.();
+  }
+}
+
 export function listClaims(options: ClaimCheckOptions = {}): ClaimCheckResult {
   const findings: Finding[] = [];
   const rootDir = path.resolve(options.rootDir || process.cwd());
-  const store = readClaimStore(rootDir, options.claimsPath, findings);
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  let manifest: CellFenceManifest | undefined;
+  try {
+    manifest = readJsonFile(manifestPath) as CellFenceManifest;
+  } catch {
+    manifest = undefined;
+  }
+  let backend: ClaimStoreBackend;
+  try {
+    backend = options.claimBackend ?? resolveClaimBackend({
+      rootDir,
+      defaultFilePath: claimStorePath(rootDir, options.claimsPath),
+      manifest,
+    }).backend;
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error), repoPath(rootDir, claimStorePath(rootDir, options.claimsPath)));
+  }
+  const store = readClaimStore(rootDir, options.claimsPath, findings, backend);
+  const now = options.now || new Date();
+  return claimResult(findings, [], store.claims, store.claims.filter((claim) => claimIsActive(claim, now)));
+}
+
+export async function listClaimsAsync(options: ClaimCheckOptions = {}): Promise<ClaimCheckResult> {
+  const findings: Finding[] = [];
+  const rootDir = path.resolve(options.rootDir || process.cwd());
+  const manifestPath = path.resolve(rootDir, options.manifestPath || DEFAULT_MANIFEST_PATH);
+  let manifest: CellFenceManifest | undefined;
+  try {
+    manifest = readJsonFile(manifestPath) as CellFenceManifest;
+  } catch {
+    manifest = undefined;
+  }
+  let backend: ClaimStoreBackend;
+  try {
+    backend = options.claimBackend ?? resolveClaimBackend({
+      rootDir,
+      defaultFilePath: claimStorePath(rootDir, options.claimsPath),
+      manifest,
+    }).backend;
+  } catch (error) {
+    return claimConfigurationFailure(errorMessage(error), repoPath(rootDir, claimStorePath(rootDir, options.claimsPath)));
+  }
+  const store = await readClaimStoreAsync(rootDir, options.claimsPath, findings, backend);
   const now = options.now || new Date();
   return claimResult(findings, [], store.claims, store.claims.filter((claim) => claimIsActive(claim, now)));
 }
