@@ -23,6 +23,7 @@ export type RuleId = | "CELLFENCE_MANIFEST_INVALID"
   | "CELLFENCE_OWNERSHIP_COVERAGE_DISABLED"
   | "CELLFENCE_UNOWNED_SOURCE"
   | "CELLFENCE_UNOWNED_IMPORT_TARGET"
+  | "CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT"
   | "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP"
   | "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP"
   | "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP"
@@ -548,6 +549,7 @@ export type ResolvedImport = {
   targetCell?: CellManifest;
   artifactLaneId?: string;
   matchedSpecifier?: string;
+  targetOutsideRoot?: boolean;
   isExternal: boolean;
   isPublicPackage: boolean;
   packageExportState?: PackageExportResolutionState;

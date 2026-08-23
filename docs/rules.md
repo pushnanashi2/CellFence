@@ -13,6 +13,7 @@
 | `CELLFENCE_OWNERSHIP_COVERAGE_DISABLED` | Strict ownership coverage is disabled, so source outside ownedPaths can escape checks |
 | `CELLFENCE_UNOWNED_SOURCE` | Strict governance found source matched by `governance.include` that no cell owns |
 | `CELLFENCE_UNOWNED_IMPORT_TARGET` | A cell imports governed source that no cell owns |
+| `CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT` | A source import resolved to a real file outside the repository root |
 | `CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP` | A public entry or public path is outside the declaring cell's owned paths |
 | `CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP` | A non-external produced artifact lane is outside the producer's owned paths |
 | `CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP` | A governed symlink points outside its owning cell, outside the repository, or cannot be resolved |
@@ -107,7 +108,7 @@ Computed dynamic imports, computed calls in recognized CommonJS `require()` form
 
 For TypeScript and JavaScript public entries, public surface hashes are based on isolated normalized declaration output when TypeScript can emit it, with a lightweight syntax fingerprint as a fallback. This catches type-facing changes such as generic constraints, inferred changes that appear in declarations, const literal type changes, class member signatures, and namespaces while avoiding method-body churn. It is still a v0.x contract fingerprint, not a full TypeScript semantic-versioning oracle.
 
-NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/`, manifest-derived package roots, and common Python packaging metadata. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored.
+NodeNext-style runtime `.js`, `.jsx`, `.mjs`, and `.cjs` relative specifiers are remapped to TypeScript source candidates such as `.ts`, `.tsx`, `.mts`, and `.cts` before boundary checks. Python imports are resolved from known source roots such as `src/`, manifest-derived package roots, and common Python packaging metadata. Relative imports that still cannot be resolved produce `CELLFENCE_UNRESOLVED_IMPORT` errors instead of being ignored. Relative, absolute, tsconfig alias, and Python source-root imports that resolve to files outside the repository root produce `CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT` errors instead of being treated as ungoverned or external.
 
 The repository CI includes a synthetic scale benchmark for 10,000 files / 20 cells, 50,000 files / 100 cells, and 100,000 files / 300 cells. It is a regression tripwire for file discovery, ownership indexing, and low-signal source scanning; it is not a universal performance guarantee for every monorepo shape.
 

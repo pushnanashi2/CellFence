@@ -1280,6 +1280,8 @@ test("module resolution fails closed for string execution require forms", () => 
         "eval(\"require('./eval.js')\");",
         "Function(\"return require('./function.js')\")();",
         "eval(\"import('./eval-import.js')\");",
+        "eval(\"importSoon('./not-import-call.js')\");",
+        "eval(\"import(notAString'./not-import-argument.js')\");",
         "eval(code);",
         "",
       ].join("\n"),
@@ -1297,8 +1299,8 @@ test("module resolution fails closed for string execution require forms", () => 
       ruleId: "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE",
       severity: "warning",
       filePath: "src/app.ts",
-      message: "computed eval() source cannot be resolved statically at line 5",
-      details: { line: 5 },
+      message: "computed eval() source cannot be resolved statically at line 7",
+      details: { line: 7 },
     }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
@@ -3189,6 +3191,18 @@ test("module resolution declaration text strips docs and internal declarations",
     assert.equal(
       declarationTextForRoot(sourcePath, { declaration: true, emitDeclarationOnly: true, stripInternal: false }),
       "export declare function visible(value: string): string;\n",
+    );
+
+    const multilineSourcePath = path.join(rootDir, "multiline.ts");
+    fs.writeFileSync(multilineSourcePath, [
+      "/** @internal */ export const hidden = true",
+      "export const first = 1",
+      "export const second = 2",
+      "",
+    ].join("\n"));
+    assert.equal(
+      declarationTextForRoot(multilineSourcePath, { declaration: true, emitDeclarationOnly: true, stripInternal: false }),
+      "export declare const first = 1;\nexport declare const second = 2;\n",
     );
     assert.equal(declarationTextForRoot(path.join(rootDir, "missing.ts"), {}), "");
   } finally {

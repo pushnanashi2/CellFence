@@ -1648,9 +1648,9 @@ function normalizeDeclarationText(text: string): string {
 
 function sourceTextWithoutInternalDeclarations(filePath: string): string {
   const sourceText = fs.readFileSync(filePath, "utf8");
-  // Stryker disable next-line BooleanLiteral: parent pointers are not used while stripping internal declarations.
+  // Stryker disable next-line BooleanLiteral: parent pointers are not used while collecting internal declaration line ranges.
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
-  // Stryker disable next-line ArrayDeclaration: TypeScript declaration emit also honors @internal tags; this prefilter is a defensive compatibility layer.
+  // Stryker disable next-line ArrayDeclaration: a non-range sentinel in this private, typed collection has no valid line bounds and cannot remove source text.
   const lineRanges: Array<{ start: number; end: number }> = [];
   function visit(node: ts.Node): void {
     if (hasInternalTag(node)) {

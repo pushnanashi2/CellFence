@@ -16,7 +16,8 @@ import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 import {
   detectBaselineChanges,
 } from "@cellfence/engine/baseline-change-detector.js";
-import type { CellFenceBaseline, GovernanceChangeReport } from "@cellfence/engine";
+import { validateBaseline, type CellFenceBaseline } from "@cellfence/schema";
+import type { GovernanceChangeReport } from "@cellfence/engine";
 
 export type { GovernanceChangeReport } from "@cellfence/engine";
 
@@ -111,34 +112,12 @@ function readBaselineFromPath(filePath: string): unknown {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function baselineValidationErrors(value: unknown): string[] {
-  const errors: string[] = [];
-  if (!isRecord(value)) return ["baseline must be an object"];
-  if (value.schemaVersion !== CELLFENCE_BASELINE_SCHEMA_VERSION) {
-    errors.push(`schemaVersion must be ${CELLFENCE_BASELINE_SCHEMA_VERSION}`);
-  }
-  if (typeof value.generatedAt !== "string" || Number.isNaN(Date.parse(value.generatedAt))) {
-    errors.push("generatedAt must be an ISO 8601 date-time string");
-  }
-  if (!isRecord(value.cells)) {
-    errors.push("cells must be an object");
-  }
-  if (value.cellIds !== undefined && !Array.isArray(value.cellIds)) {
-    errors.push("cellIds must be an array when present");
-  }
-  return errors;
-}
-
 function validateBaselineValue(value: unknown, displayPath: string): CellFenceBaseline {
-  const errors = baselineValidationErrors(value);
-  if (errors.length > 0) {
-    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${errors.join("; ")}`);
+  const result = validateBaseline(value);
+  if (!result.ok) {
+    throw new Error(`baseline at ${displayPath} is not a valid CellFenceBaseline: ${result.errors.join("; ")}`);
   }
-  return value as CellFenceBaseline;
+  return result.value as CellFenceBaseline;
 }
 
 export function runBaselineGateFull(options: BaselineGateOptions): BaselineGateResult {

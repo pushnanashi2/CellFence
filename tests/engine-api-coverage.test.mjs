@@ -95,6 +95,7 @@ const defaultRequiredRules = [
   "CELLFENCE_OWNERSHIP_OVERLAP",
   "CELLFENCE_UNOWNED_SOURCE",
   "CELLFENCE_UNOWNED_IMPORT_TARGET",
+  "CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT",
   "CELLFENCE_PUBLIC_ENTRY_OUTSIDE_OWNERSHIP",
   "CELLFENCE_ARTIFACT_OUTSIDE_OWNERSHIP",
   "CELLFENCE_SYMLINK_TARGET_OUTSIDE_OWNERSHIP",
@@ -607,6 +608,66 @@ test("engine resolves exact tsconfig path aliases and package-name public import
       && finding.details?.targetPath === "src/loose/internal.ts"));
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("engine rejects imports resolved outside the repository root", () => {
+  const parentDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-import-outside-root-"));
+  const rootDir = path.join(parentDir, "repo");
+  const outsideDir = path.join(parentDir, "outside");
+  try {
+    fs.mkdirSync(path.join(rootDir, "src/app"), { recursive: true });
+    fs.mkdirSync(path.join(rootDir, "src/pyapp"), { recursive: true });
+    fs.mkdirSync(path.join(outsideDir, "outsidepkg"), { recursive: true });
+    fs.writeFileSync(path.join(outsideDir, "secret.ts"), "export const secret = true; export const absSecret = true; export const aliasSecret = true;\n");
+    fs.writeFileSync(path.join(outsideDir, "outsidepkg/__init__.py"), "");
+    fs.writeFileSync(path.join(outsideDir, "outsidepkg/secret.py"), "VALUE = True\n");
+    const absoluteSpecifier = path.join(outsideDir, "secret").split(path.sep).join("/");
+    fs.writeFileSync(
+      path.join(rootDir, "src/app/public.ts"),
+      [
+        "import { secret } from '../../../outside/secret';",
+        `import { absSecret } from '${absoluteSpecifier}';`,
+        "import { aliasSecret } from '@outside/secret';",
+        "export const app = secret && absSecret && aliasSecret;",
+        "",
+      ].join("\n"),
+    );
+    fs.writeFileSync(
+      path.join(rootDir, "src/pyapp/public.py"),
+      [
+        "from outsidepkg import secret",
+        "app = secret.VALUE",
+        "",
+      ].join("\n"),
+    );
+    writeJson(path.join(rootDir, "tsconfig.json"), {
+      compilerOptions: {
+        baseUrl: ".",
+        paths: { "@outside/*": ["../outside/*"] },
+      },
+    });
+    fs.writeFileSync(path.join(rootDir, "pyproject.toml"), "[tool.setuptools.packages.find]\nwhere = [\"../outside\"]\n");
+    writeManifest(rootDir, [
+      baseCell("app", { publicSymbols: ["app"] }),
+      baseCell("pyapp", { publicEntry: "src/pyapp/public.py", publicSymbols: ["app"] }),
+    ]);
+
+    const result = checkRepository({ rootDir, manifestPath: "cellfence.manifest.json" });
+
+    assert.equal(result.ok, false);
+    const outsideRootFindings = result.findings.filter((finding) => finding.ruleId === "CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT");
+    assert.equal(outsideRootFindings.length, 4, JSON.stringify(result.findings));
+    assert.deepEqual(outsideRootFindings.map((finding) => finding.details?.specifier).sort(), [
+      "../../../outside/secret",
+      "@outside/secret",
+      absoluteSpecifier,
+      "outsidepkg.secret",
+    ].sort());
+    assert.ok(outsideRootFindings.every((finding) => String(finding.details?.targetPath).startsWith("../outside/")));
+    assert.ok(outsideRootFindings.every((finding) => finding.cellId === "app" || finding.cellId === "pyapp"));
+  } finally {
+    fs.rmSync(parentDir, { recursive: true, force: true });
   }
 });
 

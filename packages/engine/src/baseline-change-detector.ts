@@ -13,6 +13,7 @@ export type BaselineDimension =
   | "signatures"
   | "resourceAccesses"
   | "artifactContracts"
+  | "externalDependencies"
   | "publicSurfaceMetadata"
   | "dependencyCounts";
 
@@ -229,7 +230,7 @@ function diffArtifactContracts(baseBaseline: CellFenceBaseline, headBaseline: Ce
     for (const entry of head) if (!base.has(entry)) added.push(`${cellId}: ${entry}`);
     for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
   }
-  return { dimension: "artifactContracts" as BaselineDimension, added, removed };
+  return { dimension: "artifactContracts", added, removed };
 }
 
 function externalDependencySetForCell(baseline: CellFenceBaseline, cellId: string): string[] {
@@ -246,7 +247,7 @@ function diffExternalDependencies(baseBaseline: CellFenceBaseline, headBaseline:
     for (const entry of head) if (!base.has(entry)) added.push(`${cellId}: ${entry}`);
     for (const entry of base) if (!head.has(entry)) removed.push(`${cellId}: ${entry}`);
   }
-  return { dimension: "externalDependencies" as BaselineDimension, added, removed };
+  return { dimension: "externalDependencies", added, removed };
 }
 
 // `publicSurfaceMetadata` covers the fields that describe the cell

@@ -185,7 +185,7 @@ test("command resolution ignores empty PATH entries", () => {
     writeExecutable(path.join(rootDir, "local-tool"), "local executable\n");
     writeExecutable(path.join(binDir, "local-tool"), "selected executable\n");
     fs.mkdirSync(path.join(rootDir, "Stryker was here!"));
-    fs.writeFileSync(path.join(rootDir, "Stryker was here!", "fallback-tool"), "mutant target\n");
+    writeExecutable(path.join(rootDir, "Stryker was here!", "fallback-tool"), "mutant target\n");
     process.chdir(rootDir);
     withCommandEnvironment({
       platform: "linux",

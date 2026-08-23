@@ -13,7 +13,6 @@ import { runBaselineGateFull } from "../packages/github-action-baseline-gate/dis
 const root = process.cwd();
 const bundledActionEntrypoint = path.join(root, "packages/github-action-baseline-gate/dist/index.js");
 
-
 function makeBaseline(overrides = {}) {
   return {
     schemaVersion: "cellfence.baseline.v1",
@@ -71,6 +70,35 @@ function createBaselineRepository(context) {
   git(rootDir, ["commit", "-qm", "base baseline"]);
   return rootDir;
 }
+
+test("github action baseline gate normalizes Windows-style baseline paths for git refs", (context) => {
+  if (process.platform === "win32") {
+    context.skip("backslash paths are native separators on Windows");
+    return;
+  }
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-baseline-gate-windows-path-"));
+  context.after(() => fs.rmSync(rootDir, { recursive: true, force: true }));
+  git(rootDir, ["init", "-q", "-b", "main"]);
+  git(rootDir, ["config", "user.name", "CellFence Test"]);
+  git(rootDir, ["config", "user.email", "test@example.com"]);
+  fs.mkdirSync(path.join(rootDir, "nested"), { recursive: true });
+  writeJson(path.join(rootDir, "nested/cellfence.baseline.json"), makeBaseline());
+  git(rootDir, ["add", "nested/cellfence.baseline.json"]);
+  git(rootDir, ["commit", "-qm", "nested baseline"]);
+
+  const result = runBaselineGateFull({
+    rootDir,
+    baselineFile: "nested\\cellfence.baseline.json",
+    baseRef: "HEAD",
+  });
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(result.report.hasChange, true);
+  assert.deepEqual(result.report.deltas.find((delta) => delta.dimension === "cellIds")?.removed, [
+    "api",
+    "worker",
+  ]);
+});
 
 test("detectBaselineChanges flags added and removed owned paths", () => {
   const baseBaseline = makeBaseline();
@@ -265,6 +293,18 @@ test("github action baseline gate validates baseline JSON before diffing", (cont
     }),
     /not a valid CellFenceBaseline: schemaVersion must be cellfence\.baseline\.v1; generatedAt must be an ISO 8601 date-time string/,
   );
+
+  writeJson(path.join(rootDir, "cellfence.baseline.json"), makeBaseline({
+    cells: { api: null },
+  }));
+  assert.throws(
+    () => runBaselineGateFull({
+      rootDir,
+      baselineFile: "cellfence.baseline.json",
+      baseRef: "HEAD",
+    }),
+    /not a valid CellFenceBaseline: cells\.api must be an object/,
+  );
 });
 
 test("github action baseline gate rejects non-object and malformed baseline structure", (context) => {
@@ -293,7 +333,7 @@ test("github action baseline gate rejects non-object and malformed baseline stru
       baselineFile: "cellfence.baseline.json",
       baseRef: "HEAD",
     }),
-    /generatedAt must be an ISO 8601 date-time string; cells must be an object; cellIds must be an array when present/,
+    /generatedAt must be a non-empty string; cellIds must be an array of non-empty strings when present; cells must be an object/,
   );
 });
 

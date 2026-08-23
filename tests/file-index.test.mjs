@@ -309,6 +309,7 @@ test("glob subset distinguishes literal, slash, non-slash, and any transitions",
   }
   assert.equal(pathPatternSubset("src/**", "src/*"), false, "cached false subset result must stay false");
 
+  assert.equal(pathPatternSubset("src/**", "src/*"), false, "cached false subset stays false");
   assert.equal(patternCoveredByOwnedPaths("src/core/a.ts", ["src/core/"]), true);
 });
 

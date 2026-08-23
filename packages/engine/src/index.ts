@@ -842,6 +842,33 @@ function findArtifactLaneForPath(cell: CellManifest, relativePath: string): stri
   return undefined;
 }
 
+function repoRelativePathEscapesRoot(relativePath: string): boolean {
+  const normalized = normalizePath(relativePath);
+  return normalized === ".."
+    || normalized.startsWith("../")
+    || path.isAbsolute(normalized)
+    || /^[A-Za-z]:\//.test(normalized);
+}
+
+function resolvedRepositoryImport(
+  context: AnalysisContext,
+  targetPath: string,
+  options: Partial<Pick<ResolvedImport, "matchedSpecifier" | "isPublicPackage" | "packageExportState" | "packageExportReason">> & { targetCell?: CellManifest } = {},
+): ResolvedImport {
+  const base: ResolvedImport = {
+    targetPath,
+    matchedSpecifier: options.matchedSpecifier,
+    isExternal: false,
+    isPublicPackage: options.isPublicPackage ?? false,
+    packageExportState: options.packageExportState,
+    packageExportReason: options.packageExportReason,
+  };
+  if (repoRelativePathEscapesRoot(targetPath)) return { ...base, targetOutsideRoot: true };
+  const targetCell = options.targetCell ?? findOwningCell(context.manifest, targetPath);
+  const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, targetPath) : undefined;
+  return { ...base, targetCell, artifactLaneId };
+}
+
 function resolveWorkspacePackageImport(context: AnalysisContext, reference: ImportReference): ResolvedImport | undefined {
   const exactPackageCell = context.packageToCell.get(reference.specifier);
   if (exactPackageCell) {
@@ -851,8 +878,16 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
       ? resolvePackageExportTarget(context.rootDir, packageRoot, reference.specifier, reference.specifier, mode)
       : undefined;
     if (exportedTarget?.exported) {
+      if (exportedTarget.targetPath) {
+        return resolvedRepositoryImport(context, exportedTarget.targetPath, {
+          targetCell: exactPackageCell,
+          matchedSpecifier: reference.specifier,
+          isPublicPackage: true,
+          packageExportState: exportedTarget.state,
+          packageExportReason: exportedTarget.reason,
+        });
+      }
       return {
-        targetPath: exportedTarget.targetPath,
         targetCell: exactPackageCell,
         matchedSpecifier: reference.specifier,
         isExternal: false,
@@ -871,15 +906,13 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
         packageExportReason: exportedTarget.reason,
       };
     }
-    return {
-      targetPath: exactPackageCell.publicEntry,
+    return resolvedRepositoryImport(context, exactPackageCell.publicEntry, {
       targetCell: exactPackageCell,
       matchedSpecifier: reference.specifier,
-      isExternal: false,
       isPublicPackage: true,
       packageExportState: exportedTarget ? "UNRESOLVED_UNKNOWN" : "PUBLIC_RESOLVED",
       packageExportReason: exportedTarget ? "package has no exports map; using manifest packageName public entry" : undefined,
-    };
+    });
   }
 
   for (const [packageName, packageCell] of context.packageToCell.entries()) {
@@ -895,8 +928,16 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
         reason: "workspace package root could not be resolved",
       };
     if (exportedTarget.exported) {
+      if (exportedTarget.targetPath) {
+        return resolvedRepositoryImport(context, exportedTarget.targetPath, {
+          targetCell: packageCell,
+          matchedSpecifier: reference.specifier,
+          isPublicPackage: true,
+          packageExportState: exportedTarget.state,
+          packageExportReason: exportedTarget.reason,
+        });
+      }
       return {
-        targetPath: exportedTarget.targetPath,
         targetCell: packageCell,
         matchedSpecifier: reference.specifier,
         isExternal: false,
@@ -910,8 +951,15 @@ function resolveWorkspacePackageImport(context: AnalysisContext, reference: Impo
       ? resolveRelativeImport(context.rootDir, normalizePath(path.join(packageRoot, "package.json")), `./${subpath}`)
         || normalizePath(path.join(packageRoot, subpath))
       : undefined;
+    if (targetPath) {
+      return resolvedRepositoryImport(context, targetPath, {
+        targetCell: packageCell,
+        matchedSpecifier: reference.specifier,
+        packageExportState: exportedTarget.state,
+        packageExportReason: exportedTarget.reason,
+      });
+    }
     return {
-      targetPath,
       targetCell: packageCell,
       matchedSpecifier: reference.specifier,
       isExternal: false,
@@ -929,11 +977,7 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     const specifiers = [...(reference.candidateSpecifiers || []), reference.specifier];
     for (const specifier of specifiers) {
       const pythonTargetPath = resolvePythonImport(context.rootDir, reference.importerPath, specifier, pythonSourceRoots(context));
-      if (pythonTargetPath) {
-        const targetCell = findOwningCell(context.manifest, pythonTargetPath);
-        const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, pythonTargetPath) : undefined;
-        return { targetPath: pythonTargetPath, targetCell, artifactLaneId, matchedSpecifier: specifier, isExternal: false, isPublicPackage: false };
-      }
+      if (pythonTargetPath) return resolvedRepositoryImport(context, pythonTargetPath, { matchedSpecifier: specifier });
     }
     if (reference.specifier.startsWith(".")) return { isExternal: false, isPublicPackage: false };
   }
@@ -941,9 +985,7 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
   if (reference.specifier.startsWith(".") || reference.specifier.startsWith("/")) {
     const targetPath = resolveRelativeImport(context.rootDir, reference.importerPath, reference.specifier);
     if (!targetPath) return { isExternal: false, isPublicPackage: false };
-    const targetCell = findOwningCell(context.manifest, targetPath);
-    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, targetPath) : undefined;
-    return { targetPath, targetCell, artifactLaneId, isExternal: false, isPublicPackage: false };
+    return resolvedRepositoryImport(context, targetPath);
   }
 
   const packageImportTargetPath = resolvePackageImportsTarget(
@@ -952,22 +994,14 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     reference.specifier,
     reference.typeOnly ? "types" : reference.kind === "require" ? "require" : "import",
   );
-  if (packageImportTargetPath) {
-    const targetCell = findOwningCell(context.manifest, packageImportTargetPath);
-    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, packageImportTargetPath) : undefined;
-    return { targetPath: packageImportTargetPath, targetCell, artifactLaneId, matchedSpecifier: reference.specifier, isExternal: false, isPublicPackage: false };
-  }
+  if (packageImportTargetPath) return resolvedRepositoryImport(context, packageImportTargetPath, { matchedSpecifier: reference.specifier });
 
   const packageImport = resolveWorkspacePackageImport(context, reference);
   if (packageImport) return packageImport;
 
   const aliasTargetPath = resolveNearestPathAliasTarget(context.rootDir, reference.importerPath, reference.specifier)
     || resolvePathAliasTarget(context, reference.specifier);
-  if (aliasTargetPath) {
-    const targetCell = findOwningCell(context.manifest, aliasTargetPath);
-    const artifactLaneId = targetCell ? findArtifactLaneForPath(targetCell, aliasTargetPath) : undefined;
-    return { targetPath: aliasTargetPath, targetCell, artifactLaneId, matchedSpecifier: reference.specifier, isExternal: false, isPublicPackage: false };
-  }
+  if (aliasTargetPath) return resolvedRepositoryImport(context, aliasTargetPath, { matchedSpecifier: reference.specifier });
 
   return { isExternal: true, isPublicPackage: false };
 }
@@ -1120,6 +1154,27 @@ function validateImports(
             kind: reference.kind,
             typeOnly: reference.typeOnly,
           });
+        }
+        if (resolvedImport.targetOutsideRoot && resolvedImport.targetPath) {
+          addFinding(findings, {
+            ruleId: "CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT",
+            severity: "error",
+            cellId: importerCell.id,
+            filePath: reference.importerPath,
+            message: `${importerCell.id} imports a file outside the repository root: ${specifier}`,
+            details: { line: reference.line, specifier, targetPath: resolvedImport.targetPath },
+            suggestedResolutions: [
+              codeResolution("Move the imported source into the repository or stop importing it through a source boundary", {
+                specifier,
+                targetPath: resolvedImport.targetPath,
+              }),
+              manifestResolution("Model the dependency as an explicit package or checked-in cell source instead of a root-escaping path", Boolean(importerCell.locked), {
+                cell: importerCell.id,
+                specifier,
+              }),
+            ],
+          });
+          continue;
         }
         if (!resolvedImport.targetPath && !resolvedImport.isExternal && (reference.specifier.startsWith(".") || reference.specifier.startsWith("/"))) {
           addFinding(findings, {

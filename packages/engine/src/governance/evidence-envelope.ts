@@ -90,6 +90,7 @@ function observationStatusFor(filePath: string, family: ObservationFamily, diagn
       finding.ruleId === "CELLFENCE_UNSUPPORTED_DYNAMIC_IMPORT"
       || finding.ruleId === "CELLFENCE_UNSUPPORTED_DYNAMIC_REQUIRE"
       || finding.ruleId === "CELLFENCE_UNRESOLVED_IMPORT"
+      || finding.ruleId === "CELLFENCE_IMPORT_TARGET_OUTSIDE_ROOT"
       || finding.ruleId === "CELLFENCE_UNRESOLVED_REQUIRE");
     if (unsupported) return { filePath, family, status: "unsupported", message: unsupported.message };
   }
