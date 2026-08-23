@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { npmPublishWorkspaceDirs } from "./npm-publish-workspaces.mjs";
 import { publicWorkspaceDirs } from "./public-workspaces.mjs";
 
 const requiredFiles = [
@@ -126,13 +127,22 @@ if (!mcpProxyVersionMatch) {
 }
 
 const publicPackages = publicWorkspaceDirs();
+const npmPublishPackages = npmPublishWorkspaceDirs();
 const npmPublishWorkflow = fs.readFileSync(".github/workflows/npm-publish.yml", "utf8");
 if (/package_dirs=\(\s*\r?\n\s*packages\//.test(npmPublishWorkflow)) {
-  findings.push(".github/workflows/npm-publish.yml must derive package_dirs from scripts/public-workspaces.mjs instead of a hand-written list");
+  findings.push(".github/workflows/npm-publish.yml must derive package_dirs from scripts/npm-publish-workspaces.mjs instead of a hand-written list");
 }
-const publicWorkspaceCalls = [...npmPublishWorkflow.matchAll(/mapfile -t package_dirs < <\(node scripts\/public-workspaces\.mjs\)/g)].length;
-if (publicWorkspaceCalls !== 3) {
-  findings.push(`.github/workflows/npm-publish.yml must load public workspaces in preflight, publish, and smoke steps; found ${publicWorkspaceCalls}`);
+const npmPublishWorkspaceCalls = [...npmPublishWorkflow.matchAll(/mapfile -t package_dirs < <\(node scripts\/npm-publish-workspaces\.mjs\)/g)].length;
+if (npmPublishWorkspaceCalls !== 3) {
+  findings.push(`.github/workflows/npm-publish.yml must load npm publish workspaces in preflight, publish, and smoke steps; found ${npmPublishWorkspaceCalls}`);
+}
+if (npmPublishPackages.includes("packages/mcp-proxy")) {
+  findings.push("scripts/npm-publish-workspaces.mjs must keep packages/mcp-proxy out of registry publishing until trusted publishing is bootstrapped");
+}
+for (const packageDir of npmPublishPackages) {
+  if (!publicPackages.includes(packageDir)) {
+    findings.push(`npm publish workspace is not a public workspace: ${packageDir}`);
+  }
 }
 for (const packageDir of publicPackages) {
   const packageJsonPath = `${packageDir}/package.json`;

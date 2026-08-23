@@ -84,7 +84,7 @@ git tag -s v0.3.0 -m "CellFence v0.3.0"
 git push origin v0.3.0
 ```
 
-Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every package in the publish set:
+Run the workflow in dry-run mode first. This performs all release gates, regenerates the ignored SBOM, and executes `npm publish --dry-run` for every package returned by `scripts/npm-publish-workspaces.mjs`:
 
 ```bash
 gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.3.0 -f dry_run=true
@@ -96,7 +96,7 @@ For the real publish, use the same tag ref, set `dry_run=false`, enter the exact
 gh workflow run npm-publish.yml --repo OWNER/REPOSITORY --ref v0.3.0 -f dry_run=false -f confirm_publish="publish 0.3.0"
 ```
 
-The workflow preflight checks that every package in the publish set is visible on npm before `dry_run=false`. `@cellfence/mcp-proxy` remains covered by `pack:smoke`, but it is held out of the registry publish set because npm Trusted Publisher configuration requires an existing package page. Resolve its first-publish path separately before adding it to `npm-publish.yml`; do not add a repository `NPM_TOKEN` as a shortcut.
+The workflow preflight checks that every package in the registry publish set is visible on npm before `dry_run=false`. `@cellfence/mcp-proxy` remains covered by `pack:smoke`, but it is held out of `scripts/npm-publish-workspaces.mjs` because npm Trusted Publisher configuration requires an existing package page. Resolve its first-publish path separately before adding it to the registry publish set; do not add a repository `NPM_TOKEN` as a shortcut.
 
 ## SBOM
 

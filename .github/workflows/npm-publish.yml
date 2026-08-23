@@ -104,7 +104,7 @@ jobs:
           set -euo pipefail
 
           # Include all publishable workspace packages in dependency order.
-          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
+          mapfile -t package_dirs < <(node scripts/npm-publish-workspaces.mjs)
 
           missing_packages=0
           for package_dir in "${package_dirs[@]}"; do
@@ -129,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
+          mapfile -t package_dirs < <(node scripts/npm-publish-workspaces.mjs)
 
           for package_dir in "${package_dirs[@]}"; do
             package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
@@ -161,7 +161,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          mapfile -t package_dirs < <(node scripts/public-workspaces.mjs)
+          mapfile -t package_dirs < <(node scripts/npm-publish-workspaces.mjs)
 
           for package_dir in "${package_dirs[@]}"; do
             package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
