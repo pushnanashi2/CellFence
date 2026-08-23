@@ -173,3 +173,7 @@ const summary = {
 
 fs.writeFileSync(path.join(outDir, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`);
 console.log(JSON.stringify(summary, null, 2));
+
+if (Object.values(results).some((result) => result.exitCode !== 0)) {
+  process.exitCode = 1;
+}

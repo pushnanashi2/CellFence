@@ -77,15 +77,25 @@ export function agentBudgetPlugin(options: AgentBudgetOptions = {}): CellFencePl
               });
             }
             const cellId = cellForFile(context.repository, filePath);
-            if (options.allowedCells && cellId && !options.allowedCells.includes(cellId)) {
-              findings.push({
-                ruleId: "agent-budget/disallowed-cell",
-                severity,
-                filePath,
-                cellId,
-                message: `${filePath} belongs to ${cellId}, which is outside allowedCells`,
-                details: { allowedCells: options.allowedCells },
-              });
+            if (options.allowedCells) {
+              if (!cellId) {
+                findings.push({
+                  ruleId: "agent-budget/unowned-file",
+                  severity,
+                  filePath,
+                  message: `${filePath} is not owned by any allowed cell`,
+                  details: { allowedCells: options.allowedCells },
+                });
+              } else if (!options.allowedCells.includes(cellId)) {
+                findings.push({
+                  ruleId: "agent-budget/disallowed-cell",
+                  severity,
+                  filePath,
+                  cellId,
+                  message: `${filePath} belongs to ${cellId}, which is outside allowedCells`,
+                  details: { allowedCells: options.allowedCells },
+                });
+              }
             }
           }
 

@@ -29,6 +29,7 @@ function changedCells(repository: CellFenceRepositoryModel): Set<string> {
 function reverseImportGraph(repository: CellFenceRepositoryModel): Map<string, Set<string>> {
   const reverse = new Map<string, Set<string>>();
   for (const reference of repository.imports) {
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: unresolved and self references cannot expand the downstream closure once changed cells are marked visited.
     if (!reference.targetCellId || reference.targetCellId === reference.importerCellId) continue;
     const consumers = reverse.get(reference.targetCellId) || new Set<string>();
     consumers.add(reference.importerCellId);
@@ -39,13 +40,15 @@ function reverseImportGraph(repository: CellFenceRepositoryModel): Map<string, S
 
 function collectAffectedCells(changed: Set<string>, reverse: Map<string, Set<string>>): Set<string> {
   const affected = new Set<string>();
+  const visited = new Set<string>(changed);
   const queue = [...changed];
   // Stryker disable next-line EqualityOperator,BlockStatement: mutating the queue loop can remove the only progress step and non-terminate; transitive closure behavior is covered by cycle and threshold tests.
   while (queue.length > 0) {
     const cellId = queue.shift() as string;
     for (const consumer of reverse.get(cellId) || []) {
       // Stryker disable next-line ConditionalExpression: removing the visited guard makes cyclic dependency graphs non-terminating; cycle handling is covered by blast-radius boundary tests.
-      if (affected.has(consumer)) continue;
+      if (visited.has(consumer)) continue;
+      visited.add(consumer);
       affected.add(consumer);
       queue.push(consumer);
     }

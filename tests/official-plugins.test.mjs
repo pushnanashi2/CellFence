@@ -692,6 +692,17 @@ test("agent budget plugin handles isolated glob and default-array edge cases", (
       .run(exactContext(["Stryker was here"])),
     [],
   );
+  assert.deepEqual(
+    directRule(agentBudgetPlugin({ allowedCells: ["core"] }), "agent-budget/change-budget")
+      .run(exactContext(["README.md"])),
+    [{
+      ruleId: "agent-budget/unowned-file",
+      severity: "error",
+      filePath: "README.md",
+      message: "README.md is not owned by any allowed cell",
+      details: { allowedCells: ["core"] },
+    }],
+  );
 
   const symbolBudgetRule = directRule(agentBudgetPlugin({ maxPublicSymbolsAdded: 0 }), "agent-budget/change-budget");
   assert.deepEqual(symbolBudgetRule.run(directContext(baseRepository({
@@ -848,6 +859,16 @@ test("blast radius plugin covers glob, self-edge, and threshold boundaries", () 
   });
   assert.deepEqual(directRule(blastRadiusPlugin({ maxAffectedCells: 1 }), "blast-radius/affected-cells")
     .run(directContext(equalBudgetRepository)), []);
+
+  const cycleRepository = baseRepository({
+    changedFiles: new Set(["src/core/public.ts"]),
+    imports: [
+      { importerCellId: "app", targetCellId: "core" },
+      { importerCellId: "core", targetCellId: "app" },
+    ],
+  });
+  assert.deepEqual(directRule(blastRadiusPlugin({ maxAffectedCells: 1 }), "blast-radius/affected-cells")
+    .run(directContext(cycleRepository)), []);
 
   const exactAndWindowsRepository = baseRepository({
     manifest: {
@@ -1748,7 +1769,19 @@ test("official rule plugins cover pass, warning, and secondary budget branches",
       changedFiles: ["README.md"],
       plugins: [agentBudgetPlugin({ allowedCells: ["app"] })],
     });
-    assert.deepEqual(unownedBudgetResult.findings.filter((finding) => finding.ruleId.startsWith("agent-budget/")), []);
+    assert.deepEqual(unownedBudgetResult.findings.filter((finding) => finding.ruleId.startsWith("agent-budget/")).map((finding) => ({
+      ruleId: finding.ruleId,
+      severity: finding.severity,
+      filePath: finding.filePath,
+      message: finding.message,
+      details: finding.details,
+    })), [{
+      ruleId: "agent-budget/unowned-file",
+      severity: "error",
+      filePath: "README.md",
+      message: "README.md is not owned by any allowed cell",
+      details: { allowedCells: ["app"] },
+    }]);
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
