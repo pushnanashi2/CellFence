@@ -140,9 +140,14 @@ jobs:
           output="$(node packages/github-action-baseline-gate/dist/index.js 2>&1)"
           status="$?"
           set -e
-          echo "$output"
-          test "$status" -eq 1
-          echo "$output" | grep -F "requires a pull_request event"
+          if [ "$status" -ne 1 ]; then
+            echo "$output"
+            exit 1
+          fi
+          if ! echo "$output" | grep -F "requires a pull_request event" >/dev/null; then
+            echo "$output"
+            exit 1
+          fi
       - run: git diff --exit-code -- packages/github-action-baseline-gate/dist/index.js
 
   self-check:
