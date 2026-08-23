@@ -165,13 +165,13 @@ jobs:
 
           for package_dir in "${package_dirs[@]}"; do
             package_name="$(node -p "JSON.parse(require('fs').readFileSync('${package_dir}/package.json', 'utf8')).name")"
-            for attempt in 1 2 3 4 5 6; do
+            for attempt in {1..30}; do
               if npm view "${package_name}@${RELEASE_VERSION}" version | grep -Fx "${RELEASE_VERSION}" >/dev/null; then
                 echo "${package_name}@${RELEASE_VERSION} is visible on npm."
                 break
               fi
 
-              if [[ "${attempt}" -eq 6 ]]; then
+              if [[ "${attempt}" -eq 30 ]]; then
                 echo "::error::${package_name}@${RELEASE_VERSION} is not visible on npm."
                 exit 1
               fi
