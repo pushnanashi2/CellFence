@@ -1548,6 +1548,59 @@ test("quants trend plugin covers defaults, moving average math, and equality bou
   assert.deepEqual(averageRule.run(directContext(baseRepository({
     metrics: { core: { publicSurfaceLines: 7 } },
   }))), []);
+
+  const reversedHistoryRule = directRule(quantsTrendPlugin({
+    history: [{
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-03T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 4 } },
+    }, {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 1 } },
+    }, {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-02T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 3 } },
+    }],
+    metrics: ["publicSurfaceLines"],
+    multiplier: 2,
+    minimumGrowth: 0,
+    severity: "error",
+  }), "quants-trend/architecture-momentum");
+  assert.deepEqual(reversedHistoryRule.run(directContext(baseRepository({
+    metrics: { core: { publicSurfaceLines: 8 } },
+  }))).map((finding) => finding.details), [{
+    cellId: "core",
+    metric: "publicSurfaceLines",
+    currentDelta: 4,
+    averageDelta: 1.5,
+    threshold: 3,
+    history: [1, 3, 4],
+  }]);
+
+  const equalTimestampRule = directRule(quantsTrendPlugin({
+    history: [{
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 1 } },
+    }, {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 3 } },
+    }, {
+      schemaVersion: "cellfence.baseline.v1",
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      cells: { core: { publicSurfaceLines: 4 } },
+    }],
+    metrics: ["publicSurfaceLines"],
+    multiplier: 2,
+    minimumGrowth: 0,
+    severity: "error",
+  }), "quants-trend/architecture-momentum");
+  assert.deepEqual(equalTimestampRule.run(directContext(baseRepository({
+    metrics: { core: { publicSurfaceLines: 8 } },
+  }))).map((finding) => finding.details.history), [[1, 3, 4]]);
 });
 
 test("economy matrix reporter emits exact sorted rows and markdown", () => {

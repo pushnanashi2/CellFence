@@ -26,11 +26,24 @@ function mean(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function generatedAtSortKey(baseline: CellFenceBaseline): number {
+  const timestamp = Date.parse(baseline.generatedAt);
+  return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY;
+}
+
+function chronologicalHistory(history: CellFenceBaseline[]): CellFenceBaseline[] {
+  return history
+    .map((baseline) => ({ baseline, timestamp: generatedAtSortKey(baseline) }))
+    .sort((left, right) => left.timestamp - right.timestamp)
+    .map((entry) => entry.baseline);
+}
+
 export function quantsTrendPlugin(options: QuantsTrendOptions): CellFencePlugin {
   const severity = options.severity || "warning";
   const metrics = options.metrics || ["publicSymbols", "crossCellDependencies"];
   const multiplier = options.multiplier ?? 2;
   const minimumGrowth = options.minimumGrowth ?? 2;
+  const history = chronologicalHistory(options.history);
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-quants-trend",
@@ -46,10 +59,10 @@ export function quantsTrendPlugin(options: QuantsTrendOptions): CellFencePlugin 
         run(context) {
           const findings: CellFenceFinding[] = [];
           // Stryker disable next-line ConditionalExpression: without two history points, downstream mean/threshold becomes NaN and still emits no findings.
-          if (options.history.length < 2) return findings;
+          if (history.length < 2) return findings;
           for (const [cellId, current] of Object.entries(context.repository.metrics)) {
             for (const metric of metrics) {
-              const historicalValues = options.history.map((baseline) => metricValue(baseline.cells[cellId], metric));
+              const historicalValues = history.map((baseline) => metricValue(baseline.cells[cellId], metric));
               const deltas = historicalValues.slice(1).map((value, index) => Math.max(0, value - historicalValues[index]));
               const averageDelta = mean(deltas);
               const previousValue = historicalValues[historicalValues.length - 1] || 0;
