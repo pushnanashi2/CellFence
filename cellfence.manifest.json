@@ -632,6 +632,24 @@
             "unresolved:dynamic-file-path"
           ],
           "description": "Baseline gate reads the operator-selected baseline JSON path from the working tree when a git ref is not supplied."
+        },
+        {
+          "id": "github-action-baseline-gate-github-api",
+          "kind": "http",
+          "access": [
+            "call"
+          ],
+          "selectors": [
+            "unresolved:dynamic-http-url",
+            "DELETE",
+            "GET",
+            "HEAD",
+            "OPTIONS",
+            "PATCH",
+            "POST",
+            "PUT"
+          ],
+          "description": "Baseline gate uses @actions/github and @actions/http-client to call GitHub API endpoints selected by the Actions runtime and Octokit request layer."
         }
       ],
       "producesArtifacts": [],

@@ -39,8 +39,14 @@ exit 0
 `);
   writeExecutable(path.join(binDir, "node"), `#!/bin/sh
 if [ "$1" = "--test" ]; then
+  if [ -n "$CELLFENCE_BASELINE_ED25519_PUBLIC_KEY" ]; then
+    exit 9
+  fi
   printf 'TAP version 13\\n# fail 0\\n# cancelled 0\\n'
   exit 0
+fi
+if [ "$1" = "packages/cli/dist/index.js" ] && [ "$CELLFENCE_BASELINE_ED25519_PUBLIC_KEY" != "public-test-key" ]; then
+  exit 8
 fi
 printf '{"findings":[],"warnings":[]}\\n'
 exit 0
@@ -52,6 +58,7 @@ exit 0
     env: {
       ...process.env,
       CELLFENCE_CI_COUNTS_DIR: outDir,
+      CELLFENCE_BASELINE_ED25519_PUBLIC_KEY: "public-test-key",
       PATH: `${binDir}${path.delimiter}${process.env.PATH}`,
     },
   });
@@ -60,5 +67,7 @@ exit 0
 
   const summary = JSON.parse(fs.readFileSync(path.join(outDir, "summary.json"), "utf8"));
   assert.equal(summary.results.coverage.exitCode, 1);
+  assert.equal(summary.results.test.exitCode, 0);
+  assert.equal(summary.results.cellfence.exitCode, 0);
   assert.equal(summary.results.lint.exitCode, 0);
 });

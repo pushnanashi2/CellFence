@@ -16,6 +16,7 @@ import {
   extractImports,
   extractPublicSymbols,
   getLineNumber,
+  importSpecifierLooksPathLike,
   literalText,
   publicSurfaceHash,
   readPathAliases,
@@ -54,6 +55,17 @@ function packageFreeTempRoot(prefix) {
   const rootParent = fs.existsSync(candidateRoot) ? candidateRoot : os.tmpdir();
   return fs.mkdtempSync(path.join(rootParent, prefix));
 }
+
+test("module resolution treats drive-letter specifiers as path-like imports", () => {
+  assert.equal(importSpecifierLooksPathLike("./local"), true);
+  assert.equal(importSpecifierLooksPathLike("../parent"), true);
+  assert.equal(importSpecifierLooksPathLike("/absolute"), true);
+  assert.equal(importSpecifierLooksPathLike("C:/repo/src/public"), true);
+  assert.equal(importSpecifierLooksPathLike("D:\\repo\\src\\public"), true);
+  assert.equal(importSpecifierLooksPathLike("pkg/C:/repo/src/public"), false);
+  assert.equal(importSpecifierLooksPathLike("@scope/package"), false);
+  assert.equal(importSpecifierLooksPathLike("node:fs"), false);
+});
 
 test("module resolution maps NodeNext runtime specifiers to source files", () => {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-module-runtime-"));

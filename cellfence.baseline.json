@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cellfence.baseline.v1",
-  "generatedAt": "2026-08-22T06:51:29.504Z",
+  "generatedAt": "2026-08-23T10:36:04.955Z",
   "cellIds": [
     "adapter-call-pattern",
     "adapter-opentelemetry",
@@ -24,7 +24,7 @@
     "schema": {
       "ownedPathPatterns": 1,
       "publicSymbols": 39,
-      "publicSurfaceLines": 1036,
+      "publicSurfaceLines": 1081,
       "crossCellDependencies": 0,
       "ownedPathSet": [
         "packages/schema/**"
@@ -124,7 +124,7 @@
     "engine": {
       "ownedPathPatterns": 1,
       "publicSymbols": 135,
-      "publicSurfaceLines": 2207,
+      "publicSurfaceLines": 2325,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/engine/**"
@@ -267,7 +267,7 @@
         "WriteAccessResult",
         "writeBaselineFile"
       ],
-      "publicSurfaceHash": "6c9bdb8b3dad316adbe876964418edcb29b306e6fe6c06cd3762a1740677e66c",
+      "publicSurfaceHash": "003e1fecbd90b7913e32aa8ca95aca96fa2d6a3fba3639bd7441779942be90c6",
       "dependencyEdges": [
         "engine->schema"
       ],
@@ -303,7 +303,7 @@
     "mcp-proxy": {
       "ownedPathPatterns": 1,
       "publicSymbols": 15,
-      "publicSurfaceLines": 934,
+      "publicSurfaceLines": 935,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/mcp-proxy/**"
@@ -354,7 +354,7 @@
     "cli": {
       "ownedPathPatterns": 1,
       "publicSymbols": 3,
-      "publicSurfaceLines": 2243,
+      "publicSurfaceLines": 2245,
       "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/cli/**"
@@ -412,7 +412,7 @@
     "trace": {
       "ownedPathPatterns": 1,
       "publicSymbols": 10,
-      "publicSurfaceLines": 306,
+      "publicSurfaceLines": 317,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/trace/**"
@@ -487,7 +487,7 @@
     "plugin-agent-budget": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 124,
+      "publicSurfaceLines": 134,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-agent-budget/**"
@@ -508,7 +508,7 @@
     "plugin-blast-radius": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 94,
+      "publicSurfaceLines": 97,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-blast-radius/**"
@@ -550,7 +550,7 @@
     "plugin-geo-purity": {
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
-      "publicSurfaceLines": 98,
+      "publicSurfaceLines": 131,
       "crossCellDependencies": 1,
       "ownedPathSet": [
         "packages/plugin-geo-purity/**"
@@ -592,7 +592,7 @@
     "plugin-quants-trend": {
       "ownedPathPatterns": 1,
       "publicSymbols": 3,
-      "publicSurfaceLines": 75,
+      "publicSurfaceLines": 88,
       "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/plugin-quants-trend/**"
@@ -639,7 +639,7 @@
       "ownedPathPatterns": 1,
       "publicSymbols": 2,
       "publicSurfaceLines": 496,
-      "crossCellDependencies": 1,
+      "crossCellDependencies": 2,
       "ownedPathSet": [
         "packages/github-action-baseline-gate/**"
       ],
@@ -650,7 +650,8 @@
       ],
       "publicSurfaceHash": "65486365d49ac4297bf84019db6ba6fa78a0301b5c617de50f079a231569fbf9",
       "dependencyEdges": [
-        "github-action-baseline-gate->engine"
+        "github-action-baseline-gate->engine",
+        "github-action-baseline-gate->schema"
       ],
       "artifactContracts": [],
       "resourceAccesses": [
@@ -659,6 +660,62 @@
           "access": "read",
           "selector": "unresolved:dynamic-file-path",
           "detectedBy": "file-call",
+          "confidence": "low"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "DELETE",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "GET",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "HEAD",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "OPTIONS",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "PATCH",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "POST",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "PUT",
+          "detectedBy": "request",
+          "confidence": "high"
+        },
+        {
+          "kind": "http",
+          "access": "call",
+          "selector": "unresolved:dynamic-http-url",
+          "detectedBy": "http-call",
           "confidence": "low"
         }
       ],
@@ -670,8 +727,8 @@
   },
   "seal": {
     "algorithm": "ed25519",
-    "keyId": "baseline-ed25519-2026-08-22-ci-fix",
+    "keyId": "baseline-ed25519-2026-08-23-self-check",
     "payloadVersion": "seal-metadata-v1",
-    "signature": "WCNrCBRwbzJzvpLtYYo0qXS3uuVEQKCnc5uNWB+PYGma3a3nR3jmNXAeze0G+HqbH6SX/tR29AkA8Xc0dbsEBw=="
+    "signature": "4xlvWFcjlRPtLd7R3/6QaKQ+1JKzGURFohhbreE1SxDOy995J9TGsg6nyQvxDBqHFfzdKT3w/+IbtdF/+cwxDg=="
   }
 }

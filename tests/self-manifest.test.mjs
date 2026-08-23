@@ -46,4 +46,10 @@ test("CellFence self manifest declares detected self resource accesses", () => {
     contract.kind === "file"
       && contract.access.includes("read")
       && contract.selectors.includes("unresolved:dynamic-file-path")));
+  assert.ok(baselineGate.resourceContracts.some((contract) =>
+    contract.kind === "http"
+      && contract.access.includes("call")
+      && contract.selectors.includes("unresolved:dynamic-http-url")
+      && contract.selectors.includes("GET")
+      && contract.selectors.includes("POST")));
 });

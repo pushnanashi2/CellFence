@@ -238,6 +238,12 @@ function isPythonPath(filePath: string): boolean {
   return path.extname(filePath) === ".py";
 }
 
+export function importSpecifierLooksPathLike(specifier: string): boolean {
+  return specifier.startsWith(".")
+    || specifier.startsWith("/")
+    || /^[A-Za-z]:[\\/]/.test(specifier);
+}
+
 function resolvePythonRelativeModule(rootDir: string, importerPath: string, specifier: string): string | undefined {
   let dotCount = 0;
   while (specifier[dotCount] === ".") dotCount += 1;

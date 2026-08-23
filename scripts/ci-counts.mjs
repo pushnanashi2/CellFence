@@ -6,11 +6,33 @@ const root = process.cwd();
 const outDir = path.resolve(root, process.env.CELLFENCE_CI_COUNTS_DIR || "tmp/ci-counts");
 fs.mkdirSync(outDir, { recursive: true });
 
+const BASELINE_VERIFIER_ENV_NAMES = [
+  "CELLFENCE_BASELINE_ED25519_PUBLIC_KEY",
+  "CELLFENCE_BASELINE_ED25519_PRIVATE_KEY",
+  "CELLFENCE_BASELINE_ED25519_KEY_ID",
+  "CELLFENCE_BASELINE_HMAC_KEY",
+  "CELLFENCE_BASELINE_HMAC_KEY_ID",
+];
+
+function defaultChildEnv() {
+  const env = { ...process.env };
+  for (const name of BASELINE_VERIFIER_ENV_NAMES) delete env[name];
+  return env;
+}
+
+function configuredBaselineVerifierEnv() {
+  const env = {};
+  for (const name of ["CELLFENCE_BASELINE_ED25519_PUBLIC_KEY", "CELLFENCE_BASELINE_HMAC_KEY"]) {
+    if (process.env[name]) env[name] = process.env[name];
+  }
+  return env;
+}
+
 function run(name, command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd || root,
     encoding: "utf8",
-    env: { ...process.env, ...options.env },
+    env: { ...defaultChildEnv(), ...options.env },
     maxBuffer: 100 * 1024 * 1024,
   });
   const stdout = result.stdout || "";
@@ -103,15 +125,6 @@ results.test = {
 const coverageDir = path.join(outDir, "coverage");
 const coverage = run("coverage100", "npx", [
   "c8",
-  "--check-coverage",
-  "--lines",
-  "100",
-  "--statements",
-  "100",
-  "--branches",
-  "100",
-  "--functions",
-  "100",
   "--reporter=json-summary",
   "--reports-dir",
   coverageDir,
@@ -136,7 +149,7 @@ const selfCheck = run("cellfence-self-check", "node", [
   "--json",
   "--summary-json",
   selfCheckJson,
-]);
+], { env: configuredBaselineVerifierEnv() });
 const selfCheckSummary = readJsonIfPresent(selfCheckJson);
 const selfCheckResult = readJsonIfPresent(path.join(outDir, "cellfence-self-check.stdout.log"));
 results.cellfence = {

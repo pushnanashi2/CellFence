@@ -39,6 +39,7 @@ import {
   extractImports,
   extractPublicSymbols,
   getLineNumber,
+  importSpecifierLooksPathLike,
   literalText,
   resolvePythonImport,
   resolveNearestPathAliasTarget,
@@ -982,7 +983,7 @@ function resolveImport(context: AnalysisContext, reference: ImportReference): Re
     if (reference.specifier.startsWith(".")) return { isExternal: false, isPublicPackage: false };
   }
 
-  if (reference.specifier.startsWith(".") || reference.specifier.startsWith("/")) {
+  if (importSpecifierLooksPathLike(reference.specifier)) {
     const targetPath = resolveRelativeImport(context.rootDir, reference.importerPath, reference.specifier);
     if (!targetPath) return { isExternal: false, isPublicPackage: false };
     return resolvedRepositoryImport(context, targetPath);
