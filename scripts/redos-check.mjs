@@ -1,6 +1,8 @@
 import { matchesPattern } from "../packages/engine/dist/file-index.js";
 
 const MAX_CASE_MS = 1_000;
+const pathologicalSegments = Array.from({ length: 14 }, (_, index) => `**/x${index}*`);
+const pathologicalPathSegments = pathologicalSegments.flatMap((_, index) => [`noise${index}`, `x${index}-segment`]);
 
 const cases = [
   { name: "globstar root", pattern: "**", path: "src/a.ts", expected: true },
@@ -17,6 +19,18 @@ const cases = [
     name: "pathological non-match",
     pattern: `src/${"**/".repeat(14)}zzz.ts`,
     path: `src/${"a/".repeat(20)}nope.ts`,
+    expected: false,
+  },
+  {
+    name: "non-collapsing pathological match",
+    pattern: `src/${pathologicalSegments.join("/")}/target.ts`,
+    path: `src/${pathologicalPathSegments.join("/")}/target.ts`,
+    expected: true,
+  },
+  {
+    name: "non-collapsing pathological non-match",
+    pattern: `src/${pathologicalSegments.join("/")}/target.ts`,
+    path: `src/${pathologicalPathSegments.join("/")}/miss.ts`,
     expected: false,
   },
 ];

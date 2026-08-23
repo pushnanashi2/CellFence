@@ -114,6 +114,6 @@ CellFence path patterns are repository-relative and use this deliberately small 
 - `?`, `{}`, `[`, `]`, and extglob grouping are rejected by manifest validation instead of being treated as silent literals.
 - Trailing `/` characters are removed before matching, so `src/core/` is the canonical equivalent of `src/core`.
 
-The `*` and `**` portions of the canonical dialect (after separator normalization) are enforced against minimatch with `{ dot: true }` as the external oracle in `tests/conformance-glob-oracle.test.mjs`. Syntax that minimatch treats as additional operators (`?`, braces, character classes, and extglobs) is intentionally outside the dialect and fails manifest validation.
+The `*` and `**` portions of the canonical dialect (after separator and dot-segment normalization, including leading `./`, repeated `/`, and `/./`) are enforced against minimatch with `{ dot: true }` as the external oracle in `tests/conformance-glob-oracle.test.mjs`. Syntax that minimatch treats as additional operators (`?`, braces, character classes, and extglobs) is intentionally outside the dialect and fails manifest validation.
 
 Resource contract selectors may use precise values or bounded glob patterns, but selectors cannot be bare `**` or start with `**/`; broad allow-everything resource contracts must be split into explicit reviewed selectors.

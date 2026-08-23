@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import test from "node:test";
 
 import { minimatch } from "minimatch";
@@ -15,7 +16,12 @@ import { pathPatternsOverlap } from "../packages/engine/dist/glob-overlap.js";
 // key: `${pattern}\u0000${path}` -> { ours, oracle, reason }
 const DOCUMENTED_DIVERGENCES = new Map();
 
-const oracle = (relativePath, pattern) => minimatch(relativePath, pattern, { dot: true });
+function normalizeForOracle(value) {
+  const normalized = path.posix.normalize(value.replace(/\\/g, "/"));
+  return (normalized === "." ? "" : normalized).replace(/\/+$/, "");
+}
+
+const oracle = (relativePath, pattern) => minimatch(normalizeForOracle(relativePath), normalizeForOracle(pattern), { dot: true });
 
 function* tokenCombinations(tokens, maxLength) {
   for (const token of tokens) yield [token];
@@ -26,13 +32,13 @@ function* tokenCombinations(tokens, maxLength) {
 }
 
 const pathSegments = ["src", "core", "a", "deep", "a.ts", "x.test.ts", "b.py", "README.md"];
-const patternTokens = ["src", "core", "*", "**", "*.ts", "**.ts", "a", "deep"];
+const patternTokens = ["src", "core", "*", "**", "*.ts", "**.ts", "a", "deep", "./src", "***", "", "."];
 const unsupportedSyntax = /[?{}[\]!()+@]/;
 
-const corpusPaths = [...tokenCombinations(pathSegments, 3)].map((parts) => parts.join("/"));
-const corpusPatterns = [...tokenCombinations(patternTokens, 3)]
+const corpusPaths = [...new Set([...tokenCombinations(pathSegments, 3)].map((parts) => parts.join("/")))];
+const corpusPatterns = [...new Set([...tokenCombinations(patternTokens, 3)]
   .map((parts) => parts.join("/"))
-  .filter((pattern) => !unsupportedSyntax.test(pattern));
+  .filter((pattern) => pattern.length > 0 && !pattern.startsWith("/") && !unsupportedSyntax.test(pattern)))];
 
 test("path matcher agrees with the minimatch oracle across the exhaustive dialect corpus", () => {
   const divergences = [];
