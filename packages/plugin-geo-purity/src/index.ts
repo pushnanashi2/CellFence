@@ -14,14 +14,47 @@ export type GeoPurityOptions = {
 };
 
 function lineCount(text: string): number {
-  return text.length === 0 ? 0 : text.split(/\r?\n/).length;
+  const normalized = text.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  return lines[lines.length - 1] === "" ? lines.length - 1 : lines.length;
+}
+
+function hasImmediateJsdoc(text: string, exportIndex: number): boolean {
+  const beforeExport = text.slice(0, exportIndex).trimEnd();
+  if (!beforeExport.endsWith("*/")) return false;
+  const commentStart = beforeExport.lastIndexOf("/*");
+  // Stryker disable next-line ConditionalExpression: after the suffix guard, valid block comments always include an opening delimiter; malformed fragments are outside the supported source dialect.
+  return commentStart >= 0 && beforeExport.slice(commentStart).startsWith("/**");
+}
+
+function exportedNames(specifierList: string): string[] {
+  // Stryker disable next-line ArrayDeclaration: injected sentinel names are not valid TypeScript export identifiers and cannot match supported public symbols.
+  const names: string[] = [];
+  for (const rawSpecifier of specifierList.split(",")) {
+    const trimmed = rawSpecifier.trim();
+    // Stryker disable next-line ConditionalExpression: empty named-export specifiers are invalid source syntax; supported named exports are covered by direct tests.
+    if (!trimmed) continue;
+    const tokens = trimmed.split(/\s+/);
+    const typedTokens = tokens[0] === "type" ? tokens.slice(1) : tokens;
+    const aliasIndex = typedTokens.indexOf("as");
+    const exported = typedTokens[aliasIndex + 1] || typedTokens[0];
+    // Stryker disable next-line ConditionalExpression: missing exported names require malformed export specifiers that the plugin does not parse as a supported source dialect.
+    if (exported) names.push(exported);
+  }
+  return names;
 }
 
 function hasJsdocForExport(text: string, symbol: string): boolean {
   const escaped = symbol.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-  const expression = new RegExp(`/\\*\\*[\\s\\S]*?\\*/\\s*export\\s+(?:declare\\s+)?(?:const|let|var|function|class|interface|type|enum)\\s+${escaped}\\b`);
-  const namedExport = new RegExp(`/\\*\\*[\\s\\S]*?\\*/\\s*export\\s*\\{[^}]*\\b${escaped}\\b[^}]*\\}`);
-  return expression.test(text) || namedExport.test(text);
+  const expression = new RegExp(`\\bexport\\s+(?:declare\\s+)?(?:async\\s+)?(?:const|let|var|function|class|interface|type|enum)\\s+${escaped}\\b`, "g");
+  for (const match of text.matchAll(expression)) {
+    if (hasImmediateJsdoc(text, match.index || 0)) return true;
+  }
+  const namedExport = /\bexport\s*\{([^}]*)\}/g;
+  for (const match of text.matchAll(namedExport)) {
+    if (exportedNames(match[1]).includes(symbol) && hasImmediateJsdoc(text, match.index || 0)) return true;
+  }
+  return false;
 }
 
 export function geoPurityPlugin(options: GeoPurityOptions = {}): CellFencePlugin {

@@ -414,7 +414,8 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     } else if (argument.startsWith("--downstream-command=")) {
       downstreamCommand = argument.slice("--downstream-command=".length);
     } else if (argument === "--downstream-arg") {
-      downstreamArgs.push(argv[index + 1] || "");
+      if (index + 1 >= argv.length) throw new Error("--downstream-arg requires a value");
+      downstreamArgs.push(argv[index + 1] ?? "");
       index += 1;
     } else if (argument.startsWith("--downstream-arg=")) {
       downstreamArgs.push(argument.slice("--downstream-arg=".length));
@@ -446,7 +447,7 @@ export function parseProxyArgs(argv: string[], env: NodeJS.ProcessEnv = process.
     failMode,
     auditLogPath,
     downstreamCommand,
-    downstreamArgs: downstreamArgs.filter((entry) => entry.length > 0),
+    downstreamArgs,
     downstreamCwd,
     downstreamEnv: safeDownstreamEnvironment(env, downstreamEnvAllowlist),
     allowCwdMismatch,

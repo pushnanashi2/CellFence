@@ -573,11 +573,28 @@ test("proxy argument parser covers env defaults, file config, inline overrides, 
     });
     assert.equal(missingRootValue.rootDir, process.cwd());
 
-    const missingArgValue = parseProxyArgs(["--downstream-arg"], {
+    assert.throws(() => parseProxyArgs(["--downstream-arg"], {
+      CELLFENCE_AGENT: "fallback-agent",
+      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
+    }), /--downstream-arg requires a value/);
+
+    const emptyArgValue = parseProxyArgs(["--downstream-arg="], {
       CELLFENCE_AGENT: "fallback-agent",
       CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
     });
-    assert.deepEqual(missingArgValue.downstreamArgs, []);
+    assert.deepEqual(emptyArgValue.downstreamArgs, [""]);
+
+    const separatedEmptyArgValue = parseProxyArgs(["--downstream-arg", ""], {
+      CELLFENCE_AGENT: "fallback-agent",
+      CELLFENCE_MCP_DOWNSTREAM_COMMAND: "fallback-cmd",
+    });
+    assert.deepEqual(separatedEmptyArgValue.downstreamArgs, [""]);
+
+    const separatorEmptyArg = parseProxyArgs(["--", "cmd", "before", "", "after"], {
+      CELLFENCE_AGENT: "fallback-agent",
+    });
+    assert.equal(separatorEmptyArg.downstreamCommand, "cmd");
+    assert.deepEqual(separatorEmptyArg.downstreamArgs, ["before", "", "after"]);
 
     assert.equal(await main(["--help"], {}), 0);
     assert.equal(await main(["--mode=bad", "--agent=a", "--downstream-command=node"], {}), 2);

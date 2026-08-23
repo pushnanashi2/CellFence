@@ -1122,8 +1122,8 @@ test("geo purity plugin emits exact context-shape findings", () => {
     severity: "error",
     cellId: "core",
     filePath: "src/core/public.ts",
-    message: "core public entry has 3 lines, exceeding 1",
-    details: { lines: 3, maxPublicEntryLines: 1 },
+    message: "core public entry has 2 lines, exceeding 1",
+    details: { lines: 2, maxPublicEntryLines: 1 },
   }, {
     ruleId: "geo-purity/public-symbol-undocumented",
     severity: "error",
@@ -1142,23 +1142,9 @@ test("geo purity plugin emits exact context-shape findings", () => {
     ruleId: "geo-purity/owned-file-too-large",
     severity: "error",
     cellId: "core",
-    filePath: "src/core/public.ts",
-    message: "src/core/public.ts has 3 lines, exceeding 2",
-    details: { lines: 3, maxOwnedFileLines: 2 },
-  }, {
-    ruleId: "geo-purity/owned-file-too-large",
-    severity: "error",
-    cellId: "core",
     filePath: "src/core/extra.ts",
-    message: "src/core/extra.ts has 4 lines, exceeding 2",
-    details: { lines: 4, maxOwnedFileLines: 2 },
-  }, {
-    ruleId: "geo-purity/public-entry-too-large",
-    severity: "error",
-    cellId: "mid",
-    filePath: "src/mid/public.ts",
-    message: "mid public entry has 2 lines, exceeding 1",
-    details: { lines: 2, maxPublicEntryLines: 1 },
+    message: "src/core/extra.ts has 3 lines, exceeding 2",
+    details: { lines: 3, maxOwnedFileLines: 2 },
   }, {
     ruleId: "geo-purity/public-symbol-undocumented",
     severity: "error",
@@ -1167,26 +1153,12 @@ test("geo purity plugin emits exact context-shape findings", () => {
     message: "mid public symbol midApi is missing nearby JSDoc",
     details: { symbol: "midApi" },
   }, {
-    ruleId: "geo-purity/public-entry-too-large",
-    severity: "error",
-    cellId: "app",
-    filePath: "src/app/public.ts",
-    message: "app public entry has 2 lines, exceeding 1",
-    details: { lines: 2, maxPublicEntryLines: 1 },
-  }, {
     ruleId: "geo-purity/public-symbol-undocumented",
     severity: "error",
     cellId: "app",
     filePath: "src/app/public.ts",
     message: "app public symbol appApi is missing nearby JSDoc",
     details: { symbol: "appApi" },
-  }, {
-    ruleId: "geo-purity/public-entry-too-large",
-    severity: "error",
-    cellId: "legacy",
-    filePath: "src/legacy/public.ts",
-    message: "legacy public entry has 2 lines, exceeding 1",
-    details: { lines: 2, maxPublicEntryLines: 1 },
   }, {
     ruleId: "geo-purity/public-symbol-undocumented",
     severity: "error",
@@ -1287,6 +1259,88 @@ test("geo purity plugin covers defaults, line boundaries, and escaped symbols", 
       },
     },
   }))), []);
+
+  assert.deepEqual(directRule(geoPurityPlugin({
+    maxPublicEntryLines: 1,
+    maxOwnedFileLines: 1,
+  }), "geo-purity/context-shape").run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "single",
+        ownedPaths: ["src/single/**"],
+        publicEntry: "src/single/public.ts",
+        publicSymbols: [],
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { single: ["src/single/public.ts"] },
+      contents: { "src/single/public.ts": "export const one = true;\n" },
+    },
+  }))), []);
+
+  assert.deepEqual(directRule(geoPurityPlugin({
+    maxPublicEntryLines: 1,
+    maxOwnedFileLines: 1,
+    severity: "error",
+  }), "geo-purity/context-shape").run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "crlf",
+        ownedPaths: ["src/crlf/**"],
+        publicEntry: "src/crlf/public.ts",
+        publicSymbols: [],
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { crlf: ["src/crlf/public.ts"] },
+      contents: { "src/crlf/public.ts": "export const one = true;\r\nexport const two = true;\r\n" },
+    },
+  }))), [{
+    ruleId: "geo-purity/public-entry-too-large",
+    severity: "error",
+    cellId: "crlf",
+    filePath: "src/crlf/public.ts",
+    message: "crlf public entry has 2 lines, exceeding 1",
+    details: { lines: 2, maxPublicEntryLines: 1 },
+  }, {
+    ruleId: "geo-purity/owned-file-too-large",
+    severity: "error",
+    cellId: "crlf",
+    filePath: "src/crlf/public.ts",
+    message: "src/crlf/public.ts has 2 lines, exceeding 1",
+    details: { lines: 2, maxOwnedFileLines: 1 },
+  }]);
+
+  assert.deepEqual(directRule(geoPurityPlugin({
+    maxPublicEntryLines: 1,
+    maxOwnedFileLines: 1,
+    severity: "error",
+  }), "geo-purity/context-shape").run(directContext(baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "lf",
+        ownedPaths: ["src/lf/**"],
+        publicEntry: "src/lf/public.ts",
+        publicSymbols: [],
+      }],
+    },
+    files: {
+      all: [],
+      governed: [],
+      byCell: { lf: ["src/lf/public.ts"] },
+      contents: { "src/lf/public.ts": "export const one = true;\nexport const two = true;" },
+    },
+  }))).map((finding) => finding.details), [
+    { lines: 2, maxPublicEntryLines: 1 },
+    { lines: 2, maxOwnedFileLines: 1 },
+  ]);
 });
 
 test("legacy strangler plugin emits exact legacy dependency findings", () => {
@@ -1825,6 +1879,134 @@ test("geo purity accepts documented public symbols", () => {
   } finally {
     fs.rmSync(rootDir, { recursive: true, force: true });
   }
+});
+
+test("geo purity requires JSDoc to immediately precede exported symbols", () => {
+  const rule = directRule(geoPurityPlugin({ requirePublicJsdoc: true, severity: "error" }), "geo-purity/context-shape");
+  const documentedNamedRepository = baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["actual", "renamed", "RenamedType", "DirectType", "compact"],
+      }],
+    },
+    files: {
+      ...baseRepository().files,
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "/** Documents a direct export. */",
+          "export const actual = true;",
+          "const local = true;",
+          "type Local = { ok: boolean };",
+          "type DirectType = { direct: boolean };",
+          "const compact = true;",
+          "/** Documents a renamed value export. */",
+          "export {  local   as   renamed };",
+          "/** Documents a renamed type export. */",
+          "export { type Local as RenamedType };",
+          "/** Documents a type-only export. */",
+          "export { type DirectType };",
+          "/** Documents compact named export syntax. */",
+          "export{compact};",
+          "",
+        ].join("\n"),
+      },
+    },
+  });
+  assert.deepEqual(rule.run(directContext(documentedNamedRepository)), []);
+
+  const repository = baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["actual"],
+      }],
+    },
+    files: {
+      ...baseRepository().files,
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "/** Documents the helper, not the export below. */",
+          "const helper = true;",
+          "",
+          "export const actual = helper;",
+          "",
+        ].join("\n"),
+      },
+    },
+  });
+
+  assert.deepEqual(rule.run(directContext(repository)), [{
+    ruleId: "geo-purity/public-symbol-undocumented",
+    severity: "error",
+    cellId: "core",
+    filePath: "src/core/public.ts",
+    message: "core public symbol actual is missing nearby JSDoc",
+    details: { symbol: "actual" },
+  }]);
+
+  const ordinaryCommentRepository = baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["actual"],
+      }],
+    },
+    files: {
+      ...baseRepository().files,
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "/** Documents a previous declaration. */",
+          "const previous = true;",
+          "/* Ordinary separator, not JSDoc. */",
+          "export const actual = previous;",
+          "",
+        ].join("\n"),
+      },
+    },
+  });
+  assert.deepEqual(rule.run(directContext(ordinaryCommentRepository)).map((finding) => finding.ruleId), [
+    "geo-purity/public-symbol-undocumented",
+  ]);
+
+  const differentNamedExportRepository = baseRepository({
+    manifest: {
+      schemaVersion: "cellfence.manifest.v1",
+      cells: [{
+        id: "core",
+        ownedPaths: ["src/core/**"],
+        publicEntry: "src/core/public.ts",
+        publicSymbols: ["missing"],
+      }],
+    },
+    files: {
+      ...baseRepository().files,
+      byCell: { core: ["src/core/public.ts"] },
+      contents: {
+        "src/core/public.ts": [
+          "const present = true;",
+          "/** Documents the present export only. */",
+          "export { present };",
+          "",
+        ].join("\n"),
+      },
+    },
+  });
+  assert.deepEqual(rule.run(directContext(differentNamedExportRepository)).map((finding) => finding.details), [
+    { symbol: "missing" },
+  ]);
 });
 
 test("opentelemetry adapter handles nested, array, and semantic-convention variants", () => {
