@@ -203,77 +203,94 @@ CellFence complements — and assumes — linting, type checking, tests, protect
 
 ## Self-governance
 
-CellFence checks its own architecture with itself (`npm run cellfence:self-check`). The diagram below is not hand-drawn; it is the output of `cellfence graph --format mermaid` against this repository's own manifest.
+CellFence checks its own architecture with itself (`npm run cellfence:self-check`). Its own manifest keeps every built-in `resourceAdapters` detector on, so self-check covers resource coupling instead of exempting the differentiating feature. The diagram below is not hand-drawn; it is the output of `cellfence graph --format mermaid` against this repository's own manifest.
 
 ```mermaid
 flowchart LR
-  adapter_call_pattern["adapter-call-pattern"]
-  adapter_opentelemetry["adapter-opentelemetry"]
-  cli["cli"]
-  engine["engine"]
-  github_action["github-action"]
-  github_action_baseline_gate["github-action-baseline-gate"]
-  mcp_proxy["mcp-proxy"]
-  plugin_agent_budget["plugin-agent-budget"]
-  plugin_api["plugin-api"]
-  plugin_blast_radius["plugin-blast-radius"]
-  plugin_dependency_sovereignty["plugin-dependency-sovereignty"]
-  plugin_geo_purity["plugin-geo-purity"]
-  plugin_legacy_strangler["plugin-legacy-strangler"]
-  plugin_quants_trend["plugin-quants-trend"]
-  reporter_economy_matrix["reporter-economy-matrix"]
-  schema["schema"]
-  trace["trace"]
-  file__proc_sys_kernel_random_boot_id["file:/proc/sys/kernel/random/boot_id"]
-  file_unresolved_dynamic_file_path["file:unresolved:dynamic-file-path"]
-  adapter_call_pattern -- "declares (declared-consumer)" --> plugin_api
-  adapter_call_pattern -- "imports (observed-import)" --> plugin_api
-  adapter_call_pattern -- "declares (declared-consumer)" --> schema
-  adapter_call_pattern -- "imports (observed-import)" --> schema
-  adapter_opentelemetry -- "declares (declared-consumer)" --> schema
-  adapter_opentelemetry -- "imports (observed-import)" --> schema
-  cli -- "declares (declared-consumer)" --> engine
-  cli -- "imports (observed-import)" --> engine
-  cli -- "read (resource-access)" --> file_unresolved_dynamic_file_path
-  cli -- "write (resource-access)" --> file_unresolved_dynamic_file_path
-  cli -- "declares (declared-consumer)" --> schema
-  cli -- "imports (observed-import)" --> schema
-  engine -- "read (resource-access)" --> file__proc_sys_kernel_random_boot_id
-  engine -- "read (resource-access)" --> file_unresolved_dynamic_file_path
-  engine -- "write (resource-access)" --> file_unresolved_dynamic_file_path
-  engine -- "declares (declared-consumer)" --> schema
-  engine -- "imports (observed-import)" --> schema
-  github_action_baseline_gate -- "declares (declared-consumer)" --> engine
-  github_action_baseline_gate -- "imports (observed-import)" --> engine
-  github_action_baseline_gate -- "read (resource-access)" --> file_unresolved_dynamic_file_path
-  github_action_baseline_gate -- "declares (declared-consumer)" --> schema
-  github_action -- "declares (declared-consumer)" --> engine
-  github_action -- "imports (observed-import)" --> engine
-  mcp_proxy -- "declares (declared-consumer)" --> engine
-  mcp_proxy -- "imports (observed-import)" --> engine
-  mcp_proxy -- "read (resource-access)" --> file_unresolved_dynamic_file_path
-  mcp_proxy -- "write (resource-access)" --> file_unresolved_dynamic_file_path
-  mcp_proxy -- "declares (declared-consumer)" --> schema
-  plugin_agent_budget -- "declares (declared-consumer)" --> plugin_api
-  plugin_agent_budget -- "imports (observed-import)" --> plugin_api
-  plugin_api -- "declares (declared-consumer)" --> schema
-  plugin_api -- "imports (observed-import)" --> schema
-  plugin_blast_radius -- "declares (declared-consumer)" --> plugin_api
-  plugin_blast_radius -- "imports (observed-import)" --> plugin_api
-  plugin_dependency_sovereignty -- "declares (declared-consumer)" --> plugin_api
-  plugin_dependency_sovereignty -- "imports (observed-import)" --> plugin_api
-  plugin_geo_purity -- "declares (declared-consumer)" --> plugin_api
-  plugin_geo_purity -- "imports (observed-import)" --> plugin_api
-  plugin_legacy_strangler -- "declares (declared-consumer)" --> plugin_api
-  plugin_legacy_strangler -- "imports (observed-import)" --> plugin_api
-  plugin_quants_trend -- "declares (declared-consumer)" --> plugin_api
-  plugin_quants_trend -- "imports (observed-import)" --> plugin_api
-  plugin_quants_trend -- "declares (declared-consumer)" --> schema
-  plugin_quants_trend -- "imports (observed-import)" --> schema
-  reporter_economy_matrix -- "declares (declared-consumer)" --> plugin_api
-  reporter_economy_matrix -- "imports (observed-import)" --> plugin_api
-  trace -- "declares (declared-consumer)" --> schema
-  trace -- "imports (observed-import)" --> schema
+  c0["adapter-call-pattern"]
+  c1["adapter-opentelemetry"]
+  c2["cli"]
+  c3["engine"]
+  c4["github-action"]
+  c5["github-action-baseline-gate"]
+  c6["mcp-proxy"]
+  c7["plugin-agent-budget"]
+  c8["plugin-api"]
+  c9["plugin-blast-radius"]
+  c10["plugin-dependency-sovereignty"]
+  c11["plugin-geo-purity"]
+  c12["plugin-legacy-strangler"]
+  c13["plugin-quants-trend"]
+  c14["reporter-economy-matrix"]
+  c15["schema"]
+  c16["trace"]
+  c17["file:/proc/sys/kernel/random/boot_id"]
+  c18["file:unresolved:dynamic-file-path"]
+  c19["http:DELETE"]
+  c20["http:GET"]
+  c21["http:HEAD"]
+  c22["http:OPTIONS"]
+  c23["http:PATCH"]
+  c24["http:POST"]
+  c25["http:PUT"]
+  c26["http:unresolved:dynamic-http-url"]
+  c0 -- "declares (declared-consumer)" --> c8
+  c0 -- "imports (observed-import)" --> c8
+  c0 -- "declares (declared-consumer)" --> c15
+  c0 -- "imports (observed-import)" --> c15
+  c1 -- "declares (declared-consumer)" --> c15
+  c1 -- "imports (observed-import)" --> c15
+  c2 -- "declares (declared-consumer)" --> c3
+  c2 -- "imports (observed-import)" --> c3
+  c2 -- "read (resource-access)" --> c18
+  c2 -- "write (resource-access)" --> c18
+  c2 -- "declares (declared-consumer)" --> c15
+  c2 -- "imports (observed-import)" --> c15
+  c3 -- "read (resource-access)" --> c17
+  c3 -- "read (resource-access)" --> c18
+  c3 -- "write (resource-access)" --> c18
+  c3 -- "declares (declared-consumer)" --> c15
+  c3 -- "imports (observed-import)" --> c15
+  c5 -- "declares (declared-consumer)" --> c3
+  c5 -- "imports (observed-import)" --> c3
+  c5 -- "read (resource-access)" --> c18
+  c5 -- "call (resource-access)" --> c19
+  c5 -- "call (resource-access)" --> c20
+  c5 -- "call (resource-access)" --> c21
+  c5 -- "call (resource-access)" --> c22
+  c5 -- "call (resource-access)" --> c23
+  c5 -- "call (resource-access)" --> c24
+  c5 -- "call (resource-access)" --> c25
+  c5 -- "call (resource-access)" --> c26
+  c5 -- "declares (declared-consumer)" --> c15
+  c5 -- "imports (observed-import)" --> c15
+  c4 -- "declares (declared-consumer)" --> c3
+  c4 -- "imports (observed-import)" --> c3
+  c6 -- "declares (declared-consumer)" --> c3
+  c6 -- "imports (observed-import)" --> c3
+  c6 -- "read (resource-access)" --> c18
+  c6 -- "write (resource-access)" --> c18
+  c6 -- "declares (declared-consumer)" --> c15
+  c7 -- "declares (declared-consumer)" --> c8
+  c7 -- "imports (observed-import)" --> c8
+  c8 -- "declares (declared-consumer)" --> c15
+  c8 -- "imports (observed-import)" --> c15
+  c9 -- "declares (declared-consumer)" --> c8
+  c9 -- "imports (observed-import)" --> c8
+  c10 -- "declares (declared-consumer)" --> c8
+  c10 -- "imports (observed-import)" --> c8
+  c11 -- "declares (declared-consumer)" --> c8
+  c11 -- "imports (observed-import)" --> c8
+  c12 -- "declares (declared-consumer)" --> c8
+  c12 -- "imports (observed-import)" --> c8
+  c13 -- "declares (declared-consumer)" --> c8
+  c13 -- "imports (observed-import)" --> c8
+  c13 -- "declares (declared-consumer)" --> c15
+  c13 -- "imports (observed-import)" --> c15
+  c14 -- "declares (declared-consumer)" --> c8
+  c14 -- "imports (observed-import)" --> c8
+  c16 -- "declares (declared-consumer)" --> c15
+  c16 -- "imports (observed-import)" --> c15
 ```
 
 ## Performance
@@ -396,7 +413,7 @@ Exit codes: `0` no violations · `1` governance violations · `2` configuration 
 
 ## Status and limitations
 
-Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript with fail-closed parser diagnostics; isolated declaration-derived public surface fingerprints; AST-based Python boundary analysis for `.py` imports, public entries, and selected Django/FastAPI/SQLAlchemy/Celery resource patterns; packaging-aware Python manifest inference; adapter-scoped resource detection; and conservative static analysis for dynamic imports, non-literal file paths, dynamic HTTP URLs, and known SQL receivers with non-static query arguments. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness, full API compatibility proof, or runtime path-write prevention — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
+Version 0.x is deliberately narrow: Node.js ≥ 20; one public entry per cell; repository-local cells; strongest static analysis for TypeScript/JavaScript with fail-closed parser diagnostics; isolated declaration-derived public surface fingerprints; AST-based Python boundary analysis for `.py` imports and public entries; packaging-aware Python manifest inference; adapter-scoped resource detection for selected file, HTTP, queue, SQL, Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, NestJS, Fastify, Django, FastAPI, SQLAlchemy, and Celery patterns; and conservative static analysis for dynamic imports, non-literal file paths, dynamic HTTP URLs, and known SQL receivers with non-static query arguments. CellFence verifies the repository state agents leave behind; it does not claim full dynamic-language soundness, full API compatibility proof, or runtime path-write prevention — combine it with worktree isolation and protected branches for a full control chain. Full list: [docs/limitations.md](docs/limitations.md).
 
 ## Documentation map
 

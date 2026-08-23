@@ -11,7 +11,7 @@ Version 0.x is deliberately narrow:
 - repository-local cells only;
 - file-path artifact lanes only;
 - selected static resource access and imported runtime evidence only; dynamic dataflow, arbitrary runtime broker behavior, and live database schema drift are not inferred, but recognized dynamic HTTP URLs and known SQL receivers with non-static query arguments fail closed as unresolved resources;
-- ORM, query builder, and broker-client support is adapter-scoped; unsupported libraries require a dedicated adapter or runtime evidence;
+- resource adapters are deliberately scoped: v0.x detects selected file, HTTP, queue, SQL, Prisma, TypeORM, Drizzle, BullMQ, KafkaJS, NestJS, Fastify, Django, FastAPI, SQLAlchemy, and Celery patterns, while unsupported libraries require a dedicated adapter or runtime evidence;
 - external dependency policy covers npm package roots and Python import roots observed by the resolver; it is not a package-manager lockfile auditor;
 - ownership overlap detection uses the same directory expansion for bare owned paths as source ownership and solves the supported glob dialect; unsupported glob syntax remains literal and suspicious multi-star segments are reported as manifest warnings;
 - public symbol analysis supports common TypeScript forms, exported namespaces, and Python AST top-level declarations / literal `__all__`, not every possible dynamic export pattern. In Python, module-level imports are public attributes unless hidden by underscore aliases or constrained by `__all__`;

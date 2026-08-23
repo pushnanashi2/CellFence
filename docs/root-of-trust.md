@@ -28,7 +28,7 @@ The following mechanisms require human configuration outside the repository:
 - separated credentials for automation;
 - human-only merge path;
 - break-glass approval procedure;
-- npm trusted publishing through GitHub OIDC.
+- npm trusted publishing through GitHub OIDC;
 - npm provenance, SBOM publication, and GitHub Release artifacts.
 
 ## Sealed Ledger
