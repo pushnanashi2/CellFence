@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- No unreleased changes.
+
+## 0.3.0 - 2026-08-23
+
 - Breaking changes since 0.2.1 (migration steps below):
   - Evidence schema v1 -> v2 with `commitSha` required. Run
     `npx cellfence evidence rewrite --cell <id>` against existing
@@ -22,9 +28,6 @@
     date against the 90-day cap before rendering a directive.
     Scripts that generated waivers with a longer horizon
     must split the work into multiple waivers within the cap.
-
-## Unreleased
-
 - Align `governance.claimBackend` with manifest validation and published JSON Schema, remove validator-blind nested analysis flags from artifact/resource contract types, make bare owned paths cover the directory itself and descendants, and avoid unnecessary GitHub Action package metadata rewrites during bundling.
 - Add per-cell external dependency `claim`/`allow` policy, external dependency baseline sets, locked-cell dependency expansion checks, context output, and runtime/schema validation for npm package roots and Python import roots.
 - Harden waiver and claim review controls by making generated manifests require key governance rules by default, limiting source waivers to short reviewed identities, and rejecting duplicate `claim create --claim-id` leases instead of replacing existing claims.

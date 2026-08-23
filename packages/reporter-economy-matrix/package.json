@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/reporter-economy-matrix",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "CellFence reporter plugin for producer and consumer flow matrices.",
   "license": "Apache-2.0",
   "type": "module",
@@ -40,6 +40,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@cellfence/plugin-api": "0.2.1"
+    "@cellfence/plugin-api": "0.3.0"
   }
 }

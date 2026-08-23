@@ -36,7 +36,7 @@ jobs:
       - uses: ./packages/github-action-baseline-gate
         with:
           github-token: ${{ github.token }}
-          cellfence-version: "0.2.1"
+          cellfence-version: "0.3.0"
           baseline-codeowners: "@alice,@bob"
           require-separate-pr: "true"
           comment-mode: "update"
@@ -53,7 +53,7 @@ commit.
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
 | `github-token` | yes | (none) | GitHub token used to read PR reviews and update labels/comments. Pass `${{ github.token }}`. |
-| `cellfence-version` | no | `0.2.1` | CellFence release version this bundled gate is paired with. The action itself does not invoke the CLI; it reads the two baseline files directly. |
+| `cellfence-version` | no | `0.3.0` | CellFence release version this bundled gate is paired with. The action itself does not invoke the CLI; it reads the two baseline files directly. |
 | `baseline-codeowners` | no | (resolved from `CODEOWNERS`) | Comma-separated list of GitHub usernames that can approve a baseline change. Team entries are not resolved automatically. Defaults to the `CODEOWNERS` entry that matches `baseline-file` at the PR base SHA. |
 | `require-separate-pr` | no | `true` | When `true`, a mixed PR (baseline + implementation) is surfaced as a sticky comment and fails by default. |
 | `fail-on-mixed-pr` | no | `true` | When `true`, the action exits non-zero on a mixed PR. Ignored unless `require-separate-pr` is `true`. |

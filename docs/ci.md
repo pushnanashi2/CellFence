@@ -99,9 +99,9 @@ For PR discussion, post or summarize `tmp/cellfence/comment.md`; it is generated
 The reusable Action wrapper accepts a `version` input. The checked-in Action defaults to the current package version for reproducibility. For required checks, keep it pinned to an exact published version:
 
 ```yaml
-- uses: OWNER/REPOSITORY/packages/github-action@v0.2.1
+- uses: OWNER/REPOSITORY/packages/github-action@v0.3.0
   with:
-    version: 0.2.1
+    version: 0.3.0
     manifest: cellfence.manifest.json
     baseline: cellfence.baseline.json
 ```
@@ -179,7 +179,7 @@ jobs:
           node-version: 22
       - name: Install reviewed CellFence package
         env:
-          CELLFENCE_VERSION: 0.2.1 # replace with the exact published version approved for this workflow
+          CELLFENCE_VERSION: 0.3.0 # replace with the exact published version approved for this workflow
         run: npm install --global "cellfence@${CELLFENCE_VERSION}"
       - name: Sign reviewed baseline only
         env:

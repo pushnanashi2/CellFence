@@ -52,7 +52,7 @@ export function economyMatrixPlugin(): CellFencePlugin {
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/reporter-economy-matrix",
-    version: "0.2.1",
+    version: "0.3.0",
     reporters: [economyMatrixReporter()],
   });
 }

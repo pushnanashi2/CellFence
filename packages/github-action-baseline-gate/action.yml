@@ -10,7 +10,7 @@ inputs:
   cellfence-version:
     description: "CellFence release version this bundled gate is paired with. The action does not install the CLI."
     required: false
-    default: "0.2.1"
+    default: "0.3.0"
   baseline-codeowners:
     description: "Comma-separated list of GitHub usernames who can approve a baseline change. Team entries are not resolved automatically. Defaults to the repo's CODEOWNERS entries under .cellfence/baselines/."
     required: false

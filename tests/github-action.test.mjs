@@ -10,6 +10,7 @@ const root = process.cwd();
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const actionYaml = fs.readFileSync(path.join(root, "packages/github-action/action.yml"), "utf8");
 const actionEntrypoint = path.join(root, "packages/github-action/dist/index.js");
+const escapedPackageVersion = packageJson.version.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
@@ -41,9 +42,9 @@ test("GitHub Action wrapper does not assume CellFence source checkout in consume
   assert.doesNotMatch(actionYaml, /npm run build/);
   assert.doesNotMatch(actionYaml, /packages\/cli\/dist\/index\.js/);
   assert.match(actionYaml, /^\s{2}version:\r?\n/m);
-  assert.match(actionYaml, /^\s{4}default:\s*"0\.2\.1"\s*$/m);
+  assert.match(actionYaml, new RegExp(`^\\s{4}default:\\s*"${escapedPackageVersion}"\\s*$`, "m"));
   assert.match(actionYaml, /cli_package="cellfence@\$\{cli_version\}"/);
-  assert.match(actionYaml, /cli_version="0\.2\.1"/);
+  assert.match(actionYaml, new RegExp(`cli_version="${escapedPackageVersion}"`));
   assert.doesNotMatch(actionYaml, /^\s{4}default:\s*latest\s*$/m);
   assert.doesNotMatch(actionYaml, new RegExp(`cellfence@${packageJson.version.replaceAll(".", "\\.")}`));
   assert.match(actionYaml, /CELLFENCE_ACTION_VERSION:\s*\$\{\{ inputs\.version \}\}/);

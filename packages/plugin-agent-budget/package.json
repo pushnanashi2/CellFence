@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/plugin-agent-budget",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "CellFence rule plugin for AI agent change budgets.",
   "license": "Apache-2.0",
   "type": "module",
@@ -40,6 +40,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@cellfence/plugin-api": "0.2.1"
+    "@cellfence/plugin-api": "0.3.0"
   }
 }

@@ -3,14 +3,14 @@
 GitHub Action entrypoint package for CellFence checks.
 
 The reusable Action runs the published npm CLI. `version` defaults to the
-package's current exact release (`0.2.1`) so required checks are
+package's current exact release (`0.3.0`) so required checks are
 reproducible. Override it only when intentionally testing a different
 published CLI version:
 
 ```yaml
-- uses: OWNER/REPOSITORY/packages/github-action@v0.2.1
+- uses: OWNER/REPOSITORY/packages/github-action@v0.3.0
   with:
-    version: 0.2.1
+    version: 0.3.0
     manifest: cellfence.manifest.json
     baseline: cellfence.baseline.json
 ```

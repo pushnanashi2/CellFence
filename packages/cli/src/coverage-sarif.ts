@@ -92,7 +92,7 @@ export function coverageReportToSarif(report: CoverageReport): SarifLog {
         tool: {
           driver: {
             name: "cellfence-coverage",
-            version: "0.2.1",
+            version: "0.3.0",
             informationUri: "https://github.com/pushnanashi2/CellFence",
             rules,
           },

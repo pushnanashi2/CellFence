@@ -10,7 +10,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
-    "@cellfence/schema": "0.2.1"
+    "@cellfence/schema": "0.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

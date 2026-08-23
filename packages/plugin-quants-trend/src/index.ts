@@ -47,7 +47,7 @@ export function quantsTrendPlugin(options: QuantsTrendOptions): CellFencePlugin 
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-quants-trend",
-    version: "0.2.1",
+    version: "0.3.0",
     rules: {
       "quants-trend/architecture-momentum": defineRule({
         id: "quants-trend/architecture-momentum",

@@ -4,8 +4,8 @@ This file is a public, repository-local progress summary. It intentionally avoid
 
 ## Current Line
 
-- Current package version: `0.2.1`.
-- Active work is tracked under `CHANGELOG.md` `Unreleased`; release publishing must move those notes under a dated version heading before a real npm publish.
+- Current package version: `0.3.0`.
+- `CHANGELOG.md` keeps an empty `Unreleased` section for release publishing; add new post-release work there before the next cut.
 - Main CI includes lint, typecheck, build, tests, cross-platform smoke tests, external oracles, self-check, release verification, provenance scan, pack smoke, synthetic scale benchmark, and CI-count telemetry.
 - Self-check runs against `cellfence.manifest.json` with all built-in `resourceAdapters` enabled and verifies `cellfence.baseline.json` with an Ed25519 public key.
 

@@ -2049,7 +2049,7 @@ function handleMcpRequest(request: JsonRpcRequest, defaultRootDir: string): stri
     return mcpResponse(request.id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "cellfence", version: "0.2.1" },
+      serverInfo: { name: "cellfence", version: "0.3.0" },
     });
   }
   if (request.method === "tools/list") {

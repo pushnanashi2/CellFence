@@ -88,7 +88,7 @@ type ToolDecision = {
   access?: WriteAccessResult;
 };
 
-const VERSION = "0.2.1";
+const VERSION = "0.3.0";
 
 // H-5 (0.3.0): the previous default only knew about the original
 // five tool names. Real agent harnesses use Write/Edit/NotebookEdit/

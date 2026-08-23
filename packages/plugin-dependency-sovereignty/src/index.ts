@@ -29,7 +29,7 @@ export function dependencySovereigntyPlugin(options: DependencySovereigntyOption
   return definePlugin({
     apiVersion: CELLFENCE_PLUGIN_API_VERSION,
     name: "@cellfence/plugin-dependency-sovereignty",
-    version: "0.2.1",
+    version: "0.3.0",
     capabilities: { needsGitDiff: Boolean(options.changedOnly) },
     rules: {
       "dependency-sovereignty/approval-required": defineRule({

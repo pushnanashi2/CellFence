@@ -1,6 +1,6 @@
 {
   "name": "@cellfence/adapter-opentelemetry",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "OpenTelemetry resource evidence converter for CellFence.",
   "license": "Apache-2.0",
   "type": "module",
@@ -40,6 +40,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@cellfence/schema": "0.2.1"
+    "@cellfence/schema": "0.3.0"
   }
 }
