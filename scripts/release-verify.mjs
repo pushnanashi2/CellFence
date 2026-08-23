@@ -154,7 +154,7 @@ const expectedActionPins = new Map([
   ["actions/setup-node", "249970729cb0ef3589644e2896645e5dc5ba9c38"],
   ["actions/setup-python", "ece7cb06caefa5fff74198d8649806c4678c61a1"],
   ["actions/cache", "caa296126883cff596d87d8935842f9db880ef25"],
-  ["actions/upload-artifact", "330a01c490aca151604b8cf639adc76d48f6c5d4"],
+  ["actions/upload-artifact", "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"],
 ]);
 
 for (const workflowPath of fs.readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name)).map((name) => `.github/workflows/${name}`)) {

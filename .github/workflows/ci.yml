@@ -84,7 +84,7 @@ jobs:
       - name: Run SARIF official-schema oracle
         if: always()
         run: node scripts/sarif-oracle-conformance.mjs --root fixtures/invalid/private-cross-cell-import
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: external-oracle-reports-${{ github.run_attempt }}
@@ -261,7 +261,7 @@ jobs:
               ""
             ].join("\n"));
           '
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: ci-counts
@@ -301,7 +301,7 @@ jobs:
       - name: Summarize changed mutation results
         if: always()
         run: node scripts/mutation-step-summary.mjs
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: mutation-changed-${{ github.event.pull_request.number }}
