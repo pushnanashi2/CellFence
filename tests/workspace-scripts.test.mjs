@@ -21,7 +21,14 @@ function packageDirsInScript(script) {
     .sort();
 }
 
-test("root typecheck script covers every workspace package", () => {
+for (const scriptName of ["build", "typecheck"]) {
+  test(`root ${scriptName} script covers every workspace package`, () => {
+    const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+    assert.deepEqual(packageDirsInScript(packageJson.scripts[scriptName]), workspacePackageDirs());
+  });
+}
+
+test("root build and typecheck scripts cover the same workspace packages", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
-  assert.deepEqual(packageDirsInScript(packageJson.scripts.typecheck), workspacePackageDirs());
+  assert.deepEqual(packageDirsInScript(packageJson.scripts.build), packageDirsInScript(packageJson.scripts.typecheck));
 });
