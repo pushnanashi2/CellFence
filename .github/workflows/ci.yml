@@ -136,9 +136,10 @@ jobs:
       - run: npm run build
       - name: Verify acceptance record artifact
         run: |
-          mkdir -p reports/acceptance
-          node packages/cli/dist/index.js check --root fixtures/valid/public-import --json --evidence-graph reports/acceptance/evidence-graph.json --acceptance-record reports/acceptance/record.json > reports/acceptance/check-result.json
-          node scripts/acceptance-record-verify.mjs --record reports/acceptance/record.json --graph reports/acceptance/evidence-graph.json --out reports/acceptance/verify-report.json
+          acceptance_dir="$PWD/reports/acceptance"
+          mkdir -p "$acceptance_dir"
+          node packages/cli/dist/index.js check --root fixtures/valid/public-import --json --evidence-graph "$acceptance_dir/evidence-graph.json" --acceptance-record "$acceptance_dir/record.json" > "$acceptance_dir/check-result.json"
+          node scripts/acceptance-record-verify.mjs --record "$acceptance_dir/record.json" --graph "$acceptance_dir/evidence-graph.json" --out "$acceptance_dir/verify-report.json"
       - name: Smoke test bundled baseline gate action
         run: |
           set +e
