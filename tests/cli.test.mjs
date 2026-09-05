@@ -2393,6 +2393,36 @@ test("CLI check can write an evidence graph artifact for independent verificatio
   }
 });
 
+test("CLI check can write an acceptance record artifact for independent verification", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-acceptance-record-"));
+  try {
+    fs.cpSync(path.join(root, "fixtures/valid/public-import"), tempDir, { recursive: true });
+    const graphPath = path.join(tempDir, "tmp", "evidence-graph.json");
+    const recordPath = path.join(tempDir, "tmp", "acceptance-record.json");
+    const result = runCli(["check", "--json", "--evidence-graph", graphPath, "--acceptance-record", recordPath], tempDir);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const graph = JSON.parse(fs.readFileSync(graphPath, "utf8"));
+    const record = JSON.parse(fs.readFileSync(recordPath, "utf8"));
+    assert.equal(record.schemaVersion, "cellfence.acceptance-record.v1");
+    assert.equal(record.decision.gateDecision, "ALLOW");
+    assert.ok(record.evidence.requiredObservations.length > 0);
+
+    const verify = runExecutable(process.execPath, [
+      path.join(root, "scripts", "acceptance-record-verify.mjs"),
+      "--record",
+      recordPath,
+      "--graph",
+      graphPath,
+    ]);
+    assert.equal(verify.status, 0, verify.stderr || verify.stdout);
+    assert.equal(JSON.parse(verify.stdout).input.evidenceGraphCanonicalSha256.length, 64);
+    assert.equal(graph.schemaVersion, "cellfence.evidence-graph.v1");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("CLI changed check rejects evidence graph output instead of emitting partial proof artifacts", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-cli-changed-evidence-graph-"));
   try {
@@ -2400,6 +2430,9 @@ test("CLI changed check rejects evidence graph output instead of emitting partia
     const result = runCli(["check", "--changed", "--json", "--evidence-graph", "tmp/graph.json"], tempDir);
     assert.equal(result.status, 2);
     assert.match(result.stderr, /only supported for full repository checks/);
+    const recordResult = runCli(["check", "--changed", "--json", "--acceptance-record", "tmp/record.json"], tempDir);
+    assert.equal(recordResult.status, 2);
+    assert.match(recordResult.stderr, /only supported for full repository checks/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

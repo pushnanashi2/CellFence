@@ -61,6 +61,7 @@
     "precision:rounds": "node scripts/precision-round-handoff.mjs",
     "evidence:graph:verify": "node scripts/evidence-graph-verify.mjs",
     "evidence:graph:smoke": "npm run build && node scripts/evidence-graph-smoke.mjs",
+    "acceptance:verify": "node scripts/acceptance-record-verify.mjs",
     "evidence:corpus": "npm run build && node scripts/product-evidence-corpus.mjs",
     "evidence:github-corpus": "node scripts/github-corpus-collector.mjs",
     "evidence:oss-scale": "npm run build && node scripts/oss-scale-study.mjs",

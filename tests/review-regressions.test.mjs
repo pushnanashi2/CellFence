@@ -375,7 +375,7 @@ test("review CF-20, CF-21, CF-23 through CF-25: governance metadata and recovery
   const headBaseline = makeBaseline();
   headBaseline.cells.core.ownedPathPatterns = 999;
   const baselineReport = detectBaselineChanges(baseBaseline, headBaseline, "base.json", "head.json");
-  assert.deepEqual(baselineReport.deltas.find((delta) => delta.dimension === "ownedPathMetadata")?.added, ["core: head=999"]);
+  assert.deepEqual(baselineReport.deltas.find((delta) => delta.dimension === "ownedPaths")?.added, ["core: ownedPathPatterns=999"]);
 
   const coverageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-review-coverage-"));
   try {
@@ -388,7 +388,7 @@ test("review CF-20, CF-21, CF-23 through CF-25: governance metadata and recovery
       check: { baselinePath: "missing-baseline.json" },
     });
     assert.equal(coverage.exitCode, 1);
-    assert.equal(coverage.report.findings.some((finding) => finding.kind === "configuration"), true);
+    assert.equal(coverage.report.findings.some((finding) => finding.shape === "configuration"), true);
   } finally {
     fs.rmSync(coverageRoot, { recursive: true, force: true });
   }

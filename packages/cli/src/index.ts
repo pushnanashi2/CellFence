@@ -29,7 +29,6 @@ import {
   CORE_REQUIRED_RULES,
   defaultBaselinePath,
   execCommandSync,
-  extractPublicSymbols,
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
@@ -49,6 +48,7 @@ import {
   stampDesignDoc,
   verifyManifestFromServiceManifests,
   verifyBaselineSeal,
+  type CheckOptions,
   type CheckResult,
   writeBaselineFile,
 } from "@cellfence/engine";
@@ -64,6 +64,8 @@ import { runCoverageCommand } from "./coverage-command.js";
 import { type BaselineGateResult } from "./baseline-gate-command.js";
 import { runBaselineGateFull } from "./baseline-gate-full.js";
 
+type InternalCheckOptions = CheckOptions & { includeAcceptanceRecord?: boolean };
+type CheckResultWithAcceptanceRecord = CheckResult & { acceptanceRecord?: unknown };
 
 type ParsedArgs = {
   command: string[];
@@ -72,6 +74,7 @@ type ParsedArgs = {
   auditLogPath?: string;
   summaryJsonPath?: string;
   evidenceGraphPath?: string;
+  acceptanceRecordPath?: string;
   cellId?: string;
   claimId?: string;
   claimsPath?: string;
@@ -131,7 +134,7 @@ function printUsage(): void {
 Usage:
   cellfence init [--preset python-service|polyglot-monorepo] [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
   cellfence init --from systems/*/service.json [--output cellfence.manifest.json] [--no-scaffold] [--production-scope]
-  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
+  cellfence check [--manifest cellfence.manifest.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json] [--acceptance-record record.json]
   cellfence check --changed [--base origin/main] [--head HEAD] [--profile name] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json]
   cellfence manifest verify --from systems/*/service.json [--production-scope] [--json]
   cellfence context --cell cell-id [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json|--format agents-md]
@@ -147,7 +150,7 @@ Usage:
   cellfence claim list [--claims .cellfence/claims.json] [--json]
   cellfence task check --task .cellfence/tasks/task.json [--base origin/main] [--head HEAD] [--json]
   cellfence baseline create [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
-  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json]
+  cellfence baseline check [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json] [--json|--format markdown|--format sarif] [--audit-log audit.jsonl] [--summary-json summary.json] [--evidence-graph graph.json] [--acceptance-record record.json]
   cellfence baseline update [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--evidence resource-evidence.json]
   cellfence baseline sign [--baseline cellfence.baseline.json]
   cellfence baseline verify [--manifest cellfence.manifest.json] [--baseline cellfence.baseline.json] [--json]
@@ -273,6 +276,11 @@ function parseArgs(argv: string[]): ParsedArgs {
       index += 1;
     } else if (argument.startsWith("--evidence-graph=")) {
       parsed.evidenceGraphPath = argument.slice("--evidence-graph=".length);
+    } else if (argument === "--acceptance-record") {
+      parsed.acceptanceRecordPath = requireOptionValue(argv, index, "--acceptance-record");
+      index += 1;
+    } else if (argument.startsWith("--acceptance-record=")) {
+      parsed.acceptanceRecordPath = requireInlineOptionValue(argument, "--acceptance-record=", "--acceptance-record");
     } else if (argument === "--cell") {
       parsed.cellId = requireOptionValue(argv, index, "--cell");
       parsed.claimCells.push(parsed.cellId);
@@ -628,6 +636,10 @@ function writeCheckArtifacts(parsed: ParsedArgs, result: CheckResult, metadata: 
   if (parsed.evidenceGraphPath && result.evidenceGraph) {
     writeFileEnsuringDirectory(resolveOutputPath(parsed.rootDir, parsed.evidenceGraphPath), `${JSON.stringify(result.evidenceGraph, null, 2)}\n`);
   }
+  const artifactResult = result as CheckResultWithAcceptanceRecord;
+  if (parsed.acceptanceRecordPath && artifactResult.acceptanceRecord) {
+    writeFileEnsuringDirectory(resolveOutputPath(parsed.rootDir, parsed.acceptanceRecordPath), `${JSON.stringify(artifactResult.acceptanceRecord, null, 2)}\n`);
+  }
 }
 
 function commandInit(parsed: ParsedArgs): number {
@@ -664,10 +676,6 @@ function commandInit(parsed: ParsedArgs): number {
     && manifest.cells[0]?.publicEntry === "src/example/public.ts";
   const exampleFallbackPublicEntry = path.join(rootDir, "src/example/public.ts");
   const exampleFallbackPublicEntryExists = fs.existsSync(exampleFallbackPublicEntry);
-  if (inferredExampleFallback && exampleFallbackPublicEntryExists) {
-    manifest.cells[0].publicSymbols = [...extractPublicSymbols(exampleFallbackPublicEntry)]
-      .sort((left, right) => left.localeCompare(right));
-  }
   if (parsed.noScaffold && inferredExampleFallback && !exampleFallbackPublicEntryExists) {
     console.error("cellfence init could not infer source cells; rerun without --no-scaffold to scaffold the example cell, or add source files first");
     return 2;
@@ -709,8 +717,8 @@ function commandCheck(parsed: ParsedArgs): number {
   const startedAtMs = Date.now();
   const startedAt = new Date(startedAtMs).toISOString();
   const shouldRunChanged = parsed.changed || Boolean(profile?.changedOnly);
-  if (parsed.evidenceGraphPath && shouldRunChanged) {
-    console.error("cellfence check --evidence-graph is only supported for full repository checks");
+  if ((parsed.evidenceGraphPath || parsed.acceptanceRecordPath) && shouldRunChanged) {
+    console.error("cellfence check --evidence-graph and --acceptance-record are only supported for full repository checks");
     return 2;
   }
   const result = shouldRunChanged
@@ -723,8 +731,9 @@ function commandCheck(parsed: ParsedArgs): number {
     })
     : checkRepository({
       ...options,
-      includeEvidenceGraph: Boolean(parsed.evidenceGraphPath),
-    });
+      includeEvidenceGraph: Boolean(parsed.evidenceGraphPath || parsed.acceptanceRecordPath),
+      includeAcceptanceRecord: Boolean(parsed.acceptanceRecordPath),
+    } as InternalCheckOptions);
   const effectiveResult: CheckResult = profile?.reportOnly
     ? {
       ...result,
@@ -1148,8 +1157,9 @@ function commandBaselineCheck(parsed: ParsedArgs, commandName = "baseline check"
     manifestPath: parsed.manifestPath,
     baselinePath: effectiveParsed.baselinePath,
     evidencePaths: parsed.evidencePaths,
-    includeEvidenceGraph: Boolean(parsed.evidenceGraphPath),
-  });
+    includeEvidenceGraph: Boolean(parsed.evidenceGraphPath || parsed.acceptanceRecordPath),
+    includeAcceptanceRecord: Boolean(parsed.acceptanceRecordPath),
+  } as InternalCheckOptions);
   const metadata = createRunMetadata(commandName, parsed.rootDir, startedAtMs, startedAt);
   writeCheckArtifacts(effectiveParsed, result, metadata);
   printCheckResult(outputFormat, result, metadata);

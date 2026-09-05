@@ -10,6 +10,7 @@ import { createGovernanceControlState } from "../packages/engine/dist/governance
 import { assessEvidence } from "../packages/engine/dist/governance/evidence-assessment.js";
 import { governanceEvidenceEnvelopeForCheck } from "../packages/engine/dist/governance/evidence-envelope.js";
 import { evaluateGovernance } from "../packages/engine/dist/governance/evaluator.js";
+import { evaluateImportPolicyFact, importPolicyViolations } from "../packages/engine/dist/governance/import-policy.js";
 import { legacyDecisionFromEvaluation } from "../packages/engine/dist/governance/legacy-adapter.js";
 import { createRawObservationReport } from "../packages/engine/dist/governance/observation-report.js";
 import {
@@ -188,6 +189,7 @@ test("governance evidence envelope does not fabricate processed source observati
     assert.ok(missingSourceStatuses.some((status) => status.family === "imports" && status.status === "unsupported"));
     assert.ok(missingSourceStatuses.some((status) => status.family === "resources" && status.status === "unsupported"));
     assert.ok(missingSourceStatuses.some((status) => status.family === "public-surface" && status.status === "not-applicable"));
+    assert.ok(missing.assessment.defects.some((defect) => defect.code === "MISSING_REQUIRED_OBSERVATION"));
 
     const observed = governanceEvidenceEnvelopeForCheck(
       context,
@@ -253,6 +255,70 @@ test("evidence gaps are fail-closed with UNKNOWN rule status", () => {
   assert.ok(evaluation.ruleResults.some((result) => result.status === "UNKNOWN" && result.ruleId === "CELLFENCE_EVIDENCE_COVERAGE"));
 });
 
+test("evidence assessment requires each obligated file and family observation", () => {
+  const snapshot = createSubjectSnapshotFromFiles([
+    { path: "src/a/public.ts", role: "source", content: "export const a = 1;\n" },
+    { path: "src/b/public.ts", role: "source", content: "export const b = 1;\n" },
+    { path: "cellfence.manifest.json", role: "manifest", content: "{\"schemaVersion\":\"cellfence.manifest.v1\"}\n" },
+  ]);
+  const report = createRawObservationReport({
+    observer: "unit-test",
+    snapshot,
+    statuses: [
+      { filePath: "cellfence.manifest.json", family: "manifest", status: "processed" },
+      { filePath: "cellfence.manifest.json", family: "ownership", status: "processed" },
+      { filePath: "./src/a/public.ts", family: "imports", status: "processed" },
+      { filePath: "src/b/public.ts", family: "resources", status: "processed" },
+    ],
+  });
+  const assessment = assessEvidence(snapshot, report, {
+    requiredFamilies: ["manifest", "ownership", "imports", "resources"],
+    requiredObservations: [
+      { filePath: "src/a/public.ts", family: "imports" },
+      { filePath: "src/a/public.ts", family: "resources" },
+      { filePath: "src/b/public.ts", family: "imports" },
+      { filePath: "src/b/public.ts", family: "resources" },
+    ],
+  });
+
+  assert.equal(assessment.status, "INCOMPLETE");
+  assert.equal(assessment.defects.some((defect) => defect.code === "MISSING_OBSERVATION_FAMILY"), false);
+  assert.deepEqual(
+    assessment.defects
+      .filter((defect) => defect.code === "MISSING_REQUIRED_OBSERVATION")
+      .map((defect) => `${defect.filePath}:${defect.family}`)
+      .sort(),
+    ["src/a/public.ts:resources", "src/b/public.ts:imports"],
+  );
+});
+
+test("required observations cannot be satisfied by not-applicable statuses", () => {
+  const snapshot = completeSnapshot();
+  const report = createRawObservationReport({
+    observer: "unit-test",
+    snapshot,
+    statuses: [
+      { filePath: "cellfence.manifest.json", family: "manifest", status: "processed" },
+      { filePath: "cellfence.manifest.json", family: "ownership", status: "processed" },
+      { filePath: "src/a/public.ts", family: "imports", status: "processed" },
+      { filePath: "src/a/public.ts", family: "resources", status: "processed" },
+      { filePath: "src/a/public.ts", family: "public-surface", status: "not-applicable" },
+    ],
+  });
+  const assessment = assessEvidence(snapshot, report, {
+    requiredFamilies: ["manifest", "ownership", "imports", "resources", "public-surface"],
+    requiredObservations: [
+      { filePath: "src/a/public.ts", family: "public-surface", reason: "declared public entry" },
+    ],
+  });
+
+  assert.equal(assessment.status, "INCOMPLETE");
+  assert.ok(assessment.defects.some((defect) =>
+    defect.code === "MISSING_REQUIRED_OBSERVATION"
+    && defect.filePath === "src/a/public.ts"
+    && defect.family === "public-surface"));
+});
+
 test("parse errors and unsupported observations block without erasing active violations", () => {
   const snapshot = completeSnapshot();
   const report = createRawObservationReport({
@@ -281,6 +347,38 @@ test("parse errors and unsupported observations block without erasing active vio
   assert.equal(evaluation.gateDecision, "BLOCK");
   assert.ok(evaluation.ruleResults.some((result) => result.ruleId === "CELLFENCE_PRIVATE_IMPORT" && result.status === "VIOLATED"));
   assert.ok(evaluation.ruleResults.some((result) => result.ruleId === "CELLFENCE_EVIDENCE_COVERAGE" && result.status === "UNKNOWN"));
+});
+
+test("import policy judgments are derived from normalized observed import facts", () => {
+  const baseFact = {
+    importerPath: "src/consumer/public.ts",
+    importerCellId: "consumer",
+    specifier: "../producer/internal",
+    kind: "import",
+    typeOnly: false,
+    targetPath: "src/producer/internal.ts",
+    producerCellId: "producer",
+    isExternal: false,
+    isPublicPackage: false,
+    declaredConsumer: false,
+    privateImplementation: true,
+  };
+
+  assert.deepEqual(
+    importPolicyViolations([baseFact]).map((judgment) => judgment.ruleId).sort(),
+    ["CELLFENCE_PRIVATE_IMPORT", "CELLFENCE_UNDECLARED_CONSUMER"],
+  );
+  assert.deepEqual(
+    evaluateImportPolicyFact({ ...baseFact, declaredConsumer: true, privateImplementation: false })
+      .map((judgment) => `${judgment.ruleId}:${judgment.status}`)
+      .sort(),
+    ["CELLFENCE_PRIVATE_IMPORT:SATISFIED", "CELLFENCE_UNDECLARED_CONSUMER:SATISFIED"],
+  );
+  assert.deepEqual(
+    evaluateImportPolicyFact({ ...baseFact, isExternal: true, producerCellId: undefined })
+      .map((judgment) => judgment.status),
+    ["NOT_APPLICABLE", "NOT_APPLICABLE"],
+  );
 });
 
 test("check evidence graph records unsupported source observations as incomplete", () => {
@@ -799,6 +897,24 @@ test("checkRepository can return an opt-in evidence graph with finding witnesses
     && witness.filePath === "src/consumer/public.ts"
     && witness.subjects.some((subject) => subject.kind === "detail" && subject.key === "targetPath")));
   assert.equal(checkFixture("invalid/private-cross-cell-import").evidenceGraph, undefined);
+});
+
+test("checkRepository can return an opt-in acceptance record bound to its evidence graph", () => {
+  const result = checkFixture("valid/public-import", {
+    includeEvidenceGraph: true,
+    includeAcceptanceRecord: true,
+  });
+  const record = result.acceptanceRecord;
+  assert.equal(result.ok, true);
+  assert.equal(record.schemaVersion, "cellfence.acceptance-record.v1");
+  assert.equal(record.decision.gateDecision, "ALLOW");
+  assert.equal(record.evidence.status, "COMPLETE");
+  assert.equal(record.controls.evidenceGraphDigest, stableDigest(result.evidenceGraph));
+  const { recordDigest, ...recordBody } = record;
+  assert.equal(recordDigest, stableDigest(recordBody));
+  assert.ok(record.evidence.requiredObservations.some((requirement) =>
+    requirement.filePath === "src/consumer/public.ts"
+    && requirement.family === "imports"));
 });
 
 test("pure evaluator dependency closure excludes filesystem, process, git, and compiler imports", () => {

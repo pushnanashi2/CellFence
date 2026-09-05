@@ -5,10 +5,15 @@ import type {
   NormalizedObservedIntermediateRepresentation,
 } from "./model.js";
 import { stableDigest } from "./canonicalization.js";
+import type { NormalizedObservedImportFact } from "./import-policy.js";
+
+type ObservedIntermediateRepresentationWithImportFacts = NormalizedObservedIntermediateRepresentation & {
+  importFacts?: NormalizedObservedImportFact[];
+};
 
 type ControlStateInput = {
   declared: DeclaredIntermediateRepresentation;
-  observed: NormalizedObservedIntermediateRepresentation;
+  observed: ObservedIntermediateRepresentationWithImportFacts;
   accepted: AcceptedIntermediateRepresentation;
   observer: string;
 };
@@ -23,6 +28,26 @@ function sortedValues<Value extends string>(values: Value[]): Value[] {
   return [...values].sort((left, right) => left.localeCompare(right));
 }
 
+function importFactSortKey(fact: NormalizedObservedImportFact): string {
+  return [
+    fact.importerPath,
+    fact.importerCellId,
+    fact.specifier,
+    fact.targetPath || "",
+    fact.producerCellId || "",
+    fact.kind,
+    String(fact.typeOnly),
+    String(fact.isExternal),
+    String(fact.isPublicPackage),
+    String(fact.declaredConsumer),
+    String(fact.privateImplementation),
+  ].join("\0");
+}
+
+function sortedImportFacts(facts: NormalizedObservedImportFact[] | undefined): NormalizedObservedImportFact[] {
+  return [...(facts || [])].sort((left, right) => importFactSortKey(left).localeCompare(importFactSortKey(right)));
+}
+
 export function createGovernanceControlState(input: ControlStateInput): GovernanceControlState {
   const stateWithoutDigest = {
     schemaVersion: "cellfence.governance-control-state.v1" as const,
@@ -35,6 +60,7 @@ export function createGovernanceControlState(input: ControlStateInput): Governan
       findingRuleIds: sortedValues(input.observed.findingRuleIds),
       warningRuleIds: sortedValues(input.observed.warningRuleIds),
       observedFamilies: sortedValues(input.observed.observedFamilies),
+      importFacts: sortedImportFacts(input.observed.importFacts),
     },
     accepted: {
       baselineCellIds: sortedValues(input.accepted.baselineCellIds),

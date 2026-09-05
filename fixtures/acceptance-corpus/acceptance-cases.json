@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "cellfence.acceptance-corpus.v1",
+  "cases": [
+    {
+      "id": "legitimate-public-import",
+      "kind": "legitimate-design-change",
+      "fixture": "fixtures/valid/public-import",
+      "expected": {
+        "ok": true,
+        "gateDecision": "ALLOW",
+        "violatedRules": []
+      }
+    },
+    {
+      "id": "private-implementation-bypass",
+      "kind": "bypass-attempt",
+      "fixture": "fixtures/invalid/private-cross-cell-import",
+      "expected": {
+        "ok": false,
+        "gateDecision": "BLOCK",
+        "violatedRules": [
+          "CELLFENCE_PRIVATE_IMPORT"
+        ]
+      }
+    },
+    {
+      "id": "undeclared-consumer-bypass",
+      "kind": "bypass-attempt",
+      "fixture": "fixtures/invalid/undeclared-consumer",
+      "expected": {
+        "ok": false,
+        "gateDecision": "BLOCK",
+        "violatedRules": [
+          "CELLFENCE_UNDECLARED_CONSUMER"
+        ]
+      }
+    }
+  ]
+}

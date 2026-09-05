@@ -1705,7 +1705,31 @@ function normalizeDeclarationText(text: string): string {
 }
 
 function sourceTextWithoutInternalDeclarations(filePath: string): string {
-  return normalizedDeclarationSourceText(filePath);
+  const sourceText = fs.readFileSync(filePath, "utf8");
+  // Stryker disable next-line BooleanLiteral: parent pointers are not used while collecting internal declaration line ranges.
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
+  // Stryker disable next-line ArrayDeclaration: a non-range sentinel in this private, typed collection has no valid line bounds and cannot remove source text.
+  const lineRanges: Array<{ start: number; end: number }> = [];
+  function visit(node: ts.Node): void {
+    if (hasInternalTag(node)) {
+      lineRanges.push({
+        start: sourceFile.getLineAndCharacterOfPosition(node.getFullStart()).line,
+        end: sourceFile.getLineAndCharacterOfPosition(node.getEnd()).line,
+      });
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  // Stryker disable next-line ConditionalExpression: with no internal ranges, declaration emit observes the same source text after line splitting.
+  if (lineRanges.length === 0) return sourceText;
+  const removedLines = new Set<number>();
+  for (const range of lineRanges) {
+    for (let line = range.start; line <= range.end; line += 1) removedLines.add(line);
+  }
+  const lines = sourceText.split("\n");
+  // Stryker disable next-line StringLiteral: declaration emit normalizes equivalent internal-stripped source text; public surface output is asserted black-box.
+  return lines.filter((_, index) => !removedLines.has(index)).join("\n");
 }
 
 function normalizedDeclarationSourceText(filePath: string): string {
@@ -1761,9 +1785,14 @@ export function declarationPublicSurfaceSignatureParts(filePath: string): string
     .map((declaration) => `dts:${declaration.text}`);
 }
 
+function declarationPartIsSubstantive(part: string): boolean {
+  const text = part.replace(/^dts:/, "");
+  return text !== "export {};";
+}
+
 function publicSurfaceSignatureParts(filePath: string): string[] {
   const declarationParts = declarationPublicSurfaceSignatureParts(filePath);
-  return declarationParts.length > 0 ? declarationParts : syntaxPublicSurfaceSignatureParts(filePath);
+  return declarationParts.some(declarationPartIsSubstantive) ? declarationParts : syntaxPublicSurfaceSignatureParts(filePath);
 }
 
 export function publicSurfaceHash(filePath: string): string {

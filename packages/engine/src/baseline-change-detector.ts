@@ -8,7 +8,6 @@ import type { CellFenceBaseline } from "@cellfence/schema";
 export type BaselineDimension =
   | "cellIds"
   | "ownedPaths"
-  | "ownedPathMetadata"
   | "publicSymbols"
   | "crossCellEdges"
   | "signatures"
@@ -50,7 +49,6 @@ export function detectBaselineChanges(
 ): GovernanceChangeReport {
   const cellIds = diffCellIds(baseBaseline, headBaseline);
   const ownedPaths = diffOwnedPaths(baseBaseline, headBaseline);
-  const ownedPathMetadata = diffOwnedPathMetadata(baseBaseline, headBaseline);
   const publicSymbols = diffPublicSymbols(baseBaseline, headBaseline);
   const crossCellEdges = diffCrossCellEdges(baseBaseline, headBaseline);
   const signatures = diffSignatures(baseBaseline, headBaseline);
@@ -60,7 +58,7 @@ export function detectBaselineChanges(
   const publicSurfaceMetadata = diffPublicSurfaceMetadata(baseBaseline, headBaseline);
   const dependencyCounts = diffDependencyCounts(baseBaseline, headBaseline);
 
-  const deltas = [cellIds, ownedPaths, ownedPathMetadata, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, externalDependencies, publicSurfaceMetadata, dependencyCounts].filter(
+  const deltas = [cellIds, ownedPaths, publicSymbols, crossCellEdges, signatures, resourceAccesses, artifactContracts, externalDependencies, publicSurfaceMetadata, dependencyCounts].filter(
     (delta) => delta.added.length > 0 || delta.removed.length > 0 || (delta.skippedCells?.length ?? 0) > 0,
   );
 
@@ -126,25 +124,18 @@ function diffOwnedPaths(baseBaseline: CellFenceBaseline, headBaseline: CellFence
     const headSet = new Set(head.entries);
     for (const entry of headSet) if (!baseSet.has(entry)) added.push(`${cellId}: ${entry}`);
     for (const entry of baseSet) if (!headSet.has(entry)) removed.push(`${cellId}: ${entry}`);
-  }
-  return { dimension: "ownedPaths", added, removed, ...(skippedCells.length ? { skippedCells } : {}) };
-}
-
-function diffOwnedPathMetadata(baseBaseline: CellFenceBaseline, headBaseline: CellFenceBaseline): BaselineDimensionDelta {
-  const added: string[] = [];
-  const removed: string[] = [];
-  const cellIds = cellIdsForComparison(baseBaseline, headBaseline);
-  for (const cellId of cellIds) {
     const baseRecord = acceptedCellRecord(baseBaseline, cellId);
     const headRecord = acceptedCellRecord(headBaseline, cellId);
-    const base = typeof baseRecord?.ownedPathPatterns === "number" ? baseRecord.ownedPathPatterns : null;
-    const head = typeof headRecord?.ownedPathPatterns === "number" ? headRecord.ownedPathPatterns : null;
-    if (base === null && head === null) continue;
-    if (base === head) continue;
-    if (base !== null) removed.push(`${cellId}: base=${base}`);
-    if (head !== null) added.push(`${cellId}: head=${head}`);
+    if (baseRecord && headRecord) {
+      const basePatternCount = typeof baseRecord.ownedPathPatterns === "number" ? baseRecord.ownedPathPatterns : null;
+      const headPatternCount = typeof headRecord.ownedPathPatterns === "number" ? headRecord.ownedPathPatterns : null;
+      if (basePatternCount !== headPatternCount) {
+        if (basePatternCount !== null) removed.push(`${cellId}: ownedPathPatterns=${basePatternCount}`);
+        if (headPatternCount !== null) added.push(`${cellId}: ownedPathPatterns=${headPatternCount}`);
+      }
+    }
   }
-  return { dimension: "ownedPathMetadata", added, removed };
+  return { dimension: "ownedPaths", added, removed, ...(skippedCells.length ? { skippedCells } : {}) };
 }
 
 function publicSymbolSetForCell(baseline: CellFenceBaseline, cellId: string): string[] {

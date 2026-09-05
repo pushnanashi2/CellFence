@@ -134,6 +134,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Verify acceptance record artifact
+        run: |
+          mkdir -p reports/acceptance
+          node packages/cli/dist/index.js check --root fixtures/valid/public-import --json --evidence-graph reports/acceptance/evidence-graph.json --acceptance-record reports/acceptance/record.json > reports/acceptance/check-result.json
+          node scripts/acceptance-record-verify.mjs --record reports/acceptance/record.json --graph reports/acceptance/evidence-graph.json --out reports/acceptance/verify-report.json
       - name: Smoke test bundled baseline gate action
         run: |
           set +e

@@ -65,9 +65,11 @@ import {
   validateExternalDependencyPolicy,
   type ExternalDependencyObservation,
 } from "./external-dependencies.js";
+import { createAcceptanceRecord } from "./governance/acceptance-record.js";
 import { createEvidenceGraph } from "./governance/evidence-graph.js";
 import { governanceEvidenceEnvelopeForCheck } from "./governance/evidence-envelope.js";
 import { evaluateGovernance } from "./governance/evaluator.js";
+import { evaluateImportPolicyFact } from "./governance/import-policy.js";
 import { legacyDecisionFromEvaluation } from "./governance/legacy-adapter.js";
 import { validateChangedPathClasses, validatePathClassImports } from "./advanced-governance.js";
 import { CORE_REQUIRED_RULES, DEFAULT_MANIFEST_PATH } from "./constants.js";
@@ -1056,6 +1058,33 @@ function addPrivateImportFinding(
   });
 }
 
+function addUndeclaredConsumerFinding(
+  findings: Finding[],
+  importerCell: CellManifest,
+  producerCell: CellManifest,
+  reference: ImportReference,
+  specifier: string,
+): void {
+  addFinding(findings, {
+    ruleId: "CELLFENCE_UNDECLARED_CONSUMER",
+    severity: "error",
+    cellId: importerCell.id,
+    producerCellId: producerCell.id,
+    filePath: reference.importerPath,
+    message: `${importerCell.id} imports ${producerCell.id} without declaring a consumer relationship`,
+    details: { specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
+    suggestedResolutions: [
+      codeResolution(`Remove the ${producerCell.id} import or move the code behind an existing allowed cell`, {
+        specifier,
+      }),
+      manifestResolution(`Declare ${importerCell.id} as a consumer of ${producerCell.id}`, Boolean(importerCell.locked), {
+        cell: importerCell.id,
+        consumes: { cell: producerCell.id },
+      }),
+    ],
+  });
+}
+
 function validatePublicEntries(context: AnalysisContext, findings: Finding[], observedPublicSurfaceFiles = new Set<string>()): void {
   for (const cell of context.manifest.cells) {
     const publicEntryPath = absolutePath(context.rootDir, cell.publicEntry);
@@ -1129,7 +1158,7 @@ function validateImports(
       for (const reference of references) {
         const resolvedImport = resolveImport(context, reference);
         const specifier = resolvedSpecifier(reference, resolvedImport);
-        observedImports.push({
+        const observedImport: PluginImportReference = {
           importerPath: reference.importerPath,
           importerCellId: importerCell.id,
           specifier,
@@ -1143,7 +1172,8 @@ function validateImports(
           isPublicPackage: resolvedImport.isPublicPackage,
           packageExportState: resolvedImport.packageExportState,
           packageExportReason: resolvedImport.packageExportReason,
-        });
+        };
+        observedImports.push(observedImport);
         const dependencyId = externalDependencyIdForImport(reference, resolvedImport);
         if (dependencyId) {
           externalDependencyObservations.push({
@@ -1221,36 +1251,37 @@ function validateImports(
         if (resolvedImport.isExternal || !resolvedImport.targetCell || resolvedImport.targetCell.id === importerCell.id) continue;
         const producerCell = resolvedImport.targetCell;
         const declaration = consumerDeclaration(importerCell, producerCell.id);
+        const privateImplementation = importTargetsPrivateImplementation(resolvedImport, producerCell);
         const dependencySet = crossCellDependencies.get(importerCell.id) || new Set<string>();
         dependencySet.add(producerCell.id);
         crossCellDependencies.set(importerCell.id, dependencySet);
 
-        if (!declaration) {
-          addFinding(findings, {
-            ruleId: "CELLFENCE_UNDECLARED_CONSUMER",
-            severity: "error",
-            cellId: importerCell.id,
-            producerCellId: producerCell.id,
-            filePath: reference.importerPath,
-            message: `${importerCell.id} imports ${producerCell.id} without declaring a consumer relationship`,
-            details: { specifier, line: reference.line, kind: reference.kind, typeOnly: reference.typeOnly },
-            suggestedResolutions: [
-              codeResolution(`Remove the ${producerCell.id} import or move the code behind an existing allowed cell`, {
-                specifier,
-              }),
-              manifestResolution(`Declare ${importerCell.id} as a consumer of ${producerCell.id}`, Boolean(importerCell.locked), {
-                cell: importerCell.id,
-                consumes: { cell: producerCell.id },
-              }),
-            ],
-          });
+        const importFact = {
+          importerPath: reference.importerPath,
+          importerCellId: importerCell.id,
+          specifier,
+          kind: reference.kind,
+          typeOnly: reference.typeOnly,
+          targetPath: observedImport.targetPath,
+          producerCellId: producerCell.id,
+          isExternal: resolvedImport.isExternal,
+          isPublicPackage: resolvedImport.isPublicPackage,
+          declaredConsumer: Boolean(declaration),
+          privateImplementation,
+        } satisfies Parameters<typeof evaluateImportPolicyFact>[0];
+        const importJudgments = evaluateImportPolicyFact(importFact);
+        for (const judgment of importJudgments) {
+          if (judgment.status !== "VIOLATED") continue;
+          if (judgment.ruleId === "CELLFENCE_UNDECLARED_CONSUMER") {
+            addUndeclaredConsumerFinding(findings, importerCell, producerCell, reference, specifier);
+          }
         }
 
         if (resolvedImport.artifactLaneId) {
           if (
             resolvedImport.targetPath
             && SOURCE_EXTENSIONS.includes(path.extname(resolvedImport.targetPath))
-            && importTargetsPrivateImplementation(resolvedImport, producerCell)
+            && privateImplementation
           ) {
             addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
           }
@@ -1278,8 +1309,10 @@ function validateImports(
           continue;
         }
 
-        if (importTargetsPrivateImplementation(resolvedImport, producerCell)) {
-          addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
+        for (const judgment of importJudgments) {
+          if (judgment.status === "VIOLATED" && judgment.ruleId === "CELLFENCE_PRIVATE_IMPORT") {
+            addPrivateImportFinding(findings, importerCell, producerCell, reference, resolvedImport);
+          }
         }
       }
     }
@@ -1294,6 +1327,14 @@ function manifestInvalidResult(message: string): CheckResult {
     message,
   };
   return { ok: false, exitCode: 2, findings: [finding], warnings: [], metrics: {} };
+}
+
+function currentGitHeadOrUndefined(rootDir: string): string | undefined {
+  try {
+    return gitCommand(rootDir, ["rev-parse", "--verify", "--end-of-options", "HEAD^{commit}"]);
+  } catch {
+    return undefined;
+  }
 }
 
 function configuredRuleSeverity(
@@ -1606,6 +1647,18 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
       warnings: decision.warnings,
     })
     : undefined;
+  const internalOptions = options as CheckOptions & { includeAcceptanceRecord?: boolean };
+  const acceptanceRecord = internalOptions.includeAcceptanceRecord
+    ? createAcceptanceRecord({
+      manifestPath: repoPath(rootDir, manifestPath),
+      baselinePath: baselinePath ? repoPath(rootDir, baselinePath) : undefined,
+      headSha: currentGitHeadOrUndefined(rootDir),
+      snapshot: evidenceEnvelope.snapshot,
+      evidence: evidenceEnvelope.assessment,
+      evidenceGraph,
+      evaluation,
+    })
+    : undefined;
   return {
     ok: decision.ok,
     exitCode: decision.exitCode,
@@ -1613,6 +1666,7 @@ export function checkRepository(options: CheckOptions = {}): CheckResult {
     warnings: decision.warnings,
     metrics: decision.metrics,
     ...(evidenceGraph ? { evidenceGraph } : {}),
+    ...(acceptanceRecord ? { acceptanceRecord } : {}),
   };
 }
 
@@ -2257,10 +2311,6 @@ export function formatHumanResult(result: CheckResult): string {
 }
 
 export { findingFingerprint } from "./findings.js";
-
-export {
-  extractPublicSymbols,
-} from "./module-resolution.js";
 
 export {
   repoPath,

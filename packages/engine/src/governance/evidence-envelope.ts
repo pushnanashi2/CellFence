@@ -10,9 +10,8 @@ import {
 } from "../file-index.js";
 import type { ResourceAccessReference } from "../resource-access.js";
 import type { AnalysisContext, Finding, PluginImportReference } from "../types.js";
-import { assessEvidence } from "./evidence-assessment.js";
+import { assessEvidence, type EvidenceAssessmentWithRequirements, type ObservationRequirement } from "./evidence-assessment.js";
 import type {
-  EvidenceAssessment,
   FileObservation,
   ObservationFamily,
   RawObservationReport,
@@ -67,6 +66,35 @@ function requiredGovernanceFamilies(baselinePath: string | undefined): Observati
   return families;
 }
 
+function requiredGovernanceObservations(context: AnalysisContext, snapshot: SubjectSnapshot): ObservationRequirement[] {
+  const publicEntries = new Set(context.manifest.cells.map((cell) => normalizePath(cell.publicEntry)));
+  return snapshot.files.flatMap((file): ObservationRequirement[] => {
+    if (file.role === "manifest") {
+      return [
+        { filePath: file.path, family: "manifest", reason: "manifest schema and policy declarations" },
+        { filePath: file.path, family: "ownership", reason: "ownership coverage and overlap rules" },
+      ];
+    }
+    if (file.role === "baseline") {
+      return [{ filePath: file.path, family: "baseline", reason: "accepted baseline comparison" }];
+    }
+    if (file.role === "runtime-evidence") {
+      return [{ filePath: file.path, family: "resources", reason: "runtime resource evidence transcript" }];
+    }
+    if (file.role === "source") {
+      const requirements: ObservationRequirement[] = [
+        { filePath: file.path, family: "imports", reason: "source import boundary rules" },
+        { filePath: file.path, family: "resources", reason: "source resource contract rules" },
+      ];
+      if (publicEntries.has(normalizePath(file.path))) {
+        requirements.push({ filePath: file.path, family: "public-surface", reason: "declared public entry" });
+      }
+      return requirements;
+    }
+    return [];
+  });
+}
+
 function diagnosticsByFile(diagnostics: Finding[]): Map<string, Finding[]> {
   const byFile = new Map<string, Finding[]>();
   for (const finding of diagnostics) {
@@ -107,7 +135,7 @@ function observationStatusFor(filePath: string, family: ObservationFamily, diagn
 export type GovernanceEvidenceEnvelope = {
   snapshot: SubjectSnapshot;
   report: RawObservationReport;
-  assessment: EvidenceAssessment;
+  assessment: EvidenceAssessmentWithRequirements;
 };
 
 type ObservedFilesByFamily = Partial<Record<ObservationFamily, Iterable<string>>>;
@@ -189,6 +217,9 @@ export function governanceEvidenceEnvelopeForCheck(
   return {
     snapshot,
     report,
-    assessment: assessEvidence(snapshot, report, { requiredFamilies: requiredGovernanceFamilies(baselinePath) }),
+    assessment: assessEvidence(snapshot, report, {
+      requiredFamilies: requiredGovernanceFamilies(baselinePath),
+      requiredObservations: requiredGovernanceObservations(context, snapshot),
+    }),
   };
 }

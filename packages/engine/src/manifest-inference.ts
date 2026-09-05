@@ -895,6 +895,11 @@ export function inferManifest(options: InferManifestOptions = {}): CellFenceMani
   const rootDir = path.resolve(options.rootDir || process.cwd());
   const candidates = discoverCandidates(rootDir, options);
   if (candidates.length > 0) return manifestFromCandidatesWithOptions(rootDir, candidates, options);
+  const examplePublicEntry = "src/example/public.ts";
+  const examplePublicEntryPath = path.join(rootDir, examplePublicEntry);
+  const examplePublicSymbols = fs.existsSync(examplePublicEntryPath)
+    ? [...extractPublicSymbols(examplePublicEntryPath)].sort((left, right) => left.localeCompare(right))
+    : ["example"];
   return {
     schemaVersion: CELLFENCE_MANIFEST_SCHEMA_VERSION,
     governance: {
@@ -907,8 +912,8 @@ export function inferManifest(options: InferManifestOptions = {}): CellFenceMani
       {
         id: "example",
         ownedPaths: ["src/example/**"],
-        publicEntry: "src/example/public.ts",
-        publicSymbols: ["example"],
+        publicEntry: examplePublicEntry,
+        publicSymbols: examplePublicSymbols,
         consumes: [],
         producesArtifacts: [],
       },

@@ -50,11 +50,11 @@ const CONFIGURATION_UNRESOLVED_RULES = new Set([
   "CELLFENCE_BASELINE_SEAL_INVALID",
 ]);
 
-function bucketForRule(ruleId: string): CoverageKind | undefined {
-  if (IMPORT_UNRESOLVED_RULES.has(ruleId)) return "import";
-  if (RESOURCE_UNRESOLVED_RULES.has(ruleId)) return "resource";
-  if (PUBLIC_SURFACE_UNRESOLVED_RULES.has(ruleId)) return "public-surface";
-  if (CONFIGURATION_UNRESOLVED_RULES.has(ruleId)) return "configuration";
+function bucketForRule(ruleId: string): { kind: CoverageKind; configuration: boolean } | undefined {
+  if (IMPORT_UNRESOLVED_RULES.has(ruleId)) return { kind: "import", configuration: false };
+  if (RESOURCE_UNRESOLVED_RULES.has(ruleId)) return { kind: "resource", configuration: false };
+  if (PUBLIC_SURFACE_UNRESOLVED_RULES.has(ruleId)) return { kind: "public-surface", configuration: false };
+  if (CONFIGURATION_UNRESOLVED_RULES.has(ruleId)) return { kind: "resource", configuration: true };
   return undefined;
 }
 
@@ -89,15 +89,15 @@ export function walkCoverage(options: WalkOptions): WalkResult {
   const check = checkRepository(options);
   const unresolved: CoverageUnresolved[] = [];
   for (const finding of [...check.findings, ...check.warnings]) {
-    const kind = bucketForRule(finding.ruleId);
-    if (!kind) continue;
-    if (kind === "configuration" && !configurationInputWasExplicit(options)) continue;
+    const bucket = bucketForRule(finding.ruleId);
+    if (!bucket) continue;
+    if (bucket.configuration && !configurationInputWasExplicit(options)) continue;
     recordUnresolved(unresolved, {
-      kind,
+      kind: bucket.kind,
       cellId: undefined,
       filePath: finding.filePath ? path.resolve(options.rootDir, finding.filePath) : options.rootDir,
       line: undefined,
-      shape: shapeForRule(finding.ruleId, finding.message),
+      shape: bucket.configuration ? "configuration" : shapeForRule(finding.ruleId, finding.message),
       reason: finding.message,
       suggestion: undefined,
     });
