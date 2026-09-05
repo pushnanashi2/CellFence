@@ -2259,6 +2259,10 @@ export function formatHumanResult(result: CheckResult): string {
 export { findingFingerprint } from "./findings.js";
 
 export {
+  extractPublicSymbols,
+} from "./module-resolution.js";
+
+export {
   repoPath,
   sourceFilesForCell,
   sourceFilesUnderGovernance,

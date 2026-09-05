@@ -653,6 +653,7 @@ test("baseline gate action metadata declares every source input", () => {
   assert.match(actionYaml, /fail-on-mixed-pr:\r?\n\s+description: "When `require-separate-pr` is true, exit non-zero if the PR mixes baseline and implementation changes\."\r?\n\s+required: false\r?\n\s+default: "true"/);
   assert.match(source, /baseline-codeowners currently supports GitHub usernames only/);
   assert.match(source, /repos\.getContent\(\{ owner, repo, path: codeownersPath, ref \}\)/);
+  assert.doesNotMatch(source, /owners\.length === 0\)\s*continue/);
   assert.match(source, /loadCodeownersFromRepo\(octokit, context\.repo\.owner, context\.repo\.repo, baselineFile, baseSha\)/);
   assert.match(source, /assertPullRequestRevision\(octokit, owner, repo, pullNumber, expectedBaseSha, expectedHeadSha\)/);
   assert.match(source, /review\.state === "APPROVED" && review\.commitId === headSha/);

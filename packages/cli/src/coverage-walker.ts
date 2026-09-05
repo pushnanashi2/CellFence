@@ -45,10 +45,16 @@ const PUBLIC_SURFACE_UNRESOLVED_RULES = new Set([
   "CELLFENCE_PUBLIC_ENTRY_MISSING",
 ]);
 
+const CONFIGURATION_UNRESOLVED_RULES = new Set([
+  "CELLFENCE_MANIFEST_INVALID",
+  "CELLFENCE_BASELINE_SEAL_INVALID",
+]);
+
 function bucketForRule(ruleId: string): CoverageKind | undefined {
   if (IMPORT_UNRESOLVED_RULES.has(ruleId)) return "import";
   if (RESOURCE_UNRESOLVED_RULES.has(ruleId)) return "resource";
   if (PUBLIC_SURFACE_UNRESOLVED_RULES.has(ruleId)) return "public-surface";
+  if (CONFIGURATION_UNRESOLVED_RULES.has(ruleId)) return "configuration";
   return undefined;
 }
 
@@ -75,12 +81,17 @@ export type WalkResult = {
   check: CheckResult;
 };
 
+function configurationInputWasExplicit(options: WalkOptions): boolean {
+  return Boolean(options.manifestPath || options.baselinePath || (options.evidencePaths && options.evidencePaths.length > 0));
+}
+
 export function walkCoverage(options: WalkOptions): WalkResult {
   const check = checkRepository(options);
   const unresolved: CoverageUnresolved[] = [];
   for (const finding of [...check.findings, ...check.warnings]) {
     const kind = bucketForRule(finding.ruleId);
     if (!kind) continue;
+    if (kind === "configuration" && !configurationInputWasExplicit(options)) continue;
     recordUnresolved(unresolved, {
       kind,
       cellId: undefined,

@@ -175,6 +175,16 @@ test("file index glob matching distinguishes single-star, double-star, and liter
   assert.equal(literalPrefix("src/core/file?.ts"), "src/core/file?.ts");
 });
 
+test("file index glob matching keeps star-heavy single segments linear", () => {
+  const pattern = `src/${"a*".repeat(80)}z.ts`;
+  const target = `src/${"a".repeat(80)}y.ts`;
+  const startedAt = Date.now();
+  for (let index = 0; index < 200; index += 1) {
+    assert.equal(matchesPattern(target, pattern), false);
+  }
+  assert.equal(Date.now() - startedAt < 250, true);
+});
+
 test("file index treats unsupported glob operators as literal text", () => {
   for (const [pattern, expandedPath] of [
     ["src/file?.ts", "src/file1.ts"],

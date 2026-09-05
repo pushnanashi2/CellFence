@@ -3,16 +3,16 @@ import path from "node:path";
 import type * as ts from "typescript";
 
 import type { CellFenceManifest, CellManifest } from "@cellfence/schema";
-import { absolutePath, matchesPattern, repoPath } from "./file-index.js";
+import { absolutePath, pathOwnedByCell, repoPath } from "./file-index.js";
 import { readWorkspacePathAliases } from "./module-resolution.js";
 import type { AnalysisContext } from "./types.js";
 
 export function findOwningCell(manifest: CellFenceManifest, relativePath: string): CellManifest | undefined {
-  return manifest.cells.find((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
+  return manifest.cells.find((cell) => pathOwnedByCell(cell, relativePath));
 }
 
 export function owningCells(manifest: CellFenceManifest, relativePath: string): CellManifest[] {
-  return manifest.cells.filter((cell) => cell.ownedPaths.some((pattern) => matchesPattern(relativePath, pattern)));
+  return manifest.cells.filter((cell) => pathOwnedByCell(cell, relativePath));
 }
 
 function findPackageRoot(rootDir: string, publicEntry: string): string | undefined {

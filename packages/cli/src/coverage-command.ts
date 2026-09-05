@@ -68,7 +68,10 @@ export function runCoverageCommand(options: CoverageCommandOptions): CoverageCom
     unresolved: walked.unresolved,
   });
   let exitCode = 0;
-  if (typeof options.failUnder === "number" && report.summary.coverage < options.failUnder) {
+  if (report.findings.some((finding) => finding.kind === "configuration")) {
+    exitCode = 1;
+  }
+  if (exitCode === 0 && typeof options.failUnder === "number" && report.summary.coverage < options.failUnder) {
     exitCode = 2;
   }
   if (options.format === "human") {

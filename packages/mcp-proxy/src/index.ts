@@ -216,13 +216,14 @@ function getNestedValues(value: unknown, keyPath: string): unknown[] {
 }
 
 function mergeWriteToolConfig(base: WriteToolConfig, patch: WriteToolConfig): WriteToolConfig {
-  return {
-    ...base,
-    ...Object.fromEntries(Object.entries(patch).map(([tool, keys]) => [
-      tool,
-      [...new Set(keys.map((key) => key.trim()).filter(Boolean))],
-    ])),
-  };
+  const merged: WriteToolConfig = { ...base };
+  for (const [tool, keys] of Object.entries(patch)) {
+    for (const existingKey of Object.keys(merged)) {
+      if (existingKey.toLowerCase() === tool.toLowerCase()) delete merged[existingKey];
+    }
+    merged[tool] = [...new Set(keys.map((key) => key.trim()).filter(Boolean))];
+  }
+  return merged;
 }
 
 function mergeReadTools(base: string[], patch: string[]): string[] {

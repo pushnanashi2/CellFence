@@ -40,7 +40,7 @@ function normalizeKind(value: string | undefined): ResourceContractKind | undefi
 
 function normalizeOperation(kind: ResourceContractKind, value: string | undefined): ResourceAccessMode {
   if (value === "read" || value === "write" || value === "publish" || value === "subscribe" || value === "call" || value === "serve") return value;
-  if (kind === "database") return value && /insert|update|delete|write/i.test(value) ? "write" : "read";
+  if (kind === "database") return value && /insert|update|delete|write|upsert|merge|truncate|drop|create|alter|replace|grant|revoke/i.test(value) ? "write" : "read";
   if (kind === "queue") return value && /receive|consume|subscribe/i.test(value) ? "subscribe" : "publish";
   if (kind === "http") return value && /server|serve/i.test(value) ? "serve" : "call";
   return value && /write/i.test(value) ? "write" : "read";
@@ -137,6 +137,7 @@ export function openTelemetryToResourceEvidence(input: unknown, options: OpenTel
     schemaVersion: CELLFENCE_RESOURCE_EVIDENCE_SCHEMA_VERSION,
     commitSha: options.commitSha ?? readCommitSha(),
     generatedAt,
+    transcriptStatus: "active",
     accesses,
   };
 }

@@ -195,11 +195,13 @@ def normalize_http_path(prefix, route):
 
 def sql_table_accesses(text):
     accesses = []
-    for match in re.finditer(r"\b(delete\s+from|from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$\"]*)", text, re.IGNORECASE):
+    identifier = r'(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_$]*)(?:\s*\.\s*(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_$]*))*'
+    pattern = r"\b(delete\s+from|insert\s+into|merge\s+into|truncate(?:\s+table)?|drop\s+table(?:\s+if\s+exists)?|create\s+table(?:\s+if\s+not\s+exists)?|alter\s+table|from|join|update)\s+(" + identifier + ")"
+    for match in re.finditer(pattern, text, re.IGNORECASE):
         verb = match.group(1).lower()
-        selector = match.group(2).replace('"', "")
+        selector = re.sub(r"\s*\.\s*", ".", match.group(2).replace('"', "")).strip()
         accesses.append({
-            "access": "write" if verb in ("into", "update", "delete from") else "read",
+            "access": "read" if verb in ("from", "join") else "write",
             "selector": selector,
         })
     return accesses
@@ -273,6 +275,16 @@ warnings = []
 explicit_all = None
 top_level_public = set()
 surface_parts = []
+
+def surface_part_name(part):
+    for prefix in ("py:function:", "py:class:"):
+        if part.startswith(prefix):
+            return part[len(prefix):].split("(", 1)[0]
+    if part.startswith("py:variable:"):
+        return part[len("py:variable:"):].split(":", 1)[0]
+    if part.startswith("py:import:"):
+        return part[len("py:import:"):]
+    return None
 
 def add_import(specifier, line, candidate_specifiers=None):
     candidate_specifiers = [item for item in (candidate_specifiers or []) if item and item != specifier]
@@ -378,7 +390,20 @@ for node in tree.body:
 
 if explicit_all is not None:
     public_symbols = sorted(set(explicit_all))
-    surface_parts = ["py:__all__:" + ",".join(public_symbols)]
+    public_symbol_set = set(public_symbols)
+    named_surface_parts = []
+    seen_surface_names = set()
+    for part in surface_parts:
+        name = surface_part_name(part)
+        if name in public_symbol_set:
+            named_surface_parts.append(part)
+            seen_surface_names.add(name)
+    missing_symbols = sorted(public_symbol_set - seen_surface_names)
+    surface_parts = sorted(set(
+        ["py:__all__:" + ",".join(public_symbols)]
+        + named_surface_parts
+        + ["py:__all_missing__:" + name for name in missing_symbols]
+    ))
 else:
     public_symbols = sorted(top_level_public)
     surface_parts = sorted(set(surface_parts))

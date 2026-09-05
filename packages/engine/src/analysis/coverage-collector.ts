@@ -14,7 +14,7 @@
 
 import path from "node:path";
 
-export type CoverageKind = "import" | "resource" | "public-surface";
+export type CoverageKind = "import" | "resource" | "public-surface" | "configuration";
 
 export type CoverageUnresolved = {
   /** Cell id that the unresolved observation belongs to, or undefined if it could not be attributed. */
@@ -40,6 +40,7 @@ export type CoverageSummary = {
   unresolvedImports: number;
   unresolvedResources: number;
   unresolvedPublicSurface: number;
+  unresolvedConfiguration: number;
 };
 
 export type CoverageReport = {
@@ -76,6 +77,7 @@ export function buildCoverageReport(input: CoverageInput): CoverageReport {
   const unresolvedImports = findings.filter((entry) => entry.kind === "import").length;
   const unresolvedResources = findings.filter((entry) => entry.kind === "resource").length;
   const unresolvedPublicSurface = findings.filter((entry) => entry.kind === "public-surface").length;
+  const unresolvedConfiguration = findings.filter((entry) => entry.kind === "configuration").length;
   // Coverage is computed against the analyzer's actual reach rather than
   // raw file count, since the latter gets dragged around by tests, build
   // output, fixtures, and other sources of noise.
@@ -91,6 +93,7 @@ export function buildCoverageReport(input: CoverageInput): CoverageReport {
       unresolvedImports,
       unresolvedResources,
       unresolvedPublicSurface,
+      unresolvedConfiguration,
     },
     findings,
   };

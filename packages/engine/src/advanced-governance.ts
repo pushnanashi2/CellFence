@@ -645,11 +645,21 @@ function owningCellsForFiles(manifest: CellFenceManifest, files: string[]): stri
 }
 
 function csv(value: string | undefined): string[] {
+  if (value && /^(n\/a|none|no-tests|not-applicable)$/i.test(value.trim())) return [];
   return (value || "").split(/[,\s]+/).map((entry) => entry.trim()).filter(Boolean).sort((left, right) => left.localeCompare(right));
 }
 
 function looksPlaceholder(value: string): boolean {
   return value.trim().length < 12 || /^(n\/a|none|todo|tbd|same|misc|update)$/i.test(value.trim());
+}
+
+function trailerLooksPlaceholder(trailer: string, value: string | undefined): boolean {
+  if (!value) return true;
+  if (trailer === "Changed-Cells" || trailer === "Tests-Added" || trailer === "Tests-Modified") {
+    if (/^(n\/a|none|no-tests|not-applicable)$/i.test(value.trim())) return false;
+    return csv(value).length === 0;
+  }
+  return looksPlaceholder(value);
 }
 
 export function checkCommitEvidence(options: { rootDir?: string; manifest: CellFenceManifest; baseRef?: string; headRef?: string; commit?: string; maxCommits?: number }): CommitEvidenceResult {
@@ -672,7 +682,7 @@ export function checkCommitEvidence(options: { rootDir?: string; manifest: CellF
       }
     }
     for (const trailer of requiredTrailers) {
-      if (!trailers[trailer] || looksPlaceholder(trailers[trailer])) {
+      if (trailerLooksPlaceholder(trailer, trailers[trailer])) {
         findings.push({ ruleId: "CELLFENCE_COMMIT_TRAILER_MISSING", severity: "error", message: `${commit.slice(0, 12)} missing concrete ${trailer} trailer`, details: { commit, trailer } });
       }
     }
@@ -692,7 +702,7 @@ export function checkCommitEvidence(options: { rootDir?: string; manifest: CellF
     if (productionChanged && addedTests.length + modifiedTests.length === 0 && looksPlaceholder(trailers["Tests-Not-Added-Reason"] || "")) {
       findings.push({ ruleId: "CELLFENCE_COMMIT_TEST_REASON_REQUIRED", severity: "error", message: `${commit.slice(0, 12)} changes production source without concrete test reason`, details: { commit } });
     }
-    for (const filePath of filePaths.filter((entry) => /(^|\/)(tests?|__tests__)\//.test(entry))) {
+    for (const filePath of files.filter((entry) => !entry.status.startsWith("D") && /(^|\/)(tests?|__tests__)\//.test(entry.path)).map((entry) => entry.path)) {
       const content = git(rootDir, ["show", `${commit}:${filePath}`]);
       if (
         /\b(?:test|it|describe)(?:\.[A-Za-z_$][\w$]*)*?\.(?:only|skip|todo)\s*\(/.test(content)
@@ -798,8 +808,16 @@ export function checkTaskManifest(options: { rootDir?: string; manifest: CellFen
 
 function changedFilesForTask(rootDir: string, baseRef?: string, headRef?: string): string[] {
   const range = baseRef ? `${baseRef}...${headRef || "HEAD"}` : undefined;
-  const args = range ? ["diff", "--name-only", "--diff-filter=ACMR", range] : ["diff", "--name-only", "--diff-filter=ACMR"];
+  const diffFilter = "--diff-filter=ACDMRT";
+  const args = range ? ["diff", "--name-only", diffFilter, range] : ["diff", "--name-only", diffFilter];
   const files = new Set(git(rootDir, args).split(/\r?\n/).map((line) => normalizePath(line.trim())).filter(Boolean));
+  if (!range) {
+    const staged = git(rootDir, ["diff", "--cached", "--name-only", diffFilter])
+      .split(/\r?\n/)
+      .map((line) => normalizePath(line.trim()))
+      .filter(Boolean);
+    for (const filePath of staged) files.add(filePath);
+  }
   const untracked = git(rootDir, ["ls-files", "--others", "--exclude-standard"]).split(/\r?\n/).map((line) => normalizePath(line.trim())).filter(Boolean);
   for (const filePath of untracked) files.add(filePath);
   return [...files].sort((left, right) => left.localeCompare(right));
@@ -879,22 +897,25 @@ function addMutationStatus(counts: MutationCounts, status: string): void {
   else if (normalized === "ignored") counts.ignored += 1;
 }
 
+function mutationReportFilePath(value: unknown): string | undefined {
+  if (typeof value !== "string" || /[\r\n]/.test(value)) return undefined;
+  const normalized = normalizePath(value);
+  return SOURCE_EXTENSIONS.includes(path.extname(normalized)) ? normalized : undefined;
+}
+
 function collectMutants(input: unknown, currentFile: string | undefined, output: Array<{ file?: string; status: string }>): void {
   if (Array.isArray(input)) {
     for (const entry of input) collectMutants(entry, currentFile, output);
     return;
   }
   if (!isRecord(input)) return;
-  const nextFile = typeof input.source === "string"
-    ? input.source
-    : typeof input.fileName === "string"
-      ? input.fileName
-      : typeof input.path === "string"
-        ? input.path
-        : currentFile;
+  const nextFile = mutationReportFilePath(input.fileName)
+    || mutationReportFilePath(input.path)
+    || mutationReportFilePath(input.source)
+    || currentFile;
   if (typeof input.status === "string") output.push({ file: nextFile, status: input.status });
   for (const [key, value] of Object.entries(input)) {
-    const keyedFile = SOURCE_EXTENSIONS.includes(path.extname(key)) ? normalizePath(key) : nextFile;
+    const keyedFile = mutationReportFilePath(key) || nextFile;
     collectMutants(value, keyedFile, output);
   }
 }

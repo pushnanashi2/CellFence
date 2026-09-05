@@ -515,31 +515,36 @@ test("package maps honor condition order, arrays, wildcard precedence, and packa
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#feature/feature"), "packages/app/src/feature.ts");
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#feature/feature.private"), undefined);
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#invalid/feature"), undefined);
-    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#invalid-fallback"), "packages/app/src/unknown.ts");
+    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#invalid-fallback"), undefined);
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#suffix/feature.private"), "packages/app/src/feature.ts");
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#bare"), undefined);
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#outside"), undefined);
-    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#unknown"), "packages/app/src/unknown.ts");
+    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#unknown"), undefined);
     Object.defineProperty(Object.prototype, "import", {
       configurable: true,
       value: "./src/import.js",
     });
     try {
-      assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#unknown"), "packages/app/src/unknown.ts");
+      assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#unknown"), undefined);
     } finally {
       delete Object.prototype.import;
     }
-    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#node-priority", "import"), "packages/app/src/node.ts");
+    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#node-priority", "import"), "packages/app/src/default.ts");
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#default-priority", "import"), "packages/app/src/default.ts");
-    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#require-fallback", "import"), "packages/app/src/require.ts");
-    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#types-fallback", "import"), "packages/app/src/types.ts");
+    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#require-fallback", "import"), undefined);
+    assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "#types-fallback", "import"), undefined);
     assert.equal(resolvePackageImportsTarget(rootDir, importerPath, "plain/feature"), undefined);
     assert.equal(resolvePackageImportsTarget(rootDir, "orphan/importer.ts", "#condition"), undefined);
     for (const [mode, priorities] of Object.entries(conditionPriorities)) {
       for (const condition of priorities) {
+        const active = mode === "types"
+          ? ["types", "import", "node", "default"].includes(condition)
+          : mode === "require"
+            ? ["require", "node", "default"].includes(condition)
+            : ["import", "node", "default"].includes(condition);
         assert.equal(
           resolvePackageImportsTarget(rootDir, importerPath, `#priority-${mode}-${condition}`, mode),
-          `packages/app/src/${condition}.ts`,
+          active ? `packages/app/src/${condition}.ts` : undefined,
         );
       }
     }

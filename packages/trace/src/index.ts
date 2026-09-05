@@ -56,7 +56,7 @@ export function traceDiagnostics(): { installed: boolean; flushHooksRegistered: 
 
 function normalizeSelector(selector: fs.PathOrFileDescriptor): string | undefined {
   if (typeof selector === "number") return undefined;
-  const text = selector instanceof URL ? selector.pathname : selector.toString();
+  const text = selector instanceof URL ? fileURLToPath(selector) : selector.toString();
   return text.split(path.sep).join("/");
 }
 

@@ -52,6 +52,7 @@ const KIND_TO_LEVEL: Record<CoverageUnresolved["kind"], SarifRule["defaultConfig
   "import": "warning",
   "resource": "warning",
   "public-surface": "note",
+  "configuration": "warning",
 };
 
 function ruleIdForKind(kind: CoverageUnresolved["kind"]): string {

@@ -29,6 +29,7 @@ import {
   CORE_REQUIRED_RULES,
   defaultBaselinePath,
   execCommandSync,
+  extractPublicSymbols,
   formatCouplingGraphMermaid,
   formatHumanResult,
   guardBaselineUpdate,
@@ -658,14 +659,22 @@ function commandInit(parsed: ParsedArgs): number {
     console.error(errorMessage(error));
     return 2;
   }
-  const inferredExampleFallback = manifest.cells.length === 1 && manifest.cells[0]?.id === "example";
-  if (parsed.noScaffold && inferredExampleFallback) {
+  const inferredExampleFallback = manifest.cells.length === 1
+    && manifest.cells[0]?.id === "example"
+    && manifest.cells[0]?.publicEntry === "src/example/public.ts";
+  const exampleFallbackPublicEntry = path.join(rootDir, "src/example/public.ts");
+  const exampleFallbackPublicEntryExists = fs.existsSync(exampleFallbackPublicEntry);
+  if (inferredExampleFallback && exampleFallbackPublicEntryExists) {
+    manifest.cells[0].publicSymbols = [...extractPublicSymbols(exampleFallbackPublicEntry)]
+      .sort((left, right) => left.localeCompare(right));
+  }
+  if (parsed.noScaffold && inferredExampleFallback && !exampleFallbackPublicEntryExists) {
     console.error("cellfence init could not infer source cells; rerun without --no-scaffold to scaffold the example cell, or add source files first");
     return 2;
   }
-  if (!parsed.noScaffold && inferredExampleFallback) {
+  if (!parsed.noScaffold && inferredExampleFallback && !exampleFallbackPublicEntryExists) {
     fs.mkdirSync(path.join(rootDir, "src/example"), { recursive: true });
-    fs.writeFileSync(path.join(rootDir, "src/example/public.ts"), "export const example = true;\n");
+    fs.writeFileSync(exampleFallbackPublicEntry, "export const example = true;\n", { flag: "wx" });
   }
   if (!writeNewFileEnsuringDirectory(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, displayManifestPath)) return 2;
   console.log(`created ${manifestPath}`);

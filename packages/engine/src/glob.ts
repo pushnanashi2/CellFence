@@ -34,23 +34,39 @@ import path from "node:path";
 
 const MATCHER_CACHE = new Map<string, (pathSegments: string[]) => boolean>();
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-}
+type SegmentMatcher = (pathSegment: string) => boolean;
 
-function compilePatternSegmentToRegExp(segment: string): RegExp {
-  const escaped = segment.split("*").map(escapeRegExp).join("[^/]*");
-  return new RegExp(`^${escaped}$`);
-}
+const SEGMENT_MATCHER_CACHE = new Map<string, SegmentMatcher>();
 
-const SEGMENT_REGEXP_CACHE = new Map<string, RegExp>();
-
-function compileSegmentMatcher(segment: string): RegExp {
-  const cached = SEGMENT_REGEXP_CACHE.get(segment);
+function compileSegmentMatcher(segment: string): SegmentMatcher {
+  const cached = SEGMENT_MATCHER_CACHE.get(segment);
   if (cached) return cached;
-  const re = compilePatternSegmentToRegExp(segment);
-  SEGMENT_REGEXP_CACHE.set(segment, re);
-  return re;
+  const matcher: SegmentMatcher = segment.includes("*")
+    ? (pathSegment) => {
+        const M = segment.length;
+        const N = pathSegment.length;
+        const dp = new Uint8Array((M + 1) * (N + 1));
+        const at = (i: number, j: number) => dp[i * (N + 1) + j];
+        const set = (i: number, j: number) => {
+          dp[i * (N + 1) + j] = 1;
+        };
+        set(0, 0);
+        for (let i = 1; i <= M; i += 1) {
+          if (segment[i - 1] === "*") {
+            for (let j = 0; j <= N; j += 1) {
+              if (at(i - 1, j) === 1 || (j > 0 && at(i, j - 1) === 1)) set(i, j);
+            }
+          } else {
+            for (let j = 1; j <= N; j += 1) {
+              if (at(i - 1, j - 1) === 1 && segment[i - 1] === pathSegment[j - 1]) set(i, j);
+            }
+          }
+        }
+        return at(M, N) === 1;
+      }
+    : (pathSegment) => pathSegment === segment;
+  SEGMENT_MATCHER_CACHE.set(segment, matcher);
+  return matcher;
 }
 
 function collapseAdjacentGlobstars(segments: string[]): string[] {
@@ -118,7 +134,7 @@ function buildMatcher(normalizedPattern: string): (pathSegments: string[]) => bo
         }
       } else {
         for (let j = 1; j <= N; j += 1) {
-          if (at(i - 1, j - 1) === 1 && seg.matcher!.test(pathSegments[j - 1])) {
+          if (at(i - 1, j - 1) === 1 && seg.matcher!(pathSegments[j - 1])) {
             set(i, j);
           }
         }
@@ -147,5 +163,5 @@ export function matchesGlobPattern(relativePath: string, pattern: string): boole
 
 export function clearGlobMatcherCache(): void {
   MATCHER_CACHE.clear();
-  SEGMENT_REGEXP_CACHE.clear();
+  SEGMENT_MATCHER_CACHE.clear();
 }

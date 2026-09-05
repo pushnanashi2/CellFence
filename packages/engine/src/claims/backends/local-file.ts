@@ -22,6 +22,8 @@ export type LocalFileClaimStoreOptions = {
   filePath: string;
 };
 
+const DIRECT_WRITE_LOCK_STALE_MS = 5 * 60 * 1000;
+
 function readState(filePath: string): ClaimStoreState {
   if (!fs.existsSync(filePath)) return emptyClaimStoreState();
   try {
@@ -44,12 +46,50 @@ function fingerprintOf(state: ClaimStoreState): string {
   return crypto.createHash("sha256").update(canonical).digest("hex");
 }
 
+function processIsAlive(pid: number): boolean {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function recoverStaleDirectWriteLock(lockPath: string): boolean {
+  try {
+    const stat = fs.statSync(lockPath);
+    const [pidText = "", timestampText = ""] = fs.readFileSync(lockPath, "utf8").split(/\r?\n/);
+    const pid = Number(pidText.trim());
+    const timestampMs = Date.parse(timestampText.trim());
+    const ageMs = Date.now() - (Number.isFinite(timestampMs) ? timestampMs : stat.mtimeMs);
+    if (ageMs < DIRECT_WRITE_LOCK_STALE_MS) return false;
+    if (Number.isInteger(pid) && pid > 0 && processIsAlive(pid)) return false;
+    fs.rmSync(lockPath, { force: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function openDirectWriteLock(lockPath: string): number {
+  try {
+    return fs.openSync(lockPath, "wx", 0o600);
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    if (code === "EEXIST" && recoverStaleDirectWriteLock(lockPath)) {
+      return fs.openSync(lockPath, "wx", 0o600);
+    }
+    throw error;
+  }
+}
+
 function withDirectWriteLock<Result>(filePath: string, callback: () => Result): Result {
   const lockPath = `${filePath}.local-file-write.lock`;
   let fd: number | undefined;
   try {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fd = fs.openSync(lockPath, "wx", 0o600);
+    fd = openDirectWriteLock(lockPath);
     fs.writeFileSync(fd, `${process.pid}\n${new Date().toISOString()}\n`);
     return callback();
   } catch (error) {

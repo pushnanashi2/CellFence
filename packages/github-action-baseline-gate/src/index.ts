@@ -95,30 +95,58 @@ function validateUsernameCodeowners(codeowners: string[]): void {
   );
 }
 
-// Minimal CODEOWNERS parser: only enough to pull out the entries
-// that apply to the baseline path. The full CODEOWNERS spec has
-// many edge cases (negations, escape rules); for the gate's
-// default-allowlist purpose we only need "who owns the baseline
-// file". Falls back to an empty list on parse failure.
+function escapeRegExp(text: string): string {
+  return text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+}
+
+function codeownersGlobToRegExpBody(pattern: string): string {
+  let body = "";
+  for (let index = 0; index < pattern.length; index += 1) {
+    const char = pattern[index];
+    if (char === "*") {
+      if (pattern[index + 1] === "*") {
+        const followedBySlash = pattern[index + 2] === "/";
+        body += followedBySlash ? "(?:.*/)?" : ".*";
+        index += followedBySlash ? 2 : 1;
+      } else {
+        body += "[^/]*";
+      }
+    } else if (char === "?") {
+      body += "[^/]";
+    } else {
+      body += escapeRegExp(char || "");
+    }
+  }
+  return body;
+}
+
+function codeownersPatternMatches(pattern: string, targetPath: string): boolean {
+  if (pattern.startsWith("!")) return false;
+  const anchored = pattern.startsWith("/");
+  let normalized = pattern.replace(/^\/+/, "").replace(/\\/g, "/");
+  if (!normalized) return false;
+  if (normalized.endsWith("/")) normalized = `${normalized}**`;
+  const hasSlash = normalized.includes("/");
+  const body = codeownersGlobToRegExpBody(normalized);
+  const prefix = anchored || hasSlash ? "^" : "(?:^|.*/)";
+  return new RegExp(`${prefix}${body}$`).test(targetPath);
+}
+
+// Pull out the CODEOWNERS entries that apply to the baseline path.
+// CODEOWNERS uses "latest match wins", so we keep scanning after a
+// match instead of returning the first owner list.
 function codeownersForPath(codeownersText: string, targetPath: string): string[] {
   const target = targetPath.replace(/^\.\//, "").replace(/\\/g, "/");
   const candidates: { pattern: string; owners: string[] }[] = [];
   for (const rawLine of codeownersText.split(/\r?\n/)) {
-    const line = rawLine.replace(/#.*$/, "").trim();
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
     if (!line) continue;
     const [pattern, ...owners] = line.split(/\s+/);
-    if (!pattern || owners.length === 0) continue;
+    if (!pattern) continue;
     candidates.push({ pattern, owners });
   }
-  // CODEOWNERS: latest match wins. Patterns are not full globs;
-  // we approximate by checking substring + trailing /**.
-  const matches = candidates.filter(({ pattern }) => {
-    const norm = pattern.replace(/^\//, "");
-    if (norm === target) return true;
-    if (norm.endsWith("/**") && target.startsWith(norm.slice(0, -2))) return true;
-    if (target.startsWith(norm.replace(/\/$/, "") + "/")) return true;
-    return false;
-  });
+  const matches = candidates.filter(({ pattern }) => codeownersPatternMatches(pattern, target));
   if (matches.length === 0) return [];
   return matches[matches.length - 1].owners;
 }
@@ -145,7 +173,6 @@ async function loadCodeownersFromRepo(
       continue;
     }
     const owners = codeownersForPath(text, baselineFile);
-    if (owners.length === 0) continue;
     validateUsernameCodeowners(owners);
     return owners;
   }

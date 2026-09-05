@@ -71,6 +71,7 @@ test("trace hook emits async and append file evidence while ignoring source file
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cellfence-trace-async-"));
   fs.mkdirSync(path.join(tempDir, "data"), { recursive: true });
   fs.writeFileSync(path.join(tempDir, "data/input.json"), "{\"ok\":true}\n");
+  fs.writeFileSync(path.join(tempDir, "data/orders data.json"), "{\"ok\":true}\n");
   for (const extension of ["js", "cjs", "ts", "tsx", "jsx", "mts", "cts"]) {
     fs.writeFileSync(path.join(tempDir, `source.${extension}`), "export const ignored = true;\n");
   }
@@ -79,6 +80,7 @@ test("trace hook emits async and append file evidence while ignoring source file
     import { appendFile, readFile, writeFile } from "node:fs/promises";
     await readFile("data/input.json", "utf8");
     fs.readFileSync(new URL("./data/input.json", import.meta.url), "utf8");
+    fs.readFileSync(new URL("./data/orders data.json", import.meta.url), "utf8");
     await writeFile("data/promise-write.json", "{}\\n");
     await appendFile("data/promise-append.json", "{}\\n");
     fs.appendFileSync("data/sync-output.json", "{}\\n");
@@ -108,6 +110,8 @@ test("trace hook emits async and append file evidence while ignoring source file
   const observed = evidence.accesses.map((access) => `${access.access}:${access.selector}`);
   assert.ok(observed.includes("read:data/input.json"));
   assert.ok(observed.some((entry) => entry.startsWith("read:") && entry.endsWith("/data/input.json")));
+  assert.ok(observed.some((entry) => entry.startsWith("read:") && entry.endsWith("/data/orders data.json")));
+  assert.equal(observed.some((entry) => entry.includes("orders%20data.json")), false);
   assert.ok(observed.includes("write:data/promise-write.json"));
   assert.ok(observed.includes("write:data/promise-append.json"));
   assert.ok(observed.includes("write:data/sync-output.json"));

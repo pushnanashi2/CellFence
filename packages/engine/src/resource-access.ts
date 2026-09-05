@@ -542,16 +542,25 @@ export function addResourceAccess(accesses: ResourceAccessReference[], access: R
   if (!duplicate) accesses.push(access);
 }
 
+function normalizeSqlSelector(selector: string): string {
+  return selector
+    .replace(/"/g, "")
+    .replace(/\s*\.\s*/g, ".")
+    .trim();
+}
+
 function sqlTableAccesses(text: string): Array<{ access: "read" | "write"; selector: string }> {
   const accesses: Array<{ access: "read" | "write"; selector: string }> = [];
-  // Stryker disable next-line Regex: SQL extraction is intentionally shallow and is fixed by black-box table extraction tests, not by regex micro-mutations.
-  const sqlPattern = /\b(from|join|into|update)\s+([A-Za-z_][A-Za-z0-9_.$"]*)/gi;
+  const identifier = String.raw`(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_$]*)(?:\s*\.\s*(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_$]*))*`;
+  const sqlPattern = new RegExp(
+    String.raw`\b(delete\s+from|insert\s+into|merge\s+into|truncate(?:\s+table)?|drop\s+table(?:\s+if\s+exists)?|create\s+table(?:\s+if\s+not\s+exists)?|alter\s+table|from|join|update)\s+(${identifier})`,
+    "gi",
+  );
   let match: RegExpExecArray | null;
   while ((match = sqlPattern.exec(text)) !== null) {
     const verb = match[1].toLowerCase();
-    // Stryker disable next-line StringLiteral: quote stripping is covered by selector assertions; replacement-string mutation is not a meaningful policy variant.
-    const selector = match[2].replace(/"/g, "");
-    accesses.push({ access: verb === "into" || verb === "update" ? "write" : "read", selector });
+    const selector = normalizeSqlSelector(match[2]);
+    accesses.push({ access: verb === "from" || verb === "join" ? "read" : "write", selector });
   }
   return accesses;
 }
@@ -698,13 +707,36 @@ function fsMethodKnown(methodName: string): boolean {
   return FILE_READ_METHODS.has(methodName) || FILE_WRITE_METHODS.has(methodName) || FILE_COPY_METHODS.has(methodName);
 }
 
-function fsOpenAccessMode(flag: string | undefined): ResourceAccessMode {
+function numericLiteralValue(node: ts.Expression | undefined): number | undefined {
+  if (!node) return undefined;
+  if (ts.isNumericLiteral(node)) return Number(node.text);
+  if (ts.isPrefixUnaryExpression(node) && (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+    const value = numericLiteralValue(node.operand);
+    if (value === undefined) return undefined;
+    return node.operator === ts.SyntaxKind.MinusToken ? -value : value;
+  }
+  return undefined;
+}
+
+function fsOpenAccessMode(flagExpression: ts.Expression | undefined): ResourceAccessMode {
+  const flag = literalText(flagExpression);
   if (flag && /[wa+]/.test(flag)) return "write";
+  if (flag !== undefined) return "read";
+  const numericFlag = numericLiteralValue(flagExpression);
+  if (numericFlag !== undefined) {
+    const constants = fs.constants as typeof fs.constants & { O_ACCMODE?: number };
+    const accessModeMask = constants.O_ACCMODE ?? 3;
+    const accessMode = numericFlag & accessModeMask;
+    if (accessMode === fs.constants.O_WRONLY || accessMode === fs.constants.O_RDWR) return "write";
+    if ((numericFlag & (fs.constants.O_APPEND | fs.constants.O_CREAT | fs.constants.O_TRUNC)) !== 0) return "write";
+    return "read";
+  }
+  if (flagExpression) return "write";
   return "read";
 }
 
-function fileAccessModeForMethod(methodName: string, flag: string | undefined): ResourceAccessMode {
-  if (methodName === "open" || methodName === "openSync") return fsOpenAccessMode(flag);
+function fileAccessModeForMethod(methodName: string, flagExpression: ts.Expression | undefined): ResourceAccessMode {
+  if (methodName === "open" || methodName === "openSync") return fsOpenAccessMode(flagExpression);
   return FILE_READ_METHODS.has(methodName) ? "read" : "write";
 }
 
@@ -1548,7 +1580,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             { argument: firstFileArgument, access: "read" as const },
             { argument: node.arguments[1], access: "write" as const },
           ]
-          : [{ argument: firstFileArgument, access: fileAccessModeForMethod(fsMethodName, literalText(node.arguments[1])) }];
+          : [{ argument: firstFileArgument, access: fileAccessModeForMethod(fsMethodName, node.arguments[1]) }];
         for (const { argument, access } of unresolvedFileAccesses) {
           if (!argument || literalText(argument)) continue;
           addResourceAccess(accesses, {
@@ -1639,7 +1671,7 @@ export function collectResourceAccesses(context: ResourceAccessAnalysisContext, 
             if (fileEnabled) {
             addResourceAccess(accesses, {
               kind: "file",
-              access: fileAccessModeForMethod(fsMethodName, literalText(node.arguments[1])),
+              access: fileAccessModeForMethod(fsMethodName, node.arguments[1]),
               selector: normalizePath(firstArgumentText),
               filePath: relativeFilePath,
               line: getLineNumber(sourceFile, node),

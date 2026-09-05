@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 import {
@@ -241,7 +242,17 @@ function isPythonPath(filePath: string): boolean {
 export function importSpecifierLooksPathLike(specifier: string): boolean {
   return specifier.startsWith(".")
     || specifier.startsWith("/")
+    || /^file:/i.test(specifier)
     || /^[A-Za-z]:[\\/]/.test(specifier);
+}
+
+function fileUrlSpecifierPath(specifier: string): string | undefined {
+  if (!/^file:/i.test(specifier)) return undefined;
+  try {
+    return fileURLToPath(new URL(specifier));
+  } catch {
+    return undefined;
+  }
 }
 
 function resolvePythonRelativeModule(rootDir: string, importerPath: string, specifier: string): string | undefined {
@@ -275,29 +286,42 @@ export function resolveRelativeImport(rootDir: string, importerPath: string, spe
     return resolvePythonRelativeModule(rootDir, importerPath, specifier);
   }
   const importerAbsolutePath = absolutePath(rootDir, importerPath);
-  const basePath = path.resolve(path.dirname(importerAbsolutePath), stripResourceQuery(specifier));
+  const basePath = fileUrlSpecifierPath(specifier)
+    || path.resolve(path.dirname(importerAbsolutePath), stripResourceQuery(specifier));
   const target = existingFileFromCandidates(candidateModulePaths(basePath));
   return target ? repoPath(rootDir, target) : undefined;
 }
 
 export function resolvePathAliasTarget(context: PathAliasContext, specifier: string): string | undefined {
+  const matches: Array<{ alias: PathAlias; wildcardValue: string; exact: boolean; prefixLength: number; suffixLength: number }> = [];
   for (const alias of context.pathAliases) {
     const wildcardIndex = alias.pattern.indexOf("*");
     let wildcardValue = "";
     if (wildcardIndex === -1) {
       if (alias.pattern !== specifier) continue;
+      matches.push({ alias, wildcardValue, exact: true, prefixLength: alias.pattern.length, suffixLength: alias.pattern.length });
     } else {
       const prefix = alias.pattern.slice(0, wildcardIndex);
       const suffix = alias.pattern.slice(wildcardIndex + 1);
       if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue;
       wildcardValue = specifier.slice(prefix.length, specifier.length - suffix.length);
+      matches.push({ alias, wildcardValue, exact: false, prefixLength: prefix.length, suffixLength: suffix.length });
     }
+  }
 
-    for (const target of alias.targets) {
+  matches.sort((left, right) =>
+    Number(right.exact) - Number(left.exact)
+    || right.prefixLength - left.prefixLength
+    || right.suffixLength - left.suffixLength
+    || right.alias.pattern.length - left.alias.pattern.length
+  );
+
+  for (const match of matches) {
+    for (const target of match.alias.targets) {
       const targetWildcardIndex = target.indexOf("*");
       const baseTarget = targetWildcardIndex === -1
         ? target
-        : `${target.slice(0, targetWildcardIndex)}${wildcardValue}${target.slice(targetWildcardIndex + 1)}`;
+        : `${target.slice(0, targetWildcardIndex)}${match.wildcardValue}${target.slice(targetWildcardIndex + 1)}`;
       const targetPath = existingFileFromCandidates(candidateModulePaths(baseTarget));
       if (targetPath) {
         return context.rootDir ? repoPath(context.rootDir, targetPath) : normalizePath(targetPath);
@@ -336,10 +360,10 @@ function nearestPackageInfo(fromFilePath: string): { rootDir: string; name?: str
   }
 }
 
-function packageConditionOrder(mode?: PackageConditionMode): string[] {
-  if (mode === "types") return ["types", "import", "node", "default", "require"];
-  if (mode === "require") return ["require", "node", "default", "import", "types"];
-  return ["import", "node", "default", "require", "types"];
+function packageConditions(mode?: PackageConditionMode): Set<string> {
+  if (mode === "types") return new Set(["types", "node", "import", "default"]);
+  if (mode === "require") return new Set(["node", "require", "default"]);
+  return new Set(["node", "import", "default"]);
 }
 
 function packageMapEntryTarget(entry: unknown, mode?: PackageConditionMode): string | null | undefined {
@@ -358,12 +382,14 @@ function packageMapEntryTarget(entry: unknown, mode?: PackageConditionMode): str
     return sawNullTarget ? null : undefined;
   }
   const record = entry as Record<string, unknown>;
-  for (const condition of packageConditionOrder(mode)) {
-    if (!Object.prototype.hasOwnProperty.call(record, condition)) continue;
-    const target = packageMapEntryTarget(record[condition], mode);
+  const activeConditions = packageConditions(mode);
+  if (mode === "types" && Object.prototype.hasOwnProperty.call(record, "types")) {
+    const target = packageMapEntryTarget(record.types, mode);
     if (target !== undefined) return target;
   }
-  for (const value of Object.values(record)) {
+  for (const [condition, value] of Object.entries(record)) {
+    if (mode === "types" && condition === "types") continue;
+    if (!activeConditions.has(condition)) continue;
     const target = packageMapEntryTarget(value, mode);
     if (target !== undefined) return target;
   }
@@ -1256,6 +1282,8 @@ export function extractImports(
 
   function visitVariableDeclaration(scope: ImportScope, node: ts.VariableDeclaration): void {
     if (node.initializer) visit(scope, node.initializer);
+    visitBindingNameExpressions(scope, node.name);
+    if (node.type) visit(scope, node.type);
     const declarationList = node.parent as ts.VariableDeclarationList;
     const varScoped = isVarScopedDeclarationList(declarationList);
     const constScoped = isConstDeclarationList(declarationList);
@@ -1291,6 +1319,25 @@ export function extractImports(
     }
   }
 
+  function visitBindingNameExpressions(scope: ImportScope, name: ts.BindingName): void {
+    if (ts.isIdentifier(name)) return;
+    for (const element of name.elements) {
+      if (ts.isOmittedExpression(element)) continue;
+      if (element.propertyName && ts.isComputedPropertyName(element.propertyName)) {
+        visit(scope, element.propertyName.expression);
+      }
+      if (element.initializer) visit(scope, element.initializer);
+      visitBindingNameExpressions(scope, element.name);
+    }
+  }
+
+  function visitTypeParameters(scope: ImportScope, node: { typeParameters?: ts.NodeArray<ts.TypeParameterDeclaration> }): void {
+    for (const typeParameter of node.typeParameters || []) {
+      if (typeParameter.constraint) visit(scope, typeParameter.constraint);
+      if (typeParameter.default) visit(scope, typeParameter.default);
+    }
+  }
+
   function isFunctionLikeWithBody(node: ts.Node): node is FunctionLikeWithBody {
     return ts.isFunctionDeclaration(node)
       || ts.isFunctionExpression(node)
@@ -1303,10 +1350,15 @@ export function extractImports(
 
   function visitFunctionLike(scope: ImportScope, node: FunctionLikeWithBody): void {
     const childScope = createImportScope(scope, true);
+    visitTypeParameters(childScope, node);
     for (const parameter of node.parameters) {
+      visitBindingNameExpressions(childScope, parameter.name);
+      if (parameter.type) visit(childScope, parameter.type);
+      if (parameter.initializer) visit(childScope, parameter.initializer);
       // Stryker disable next-line BooleanLiteral: childScope is itself the function var-scope, so either routing choice selects the same map.
       bindPattern(childScope, parameter.name, null, false);
     }
+    if (node.type) visit(childScope, node.type);
     if (node.body) visit(childScope, node.body);
   }
 
@@ -1653,31 +1705,7 @@ function normalizeDeclarationText(text: string): string {
 }
 
 function sourceTextWithoutInternalDeclarations(filePath: string): string {
-  const sourceText = fs.readFileSync(filePath, "utf8");
-  // Stryker disable next-line BooleanLiteral: parent pointers are not used while collecting internal declaration line ranges.
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, sourceKindForPath(filePath));
-  // Stryker disable next-line ArrayDeclaration: a non-range sentinel in this private, typed collection has no valid line bounds and cannot remove source text.
-  const lineRanges: Array<{ start: number; end: number }> = [];
-  function visit(node: ts.Node): void {
-    if (hasInternalTag(node)) {
-      lineRanges.push({
-        start: sourceFile.getLineAndCharacterOfPosition(node.getFullStart()).line,
-        end: sourceFile.getLineAndCharacterOfPosition(node.getEnd()).line,
-      });
-      return;
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(sourceFile);
-  // Stryker disable next-line ConditionalExpression: with no internal ranges, declaration emit observes the same source text after line splitting.
-  if (lineRanges.length === 0) return sourceText;
-  const removedLines = new Set<number>();
-  for (const range of lineRanges) {
-    for (let line = range.start; line <= range.end; line += 1) removedLines.add(line);
-  }
-  const lines = sourceText.split("\n");
-  // Stryker disable next-line StringLiteral: declaration emit normalizes equivalent internal-stripped source text; public surface output is asserted black-box.
-  return lines.filter((_, index) => !removedLines.has(index)).join("\n");
+  return normalizedDeclarationSourceText(filePath);
 }
 
 function normalizedDeclarationSourceText(filePath: string): string {
